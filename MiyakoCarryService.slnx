@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Client/">
+    <Project Path="Client/MiyakoCarryServiceClient.csproj" />
+  </Folder>
+  <Folder Name="/Server/">
+    <Project Path="Server/MiyakoCarryServiceServer.csproj" />
+  </Folder>
+</Solution>

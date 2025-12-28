@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <DevGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X</DevGamePath>
+    <DevGamePluginsMiyakoCarryServicePath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMiyakoCarryServicePath>
+    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceClient</BuildMiyakoCarryServicePath>  
+    <AssemblyName>Himesamanoyume.MiyakoCarryServiceClient</AssemblyName>
+    <AssemblyCompany>Himesamanoyume</AssemblyCompany>
+    <AssemblyProduct>MiyakoCarryServiceClient</AssemblyProduct>  
+    <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
+    <Version>0.0.1.0</Version>
+    <AssemblyTitle>MiyakoCarryServiceClient</AssemblyTitle>
+    <Trademark>https://sns.oddba.cn/163832.html</Trademark>
+    <RootNamespace>MiyakoCarryService.Client</RootNamespace>
+    <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx" HintPath=".\Ref\BepInEx.dll" Private="false" />
+    <Reference Include="ConfigurationManager" HintPath=".\Ref\ConfigurationManager.dll" Private="false" />
+    <Reference Include="spt-common" HintPath=".\Ref\spt-common.dll" Private="false" />
+    <Reference Include="spt-core" HintPath=".\Ref\spt-core.dll" Private="false" />
+    <Reference Include="spt-custom" HintPath=".\Ref\spt-custom.dll" Private="false" />
+    <Reference Include="spt-debugging" HintPath=".\Ref\spt-debugging.dll" Private="false" />
+    <Reference Include="spt-singleplayer" HintPath=".\Ref\spt-singleplayer.dll" Private="false" />
+    <Reference Include="spt-reflection" HintPath=".\Ref\spt-reflection.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath=".\Ref\0Harmony.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath=".\Ref\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath=".\Ref\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.IMGUIModule" HintPath=".\Ref\UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AudioModule" HintPath=".\Ref\UnityEngine.AudioModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule" HintPath=".\Ref\UnityEngine.UnityWebRequestAudioModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UnityWebRequestModule" HintPath=".\Ref\UnityEngine.UnityWebRequestModule.dll" Private="false" />
+    <Reference Include="UnityEngine.TextRenderingModule" HintPath=".\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
+    <Reference Include="Comfort" HintPath=".\Ref\Comfort.dll" Private="false" />
+    <Reference Include="Comfort.Unity" HintPath=".\Ref\Comfort.Unity.dll" Private="false" />
+    <Reference Include="Unity.Postprocessing.Runtime" HintPath=".\Ref\Unity.Postprocessing.Runtime.dll" Private="false" />
+    <Reference Include="UnityEngine.PhysicsModule" HintPath=".\Ref\UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath=".\Ref\UnityEngine.AssetBundleModule.dll" Private="false" />
+    <Reference Include="ItemComponent.Types" HintPath=".\Ref\ItemComponent.Types.dll" Private="false" />
+    <Reference Include="UnityEngine.InputLegacyModule" HintPath=".\Ref\UnityEngine.InputLegacyModule.dll" Private="false" />
+    <Reference Include="Sirenix.Serialization" HintPath=".\Ref\Sirenix.Serialization.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath=".\Ref\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="UnityEngine.UI" HintPath=".\Ref\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
+    <Reference Include="Newtonsoft.Json" HintPath=".\Ref\Newtonsoft.Json.dll" Private="false" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
+    <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)') And '$(Configuration)' == 'Debug'" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Debug'" />  
+    <Exec Command="mkdir &quot;$(BuildMiyakoCarryServicePath)&quot;" Condition="!Exists('$(BuildMiyakoCarryServicePath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMiyakoCarryServicePath)\$(TargetFileName)&quot;" />
+  </Target> 
+</Project>

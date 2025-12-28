@@ -1,0 +1,289 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"tasks": {
+		"version": "2.0.0",
+		"options": {
+			"env": {
+				"DOTNET_NOLOGO": "yes",
+				"DOTNET_CLI_TELEMETRY_OPTOUT": "yes"
+			}
+		},
+		"tasks": [
+			{
+				"label": "copy: ref dlls from game",
+				"type": "shell",
+				"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference = 'Stop'; try { $files = @( 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\ConfigurationManager.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-common.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-core.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-custom.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-debugging.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-reflection.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-singleplayer.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\0Harmony.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\0Harmony20.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\BepInEx.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\BepInEx.Harmony.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\BepInEx.Preloader.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Assembly-CSharp.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.CoreModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.IMGUIModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.AudioModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.UnityWebRequestAudioModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.UnityWebRequestModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.TextRenderingModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Comfort.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Unity.Postprocessing.Runtime.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.PhysicsModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.AssetBundleModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\ItemComponent.Types.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.InputLegacyModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Sirenix.Serialization.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Unity.TextMeshPro.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.UI.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\DissonanceVoip.dll' ); foreach($file in $files) { if(Test-Path $file) { Copy-Item $file '${workspaceFolder}\\Client\\Ref\\' -Force; Write-Host \\\"Copied: $file\\\" } else { Write-Host \\\"Warning: $file not found\\\" } } } catch { Write-Host \\\"Error: $_\\\"; exit 1 }\""
+			},
+			{
+				"label": "client: restore",
+				"type": "shell",
+				"command": "dotnet restore Client/MiyakoCarryServiceClient.sln --nologo",
+			},
+			{
+				"label": "server: restore",
+				"type": "shell",
+				"command": "dotnet restore Server/MiyakoCarryServiceServer.sln --nologo",
+			},
+			{  
+				"label": "package",
+				"type": "shell",
+				"command": "powershell",
+				"args": [
+					"-NoProfile",
+					"-ExecutionPolicy", "Bypass",
+					"-Command",
+					"$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver.zip\" -Force"
+				],
+			}, 
+			{  
+				"label": "package: NME",
+				"type": "shell",
+				"command": "powershell",
+				"args": [
+					"-NoProfile",
+					"-ExecutionPolicy", "Bypass",
+					"-Command",
+					"$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver-CHEATERCARRY.zip\" -Force"
+				],
+			}, 
+			{
+				"label": "client: build",
+				"type": "shell",
+				"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore -p:DefineConstants=\"\" --configuration Release",
+				"dependsOrder": "sequence",
+				"dependsOn": "client: restore",
+				"group": {
+					"kind": "build"
+				}
+			}, 
+			{
+				"label": "client: build NME",
+				"type": "shell",
+				"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
+				"dependsOrder": "sequence",
+				"dependsOn": "client: restore",
+				"group": {
+					"kind": "build"
+				}
+			},
+			{
+				"label": "client: debug build NME",
+				"type": "shell",
+				"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
+				"dependsOrder": "sequence",
+				"dependsOn": "client: restore",
+				"group": {
+					"kind": "build"
+				}
+			},
+			{  
+				"label": "server: build",  
+				"type": "shell",  
+				"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore -p:DefineConstants=\"\" --configuration Release", 
+				"dependsOrder": "sequence",
+				"dependsOn": "server: restore",
+				"group": {
+					"kind": "build"
+				}
+			},
+			{  
+				"label": "server: build NME",  
+				"type": "shell",  
+				"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release", 
+				"dependsOrder": "sequence",
+				"dependsOn": "server: restore",
+				"group": {
+					"kind": "build"
+				}
+			},
+			{  
+				"label": "build: clean",  
+				"type": "shell",
+				"command": "powershell",
+				"args": [
+					"-NoProfile",
+					"-ExecutionPolicy", "Bypass",
+					"-Command",
+					"if (Test-Path '${workspaceFolder}\\Build') { Remove-Item '${workspaceFolder}\\Build\\*' -Recurse -Force }"
+				]
+			},
+			{  
+				"label": "all: build",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"build: clean",
+					"server: build", 
+					"client: build" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: build NME",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"build: clean",
+					"server: build NME",
+					"client: build NME" 
+				],  
+				"group": "build"  
+			},
+			{
+				"label": "client: move",
+				"type": "shell",
+				"command": "xcopy",
+				"args": [
+					"/E",
+					"/I",
+					"/Y",
+					"'${workspaceFolder}\\Build\\BepInEx\\'",
+					"'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\'"
+				]
+			},
+			{
+				"label": "server: move",
+				"type": "shell",
+				"command": "xcopy",
+				"args": [
+					"/E",
+					"/I",
+					"/Y",
+					"'${workspaceFolder}\\Build\\SPT\\user\\'",
+					"'D:\\OtherGames\\SPT4.0.X\\Server-4.0.X\\SPT\\user'"
+				]
+			},
+			{
+				"label": "all: move",
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"server: move", 
+					"client: move" 
+				],  
+				"group": "build" 
+			},
+			{  
+				"label": "all: (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build", 
+					"all: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: NME (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build NME", 
+					"all: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: (build & package)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build",
+					"package"
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: NME (build & package)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build NME",
+					"package: NME"
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: (build & package & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build",
+					"package",
+					"all: move"
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: NME (build & package & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: build NME",
+					"package: NME",
+					"all: move"
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "client: (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"client: build", 
+					"client: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "client: NME (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"client: build NME", 
+					"client: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "client: NME (debug build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"client: debug build NME", 
+					"client: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "server: (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"server: build", 
+					"server: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "server: NME (build & move)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"server: build NME", 
+					"server: move" 
+				],  
+				"group": "build"  
+			},
+			{  
+				"label": "all: standard & NME (build & package)",  
+				"dependsOrder": "sequence",
+				"dependsOn": [  
+					"all: (build & package)", 
+					"all: NME (build & package)"
+				],  
+				"group": "build"  
+			}
+		]
+	},
+	"settings": {
+		"window.title": "Himesamanoyume.MiyakoCarryService-4.0.X",
+		"dotnet.preferCSharpExtension": true,
+		"dotnet.defaultSolution": "MiyakoCarryService.slnx"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-dotnettools.csharp"
+		]
+	}
+}
