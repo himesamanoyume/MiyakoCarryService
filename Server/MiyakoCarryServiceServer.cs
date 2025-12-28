@@ -18,11 +18,12 @@ namespace MiyakoCarryService.Server
         }
 
         [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
-        public sealed class MiyakoCarryServiceServerPostLoad(LocaleService localeService) : IOnLoad
+        public sealed class MiyakoCarryServiceServerPostLoad(LocaleService localeService, MiyakoTraderService miyakoTraderService) : IOnLoad
         {
             public async Task OnLoad()
             {
                 await localeService.OnPostLoadAsync();
+                await miyakoTraderService.OnPostLoadAsync();
             }
         }
     }

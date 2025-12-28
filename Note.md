@@ -9,9 +9,13 @@
 - **赞助版**：解锁红护/挂护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资
 - - 如果是红护根据价位有不同的概率（通过封号系数决定，可关闭）可能被封号，然后根据你本局的战利品收益进行追缴（可关闭）
 - 图标：宫子头饰, 后面一个光环
+- 根据好感度等级能够打折扣
 
 ## TODO
 
 - ~~实现好友位的TsukiyukiMiyako~~
 - - 实现消息聊天的本地化
-- 尽可能实现非存档侵入式的自定义商人和发放行动任务
+- 尽可能实现非存档侵入式的~~自定义商人~~和发放行动任务（行动任务直接用原图即可）
+> 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
+
+> 参考[AddTraderWithAssortJson](https://github.com/sp-tarkov/server-mod-examples/tree/main/13AddTraderWithAssortJson)

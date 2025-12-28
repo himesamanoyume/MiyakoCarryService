@@ -12,12 +12,15 @@ using SPTarkov.Server.Core.Services;
 namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
-    public class MiyakoChatBot(ISptLogger<AbstractDialogChatBot> logger, MailSendService mailSendService,
-    ServerLocalisationService localisationService, IEnumerable<MiyakoChatBotCommands> chatCommands)
+    public class MiyakoChatBot(
+        ISptLogger<AbstractDialogChatBot> logger, 
+        MailSendService mailSendService, 
+        ServerLocalisationService localisationService, 
+        IEnumerable<MiyakoChatBotCommands> chatCommands)
     : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
     {
         private readonly Dictionary<string, MiyakoChatBotCommands> _miyakoCommands = chatCommands.ToDictionary(c => c.CommandPrefix);
-        private static readonly MongoId _miyakoId = new("686d2f9a3e1b4c8d2a5f0e7c");
+        private static readonly MongoId _miyakoId = new("686d2f9a3e1b4c8d2a5f0e7d");
 
         public override UserDialogInfo GetChatBot()
         {

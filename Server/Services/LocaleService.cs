@@ -10,7 +10,10 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
-public sealed class LocaleService(FileUtil fileUtil, ConfigService MiyakoCarryServiceConfig, DatabaseService databaseService)
+public sealed class LocaleService(
+    FileUtil fileUtil, 
+    ConfigService MiyakoCarryServiceConfig, 
+    DatabaseService databaseService)
 {
     private readonly string globalLocaleDir = Path.Join(MiyakoCarryServiceConfig.GetModPath(), "Assets", "database", "locales", "global");
     Dictionary<string, Dictionary<string, string>> _globalLocales = [];
