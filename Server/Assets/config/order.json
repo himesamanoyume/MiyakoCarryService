@@ -1,0 +1,79 @@
+{
+    "orderQuests": [
+        {
+            "id": "615ffc701c97c768137e719b",
+            "name": "Daily",
+            "side": "Pmc",
+            "types": [
+                "Pickup"
+            ],
+            "resetTime": 86400,
+            "numQuests": 4,
+            "minPlayerLevel": 0,
+            "rewardScaling": {
+                "levels": [
+                    0
+                ],
+                "experience": [
+                    0
+                ],
+                "roubles": [
+                    0
+                ],
+                "gpCoins": [
+                    0
+                ],
+                "items": [
+                    0
+                ],
+                "reputation": [
+                    0.01,
+                    0.02,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03
+                ],
+                "rewardSpread": 0.25,
+                "skillRewardChance": [
+                    0
+                ],
+                "skillPointReward": [
+                    0
+                ]
+            },
+            "locations": {
+                "any": [
+                    "any"
+                ]
+            },
+            "traderWhitelist": [],
+            "questConfig": {
+                "Pickup": {
+                    "possibleSkillRewards": [],
+                    "ItemTypeToFetchWithMaxCount": [
+                        {
+                            "itemType": "5b47574386f77428ca22b335",
+                            "minPickupCount": 10000,
+                            "maxPickupCount": 50000
+                        }
+                    ],
+                    "ItemTypesToFetch": [
+                        "5b47574386f77428ca22b335"
+                    ],
+                    "maxItemFetchCount": 3
+                }
+            },
+            "rewardBaseTypeBlacklist": [],
+            "rewardBlacklist": [],
+            "rewardAmmoStackMinSize": 0,
+            "freeChangesAvailable": 0,
+            "freeChanges": 0,
+            "keepDailyQuestTypeOnReplacement": false,
+            "standingChangeCost": [
+                0
+            ]
+        }
+    ]
+}

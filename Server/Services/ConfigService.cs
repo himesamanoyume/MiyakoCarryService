@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -6,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services;
@@ -14,7 +16,8 @@ namespace MiyakoCarryService.Server.Services;
 public sealed class ConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 {
     private readonly string configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets/config");
-    public MiyakoCarryServiceConfig Config { get; private set; } = new MiyakoCarryServiceConfig();
+    public MiyakoCarryServiceConfig MiyakoCarryServiceConfig { get; private set; } = new MiyakoCarryServiceConfig();
+    public OrderConfig OrderConfig { get; private set; }
     private readonly ModMetadata MiyakoCarryServiceServerModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
@@ -40,15 +43,21 @@ public sealed class ConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 
     public async Task OnPreLoad()
     {
-        string configPath = Path.Combine(configFolderPath, "miyakocarryservice.jsonc");
-        Config = await jsonUtil.DeserializeFromFileAsync<MiyakoCarryServiceConfig>(configPath) ?? new MiyakoCarryServiceConfig();
+        var miyakoCarryServicePath = Path.Combine(configFolderPath, "miyakocarryservice.jsonc");
+        MiyakoCarryServiceConfig = await jsonUtil.DeserializeFromFileAsync<MiyakoCarryServiceConfig>(miyakoCarryServicePath) ?? new MiyakoCarryServiceConfig();
+        var orderConfigPath = Path.Combine(configFolderPath, "order.json");
+        OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
     }
 
-    public MiyakoCarryServiceConfig GetConfig()
+    public MiyakoCarryServiceConfig GetMiyakoCarryServiceConfig()
     {
-        return Config;
+        return MiyakoCarryServiceConfig;
     }
 
+    public OrderConfig GetOrderConfig()
+    {
+        return OrderConfig;
+    }
 }
 
 public record MiyakoCarryServiceClientConfig
@@ -61,11 +70,17 @@ public record MiyakoCarryServiceServerConfig
     
 }
 
-public sealed class MiyakoCarryServiceConfig
+public record MiyakoCarryServiceConfig
 {
     [JsonPropertyName("Client")]
-    public MiyakoCarryServiceClientConfig ClientConfig { get; set; } = new MiyakoCarryServiceClientConfig();
+    public MiyakoCarryServiceClientConfig ClientConfig { get; set; }
 
     [JsonPropertyName("Server")]
-    public MiyakoCarryServiceServerConfig ServerConfig { get; set; } = new MiyakoCarryServiceServerConfig();
+    public MiyakoCarryServiceServerConfig ServerConfig { get; set; }
+}
+
+public record OrderConfig
+{
+    [JsonPropertyName("orderQuests")]
+    public required List<RepeatableQuestConfig> OrderQuests { get; set; }
 }

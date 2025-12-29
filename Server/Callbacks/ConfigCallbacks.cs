@@ -21,7 +21,7 @@ public sealed class ConfigCallbacks(
 
     private string GetConfig()
     {
-        var config = configService.GetConfig();
+        var config = configService.GetMiyakoCarryServiceConfig();
         var cfgStr = JsonSerializer.Serialize(config);
         var cfgObject = JsonNode.Parse(cfgStr)!.AsObject();
         return cfgObject.ToJsonString();
