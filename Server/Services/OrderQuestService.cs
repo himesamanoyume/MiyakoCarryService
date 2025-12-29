@@ -26,6 +26,11 @@ namespace MiyakoCarryService.Server.Services
             _orderTemplate = orderTemplate;
         }
 
+        public RepeatableQuest GetOrderTemplate()
+        {
+            return _orderTemplate;
+        }
+
         private void CreateQuest(RepeatableQuest repeatableQuest)
         {
             var newQuestDetails = new NewQuestDetails

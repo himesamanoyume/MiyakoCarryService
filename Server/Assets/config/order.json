@@ -2,7 +2,7 @@
     "orderQuests": [
         {
             "id": "615ffc701c97c768137e719b",
-            "name": "Daily",
+            "name": "Order",
             "side": "Pmc",
             "types": [
                 "Pickup"
@@ -62,7 +62,7 @@
                     "ItemTypesToFetch": [
                         "5b47574386f77428ca22b335"
                     ],
-                    "maxItemFetchCount": 3
+                    "maxItemFetchCount": 4
                 }
             },
             "rewardBaseTypeBlacklist": [],
