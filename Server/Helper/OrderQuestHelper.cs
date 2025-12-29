@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Server.Helper
     {
         protected readonly OrderConfig OrderConfig = configService.GetOrderConfig();
 
-        public RepeatableQuest? GenerateOrderTemplate(
+        public RepeatableQuest GenerateOrderTemplate(
             RepeatableQuestType type,
             MongoId traderId,
             MongoId sessionId)
@@ -88,13 +88,13 @@ namespace MiyakoCarryService.Server.Helper
             }
 
             questData.QuestStatus.Id = new MongoId();
-            questData.QuestStatus.Uid = sessionId; // Needs to match user id
-            questData.QuestStatus.QId = questData.Id; // Needs to match quest id
+            questData.QuestStatus.Uid = sessionId;
+            questData.QuestStatus.QId = questData.Id;
 
             return questData;
         }
 
-        public RepeatableQuest? GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
+        public RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
         {
             var orderTemplate = orderQuestService.GetOrderTemplate();
             var quest = type switch

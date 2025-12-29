@@ -20,7 +20,8 @@ namespace MiyakoCarryService.Server.Services
         DatabaseService databaseService,
         ConfigService MiyakoCarryServiceConfig)
     {
-        private readonly string _traderDir = System.IO.Path.Join(MiyakoCarryServiceConfig.GetModPath(), "Assets", "database", "traders", "687345e3bcf2abcd12345678");
+        private readonly string _traderDir = System.IO.Path.Join(MiyakoCarryServiceConfig.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
+        public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
 
         public async Task OnPostLoadAsync()
         {

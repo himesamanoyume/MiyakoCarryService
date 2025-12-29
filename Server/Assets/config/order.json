@@ -1,7 +1,7 @@
 {
     "orderQuests": [
         {
-            "id": "615ffc701c97c768137e719b",
+            "id": "6952d5f6bcc1dd1e3c80dfcb",
             "name": "Order",
             "side": "Pmc",
             "types": [
@@ -63,7 +63,80 @@
                         "5b47574386f77428ca22b335"
                     ],
                     "maxItemFetchCount": 4
-                }
+                },
+                "Exploration": [
+                    {
+                        "levelRange": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "minExtracts": 0,
+                        "maxExtracts": 0,
+                        "minExtractsWithSpecificExit": 0,
+                        "maxExtractsWithSpecificExit": 0,
+                        "possibleSkillRewards": [],
+                        "specificExits": {
+                            "chance": 0,
+                            "passageRequirementWhitelist": []
+                        }
+                    }
+                ],
+                "Completion": [
+                    {
+                        "levelRange": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "possibleSkillRewards": [],
+                        "requestedItemCount": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "uniqueItemCount": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "requestedBulletCount": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "useWhitelist": false,
+                        "useBlacklist": false,
+                        "requiredItemsAreFiR": false,
+                        "requiredItemMinDurabilityMinMax": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "requiredItemTypeBlacklist": []
+                    }
+                ],
+                "Elimination": [
+                    {
+                        "levelRange": {
+                            "min": 0,
+                            "max": 0
+                        },
+                        "possibleSkillRewards": [],
+                        "targets": [],
+                        "bodyPartChance": 0,
+                        "bodyParts": [],
+                        "specificLocationChance": 0,
+                        "distLocationBlacklist": [],
+                        "distProb": 0,
+                        "maxDist": 0,
+                        "minDist": 0,
+                        "maxKills": 0,
+                        "minKills": 0,
+                        "maxBossKills": 0,
+                        "minBossKills": 0,
+                        "maxPmcKills": 0,
+                        "minPmcKills": 0,
+                        "weaponRequirementChance": 0,
+                        "weaponCategoryRequirementChance": 0,
+                        "weaponCategoryRequirements": [],
+                        "weaponRequirements": []
+                    }
+                ]
             },
             "rewardBaseTypeBlacklist": [],
             "rewardBlacklist": [],

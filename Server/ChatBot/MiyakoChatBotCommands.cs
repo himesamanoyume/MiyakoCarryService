@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Server.ChatBot
         {
             get
             {
-                return "miyakocarryservice";
+                return "miyakocs";
             }
         }
 
