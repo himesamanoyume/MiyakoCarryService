@@ -13,12 +13,12 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
-public sealed class ConfigService(ModHelper modHelper, JsonUtil jsonUtil)
+public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 {
     private readonly string configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets/config");
-    public MiyakoCarryServiceConfig MiyakoCarryServiceConfig { get; private set; } = new MiyakoCarryServiceConfig();
-    public OrderConfig OrderConfig { get; private set; }
-    private readonly ModMetadata MiyakoCarryServiceServerModMetadata = new ModMetadata();
+    public MCSConfig MCSConfig { get; private set; } = new MCSConfig();
+    public MCSOrderConfig MCSOrderConfig { get; private set; }
+    private readonly ModMetadata MCSModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
     public string GetModPath()
@@ -28,58 +28,58 @@ public sealed class ConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 
     public SemanticVersioning.Version GetServerVersion()
     {
-        return MiyakoCarryServiceServerModMetadata.Version;
+        return MCSModMetadata.Version;
     }
 
     public System.Version GetClientVersion()
     {
-        return MiyakoCarryServiceServerModMetadata.ClientVersion;
+        return MCSModMetadata.ClientVersion;
     }
 
     public string GetModUrl()
     {
-        return MiyakoCarryServiceServerModMetadata.Url;
+        return MCSModMetadata.Url;
     }
 
     public async Task OnPreLoad()
     {
         var miyakoCarryServicePath = Path.Combine(configFolderPath, "miyakocarryservice.jsonc");
-        MiyakoCarryServiceConfig = await jsonUtil.DeserializeFromFileAsync<MiyakoCarryServiceConfig>(miyakoCarryServicePath) ?? new MiyakoCarryServiceConfig();
+        MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath) ?? new MCSConfig();
         var orderConfigPath = Path.Combine(configFolderPath, "order.json");
-        OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
+        MCSOrderConfig = await jsonUtil.DeserializeFromFileAsync<MCSOrderConfig>(orderConfigPath);
     }
 
-    public MiyakoCarryServiceConfig GetMiyakoCarryServiceConfig()
+    public MCSConfig GetMiyakoCarryServiceConfig()
     {
-        return MiyakoCarryServiceConfig;
+        return MCSConfig;
     }
 
-    public OrderConfig GetOrderConfig()
+    public MCSOrderConfig GetOrderConfig()
     {
-        return OrderConfig;
+        return MCSOrderConfig;
     }
 }
 
-public record MiyakoCarryServiceClientConfig
+public record MCSClientConfig
 {
 
 }
 
-public record MiyakoCarryServiceServerConfig
+public record MCSServerConfig
 {
     
 }
 
-public record MiyakoCarryServiceConfig
+public record MCSConfig
 {
     [JsonPropertyName("Client")]
-    public MiyakoCarryServiceClientConfig ClientConfig { get; set; }
+    public MCSClientConfig ClientConfig { get; set; }
 
     [JsonPropertyName("Server")]
-    public MiyakoCarryServiceServerConfig ServerConfig { get; set; }
+    public MCSServerConfig ServerConfig { get; set; }
 }
 
-public record OrderConfig
+public record MCSOrderConfig
 {
     [JsonPropertyName("orderQuests")]
     public required List<RepeatableQuestConfig> OrderQuests { get; set; }

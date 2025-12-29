@@ -3,7 +3,7 @@
     "traderId": "6952ced4bcc1dd1e3c80dfcb",
     "location": "any",
     "image": "/files/quest/icon/62bd61b1b818ff064405b827.jpg",
-    "type": "PickUp",
+    "type": "Completion",
     "isKey": false,
     "restartable": false,
     "instantComplete": false,
@@ -20,7 +20,7 @@
             {
                 "id": "64cfb3818db9f48b3f0b0a6f",
                 "parentId": "",
-                "dynamicLocale": false,
+                "dynamicLocale": true,
                 "index": 0,
                 "visibilityConditions": [],
                 "globalQuestCounterId": "",
@@ -34,7 +34,7 @@
                 "onlyFoundInRaid": false,
                 "isEncoded": false,
                 "countInRaid": true,
-                "conditionType": "FindItem"
+                "conditionType": "HandoverItem"
             }
         ],
         "Fail": []

@@ -5,7 +5,7 @@
             "name": "Order",
             "side": "Pmc",
             "types": [
-                "Pickup"
+                "Completion"
             ],
             "resetTime": 86400,
             "numQuests": 4,
@@ -52,17 +52,9 @@
             "questConfig": {
                 "Pickup": {
                     "possibleSkillRewards": [],
-                    "ItemTypeToFetchWithMaxCount": [
-                        {
-                            "itemType": "5b47574386f77428ca22b335",
-                            "minPickupCount": 10000,
-                            "maxPickupCount": 50000
-                        }
-                    ],
-                    "ItemTypesToFetch": [
-                        "5b47574386f77428ca22b335"
-                    ],
-                    "maxItemFetchCount": 4
+                    "ItemTypeToFetchWithMaxCount": [],
+                    "ItemTypesToFetch": [],
+                    "maxItemFetchCount": 0
                 },
                 "Exploration": [
                     {
@@ -85,12 +77,12 @@
                     {
                         "levelRange": {
                             "min": 0,
-                            "max": 0
+                            "max": 9999
                         },
                         "possibleSkillRewards": [],
                         "requestedItemCount": {
-                            "min": 0,
-                            "max": 0
+                            "min": 10000,
+                            "max": 50000
                         },
                         "uniqueItemCount": {
                             "min": 0,

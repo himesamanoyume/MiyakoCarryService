@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Services.Mod;
@@ -8,12 +10,12 @@ using SPTarkov.Server.Core.Services.Mod;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class OrderQuestService(
+    public sealed class MCSOrderQuestService(
         ModHelper modHelper,
-        CustomQuestService customQuestService,
-        ConfigService MiyakoCarryServiceConfig)
+        MCSConfigService mcsConfigService
+    )
     {
-        private readonly string _traderDir = System.IO.Path.Join(MiyakoCarryServiceConfig.GetModPath(), "Assets", "database", "templates");
+        private readonly string _traderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "templates");
         private RepeatableQuest _orderTemplate;
         public async Task OnPostLoadAsync()
         {
@@ -29,16 +31,6 @@ namespace MiyakoCarryService.Server.Services
         public RepeatableQuest GetOrderTemplate()
         {
             return _orderTemplate;
-        }
-
-        private void CreateQuest(RepeatableQuest repeatableQuest)
-        {
-            var newQuestDetails = new NewQuestDetails
-            {
-                NewQuest = repeatableQuest,
-                Locales = null
-            };
-            customQuestService.CreateQuest(newQuestDetails);
         }
     }
 

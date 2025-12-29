@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPostfix]
         public static void Postfix(RepeatableQuestController __instance, MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
         {
-            var configService = ServiceLocator.ServiceProvider.GetService<ConfigService>();
+            var configService = ServiceLocator.ServiceProvider.GetService<MCSConfigService>();
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var timeUtil = ServiceLocator.ServiceProvider.GetService<TimeUtil>();
             var currentTime = timeUtil.GetTimeStamp();

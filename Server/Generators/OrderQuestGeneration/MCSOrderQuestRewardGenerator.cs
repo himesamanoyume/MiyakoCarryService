@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -13,18 +12,18 @@ using SPTarkov.Server.Core.Models.Spt.Repeatable;
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class OrderQuestRewardGenerator(
+    public class MCSOrderQuestRewardGenerator(
         RepeatableQuestRewardGenerator repeatableQuestRewardGenerator
     )
     {
         public Dictionary<string, List<Reward>> GenerateReward(
+            int players,
             int carryServiceLevel,
             MongoId traderId,
-            OrderConfig orderConfig
+            MCSOrderConfig orderConfig
         )
         {
             var repeatableQuestRewardGeneratorTraverse = Traverse.Create(repeatableQuestRewardGenerator);
-            var rewardParams = repeatableQuestRewardGeneratorTraverse.Method("GetQuestRewardValues", [orderConfig.OrderQuests.First().RewardScaling, carryServiceLevel, 1]).GetValue<QuestRewardValues>();
 
             var rewards = new Dictionary<string, List<Reward>>
             {
@@ -34,22 +33,26 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             };
 
             var rewardIndex = -1;
-
-            if (rewardParams.RewardReputation > 0)
+            for (int i = 0; i < players; i++)
             {
-                Reward reward = new()
+                var rewardParams = repeatableQuestRewardGeneratorTraverse.Method("GetQuestRewardValues", [orderConfig.OrderQuests.First().RewardScaling, carryServiceLevel, 1]).GetValue<QuestRewardValues>();
+                
+                if (rewardParams.RewardReputation > 0)
                 {
-                    Id = new MongoId(),
-                    Unknown = false,
-                    GameMode = [],
-                    AvailableInGameEditions = [],
-                    Target = traderId,
-                    Value = rewardParams.RewardReputation,
-                    Type = RewardType.TraderStanding,
-                    Index = rewardIndex,
-                };
-                rewards["Success"].Add(reward);
-                rewardIndex++;
+                    Reward reward = new()
+                    {
+                        Id = new MongoId(),
+                        Unknown = false,
+                        GameMode = [],
+                        AvailableInGameEditions = [],
+                        Target = traderId,
+                        Value = rewardParams.RewardReputation,
+                        Type = RewardType.TraderStanding,
+                        Index = rewardIndex,
+                    };
+                    rewards["Success"].Add(reward);
+                    rewardIndex++;
+                }
             }
 
             return rewards;

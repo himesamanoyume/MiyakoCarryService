@@ -13,14 +13,14 @@ using SPTarkov.Server.Core.Utils.Cloners;
 namespace MiyakoCarryService.Server.Helper
 {
     [Injectable]
-    public class OrderQuestHelper(
-        ISptLogger<OrderQuestHelper> logger,
-        OrderQuestService orderQuestService,
-        ConfigService configService,
+    public class MCSOrderQuestHelper(
+        ISptLogger<MCSOrderQuestHelper> logger,
+        MCSOrderQuestService mcsOrderQuestService,
+        MCSConfigService mcsConfigService,
         ServerLocalisationService serverLocalisationService,
         ICloner cloner)
     {
-        protected readonly OrderConfig OrderConfig = configService.GetOrderConfig();
+        protected readonly MCSOrderConfig OrderConfig = mcsConfigService.GetOrderConfig();
 
         public RepeatableQuest GenerateOrderTemplate(
             RepeatableQuestType type,
@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Server.Helper
             // Get template id from config based on side and type of quest
             var typeIds = new Dictionary<string, MongoId>()
             {
-                {"PickUp", "695207e8bcc1dd1e3c80dfcb"}
+                {"Completion", "695207e8bcc1dd1e3c80dfcb"}
             };
             questData.TemplateId = typeIds.GetValueOrDefault(templateName);
 
@@ -96,10 +96,10 @@ namespace MiyakoCarryService.Server.Helper
 
         public RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
         {
-            var orderTemplate = orderQuestService.GetOrderTemplate();
+            var orderTemplate = mcsOrderQuestService.GetOrderTemplate();
             var quest = type switch
             {
-                RepeatableQuestType.Pickup => cloner.Clone(orderTemplate),
+                RepeatableQuestType.Completion => cloner.Clone(orderTemplate),
                 _ => null,
             };
 
