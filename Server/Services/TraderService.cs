@@ -1,0 +1,84 @@
+
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Routers;
+using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Utils.Cloners;
+
+namespace MiyakoCarryService.Server.Services
+{
+    [Injectable(InjectionType.Singleton)]
+    public sealed class TraderService(
+        ModHelper modHelper,
+        ICloner cloner,
+        ImageRouter imageRouter,
+        DatabaseService databaseService,
+        ConfigService MiyakoCarryServiceConfig)
+    {
+        private readonly string _traderDir = System.IO.Path.Join(MiyakoCarryServiceConfig.GetModPath(), "Assets", "database", "traders", "687345e3bcf2abcd12345678");
+
+        public async Task OnPostLoadAsync()
+        {
+            await LoadTrader();
+        }
+
+        private async Task LoadTrader()
+        {
+            var iconPath = System.IO.Path.Join(_traderDir, "miyako.jpg");
+            var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderDir, "base.json");
+            imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
+            AddTraderWithEmptyAssortToDb(traderBase);
+            var assort = modHelper.GetJsonDataFromFile<TraderAssort>(_traderDir, "assort.json");
+            OverwriteTraderAssort(traderBase.Id, assort);
+        }
+
+
+        private void AddTraderWithEmptyAssortToDb(TraderBase traderDetailsToAdd)
+        {
+            // Create an empty assort ready for our items
+            var emptyTraderItemAssortObject = new TraderAssort
+            {
+                Items = [],
+                BarterScheme = new Dictionary<MongoId, List<List<BarterScheme>>>(),
+                LoyalLevelItems = new Dictionary<MongoId, int>()
+            };
+
+            // Create trader data ready to add to database
+            var traderDataToAdd = new Trader
+            {
+                Assort = emptyTraderItemAssortObject,
+                Base = cloner.Clone(traderDetailsToAdd),
+                QuestAssort = new() // quest assort is empty as trader has no assorts unlocked by quests
+                {
+                    // We create 3 empty arrays, one for each of the main statuses that are possible
+                    { "Started", new() },
+                    { "Success", new() },
+                    { "Fail", new() }
+                },
+                Dialogue = []
+            };
+
+            // Add the new trader id and data to the server
+            if (!databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
+            {
+                //Failed to add trader!
+            }
+        }
+
+        public void OverwriteTraderAssort(string traderId, TraderAssort newAssorts)
+        {
+            if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var traderToEdit))
+            {
+                return;
+            }
+
+            // Override the traders assorts with the ones we passed in
+            traderToEdit.Assort = newAssorts;
+        }
+    }
+}
