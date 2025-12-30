@@ -7,6 +7,7 @@ using System;
 using BepInEx.Bootstrap;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
+using MiyakoCarryService.Client.Patches.RefreshQuests;
 
 namespace MiyakoCarryService.Client;
 
@@ -18,7 +19,7 @@ namespace MiyakoCarryService.Client;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
-    public const string BepInExClientVersion = "0.0.1.0";
+    public const string BepInExClientVersion = "0.0.2.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string MiyakoCarryServiceGUID = "top.himesamanoyume.miyakocarryservice";
     public const string MiyakoCarryServicePluginName = "Himesamanoyume.MiyakoCarryService";
@@ -117,7 +118,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         {
             return;
         }
-
+        new TradingScreenShowPatch().Enable();
 #if DEBUG
         
 #endif

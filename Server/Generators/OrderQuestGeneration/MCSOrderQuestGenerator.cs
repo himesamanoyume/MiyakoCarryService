@@ -9,6 +9,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Json;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
@@ -63,11 +64,11 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             );
 
             var requestedItemCount = completionConfig.RequestedItemCount;
-            var handoverItemCondition = quest.Conditions.AvailableForFinish.FirstOrDefault(x => x.ConditionType == "HandoverItem");
-            handoverItemCondition.Value = 0;
+            quest.Conditions.AvailableForFinish = [];
 
             for (int i = 0; i < players; i++)
             {
+                
                 var currentRequestedItemCount = carryServiceLevel switch
                 {
                     1 => randomUtil.RandInt(
@@ -89,7 +90,24 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                         (int)(requestedItemCount.Min * discount * 0.98f),
                         (int)(requestedItemCount.Max * discount * 1.02f) + 1)
                 };
-                handoverItemCondition.Value += currentRequestedItemCount;
+
+                var handoverItemCondition = new QuestCondition
+                {
+                    Id = new MongoId(),
+                    Index = i,
+                    ParentId = string.Empty,
+                    DynamicLocale = true,
+                    VisibilityConditions = [],
+                    Target = new ListOrT<string>([new ("5449016a4bdc2d6f028b456f")], null),
+                    Value = currentRequestedItemCount,
+                    MinDurability = 0,
+                    MaxDurability = 100,
+                    DogtagLevel = 0,
+                    OnlyFoundInRaid = false,
+                    IsEncoded = false,
+                    ConditionType = "HandoverItem",
+                };
+                quest.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
             quest.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId, orderConfig);
             logger.Info("订单任务信息构建结束");

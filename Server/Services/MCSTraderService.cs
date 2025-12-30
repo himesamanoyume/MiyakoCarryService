@@ -49,7 +49,6 @@ namespace MiyakoCarryService.Server.Services
 
         private void AddTraderWithEmptyAssortToDb(TraderBase traderDetailsToAdd)
         {
-            // Create an empty assort ready for our items
             var emptyTraderItemAssortObject = new TraderAssort
             {
                 Items = [],
@@ -57,14 +56,12 @@ namespace MiyakoCarryService.Server.Services
                 LoyalLevelItems = new Dictionary<MongoId, int>()
             };
 
-            // Create trader data ready to add to database
             var traderDataToAdd = new Trader
             {
                 Assort = emptyTraderItemAssortObject,
                 Base = cloner.Clone(traderDetailsToAdd),
-                QuestAssort = new() // quest assort is empty as trader has no assorts unlocked by quests
+                QuestAssort = new()
                 {
-                    // We create 3 empty arrays, one for each of the main statuses that are possible
                     { "Started", new() },
                     { "Success", new() },
                     { "Fail", new() }
@@ -72,10 +69,9 @@ namespace MiyakoCarryService.Server.Services
                 Dialogue = []
             };
 
-            // Add the new trader id and data to the server
             if (!databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
             {
-                //Failed to add trader!
+                
             }
         }
 
@@ -85,14 +81,11 @@ namespace MiyakoCarryService.Server.Services
             {
                 return;
             }
-
-            // Override the traders assorts with the ones we passed in
             traderToEdit.Assort = newAssorts;
         }
 
         private void SetTraderUpdateTime(TraderConfig traderConfig, TraderBase baseJson, int refreshTimeSecondsMin, int refreshTimeSecondsMax)
         {
-            // Add refresh time in seconds to config
             var traderRefreshRecord = new UpdateTime
             {
                 TraderId = baseJson.Id,

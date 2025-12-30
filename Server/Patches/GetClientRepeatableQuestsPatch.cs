@@ -35,7 +35,8 @@ namespace MiyakoCarryService.Server.Patches
 
             generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
             generatedOrder.InactiveQuests = [];
-            repeatableQuestControllerTraverse.Method("ProcessExpiredQuests", [generatedOrder, pmcData]);
+            Console.WriteLine("将尝试清除过期订单任务");
+            repeatableQuestControllerTraverse.Method("ProcessExpiredQuests", [generatedOrder, pmcData]).GetValue();
             generatedOrder.ChangeRequirement = [];
 
             while (RepeatableQuestsQueue.Count > 0)

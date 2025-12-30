@@ -31,5 +31,14 @@
 
 > 参考[RepeatableQuestController](https://github.com/sp-tarkov/server-csharp/blob/main/Libraries/SPTarkov.Server.Core/Controllers/RepeatableQuestController.cs#L68)
 
-- 能否改掉寻物上交这些内容
+- ~~能否改掉寻物上交这些内容~~
 - `RemoveInvalidRepeatableQuests`可能有必要打补丁防止删除订单任务
+- ~~确认一下现在的Order类型任务是否还能更改任务~~**可以，需要进行处理**
+- ~~确认一下现在的Order类型任务是否能够同时存在两个(可以，但完成一个同时也会完成同池子下其他任务)弄清为何会导致这种情况~~
+- ~~条件还是改为多个上交~~
+- ~~`QuestListItem.UpdateTimer`似乎可以触发`/client/repeatalbeQuests/activityPeriods`~~
+- - ~~其实可以直接在打开任务界面的时候强制触发`/client/repeatalbeQuests/activityPeriods`~~
+- - ~~猜测是15分钟到了开始刷新新的每日任务导致触发的~~
+- ~~BUG: 15分钟过期后没有正确将任务消除，很可能是受后端影响，因为后端存档中显示此任务还处于activeQuest~~
+- - ~~判断是`ProcessExpiredQuests`未按预期执行~~
+- 任务队列添加需要指定对应pmc的id，才进行添加
