@@ -1,30 +1,20 @@
 using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
-using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Generators.RepeatableQuestGeneration;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Spt.Repeatable;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class MCSOrderQuestRewardGenerator(
-        RepeatableQuestRewardGenerator repeatableQuestRewardGenerator
-    )
+    public class MCSOrderQuestRewardGenerator()
     {
         public Dictionary<string, List<Reward>> GenerateReward(
             int players,
             int carryServiceLevel,
-            MongoId traderId,
-            MCSOrderConfig orderConfig
+            MongoId traderId
         )
         {
-            var repeatableQuestRewardGeneratorTraverse = Traverse.Create(repeatableQuestRewardGenerator);
-
             var rewards = new Dictionary<string, List<Reward>>
             {
                 { "Success", [] },
@@ -48,11 +38,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
-                var rewardParams = repeatableQuestRewardGeneratorTraverse.Method("GetQuestRewardValues", [orderConfig.OrderQuests.First().RewardScaling, carryServiceLevel, 1]).GetValue<QuestRewardValues>();
-                if (rewardParams.RewardReputation > 0)
-                {
-                    reward.Value += rewardParams.RewardReputation;
-                }
+                reward.Value += 0.01 * carryServiceLevel;
             }
 
             return rewards;

@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Patches
     public sealed class GetClientRepeatableQuestsPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.GetClientRepeatableQuests));
-        public static Queue<RepeatableQuest> RepeatableQuestsQueue = new();
+        public static Dictionary<MongoId, Queue<RepeatableQuest>> OrderQuestsQueueDict = new();
 
         [PatchPostfix]
         public static void Postfix(RepeatableQuestController __instance, MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
@@ -33,26 +33,27 @@ namespace MiyakoCarryService.Server.Patches
             var repeatableQuestControllerTraverse = Traverse.Create(__instance);
             var generatedOrder = repeatableQuestControllerTraverse.Method("GetRepeatableQuestSubTypeFromProfile", [orderConfig, pmcData]).GetValue<PmcDataRepeatableQuest>();
 
-            generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
-            generatedOrder.InactiveQuests = [];
-            Console.WriteLine("将尝试清除过期订单任务");
-            repeatableQuestControllerTraverse.Method("ProcessExpiredQuests", [generatedOrder, pmcData]).GetValue();
-            generatedOrder.ChangeRequirement = [];
+            // 实现完成后将新ProcessExpiredQuests重新放入此处
 
-            while (RepeatableQuestsQueue.Count > 0)
+            if (OrderQuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
             {
-                var quest = RepeatableQuestsQueue.Dequeue();
-                Console.WriteLine("加入新任务");
-                quest.Side = Enum.GetName(orderConfig.Side);
-                generatedOrder.ActiveQuests.Add(quest);
-                generatedOrder.ChangeRequirement.TryAdd(
-                    quest.Id,
-                    new ChangeRequirement
-                    {
-                        ChangeCost = quest.ChangeCost,
-                        ChangeStandingCost = 0
-                    }
-                );
+                generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
+                while (orderQuestsQueue.Count > 0)
+                {
+                    var quest = orderQuestsQueue.Dequeue();
+                    Console.WriteLine("加入新任务");
+                    quest.Side = Enum.GetName(orderConfig.Side);
+                    generatedOrder.ActiveQuests.Add(quest);
+                    generatedOrder.ChangeRequirement.TryAdd(
+                        quest.Id,
+                        new ChangeRequirement
+                        {
+                            ChangeCost = quest.ChangeCost,
+                            ChangeStandingCost = 0
+                        }
+                    );
+                }
+                OrderQuestsQueueDict.Remove(sessionID);
             }
 
             if (currentTime < generatedOrder.EndTime - 1)
@@ -61,6 +62,15 @@ namespace MiyakoCarryService.Server.Patches
                 __result.Add(generatedOrder);
                 return;
             }
+
+            generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
+            generatedOrder.InactiveQuests = [];
+            generatedOrder.ChangeRequirement = [];
+
+            Console.WriteLine("将尝试清除过期订单任务");
+            repeatableQuestControllerTraverse.Method("ProcessExpiredQuests", [generatedOrder, pmcData]).GetValue();
+            // 该函数的作用是将此配置分类中只要没完成的任务全部清除，应该自定义一个新的处理过期任务函数，而不是单纯使用配置分类下的endTime作为过期的标准
+            // 或者最佳方式是继承RepeatableQuest得到OrderQuest，并多出一个对应自身任务的endTime，清理过期任务时则是检查该项来决定是否保留
 
             __result.Add(
                 new PmcDataRepeatableQuest

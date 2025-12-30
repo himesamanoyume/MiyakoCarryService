@@ -118,7 +118,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         {
             return;
         }
-        new TradingScreenShowPatch().Enable();
+        new TraderScreensGroupShowPatch().Enable();
 #if DEBUG
         
 #endif

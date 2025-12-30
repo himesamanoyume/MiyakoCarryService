@@ -22,7 +22,14 @@ namespace MiyakoCarryService.Server.Controllers
             logger.Info("开始创建任务");
             var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(sessionID, pmcData, players, carryServiceLevel, hours);
             logger.Info("任务插入等待创建队列");
-            GetClientRepeatableQuestsPatch.RepeatableQuestsQueue.Enqueue(orderQuest);
+            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
+            {
+                orderQuestsQueue.Enqueue(orderQuest);
+            }
+            else
+            {
+                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(sessionID, new([orderQuest]));
+            }
         }
     }
 }

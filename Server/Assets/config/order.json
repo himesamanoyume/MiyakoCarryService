@@ -7,7 +7,7 @@
             "types": [
                 "Completion"
             ],
-            "resetTime": 60,
+            "resetTime": 120,
             "numQuests": 100,
             "minPlayerLevel": 0,
             "rewardScaling": {
@@ -30,7 +30,7 @@
                     0.01,
                     0.02
                 ],
-                "rewardSpread": 0.25,
+                "rewardSpread": 0.01,
                 "skillRewardChance": [
                     0
                 ],

@@ -75,19 +75,19 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                         (int)(requestedItemCount.Max * discount * 0.18f),
                         (int)(requestedItemCount.Max * discount * 0.22f) + 1),
                     2 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Min * discount * 0.38f),
+                        (int)(requestedItemCount.Max * discount * 0.38f),
                         (int)(requestedItemCount.Max * discount * 0.42f) + 1),
                     3 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Min * discount * 0.58f),
+                        (int)(requestedItemCount.Max * discount * 0.58f),
                         (int)(requestedItemCount.Max * discount * 0.62f) + 1),
                     4 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Min * discount * 0.78f),
+                        (int)(requestedItemCount.Max * discount * 0.78f),
                         (int)(requestedItemCount.Max * discount * 0.82f) + 1),
                     5 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Min * discount * 0.98f),
+                        (int)(requestedItemCount.Max * discount * 0.98f),
                         (int)(requestedItemCount.Max * discount * 1.02f) + 1),
                     _ => randomUtil.RandInt(
-                        (int)(requestedItemCount.Min * discount * 0.98f),
+                        (int)(requestedItemCount.Max * discount * 0.98f),
                         (int)(requestedItemCount.Max * discount * 1.02f) + 1)
                 };
 
@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 };
                 quest.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
-            quest.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId, orderConfig);
+            quest.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
             logger.Info("订单任务信息构建结束");
             return quest;
         }
