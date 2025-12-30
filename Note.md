@@ -23,7 +23,7 @@
 - - ~~根据人数修改条件数量~~。
 > 参考`GenerateAvailableForFinish`
 
-- - **别忘了修改任务接取过期时长为15分钟**
+- - ~~别忘了修改任务接取过期时长为15分钟~~
 - - 新的AI队友处于好友列表的时长才为指定的时间
 > 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
 

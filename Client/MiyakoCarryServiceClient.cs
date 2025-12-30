@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System;
 using BepInEx.Bootstrap;
 using MiyakoCarryService.Client.Enums;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client;
@@ -21,8 +20,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
     public const string BepInExClientVersion = "0.0.1.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
-    public const string MiyakoCarryServiceGUID = "top.himesamanoyume.MiyakoCarryService";
-    public const string MiyakoCarryServicePluginName = "姫様の夢.MiyakoCarryService";
+    public const string MiyakoCarryServiceGUID = "top.himesamanoyume.miyakocarryservice";
+    public const string MiyakoCarryServicePluginName = "Himesamanoyume.MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
     public static bool FikaInstalled = false;

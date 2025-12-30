@@ -2,7 +2,7 @@
     "orderQuests": [
         {
             "id": "6953358977d6d54857304681",
-            "name": "Weekly",
+            "name": "Order",
             "side": "Pmc",
             "types": [
                 "Completion"
@@ -28,12 +28,7 @@
                 ],
                 "reputation": [
                     0.01,
-                    0.02,
-                    0.03,
-                    0.03,
-                    0.03,
-                    0.03,
-                    0.03
+                    0.02
                 ],
                 "rewardSpread": 0.25,
                 "skillRewardChance": [
