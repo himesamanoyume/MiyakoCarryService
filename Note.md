@@ -32,7 +32,7 @@
 > 参考[RepeatableQuestController](https://github.com/sp-tarkov/server-csharp/blob/main/Libraries/SPTarkov.Server.Core/Controllers/RepeatableQuestController.cs#L68)
 
 - ~~能否改掉寻物上交这些内容~~
-- `RemoveInvalidRepeatableQuests`可能有必要打补丁防止删除订单任务
+- **`RemoveInvalidRepeatableQuests`可能有必要打补丁防止删除订单任务**
 - ~~确认一下现在的Order类型任务是否还能更改任务~~**可以，需要进行处理**
 - ~~确认一下现在的Order类型任务是否能够同时存在两个(可以，但完成一个同时也会完成同池子下其他任务)弄清为何会导致这种情况~~
 - ~~条件还是改为多个上交~~
@@ -43,4 +43,4 @@
 - - ~~判断是`ProcessExpiredQuests`未按预期执行~~
 - ~~任务队列添加需要指定对应pmc的id，才进行添加~~
 - ~~获取行动任务的函数不应该会持续执行~~
-- 当前能够做到多个行动任务拥有不同的过期时间，但是最开始的任务会因为被刷新了过期时间导致出现即便过期了也不会立即清除的问题
+- ~~当前能够做到多个行动任务拥有不同的过期时间，但是最开始的任务会因为被刷新了过期时间导致出现即便过期了也不会立即清除的问题~~
