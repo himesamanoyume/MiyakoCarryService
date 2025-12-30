@@ -6,8 +6,11 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Routers;
+using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace MiyakoCarryService.Server.Services
@@ -17,6 +20,8 @@ namespace MiyakoCarryService.Server.Services
         ModHelper modHelper,
         ICloner cloner,
         ImageRouter imageRouter,
+        ConfigServer configServer,
+        TimeUtil timeUtil,
         DatabaseService databaseService,
         MCSConfigService MCSConfigService)
     {
@@ -28,7 +33,7 @@ namespace MiyakoCarryService.Server.Services
             await LoadTrader();
         }
 
-        private async Task LoadTrader()
+        private Task LoadTrader()
         {
             var iconPath = System.IO.Path.Join(_traderDir, "miyako.jpg");
             var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderDir, "base.json");
@@ -36,6 +41,8 @@ namespace MiyakoCarryService.Server.Services
             AddTraderWithEmptyAssortToDb(traderBase);
             var assort = modHelper.GetJsonDataFromFile<TraderAssort>(_traderDir, "assort.json");
             OverwriteTraderAssort(traderBase.Id, assort);
+            SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
+            return Task.CompletedTask;
         }
 
 
@@ -71,7 +78,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void OverwriteTraderAssort(string traderId, TraderAssort newAssorts)
+        private void OverwriteTraderAssort(string traderId, TraderAssort newAssorts)
         {
             if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var traderToEdit))
             {
@@ -80,6 +87,18 @@ namespace MiyakoCarryService.Server.Services
 
             // Override the traders assorts with the ones we passed in
             traderToEdit.Assort = newAssorts;
+        }
+
+        private void SetTraderUpdateTime(TraderConfig traderConfig, TraderBase baseJson, int refreshTimeSecondsMin, int refreshTimeSecondsMax)
+        {
+            // Add refresh time in seconds to config
+            var traderRefreshRecord = new UpdateTime
+            {
+                TraderId = baseJson.Id,
+                Seconds = new MinMax<int>(refreshTimeSecondsMin, refreshTimeSecondsMax)
+            };
+
+            traderConfig.UpdateTime.Add(traderRefreshRecord);
         }
     }
 }

@@ -41,7 +41,7 @@ public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
         return MCSModMetadata.Url;
     }
 
-    public async Task OnPreLoad()
+    public async Task OnPreLoadAsync()
     {
         var miyakoCarryServicePath = Path.Combine(configFolderPath, "miyakocarryservice.jsonc");
         MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath) ?? new MCSConfig();

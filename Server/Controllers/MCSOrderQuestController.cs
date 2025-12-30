@@ -1,16 +1,16 @@
 
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
+using MiyakoCarryService.Server.Patches;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Spt.Mod;
-using SPTarkov.Server.Core.Services.Mod;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
     public class MCSOrderQuestController(
-        CustomQuestService customQuestService,
+        ISptLogger<MCSOrderQuestController> logger,
         MCSOrderQuestGenerator mcsOrderQuestGenerator,
         ProfileHelper profileHelper
         )
@@ -19,13 +19,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             var fullProfile = profileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
+            logger.Info("开始创建任务");
             var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(sessionID, pmcData, players, carryServiceLevel, hours);
-            var newQuestDetails = new NewQuestDetails
-            {
-                NewQuest = orderQuest,
-                Locales = null
-            };
-            customQuestService.CreateQuest(newQuestDetails);
+            logger.Info("任务插入等待创建队列");
+            GetClientRepeatableQuestsPatch.RepeatableQuestsQueue.Enqueue(orderQuest);
         }
     }
 }

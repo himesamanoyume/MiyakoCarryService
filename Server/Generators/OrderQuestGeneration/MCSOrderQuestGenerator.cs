@@ -7,12 +7,14 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
     public class MCSOrderQuestGenerator(
+        ISptLogger<MCSOrderQuestGenerator> logger,
         RandomUtil randomUtil,
         MCSOrderQuestRewardGenerator mcsOrderQuestRewardGenerator,
         MCSOrderQuestHelper mcsOrderQuestHelper,
@@ -39,7 +41,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 5 => 0.92f,
                 _ => 1f,
             };
-
+            logger.Info("开始生成订单");
             var order = Generate(sessionId, players, carryServiceLevel, discount, MCSTraderService.MiyakoTraderId, mcsConfigService.GetOrderConfig());
             return order;
         }
@@ -90,6 +92,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 handoverItemCondition.Value += currentRequestedItemCount;
             }
             quest.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId, orderConfig);
+            logger.Info("订单任务信息构建结束");
             return quest;
         }
     }

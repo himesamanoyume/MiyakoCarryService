@@ -17,16 +17,17 @@
 ## TODO
 
 - ~~实现好友位的TsukiyukiMiyako~~
-- - 实现消息聊天的本地化
-- 尽可能实现非存档侵入式的~~自定义商人~~和**发放行动任务**（行动任务直接用原图即可）
+- 实现~~自定义商人~~和~~发放行动任务~~
 - - ~~弄清如何构建行动任务~~
-- - 实现临时指令来触发发放行动任务
-- - **根据人数修改条件数量**。
+- - ~~实现临时指令来触发发放行动任务~~
+- - ~~根据人数修改条件数量~~。
 > 参考`GenerateAvailableForFinish`
-- - 别忘了修改任务接取过期时长为15分钟
+- - **别忘了修改任务接取过期时长为15分钟**
 - - 新的AI队友处于好友列表的时长才为指定的时间
 > 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
 
 > 参考[AddTraderWithAssortJson](https://github.com/sp-tarkov/server-mod-examples/tree/main/13AddTraderWithAssortJson)
 
 > 参考[RepeatableQuestController](https://github.com/sp-tarkov/server-csharp/blob/main/Libraries/SPTarkov.Server.Core/Controllers/RepeatableQuestController.cs#L68)
+
+- 能否改掉寻物上交这些内容

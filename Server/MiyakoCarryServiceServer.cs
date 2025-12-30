@@ -13,8 +13,8 @@ namespace MiyakoCarryService.Server
         {
             public async Task OnLoad()
             {
-                // new GetClientRepeatableQuestsPatch().Enable();
-                await configService.OnPreLoad();
+                new GetClientRepeatableQuestsPatch().Enable();
+                await configService.OnPreLoadAsync();
             }
         }
 
