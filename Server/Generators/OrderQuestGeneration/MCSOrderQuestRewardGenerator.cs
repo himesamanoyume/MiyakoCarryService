@@ -8,11 +8,13 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Repeatable;
+using SPTarkov.Server.Core.Models.Utils;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
     public class MCSOrderQuestRewardGenerator(
+        ISptLogger<MCSOrderQuestRewardGenerator> logger,
         RepeatableQuestRewardGenerator repeatableQuestRewardGenerator
     )
     {
@@ -32,26 +34,27 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 { "Fail", [] },
             };
 
-            var rewardIndex = -1;
+            Reward reward = new()
+            {
+                Id = new MongoId(),
+                Unknown = false,
+                GameMode = [],
+                AvailableInGameEditions = [],
+                Target = traderId,
+                Value = 0,
+                Type = RewardType.TraderStanding,
+                Index = 0,
+            };
+            
+            rewards["Success"].Add(reward);
+
             for (int i = 0; i < players; i++)
             {
                 var rewardParams = repeatableQuestRewardGeneratorTraverse.Method("GetQuestRewardValues", [orderConfig.OrderQuests.First().RewardScaling, carryServiceLevel, 1]).GetValue<QuestRewardValues>();
-                
+                logger.Info($"生成声望: {rewardParams.RewardReputation}");
                 if (rewardParams.RewardReputation > 0)
                 {
-                    Reward reward = new()
-                    {
-                        Id = new MongoId(),
-                        Unknown = false,
-                        GameMode = [],
-                        AvailableInGameEditions = [],
-                        Target = traderId,
-                        Value = rewardParams.RewardReputation,
-                        Type = RewardType.TraderStanding,
-                        Index = rewardIndex,
-                    };
-                    rewards["Success"].Add(reward);
-                    rewardIndex++;
+                    reward.Value += rewardParams.RewardReputation;
                 }
             }
 

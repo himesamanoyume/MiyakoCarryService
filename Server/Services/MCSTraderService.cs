@@ -23,7 +23,8 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
-        MCSConfigService MCSConfigService)
+        MCSConfigService MCSConfigService
+    )
     {
         private readonly string _traderDir = System.IO.Path.Join(MCSConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";

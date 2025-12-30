@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialogue;
 using SPTarkov.Server.Core.Models.Common;
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Server.ChatBot
     : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
     {
         private readonly Dictionary<string, MCSChatBotCommands> _miyakoCommands = chatCommands.ToDictionary(c => c.CommandPrefix);
-        private static readonly MongoId _miyakoId = new("686d2f9a3e1b4c8d2a5f0e7d");
+        private static readonly MongoId _miyakoId = new(MCSTraderService.MiyakoTraderId);
 
         public override UserDialogInfo GetChatBot()
         {
@@ -31,8 +32,8 @@ namespace MiyakoCarryService.Server.ChatBot
                 Info = new()
                 {
                     Level = 9999,
-                    MemberCategory = MemberCategory.Sherpa,
-                    SelectedMemberCategory = MemberCategory.Sherpa,
+                    MemberCategory = MemberCategory.Trader,
+                    SelectedMemberCategory = MemberCategory.Trader,
                     Nickname = "Miyako",
                     Side = "Usec",
                 },

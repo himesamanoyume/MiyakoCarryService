@@ -22,6 +22,7 @@
 - - ~~实现临时指令来触发发放行动任务~~
 - - ~~根据人数修改条件数量~~。
 > 参考`GenerateAvailableForFinish`
+
 - - **别忘了修改任务接取过期时长为15分钟**
 - - 新的AI队友处于好友列表的时长才为指定的时间
 > 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
@@ -31,3 +32,4 @@
 > 参考[RepeatableQuestController](https://github.com/sp-tarkov/server-csharp/blob/main/Libraries/SPTarkov.Server.Core/Controllers/RepeatableQuestController.cs#L68)
 
 - 能否改掉寻物上交这些内容
+- `RemoveInvalidRepeatableQuests`可能有必要打补丁防止删除订单任务

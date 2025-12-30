@@ -8,8 +8,10 @@ namespace MiyakoCarryService.Server
 {
     public sealed class MiyakoCarryServiceServer
     {
-        [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PreSptModLoader)]
-        public sealed class MiyakoCarryServiceServerPreLoad(MCSConfigService configService) : IOnLoad
+        [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
+        public sealed class MiyakoCarryServiceServerPreLoad(
+            MCSConfigService configService
+        ) : IOnLoad
         {
             public async Task OnLoad()
             {
@@ -22,7 +24,8 @@ namespace MiyakoCarryService.Server
         public sealed class MiyakoCarryServiceServerPostLoad(
             MCSLocaleService mcsLocaleService, 
             MCSOrderQuestService mcsOrderQuestService,
-            MCSTraderService mcsTraderService) : IOnLoad
+            MCSTraderService mcsTraderService
+        ) : IOnLoad
         {
             public async Task OnLoad()
             {
