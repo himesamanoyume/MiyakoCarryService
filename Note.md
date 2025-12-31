@@ -45,3 +45,12 @@
 - ~~获取行动任务的函数不应该会持续执行~~
 - ~~当前能够做到多个行动任务拥有不同的过期时间，但是最开始的任务会因为被刷新了过期时间导致出现即便过期了也不会立即清除的问题~~
 - ~~Patch替换任务的函数~~**找个机会测试一下替换任务是否报错**
+- 参考FriendlyPMC如何添加队友成员，并能够邀请加入队伍的
+- - 1. 生成BOT,构建存档信息
+- - 2. 并作为好友列表申请类型的消息被发送
+- 好友请求`NotificationEventType.friendListNewRequest`
+- 生成bot`botGenerator.PrepareAndGenerateBot`
+- 删除好友`dialogueController.DeleteFriend`
+- - 尝试实现通过完成订单任务后才添加指定数量的好友
+- 要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime
+- 要在`database/profiles`中记录护航玩家存档

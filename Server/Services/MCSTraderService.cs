@@ -23,10 +23,10 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
-        MCSConfigService MCSConfigService
+        MCSConfigService mcsConfigService
     )
     {
-        private readonly string _traderDir = System.IO.Path.Join(MCSConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
+        private readonly string _traderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
 
         public async Task OnPostLoadAsync()
@@ -45,7 +45,6 @@ namespace MiyakoCarryService.Server.Services
             SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
             return Task.CompletedTask;
         }
-
 
         private void AddTraderWithEmptyAssortToDb(TraderBase traderDetailsToAdd)
         {

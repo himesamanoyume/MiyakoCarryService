@@ -1,13 +1,11 @@
 
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Models.Common.Tables;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services;
@@ -15,7 +13,7 @@ namespace MiyakoCarryService.Server.Services;
 [Injectable(InjectionType.Singleton)]
 public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 {
-    private readonly string configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets/config");
+    private readonly string configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
     public MCSConfig MCSConfig { get; private set; } = new MCSConfig();
     public MCSOrderConfig MCSOrderConfig { get; private set; }
     private readonly ModMetadata MCSModMetadata = new ModMetadata();
@@ -58,29 +56,4 @@ public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
     {
         return MCSOrderConfig;
     }
-}
-
-public record MCSClientConfig
-{
-
-}
-
-public record MCSServerConfig
-{
-    
-}
-
-public record MCSConfig
-{
-    [JsonPropertyName("Client")]
-    public MCSClientConfig ClientConfig { get; set; }
-
-    [JsonPropertyName("Server")]
-    public MCSServerConfig ServerConfig { get; set; }
-}
-
-public record MCSOrderConfig
-{
-    [JsonPropertyName("orderQuests")]
-    public required List<RepeatableQuestConfig> OrderQuests { get; set; }
 }
