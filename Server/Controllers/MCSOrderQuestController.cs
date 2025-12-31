@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Server.Controllers
             {
                 GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(sessionId, new([orderQuest]));
             }
-            _ = mcsOrderInfoController.CreateOrderInfo(sessionId, players, carryServiceLevel, hours, orderQuest.Id);
+            mcsOrderInfoController.CreateOrderInfo(sessionId, players, carryServiceLevel, hours, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData pmcData)

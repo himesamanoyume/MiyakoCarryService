@@ -60,7 +60,7 @@ namespace MiyakoCarryService.Server.Patches
 
             Console.WriteLine("将尝试清除过期订单、任务");
             mcsOrderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            _ = mcsOrderInfoController.ProcessExpiredOrderInfos(sessionId);
+            mcsOrderInfoController.ProcessExpiredOrderInfos(sessionId);
 
             if (currentTime < generatedOrder.EndTime - 1)
             {

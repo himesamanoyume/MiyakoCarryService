@@ -25,14 +25,18 @@ namespace MiyakoCarryService.Server
         public sealed class MiyakoCarryServiceServerPostLoad(
             MCSLocaleService mcsLocaleService, 
             MCSOrderQuestService mcsOrderQuestService,
-            MCSTraderService mcsTraderService
+            MCSTraderService mcsTraderService,
+            MCSProfileService mcsProfileService,
+            MCSOrderInfoService mcsOrderInfoService
         ) : IOnLoad
         {
             public async Task OnLoad()
             {
                 await mcsLocaleService.OnPostLoadAsync();
                 await mcsTraderService.OnPostLoadAsync();
+                await mcsProfileService.OnPostLoadAsync();
                 await mcsOrderQuestService.OnPostLoadAsync();
+                await mcsOrderInfoService.OnPostLoadAsync();
             }
         }
     }

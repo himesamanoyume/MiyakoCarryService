@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
@@ -19,7 +18,7 @@ namespace MiyakoCarryService.Server.Controllers
         TimeUtil timeUtil
     )
     {
-        public async Task CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int hours, MongoId questId)
+        public void CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int hours, MongoId questId)
         {
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
@@ -36,22 +35,21 @@ namespace MiyakoCarryService.Server.Controllers
                 Status = EOrderInfoStatus.AvailableForStart,
                 ExpirationTime = timeUtil.GetTimeStamp() + mcsConfigService.GetOrderConfig().OrderQuests.First().ResetTime
             };
-            await mcsOrderInfoService.AddOrderInfo(sessionId, orderInfo);
+            mcsOrderInfoService.AddOrderInfo(orderInfo);
         }
 
-        public async Task ProcessExpiredOrderInfos(MongoId sessionId)
+        public void ProcessExpiredOrderInfos(MongoId sessionId)
         {
-            var orderInfos = await mcsOrderInfoService.GetAllOrderInfos(sessionId);
-            List<MCSOrderInfo> keepOrderInfos = new();
+            var orderInfos = mcsOrderInfoService.GetAllOrderInfos();
             foreach (var orderInfo in orderInfos)
             {
                 var currentTime = timeUtil.GetTimeStamp();
-                if (currentTime < orderInfo.ExpirationTime - 1)
+                if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    keepOrderInfos.Add(orderInfo);
+                    mcsOrderInfoService.RemoveOrderInfo(orderInfo);
                 }
             }
-            await mcsOrderInfoService.SaveOrderInfo(sessionId, keepOrderInfos);
+            mcsOrderInfoService.SaveOrderInfo();
         }
     }
 }

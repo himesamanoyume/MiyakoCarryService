@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using SPTarkov.DI.Annotations;
@@ -17,80 +17,67 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly string _orderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "orders");
-        private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
+        private readonly ConcurrentDictionary<MongoId, MCSOrderInfo> _orderInfos = new();
 
-        public async Task AddOrderInfo(MongoId sessionId, MCSOrderInfo orderInfo)
+        public void AddOrderInfo(MCSOrderInfo orderInfo)
         {
-            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            await saveLock.WaitAsync();
-            try
+            _orderInfos.TryAdd(orderInfo.QuestId, orderInfo);
+        }
+
+        public void AddOrderInfos(List<MCSOrderInfo> orderInfos)
+        {
+            foreach (var orderInfo in orderInfos)
             {
-                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
-                var mcsOrderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
-                mcsOrderInfos.Add(orderInfo);
-                var jsonMCSOrderInfos = jsonUtil.Serialize(mcsOrderInfos, false);
-                await fileUtil.WriteFileAsync(orderPath, jsonMCSOrderInfos);
-            }
-            finally
-            {
-                saveLock.Release();
+                AddOrderInfo(orderInfo);
             }
         }
 
-        public async Task SaveOrderInfo(MongoId sessionId, List<MCSOrderInfo> orderInfos)
+        public void RemoveOrderInfo(MCSOrderInfo orderInfo)
         {
-            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            await saveLock.WaitAsync();
-            try
-            {
-                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
-                var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, false);
-                await fileUtil.WriteFileAsync(orderPath, jsonMCSOrderInfos);
-            }
-            finally
-            {
-                saveLock.Release();
-            }
+            _orderInfos.TryRemove(orderInfo.QuestId, out _);
         }
 
-        public async Task<List<MCSOrderInfo>> GetOrderInfos(MongoId sessionId)
+        public void SaveOrderInfo()
+        {
+            var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
+            var orderInfos = _orderInfos.Values.ToList();
+            var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, false);
+            fileUtil.WriteFile(orderPath, jsonMCSOrderInfos);
+        }
+
+        public List<MCSOrderInfo> GetOrderInfos(MongoId sessionId)
         {
             List<MCSOrderInfo> targetMCSOrderInfos = new();
-            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            await saveLock.WaitAsync();
-            try
+
+            foreach (var mcsOrderInfo in _orderInfos.Values.ToList())
             {
-                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
-                var mcsOrderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
-                foreach (var mcsOrderInfo in mcsOrderInfos)
+                if (mcsOrderInfo.SessionId == sessionId)
                 {
-                    if (mcsOrderInfo.SessionId == sessionId)
-                    {
-                        targetMCSOrderInfos.Add(mcsOrderInfo);
-                    }
+                    targetMCSOrderInfos.Add(mcsOrderInfo);
                 }
             }
-            finally
-            {
-                saveLock.Release();
-            }
+
             return targetMCSOrderInfos;
         }
 
-        public async Task<List<MCSOrderInfo>> GetAllOrderInfos(MongoId sessionId)
+        public List<MCSOrderInfo> GetAllOrderInfos()
         {
-            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
-            await saveLock.WaitAsync();
-            try
+            return _orderInfos.Values.ToList();
+        }
+
+        public async Task LoadAllOrderInfos()
+        {
+            var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
+            var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
+            foreach (var orderInfo in orderInfos)
             {
-                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
-                var mcsOrderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
-                return mcsOrderInfos;
+                _orderInfos[orderInfo.QuestId] = orderInfo;
             }
-            finally
-            {
-                saveLock.Release();
-            }
+        }
+
+        public async Task OnPostLoadAsync()
+        {
+            await LoadAllOrderInfos();
         }
     }
 }
