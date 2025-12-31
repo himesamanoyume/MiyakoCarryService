@@ -13,6 +13,6 @@
     "695207e8bcc1dd1e3c80dfcb acceptPlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "已确认下单",
     "695207e8bcc1dd1e3c80dfcb declinePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "已拒绝订单",
     "695207e8bcc1dd1e3c80dfcb completePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "订单已结算",
-    "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "刷新订单",
+    "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "本订单不支持刷新",
     "MCS/A.Basic": "A. Basic"
 }
