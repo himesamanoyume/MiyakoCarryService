@@ -18,9 +18,10 @@ namespace MiyakoCarryService.Server.Services
     {
         private readonly string _orderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "orders");
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
-        public async Task SaveOrderInfo(MongoId sessionID, MCSOrderInfo orderInfo)
+
+        public async Task AddOrderInfo(MongoId sessionId, MCSOrderInfo orderInfo)
         {
-            var saveLock = _saveLocks.GetOrAdd(sessionID, _ => new SemaphoreSlim(1, 1));
+            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
             await saveLock.WaitAsync();
             try
             {
@@ -36,10 +37,26 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public async Task<List<MCSOrderInfo>> GetOrderInfo(MongoId sessionID)
+        public async Task SaveOrderInfo(MongoId sessionId, List<MCSOrderInfo> orderInfos)
+        {
+            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
+            await saveLock.WaitAsync();
+            try
+            {
+                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
+                var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, false);
+                await fileUtil.WriteFileAsync(orderPath, jsonMCSOrderInfos);
+            }
+            finally
+            {
+                saveLock.Release();
+            }
+        }
+
+        public async Task<List<MCSOrderInfo>> GetOrderInfos(MongoId sessionId)
         {
             List<MCSOrderInfo> targetMCSOrderInfos = new();
-            var saveLock = _saveLocks.GetOrAdd(sessionID, _ => new SemaphoreSlim(1, 1));
+            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
             await saveLock.WaitAsync();
             try
             {
@@ -47,7 +64,7 @@ namespace MiyakoCarryService.Server.Services
                 var mcsOrderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
                 foreach (var mcsOrderInfo in mcsOrderInfos)
                 {
-                    if (mcsOrderInfo.SessionID == sessionID)
+                    if (mcsOrderInfo.SessionId == sessionId)
                     {
                         targetMCSOrderInfos.Add(mcsOrderInfo);
                     }
@@ -58,6 +75,22 @@ namespace MiyakoCarryService.Server.Services
                 saveLock.Release();
             }
             return targetMCSOrderInfos;
+        }
+
+        public async Task<List<MCSOrderInfo>> GetAllOrderInfos(MongoId sessionId)
+        {
+            var saveLock = _saveLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
+            await saveLock.WaitAsync();
+            try
+            {
+                var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
+                var mcsOrderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
+                return mcsOrderInfos;
+            }
+            finally
+            {
+                saveLock.Release();
+            }
         }
     }
 }

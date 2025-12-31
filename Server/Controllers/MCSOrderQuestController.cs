@@ -21,24 +21,26 @@ namespace MiyakoCarryService.Server.Controllers
         MCSOrderQuestGenerator mcsOrderQuestGenerator,
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,
+        MCSOrderInfoController mcsOrderInfoController,
         ProfileHelper profileHelper
-        )
+    )
     {
-        public void CreateOrderQuest(MongoId sessionID, int players, int carryServiceLevel, int hours)
+        public void CreateOrderQuest(MongoId sessionId, int players, int carryServiceLevel, int hours)
         {
-            var fullProfile = profileHelper.GetFullProfile(sessionID);
+            var fullProfile = profileHelper.GetFullProfile(sessionId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info("开始创建任务");
-            var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(sessionID, pmcData, players, carryServiceLevel, hours);
+            var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(sessionId, pmcData, players, carryServiceLevel, hours);
             logger.Info("任务插入等待创建队列");
-            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
+            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(sessionId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);
             }
             else
             {
-                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(sessionID, new([orderQuest]));
+                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(sessionId, new([orderQuest]));
             }
+            _ = mcsOrderInfoController.CreateOrderInfo(sessionId, players, carryServiceLevel, hours, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData pmcData)

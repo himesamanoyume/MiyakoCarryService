@@ -1,7 +1,7 @@
 
 using System;
 using System.Collections.Generic;
-using MiyakoCarryService.Server.Models.Common.Tables;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -19,7 +19,8 @@ namespace MiyakoCarryService.Server.Helper
         MCSOrderQuestService mcsOrderQuestService,
         MCSConfigService mcsConfigService,
         ServerLocalisationService serverLocalisationService,
-        ICloner cloner)
+        ICloner cloner
+    )
     {
         protected readonly MCSOrderConfig OrderConfig = mcsConfigService.GetOrderConfig();
 

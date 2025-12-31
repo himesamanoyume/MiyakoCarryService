@@ -17,8 +17,8 @@ namespace MiyakoCarryService.Server.ChatBot
         ISptLogger<AbstractDialogChatBot> logger, 
         MailSendService mailSendService, 
         ServerLocalisationService localisationService, 
-        IEnumerable<MCSChatBotCommands> chatCommands)
-    : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
+        IEnumerable<MCSChatBotCommands> chatCommands
+    ) : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
     {
         private readonly Dictionary<string, MCSChatBotCommands> _miyakoCommands = chatCommands.ToDictionary(c => c.CommandPrefix);
         private static readonly MongoId _miyakoId = new(MCSTraderService.MiyakoTraderId);

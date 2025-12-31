@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
     [Injectable]
     public partial class MCSOrderCommand(
         MailSendService mailSendService,
-        MCSOrderQuestController mCSOrderQuestController
+        MCSOrderQuestController mcsOrderQuestController
     ) : IMCSCommand
     {
         [GeneratedRegex(@"^mcs\s+order\s+(\d+)\s+([1-5])\s+(\d+)$")]
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     $"已成功下单！您的订单信息: \n护航{players}人, 护航{level}级, 时长{hours}小时\n请到商人界面接取订单并付款~"
                 );
 
-                mCSOrderQuestController.CreateOrderQuest(sessionId, players, level, hours);
+                mcsOrderQuestController.CreateOrderQuest(sessionId, players, level, hours);
             }
             else
             {

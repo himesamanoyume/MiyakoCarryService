@@ -4,8 +4,6 @@ namespace MiyakoCarryService.Server.Models.Enums
     {
         AvailableForStart = 0,
         Started,
-        Success,
-        Fail,
         Expired
     }
 }

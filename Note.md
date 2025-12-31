@@ -22,7 +22,6 @@
 - - ~~实现临时指令来触发发放行动任务~~
 - - ~~根据人数修改条件数量~~。
 > 参考`GenerateAvailableForFinish`
-
 - - ~~别忘了修改任务接取过期时长为15分钟~~
 - - 新的AI队友处于好友列表的时长才为指定的时间
 > 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
@@ -48,12 +47,15 @@
 - 参考FriendlyPMC如何添加队友成员，并能够邀请加入队伍的
 - - 1. 生成BOT,构建存档信息
 - - 2. 并作为好友列表申请类型的消息被发送
-- 好友请求`NotificationEventType.friendListNewRequest`
-- 生成bot`botGenerator.PrepareAndGenerateBot`
-- 删除好友`dialogueController.DeleteFriend`
+> 好友请求`NotificationEventType.friendListNewRequest`
+
+> 生成bot`botGenerator.PrepareAndGenerateBot`
+
+> 删除好友`dialogueController.DeleteFriend`
 - - 尝试实现通过完成订单任务后才添加指定数量的好友
-- **要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime**
+- ~~要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime~~
+- - **对FinishQuest相关函数进行Patch，当检查到任务完成的QuestId属于OrderInfos中的QuestId时，改变其OrderInfo的状态为Stated，并触发一系列函数：根据OrderInfo内容生成对应数量的Profile并保存，重新计算过期时间，发送好友列表申请**
 - 要在`database/profiles`中记录护航玩家存档
+- - **profiles下先是玩家的sessionId文件夹，里面才实际存放护航的存档**
 - - 主要参考`saveServer.SaveProfileAsync`函数
-- - `jsonUtil.Serialize`
-- - `fileUtil.WriteFile`
+> `jsonUtil.Serialize`, `fileUtil.WriteFile`
