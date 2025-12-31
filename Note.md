@@ -52,5 +52,8 @@
 - 生成bot`botGenerator.PrepareAndGenerateBot`
 - 删除好友`dialogueController.DeleteFriend`
 - - 尝试实现通过完成订单任务后才添加指定数量的好友
-- 要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime
+- **要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime**
 - 要在`database/profiles`中记录护航玩家存档
+- - 主要参考`saveServer.SaveProfileAsync`函数
+- - `jsonUtil.Serialize`
+- - `fileUtil.WriteFile`

@@ -1,7 +1,7 @@
 
 using System.Linq;
 using MiyakoCarryService.Server.Helper;
-using MiyakoCarryService.Server.Models.Common.Tables;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;

@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Server.Services
         MCSConfigService mcsConfigService
     )
     {
-        private readonly string _traderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "templates");
+        private readonly string _traderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "templates");
         private RepeatableQuest _orderTemplate;
         public async Task OnPostLoadAsync()
         {
@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Server.Services
 
         private void LoadOrderTemplate()
         {
-            var orderTemplate = modHelper.GetJsonDataFromFile<RepeatableQuest>(_traderDir, "orderQuests.json");
+            var orderTemplate = modHelper.GetJsonDataFromFile<RepeatableQuest>(_traderFolderDir, "orderQuests.json");
             _orderTemplate = orderTemplate;
         }
 

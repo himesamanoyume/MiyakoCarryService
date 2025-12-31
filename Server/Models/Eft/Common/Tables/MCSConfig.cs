@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Spt.Config;
 
-namespace MiyakoCarryService.Server.Models.Common.Tables
+namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
     public record MCSClientConfig
     {

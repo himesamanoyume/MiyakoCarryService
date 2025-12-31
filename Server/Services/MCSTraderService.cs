@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Server.Services
         MCSConfigService mcsConfigService
     )
     {
-        private readonly string _traderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
+        private readonly string _traderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
 
         public async Task OnPostLoadAsync()
@@ -36,11 +36,11 @@ namespace MiyakoCarryService.Server.Services
 
         private Task LoadTrader()
         {
-            var iconPath = System.IO.Path.Join(_traderDir, "miyako.jpg");
-            var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderDir, "base.json");
+            var iconPath = System.IO.Path.Join(_traderFolderDir, "miyako.jpg");
+            var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderFolderDir, "base.json");
             imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
             AddTraderWithEmptyAssortToDb(traderBase);
-            var assort = modHelper.GetJsonDataFromFile<TraderAssort>(_traderDir, "assort.json");
+            var assort = modHelper.GetJsonDataFromFile<TraderAssort>(_traderFolderDir, "assort.json");
             OverwriteTraderAssort(traderBase.Id, assort);
             SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
             return Task.CompletedTask;

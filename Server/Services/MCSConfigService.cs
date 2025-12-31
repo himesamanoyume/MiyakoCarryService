@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
-using MiyakoCarryService.Server.Models.Common.Tables;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Utils;
@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Server.Services;
 [Injectable(InjectionType.Singleton)]
 public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 {
-    private readonly string configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
+    private readonly string _configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
     public MCSConfig MCSConfig { get; private set; } = new MCSConfig();
     public MCSOrderConfig MCSOrderConfig { get; private set; }
     private readonly ModMetadata MCSModMetadata = new ModMetadata();
@@ -41,9 +41,9 @@ public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
 
     public async Task OnPreLoadAsync()
     {
-        var miyakoCarryServicePath = Path.Combine(configFolderPath, "miyakocarryservice.jsonc");
+        var miyakoCarryServicePath = Path.Combine(_configFolderPath, "miyakocarryservice.jsonc");
         MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath) ?? new MCSConfig();
-        var orderConfigPath = Path.Combine(configFolderPath, "order.json");
+        var orderConfigPath = Path.Combine(_configFolderPath, "order.json");
         MCSOrderConfig = await jsonUtil.DeserializeFromFileAsync<MCSOrderConfig>(orderConfigPath);
     }
 

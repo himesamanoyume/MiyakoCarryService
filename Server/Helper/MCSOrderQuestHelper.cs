@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using MiyakoCarryService.Server.Models.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;

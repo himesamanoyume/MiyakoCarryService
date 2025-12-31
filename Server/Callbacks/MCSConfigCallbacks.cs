@@ -1,29 +1,20 @@
 
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using MiyakoCarryService.Server.Services;
+using MiyakoCarryService.Server.Controllers;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Utils;
 
-namespace MiyakoCarryService.Server.Callbacks;
-
-[Injectable]
-public sealed class MCSConfigCallbacks(
-    MCSConfigService mcsConfigService
-)
+namespace MiyakoCarryService.Server.Callbacks
 {
-    public ValueTask<string> HandleConfig(string url, IRequestData info, MongoId sessionId)
+    [Injectable]
+    public sealed class MCSConfigCallbacks(
+        MCSConfigController mcsConfigController
+    )
     {
-        return new ValueTask<string>(GetConfig());
-    }
-
-    private string GetConfig()
-    {
-        var config = mcsConfigService.GetMiyakoCarryServiceConfig();
-        var cfgStr = JsonSerializer.Serialize(config);
-        var cfgObject = JsonNode.Parse(cfgStr)!.AsObject();
-        return cfgObject.ToJsonString();
+        public ValueTask<string> HandleConfig(string url, IRequestData info, MongoId sessionId)
+        {
+            return new ValueTask<string>(mcsConfigController.GetConfig());
+        }
     }
 }

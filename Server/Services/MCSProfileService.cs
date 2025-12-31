@@ -7,6 +7,6 @@ namespace MiyakoCarryService.Server.Services
         MCSConfigService mcsConfigService
     )
     {
-        private readonly string _profileDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "profiles");
+        private readonly string _profileFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "profiles");
     }
 }

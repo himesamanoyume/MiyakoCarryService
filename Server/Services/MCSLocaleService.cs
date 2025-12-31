@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Server.Services
         DatabaseService databaseService
     )
     {
-        private readonly string globalLocaleDir = Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "locales", "global");
+        private readonly string _globalLocaleFolderDir = Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "locales", "global");
         Dictionary<string, Dictionary<string, string>> _globalLocales = [];
 
         public async Task OnPostLoadAsync()
@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Server.Services
 
         private async Task LoadGlobalLocales()
         {
-            _globalLocales = await RecursiveLoadFiles(globalLocaleDir);
+            _globalLocales = await RecursiveLoadFiles(_globalLocaleFolderDir);
 
             foreach ((var locale, var lazyLoadedValue) in databaseService.GetLocales().Global)
             {
