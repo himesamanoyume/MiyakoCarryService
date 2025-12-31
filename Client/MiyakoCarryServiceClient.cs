@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
-    public const string BepInExClientVersion = "0.0.2.0";
+    public const string BepInExClientVersion = "0.0.3.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string MiyakoCarryServiceGUID = "top.himesamanoyume.miyakocarryservice";
     public const string MiyakoCarryServicePluginName = "Himesamanoyume.MiyakoCarryService";
