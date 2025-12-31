@@ -54,7 +54,7 @@
 > 删除好友`dialogueController.DeleteFriend`
 - - 尝试实现通过完成订单任务后才添加指定数量的好友
 - ~~要在`database/orders`中记录订单状态，并根据其中的数量生成指定好友、根据时长设定EndTime~~
-- - **对CompleteQuest相关函数进行Patch，当检查到任务完成的QuestId属于OrderInfos中的QuestId时，改变其OrderInfo的状态为Stated，并触发一系列函数：根据OrderInfo内容生成对应数量的Profile并保存，重新计算过期时间，发送好友列表申请**
+- - ~~对CompleteQuest相关函数进行Patch，当检查到任务完成的QuestId属于OrderInfos中的QuestId时，改变其OrderInfo的状态为Stated，并触发一系列函数：根据OrderInfo内容生成对应数量的Profile并保存，重新计算过期时间，~~**发送好友列表申请**
 - 要在`database/profiles`中记录护航玩家存档
 - - **profiles下先是玩家的sessionId文件夹，里面才实际存放护航的存档**
 - - 主要参考`saveServer.SaveProfileAsync`函数

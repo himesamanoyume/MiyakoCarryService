@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Models.Enums;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -12,7 +14,9 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public sealed class MCSOrderInfoService(
         MCSConfigService mcsConfigService,
+        MCSProfileService mcsProfileService,
         JsonUtil jsonUtil,
+        TimeUtil timeUtil,
         FileUtil fileUtil
     )
     {
@@ -72,6 +76,23 @@ namespace MiyakoCarryService.Server.Services
             foreach (var orderInfo in orderInfos)
             {
                 _orderInfos[orderInfo.QuestId] = orderInfo;
+            }
+        }
+
+        public void SetOrderInfoStarted(MCSOrderInfo orderInfo)
+        {
+            if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+            {
+                orderInfo.Status = EOrderInfoStatus.Started;
+                var currentTime = timeUtil.GetTimeStamp();
+                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
+                var csBotBases = new List<BotBase>();
+                foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                {
+                    var botBase = mcsProfileService.GenerateBotProfile(orderInfo.SessionId, orderInfo.CarryServiceLevel);
+                    botBase.SessionId = csPlayerSessionId;
+                    csBotBases.Add(botBase);
+                }
             }
         }
 

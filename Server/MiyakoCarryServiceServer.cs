@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Server
             {
                 new GetClientRepeatableQuestsPatch().Enable();
                 new ChangeRepeatableQuestPatch().Enable();
+                new CompleteQuestPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }

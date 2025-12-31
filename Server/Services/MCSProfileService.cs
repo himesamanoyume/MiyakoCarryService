@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -18,14 +20,19 @@ namespace MiyakoCarryService.Server.Services
     public sealed class MCSProfileService(
         JsonUtil jsonUtil,
         FileUtil fileUtil,
-        ProfileValidatorService profileValidatorService,
         ISptLogger<MCSProfileService> logger,
-        MCSConfigService mcsConfigService
+        MCSConfigService mcsConfigService,
+        ProfileHelper profileHelper,
+        RandomUtil randomUtil,
+        DatabaseService databaseService,
+        BotGenerator botGenerator
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "profiles");
+        private readonly string _afdianFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "bots", "types");
 
-        private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
+        private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, BotBase>> _profiles = new();
+        private List<string> _afdianNames = [];
 
         public bool RemoveProfile(MongoId sessionId, MongoId csPlayerSessionId)
         {
@@ -42,9 +49,9 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void SaveMCPlayerProfile(MongoId sessionId, SptProfile profile)
+        public void SaveMCPlayerProfile(MongoId sessionId, BotBase profile)
         {
-            var csPlayerSessionId = (MongoId)profile.ProfileInfo.ProfileId;
+            var csPlayerSessionId = (MongoId)profile.Id;
             var profilePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayerSessionId}.json");
             _profiles[sessionId][csPlayerSessionId] = profile;
             var jsonProfile = jsonUtil.Serialize(_profiles[sessionId][csPlayerSessionId], false);
@@ -56,23 +63,15 @@ namespace MiyakoCarryService.Server.Services
             var filePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayeSessionId}.json");
             if (fileUtil.FileExists(filePath))
             {
-                var profile = await jsonUtil.DeserializeFromFileAsync<JsonObject>(filePath);
+                var profile = await jsonUtil.DeserializeFromFileAsync<BotBase>(filePath);
                 if (profile is not null)
                 {
-                    try
-                    {
-                        _profiles[sessionId][csPlayeSessionId] = profileValidatorService.MigrateAndValidateProfile(profile);
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        logger.Critical($"Failed to load profile with ID '{sessionId}'");
-                        logger.Critical(ex.ToString());
-                    }
+                    _profiles[sessionId][csPlayeSessionId] = profile;
                 }
             }
         }
 
-        public async Task LoadAllCSPlayerProfileAsync()
+        private async Task LoadAllCSPlayerProfileAsync()
         {
             if (!fileUtil.DirectoryExists(_profileFolderDir))
             {
@@ -95,9 +94,51 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        private async Task LoadAfdianPmcName()
+        {
+            if (!fileUtil.DirectoryExists(_afdianFolderDir))
+            {
+                fileUtil.CreateDirectory(_afdianFolderDir);
+            }
+
+            var files = fileUtil.GetFiles(_afdianFolderDir).Where(item => fileUtil.GetFileExtension(item) == "json");
+            foreach (var file in files)
+            {
+                _afdianNames = await jsonUtil.DeserializeFromFileAsync<List<string>>(file);
+            }
+        }
+
+        public BotBase GenerateBotProfile(MongoId sessionId, int carryServiceLevel)
+        {
+            var pmcProfile = profileHelper.GetPmcProfile(sessionId);
+            var playerName = randomUtil.GetArrayValue(_afdianNames);
+            var bots = databaseService.GetBots().Types;
+            var pmcNames = new List<string>();
+            pmcNames.AddRange(bots["usec"].FirstNames);
+            pmcNames.AddRange(bots["bear"].FirstNames);
+            
+            var botBase = botGenerator.PrepareAndGenerateBot(sessionId, new()
+            {
+                IsPmc = true,
+                
+                Side = pmcProfile.Info.Side,
+                Role = pmcProfile.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR",
+                PlayerLevel = carryServiceLevel * 10 + 20,
+                PlayerName = playerName is null ? randomUtil.GetArrayValue(pmcNames) : playerName,
+                BotRelativeLevelDeltaMin = 0,
+                BotRelativeLevelDeltaMax = 0,
+                BotCountToGenerate = 1,
+                BotDifficulty = "hard",
+                IsPlayerScav = false,
+                AllPmcsHaveSameNameAsPlayer = false
+            });
+            return botBase;
+        }
+
         public async Task OnPostLoadAsync()
         {
             await LoadAllCSPlayerProfileAsync();
+            await LoadAfdianPmcName();
         }
     }
 }

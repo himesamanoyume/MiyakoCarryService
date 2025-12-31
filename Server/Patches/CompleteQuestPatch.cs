@@ -2,6 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.DI;
@@ -26,7 +27,7 @@ namespace MiyakoCarryService.Server.Patches
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    
+                    mcsOrderInfoService.SetOrderInfoStarted(orderInfo);
                 }
             }
         }
