@@ -1,15 +1,12 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
-using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -22,7 +19,6 @@ namespace MiyakoCarryService.Server.Services
         FileUtil fileUtil,
         ISptLogger<MCSProfileService> logger,
         MCSConfigService mcsConfigService,
-        ProfileHelper profileHelper,
         RandomUtil randomUtil,
         DatabaseService databaseService,
         BotGenerator botGenerator
@@ -108,9 +104,8 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public BotBase GenerateBotProfile(MongoId sessionId, int carryServiceLevel)
+        public BotBase GenerateBotProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)
         {
-            var pmcProfile = profileHelper.GetPmcProfile(sessionId);
             var playerName = randomUtil.GetArrayValue(_afdianNames);
             var bots = databaseService.GetBots().Types;
             var pmcNames = new List<string>();
@@ -120,9 +115,8 @@ namespace MiyakoCarryService.Server.Services
             var botBase = botGenerator.PrepareAndGenerateBot(sessionId, new()
             {
                 IsPmc = true,
-                
-                Side = pmcProfile.Info.Side,
-                Role = pmcProfile.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR",
+                Side = pmcData.Info.Side,
+                Role = pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR",
                 PlayerLevel = carryServiceLevel * 10 + 20,
                 PlayerName = playerName is null ? randomUtil.GetArrayValue(pmcNames) : playerName,
                 BotRelativeLevelDeltaMin = 0,

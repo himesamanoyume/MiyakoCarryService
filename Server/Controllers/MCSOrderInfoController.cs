@@ -1,5 +1,4 @@
 
-
 using System.Collections.Generic;
 using System.Linq;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
@@ -7,6 +6,7 @@ using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Controllers
@@ -14,6 +14,7 @@ namespace MiyakoCarryService.Server.Controllers
     [Injectable]
     public class MCSOrderInfoController(
         MCSOrderInfoService mcsOrderInfoService,
+        MCSProfileController mcsProfileController, 
         MCSConfigService mcsConfigService,
         TimeUtil timeUtil
     )
@@ -38,7 +39,7 @@ namespace MiyakoCarryService.Server.Controllers
             mcsOrderInfoService.AddOrderInfo(orderInfo);
         }
 
-        public void ProcessExpiredOrderInfos(MongoId sessionId)
+        public void ProcessExpiredOrderInfos(PmcData pmcData)
         {
             var orderInfos = mcsOrderInfoService.GetAllOrderInfos();
             foreach (var orderInfo in orderInfos)
@@ -47,6 +48,10 @@ namespace MiyakoCarryService.Server.Controllers
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
                     mcsOrderInfoService.RemoveOrderInfo(orderInfo);
+                    foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                    {
+                        mcsProfileController.ProcessExpiredCarryServiceProfile(orderInfo.SessionId, csPlayerSessionId);
+                    }
                 }
             }
             mcsOrderInfoService.SaveOrderInfo();

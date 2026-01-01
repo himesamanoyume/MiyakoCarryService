@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Enums;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -15,6 +18,7 @@ namespace MiyakoCarryService.Server.Services
     public sealed class MCSOrderInfoService(
         MCSConfigService mcsConfigService,
         MCSProfileService mcsProfileService,
+        DialogueController dialogueController,
         JsonUtil jsonUtil,
         TimeUtil timeUtil,
         FileUtil fileUtil
@@ -79,7 +83,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void SetOrderInfoStarted(MCSOrderInfo orderInfo)
+        public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData pmcData)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
             {
@@ -89,9 +93,17 @@ namespace MiyakoCarryService.Server.Services
                 var csBotBases = new List<BotBase>();
                 foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                 {
-                    var botBase = mcsProfileService.GenerateBotProfile(orderInfo.SessionId, orderInfo.CarryServiceLevel);
+                    var botBase = mcsProfileService.GenerateBotProfile(orderInfo.SessionId, pmcData, orderInfo.CarryServiceLevel);
                     botBase.SessionId = csPlayerSessionId;
                     csBotBases.Add(botBase);
+                    mcsProfileService.SaveMCPlayerProfile(orderInfo.SessionId, botBase);
+
+                    var newFriendRequest = new FriendRequestData()
+                    {
+                        RequestId = botBase.Aid.ToString(),
+                        To = orderInfo.SessionId
+                    };
+                    dialogueController.SendFriendRequest(orderInfo.SessionId, newFriendRequest);
                 }
             }
         }
