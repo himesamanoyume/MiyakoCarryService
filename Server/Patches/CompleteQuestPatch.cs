@@ -2,7 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
-using MiyakoCarryService.Server.Services;
+using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
@@ -17,16 +17,16 @@ namespace MiyakoCarryService.Server.Patches
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.CompleteQuest));
 
         [PatchPostfix]
-        public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)
+        public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
         {
-            var mcsOrderInfoService = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoService>();
+            var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
             var completedQuestId = request.QuestId;
-            var orderInfos = mcsOrderInfoService.GetOrderInfos(sessionId);
+            var orderInfos = mcsOrderInfoController.GetOrderInfos(sessionID);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    mcsOrderInfoService.SetOrderInfoStarted(orderInfo, pmcData);
+                    mcsOrderInfoController.SetOrderInfoStarted(orderInfo, pmcData);
                 }
             }
         }

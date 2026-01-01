@@ -23,14 +23,14 @@ namespace MiyakoCarryService.Server.Patches
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.ChangeRepeatableQuest));
 
         [PatchPrefix]
-        public static bool Prefix(RepeatableQuestController __instance, PmcData pmcData, RepeatableQuestChangeRequest changeRequest, MongoId sessionId, ref ItemEventRouterResponse __result)
+        public static bool Prefix(RepeatableQuestController __instance, PmcData pmcData, RepeatableQuestChangeRequest changeRequest, MongoId sessionID, ref ItemEventRouterResponse __result)
         {
             var eventOutputHolder = ServiceLocator.ServiceProvider.GetService<EventOutputHolder>();
             var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
             var httpResponseUtil = ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>();
             var logger = ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>();
             
-            var output = eventOutputHolder.GetOutput(sessionId);
+            var output = eventOutputHolder.GetOutput(sessionID);
 
             var repeatableQuestControllerTraverse = Traverse.Create(__instance);
             var repeatables = repeatableQuestControllerTraverse.Method("GetRepeatableById", [changeRequest.QuestId, pmcData]).GetValue<GetRepeatableByIdResult?>();

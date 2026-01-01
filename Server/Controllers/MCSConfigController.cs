@@ -1,22 +1,27 @@
 
-using System.Text.Json;
-using System.Text.Json.Nodes;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
     public class MCSConfigController(
-        MCSConfigService mcsConfigService
+        MCSConfigService mcsConfigService,
+        JsonUtil jsonUtil
     )
     {
         public string GetConfig()
         {
             var config = mcsConfigService.GetMiyakoCarryServiceConfig();
-            var cfgStr = JsonSerializer.Serialize(config);
-            var cfgObject = JsonNode.Parse(cfgStr)!.AsObject();
-            return cfgObject.ToJsonString();
+            var cfgStr = jsonUtil.Serialize(config);
+            return cfgStr;
+        }
+
+        public MCSOrderConfig GetOrderConfig()
+        {
+            return mcsConfigService.GetOrderConfig();
         }
     }
 }
