@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,12 +46,14 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void SaveMCPlayerProfile(MongoId sessionId, BotBase profile)
+        public void SaveMCPlayerProfile(MongoId sessionId, BotBase csProfile)
         {
-            var csPlayerSessionId = (MongoId)profile.Id;
+            Console.WriteLine("保存护航存档");
+            Console.WriteLine(csProfile.SessionId);
+            var csPlayerSessionId = (MongoId)csProfile.SessionId;
             var profilePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayerSessionId}.json");
-            _profiles[sessionId][csPlayerSessionId] = profile;
-            var jsonProfile = jsonUtil.Serialize(_profiles[sessionId][csPlayerSessionId], false);
+            _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, BotBase>()).GetOrAdd(csPlayerSessionId, csProfile);
+            var jsonProfile = jsonUtil.Serialize(_profiles[sessionId][csPlayerSessionId], true);
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
@@ -59,10 +62,10 @@ namespace MiyakoCarryService.Server.Services
             var filePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayeSessionId}.json");
             if (fileUtil.FileExists(filePath))
             {
-                var profile = await jsonUtil.DeserializeFromFileAsync<BotBase>(filePath);
-                if (profile is not null)
+                var csProfile = await jsonUtil.DeserializeFromFileAsync<BotBase>(filePath);
+                if (csProfile is not null)
                 {
-                    _profiles[sessionId][csPlayeSessionId] = profile;
+                    _profiles[sessionId][csPlayeSessionId] = csProfile;
                 }
             }
         }

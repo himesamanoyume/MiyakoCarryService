@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Server.Services
         {
             var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
             var orderInfos = _orderInfos.Values.ToList();
-            var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, false);
+            var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, true);
             fileUtil.WriteFile(orderPath, jsonMCSOrderInfos);
         }
 
@@ -51,7 +51,7 @@ namespace MiyakoCarryService.Server.Services
 
             foreach (var mcsOrderInfo in _orderInfos.Values.ToList())
             {
-                if (mcsOrderInfo.SessionId == sessionId)
+                if (mcsOrderInfo.BossSessionId == sessionId)
                 {
                     targetMCSOrderInfos.Add(mcsOrderInfo);
                 }

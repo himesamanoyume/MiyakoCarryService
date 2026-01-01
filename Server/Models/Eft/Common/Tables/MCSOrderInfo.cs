@@ -8,8 +8,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
     public record MCSOrderInfo
     {
-        [JsonPropertyName("SessionId")]
-        public MongoId SessionId { get; set; }
+        [JsonPropertyName("BossSessionId")]
+        public MongoId BossSessionId { get; set; }
 
         [JsonPropertyName("QuestId")]
         public MongoId QuestId { get; set; }

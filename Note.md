@@ -59,7 +59,12 @@
 - - ~~profiles下先是玩家的sessionId文件夹，里面才实际存放护航的存档~~
 - - 主要参考`saveServer.SaveProfileAsync`函数
 > `jsonUtil.Serialize`, `fileUtil.WriteFile`
-- **玩家是如何读取好友列表中的护航玩家存档数据的**
 - ~~当前只是生成了护航玩家的部分存档，还没有生成装备、成就等信息~~(似乎用不着)
 > 参考`_AddProfile`, `GenerateBot -> GenerateInventory -> GenerateAndAddEquipmentToBot`
 - **暂时进入Debug阶段**
+- ~~完成任务后报错`MCSProfileService.SaveMCPlayerProfile`~~
+- **BUG:申请的好友信息是自己而不是Bot**
+- **申请之后再次登录游戏时玩家是如何读取好友列表中的护航玩家存档数据的**
+- ~~保存的cs存档是压缩的~~
+- ~~保存的cs存档_id与sessionId不对应~~
+- ~~botBase没有SessionId~~

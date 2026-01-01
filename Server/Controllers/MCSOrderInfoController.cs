@@ -11,6 +11,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
@@ -23,8 +24,8 @@ namespace MiyakoCarryService.Server.Controllers
         MCSProfileController mcsProfileController,
         MCSConfigController mcsConfigController,
         NotificationSendHelper notificationSendHelper,
-        ProfileHelper profileHelper,
         SaveServer saveServer,
+        HashUtil hashUtil,
         TimeUtil timeUtil
     )
     {
@@ -47,7 +48,7 @@ namespace MiyakoCarryService.Server.Controllers
             }
             var orderInfo = new MCSOrderInfo()
             {
-                SessionId = sessionId,
+                BossSessionId = sessionId,
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
                 CarryServiceLevel = carryServiceLevel,
@@ -69,29 +70,31 @@ namespace MiyakoCarryService.Server.Controllers
                     mcsOrderInfoService.RemoveOrderInfo(orderInfo);
                     foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                     {
-                        mcsProfileController.ProcessExpiredCarryServiceProfile(orderInfo.SessionId, csPlayerSessionId);
+                        mcsProfileController.ProcessExpiredCarryServiceProfile(orderInfo.BossSessionId, csPlayerSessionId);
                     }
                 }
             }
             mcsOrderInfoService.SaveOrderInfo();
         }
 
-        public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData pmcData)
+        public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData completeQuestPmcData)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
             {
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
-                var csBotBases = new List<BotBase>();
                 foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                 {
-                    var botBase = mcsProfileController.GenerateBotProfile(orderInfo.SessionId, pmcData, orderInfo.CarryServiceLevel);
-                    botBase.SessionId = csPlayerSessionId;
-                    csBotBases.Add(botBase);
-                    mcsProfileController.SaveMCPlayerProfile(orderInfo.SessionId, botBase);
-
-                    CompleteOrderQuestSendFriendRequest(pmcData, botBase, orderInfo.SessionId);
+                    Console.WriteLine("生成护航存档");
+                    var csBotBase = mcsProfileController.GenerateBotProfile(orderInfo.BossSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    csBotBase.Id = csPlayerSessionId;
+                    csBotBase.SessionId = csPlayerSessionId;
+                    csBotBase.Aid = hashUtil.GenerateAccountId();
+                    Console.WriteLine(csBotBase.SessionId);
+                    orderInfo.PlayerIds.Add((MongoId)csBotBase.SessionId);
+                    mcsProfileController.SaveMCPlayerProfile(orderInfo.BossSessionId, csBotBase);
+                    CompleteOrderQuestSendFriendRequest(csBotBase, orderInfo.BossSessionId);
                 }
             }
         }
@@ -101,17 +104,29 @@ namespace MiyakoCarryService.Server.Controllers
             return mcsOrderInfoService.GetOrderInfos(sessionId);
         }
 
-        public void CompleteOrderQuestSendFriendRequest(PmcData pmcData, BotBase botBase, MongoId sessionId)
+        public void CompleteOrderQuestSendFriendRequest(BotBase csBotBase, MongoId sessionId)
         {
-            var profile = saveServer.GetProfile(sessionId);
-            profile.FriendProfileIds.Add((MongoId)botBase.SessionId);
+            var completeQuestProfile = saveServer.GetProfile(sessionId);
+            completeQuestProfile.FriendProfileIds.Add((MongoId)csBotBase.SessionId);
             _ = new Timer(
                 _ =>
                 {
                     var notification = new WsFriendsListAccept
                     {
                         EventType = NotificationEventType.friendListRequestAccept,
-                        Profile = profileHelper.GetChatRoomMemberFromPmcProfile(pmcData),
+                        Profile = new SearchFriendResponse()
+                        {
+                            Id = csBotBase.Id.Value,
+                            Aid = csBotBase.Aid,
+                            Info = new UserDialogDetails
+                            {
+                                Nickname = csBotBase.Info.Nickname,
+                                Side = csBotBase.Info.Side,
+                                Level = csBotBase.Info.Level,
+                                MemberCategory = csBotBase.Info.MemberCategory,
+                                SelectedMemberCategory = csBotBase.Info.SelectedMemberCategory
+                            }
+                        }
                     };
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },

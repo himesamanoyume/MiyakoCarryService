@@ -17,8 +17,8 @@ namespace MiyakoCarryService.Server.Controllers
     {
         public void ProcessExpiredCarryServiceProfile(MongoId sessionId, MongoId csPlayerSessionId)
         {
-            var profile = saveServer.GetProfile(sessionId);
-            profile?.FriendProfileIds?.Remove(csPlayerSessionId);
+            var completeQuestProfile = saveServer.GetProfile(sessionId);
+            completeQuestProfile?.FriendProfileIds?.Remove(csPlayerSessionId);
             mcsProfileService.RemoveProfile(sessionId, csPlayerSessionId);
         }
 
@@ -27,9 +27,9 @@ namespace MiyakoCarryService.Server.Controllers
             return mcsProfileService.GenerateBotProfile(sessionId, pmcData, carryServiceLevel);
         }
 
-        public void SaveMCPlayerProfile(MongoId sessionId, BotBase profile)
+        public void SaveMCPlayerProfile(MongoId sessionId, BotBase csProfile)
         {
-            mcsProfileService.SaveMCPlayerProfile(sessionId, profile);
+            mcsProfileService.SaveMCPlayerProfile(sessionId, csProfile);
         }
     }
 }

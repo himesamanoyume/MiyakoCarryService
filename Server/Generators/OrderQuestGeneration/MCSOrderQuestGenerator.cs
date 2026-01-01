@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info("开始生成订单");
-            var order = Generate(sessionId, players, carryServiceLevel, discount, MCSTraderService.MiyakoTraderId, mcsConfigService.GetOrderConfig());
+            var order = Generate(sessionId, players, carryServiceLevel, hours, discount, MCSTraderService.MiyakoTraderId, mcsConfigService.GetOrderConfig());
             return order;
         }
 
@@ -52,9 +52,11 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             MongoId sessionId,
             int players,
             int carryServiceLevel,
+            int hours,
             float discount,
             MongoId traderId,
-            MCSOrderConfig orderConfig)
+            MCSOrderConfig orderConfig
+        )
         {
             var completionConfig = orderConfig.OrderQuests.First().QuestConfig.CompletionConfig.First();
 
@@ -69,7 +71,6 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
-                
                 var currentRequestedItemCount = carryServiceLevel switch
                 {
                     1 => randomUtil.RandInt(
@@ -100,7 +101,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                     DynamicLocale = true,
                     VisibilityConditions = [],
                     Target = new ListOrT<string>([new ("5449016a4bdc2d6f028b456f")], null),
-                    Value = currentRequestedItemCount,
+                    Value = currentRequestedItemCount * hours,
                     MinDurability = 0,
                     MaxDurability = 100,
                     DogtagLevel = 0,
