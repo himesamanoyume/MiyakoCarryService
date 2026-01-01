@@ -57,15 +57,15 @@ namespace MiyakoCarryService.Server.Services
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
-        public async Task LoadCSPlayerProfileAsync(MongoId sessionId, MongoId csPlayeSessionId)
+        public async Task LoadCSPlayerProfileAsync(MongoId sessionId, MongoId csPlayerSessionId)
         {
-            var filePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayeSessionId}.json");
+            var filePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayerSessionId}.json");
             if (fileUtil.FileExists(filePath))
             {
                 var csProfile = await jsonUtil.DeserializeFromFileAsync<BotBase>(filePath);
                 if (csProfile is not null)
                 {
-                    _profiles[sessionId][csPlayeSessionId] = csProfile;
+                    _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, BotBase>()).GetOrAdd(csPlayerSessionId, csProfile);
                 }
             }
         }
@@ -77,17 +77,18 @@ namespace MiyakoCarryService.Server.Services
                 fileUtil.CreateDirectory(_profileFolderDir);
             }
 
-            var sessionIds = fileUtil.GetDirectories(_profileFolderDir);
-            foreach (var sessionId in sessionIds)
+            var sessionIdsFolderPath = fileUtil.GetDirectories(_profileFolderDir);
+            foreach (var sessionIdFolderPath in sessionIdsFolderPath)
             {
-                var csPlayerProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, sessionId);
+                var sessionId = System.IO.Path.GetFileNameWithoutExtension(sessionIdFolderPath);
+                var csPlayerProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, sessionIdFolderPath);
                 var files = fileUtil.GetFiles(csPlayerProfileFolderPath).Where(item => fileUtil.GetFileExtension(item) == "json");
                 foreach (var file in files)
                 {
                     var filename = System.IO.Path.GetFileNameWithoutExtension(file);
                     if (MongoId.IsValidMongoId(filename))
                     {
-                        await LoadCSPlayerProfileAsync(sessionId, fileUtil.StripExtension(file));
+                        await LoadCSPlayerProfileAsync(sessionId, filename);
                     }
                 }
             }
@@ -130,6 +131,11 @@ namespace MiyakoCarryService.Server.Services
                 AllPmcsHaveSameNameAsPlayer = false
             });
             return botBase;
+        }
+
+        public BotBase GetBotBase(MongoId sessionId, MongoId csPlayerSessionId)
+        {
+            return _profiles[sessionId][csPlayerSessionId];
         }
 
         public async Task OnPostLoadAsync()

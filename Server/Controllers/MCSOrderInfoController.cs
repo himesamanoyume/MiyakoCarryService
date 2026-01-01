@@ -83,7 +83,7 @@ namespace MiyakoCarryService.Server.Controllers
             {
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
-                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
+                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
                 foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                 {
                     Console.WriteLine("生成护航存档");

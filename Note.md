@@ -63,8 +63,14 @@
 > 参考`_AddProfile`, `GenerateBot -> GenerateInventory -> GenerateAndAddEquipmentToBot`
 - **暂时进入Debug阶段**
 - ~~完成任务后报错`MCSProfileService.SaveMCPlayerProfile`~~
-- **BUG:申请的好友信息是自己而不是Bot**
+- ~~BUG:申请的好友信息是自己而不是Bot~~
 - **申请之后再次登录游戏时玩家是如何读取好友列表中的护航玩家存档数据的**
+- - 通过读取aid来获取，但目前推测先需要将护航存档加载并放入到服务端的总存档数据结构中，否则将无法找到
+- **实现能够查看护航的存档信息, 若有必要, 可再实现一遍将BotBase转换为PmcData**
 - ~~保存的cs存档是压缩的~~
 - ~~保存的cs存档_id与sessionId不对应~~
 - ~~botBase没有SessionId~~
+- ~~测试持续时长结束后好友是否有被自动删除~~
+- - ~~`ProcessExpiredCarryServiceProfile`推测服务端确实能够删除，但是不会有消息发送过去，因为原本删除是直接生效在客户端所以无需返回消息，而从服务端主动删除应该需要手动发送消息~~
+- - `youAreRemovedFromFriendList`
+- - `"{0} removed you from friends list"` -> `GClass2515`

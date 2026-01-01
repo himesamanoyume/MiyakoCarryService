@@ -11,7 +11,11 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
-public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
+public sealed class MCSConfigService(
+    ModHelper modHelper, 
+    JsonUtil jsonUtil,
+    FileUtil fileUtil
+)
 {
     private readonly string _configFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
     public MCSConfig MCSConfig { get; private set; } = new MCSConfig();
@@ -42,8 +46,23 @@ public sealed class MCSConfigService(ModHelper modHelper, JsonUtil jsonUtil)
     public async Task OnPreLoadAsync()
     {
         var miyakoCarryServicePath = Path.Combine(_configFolderPath, "miyakocarryservice.jsonc");
-        MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath) ?? new MCSConfig();
+        if (!fileUtil.FileExists(miyakoCarryServicePath))
+        {
+            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new MCSConfig()
+            {
+                ClientConfig = new MCSClientConfig()
+                {
+                    
+                },
+                ServerConfig = new MCSServerConfig()
+                {
+                    
+                }
+            }, true));
+        }
+        MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath);
         var orderConfigPath = Path.Combine(_configFolderPath, "order.json");
+        // 以后也要补上order被删除时的手动构造部分
         MCSOrderConfig = await jsonUtil.DeserializeFromFileAsync<MCSOrderConfig>(orderConfigPath);
     }
 
