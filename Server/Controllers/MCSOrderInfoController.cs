@@ -10,7 +10,6 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Servers;
@@ -25,7 +24,6 @@ namespace MiyakoCarryService.Server.Controllers
         MCSConfigController mcsConfigController,
         NotificationSendHelper notificationSendHelper,
         SaveServer saveServer,
-        HashUtil hashUtil,
         TimeUtil timeUtil
     )
     {
@@ -86,15 +84,8 @@ namespace MiyakoCarryService.Server.Controllers
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
                 foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                 {
-                    Console.WriteLine("生成护航存档");
-                    var csBotBase = mcsProfileController.GenerateBotProfile(orderInfo.BossSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
-                    csBotBase.Id = csPlayerSessionId;
-                    csBotBase.SessionId = csPlayerSessionId;
-                    csBotBase.Aid = hashUtil.GenerateAccountId();
-                    Console.WriteLine(csBotBase.SessionId);
-                    orderInfo.PlayerIds.Add((MongoId)csBotBase.SessionId);
-                    mcsProfileController.SaveMCPlayerProfile(orderInfo.BossSessionId, csBotBase);
-                    CompleteOrderQuestSendFriendRequest(csBotBase, orderInfo.BossSessionId);
+                    var csFullProfile = mcsProfileController.Generate(orderInfo.BossSessionId, csPlayerSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    CompleteOrderQuestSendFriendRequest(csFullProfile, orderInfo.BossSessionId);
                 }
             }
         }
@@ -104,10 +95,10 @@ namespace MiyakoCarryService.Server.Controllers
             return mcsOrderInfoService.GetOrderInfos(sessionId);
         }
 
-        public void CompleteOrderQuestSendFriendRequest(BotBase csBotBase, MongoId sessionId)
+        private void CompleteOrderQuestSendFriendRequest(SptProfile csFullProfile, MongoId sessionId)
         {
-            var completeQuestProfile = saveServer.GetProfile(sessionId);
-            completeQuestProfile.FriendProfileIds.Add((MongoId)csBotBase.SessionId);
+            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
+            completeQuestPlayerFullProfile?.FriendProfileIds?.Add(csFullProfile.ProfileInfo.ProfileId.Value);
             _ = new Timer(
                 _ =>
                 {
@@ -116,15 +107,15 @@ namespace MiyakoCarryService.Server.Controllers
                         EventType = NotificationEventType.friendListRequestAccept,
                         Profile = new SearchFriendResponse()
                         {
-                            Id = csBotBase.Id.Value,
-                            Aid = csBotBase.Aid,
+                            Id = csFullProfile.ProfileInfo.ProfileId.Value,
+                            Aid = csFullProfile.ProfileInfo.Aid,
                             Info = new UserDialogDetails
                             {
-                                Nickname = csBotBase.Info.Nickname,
-                                Side = csBotBase.Info.Side,
-                                Level = csBotBase.Info.Level,
-                                MemberCategory = csBotBase.Info.MemberCategory,
-                                SelectedMemberCategory = csBotBase.Info.SelectedMemberCategory
+                                Nickname = csFullProfile.CharacterData.PmcData.Info.Nickname,
+                                Side = csFullProfile.CharacterData.PmcData.Info.Side,
+                                Level = csFullProfile.CharacterData.PmcData.Info.Level,
+                                MemberCategory = csFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                                SelectedMemberCategory = csFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
                             }
                         }
                     };

@@ -8,6 +8,7 @@ using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -28,7 +29,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly string _profileFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "profiles");
         private readonly string _afdianFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "bots", "types");
 
-        private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, BotBase>> _profiles = new();
+        private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private List<string> _afdianNames = [];
 
         public bool RemoveProfile(MongoId sessionId, MongoId csPlayerSessionId)
@@ -46,26 +47,25 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void SaveMCPlayerProfile(MongoId sessionId, BotBase csProfile)
+        public void SaveCSPlayerProfile(MongoId sessionId, SptProfile csProfile)
         {
             Console.WriteLine("保存护航存档");
-            Console.WriteLine(csProfile.SessionId);
-            var csPlayerSessionId = (MongoId)csProfile.SessionId;
+            var csPlayerSessionId = (MongoId)csProfile.ProfileInfo.ProfileId;
             var profilePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayerSessionId}.json");
-            _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, BotBase>()).GetOrAdd(csPlayerSessionId, csProfile);
+            _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(csPlayerSessionId, csProfile);
             var jsonProfile = jsonUtil.Serialize(_profiles[sessionId][csPlayerSessionId], true);
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
-        public async Task LoadCSPlayerProfileAsync(MongoId sessionId, MongoId csPlayerSessionId)
+        private async Task LoadCSPlayerProfileAsync(MongoId sessionId, MongoId csPlayerSessionId)
         {
             var filePath = System.IO.Path.Combine(_profileFolderDir, sessionId, $"{csPlayerSessionId}.json");
             if (fileUtil.FileExists(filePath))
             {
-                var csProfile = await jsonUtil.DeserializeFromFileAsync<BotBase>(filePath);
-                if (csProfile is not null)
+                var csFullProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
+                if (csFullProfile is not null)
                 {
-                    _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, BotBase>()).GetOrAdd(csPlayerSessionId, csProfile);
+                    _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(csPlayerSessionId, csFullProfile);
                 }
             }
         }
@@ -108,14 +108,14 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public BotBase GenerateBotProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)
+        public BotBase GeneratePmcBotProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)
         {
             var playerName = randomUtil.GetArrayValue(_afdianNames);
             var bots = databaseService.GetBots().Types;
             var pmcNames = new List<string>();
             pmcNames.AddRange(bots["usec"].FirstNames);
             pmcNames.AddRange(bots["bear"].FirstNames);
-            
+
             var botBase = botGenerator.PrepareAndGenerateBot(sessionId, new()
             {
                 IsPmc = true,
@@ -133,9 +133,21 @@ namespace MiyakoCarryService.Server.Services
             return botBase;
         }
 
-        public BotBase GetBotBase(MongoId sessionId, MongoId csPlayerSessionId)
+        public SptProfile? GetCSFullProfile(MongoId sessionId, MongoId csPlayerSessionId)
         {
             return _profiles[sessionId][csPlayerSessionId];
+        }
+
+        public SptProfile? GetCSFullProfileByAccountId(MongoId sessionId, string csAccountId)
+        {
+            var check = int.TryParse(csAccountId, out var aid);
+            if (!check)
+            {
+                logger.Error($"Account {csAccountId} does not exist");
+            }
+
+            _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);
+            return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == aid).Value;
         }
 
         public async Task OnPostLoadAsync()

@@ -7,7 +7,7 @@
             "types": [
                 "Completion"
             ],
-            "resetTime": 900,
+            "resetTime": 180,
             "numQuests": 100,
             "minPlayerLevel": 0,
             "rewardScaling": {
@@ -45,12 +45,6 @@
             },
             "traderWhitelist": [],
             "questConfig": {
-                "Pickup": {
-                    "possibleSkillRewards": [],
-                    "ItemTypeToFetchWithMaxCount": [],
-                    "ItemTypesToFetch": [],
-                    "maxItemFetchCount": 0
-                },
                 "Exploration": [
                     {
                         "levelRange": {
