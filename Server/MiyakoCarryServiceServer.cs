@@ -19,6 +19,7 @@ namespace MiyakoCarryService.Server
                 new ChangeRepeatableQuestPatch().Enable();
                 new CompleteQuestPatch().Enable();
                 new GetOtherProfilePatch().Enable();
+                new GetFriendListPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }

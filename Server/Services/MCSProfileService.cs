@@ -147,6 +147,10 @@ namespace MiyakoCarryService.Server.Services
             }
 
             _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);
+            if (bossCSPlayerFullProfiles is null)
+            {
+                return null;
+            }
             return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == aid).Value;
         }
 
