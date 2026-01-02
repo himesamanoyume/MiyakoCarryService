@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -28,11 +29,12 @@ namespace MiyakoCarryService.Server.Patches
             var csFullProfileToView = mcsProfileController.GetCSFullProfileByAccountId(sessionId, request.AccountId);
             if (csFullProfileToView is null)
             {
+                Console.WriteLine("执行老代码");
                 return true;
             }
 
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
-
+            var bossPmcProfile = profileHelper.GetPmcProfile(sessionId);
             var csPmcProfile = csFullProfileToView.CharacterData.PmcData;
             var csScavProfile = csFullProfileToView.CharacterData.ScavData;
 
@@ -57,10 +59,10 @@ namespace MiyakoCarryService.Server.Patches
                     Nickname = csPmcProfile.Info.Nickname,
                     Side = csPmcProfile.Info.Side,
                     Experience = csPmcProfile.Info.Experience,
-                    MemberCategory = (int)(csPmcProfile.Info.MemberCategory ?? MemberCategory.Default),
+                    MemberCategory = (int)MemberCategory.Group,
                     BannedState = csPmcProfile.Info.BannedState,
                     BannedUntil = csPmcProfile.Info.BannedUntil,
-                    RegistrationDate = csPmcProfile.Info.RegistrationDate,
+                    RegistrationDate = bossPmcProfile is not null ? bossPmcProfile.Info.RegistrationDate : csPmcProfile.Info.RegistrationDate,
                 },
                 Customization = new OtherProfileCustomization
                 {
@@ -72,23 +74,27 @@ namespace MiyakoCarryService.Server.Patches
                     Voice = csPmcProfile.Customization.Voice,
                 },
                 Skills = csPmcProfile.Skills,
-                Equipment = new OtherProfileEquipment { Id = csPmcProfile.Inventory.Equipment, Items = csPmcProfile.Inventory.Items },
-                Achievements = csPmcProfile.Achievements,
+                Equipment = new OtherProfileEquipment 
+                { 
+                    Id = csPmcProfile.Inventory.Equipment, 
+                    Items = csPmcProfile.Inventory.Items 
+                },
+                Achievements = bossPmcProfile is not null ? bossPmcProfile.Achievements : csPmcProfile.Achievements,
                 FavoriteItems = profileHelper.GetOtherProfileFavorites(csPmcProfile),
                 PmcStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats
                     {
-                        TotalInGameTime = csPmcProfile.Stats.Eft.TotalInGameTime,
-                        OverAllCounters = csPmcProfile.Stats.Eft.OverallCounters,
+                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : csPmcProfile.Stats.Eft.TotalInGameTime,
+                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : csPmcProfile.Stats.Eft.OverallCounters,
                     },
                 },
                 ScavStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats
                     {
-                        TotalInGameTime = csScavProfile.Stats.Eft.TotalInGameTime,
-                        OverAllCounters = csScavProfile.Stats.Eft.OverallCounters,
+                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : csPmcProfile.Stats.Eft.TotalInGameTime,
+                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : csPmcProfile.Stats.Eft.OverallCounters,
                     },
                 },
                 Hideout = csPmcProfile.Hideout,
