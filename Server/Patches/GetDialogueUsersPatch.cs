@@ -1,0 +1,36 @@
+
+// using System;
+// using System.Reflection;
+// using HarmonyLib;
+// using Microsoft.Extensions.DependencyInjection;
+// using MiyakoCarryService.Server.Controllers;
+// using SPTarkov.Reflection.Patching;
+// using SPTarkov.Server.Core.Controllers;
+// using SPTarkov.Server.Core.DI;
+// using SPTarkov.Server.Core.Helpers;
+// using SPTarkov.Server.Core.Models.Common;
+// using SPTarkov.Server.Core.Models.Eft.Common;
+// using SPTarkov.Server.Core.Models.Eft.Profile;
+// using SPTarkov.Server.Core.Models.Eft.Quests;
+// using SPTarkov.Server.Core.Models.Enums;
+
+// namespace MiyakoCarryService.Server.Patches
+// {
+//     public sealed class GetDialogueUsersPatch : AbstractPatch
+//     {
+//         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetDialogueUsers));
+
+//         [PatchPostfix]
+//         public static void Postfix(Dialogue? dialog, MessageType? messageType, MongoId sessionId)
+//         {
+//             var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();
+//             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
+//             var profile = profileHelper.GetFullProfile(sessionId);
+//             var csProfile = mcsProfileController.GetCSFullProfile(sessionId, friendId);
+
+//             foreach (var friendId in profile.FriendProfileIds)
+//             {
+//             }
+//         }
+//     }
+// }

@@ -12,6 +12,7 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public sealed class MCSOrderInfoService(
         MCSConfigService mcsConfigService,
+        TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
     )
@@ -73,11 +74,16 @@ namespace MiyakoCarryService.Server.Services
                 await fileUtil.WriteFileAsync(orderPath, "[]");
             }
 
-            var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath) ?? new List<MCSOrderInfo>();
+            var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath);
             foreach (var orderInfo in orderInfos)
             {
-                _orderInfos[orderInfo.QuestId] = orderInfo;
+                var currentTime = timeUtil.GetTimeStamp();
+                if (currentTime < orderInfo.ExpirationTime - 1)
+                {
+                    _orderInfos[orderInfo.QuestId] = orderInfo;
+                }
             }
+            SaveOrderInfo();
         }
 
         public async Task OnPostLoadAsync()
