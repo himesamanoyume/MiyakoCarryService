@@ -20,6 +20,7 @@ namespace MiyakoCarryService.Server
                 new CompleteQuestPatch().Enable();
                 new GetOtherProfilePatch().Enable();
                 new GetFriendListPatch().Enable();
+                new SendGroupInvitePatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }

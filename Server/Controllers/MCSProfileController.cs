@@ -244,9 +244,14 @@ namespace MiyakoCarryService.Server.Controllers
             return mcsProfileService.GetCSFullProfile(sessionId, csPlayerSessionId);
         }
 
-        public SptProfile GetCSFullProfileByAccountId(MongoId sessionId, string csAccountId)
+        public SptProfile GetCSFullProfileByAccountId(MongoId sessionId, string csAid)
         {
-            return mcsProfileService.GetCSFullProfileByAccountId(sessionId, csAccountId);
+            return mcsProfileService.GetCSFullProfileByAccountId(sessionId, csAid);
+        }
+
+        public SptProfile GetCSFullProfileByAccountId(MongoId sessionId, int csAid)
+        {
+            return mcsProfileService.GetCSFullProfileByAccountId(sessionId, csAid);
         }
     }
 }

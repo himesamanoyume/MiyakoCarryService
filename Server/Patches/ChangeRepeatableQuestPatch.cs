@@ -15,7 +15,6 @@ using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace MiyakoCarryService.Server.Patches
 {
@@ -30,7 +29,6 @@ namespace MiyakoCarryService.Server.Patches
             var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
             var httpResponseUtil = ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>();
             var logger = ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>();
-            var cloner = ServiceLocator.ServiceProvider.GetService<ICloner>();
             
             var output = eventOutputHolder.GetOutput(sessionID);
 
@@ -53,9 +51,6 @@ namespace MiyakoCarryService.Server.Patches
             {
                 var message = serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
                 logger.Warning(message);
-
-                // output.ProfileChanges[sessionID].RepeatableQuests ??= [];
-                // output.ProfileChanges[sessionID].RepeatableQuests.Add(cloner.Clone(repeatables.RepeatableType));
 
                 var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
                 var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();

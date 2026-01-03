@@ -138,7 +138,7 @@ namespace MiyakoCarryService.Server.Services
             return _profiles[sessionId][csPlayerSessionId];
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId sessionId, string csAccountId)
+        public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, string csAccountId)
         {
             var check = int.TryParse(csAccountId, out var aid);
             if (!check)
@@ -146,6 +146,11 @@ namespace MiyakoCarryService.Server.Services
                 logger.Error($"Account {csAccountId} does not exist");
             }
 
+            return GetCSFullProfileByAccountId(bossSessionId, aid);
+        }
+
+        public SptProfile? GetCSFullProfileByAccountId(MongoId sessionId, int aid)
+        {
             if (_profiles.ContainsKey(sessionId))
             {
                 _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);

@@ -155,6 +155,8 @@
 - `orderInfo`与`/client/repeatalbeQuests/activityPeriods`仍然存在有bug
 - ~~`orderInfo.json`内若有过期order会导致进入游戏加载错误，应该在开启服务端时就进行一次过期函数执行~~
 - ~~`ChangeRepeatableQuestPatch`目前还不知道非Order类型的任务是否能够正常更换~~
+- ~~实现能够邀请加入队伍的~~
+> `SendGroupInvite`, `AcceptGroupInvite`, `acceptInvite`, `"/client/match/group/invite/send"`
 ---
-开始偏向客户端
-- **实现能够邀请加入队伍的**
+开始进入客户端为主的阶段
+- **移除Fika，实现原生的开始战局**

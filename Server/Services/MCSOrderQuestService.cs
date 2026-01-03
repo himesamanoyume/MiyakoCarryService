@@ -20,8 +20,7 @@ namespace MiyakoCarryService.Server.Services
 
         private void LoadOrderTemplate()
         {
-            var orderTemplate = modHelper.GetJsonDataFromFile<RepeatableQuest>(_traderFolderDir, "orderQuests.json");
-            _orderTemplate = orderTemplate;
+            _orderTemplate = modHelper.GetJsonDataFromFile<RepeatableQuest>(_traderFolderDir, "orderQuests.json");
         }
 
         public RepeatableQuest GetOrderTemplate()
