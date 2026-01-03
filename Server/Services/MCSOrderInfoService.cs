@@ -1,10 +1,19 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Models.Enums;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Eft.Ws;
+using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -12,6 +21,10 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public sealed class MCSOrderInfoService(
         MCSConfigService mcsConfigService,
+        MCSProfileService mcsProfileService,
+        NotificationSendHelper notificationSendHelper,
+        ISptLogger<MCSOrderInfoService> logger,
+        SaveServer saveServer,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
@@ -36,6 +49,26 @@ namespace MiyakoCarryService.Server.Services
         public void RemoveOrderInfo(MCSOrderInfo orderInfo)
         {
             _orderInfos.TryRemove(orderInfo.QuestId, out _);
+        }
+
+        public void CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int hours, MongoId questId)
+        {
+            var hashSetPlayers = new HashSet<MongoId>();
+            for (int i = 0; i < players; i++)
+            {
+                hashSetPlayers.Add(new MongoId());
+            }
+            var orderInfo = new MCSOrderInfo()
+            {
+                BossSessionId = sessionId,
+                QuestId = questId,
+                PlayerIds = hashSetPlayers,
+                CarryServiceLevel = carryServiceLevel,
+                Duration = hours,
+                Status = EOrderInfoStatus.AvailableForStart,
+                ExpirationTime = timeUtil.GetTimeStamp() + mcsConfigService.GetOrderConfig().OrderQuests.First().ResetTime
+            };
+            AddOrderInfo(orderInfo);
         }
 
         public void SaveOrderInfo()
@@ -77,13 +110,75 @@ namespace MiyakoCarryService.Server.Services
             var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath);
             foreach (var orderInfo in orderInfos)
             {
+                _orderInfos[orderInfo.QuestId] = orderInfo;
+            }
+        }
+
+        public void ProcessExpiredOrderInfos()
+        {
+            var orderInfos = GetAllOrderInfos();
+            foreach (var orderInfo in orderInfos)
+            {
                 var currentTime = timeUtil.GetTimeStamp();
-                if (currentTime < orderInfo.ExpirationTime - 1)
+                if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    _orderInfos[orderInfo.QuestId] = orderInfo;
+                    logger.Info($"准备清除 {orderInfo.BossSessionId} 的一个过期订单");
+                    RemoveOrderInfo(orderInfo);
+                    foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                    {
+                        logger.Info($"准备清除 {csPlayerSessionId} 的Profile");
+                        mcsProfileService.ProcessExpiredCarryServiceProfile(orderInfo.BossSessionId, csPlayerSessionId);
+                    }
                 }
             }
             SaveOrderInfo();
+        }
+
+        public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData completeQuestPmcData)
+        {
+            if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+            {
+                orderInfo.Status = EOrderInfoStatus.Started;
+                var currentTime = timeUtil.GetTimeStamp();
+                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
+                foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                {
+                    var csFullProfile = mcsProfileService.Generate(orderInfo.BossSessionId, csPlayerSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    CompleteOrderQuestSendFriendRequest(csFullProfile, orderInfo.BossSessionId);
+                }
+            }
+        }
+
+        private void CompleteOrderQuestSendFriendRequest(SptProfile csFullProfile, MongoId sessionId)
+        {
+            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
+            completeQuestPlayerFullProfile?.FriendProfileIds?.Add(csFullProfile.ProfileInfo.ProfileId.Value);
+            _ = new Timer(
+                _ =>
+                {
+                    var notification = new WsFriendsListAccept
+                    {
+                        EventType = NotificationEventType.friendListRequestAccept,
+                        Profile = new SearchFriendResponse()
+                        {
+                            Id = csFullProfile.ProfileInfo.ProfileId.Value,
+                            Aid = csFullProfile.ProfileInfo.Aid,
+                            Info = new UserDialogDetails
+                            {
+                                Nickname = csFullProfile.CharacterData.PmcData.Info.Nickname,
+                                Side = csFullProfile.CharacterData.PmcData.Info.Side,
+                                Level = csFullProfile.CharacterData.PmcData.Info.Level,
+                                MemberCategory = csFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                                SelectedMemberCategory = csFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
+                            }
+                        }
+                    };
+                    notificationSendHelper.SendMessage(sessionId, notification);
+                },
+                null,
+                TimeSpan.FromMicroseconds(1000),
+                Timeout.InfiniteTimeSpan
+            );
         }
 
         public async Task OnPostLoadAsync()

@@ -157,6 +157,10 @@
 - ~~`ChangeRepeatableQuestPatch`目前还不知道非Order类型的任务是否能够正常更换~~
 - ~~实现能够邀请加入队伍的~~
 > `SendGroupInvite`, `AcceptGroupInvite`, `acceptInvite`, `"/client/match/group/invite/send"`
+- ~~BUG:在拥有过期护航存档、过期订单信息时，新开启服务端时没有把过期护航存档删除~~
+- ~~并且需要一并将好友删除~~
+- **BUG:加载不了好友Miyako**
+- - 竟然是因为Fika没了导致的，查清是服务端的问题还是客户端
 ---
 开始进入客户端为主的阶段
 - **移除Fika，实现原生的开始战局**

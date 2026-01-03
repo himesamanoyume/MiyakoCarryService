@@ -41,6 +41,7 @@ namespace MiyakoCarryService.Server
                 await mcsProfileService.OnPostLoadAsync();
                 await mcsOrderQuestService.OnPostLoadAsync();
                 await mcsOrderInfoService.OnPostLoadAsync();
+                mcsOrderInfoService.ProcessExpiredOrderInfos();
             }
         }
     }
