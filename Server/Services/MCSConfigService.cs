@@ -23,7 +23,7 @@ public sealed class MCSConfigService(
 )
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
-    public MCSConfig MCSConfig { get; private set; } = new MCSConfig();
+    public MCSConfig MCSConfig { get; private set; }
     public MCSOrderConfig MCSOrderConfig { get; private set; }
     private readonly ModMetadata MCSModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };

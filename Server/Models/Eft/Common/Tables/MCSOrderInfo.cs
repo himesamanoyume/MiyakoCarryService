@@ -9,24 +9,24 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
     public record MCSOrderInfo
     {
         [JsonPropertyName("BossSessionId")]
-        public MongoId BossSessionId { get; set; }
+        public required MongoId BossSessionId { get; set; }
 
         [JsonPropertyName("QuestId")]
-        public MongoId QuestId { get; set; }
+        public required MongoId QuestId { get; set; }
 
         [JsonPropertyName("PlayerIds")]
-        public HashSet<MongoId> PlayerIds { get; set; }
+        public required HashSet<MongoId> PlayerIds { get; set; }
 
         [JsonPropertyName("CarryServiceLevel")]
-        public int CarryServiceLevel { get; set; }
+        public required int CarryServiceLevel { get; set; }
 
         [JsonPropertyName("Duration")]
-        public int Duration { get; set; }
+        public required int Duration { get; set; }
 
         [JsonPropertyName("Status")]
-        public EOrderInfoStatus Status { get; set; }
+        public required EOrderInfoStatus Status { get; set; }
 
         [JsonPropertyName("ExpirationTime")]
-        public long ExpirationTime { get; set; }
+        public required long ExpirationTime { get; set; }
     }
 }

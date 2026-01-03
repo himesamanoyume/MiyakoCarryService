@@ -75,6 +75,21 @@ namespace MiyakoCarryService.Server.Controllers
             mcsOrderInfoService.SaveOrderInfo();
         }
 
+        public void RemoveOrderInfo(MCSOrderInfo orderInfo)
+        {
+            mcsOrderInfoService.RemoveOrderInfo(orderInfo);
+        }
+
+        public void SaveOrderInfo()
+        {
+            mcsOrderInfoService.SaveOrderInfo();
+        }
+
+        public List<MCSOrderInfo> GetAllOrderInfos()
+        {
+            return mcsOrderInfoService.GetAllOrderInfos();
+        }
+
         public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData completeQuestPmcData)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)

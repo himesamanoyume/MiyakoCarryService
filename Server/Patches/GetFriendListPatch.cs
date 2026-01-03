@@ -26,18 +26,24 @@ namespace MiyakoCarryService.Server.Patches
 
             foreach (var friendId in profile.FriendProfileIds)
             {
-                var csProfile = mcsProfileController.GetCSFullProfile(sessionId, friendId).CharacterData.PmcData;
+                var csFullProfile = mcsProfileController.GetCSFullProfile(sessionId, friendId);
+                if (csFullProfile is null)
+                {
+                    continue;
+                }
+                
+                var csPmcData = csFullProfile.CharacterData.PmcData;
                 var csSearchFriendResponse = new SearchFriendResponse
                 {
-                    Id = csProfile.Id.Value,
-                    Aid = csProfile.Aid,
+                    Id = csPmcData.Id.Value,
+                    Aid = csPmcData.Aid,
                     Info = new UserDialogDetails
                     {
-                        Nickname = csProfile.Info.Nickname,
-                        Side = csProfile.Info.Side,
-                        Level = csProfile.Info.Level,
-                        MemberCategory = csProfile.Info.MemberCategory,
-                        SelectedMemberCategory = csProfile.Info.SelectedMemberCategory,
+                        Nickname = csPmcData.Info.Nickname,
+                        Side = csPmcData.Info.Side,
+                        Level = csPmcData.Info.Level,
+                        MemberCategory = csPmcData.Info.MemberCategory,
+                        SelectedMemberCategory = csPmcData.Info.SelectedMemberCategory,
                     },
                 };
 

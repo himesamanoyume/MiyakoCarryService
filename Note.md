@@ -152,23 +152,9 @@
 - - `"{0} removed you from friends list"` -> `GClass2515`
 - ~~是否有必要由mod主动开启允许服务端编辑存档~~
 - ~~补上order被删除时的手动构造部分~~
-- **`orderInfo`与`/client/repeatalbeQuests/activityPeriods`仍然存在有bug**
+- `orderInfo`与`/client/repeatalbeQuests/activityPeriods`仍然存在有bug
 - ~~`orderInfo.json`内若有过期order会导致进入游戏加载错误，应该在开启服务端时就进行一次过期函数执行~~
-```log
-Error handling request: /client/repeatalbeQuests/activityPeriods
-The given key '68fc96b7dd043e81bc7a506c' was not present in the dictionary.
-   at System.Collections.Concurrent.ConcurrentDictionary`2.ThrowKeyNotFoundException(TKey key)
-   at System.Collections.Concurrent.ConcurrentDictionary`2.get_Item(TKey key)
-   at MiyakoCarryService.Server.Services.MCSProfileService.GetCSFullProfile(MongoId sessionId, MongoId csPlayerSessionId)
-   at MiyakoCarryService.Server.Controllers.MCSProfileController.ProcessExpiredCarryServiceProfile(MongoId sessionId, MongoId csPlayerSessionId)
-   at MiyakoCarryService.Server.Controllers.MCSOrderInfoController.ProcessExpiredOrderInfos()
-   at MiyakoCarryService.Server.Patches.GetClientRepeatableQuestsPatch.Postfix(RepeatableQuestController __instance, MongoId sessionID, List`1& __result)
-   at DMD<DMD<>?31638126::SPTarkov.Server.Core.Controllers.RepeatableQuestController::GetClientRepeatableQuests>(RepeatableQuestController this, MongoId sessionID)
-   at SyncProxy<System.Collections.Generic.List`1[[SPTarkov.Server.Core.Models.Eft.Common.Tables.PmcDataRepeatableQuest, SPTarkov.Server.Core, Version=4.0.8.0, Culture=neutral, PublicKeyToken=null]] SPTarkov.Server.Core.Controllers.RepeatableQuestController:GetClientRepeatableQuests(SPTarkov.Server.Core.Models.Common.MongoId)>(RepeatableQuestController , MongoId )
-   at SPTarkov.Server.Core.Callbacks.QuestCallbacks.ActivityPeriods(String url, EmptyRequestData _, MongoId sessionID)
-   at SPTarkov.Server.Core.Routers.Static.QuestStaticRouter.<>c__DisplayClass0_0.<<-ctor>b__1>d.MoveNext()
-```
-- **`ChangeRepeatableQuestPatch`目前还不知道非Order类型的任务是否能够正常更换**
+- ~~`ChangeRepeatableQuestPatch`目前还不知道非Order类型的任务是否能够正常更换~~
 ---
 开始偏向客户端
 - **实现能够邀请加入队伍的**

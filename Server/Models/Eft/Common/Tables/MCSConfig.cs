@@ -17,10 +17,10 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
     public record MCSConfig
     {
         [JsonPropertyName("Client")]
-        public MCSClientConfig ClientConfig { get; set; }
+        public required MCSClientConfig ClientConfig { get; set; }
 
         [JsonPropertyName("Server")]
-        public MCSServerConfig ServerConfig { get; set; }
+        public required MCSServerConfig ServerConfig { get; set; }
     }
 
     public record MCSOrderConfig

@@ -44,11 +44,10 @@ namespace MiyakoCarryService.Server.Controllers
         SaveServer saveServer
     )
     {
-        public void ProcessExpiredCarryServiceProfile(MongoId sessionId, MongoId csPlayerSessionId)
+        public void ProcessExpiredCarryServiceProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
-            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
-            completeQuestPlayerFullProfile?.FriendProfileIds?.Remove(csPlayerSessionId);
-            var csFullProfile = mcsProfileService.GetCSFullProfile(sessionId, csPlayerSessionId);
+            RemoveCarryServiceProfile(bossSessionId, csPlayerSessionId);
+            var csFullProfile = mcsProfileService.GetCSFullProfile(bossSessionId, csPlayerSessionId);
             _ = new Timer(
                 _ =>
                 {
@@ -69,13 +68,19 @@ namespace MiyakoCarryService.Server.Controllers
                             }
                         }
                     };
-                    notificationSendHelper.SendMessage(sessionId, notification);
-                    mcsProfileService.RemoveProfile(sessionId, csPlayerSessionId);
+                    notificationSendHelper.SendMessage(bossSessionId, notification);
+                    mcsProfileService.RemoveProfile(bossSessionId, csPlayerSessionId);
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),
                 Timeout.InfiniteTimeSpan
             );
+        }
+
+        public void RemoveCarryServiceProfile(MongoId sessionId, MongoId csPlayerSessionId)
+        {
+            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
+            completeQuestPlayerFullProfile?.FriendProfileIds?.Remove(csPlayerSessionId);
         }
 
         protected BotBase GeneratePmcBotBaseProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)

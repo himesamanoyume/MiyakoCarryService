@@ -146,12 +146,16 @@ namespace MiyakoCarryService.Server.Services
                 logger.Error($"Account {csAccountId} does not exist");
             }
 
-            _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);
-            if (bossCSPlayerFullProfiles is null)
+            if (_profiles.ContainsKey(sessionId))
             {
-                return null;
+                _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);
+                if (bossCSPlayerFullProfiles is null)
+                {
+                    return null;
+                }
+                return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == aid).Value;
             }
-            return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == aid).Value;
+            return null;
         }
 
         public async Task OnPostLoadAsync()

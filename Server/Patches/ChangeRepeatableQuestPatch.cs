@@ -2,6 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
+using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
@@ -53,9 +54,25 @@ namespace MiyakoCarryService.Server.Patches
                 var message = serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
                 logger.Warning(message);
 
-                output.ProfileChanges[sessionID].RepeatableQuests ??= [];
-                output.ProfileChanges[sessionID].RepeatableQuests.Add(cloner.Clone(repeatables.RepeatableType));
+                // output.ProfileChanges[sessionID].RepeatableQuests ??= [];
+                // output.ProfileChanges[sessionID].RepeatableQuests.Add(cloner.Clone(repeatables.RepeatableType));
 
+                var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
+                var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();
+                var orderInfos = mcsOrderInfoController.GetAllOrderInfos();
+                foreach (var orderInfo in orderInfos)
+                {
+                    if (orderInfo.QuestId == questToReplace.Id)
+                    {
+                        mcsOrderInfoController.RemoveOrderInfo(orderInfo);
+                        mcsOrderInfoController.SaveOrderInfo();
+                        foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                        {
+                            mcsProfileController.RemoveCarryServiceProfile(sessionID, csPlayerSessionId);
+                        }
+                        break;
+                    }
+                }
                 __result = output;
                 return false;
             }
