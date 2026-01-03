@@ -1,7 +1,9 @@
 
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
+using MiyakoCarryService.Server.ChatBot;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
@@ -20,6 +22,9 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, ref GetFriendListDataResponse __result)
         {
+            var mcsChatBot = ServiceLocator.ServiceProvider.GetService<MCSChatBot>();
+            __result.Friends.Add(mcsChatBot.GetChatBot());
+
             var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var profile = profileHelper.GetFullProfile(sessionId);
@@ -59,6 +64,11 @@ namespace MiyakoCarryService.Server.Patches
                     );
                 }
             }
+
+            __result.Friends = __result.Friends
+                .GroupBy(u => u.Aid)
+                .Select(x => x.First())
+                .ToList();
         }
     }
 }

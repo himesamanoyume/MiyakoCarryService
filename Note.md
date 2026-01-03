@@ -16,7 +16,7 @@
 
 ## 低优先级
 
-- **与护航玩家聊天时Users没有内容**
+- 与护航玩家聊天时Users没有内容
 > 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
 - - 错误情况
 ```json
@@ -85,6 +85,8 @@
   "_id": "692edf66bfcd227424bceb4d"
 }
 ```
+
+- 好友列表显示店长机器人时一并显示头像
 
 ## TODO
 
@@ -159,8 +161,8 @@
 > `SendGroupInvite`, `AcceptGroupInvite`, `acceptInvite`, `"/client/match/group/invite/send"`
 - ~~BUG:在拥有过期护航存档、过期订单信息时，新开启服务端时没有把过期护航存档删除~~
 - ~~并且需要一并将好友删除~~
-- **BUG:加载不了好友Miyako**
-- - 竟然是因为Fika没了导致的，查清是服务端的问题还是客户端
+- ~~BUG:加载不了好友Miyako~~
 ---
 开始进入客户端为主的阶段
-- **移除Fika，实现原生的开始战局**
+- ~~移除Fika，~~**实现原生的开始战局**
+- - 护航没有准备

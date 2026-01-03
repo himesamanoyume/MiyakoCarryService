@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Server.ChatBot
         IEnumerable<MCSChatBotCommands> chatCommands
     ) : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
     {
-        private readonly Dictionary<string, MCSChatBotCommands> _miyakoCommands = chatCommands.ToDictionary(c => c.CommandPrefix);
         private static readonly MongoId _miyakoId = new(MCSTraderService.MiyakoTraderId);
 
         public override UserDialogInfo GetChatBot()
@@ -31,7 +30,7 @@ namespace MiyakoCarryService.Server.ChatBot
                 Aid = 10107,
                 Info = new()
                 {
-                    Level = 9999,
+                    Level = 999,
                     MemberCategory = MemberCategory.Trader,
                     SelectedMemberCategory = MemberCategory.Trader,
                     Nickname = "Miyako",
