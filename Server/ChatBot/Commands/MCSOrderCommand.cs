@@ -43,13 +43,13 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             {
                 int players = int.Parse(match.Groups[1].Value);
                 int level = int.Parse(match.Groups[2].Value);
-                int hours = int.Parse(match.Groups[3].Value);
+                int duration = int.Parse(match.Groups[3].Value);
 
                 mailSendService.SendUserMessageToPlayer(sessionId, commandHandler,
-                    $"已成功下单！您的订单信息: \n护航{players}人, 护航{level}级, 时长{hours}小时\n请到商人界面接取订单并付款~"
+                    $"已成功下单！您的订单信息: \n护航{players}人, 护航{level}级, 时长{duration}小时\n请到商人界面接取订单并付款~"
                 );
 
-                mcsOrderQuestController.CreateOrderQuest(sessionId, players, level, hours);
+                mcsOrderQuestController.CreateOrderQuest(sessionId, players, level, duration);
             }
             else
             {

@@ -23,9 +23,9 @@ namespace MiyakoCarryService.Server.Controllers
             mcsOrderInfoService.AddOrderInfos(orderInfos);
         }
 
-        public void CreateOrderInfo(MongoId bossSessionId, int players, int carryServiceLevel, int hours, MongoId questId)
+        public void CreateOrderInfo(MongoId bossSessionId, int players, int carryServiceLevel, int duration, MongoId questId)
         {
-            mcsOrderInfoService.CreateOrderInfo(bossSessionId, players, carryServiceLevel, hours, questId);
+            mcsOrderInfoService.CreateOrderInfo(bossSessionId, players, carryServiceLevel, duration, questId);
         }
 
         public void ProcessExpiredOrderInfos()

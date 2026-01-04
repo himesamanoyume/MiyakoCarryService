@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Server.Services
             _orderInfos.TryRemove(orderInfo.QuestId, out _);
         }
 
-        public void CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int hours, MongoId questId)
+        public void CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int duration, MongoId questId)
         {
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Server.Services
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
                 CarryServiceLevel = carryServiceLevel,
-                Duration = hours,
+                Duration = duration,
                 Status = EOrderInfoStatus.AvailableForStart,
                 ExpirationTime = timeUtil.GetTimeStamp() + mcsConfigService.GetOrderConfig().OrderQuests.First().ResetTime
             };
