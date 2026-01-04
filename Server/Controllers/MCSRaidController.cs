@@ -34,6 +34,12 @@ namespace MiyakoCarryService.Server.Controllers
         public void AcceptGroupInvite(MongoId bossSessionId, int csAid)
         {
             var csFullProfile = mcsProfileController.GetCSFullProfileByAccountId(bossSessionId, csAid);
+
+            if (csFullProfile is null)
+            {
+                return;
+            }
+
             if (CheckCSPlayerExist(bossSessionId, csAid))
             {
                 var notification = new WsGroupMatchInviteDecline
