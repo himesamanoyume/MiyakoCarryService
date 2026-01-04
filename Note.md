@@ -166,6 +166,7 @@
 - - ~~护航没有准备~~
 > `[未处理] client/match/raid/ready | not-ready`, 或直接`参考friendlypmc`
 - **如果在将护航拉入小队中时过期清除删好友了，则应该一并让护航退队**
+- ~~Ws相关消息的构建转移到MCSNotifyXXXHelper中进行~~
 ---
 开始进入客户端为主的阶段
 - ~~移除Fika，~~**实现原生的开始战局**

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using MiyakoCarryService.Server.Helper;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Generators;
@@ -41,6 +42,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         BotHelper botHelper,
         ServerLocalisationService serverLocalisationService,
+        MCSNotificationHelper mcsNotificationHelper,
         BotInventoryContainerService botInventoryContainerService,
         BotLootCacheService botLootCacheService,
         BotGenerator botGenerator,
@@ -82,23 +84,7 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = new WsFriendsListAccept
-                    {
-                        EventType = NotificationEventType.youAreRemovedFromFriendList,
-                        Profile = new SearchFriendResponse()
-                        {
-                            Id = csFullProfile.ProfileInfo.ProfileId.Value,
-                            Aid = csFullProfile.ProfileInfo.Aid,
-                            Info = new UserDialogDetails
-                            {
-                                Nickname = csFullProfile.CharacterData.PmcData.Info.Nickname,
-                                Side = csFullProfile.CharacterData.PmcData.Info.Side,
-                                Level = csFullProfile.CharacterData.PmcData.Info.Level,
-                                MemberCategory = csFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                                SelectedMemberCategory = csFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
-                            }
-                        }
-                    };
+                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.youAreRemovedFromFriendList);
                     notificationSendHelper.SendMessage(bossSessionId, notification);
                     RemoveProfile(bossSessionId, csPlayerSessionId);
                 },

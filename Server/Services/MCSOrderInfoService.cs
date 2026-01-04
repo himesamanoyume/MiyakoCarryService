@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Enums;
 using SPTarkov.DI.Annotations;
@@ -25,6 +26,7 @@ namespace MiyakoCarryService.Server.Services
         NotificationSendHelper notificationSendHelper,
         ISptLogger<MCSOrderInfoService> logger,
         SaveServer saveServer,
+        MCSNotificationHelper mcsNotificationHelper,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
@@ -156,23 +158,7 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = new WsFriendsListAccept
-                    {
-                        EventType = NotificationEventType.friendListRequestAccept,
-                        Profile = new SearchFriendResponse()
-                        {
-                            Id = csFullProfile.ProfileInfo.ProfileId.Value,
-                            Aid = csFullProfile.ProfileInfo.Aid,
-                            Info = new UserDialogDetails
-                            {
-                                Nickname = csFullProfile.CharacterData.PmcData.Info.Nickname,
-                                Side = csFullProfile.CharacterData.PmcData.Info.Side,
-                                Level = csFullProfile.CharacterData.PmcData.Info.Level,
-                                MemberCategory = csFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                                SelectedMemberCategory = csFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
-                            }
-                        }
-                    };
+                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.groupMatchInviteDecline);
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },
                 null,

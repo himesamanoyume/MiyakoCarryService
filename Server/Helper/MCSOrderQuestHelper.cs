@@ -96,7 +96,7 @@ namespace MiyakoCarryService.Server.Helper
             return questData;
         }
 
-        public RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
+        protected RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
         {
             var orderTemplate = mcsOrderQuestService.GetOrderTemplate();
             var quest = type switch
