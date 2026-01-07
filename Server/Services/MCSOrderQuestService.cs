@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -24,6 +26,8 @@ namespace MiyakoCarryService.Server.Services
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,
         MCSOrderInfoService mcsOrderInfoService,
+        ICloner cloner,
+        ServerLocalisationService serverLocalisationService,
         ProfileHelper profileHelper
     )
     {
@@ -44,22 +48,26 @@ namespace MiyakoCarryService.Server.Services
             return _orderTemplate;
         }
 
-        public void CreateOrderQuest(MongoId sessionId, int players, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId bossSessionId, int players, int carryServiceLevel, int duration)
         {
-            var fullProfile = profileHelper.GetFullProfile(sessionId);
+            var fullProfile = profileHelper.GetFullProfile(bossSessionId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info("开始创建任务");
-            var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(sessionId, pmcData, players, carryServiceLevel, duration);
+            var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, mcsConfigService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+                RepeatableQuestType.Completion,
+                MCSTraderService.MiyakoTraderId,
+                bossSessionId
+            ));
             logger.Info("任务插入等待创建队列");
-            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(sessionId, out var orderQuestsQueue))
+            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(bossSessionId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);
             }
             else
             {
-                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(sessionId, new([orderQuest]));
+                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(bossSessionId, new([orderQuest]));
             }
-            mcsOrderInfoService.CreateOrderInfo(sessionId, players, carryServiceLevel, duration, orderQuest.Id);
+            mcsOrderInfoService.CreateOrderInfo(bossSessionId, players, carryServiceLevel, duration, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
@@ -94,6 +102,98 @@ namespace MiyakoCarryService.Server.Services
             }
 
             generatedRepeatables.ActiveQuests = questsToKeep;
+        }
+
+        public RepeatableQuest GenerateOrderTemplate(
+            RepeatableQuestType type,
+            MongoId traderId,
+            MongoId sessionId)
+        {
+            var questData = GetClonedQuestTemplateForType(type, traderId);
+            if (questData is null)
+            {
+                logger.Error(serverLocalisationService.GetText("repeatable-quest_helper_template_not_found", type));
+                return null;
+            }
+
+            var templateName = Enum.GetName(type);
+            if (templateName is null)
+            {
+                logger.Error(serverLocalisationService.GetText("repeatable-quest_helper_template_name_not_found", type));
+                return null;
+            }
+
+            // Get template id from config based on side and type of quest
+            var typeIds = new Dictionary<string, MongoId>()
+            {
+                {"Completion", "695207e8bcc1dd1e3c80dfcb"}
+            };
+            questData.TemplateId = typeIds.GetValueOrDefault(templateName);
+
+            questData.Name = questData.Name.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
+
+            questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
+
+            questData.Description = questData.Description.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
+
+            questData.SuccessMessageText = questData
+                .SuccessMessageText?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.FailMessageText = questData
+                .FailMessageText?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.StartedMessageText = questData
+                .StartedMessageText?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.ChangeQuestMessageText = questData
+                .ChangeQuestMessageText?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.AcceptPlayerMessage = questData
+                .AcceptPlayerMessage?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.DeclinePlayerMessage = questData
+                .DeclinePlayerMessage?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            questData.CompletePlayerMessage = questData
+                .CompletePlayerMessage?.Replace("{traderId}", traderId)
+                .Replace("{templateId}", questData.TemplateId);
+
+            if (questData.QuestStatus is null)
+            {
+                return null;
+            }
+
+            questData.QuestStatus.Id = new MongoId();
+            questData.QuestStatus.Uid = sessionId;
+            questData.QuestStatus.QId = questData.Id;
+
+            return questData;
+        }
+
+        public RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
+        {
+            var orderTemplate = GetOrderTemplate();
+            var quest = type switch
+            {
+                RepeatableQuestType.Completion => cloner.Clone(orderTemplate),
+                _ => null,
+            };
+
+            if (quest is null)
+            {
+                return null;
+            }
+
+            quest.Id = new MongoId();
+            quest.TraderId = traderId;
+
+            return quest;
         }
     }
 

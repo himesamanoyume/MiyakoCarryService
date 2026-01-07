@@ -6,6 +6,7 @@
 > 参考[FriendlyPMC](https://bitbucket.org/pitvenin/friendlypmc/src/version-4/)
 - （最好是通过商人来交，给的是临时任务）交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同
 > 可参考ABPS这种根据玩家等级提升装备和等级
+- AI增加套包收益最大化
 - 最好支持BOSS、BOSS+小弟护航
 - 兼容SAIN、Fika
 - 最好是自带一部分QuestingBots和LootingBots的功能，可根据交互来选择帮助你。比如我想要什么物品，他就会去帮你找
@@ -165,7 +166,8 @@
 - ~~BUG:由于Patch了接受小队邀请函数，导致拉取ChatBot时会报错~~
 - - ~~护航没有准备~~
 > `[未处理] client/match/raid/ready | not-ready`, 或直接`参考friendlypmc`
-- **如果在将护航拉入小队中时过期清除删好友了，则应该一并让护航退队**
+- ~~如果在将护航拉入小队中时过期清除删好友了，则应该一并让护航退队~~
+> 参考`GClass2512`, 以及似乎需要自建ws record类，必需要aid, nickname
 - ~~Ws相关消息的构建转移到MCSNotifyXXXHelper中进行~~
 ---
 开始进入客户端为主的阶段

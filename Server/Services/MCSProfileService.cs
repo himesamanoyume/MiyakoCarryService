@@ -84,9 +84,13 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.youAreRemovedFromFriendList);
+                    var notification = mcsNotificationHelper.GenerateWsGroupMatchUserLeave(csFullProfile);
                     notificationSendHelper.SendMessage(bossSessionId, notification);
+
+                    var notification2 = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.youAreRemovedFromFriendList);
+                    notificationSendHelper.SendMessage(bossSessionId, notification2);
                     RemoveProfile(bossSessionId, csPlayerSessionId);
+
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),

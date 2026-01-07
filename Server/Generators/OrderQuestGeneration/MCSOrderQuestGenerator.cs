@@ -1,13 +1,10 @@
 
-using System.Linq;
-using MiyakoCarryService.Server.Helper;
-using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
@@ -18,17 +15,16 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
     public class MCSOrderQuestGenerator(
         ISptLogger<MCSOrderQuestGenerator> logger,
         RandomUtil randomUtil,
-        MCSOrderQuestRewardGenerator mcsOrderQuestRewardGenerator,
-        MCSOrderQuestHelper mcsOrderQuestHelper,
-        MCSConfigService mcsConfigService
+        MCSOrderQuestRewardGenerator mcsOrderQuestRewardGenerator
     )
     {
         public RepeatableQuest GenerateOrderQuest(
-            MongoId sessionId,
             PmcData pmcData,
             int players,
             int carryServiceLevel,
-            int duration
+            int duration,
+            CompletionConfig completionConfig,
+            RepeatableQuest questTemplate
         )
         {
             var traderInfos = pmcData.TradersInfo;
@@ -44,30 +40,22 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info("开始生成订单");
-            var order = Generate(sessionId, players, carryServiceLevel, duration, discount, MCSTraderService.MiyakoTraderId, mcsConfigService.GetOrderConfig());
+            var order = Generate(players, carryServiceLevel, duration, discount, MCSTraderService.MiyakoTraderId, completionConfig, questTemplate);
             return order;
         }
 
         private RepeatableQuest Generate(
-            MongoId sessionId,
             int players,
             int carryServiceLevel,
             int duration,
             float discount,
             MongoId traderId,
-            MCSOrderConfig orderConfig
+            CompletionConfig completionConfig,
+            RepeatableQuest questTemplate
         )
         {
-            var completionConfig = orderConfig.OrderQuests.First().QuestConfig.CompletionConfig.First();
-
-            var quest = mcsOrderQuestHelper.GenerateOrderTemplate(
-                RepeatableQuestType.Completion,
-                traderId,
-                sessionId
-            );
-
             var requestedItemCount = completionConfig.RequestedItemCount;
-            quest.Conditions.AvailableForFinish = [];
+            questTemplate.Conditions.AvailableForFinish = [];
 
             for (int i = 0; i < players; i++)
             {
@@ -109,11 +97,11 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                     IsEncoded = false,
                     ConditionType = "HandoverItem",
                 };
-                quest.Conditions.AvailableForFinish.Add(handoverItemCondition);
+                questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
-            quest.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
+            questTemplate.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
             logger.Info("订单任务信息构建结束");
-            return quest;
+            return questTemplate;
         }
     }
 }

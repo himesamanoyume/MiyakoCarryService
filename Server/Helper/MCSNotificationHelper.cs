@@ -1,4 +1,5 @@
 
+using MiyakoCarryService.Server.Models.Eft.Ws;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -139,6 +140,17 @@ namespace MiyakoCarryService.Server.Helper
                     IsReady = true,
                     LookingGroup = true
                 }
+            };
+        }
+
+        public WsGroupMatchUserLeave GenerateWsGroupMatchUserLeave(SptProfile csFullProfile)
+        {
+            return new WsGroupMatchUserLeave
+            {
+                EventType = NotificationEventType.groupMatchUserLeave,
+                EventIdentifier = new MongoId(),
+                Nickname = csFullProfile.ProfileInfo.Username,
+                Aid = csFullProfile.ProfileInfo.Aid.Value,
             };
         }
     }

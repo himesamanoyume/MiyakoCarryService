@@ -158,7 +158,7 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.groupMatchInviteDecline);
+                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.friendListRequestAccept);
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },
                 null,
