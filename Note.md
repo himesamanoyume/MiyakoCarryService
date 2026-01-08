@@ -7,6 +7,7 @@
 - （最好是通过商人来交，给的是临时任务）交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同
 > 可参考ABPS这种根据玩家等级提升装备和等级
 - AI增加套包收益最大化
+> 可以参考游戏对物品排序的功能是如何修改物品位置的
 - 最好支持BOSS、BOSS+小弟护航
 - 兼容SAIN、Fika
 - 最好是自带一部分QuestingBots和LootingBots的功能，可根据交互来选择帮助你。比如我想要什么物品，他就会去帮你找
@@ -169,7 +170,12 @@
 - ~~如果在将护航拉入小队中时过期清除删好友了，则应该一并让护航退队~~
 > 参考`GClass2512`, 以及似乎需要自建ws record类，必需要aid, nickname
 - ~~Ws相关消息的构建转移到MCSNotifyXXXHelper中进行~~
+- **服务端启动时，检查存档，若`orderinfo.json`中无对应的订单号，则应该将存档中的friends清除**
+- - 因为当存档中有好友，但是orderinfo.json内没有订单时，就无法正确移除好友
+- **BUG:若服务端不关闭，在玩家下线之时订单过期，护航删好友，此时玩家上线，应该会触发一次服务端的检测机制来将好友移除，此时会导致一次服务端致命报错**
+- **当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行**
 ---
 开始进入客户端为主的阶段
-- ~~移除Fika，~~**实现原生的开始战局**
-- 
+- ~~移除Fika，实现原生的开始战局~~
+- - ~~若使用`RaidSettingsLocalPatch`, 则会使原本服务端传来的准备就绪状态不被使用,导致匹配界面的准备按钮无法交互~~
+> 参考friendlyPMC `MatchmakerPlayerControllerClassAddMemberPatch`, `MainMenuControllerPatch`, 特别是 **`MainMenuControllerPatch.GroupPlayers`**

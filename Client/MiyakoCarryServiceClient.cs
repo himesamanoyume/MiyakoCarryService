@@ -8,6 +8,7 @@ using BepInEx.Bootstrap;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.RefreshQuests;
+using MiyakoCarryService.Client.Patches.Raid;
 
 namespace MiyakoCarryService.Client;
 
@@ -119,6 +120,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
             return;
         }
         new TraderScreensGroupShowPatch().Enable();
+        new RaidSettingsLocalPatch().Enable();
+        new MatchMakerAcceptScreenPatch().Enable();
 #if DEBUG
         
 #endif

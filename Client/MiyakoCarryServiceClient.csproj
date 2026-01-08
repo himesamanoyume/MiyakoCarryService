@@ -56,6 +56,8 @@
     <Reference Include="UnityEngine.UI" HintPath=".\Ref\UnityEngine.UI.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath=".\Ref\Newtonsoft.Json.dll" Private="false" />
+    <Reference Include="DrakiaXYZ-BigBrain" HintPath=".\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />
+    <Reference Include="DrakiaXYZ-Waypoints" HintPath=".\Ref\DrakiaXYZ-Waypoints.dll" Private="false" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
     <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)') And '$(Configuration)' == 'Debug'" />
