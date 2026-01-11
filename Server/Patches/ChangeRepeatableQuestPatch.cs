@@ -53,7 +53,6 @@ namespace MiyakoCarryService.Server.Patches
                 logger.Warning(message);
 
                 var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
-                var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();
                 var orderInfos = mcsOrderInfoController.GetAllOrderInfos();
                 foreach (var orderInfo in orderInfos)
                 {
@@ -61,10 +60,6 @@ namespace MiyakoCarryService.Server.Patches
                     {
                         mcsOrderInfoController.RemoveOrderInfo(orderInfo);
                         mcsOrderInfoController.SaveOrderInfo();
-                        foreach (var csPlayerSessionId in orderInfo.PlayerIds)
-                        {
-                            mcsProfileController.RemoveCarryServiceProfile(sessionID, csPlayerSessionId);
-                        }
                         break;
                     }
                 }

@@ -29,39 +29,43 @@ namespace MiyakoCarryService.Server.Patches
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var profile = profileHelper.GetFullProfile(sessionId);
 
-            foreach (var friendId in profile.FriendProfileIds)
-            {
-                var csFullProfile = mcsProfileController.GetCSFullProfile(sessionId, friendId);
-                if (csFullProfile is null)
-                {
-                    continue;
-                }
-                
-                var csPmcData = csFullProfile.CharacterData.PmcData;
-                var csSearchFriendResponse = new SearchFriendResponse
-                {
-                    Id = csPmcData.Id.Value,
-                    Aid = csPmcData.Aid,
-                    Info = new UserDialogDetails
-                    {
-                        Nickname = csPmcData.Info.Nickname,
-                        Side = csPmcData.Info.Side,
-                        Level = csPmcData.Info.Level,
-                        MemberCategory = csPmcData.Info.MemberCategory,
-                        SelectedMemberCategory = csPmcData.Info.SelectedMemberCategory,
-                    },
-                };
+            var csPlayerProfiles = mcsProfileController.GetCSFullProfileByBossId(sessionId);
 
-                if (csSearchFriendResponse is not null)
+            if (csPlayerProfiles is not null)
+            {
+                foreach (var csPlayerProfile in csPlayerProfiles)
                 {
-                    __result.Friends.Add(
-                        new UserDialogInfo
+                    if (csPlayerProfile is null)
+                    {
+                        continue;
+                    }
+
+                    var csPmcData = csPlayerProfile.CharacterData.PmcData;
+                    var csSearchFriendResponse = new SearchFriendResponse
+                    {
+                        Id = csPmcData.Id.Value,
+                        Aid = csPmcData.Aid,
+                        Info = new UserDialogDetails
                         {
-                            Id = csSearchFriendResponse.Id,
-                            Aid = csSearchFriendResponse.Aid,
-                            Info = csSearchFriendResponse.Info,
-                        }
-                    );
+                            Nickname = csPmcData.Info.Nickname,
+                            Side = csPmcData.Info.Side,
+                            Level = csPmcData.Info.Level,
+                            MemberCategory = csPmcData.Info.MemberCategory,
+                            SelectedMemberCategory = csPmcData.Info.SelectedMemberCategory,
+                        },
+                    };
+
+                    if (csSearchFriendResponse is not null)
+                    {
+                        __result.Friends.Add(
+                            new UserDialogInfo
+                            {
+                                Id = csSearchFriendResponse.Id,
+                                Aid = csSearchFriendResponse.Aid,
+                                Info = csSearchFriendResponse.Info,
+                            }
+                        );
+                    }
                 }
             }
 

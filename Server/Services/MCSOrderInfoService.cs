@@ -14,7 +14,6 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -25,7 +24,7 @@ namespace MiyakoCarryService.Server.Services
         MCSProfileService mcsProfileService,
         NotificationSendHelper notificationSendHelper,
         ISptLogger<MCSOrderInfoService> logger,
-        SaveServer saveServer,
+        // SaveServer saveServer,
         MCSNotificationHelper mcsNotificationHelper,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
@@ -153,8 +152,6 @@ namespace MiyakoCarryService.Server.Services
 
         private void CompleteOrderQuestSendFriendRequest(SptProfile csFullProfile, MongoId sessionId)
         {
-            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
-            completeQuestPlayerFullProfile?.FriendProfileIds?.Add(csFullProfile.ProfileInfo.ProfileId.Value);
             _ = new Timer(
                 _ =>
                 {

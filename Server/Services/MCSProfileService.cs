@@ -71,15 +71,8 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void RemoveCarryServiceProfile(MongoId sessionId, MongoId csPlayerSessionId)
-        {
-            var completeQuestPlayerFullProfile = saveServer.GetProfile(sessionId);
-            completeQuestPlayerFullProfile?.FriendProfileIds?.Remove(csPlayerSessionId);
-        }
-
         public void ProcessExpiredCarryServiceProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
-            RemoveCarryServiceProfile(bossSessionId, csPlayerSessionId);
             var csFullProfile = GetCSFullProfile(bossSessionId, csPlayerSessionId);
             _ = new Timer(
                 _ =>
@@ -184,9 +177,9 @@ namespace MiyakoCarryService.Server.Services
             return botBase;
         }
 
-        public SptProfile? GetCSFullProfile(MongoId sessionId, MongoId csPlayerSessionId)
+        public SptProfile? GetCSFullProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
-            return _profiles[sessionId][csPlayerSessionId];
+            return _profiles[bossSessionId][csPlayerSessionId];
         }
 
         public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, string csAccountId)
@@ -200,16 +193,31 @@ namespace MiyakoCarryService.Server.Services
             return GetCSFullProfileByAccountId(bossSessionId, aid);
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId sessionId, int aid)
+        public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, int csAid)
         {
-            if (_profiles.ContainsKey(sessionId))
+            if (_profiles.ContainsKey(bossSessionId))
             {
-                _profiles.TryGetValue(sessionId, out var bossCSPlayerFullProfiles);
+                _profiles.TryGetValue(bossSessionId, out var bossCSPlayerFullProfiles);
                 if (bossCSPlayerFullProfiles is null)
                 {
                     return null;
                 }
-                return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == aid).Value;
+                return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == csAid).Value;
+            }
+            return null;
+        }
+
+        public List<SptProfile>? GetCSFullProfileByBossId(MongoId bossSessionId)
+        {
+            if (_profiles.ContainsKey(bossSessionId))
+            {
+                _profiles.TryGetValue(bossSessionId, out var bossCSPlayerFullProfiles);
+                if (bossCSPlayerFullProfiles is null)
+                {
+                    return null;
+                }
+                List<SptProfile> csPlayerFullProfles = [.. bossCSPlayerFullProfiles.Values];
+                return csPlayerFullProfles;
             }
             return null;
         }

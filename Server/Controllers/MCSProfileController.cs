@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -16,11 +17,6 @@ namespace MiyakoCarryService.Server.Controllers
         public void ProcessExpiredCarryServiceProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
             mcsProfileService.ProcessExpiredCarryServiceProfile(bossSessionId, csPlayerSessionId);
-        }
-
-        public void RemoveCarryServiceProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
-        {
-            mcsProfileService.RemoveCarryServiceProfile(bossSessionId, csPlayerSessionId);
         }
 
         public BotBase GeneratePmcBotBaseProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)
@@ -50,6 +46,11 @@ namespace MiyakoCarryService.Server.Controllers
         public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, int csAid)
         {
             return mcsProfileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
+        }
+
+        public List<SptProfile>? GetCSFullProfileByBossId(MongoId bossSessionId)
+        {
+            return mcsProfileService.GetCSFullProfileByBossId(bossSessionId);
         }
     }
 }
