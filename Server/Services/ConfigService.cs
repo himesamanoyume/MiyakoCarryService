@@ -15,7 +15,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
-public sealed class MCSConfigService(
+public sealed class ConfigService(
     ConfigServer configServer,
     ModHelper modHelper,
     JsonUtil jsonUtil,
@@ -24,7 +24,7 @@ public sealed class MCSConfigService(
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
     public MCSConfig MCSConfig { get; private set; }
-    public MCSOrderConfig MCSOrderConfig { get; private set; }
+    public OrderConfig OrderConfig { get; private set; }
     private readonly ModMetadata MCSModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
@@ -73,7 +73,7 @@ public sealed class MCSConfigService(
         var orderConfigPath = Path.Combine(_configsFolderPath, "order.json");
         if (!fileUtil.FileExists(orderConfigPath))
         {
-            await fileUtil.WriteFileAsync(orderConfigPath, jsonUtil.Serialize(new MCSOrderConfig
+            await fileUtil.WriteFileAsync(orderConfigPath, jsonUtil.Serialize(new OrderConfig
             {
                 OrderQuests = [new RepeatableQuestConfig
                 {
@@ -163,7 +163,7 @@ public sealed class MCSConfigService(
                 }]
             }, true));
         }
-        MCSOrderConfig = await jsonUtil.DeserializeFromFileAsync<MCSOrderConfig>(orderConfigPath);
+        OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
     }
 
     public MCSConfig GetMiyakoCarryServiceConfig()
@@ -171,8 +171,8 @@ public sealed class MCSConfigService(
         return MCSConfig;
     }
 
-    public MCSOrderConfig GetOrderConfig()
+    public OrderConfig GetOrderConfig()
     {
-        return MCSOrderConfig;
+        return OrderConfig;
     }
 }

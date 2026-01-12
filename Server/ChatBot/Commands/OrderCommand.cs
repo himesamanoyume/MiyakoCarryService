@@ -11,10 +11,10 @@ using SPTarkov.Server.Core.Services;
 namespace MiyakoCarryService.Server.ChatBot.Commands
 {
     [Injectable]
-    public partial class MCSOrderCommand(
+    public partial class OrderCommand(
         MailSendService mailSendService,
-        MCSOrderQuestController mcsOrderQuestController
-    ) : IMCSCommand
+        OrderQuestController orderQuestController
+    ) : ICommand
     {
         [GeneratedRegex(@"^mcs\s+order\s+(\d+)\s+([1-5])\s+(\d+)$")]
         private static partial Regex OrderCommandRegex();
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     $"已成功下单！您的订单信息: \n护航{players}人, 护航{level}级, 时长{duration}小时\n请到商人界面接取订单并付款~"
                 );
 
-                mcsOrderQuestController.CreateOrderQuest(sessionId, players, level, duration);
+                orderQuestController.CreateOrderQuest(sessionId, players, level, duration);
             }
             else
             {

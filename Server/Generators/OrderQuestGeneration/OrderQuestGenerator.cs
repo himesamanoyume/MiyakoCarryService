@@ -1,5 +1,4 @@
 
-using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -12,10 +11,10 @@ using SPTarkov.Server.Core.Utils.Json;
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class MCSOrderQuestGenerator(
-        ISptLogger<MCSOrderQuestGenerator> logger,
+    public class OrderQuestGenerator(
+        ISptLogger<OrderQuestGenerator> logger,
         RandomUtil randomUtil,
-        MCSOrderQuestRewardGenerator mcsOrderQuestRewardGenerator
+        OrderQuestRewardGenerator orderQuestRewardGenerator
     )
     {
         public RepeatableQuest GenerateOrderQuest(
@@ -28,7 +27,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         )
         {
             var traderInfos = pmcData.TradersInfo;
-            var miyakoTraderInfo = traderInfos[MCSTraderService.MiyakoTraderId];
+            var miyakoTraderInfo = traderInfos[Services.TraderService.MiyakoTraderId];
             var loyaltyLevel = miyakoTraderInfo.LoyaltyLevel;
             var discount = loyaltyLevel switch
             {
@@ -40,7 +39,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info("开始生成订单");
-            var order = Generate(players, carryServiceLevel, duration, discount, MCSTraderService.MiyakoTraderId, completionConfig, questTemplate);
+            var order = Generate(players, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate);
             return order;
         }
 
@@ -99,7 +98,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 };
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
-            questTemplate.Rewards = mcsOrderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
+            questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
             logger.Info("订单任务信息构建结束");
             return questTemplate;
         }

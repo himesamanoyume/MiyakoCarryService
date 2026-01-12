@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Server
     {
         [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
         public sealed class MiyakoCarryServiceServerPreLoad(
-            MCSConfigService configService
+            ConfigService configService
         ) : IOnLoad
         {
             public async Task OnLoad()
@@ -30,21 +30,21 @@ namespace MiyakoCarryService.Server
 
         [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
         public sealed class MiyakoCarryServiceServerPostLoad(
-            MCSLocaleService mcsLocaleService, 
-            MCSOrderQuestService mcsOrderQuestService,
-            MCSTraderService mcsTraderService,
-            MCSProfileService mcsProfileService,
-            MCSOrderInfoService mcsOrderInfoService
+            LocaleService localeService, 
+            OrderQuestService orderQuestService,
+            TraderService traderService,
+            ProfileService profileService,
+            OrderInfoService orderInfoService
         ) : IOnLoad
         {
             public async Task OnLoad()
             {
-                await mcsLocaleService.OnPostLoadAsync();
-                await mcsTraderService.OnPostLoadAsync();
-                await mcsProfileService.OnPostLoadAsync();
-                await mcsOrderQuestService.OnPostLoadAsync();
-                await mcsOrderInfoService.OnPostLoadAsync();
-                mcsOrderInfoService.ProcessExpiredOrderInfos();
+                await localeService.OnPostLoadAsync();
+                await traderService.OnPostLoadAsync();
+                await profileService.OnPostLoadAsync();
+                await orderQuestService.OnPostLoadAsync();
+                await orderInfoService.OnPostLoadAsync();
+                orderInfoService.ProcessExpiredOrderInfos();
             }
         }
     }

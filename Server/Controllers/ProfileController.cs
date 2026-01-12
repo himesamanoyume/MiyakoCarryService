@@ -10,47 +10,47 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
-    public class MCSProfileController(
-        MCSProfileService mcsProfileService
+    public class ProfileController(
+        ProfileService profileService
     )
     {
         public void ProcessExpiredCarryServiceProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
-            mcsProfileService.ProcessExpiredCarryServiceProfile(bossSessionId, csPlayerSessionId);
+            profileService.ProcessExpiredCarryServiceProfile(bossSessionId, csPlayerSessionId);
         }
 
         public BotBase GeneratePmcBotBaseProfile(MongoId sessionId, PmcData pmcData, int carryServiceLevel)
         {
-            return mcsProfileService.GeneratePmcBotProfile(sessionId, pmcData, carryServiceLevel);
+            return profileService.GeneratePmcBotProfile(sessionId, pmcData, carryServiceLevel);
         }
 
         public void SaveCSPlayerProfile(MongoId sessionId, SptProfile csProfile)
         {
-            mcsProfileService.SaveCSPlayerProfile(sessionId, csProfile);
+            profileService.SaveCSPlayerProfile(sessionId, csProfile);
         }
 
         public SptProfile Generate(MongoId bossSessionId, MongoId csPlayerSessionId, PmcData completeQuestPmcData, int carryServiceLevel)
         {
-            return mcsProfileService.Generate(bossSessionId, csPlayerSessionId, completeQuestPmcData, carryServiceLevel);
+            return profileService.Generate(bossSessionId, csPlayerSessionId, completeQuestPmcData, carryServiceLevel);
         }
         public SptProfile? GetCSFullProfile(MongoId bossSessionId, MongoId csPlayerSessionId)
         {
-            return mcsProfileService.GetCSFullProfile(bossSessionId, csPlayerSessionId);
+            return profileService.GetCSFullProfile(bossSessionId, csPlayerSessionId);
         }
 
         public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, string csAid)
         {
-            return mcsProfileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
+            return profileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
         }
 
         public SptProfile? GetCSFullProfileByAccountId(MongoId bossSessionId, int csAid)
         {
-            return mcsProfileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
+            return profileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
         }
 
         public List<SptProfile>? GetCSFullProfileByBossId(MongoId bossSessionId)
         {
-            return mcsProfileService.GetCSFullProfileByBossId(bossSessionId);
+            return profileService.GetCSFullProfileByBossId(bossSessionId);
         }
     }
 }

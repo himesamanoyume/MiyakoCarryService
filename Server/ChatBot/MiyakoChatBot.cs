@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using System.Linq;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialogue;
@@ -13,14 +12,14 @@ using SPTarkov.Server.Core.Services;
 namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
-    public class MCSChatBot(
+    public class MiyakoChatBot(
         ISptLogger<AbstractDialogChatBot> logger, 
         MailSendService mailSendService, 
         ServerLocalisationService localisationService, 
-        IEnumerable<MCSChatBotCommands> chatCommands
+        IEnumerable<MiyakoChatBotCommands> chatCommands
     ) : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
     {
-        private static readonly MongoId _miyakoId = new(MCSTraderService.MiyakoTraderId);
+        private static readonly MongoId _miyakoId = new(TraderService.MiyakoTraderId);
 
         public override UserDialogInfo GetChatBot()
         {

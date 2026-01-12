@@ -11,13 +11,13 @@ namespace MiyakoCarryService.Server.Services
 {
 
     [Injectable(InjectionType.Singleton)]
-    public sealed class MCSLocaleService(
+    public sealed class LocaleService(
         FileUtil fileUtil,
-        MCSConfigService mcsConfigService,
+        ConfigService configService,
         DatabaseService databaseService
     )
     {
-        private readonly string _globalLocaleFolderDir = Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "locales", "global");
+        private readonly string _globalLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "global");
         Dictionary<string, Dictionary<string, string>> _globalLocales = [];
 
         public async Task OnPostLoadAsync()

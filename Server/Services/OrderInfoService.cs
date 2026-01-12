@@ -19,27 +19,27 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class MCSOrderInfoService(
-        MCSConfigService mcsConfigService,
-        MCSProfileService mcsProfileService,
+    public sealed class OrderInfoService(
+        ConfigService configService,
+        ProfileService profileService,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<MCSOrderInfoService> logger,
+        ISptLogger<OrderInfoService> logger,
         // SaveServer saveServer,
-        MCSNotificationHelper mcsNotificationHelper,
+        NotificationHelper notificationHelper,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
     )
     {
-        private readonly string _orderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "orders");
-        private readonly ConcurrentDictionary<MongoId, MCSOrderInfo> _orderInfos = new();
+        private readonly string _orderFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "orders");
+        private readonly ConcurrentDictionary<MongoId, OrderInfo> _orderInfos = new();
 
-        public void AddOrderInfo(MCSOrderInfo orderInfo)
+        public void AddOrderInfo(OrderInfo orderInfo)
         {
             _orderInfos.TryAdd(orderInfo.QuestId, orderInfo);
         }
 
-        public void AddOrderInfos(List<MCSOrderInfo> orderInfos)
+        public void AddOrderInfos(List<OrderInfo> orderInfos)
         {
             foreach (var orderInfo in orderInfos)
             {
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void RemoveOrderInfo(MCSOrderInfo orderInfo)
+        public void RemoveOrderInfo(OrderInfo orderInfo)
         {
             _orderInfos.TryRemove(orderInfo.QuestId, out _);
         }
@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 hashSetPlayers.Add(new MongoId());
             }
-            var orderInfo = new MCSOrderInfo()
+            var orderInfo = new OrderInfo()
             {
                 BossSessionId = sessionId,
                 QuestId = questId,
@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Server.Services
                 CarryServiceLevel = carryServiceLevel,
                 Duration = duration,
                 Status = EOrderInfoStatus.AvailableForStart,
-                ExpirationTime = timeUtil.GetTimeStamp() + mcsConfigService.GetOrderConfig().OrderQuests.First().ResetTime
+                ExpirationTime = timeUtil.GetTimeStamp() + configService.GetOrderConfig().OrderQuests.First().ResetTime
             };
             AddOrderInfo(orderInfo);
         }
@@ -76,26 +76,26 @@ namespace MiyakoCarryService.Server.Services
         {
             var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
             var orderInfos = _orderInfos.Values.ToList();
-            var jsonMCSOrderInfos = jsonUtil.Serialize(orderInfos, true);
-            fileUtil.WriteFile(orderPath, jsonMCSOrderInfos);
+            var jsonOrderInfos = jsonUtil.Serialize(orderInfos, true);
+            fileUtil.WriteFile(orderPath, jsonOrderInfos);
         }
 
-        public List<MCSOrderInfo> GetOrderInfos(MongoId sessionId)
+        public List<OrderInfo> GetOrderInfos(MongoId sessionId)
         {
-            List<MCSOrderInfo> targetMCSOrderInfos = new();
+            List<OrderInfo> targetOrderInfos = new();
 
-            foreach (var mcsOrderInfo in _orderInfos.Values.ToList())
+            foreach (var orderInfo in _orderInfos.Values.ToList())
             {
-                if (mcsOrderInfo.BossSessionId == sessionId)
+                if (orderInfo.BossSessionId == sessionId)
                 {
-                    targetMCSOrderInfos.Add(mcsOrderInfo);
+                    targetOrderInfos.Add(orderInfo);
                 }
             }
 
-            return targetMCSOrderInfos;
+            return targetOrderInfos;
         }
 
-        public List<MCSOrderInfo> GetAllOrderInfos()
+        public List<OrderInfo> GetAllOrderInfos()
         {
             return _orderInfos.Values.ToList();
         }
@@ -108,7 +108,7 @@ namespace MiyakoCarryService.Server.Services
                 await fileUtil.WriteFileAsync(orderPath, "[]");
             }
 
-            var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<MCSOrderInfo>>(orderPath);
+            var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<OrderInfo>>(orderPath);
             foreach (var orderInfo in orderInfos)
             {
                 _orderInfos[orderInfo.QuestId] = orderInfo;
@@ -128,14 +128,14 @@ namespace MiyakoCarryService.Server.Services
                     foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                     {
                         logger.Info($"准备清除 {csPlayerSessionId} 的Profile");
-                        mcsProfileService.ProcessExpiredCarryServiceProfile(orderInfo.BossSessionId, csPlayerSessionId);
+                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.BossSessionId, csPlayerSessionId);
                     }
                 }
             }
             SaveOrderInfo();
         }
 
-        public void SetOrderInfoStarted(MCSOrderInfo orderInfo, PmcData completeQuestPmcData)
+        public void SetOrderInfoStarted(OrderInfo orderInfo, PmcData completeQuestPmcData)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
             {
@@ -144,7 +144,7 @@ namespace MiyakoCarryService.Server.Services
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
                 foreach (var csPlayerSessionId in orderInfo.PlayerIds)
                 {
-                    var csFullProfile = mcsProfileService.Generate(orderInfo.BossSessionId, csPlayerSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    var csFullProfile = profileService.Generate(orderInfo.BossSessionId, csPlayerSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
                     CompleteOrderQuestSendFriendRequest(csFullProfile, orderInfo.BossSessionId);
                 }
             }
@@ -155,7 +155,7 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.friendListRequestAccept);
+                    var notification = notificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.friendListRequestAccept);
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },
                 null,

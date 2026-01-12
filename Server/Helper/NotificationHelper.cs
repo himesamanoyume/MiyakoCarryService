@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Models.Eft.Ws;
 namespace MiyakoCarryService.Server.Helper
 {
     [Injectable]
-    public class MCSNotificationHelper(
+    public class NotificationHelper(
 
     )
     {

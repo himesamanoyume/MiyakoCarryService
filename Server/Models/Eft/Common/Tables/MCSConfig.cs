@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         public required MCSServerConfig ServerConfig { get; set; }
     }
 
-    public record MCSOrderConfig
+    public record OrderConfig
     {
         [JsonPropertyName("orderQuests")]
         public required List<RepeatableQuestConfig> OrderQuests { get; set; }

@@ -8,13 +8,13 @@ using SPTarkov.Server.Core.Models.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class MCSConfigCallbacks(
-        MCSConfigController mcsConfigController
+    public sealed class ConfigCallbacks(
+        ConfigController configController
     )
     {
         public ValueTask<string> HandleConfig(string url, IRequestData info, MongoId sessionId)
         {
-            return new ValueTask<string>(mcsConfigController.GetConfig());
+            return new ValueTask<string>(configController.GetConfig());
         }
     }
 }

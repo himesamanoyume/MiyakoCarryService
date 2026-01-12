@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
-    public record MCSOrderInfo
+    public record OrderInfo
     {
         [JsonPropertyName("BossSessionId")]
         public required MongoId BossSessionId { get; set; }

@@ -6,33 +6,33 @@ using SPTarkov.Server.Core.Models.Common;
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
-    public class MCSRaidController(
-        MCSRaidService mcsRaidService
+    public class RaidController(
+        RaidService raidService
     )
     {
         public void AddGroupMember(MongoId bossSessionId, int csAid)
         {
-            mcsRaidService.AddGroupMember(bossSessionId, csAid);
+            raidService.AddGroupMember(bossSessionId, csAid);
         }
 
         public void RemoveGroupMember(MongoId bossSessionId, int csAid)
         {
-            mcsRaidService.RemoveGroupMember(bossSessionId, csAid);
+            raidService.RemoveGroupMember(bossSessionId, csAid);
         }
 
         public void ClearGroupMember(MongoId bossSessionId)
         {
-            mcsRaidService.ClearGroupMember(bossSessionId);
+            raidService.ClearGroupMember(bossSessionId);
         }
 
         public bool CheckCSPlayerExist(MongoId bossSessionId, int csAid)
         {
-            return mcsRaidService.CheckCSPlayerExist(bossSessionId, csAid);
+            return raidService.CheckCSPlayerExist(bossSessionId, csAid);
         }
 
         public void AcceptGroupInvite(MongoId bossSessionId, int csAid)
         {
-            mcsRaidService.AcceptGroupInvite(bossSessionId, csAid);
+            raidService.AcceptGroupInvite(bossSessionId, csAid);
         }
     }
 }

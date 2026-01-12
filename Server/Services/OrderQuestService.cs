@@ -18,20 +18,20 @@ using SPTarkov.Server.Core.Utils.Cloners;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class MCSOrderQuestService(
+    public sealed class OrderQuestService(
         ModHelper modHelper,
-        MCSConfigService mcsConfigService,
-        ISptLogger<MCSOrderQuestService> logger,
-        MCSOrderQuestGenerator mcsOrderQuestGenerator,
+        ConfigService configService,
+        ISptLogger<OrderQuestService> logger,
+        OrderQuestGenerator orderQuestGenerator,
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,
-        MCSOrderInfoService mcsOrderInfoService,
+        OrderInfoService orderInfoService,
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
         ProfileHelper profileHelper
     )
     {
-        private readonly string _traderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "templates");
+        private readonly string _traderFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "templates");
         private RepeatableQuest _orderTemplate;
         public async Task OnPostLoadAsync()
         {
@@ -53,9 +53,9 @@ namespace MiyakoCarryService.Server.Services
             var fullProfile = profileHelper.GetFullProfile(bossSessionId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info("开始创建任务");
-            var orderQuest = mcsOrderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, mcsConfigService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion,
-                MCSTraderService.MiyakoTraderId,
+                TraderService.MiyakoTraderId,
                 bossSessionId
             ));
             logger.Info("任务插入等待创建队列");
@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(bossSessionId, new([orderQuest]));
             }
-            mcsOrderInfoService.CreateOrderInfo(bossSessionId, players, carryServiceLevel, duration, orderQuest.Id);
+            orderInfoService.CreateOrderInfo(bossSessionId, players, carryServiceLevel, duration, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)

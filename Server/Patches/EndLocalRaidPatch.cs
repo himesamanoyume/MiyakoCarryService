@@ -24,8 +24,8 @@ namespace MiyakoCarryService.Server.Patches
             {
                 return;
             }
-            var mcsRaidController = ServiceLocator.ServiceProvider.GetService<MCSRaidController>();
-            mcsRaidController.ClearGroupMember(sessionID);
+            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
+            raidController.ClearGroupMember(sessionID);
         }
     }
 }

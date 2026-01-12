@@ -7,21 +7,21 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
-    public class MCSConfigController(
-        MCSConfigService mcsConfigService,
+    public class ConfigController(
+        ConfigService configService,
         JsonUtil jsonUtil
     )
     {
         public string GetConfig()
         {
-            var config = mcsConfigService.GetMiyakoCarryServiceConfig();
+            var config = configService.GetMiyakoCarryServiceConfig();
             var cfgStr = jsonUtil.Serialize(config);
             return cfgStr;
         }
 
-        public MCSOrderConfig GetOrderConfig()
+        public OrderConfig GetOrderConfig()
         {
-            return mcsConfigService.GetOrderConfig();
+            return configService.GetOrderConfig();
         }
     }
 }

@@ -8,18 +8,18 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
-    public class MCSOrderQuestController(
-        MCSOrderQuestService mcsOrderQuestService
+    public class OrderQuestController(
+        OrderQuestService orderQuestService
     )
     {
         public void CreateOrderQuest(MongoId bossSessionId, int players, int carryServiceLevel, int duration)
         {
-            mcsOrderQuestService.CreateOrderQuest(bossSessionId, players, carryServiceLevel, duration);
+            orderQuestService.CreateOrderQuest(bossSessionId, players, carryServiceLevel, duration);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
         {
-            mcsOrderQuestService.ProcessExpiredQuests(generatedRepeatables, bossPmcData);
+            orderQuestService.ProcessExpiredQuests(generatedRepeatables, bossPmcData);
         }
     }
 }

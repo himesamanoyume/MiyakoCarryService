@@ -7,7 +7,7 @@ using SPTarkov.Server.Core.Models.Enums;
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class MCSOrderQuestRewardGenerator()
+    public class OrderQuestRewardGenerator()
     {
         public Dictionary<string, List<Reward>> GenerateReward(
             int players,

@@ -18,8 +18,8 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPrefix]
         public static void Prefix(string url, EmptyRequestData _, MongoId sessionID)
         {
-            var mcsRaidController = ServiceLocator.ServiceProvider.GetService<MCSRaidController>();
-            mcsRaidController.ClearGroupMember(sessionID);
+            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
+            raidController.ClearGroupMember(sessionID);
         }
     }
 }

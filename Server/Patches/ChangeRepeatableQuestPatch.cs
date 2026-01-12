@@ -52,14 +52,14 @@ namespace MiyakoCarryService.Server.Patches
                 var message = serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
                 logger.Warning(message);
 
-                var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
-                var orderInfos = mcsOrderInfoController.GetAllOrderInfos();
+                var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
+                var orderInfos = orderInfoController.GetAllOrderInfos();
                 foreach (var orderInfo in orderInfos)
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
-                        mcsOrderInfoController.RemoveOrderInfo(orderInfo);
-                        mcsOrderInfoController.SaveOrderInfo();
+                        orderInfoController.RemoveOrderInfo(orderInfo);
+                        orderInfoController.SaveOrderInfo();
                         break;
                     }
                 }

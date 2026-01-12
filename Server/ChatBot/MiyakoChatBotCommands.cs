@@ -10,13 +10,13 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
-    public class MCSChatBotCommands(IEnumerable<IMCSCommand> miyakoCommands) : IChatCommand
+    public class MiyakoChatBotCommands(IEnumerable<ICommand> miyakoCommands) : IChatCommand
     {
-        protected readonly IDictionary<string, IMCSCommand> _miyakoCommands = miyakoCommands.ToDictionary(c => c.Command);
+        protected readonly IDictionary<string, ICommand> _miyakoCommands = miyakoCommands.ToDictionary(c => c.Command);
 
         public string GetCommandHelp(string command)
         {
-            return _miyakoCommands.TryGetValue(command, out IMCSCommand value) ? value.CommandHelp : string.Empty;
+            return _miyakoCommands.TryGetValue(command, out ICommand value) ? value.CommandHelp : string.Empty;
         }
 
         public string CommandPrefix
@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Server.ChatBot
         }
     }
 
-    public interface IMCSCommand
+    public interface ICommand
     {
         public string Command { get; }
         public string CommandHelp { get; }

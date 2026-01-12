@@ -23,15 +23,15 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPostfix]
         public static void Postfix(RepeatableQuestController __instance, MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
         {
-            var mcsConfigController = ServiceLocator.ServiceProvider.GetService<MCSConfigController>();
-            var mcsOrderQuestController = ServiceLocator.ServiceProvider.GetService<MCSOrderQuestController>();
-            var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
+            var configController = ServiceLocator.ServiceProvider.GetService<ConfigController>();
+            var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
+            var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var timeUtil = ServiceLocator.ServiceProvider.GetService<TimeUtil>();
             var currentTime = timeUtil.GetTimeStamp();
             var fullProfile = profileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
-            var orderConfig = mcsConfigController.GetOrderConfig().OrderQuests.First();
+            var orderConfig = configController.GetOrderConfig().OrderQuests.First();
             var repeatableQuestControllerTraverse = Traverse.Create(__instance);
             var generatedOrder = repeatableQuestControllerTraverse.Method("GetRepeatableQuestSubTypeFromProfile", [orderConfig, pmcData]).GetValue<PmcDataRepeatableQuest>();
 
@@ -58,8 +58,8 @@ namespace MiyakoCarryService.Server.Patches
             }
 
             Console.WriteLine("将尝试清除过期订单、任务");
-            mcsOrderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            mcsOrderInfoController.ProcessExpiredOrderInfos();
+            orderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
+            orderInfoController.ProcessExpiredOrderInfos();
 
             if (currentTime < generatedOrder.EndTime - 1)
             {

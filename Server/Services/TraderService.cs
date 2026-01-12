@@ -16,17 +16,17 @@ using SPTarkov.Server.Core.Utils.Cloners;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class MCSTraderService(
+    public sealed class TraderService(
         ModHelper modHelper,
         ICloner cloner,
         ImageRouter imageRouter,
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
-        MCSConfigService mcsConfigService
+        ConfigService configService
     )
     {
-        private readonly string _traderFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
+        private readonly string _traderFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
 
         public async Task OnPostLoadAsync()

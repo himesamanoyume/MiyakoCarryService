@@ -7,7 +7,6 @@ using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers;
@@ -20,13 +19,13 @@ namespace MiyakoCarryService.Server.Patches
 {
     public sealed class GetOtherProfilePatch : AbstractPatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileController), nameof(ProfileController.GetOtherProfile));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Controllers.ProfileController), nameof(SPTarkov.Server.Core.Controllers.ProfileController.GetOtherProfile));
 
         [PatchPrefix]
         public static bool Prefix(MongoId sessionId, GetOtherProfileRequest request, ref GetOtherProfileResponse __result)
         {
-            var mcsProfileController = ServiceLocator.ServiceProvider.GetService<MCSProfileController>();
-            var csFullProfileToView = mcsProfileController.GetCSFullProfileByAccountId(sessionId, request.AccountId);
+            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
+            var csFullProfileToView = profileController.GetCSFullProfileByAccountId(sessionId, request.AccountId);
             if (csFullProfileToView is null)
             {
                 Console.WriteLine("执行老代码");

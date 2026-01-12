@@ -8,19 +8,19 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Routers.Static
 {
     [Injectable]
-    public sealed class MCSMatchStaticRouter(
+    public sealed class MatchStaticRouter(
         JsonUtil jsonUtil,
-        MCSMatchCallbacks mcsMatchCallbacks
+        MatchCallbacks matchCallbacks
     ) : StaticRouter(
         jsonUtil,
         [
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/ready",
-                async (url, info, sessionID, output) => await mcsMatchCallbacks.RaidReady(url, info, sessionID)
+                async (url, info, sessionID, output) => await matchCallbacks.RaidReady(url, info, sessionID)
             ),
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/not-ready",
-                async (url, info, sessionID, output) => await mcsMatchCallbacks.NotRaidReady(url, info, sessionID)
+                async (url, info, sessionID, output) => await matchCallbacks.NotRaidReady(url, info, sessionID)
             )
         ]
     )

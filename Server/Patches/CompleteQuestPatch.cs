@@ -1,5 +1,4 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,14 +19,14 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPostfix]
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
         {
-            var mcsOrderInfoController = ServiceLocator.ServiceProvider.GetService<MCSOrderInfoController>();
+            var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
             var completedQuestId = request.QuestId;
-            var orderInfos = mcsOrderInfoController.GetOrderInfos(sessionID);
+            var orderInfos = orderInfoController.GetOrderInfos(sessionID);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    mcsOrderInfoController.SetOrderInfoStarted(orderInfo, pmcData);
+                    orderInfoController.SetOrderInfoStarted(orderInfo, pmcData);
                 }
             }
         }

@@ -28,13 +28,13 @@ using SPTarkov.Server.Core.Utils.Cloners;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class MCSProfileService(
+    public sealed class ProfileService(
         SaveServer saveServer,
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<MCSProfileService> logger,
-        MCSConfigService mcsConfigService,
+        ISptLogger<ProfileService> logger,
+        ConfigService configService,
         RandomUtil randomUtil,
         DatabaseService databaseService,
         HashUtil hashUtil,
@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         BotHelper botHelper,
         ServerLocalisationService serverLocalisationService,
-        MCSNotificationHelper mcsNotificationHelper,
+        NotificationHelper notificationHelper,
         BotInventoryContainerService botInventoryContainerService,
         BotLootCacheService botLootCacheService,
         BotGenerator botGenerator,
@@ -50,8 +50,8 @@ namespace MiyakoCarryService.Server.Services
         ProfileHelper profileHelper
     )
     {
-        private readonly string _profileFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "profiles");
-        private readonly string _afdianFolderDir = System.IO.Path.Join(mcsConfigService.GetModPath(), "Assets", "database", "bots", "types");
+        private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
+        private readonly string _afdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
 
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private List<string> _afdianNames = [];
@@ -77,10 +77,10 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = mcsNotificationHelper.GenerateWsGroupMatchUserLeave(csFullProfile);
+                    var notification = notificationHelper.GenerateWsGroupMatchUserLeave(csFullProfile);
                     notificationSendHelper.SendMessage(bossSessionId, notification);
 
-                    var notification2 = mcsNotificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.youAreRemovedFromFriendList);
+                    var notification2 = notificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.youAreRemovedFromFriendList);
                     notificationSendHelper.SendMessage(bossSessionId, notification2);
                     RemoveProfile(bossSessionId, csPlayerSessionId);
 

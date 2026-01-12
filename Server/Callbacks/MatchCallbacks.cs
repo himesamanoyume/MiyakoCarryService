@@ -8,7 +8,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class MCSMatchCallbacks(
+    public sealed class MatchCallbacks(
         HttpResponseUtil httpResponseUtil
     )
     {
