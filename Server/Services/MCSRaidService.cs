@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,9 +22,9 @@ namespace MiyakoCarryService.Server.Services
 
         }
 
-        public bool CheckCSPlayerExist(MongoId bossSession, int csAid)
+        public bool CheckCSPlayerExist(MongoId bossSessionId, int csAid)
         {
-            if (_bossGroup.TryGetValue(bossSession, out var csAids))
+            if (_bossGroup.TryGetValue(bossSessionId, out var csAids))
             {
                 if (csAids.Contains(csAid))
                 {
@@ -35,14 +34,19 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
-        public void AddGroupMember(MongoId bossSession, int csAid)
+        public void AddGroupMember(MongoId bossSessionId, int csAid)
         {
-            _bossGroup.GetOrAdd(bossSession, _ => new List<int>()).Add(csAid);
+            _bossGroup.GetOrAdd(bossSessionId, _ => new List<int>()).Add(csAid);
         }
 
-        public void RemoveGroupMember(MongoId bossSession, int csAid)
+        public void RemoveGroupMember(MongoId bossSessionId, int csAid)
         {
-            _bossGroup.GetOrAdd(bossSession, _ => new List<int>()).Remove(csAid);
+            _bossGroup.GetOrAdd(bossSessionId, _ => new List<int>()).Remove(csAid);
+        }
+
+        public void ClearGroupMember(MongoId bossSessionId)
+        {
+            _bossGroup.GetOrAdd(bossSessionId, _ => new List<int>()).Clear();
         }
 
         public void AcceptGroupInvite(MongoId bossSessionId, int csAid)
@@ -66,6 +70,8 @@ namespace MiyakoCarryService.Server.Services
 
                 var notification2 = mcsNotificationHelper.GenerateWsGroupMatchRaidReady(csFullProfile);
                 notificationSendHelper.SendMessage(bossSessionId, notification2);
+
+                AddGroupMember(bossSessionId, csAid);
             }
         }
     }

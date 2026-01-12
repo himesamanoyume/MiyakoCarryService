@@ -1,8 +1,6 @@
 
-using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 
 namespace MiyakoCarryService.Server.Controllers
@@ -20,6 +18,11 @@ namespace MiyakoCarryService.Server.Controllers
         public void RemoveGroupMember(MongoId bossSessionId, int csAid)
         {
             mcsRaidService.RemoveGroupMember(bossSessionId, csAid);
+        }
+
+        public void ClearGroupMember(MongoId bossSessionId)
+        {
+            mcsRaidService.ClearGroupMember(bossSessionId);
         }
 
         public bool CheckCSPlayerExist(MongoId bossSessionId, int csAid)

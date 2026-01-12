@@ -18,6 +18,8 @@
 
 ## 低优先级
 
+- 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
+
 - 与护航玩家聊天时Users没有内容
 > 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
 - - 错误情况
@@ -173,9 +175,15 @@
 - ~~服务端启动时，检查存档，若`orderinfo.json`中无对应的订单号，则应该将存档中的friends清除~~
 - - 因为当存档中有好友，但是orderinfo.json内没有订单时，就无法正确移除好友
 - ~~BUG:若服务端不关闭，在玩家下线之时订单过期，护航删好友，此时玩家上线，应该会触发一次服务端的检测机制来将好友移除，此时会导致一次服务端致命报错~~
-- **当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行**
 ---
 开始进入客户端为主的阶段
 - ~~移除Fika，实现原生的开始战局~~
 - - ~~若使用`RaidSettingsLocalPatch`, 则会使原本服务端传来的准备就绪状态不被使用,导致匹配界面的准备按钮无法交互~~
 > 参考friendlyPMC `MatchmakerPlayerControllerClassAddMemberPatch`, `MainMenuControllerPatch`, 特别是 **`MainMenuControllerPatch.GroupPlayers`**
+- **实现在战局中生成拉入小队的护航**
+> 参考friendlyPMC如何实现BOT的生成
+- - ~~应该Patch玩家的邀请入队请求，若对象为护航则应该在`mcsRaidService`中被`AddGroupMember`~~, 本地战局开始时，包括使用Fika联机时，则根据战局中的所有加入玩家调取其sessionId的护航小队成员来依次返回护航的BotBase数据进行生成
+> 参考战局开始回调`locationLifecycleService.StartLocalRaid`
+- - ~~应该Patch战局结束、重新进入游戏时的老板sessionId并在`mcsRaidService`中`ClearGroupMember`~~
+- - ~~并且踢出队伍的对象若为护航也要进行在`mcsRaidService`中的`RemoveGroupMember`~~
+> 参考战局结束回调`locationLifecycleService.EndLocalRaid`，但要注意先判断是否为转移，如果是则不进行Clear
