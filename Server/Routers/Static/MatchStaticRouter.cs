@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/ready",
-                async (url, info, sessionID, output) => await matchCallbacks.RaidReady(url, info, sessionID)
+                async (url, info, sessionId, output) => await matchCallbacks.RaidReady(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/not-ready",
-                async (url, info, sessionID, output) => await matchCallbacks.NotRaidReady(url, info, sessionID)
+                async (url, info, sessionId, output) => await matchCallbacks.NotRaidReady(url, info, sessionId)
             )
         ]
     )

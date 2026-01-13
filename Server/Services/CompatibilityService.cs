@@ -3,7 +3,6 @@
 using System;
 using System.Threading.Tasks;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Models.Utils;
 
 
 namespace MiyakoCarryService.Server.Services
@@ -13,21 +12,20 @@ namespace MiyakoCarryService.Server.Services
         // ISptLogger<CompatibilityService> logger
     )
     {
-        private bool _hasFikaServer = false;
+        public bool HasFikaServer { get; private set; } = false;
+        public Type FikaMatchService { get; private set; } = null;
+        public Type FikaMatch { get; private set; } = null;
 
         public async Task OnPostLoadAsync()
         {
             CheckFikaServerPlugins();
         }
 
-        public bool HasFikaServer()
-        {
-            return _hasFikaServer;
-        }
-
         private void CheckFikaServerPlugins()
         {
-            _hasFikaServer = Type.GetType("FikaServer.Services.MatchService, FikaServer") is not null;
+            FikaMatchService = Type.GetType("FikaServer.Services.MatchService, FikaServer");
+            HasFikaServer = FikaMatchService is not null;
+            FikaMatch = Type.GetType("FikaServer.Models.Fika.FikaMatch, FikaServer");
         }
     }
 }

@@ -3,7 +3,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using EFT;
-using MiyakoCarryService.Client.Models;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 
@@ -48,9 +47,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Profile[]> GetCarryServicePlayer(SpawnCarryServiceBotRequest data)
+        public static async Task<Profile[]> GetCarryServicePlayer()
         {
-            var response = await PostJsonAsync<SpawnCarryServiceBotRequest, CompleteProfileDescriptorClass[]>("/mcs/client/game/bot/generate", data);
+            var response = await GetJsonAsync<CompleteProfileDescriptorClass[]>("/mcs/client/game/bot/generate");
             return response.Select((descriptor) => new Profile(descriptor)).ToArray();
         }
     }
