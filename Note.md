@@ -185,7 +185,7 @@
 - - ~~应该Patch玩家的邀请入队请求，若对象为护航则应该在`mcsRaidService`中被`AddGroupMember`~~, 本地战局开始时，包括使用Fika联机时，则根据战局中的所有加入玩家调取其sessionId的护航小队成员来依次返回护航的BotBase数据进行生成
 - ~~实现检查Fika是否存在~~
 - - **postPatch`BotsEventsController.SpawnAction`函数进行异步的从服务端`/mcs/client/game/bot/generate`获取护航bot数据**
-- - - 若使用Fika，则需要服务端获取Fika的`MatchServices`的`Matches`，并根据其找到指定的Match，再获得其中所有Player的MongoId，以此获取这些老板的全部护航
+- - - **若使用Fika，则需要服务端获取Fika的`MatchServices`的`Matches`，并根据其找到指定的Match，再获得其中所有Player的MongoId，以此获取这些老板的全部护航**
 > 参考战局开始回调`locationLifecycleService.StartLocalRaid`
 - - ~~应该Patch战局结束、重新进入游戏时的老板sessionId并在`mcsRaidService`中`ClearGroupMember`~~
 - - ~~并且踢出队伍的对象若为护航也要进行在`mcsRaidService`中的`RemoveGroupMember`~~
