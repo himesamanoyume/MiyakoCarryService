@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <returns></returns>
         public async ValueTask<string> SpawnCarryServicePlayer(string url, EmptyRequestData _, MongoId sessionId)
         {
-            return httpResponseUtil.GetBody(await botController.SpawnCarryServicePlayer(sessionId));
+            return httpResponseUtil.NoBody(await botController.SpawnCarryServicePlayer(sessionId));
         }
     }
 }

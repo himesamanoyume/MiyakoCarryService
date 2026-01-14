@@ -60,11 +60,29 @@ namespace MiyakoCarryService.Client
         void Update()
         {
             CheckVaildGameWorld();
+            // if (Tools.CheckGameWorld())
+            // {
+            //     if (MyPlayer == null)
+            //     {
+            //         var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+            //         if (mainPlayer == null)
+            //         {
+            //             return;
+            //         }
+
+            //         MyPlayer = mainPlayer;
+            //     }
+            // }
         }
 
         public void Init()
         {
 
+        }
+
+        private void Reset()
+        {
+            MyPlayer = null;
         }
     }
 }

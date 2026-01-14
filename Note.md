@@ -192,3 +192,12 @@
 > 参考战局结束回调`locationLifecycleService.EndLocalRaid`，但要注意先判断是否为转移，如果是则不进行Clear
 - ~~去除MCS类的前缀~~
 - **对生成Bot情况进行Debug**
+```log
+NullReferenceException: Object reference not set to an instance of an object
+  at SPT.Custom.Patches.FixPmcSpawnParamsNullErrorPatch.PatchPrefix (EFT.BotOwner bot) [0x00026] in <2d42023d386a4ed59638bf8800038299>:0 
+  at EFT.BotSpawner.GetGroupAndSetEnemies (EFT.BotOwner bot, BotZone zone) [0x00020] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at BotCreatorClass.method_3 (BotZone zone, EFT.BotOwner bot, System.Action`1[T] callback, System.Func`3[T1,T2,TResult] groupAction) [0x00072] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at BotCreatorClass+Class563.method_0 (EFT.BotOwner bot) [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at BotCreatorClass.method_2 (EFT.Profile profile, GClass682 bornInfo, System.Action`1[T] callback, System.Boolean isLocalGame, System.Threading.CancellationToken cancellationToken) [0x00127] in <ad47400a25db462cbf0a531df654c3c3>:0 
+Rethrow as AggregateException: One or more errors occurred. (Object reference not set to an instance of an object)
+```

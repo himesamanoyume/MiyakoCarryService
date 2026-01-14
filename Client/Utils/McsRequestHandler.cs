@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Utils
 
         private static string PutJson<T>(string path, T t)
         {
-            return Task.Run(() => PutJsonAsync<T>(path, t)).GetAwaiter().GetResult();
+            return Task.Run(() => PutJsonAsync(path, t)).GetAwaiter().GetResult();
         }
 
         private static async Task<string> PutJsonAsync<T>(string path, T t)
