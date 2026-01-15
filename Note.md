@@ -195,6 +195,9 @@
 - - ~~SpawnProfileData为null~~
 - - ~~推测原因是ActivateBot没有使用到任何botCreationDataClass的_profileData~~
 - ~~BUG:`BotOwner.StartCorePoint`为null~~
-- - 将`closestGroupPoint.Id`改为`closestGroupPoint.CorePointInGame.Id`即可，**但是好像会导致不跟我生成在一起**
-- **生成的AI不与我同一位置**
-- **AI仍对我抱有敌意**
+- ~~生成的AI不与我同一位置~~
+- ~~AI仍对我抱有敌意~~
+- - **BUG: 虽然其中一个能做到友好，但一个以上时不会，且会一直盯着我**
+- - 剔除队友无效，说明当前其仍然不是真正意义上的队友，只是其对我态度为友好
+- - 对其开了一枪之后就会恢复敌意，可能AddEnemyPatch不是那么好用
+- **以实现AI与我同队，无敌意，会跟随我，能正常攻击其他AI 作为第一阶段目标**

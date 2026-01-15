@@ -124,6 +124,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new RaidSettingsLocalPatch().Enable();
         new MatchMakerAcceptScreenPatch().Enable();
         new TryLoadBotsProfilesOnStartPatch().Enable();
+        new AddEnemyPatch().Enable();
 #if DEBUG
         
 #endif

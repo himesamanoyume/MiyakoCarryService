@@ -107,12 +107,20 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     stopWatch.Start();
 
                     botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
+
+                    botOwner.Memory.DeleteInfoAboutEnemy(myPlayer);
+
+                    botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
+                    botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
+
+                    botOwner.GetPlayer.Profile.Info.GroupId = myPlayer.Profile.Info.GroupId;
+                    botOwner.GetPlayer.Profile.Info.TeamId = myPlayer.Profile.Info.TeamId;
                 });
 
                 botSpawner.InSpawnProcess += 1;
 
                 var cancellationToken = new CancellationToken();
-                await botCreator.ActivateBot(profile, new GClass682(myPlayerPos, closestGroupPoint.CorePointInGame.Id, true), closestZone, true, groupAction, onActivate, cancellationToken);
+                await botCreator.ActivateBot(profile, new GClass682(myPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
             });
         }
     }
