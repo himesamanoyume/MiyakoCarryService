@@ -38,6 +38,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 _ => WildSpawnType.assault
             };
 
+            myPlayer.Profile.Info.GroupId = myPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
+
             var botSpawnParams = new BotSpawnParams();
             botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
 
@@ -61,6 +63,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 // if (myPlayer.Side != EPlayerSide.Savage)
                 // {
+
+                if (myPlayer.BotsGroup != null)
+                {
+                    return myPlayer.BotsGroup;
+                }
+
                 botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = myPlayer.Side == EPlayerSide.Savage;
                 botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = myPlayer.Side != EPlayerSide.Savage;
 
@@ -91,6 +99,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 botsGroup.AddAlly(myPlayer);
 
                 botSpawner.Groups.AddNoKey(botsGroup, botZone);
+
+                MiyakoCarryServicePlugin.Logger.LogError("Allies: " + string.Join(",", botsGroup.Allies));
+                MiyakoCarryServicePlugin.Logger.LogError("Enemies: " + string.Join(",", botsGroup.Enemies));
+                MiyakoCarryServicePlugin.Logger.LogError($"GroupId: {botOwner.GroupId}");
+
+                myPlayer.BotsGroup = botsGroup;
+                myPlayer.BotsGroup.Lock();
 
                 botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
                 botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
