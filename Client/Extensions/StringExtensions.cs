@@ -3,19 +3,22 @@ namespace MiyakoCarryService.Client.Extensions
 {
     internal static class StringExtensions
     {
-        public static string MiyakoCarryServiceLocalized(this string id)
+        extension(string id)
         {
-            if (id.Localized() == id)
+            public string McsLocalized()
             {
-                if (!string.IsNullOrEmpty(id))
+                if (id.Localized() == id)
                 {
-                    return LocaleManagerClass.LocaleManagerClass.method_7(id, MiyakoCarryServicePlugin.DefaultLang);
+                    if (!string.IsNullOrEmpty(id))
+                    {
+                        return LocaleManagerClass.LocaleManagerClass.method_7(id, MiyakoCarryServicePlugin.DefaultLang);
+                    }
+                    return id;
                 }
-                return id;
-            }
-            else
-            {
-                return id.Localized();
+                else
+                {
+                    return id.Localized();
+                }
             }
         }
     }
