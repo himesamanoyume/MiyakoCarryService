@@ -42,12 +42,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var gameLoop = GameLoop.Instance;
             var botMgr = gameLoop.GetMgr<BotMgr>(EMgrType.BOT);
 
-            var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId));
+            var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId)).Where(bossPlayer => bossPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
             var botsController = botGame.BotsController;
             var botSpawner = botsController.BotSpawner;
             var botCreator = botSpawner.BotCreator;
+
+            MiyakoCarryServicePlugin.Logger.LogInfo("bossPlayer Count: "+ bossPlayers.Count());
 
             foreach (var bossPlayer in bossPlayers)
             {
@@ -65,8 +67,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
 
                 var botProfileDataClass = new BotProfileDataClass(bossPlayer.Side, wildSpawnType, BotDifficulty.hard, 2, botSpawnParams);
-
-
 
                 var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
 
