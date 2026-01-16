@@ -8,7 +8,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.GameWorldEvent
 {
     /// <summary>
-    /// 战局结束时事件
+    /// 处理GameWorld结束时事件
     /// </summary>
     internal sealed class RaidEndedPatch : ModulePatch
     {

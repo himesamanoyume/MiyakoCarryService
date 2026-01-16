@@ -7,9 +7,20 @@ using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
+    /// <summary>
+    /// 避免护航Bot将护航老板当做敌人
+    /// </summary>
     internal sealed class AddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
+
+        private static BotMgr _botMgr 
+        { 
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<BotMgr>(EMgrType.BOT);
+            }
+        }
 
         [PatchPrefix]
         public static bool Prefix(IPlayer person, EBotEnemyCause cause)
@@ -19,8 +30,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (GameLoop.Instance.GetMgr<BotMgr>(EMgrType.BOT).IsMcsBossPlayer(person.ProfileId))
+            if (_botMgr.IsMcsBossPlayer(person.ProfileId))
             {
+                MiyakoCarryServicePlugin.Logger.LogInfo("正在执行AddEnemy");
                 return false;
             }
 
