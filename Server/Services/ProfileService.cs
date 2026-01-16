@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Server.Services
                 var csFullProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
                 if (csFullProfile is not null)
                 {
-                    _profiles.GetOrAdd(sessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(csPlayerSessionId, csFullProfile);
+                    _profiles.GetOrAdd(sessionId, _ => new()).GetOrAdd(csPlayerSessionId, csFullProfile);
                 }
             }
         }

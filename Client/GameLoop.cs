@@ -4,13 +4,17 @@ using System;
 using SPT.Reflection.Utils;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.GameWorldEvent;
+using System.Collections.Generic;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Mgrs;
 
 namespace MiyakoCarryService.Client
 {
     internal sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
     {
         public Player MyPlayer { get; private set; } = null;
-        public PlayerOwner MyPlayerOwner { get; private set; } = null;
+        public Dictionary<EMgrType, IMgr> Mgrs = new();
 
         public ISession Session
         {
@@ -77,12 +81,17 @@ namespace MiyakoCarryService.Client
 
         public void Init()
         {
-
+            BotMgr.Enable();
         }
 
         private void Reset()
         {
             MyPlayer = null;
+        }
+
+        public T GetMgr<T>(EMgrType type) where T : IMgr
+        {
+            return (T)Mgrs[type];
         }
     }
 }

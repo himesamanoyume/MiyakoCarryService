@@ -15,10 +15,6 @@ namespace MiyakoCarryService.Client;
 
 [BepInPlugin(MiyakoCarryServiceGUID, MiyakoCarryServicePluginName, BepInExClientVersion)]
 [BepInProcess("EscapeFromTarkov.exe")]
-[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)]
-[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)]
-[BepInDependency("com.SPT.core", BepInDependency.DependencyFlags.HardDependency)]
-[BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
     public const string BepInExClientVersion = "0.0.5.0";
@@ -54,11 +50,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
         EnableAllPatches();
-        if (!IsFikaHeadless)
-        {
-            GameLoop.Instance.Init();
-            return;
-        }
+        GameLoop.Instance.Init();
     }
 
     public static string DefaultLang = "en";

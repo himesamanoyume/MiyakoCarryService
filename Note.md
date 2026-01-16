@@ -198,7 +198,15 @@
 - ~~生成的AI不与我同一位置~~
 - ~~AI仍对我抱有敌意~~
 - - ~~BUG: 虽然其中一个能做到友好，但一个以上时不会，且会一直盯着我~~
-- - 剔除队友无效，说明当前其仍然不是真正意义上的队友，只是其对我态度为友好
-- - 对其开了一枪之后就会恢复敌意，可能AddEnemyPatch不是那么好用
-- **~~以实现AI与我同队，无敌意~~，会跟随我，能正常攻击其他AI 作为第一阶段目标**
-- - 主机和护航的BotsGroup为null, 需要填补
+- - ~~剔除队友无效，说明当前其仍然不是真正意义上的队友，只是其对我态度为友好~~
+- - 对其开了一枪之后就会恢复敌意，可能AddEnemyPatch不是那么好用(**再试一次**)
+- ~~以实现AI与我同队，无敌意~~，**会跟随我，能正常攻击其他AI 作为第一阶段目标**
+- - ~~主机和护航的BotsGroup为null, 需要填补~~
+- - ~~研究SAIN是如何实现屏蔽原生的CombatLayer的?并使用SAINComponents与BotOwner并行执行的~~
+> `StandartBotBrain.Activate()`中有完整的Brain与WildSpawnType的对应关系
+- - - 通过`BrainManager`对指定的Brain列表添加自定义的Layer
+- - ~~弄清优先级数字是如何影响决策的~~
+- **OnGameStarted需要改到GameWorld被创建之后**
+- **服务端generate返回的内容需要额外附带此Bot的老板信息**
+
+- **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
