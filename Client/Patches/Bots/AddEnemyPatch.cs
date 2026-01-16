@@ -1,27 +1,26 @@
 using System.Reflection;
-using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using JetBrains.Annotations;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     internal sealed class AddEnemyPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMemoryClass), nameof(BotMemoryClass.AddEnemy));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 
         [PatchPrefix]
-        public static bool Prefix(BotMemoryClass __instance, [NotNull] IPlayer enemy, BotSettingsClass groupInfo, bool onActivation)
+        public static bool Prefix(IPlayer person, EBotEnemyCause cause)
         {
-            if (enemy == null)
+            if (person == null)
             {
                 return true;
             }
 
-            if (enemy.ProfileId == Singleton<GameWorld>.Instance.MainPlayer.ProfileId)
+            if (GameLoop.Instance.GetMgr<BotMgr>(EMgrType.BOT).IsMcsBossPlayer(person.ProfileId))
             {
-                __instance.DeleteInfoAboutEnemy(enemy);
                 return false;
             }
 

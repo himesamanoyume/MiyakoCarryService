@@ -39,6 +39,11 @@ namespace MiyakoCarryService.Client.Mgrs
             return false;
         }
 
+        public bool IsMcsBossPlayer(MongoID bossSessionId)
+        {
+            return _mcsSquadDict.ContainsKey(bossSessionId);
+        }
+
         protected override void Reset()
         {
             _mcsSquadDict.Clear();

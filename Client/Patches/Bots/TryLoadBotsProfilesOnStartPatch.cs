@@ -125,7 +125,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     var enemies = botSpawner.method_5(botOwner);
 
-                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, false);
+                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, true);
 
                     foreach (var _bossPlayer in bossPlayers)
                     {
@@ -134,6 +134,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     }
 
                     botSpawner.Groups.AddNoKey(botsGroup, botZone);
+
+                    MiyakoCarryServicePlugin.Logger.LogInfo("Allies: " + string.Join(",", botsGroup.Allies.Select(player => player.Profile.Nickname)));
+                    MiyakoCarryServicePlugin.Logger.LogInfo("Enemies: " + string.Join(",", botsGroup.Enemies.Keys.Select(player => player.Profile.Nickname)));
+                    MiyakoCarryServicePlugin.Logger.LogInfo("Members: " + string.Join(",", botsGroup.Members.Select(player => player.Profile.Nickname)));
 
                     bossPlayer.BotsGroup = botsGroup;
                     bossPlayer.BotsGroup.Lock();
