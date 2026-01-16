@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void Start()
         {
             _gameloop = GameLoop.Instance;
-            _gameloop.OnGameWorldStarted += Reset;
+            _gameloop.OnGameWorldStart += Reset;
             _gameloop.OnGameWorldDestory += Reset;
         }
 
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         protected virtual void OnMgrDestroy()
         {
-            _gameloop.OnGameWorldStarted -= Reset;
+            _gameloop.OnGameWorldStart -= Reset;
             _gameloop.OnGameWorldDestory -= Reset;
         }
 

@@ -18,7 +18,6 @@ namespace MiyakoCarryService.Client.Patches.GameWorldEvent
         [PatchPrefix]
         public static void Prefix(LocalRaidSettings settings, RaidEndDescriptorClass results, FlatItemsDataClass[] lostInsuredItems, Dictionary<string, FlatItemsDataClass[]> transferItems)
         {
-            GameLoop.Instance.IsGameStarted = false;
             GameLoop.Instance.IsVaildGameWorld = false;
             OnGameWorldDestory?.Invoke();
         }

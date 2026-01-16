@@ -1,5 +1,6 @@
 
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EFT;
@@ -47,10 +48,13 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Profile[]> GetCarryServicePlayer()
+        public static async Task<Dictionary<MongoID, Profile[]>> GetCarryServicePlayer()
         {
-            var response = await GetJsonAsync<CompleteProfileDescriptorClass[]>("/mcs/client/game/bot/generate");
-            return response.Select((descriptor) => new Profile(descriptor)).ToArray();
+            var response = await GetJsonAsync<Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate");
+            return response.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Select(desc => new Profile(desc)).ToArray()
+            );
         }
     }
 }

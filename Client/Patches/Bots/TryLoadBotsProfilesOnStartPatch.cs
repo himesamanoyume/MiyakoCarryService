@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -24,119 +26,149 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static async void Postfix(Task __result)
         {
             await __result;
-            var csProfiles = await McsRequestHandler.GetCarryServicePlayer();
-            foreach (var csProfile in csProfiles)
+
+            var csProfilesDict = await McsRequestHandler.GetCarryServicePlayer();
+
+            foreach (var csProfileItem in csProfilesDict)
             {
-                await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, csProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
+                foreach (var csProfile in csProfileItem.Value)
+                {
+                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, csProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
+                }
             }
-            var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-            var myPlayerPos = myPlayer.Position;
-            var wildSpawnType = myPlayer.Side switch
-            {
-                EPlayerSide.Bear => WildSpawnType.pmcBEAR,
-                EPlayerSide.Usec => WildSpawnType.pmcUSEC,
-                _ => WildSpawnType.assault
-            };
 
-            myPlayer.Profile.Info.GroupId = myPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
+            var gameWorld = Singleton<GameWorld>.Instance;
 
-            var botSpawnParams = new BotSpawnParams();
-            botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
+            var gameLoop = GameLoop.Instance;
+            var botMgr = gameLoop.GetMgr<BotMgr>(EMgrType.BOT);
 
-            var botProfileDataClass = new BotProfileDataClass(myPlayer.Side, wildSpawnType, BotDifficulty.hard, 2, botSpawnParams);
+            var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId));
 
             var botGame = Singleton<IBotGame>.Instance;
             var botsController = botGame.BotsController;
             var botSpawner = botsController.BotSpawner;
             var botCreator = botSpawner.BotCreator;
 
-            var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
-
-            botCreationDataClass.AddProfiles(csProfiles.ToList());
-
-            var closestGroupPoint = botsController.CoversData.GetClosest(myPlayerPos);
-            botCreationDataClass.AddPosition(myPlayerPos, closestGroupPoint.CorePointInGame.Id);
-
-            var closestZone = botSpawner.GetClosestZone(myPlayerPos, out _);
-
-            var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
+            foreach (var bossPlayer in bossPlayers)
             {
-                // if (myPlayer.Side != EPlayerSide.Savage)
-                // {
-
-                if (myPlayer.BotsGroup != null)
+                var bossPlayerPos = bossPlayer.Position;
+                var wildSpawnType = bossPlayer.Side switch
                 {
-                    return myPlayer.BotsGroup;
-                }
+                    EPlayerSide.Bear => WildSpawnType.pmcBEAR,
+                    EPlayerSide.Usec => WildSpawnType.pmcUSEC,
+                    _ => WildSpawnType.assault
+                };
 
-                botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = myPlayer.Side == EPlayerSide.Savage;
-                botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = myPlayer.Side != EPlayerSide.Savage;
+                bossPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
 
-                var oldReasons = botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
+                var botSpawnParams = new BotSpawnParams();
+                botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
 
-                botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
-                botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
+                var botProfileDataClass = new BotProfileDataClass(bossPlayer.Side, wildSpawnType, BotDifficulty.hard, 2, botSpawnParams);
 
-                botOwner.Settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
 
-                botOwner.Settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
-                botOwner.Settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
-                var enemyTypes = botOwner.Settings.GetEnemyBotTypes();
-                if (!enemyTypes.Contains(WildSpawnType.pmcBEAR))
+
+                var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
+
+                botCreationDataClass.AddProfiles(csProfilesDict.SelectMany(item => item.Value).ToList());
+
+                var closestGroupPoint = botsController.CoversData.GetClosest(bossPlayerPos);
+                botCreationDataClass.AddPosition(bossPlayerPos, closestGroupPoint.CorePointInGame.Id);
+
+                var closestZone = botSpawner.GetClosestZone(bossPlayerPos, out _);
+
+                var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
                 {
-                    enemyTypes.Add(WildSpawnType.pmcBEAR);
-                }
-                if (!enemyTypes.Contains(WildSpawnType.pmcUSEC))
-                {
-                    enemyTypes.Add(WildSpawnType.pmcUSEC);
-                }
+                    // if (myPlayer.Side != EPlayerSide.Savage)
+                    // {
 
-                var enemies = botSpawner.method_5(botOwner);
+                    botMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
 
-                var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, false);
+                    if (bossPlayer.BotsGroup != null)
+                    {
+                        // var otherCsPlayers = csProfilesDict[bossPlayer.ProfileId].Select(otherCsPlayerProfile => gameWorld.GetEverExistedPlayerByID(otherCsPlayerProfile.ProfileId));
 
-                botsGroup.RemoveEnemy(myPlayer);
-                botsGroup.AddAlly(myPlayer);
+                        // foreach (var otherCsPlayer in otherCsPlayers)
+                        // {
+                        //     if (otherCsPlayer != null)
+                        //     {
+                        //         bossPlayer.BotsGroup.RemoveEnemy(otherCsPlayer);
+                        //         bossPlayer.BotsGroup.AddAlly(otherCsPlayer);
+                        //     }
+                        // }
+                        return bossPlayer.BotsGroup;
+                    }
 
-                botSpawner.Groups.AddNoKey(botsGroup, botZone);
+                    botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = bossPlayer.Side == EPlayerSide.Savage;
+                    botOwner.Settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = bossPlayer.Side != EPlayerSide.Savage;
 
-                MiyakoCarryServicePlugin.Logger.LogError("Allies: " + string.Join(",", botsGroup.Allies));
-                MiyakoCarryServicePlugin.Logger.LogError("Enemies: " + string.Join(",", botsGroup.Enemies));
-                MiyakoCarryServicePlugin.Logger.LogError($"GroupId: {botOwner.GroupId}");
+                    var oldReasons = botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
 
-                myPlayer.BotsGroup = botsGroup;
-                myPlayer.BotsGroup.Lock();
+                    botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
+                    botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
 
-                botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-                botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
+                    botOwner.Settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
 
-                return botsGroup;
-                // }
-            });
+                    botOwner.Settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
+                    botOwner.Settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
 
-            botCreationDataClass.Profiles.ForEach(async profile =>
-            {
-                var onActivate = new Action<BotOwner>((BotOwner botOwner) =>
-                {
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
+                    var enemyTypes = botOwner.Settings.GetEnemyBotTypes();
+                    
+                    if (!enemyTypes.Contains(WildSpawnType.pmcBEAR))
+                    {
+                        enemyTypes.Add(WildSpawnType.pmcBEAR);
+                    }
+                    if (!enemyTypes.Contains(WildSpawnType.pmcUSEC))
+                    {
+                        enemyTypes.Add(WildSpawnType.pmcUSEC);
+                    }
 
-                    botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
+                    var enemies = botSpawner.method_5(botOwner);
 
-                    botOwner.Memory.DeleteInfoAboutEnemy(myPlayer);
+                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, false);
 
-                    botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
-                    botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
+                    foreach (var _bossPlayer in bossPlayers)
+                    {
+                        botsGroup.RemoveEnemy(_bossPlayer);
+                        botsGroup.AddAlly(_bossPlayer);
+                    }
 
-                    botOwner.GetPlayer.Profile.Info.GroupId = myPlayer.Profile.Info.GroupId;
-                    botOwner.GetPlayer.Profile.Info.TeamId = myPlayer.Profile.Info.TeamId;
+                    botSpawner.Groups.AddNoKey(botsGroup, botZone);
+
+                    bossPlayer.BotsGroup = botsGroup;
+                    bossPlayer.BotsGroup.Lock();
+
+                    botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
+                    botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
+
+                    return botsGroup;
+                    // }
                 });
 
-                botSpawner.InSpawnProcess += 1;
+                botCreationDataClass.Profiles.ForEach(async profile =>
+                {
+                    var onActivate = new Action<BotOwner>((BotOwner botOwner) =>
+                    {
+                        var stopWatch = new Stopwatch();
+                        stopWatch.Start();
 
-                var cancellationToken = new CancellationToken();
-                await botCreator.ActivateBot(profile, new GClass682(myPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
-            });
+                        botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
+
+                        botOwner.Memory.DeleteInfoAboutEnemy(bossPlayer);
+
+                        botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
+                        botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
+
+                        botOwner.GetPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId;
+                        botOwner.GetPlayer.Profile.Info.TeamId = bossPlayer.Profile.Info.TeamId;
+                    });
+
+                    botSpawner.InSpawnProcess += 1;
+
+                    var cancellationToken = new CancellationToken();
+                    await botCreator.ActivateBot(profile, new GClass682(bossPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
+                });
+            }
         }
     }
 }

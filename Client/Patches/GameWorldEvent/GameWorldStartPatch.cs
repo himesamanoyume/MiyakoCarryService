@@ -9,17 +9,16 @@ namespace MiyakoCarryService.Client.Patches.GameWorldEvent
     /// <summary>
     /// 处理战局开始时的事件
     /// </summary>
-    internal sealed class GameWorldOnGameStartedPatch : ModulePatch
+    internal sealed class GameWorldStartPatch : ModulePatch
     {
-        internal static Action OnGameWorldStarted;
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
+        internal static Action OnGameWorldStart;
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.Start));
 
         [PatchPostfix]
         public static void Postfix()
         {
-            GameLoop.Instance.IsGameStarted = true;
             GameLoop.Instance.CheckVaildGameWorld();
-            OnGameWorldStarted?.Invoke();
+            OnGameWorldStart?.Invoke();
         }
     }
 }

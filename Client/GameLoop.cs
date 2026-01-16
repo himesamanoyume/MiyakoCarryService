@@ -28,23 +28,20 @@ namespace MiyakoCarryService.Client
 
         public bool CheckVaildGameWorld()
         {
-            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld && IsGameStarted;
+            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
             return IsVaildGameWorld;
         }
 
-        public bool IsGameStarted = false;
-
-
-        public Action OnGameWorldStarted
+        public Action OnGameWorldStart
         {
             get
             {
-                return GameWorldOnGameStartedPatch.OnGameWorldStarted;
+                return GameWorldStartPatch.OnGameWorldStart;
             }
 
             set
             {
-                GameWorldOnGameStartedPatch.OnGameWorldStarted = value;
+                GameWorldStartPatch.OnGameWorldStart = value;
             }
         }
 

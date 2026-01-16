@@ -16,9 +16,9 @@ namespace MiyakoCarryService.Server.Controllers
         CompatibilityService compatibilityService
     )
     {
-        public async Task<IEnumerable<PmcData>> SpawnCarryServicePlayer(MongoId sessionId)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnCarryServicePlayer(MongoId sessionId)
         {
-            var sessionIds = new HashSet<MongoId> { sessionId };
+            var bossSessionIds = new HashSet<MongoId> { sessionId };
 
             if (compatibilityService.HasFikaServer)
             {
@@ -38,21 +38,31 @@ namespace MiyakoCarryService.Server.Controllers
                         {
                             if (playerSessionId != sessionId)
                             {
-                                sessionIds.Add(playerSessionId);
+                                bossSessionIds.Add(playerSessionId);
                             }
                         }
                     }
                 }
             }
 
-            var tasks = sessionIds.Select(id => Task.Run(() =>
+            var tasks = bossSessionIds.Select(async bossSessionId =>
             {
-                var profiles = profileController.GetCSFullProfileByBossId(id);
-                return profiles.Select(p => p.CharacterData.PmcData).ToList();
-            })).ToList();
+                var pmcDatas = await Task.Run(() =>
+                {
+                    var profiles = profileController.GetCSFullProfileByBossId(bossSessionId);
+                    return profiles.Select(p => p.CharacterData.PmcData).ToList();
+                });
+
+                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(bossSessionId, pmcDatas);
+            });
 
             var results = await Task.WhenAll(tasks);
-            var csPmcDatas = results.SelectMany(list => list);
+
+            var csPmcDatas = results.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value
+            );
+            
             return csPmcDatas;
         }
     }

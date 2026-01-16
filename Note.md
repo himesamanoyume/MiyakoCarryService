@@ -206,7 +206,6 @@
 > `StandartBotBrain.Activate()`中有完整的Brain与WildSpawnType的对应关系
 - - - 通过`BrainManager`对指定的Brain列表添加自定义的Layer
 - - ~~弄清优先级数字是如何影响决策的~~
-- **OnGameStarted需要改到GameWorld被创建之后**
-- **服务端generate返回的内容需要额外附带此Bot的老板信息**
-
+- ~~OnGameStarted需要改到GameWorld被创建之后~~
+- ~~服务端generate返回的内容需要额外附带此Bot的老板信息~~
 - **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
