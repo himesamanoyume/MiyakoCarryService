@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 
 namespace MiyakoCarryService.Client.Extensions
 {
     internal static class BotOwnerExtensions
     {
-        private static readonly ConditionalWeakTable<BotOwner, IEnumerable<BotBehavior>> _botBehaviorDict = new();
+        private static readonly ConditionalWeakTable<BotOwner, McsPlayerData> _botDatas = new();
         private static SquadMgr SquadMgr
         {
             get
@@ -20,18 +21,25 @@ namespace MiyakoCarryService.Client.Extensions
         
         extension(BotOwner botOwner)
         {
-            public IEnumerable<BotBehavior> GetBotBehaviors()
+            public McsPlayerData GetMcsData()
             {
-                return _botBehaviorDict.TryGetValue(botOwner, out var botBehaviors) ? botBehaviors : botOwner.InitBotBehaviors();
+                return _botDatas.GetValue(botOwner, InitMcsData);
             }
 
-            public IEnumerable<BotBehavior> InitBotBehaviors()
+            private McsPlayerData InitMcsData()
             {
                 var mcsBossPlayer = SquadMgr.GetMcsBossPlayer(botOwner.ProfileId);
-                return [new BotCarryServiceChecker(botOwner, mcsBossPlayer)];
+                return new McsPlayerData(botOwner, mcsBossPlayer);
             }
 
-            public bool IsMcsPlayer => SquadMgr.IsMcsPlayer(botOwner.ProfileId);
+            public List<BotBehavior> GetBotBehaviors()
+            {
+                return botOwner.GetMcsData().BotBehaviors;
+            }
+
+            public bool IsMcsPlayer => botOwner.GetMcsData().MyBossPlayer != null;
+
+            public Player McsBossPlayer => botOwner.GetMcsData().MyBossPlayer;
         }
     }
 }

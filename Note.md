@@ -213,5 +213,8 @@
 - ~~BUG: BotsGroup还是会将老板加入至Enemy中，只是会被清除记忆~~
 - **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
 - **具体实现FollowMcsBossLayer**
+- - 当前`IsActive`判断相当宽松，只要是护航 就一定会一直停留在这个Layer，需要优化
+- - - ~~如何高性能地判断玩家是否是护航玩家呢?friendlyPmc是通过替换Brain，但我是不打算替换Brain的，这就有可能不太适用`BotOwnerExtensions`获取McsData~~
+- - **复用NotCheater`BaseData`及其子类，并用`McsPlayerData`继承`PlayerData`**
 - 如果是队友的手雷，AI不会进行躲避
 - 如果AddEnemyPatch执行非常频繁，则应该想办法避免
