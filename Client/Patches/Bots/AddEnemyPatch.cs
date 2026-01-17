@@ -1,7 +1,6 @@
 using System.Reflection;
 using EFT;
 using HarmonyLib;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
@@ -18,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>(EMgrType.SQUAD);
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
             }
         }
 

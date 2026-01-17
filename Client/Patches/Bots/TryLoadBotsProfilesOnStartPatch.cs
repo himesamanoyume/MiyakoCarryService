@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var gameWorld = Singleton<GameWorld>.Instance;
 
             var gameLoop = GameLoop.Instance;
-            var squadMgr = gameLoop.GetMgr<SquadMgr>(EMgrType.SQUAD);
+            var squadMgr = gameLoop.GetMgr<SquadMgr>();
 
             var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId)).Where(bossPlayer => bossPlayer != null);
 

@@ -5,7 +5,6 @@ using SPT.Reflection.Utils;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.GameWorldEvent;
 using System.Collections.Generic;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;
 
@@ -14,7 +13,7 @@ namespace MiyakoCarryService.Client
     internal sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
     {
         public Player MyPlayer { get; private set; } = null;
-        public Dictionary<EMgrType, IMgr> Mgrs = new();
+        public Dictionary<Type, IMgr> Mgrs = new();
 
         public ISession Session
         {
@@ -61,19 +60,6 @@ namespace MiyakoCarryService.Client
         void Update()
         {
             CheckVaildGameWorld();
-            // if (Tools.CheckGameWorld())
-            // {
-            //     if (MyPlayer == null)
-            //     {
-            //         var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-            //         if (mainPlayer == null)
-            //         {
-            //             return;
-            //         }
-
-            //         MyPlayer = mainPlayer;
-            //     }
-            // }
         }
 
         public void Init()
@@ -87,9 +73,9 @@ namespace MiyakoCarryService.Client
             MyPlayer = null;
         }
 
-        public T GetMgr<T>(EMgrType type) where T : IMgr
+        public T GetMgr<T>() where T : IMgr
         {
-            return (T)Mgrs[type];
+            return (T)Mgrs[typeof(T)];
         }
     }
 }

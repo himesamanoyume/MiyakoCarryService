@@ -1,5 +1,6 @@
 using System;
 using EFT;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -12,7 +13,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            throw new NotImplementedException();
+            if (BotOwner.IsMcsPlayer)
+            {
+                return true;
+            }
+            return false;
         }
 
         public override bool IsCurrentActionEnding()

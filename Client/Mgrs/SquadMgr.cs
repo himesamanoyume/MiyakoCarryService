@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
-using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -15,7 +14,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            _gameloop.Mgrs.Add(EMgrType.SQUAD, this);
         }
 
         public void AddMcsSquadMember(MongoID bossSessionId, MongoID csPlayerSessionId, BotOwner botOwner)

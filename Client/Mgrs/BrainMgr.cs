@@ -1,7 +1,6 @@
 
 using DrakiaXYZ.BigBrain.Brains;
 using MiyakoCarryService.Client.Bots.Brain.Layers;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -11,7 +10,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            _gameloop.Mgrs.Add(EMgrType.BRAIN, this);
             BrainManager.AddCustomLayer(typeof(FollowMcsBossLayer), Classification.AllBrainNames, 100);
         }
 

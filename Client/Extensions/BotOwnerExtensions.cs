@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
 
 namespace MiyakoCarryService.Client.Extensions
@@ -15,7 +14,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>(EMgrType.SQUAD);
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
             }
         }
         
@@ -31,6 +30,8 @@ namespace MiyakoCarryService.Client.Extensions
                 var mcsBossPlayer = SquadMgr.GetMcsBossPlayer(botOwner.ProfileId);
                 return [new BotCarryServiceChecker(botOwner, mcsBossPlayer)];
             }
+
+            public bool IsMcsPlayer => SquadMgr.IsMcsPlayer(botOwner.ProfileId);
         }
     }
 }
