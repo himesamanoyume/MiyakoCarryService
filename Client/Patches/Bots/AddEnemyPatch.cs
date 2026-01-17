@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 
-        private static BotMgr _botMgr 
+        private static SquadMgr SquadMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<BotMgr>(EMgrType.BOT);
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>(EMgrType.SQUAD);
             }
         }
 
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (_botMgr.IsMcsBossPlayer(person.ProfileId))
+            if (SquadMgr.IsMcsBossPlayer(person.ProfileId))
             {
                 MiyakoCarryServicePlugin.Logger.LogInfo("正在执行AddEnemy");
                 return false;

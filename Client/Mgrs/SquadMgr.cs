@@ -2,19 +2,20 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class BotMgr : BaseMgr<BotMgr>
+    internal sealed class SquadMgr : BaseMgr<SquadMgr>
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, BotOwner>> _mcsSquadDict = new();
 
         public sealed override void Start()
         {
             base.Start();
-            _gameloop.Mgrs.Add(EMgrType.BOT, this);
+            _gameloop.Mgrs.Add(EMgrType.SQUAD, this);
         }
 
         public void AddMcsSquadMember(MongoID bossSessionId, MongoID csPlayerSessionId, BotOwner botOwner)
@@ -42,6 +43,18 @@ namespace MiyakoCarryService.Client.Mgrs
         public bool IsMcsBossPlayer(MongoID bossSessionId)
         {
             return _mcsSquadDict.ContainsKey(bossSessionId);
+        }
+
+        public Player GetMcsBossPlayer(MongoID csPlayerSessionId)
+        {
+            foreach (var kvp in _mcsSquadDict)
+            {
+                if (kvp.Value.ContainsKey(csPlayerSessionId))
+                {
+                    return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(kvp.Key);
+                }
+            }
+            return null;
         }
 
         protected override void Reset()

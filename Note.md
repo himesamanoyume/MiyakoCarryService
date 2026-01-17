@@ -211,6 +211,7 @@
 - ~~BUG: 护航的BotsGroup似乎与我不同，之前是否相同?~~
 - ~~BUG: 目前所有人都不会攻击我~~
 - ~~BUG: BotsGroup还是会将老板加入至Enemy中，只是会被清除记忆~~
-- **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
+- **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
+- **具体实现FollowMcsBossLayer**
 - 如果是队友的手雷，AI不会进行躲避
 - 如果AddEnemyPatch执行非常频繁，则应该想办法避免

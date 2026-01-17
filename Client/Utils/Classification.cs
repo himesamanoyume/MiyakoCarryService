@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using EFT;
+using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -72,5 +74,7 @@ namespace MiyakoCarryService.Client.Utils
             CommonId.Euros,
             CommonId.GPCoins
         };
+
+        public static List<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
     }
 }

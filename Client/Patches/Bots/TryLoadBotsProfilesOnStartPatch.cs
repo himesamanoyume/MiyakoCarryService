@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var gameWorld = Singleton<GameWorld>.Instance;
 
             var gameLoop = GameLoop.Instance;
-            var botMgr = gameLoop.GetMgr<BotMgr>(EMgrType.BOT);
+            var squadMgr = gameLoop.GetMgr<SquadMgr>(EMgrType.SQUAD);
 
             var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId)).Where(bossPlayer => bossPlayer != null);
 
@@ -82,7 +82,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     // if (myPlayer.Side != EPlayerSide.Savage)
                     // {
 
-                    botMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
+                    squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
 
                     if (bossPlayer.BotsGroup != null)
                     {

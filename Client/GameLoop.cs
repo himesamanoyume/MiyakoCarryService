@@ -78,7 +78,8 @@ namespace MiyakoCarryService.Client
 
         public void Init()
         {
-            BotMgr.Enable();
+            SquadMgr.Enable();
+            BrainMgr.Enable();
         }
 
         private void Reset()
