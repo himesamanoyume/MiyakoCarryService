@@ -18,10 +18,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             if (__instance.GroupId == "mcs" || __instance.GroupId == "fika")
             {
-                foreach(var botBehavior in __instance.GetBotBehaviors())
-                {
-                    botBehavior.ManualUpdate();
-                }
+                // foreach(var botBehavior in __instance.GetBotBehaviors())
+                // {
+                //     botBehavior.ManualUpdate();
+                // }
             }
         }
     }

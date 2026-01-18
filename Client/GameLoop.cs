@@ -12,8 +12,8 @@ namespace MiyakoCarryService.Client
 {
     internal sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
     {
-        public Player MyPlayer { get; private set; } = null;
-        public Dictionary<Type, IMgr> Mgrs = new();
+        public Dictionary<Type, IMgr> Mgrs { get; private set; } = new();
+        public Dictionary<string, TraderOffer> ItemBestPriceDict { get; private set; } = new();
 
         public ISession Session
         {
@@ -70,7 +70,7 @@ namespace MiyakoCarryService.Client
 
         private void Reset()
         {
-            MyPlayer = null;
+            
         }
 
         public T GetMgr<T>() where T : IMgr

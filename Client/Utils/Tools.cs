@@ -8,5 +8,10 @@ namespace MiyakoCarryService.Client.Utils
         {
             return GameLoop.Instance.IsVaildGameWorld;
         }
+
+        public static bool IsPlayerInventory(string id)
+        {
+            return id == CommonId.DefaultInventory;
+        }
     }
 }

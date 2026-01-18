@@ -1,21 +1,39 @@
 
 
+using System;
 using System.Collections.Generic;
 using EFT;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal class McsPlayerData : BaseData
+    internal sealed class McsPlayerData : PlayerData
     {
-        public BotOwner Self { get; private set; }
-        public Player MyBossPlayer { get; private set; }
-        public List<BotBehavior> BotBehaviors { get; private set; }
-        public McsPlayerData(BotOwner self, Player myBossPlayer)
+        private WeakReference<BotOwner> _botOwnerRef;
+        public BotOwner BotOwner
         {
-            Self = self;
-            MyBossPlayer = myBossPlayer;
-            BotBehaviors = [new BotCarryServiceChecker(Self, MyBossPlayer)];
+            get
+            {
+                _botOwnerRef.TryGetTarget(out var botOwner);
+                return botOwner;
+            }
+        }
+        private WeakReference<Player> _bossPlayeRef;
+        public Player BossPlayer
+        {
+            get
+            {
+                _bossPlayeRef.TryGetTarget(out var bossPlayer);
+                return bossPlayer;
+            }
+        }
+        public List<BotBehavior> BotBehaviors { get; private set; }
+        public McsPlayerData(Player bossPlayer, Player player, Item item) : base(player, item)
+        {
+            _botOwnerRef = new(player.AIData.BotOwner);
+            _bossPlayeRef = new(bossPlayer);
+            BotBehaviors = [new BotCarryServiceChecker(BotOwner, BossPlayer)];
         }
     }
 }
