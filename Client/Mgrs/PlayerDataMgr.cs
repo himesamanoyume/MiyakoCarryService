@@ -7,12 +7,12 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     internal sealed class PlayerDataMgr : DataMgr<PlayerDataMgr>
     {
-        public List<McsPlayerData> GetMcsPlayerAllDatas()
+        public List<McsPlayerData> GetMcsPlayerDatas()
         {
             var result = new List<McsPlayerData>();
-            foreach (BaseData item in _allDatas)
+            foreach (BaseData baseData in _datas)
             {
-                if (item is McsPlayerData mcsPlayerData)
+                if (baseData is McsPlayerData mcsPlayerData)
                 {
                     result.Add(mcsPlayerData);
                 }

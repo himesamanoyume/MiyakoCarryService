@@ -7,8 +7,13 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    internal class FollowMcsBossLayer(BotOwner botOwner, int priority) : McsBaseLayer<FollowMcsBossLayer>(botOwner, priority, botOwner.GetMcsData())
+    internal class FollowMcsBossLayer : McsBaseLayer<FollowMcsBossLayer>
     {
+        public FollowMcsBossLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        {
+            
+        }
+        
         public override Action GetNextAction()
         {
             var mcsBossPlayer = McsPlayerData.BossPlayer;
@@ -24,7 +29,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            if (McsPlayerData.BossPlayer != null)
+            if (IsMcsPlayer)
             {
                 return true;
             }

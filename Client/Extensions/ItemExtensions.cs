@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Extensions
@@ -12,6 +13,14 @@ namespace MiyakoCarryService.Client.Extensions
     internal static class ItemExtensions
     {
         private static readonly ConditionalWeakTable<Item, ItemData> _datas = new();
+
+        private static SquadMgr SquadMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+            }
+        }
 
         extension(Item item)
         {
@@ -145,15 +154,15 @@ namespace MiyakoCarryService.Client.Extensions
             };
         }
 
-        private static ItemData InitData(Item target)
+        private static ItemData InitData(Item item)
         {
-            if (target.IsPlayerInventory)
+            if (item.IsPlayerInventory)
             {
                 var gameWorld = Singleton<GameWorld>.Instance;
-                var player = target.Owner switch
+                var player = item.Owner switch
                 {
                     CorpseTraderControllerClass corpseTraderControllerClass => gameWorld.GetEverExistedPlayerByID(corpseTraderControllerClass.KilledProfileID),
-                    _ => gameWorld.GetEverExistedPlayerByID(target.Owner.ID)
+                    _ => gameWorld.GetEverExistedPlayerByID(item.Owner.ID)
                 };
 
                 if (player == null)
@@ -161,14 +170,24 @@ namespace MiyakoCarryService.Client.Extensions
                     return null;
                 }
 
-                var playerData = new PlayerData(player, target);
-                _datas.Add(target, playerData);
+                PlayerData playerData;
+                if (player.IsAI)
+                {
+                    if (SquadMgr.IsMcsPlayer(player.ProfileId))
+                    {
+                        playerData = new McsPlayerData(SquadMgr.GetMcsBossPlayerByMcsPlayerId(player.ProfileId), player, item);
+                        _datas.Add(item, playerData);
+                        return playerData;
+                    }
+                }
+                playerData = new PlayerData(player, item);
+                _datas.Add(item, playerData);
                 return playerData;
             }
 
-            var lootData = new LootData(target, ContainsBestPrice(target));
+            var lootData = new LootData(item, ContainsBestPrice(item));
             lootData.Reset();
-            _datas.Add(target, lootData);
+            _datas.Add(item, lootData);
             return lootData;
         }
     }

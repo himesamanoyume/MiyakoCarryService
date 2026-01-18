@@ -14,13 +14,23 @@ namespace MiyakoCarryService.Client.Extensions
                 return field ??= GameLoop.Instance.GetMgr<PlayerDataMgr>();
             }
         }
+
+        private static SquadMgr SquadMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+            }
+        }
         
         extension(BotOwner botOwner)
         {
+            public bool IsMcsPlayer => SquadMgr.IsMcsPlayer(botOwner.ProfileId);
+
             public McsPlayerData GetMcsData()
             {
-                var allMcsPlayerData = PlayerDataMgr.GetMcsPlayerAllDatas();
-                foreach (var mcsPlayerData in allMcsPlayerData)
+                var mcsPlayerDatas = PlayerDataMgr.GetMcsPlayerDatas();
+                foreach (var mcsPlayerData in mcsPlayerDatas)
                 {
                     if (mcsPlayerData.BotOwner == botOwner)
                     {
