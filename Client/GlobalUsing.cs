@@ -1,3 +1,9 @@
 global using SessionBackendClass = Class308;
 global using CorpseTraderControllerClass = GClass3385;
 global using TraderUtilsClass = GClass3130;
+global using BaseIntent = GClass26;
+global using FireIntent = GClass27;
+global using TimedFireIntent = GClass28;
+global using FlankIntent = GClass29;
+global using MoveIntent = GClass30;
+global using CoverIntent = GClass31;

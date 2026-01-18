@@ -20,5 +20,11 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             return result;
         }
+
+        public override void Start()
+        {
+            base.Start();
+            _datas = new List<BaseData>();
+        }
     }
 }

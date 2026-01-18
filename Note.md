@@ -1,7 +1,7 @@
 # MiyakoCarryService / 宫子护航店
 
 - 好友位自带一个TsukiyukiMiyako，通过她来进行下单（最初直接通过指令）
-- 最好能使用上大模型，语音识别
+- 最好能使用上大模型，语音识别。游戏中通过语音识别、或扩展指令系统来发出指令
 - 拉去好友进队后能够在匹配界面显示
 > 参考[FriendlyPMC](https://bitbucket.org/pitvenin/friendlypmc/src/version-4/)
 - （最好是通过商人来交，给的是临时任务）交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同
@@ -19,7 +19,7 @@
 ## 低优先级
 
 - 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
-
+- 修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息
 - 与护航玩家聊天时Users没有内容
 > 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
 - - 错误情况
@@ -211,10 +211,25 @@
 - ~~BUG: 护航的BotsGroup似乎与我不同，之前是否相同?~~
 - ~~BUG: 目前所有人都不会攻击我~~
 - ~~BUG: BotsGroup还是会将老板加入至Enemy中，只是会被清除记忆~~
-- **现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己**
+- 现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己
 - **具体实现FollowMcsBossLayer**
 - - 当前`IsActive`判断相当宽松，只要是护航 就一定会一直停留在这个Layer，需要优化
 - - - ~~如何高性能地判断玩家是否是护航玩家呢?friendlyPmc是通过替换Brain，但我是不打算替换Brain的，这就有可能不太适用`BotOwnerExtensions`获取McsData~~
 - - ~~复用NotCheater`BaseData`及其子类，并用`McsPlayerData`继承`PlayerData`~~
+- - 需要设计**跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5种重要Action，并且这些都或多或少可从本体代码中得到参考
+> 重点从`GClass133`(PatrolAssault Layer)中获取灵感
+- - 参考`PatrollingData`、`PatrolLootPointsData`(巡逻、掠夺有关)；
 - 如果是队友的手雷，AI不会进行躲避
+- - 需要实现躲避队友带来的危险的Logic
 - 如果AddEnemyPatch执行非常频繁，则应该想办法避免
+> `BotNodeAbstractClass CreateNode`写明有`BotLogicDecision`的对应Logic
+- 感觉可以尝试脱离BigBrain，自己实现一个BrainMgr**单独管理McsPlayer的Brain并在其中动态管理Layer优先级**
+> 然后参考`friendlyPMC`的Layer添加方式
+- **重点研究`AICoreStrategyAbstractClass<T>`(BaseBrain的基类)**来分析Brain中Layer是如何管理的
+- - **实现`BrainMgr`**
+- - `method_0`:添加Layer至`Dictionary_0`并加入`method_4`;添加Layer并默认Layer激活
+- - `method_1`:根据index从`Dictionary_0`中获取Layer并激活`method_4`;激活特定Layer
+- - `method_2`:检查Layer是否存在于`List_0`;检查Layer是否正在激活
+- - `method_3`:根据index从`Dictionary_0`中获取Layer并将其从`List_0`中移除;关闭Layer
+- - `method_4`:激活Layer并根据优先级插入至`List_0`中
+- - `List_0`显然是Layer的依次判断是否激活的顺序
