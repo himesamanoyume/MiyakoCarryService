@@ -18,17 +18,17 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
-        public void AddMcsSquadMember(MongoID bossSessionId, MongoID csPlayerSessionId, BotOwner botOwner)
+        public void AddMcsSquadMember(MongoID mcsBossSessionId, MongoID mcsPlayerSessionId, BotOwner botOwner)
         {
-            _mcsSquadDict.GetOrAdd(bossSessionId, _ => new()).GetOrAdd(csPlayerSessionId, botOwner);
-            _mcsBossPlayerIds.Add(bossSessionId);
-            _mcsPlayerIds.Add(csPlayerSessionId);
+            _mcsSquadDict.GetOrAdd(mcsBossSessionId, _ => new()).GetOrAdd(mcsPlayerSessionId, botOwner);
+            _mcsBossPlayerIds.Add(mcsBossSessionId);
+            _mcsPlayerIds.Add(mcsPlayerSessionId);
         }
 
-        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID bossSessionId)
+        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsBossPlayerId)
         {
-            _mcsBossPlayerIds.Add(bossSessionId);
-            return _mcsSquadDict.GetOrAdd(bossSessionId, _ => new()).Values;
+            _mcsBossPlayerIds.Add(mcsBossPlayerId);
+            return _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).Values;
         }
 
         public bool IsMcsPlayer(MongoID mcsPlayerSessionId)

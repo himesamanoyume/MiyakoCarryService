@@ -27,13 +27,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             await __result;
 
-            var csProfilesDict = await McsRequestHandler.GetCarryServicePlayer();
+            var mcsProfilesDict = await McsRequestHandler.GetCarryServicePlayer();
 
-            foreach (var csProfileItem in csProfilesDict)
+            foreach (var mcsProfileItem in mcsProfilesDict)
             {
-                foreach (var csProfile in csProfileItem.Value)
+                foreach (var mcsProfile in mcsProfileItem.Value)
                 {
-                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, csProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
+                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
                 }
             }
 
@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var gameLoop = GameLoop.Instance;
             var squadMgr = gameLoop.GetMgr<SquadMgr>();
 
-            var bossPlayers = csProfilesDict.Keys.Select(bossSessionId => gameWorld.GetEverExistedPlayerByID(bossSessionId)).Where(bossPlayer => bossPlayer != null);
+            var bossPlayers = mcsProfilesDict.Keys.Select(mcsBossPlayerId => gameWorld.GetEverExistedPlayerByID(mcsBossPlayerId)).Where(bossPlayer => bossPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
             var botsController = botGame.BotsController;
@@ -70,7 +70,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                 var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
 
-                botCreationDataClass.AddProfiles(csProfilesDict.SelectMany(item => item.Value).ToList());
+                botCreationDataClass.AddProfiles(mcsProfilesDict.SelectMany(item => item.Value).ToList());
 
                 var closestGroupPoint = botsController.CoversData.GetClosest(bossPlayerPos);
                 botCreationDataClass.AddPosition(bossPlayerPos, closestGroupPoint.CorePointInGame.Id);

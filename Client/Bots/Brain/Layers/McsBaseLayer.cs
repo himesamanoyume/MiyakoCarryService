@@ -14,13 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         private bool? _isMcsPlayer = null;
 
-        public bool IsMcsPlayer
-        {
-            get
-            {
-                return _isMcsPlayer ??= BotOwner.IsMcsPlayer;
-            }
-        }
+        public bool IsMcsPlayer => _isMcsPlayer ??= BotOwner.IsMcsPlayer;
         
         public McsPlayerData McsPlayerData
         {

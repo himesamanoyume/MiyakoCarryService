@@ -18,14 +18,14 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupInviteSendRequest info, MongoId sessionID)
         {
-            var csAccountId = info.To;
+            var mcsAid = info.To;
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            var check = int.TryParse(csAccountId, out var aid);
-            if (!check)
+            var isInt = int.TryParse(mcsAid, out var iMcsAid);
+            if (!isInt)
             {
                 return;
             }
-            raidController.AcceptGroupInvite(sessionID, aid);
+            raidController.AcceptGroupInvite(sessionID, iMcsAid);
         }
     }
 }

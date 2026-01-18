@@ -16,15 +16,15 @@ namespace MiyakoCarryService.Server.Controllers
         CompatibilityService compatibilityService
     )
     {
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnCarryServicePlayer(MongoId sessionId)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsPlayer(MongoId mcsBossPlayerId)
         {
-            var bossSessionIds = new HashSet<MongoId> { sessionId };
+            var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
 
             if (compatibilityService.HasFikaServer)
             {
                 // 暂不进行验证
                 var fikaMatchService = compatibilityService.FikaMatchService;
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [sessionId]);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsBossPlayerId]);
 
                 if (matchId is not null)
                 {
@@ -34,36 +34,36 @@ namespace MiyakoCarryService.Server.Controllers
                     {
                         var fikaPlayers = (Dictionary<MongoId, object>)AccessTools.Property(compatibilityService.FikaMatch, "Players")?.GetValue(fikaMatch);
 
-                        foreach (var playerSessionId in fikaPlayers.Keys)
+                        foreach (var playerId in fikaPlayers.Keys)
                         {
-                            if (playerSessionId != sessionId)
+                            if (playerId != mcsBossPlayerId)
                             {
-                                bossSessionIds.Add(playerSessionId);
+                                mcsBossPlayerIds.Add(playerId);
                             }
                         }
                     }
                 }
             }
 
-            var tasks = bossSessionIds.Select(async bossSessionId =>
+            var tasks = mcsBossPlayerIds.Select(async mcsBossPlayerId =>
             {
                 var pmcDatas = await Task.Run(() =>
                 {
-                    var profiles = profileController.GetCSFullProfileByBossId(bossSessionId);
+                    var profiles = profileController.GetCSFullProfileByBossId(mcsBossPlayerId);
                     return profiles.Select(p => p.CharacterData.PmcData).ToList();
                 });
 
-                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(bossSessionId, pmcDatas);
+                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(mcsBossPlayerId, pmcDatas);
             });
 
             var results = await Task.WhenAll(tasks);
 
-            var csPmcDatas = results.ToDictionary(
+            var mcsPmcDatas = results.ToDictionary(
                 pair => pair.Key,
                 pair => pair.Value
             );
             
-            return csPmcDatas;
+            return mcsPmcDatas;
         }
     }
 }

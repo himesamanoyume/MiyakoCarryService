@@ -12,9 +12,9 @@ namespace MiyakoCarryService.Server.Controllers
         OrderQuestService orderQuestService
     )
     {
-        public void CreateOrderQuest(MongoId bossSessionId, int players, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId mcsBossPlayerId, int players, int carryServiceLevel, int duration)
         {
-            orderQuestService.CreateOrderQuest(bossSessionId, players, carryServiceLevel, duration);
+            orderQuestService.CreateOrderQuest(mcsBossPlayerId, players, carryServiceLevel, duration);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)

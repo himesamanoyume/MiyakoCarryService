@@ -18,9 +18,9 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupPlayerRemoveRequest info, MongoId sessionID)
         {
-            var csAccountId = info.AidToKick;
+            var mcsAid = info.AidToKick;
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            var check = int.TryParse(csAccountId, out var aid);
+            var check = int.TryParse(mcsAid, out var aid);
             if (!check)
             {
                 return;

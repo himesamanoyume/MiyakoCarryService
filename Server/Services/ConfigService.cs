@@ -23,9 +23,9 @@ public sealed class ConfigService(
 )
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
-    public MCSConfig MCSConfig { get; private set; }
+    public McsConfig McsConfig { get; private set; }
     public OrderConfig OrderConfig { get; private set; }
-    private readonly ModMetadata MCSModMetadata = new ModMetadata();
+    private readonly ModMetadata McsModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
 
     public string GetModPath()
@@ -35,17 +35,17 @@ public sealed class ConfigService(
 
     public SemanticVersioning.Version GetServerVersion()
     {
-        return MCSModMetadata.Version;
+        return McsModMetadata.Version;
     }
 
     public System.Version GetClientVersion()
     {
-        return MCSModMetadata.ClientVersion;
+        return McsModMetadata.ClientVersion;
     }
 
     public string GetModUrl()
     {
-        return MCSModMetadata.Url;
+        return McsModMetadata.Url;
     }
 
     public async Task OnPreLoadAsync()
@@ -53,22 +53,22 @@ public sealed class ConfigService(
         var coreConfig = configServer.GetConfig<CoreConfig>();
         coreConfig.Fixes.RemoveInvalidTradersFromProfile = true;
 
-        var miyakoCarryServicePath = Path.Combine(_configsFolderPath, "miyakocarryservice.jsonc");
+        var miyakoCarryServicePath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
         if (!fileUtil.FileExists(miyakoCarryServicePath))
         {
-            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new MCSConfig
+            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new McsConfig
             {
-                ClientConfig = new MCSClientConfig()
+                ClientConfig = new McsClientConfig()
                 {
 
                 },
-                ServerConfig = new MCSServerConfig()
+                ServerConfig = new McsServerConfig()
                 {
 
                 }
             }, true));
         }
-        MCSConfig = await jsonUtil.DeserializeFromFileAsync<MCSConfig>(miyakoCarryServicePath);
+        McsConfig = await jsonUtil.DeserializeFromFileAsync<McsConfig>(miyakoCarryServicePath);
 
         var orderConfigPath = Path.Combine(_configsFolderPath, "order.json");
         if (!fileUtil.FileExists(orderConfigPath))
@@ -166,9 +166,9 @@ public sealed class ConfigService(
         OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
     }
 
-    public MCSConfig GetMiyakoCarryServiceConfig()
+    public McsConfig GetMiyakoCarryServiceConfig()
     {
-        return MCSConfig;
+        return McsConfig;
     }
 
     public OrderConfig GetOrderConfig()

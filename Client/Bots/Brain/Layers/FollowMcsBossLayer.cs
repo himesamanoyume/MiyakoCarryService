@@ -2,7 +2,6 @@
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers

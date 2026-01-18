@@ -61,7 +61,7 @@ namespace MiyakoCarryService.Server.Services
             }
             var orderInfo = new OrderInfo()
             {
-                BossSessionId = sessionId,
+                McsBossPlayerId = sessionId,
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
                 CarryServiceLevel = carryServiceLevel,
@@ -80,13 +80,13 @@ namespace MiyakoCarryService.Server.Services
             fileUtil.WriteFile(orderPath, jsonOrderInfos);
         }
 
-        public List<OrderInfo> GetOrderInfos(MongoId sessionId)
+        public List<OrderInfo> GetOrderInfos(MongoId mcsBossPlayerId)
         {
             List<OrderInfo> targetOrderInfos = new();
 
             foreach (var orderInfo in _orderInfos.Values.ToList())
             {
-                if (orderInfo.BossSessionId == sessionId)
+                if (orderInfo.McsBossPlayerId == mcsBossPlayerId)
                 {
                     targetOrderInfos.Add(orderInfo);
                 }
@@ -123,12 +123,12 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    logger.Info($"准备清除 {orderInfo.BossSessionId} 的一个过期订单");
+                    logger.Info($"准备清除 {orderInfo.McsBossPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
-                    foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                    foreach (var mcsPlayerId in orderInfo.PlayerIds)
                     {
-                        logger.Info($"准备清除 {csPlayerSessionId} 的Profile");
-                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.BossSessionId, csPlayerSessionId);
+                        logger.Info($"准备清除 {mcsPlayerId} 的Profile");
+                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.McsBossPlayerId, mcsPlayerId);
                     }
                 }
             }
@@ -142,20 +142,20 @@ namespace MiyakoCarryService.Server.Services
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
-                foreach (var csPlayerSessionId in orderInfo.PlayerIds)
+                foreach (var mcsPlayerId in orderInfo.PlayerIds)
                 {
-                    var csFullProfile = profileService.Generate(orderInfo.BossSessionId, csPlayerSessionId, completeQuestPmcData, orderInfo.CarryServiceLevel);
-                    CompleteOrderQuestSendFriendRequest(csFullProfile, orderInfo.BossSessionId);
+                    var mcsPlayerFullProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    CompleteOrderQuestSendFriendRequest(mcsPlayerFullProfile, orderInfo.McsBossPlayerId);
                 }
             }
         }
 
-        private void CompleteOrderQuestSendFriendRequest(SptProfile csFullProfile, MongoId sessionId)
+        private void CompleteOrderQuestSendFriendRequest(SptProfile mcsPlayerFullProfile, MongoId sessionId)
         {
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsFriendsListAccept(csFullProfile, NotificationEventType.friendListRequestAccept);
+                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsPlayerFullProfile, NotificationEventType.friendListRequestAccept);
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },
                 null,

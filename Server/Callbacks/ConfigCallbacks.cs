@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Server.Callbacks
         ConfigController configController
     )
     {
-        public ValueTask<string> HandleConfig(string url, EmptyRequestData _, MongoId sessionId)
+        public ValueTask<string> HandleConfig(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
             return new ValueTask<string>(configController.GetConfig());
         }

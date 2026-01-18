@@ -22,11 +22,11 @@ namespace MiyakoCarryService.Server.Services
 
         }
 
-        public bool CheckCSPlayerExist(MongoId bossSessionId, int csAid)
+        public bool CheckCSPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
         {
-            if (_bossMemberGroups.TryGetValue(bossSessionId, out var csAids))
+            if (_bossMemberGroups.TryGetValue(mcsBossPlayerId, out var mcsAids))
             {
-                if (csAids.Contains(csAid))
+                if (mcsAids.Contains(mcsAid))
                 {
                     return true;
                 }
@@ -34,52 +34,52 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
-        public void AddGroupMember(MongoId bossSessionId, int csAid)
+        public void AddGroupMember(MongoId mcsBossPlayerId, int mcsAid)
         {
-            var csAids = _bossMemberGroups.GetOrAdd(bossSessionId, _ => new List<int>());
-            if (!csAids.Contains(csAid))
+            var mcsAids = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            if (!mcsAids.Contains(mcsAid))
             {
-                csAids.Add(csAid);
+                mcsAids.Add(mcsAid);
             }
         }
 
-        public void RemoveGroupMember(MongoId bossSessionId, int csAid)
+        public void RemoveGroupMember(MongoId mcsBossPlayerId, int mcsAid)
         {
-            var csAids = _bossMemberGroups.GetOrAdd(bossSessionId, _ => new List<int>());
-            if (csAids.Contains(csAid))
+            var mcsAids = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            if (mcsAids.Contains(mcsAid))
             {
-                csAids.Remove(csAid);
+                mcsAids.Remove(mcsAid);
             }
         }
 
-        public void ClearGroupMember(MongoId bossSessionId)
+        public void ClearGroupMember(MongoId mcsBossPlayerId)
         {
-            _bossMemberGroups.GetOrAdd(bossSessionId, _ => new List<int>()).Clear();
+            _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>()).Clear();
         }
 
-        public void AcceptGroupInvite(MongoId bossSessionId, int csAid)
+        public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
         {
-            var csFullProfile = profileService.GetCSFullProfileByAccountId(bossSessionId, csAid);
+            var mcsPlayerFullProfile = profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
 
-            if (csFullProfile is null)
+            if (mcsPlayerFullProfile is null)
             {
                 return;
             }
 
-            if (CheckCSPlayerExist(bossSessionId, csAid))
+            if (CheckCSPlayerExist(mcsBossPlayerId, mcsAid))
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(csFullProfile);
-                notificationSendHelper.SendMessage(bossSessionId, notification);
+                var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsPlayerFullProfile);
+                notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
             }
             else
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(csFullProfile);
-                notificationSendHelper.SendMessage(bossSessionId, notification);
+                var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsPlayerFullProfile);
+                notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
 
-                var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(csFullProfile);
-                notificationSendHelper.SendMessage(bossSessionId, notification2);
+                var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsPlayerFullProfile);
+                notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
 
-                AddGroupMember(bossSessionId, csAid);
+                AddGroupMember(mcsBossPlayerId, mcsAid);
             }
         }
     }

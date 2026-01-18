@@ -18,9 +18,9 @@ namespace MiyakoCarryService.Server.Callbacks
         /// 处理 /mcs/client/game/bot/generate
         /// </summary>
         /// <returns></returns>
-        public async ValueTask<string> SpawnCarryServicePlayer(string url, EmptyRequestData _, MongoId sessionId)
+        public async ValueTask<string> SpawnCarryServicePlayer(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
-            return httpResponseUtil.NoBody(await botController.SpawnCarryServicePlayer(sessionId));
+            return httpResponseUtil.NoBody(await botController.SpawnMcsPlayer(mcsBossPlayerId));
         }
     }
 }

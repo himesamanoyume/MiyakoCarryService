@@ -10,7 +10,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceClient</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>0.0.6.0</Version>
+    <Version>0.0.7.0</Version>
     <AssemblyTitle>MiyakoCarryServiceClient</AssemblyTitle>
     <Trademark>https://sns.oddba.cn/163832.html</Trademark>
     <RootNamespace>MiyakoCarryService.Client</RootNamespace>

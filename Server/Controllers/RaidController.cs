@@ -10,29 +10,29 @@ namespace MiyakoCarryService.Server.Controllers
         RaidService raidService
     )
     {
-        public void AddGroupMember(MongoId bossSessionId, int csAid)
+        public void AddGroupMember(MongoId mcsBossPlayerId, int mcsAid)
         {
-            raidService.AddGroupMember(bossSessionId, csAid);
+            raidService.AddGroupMember(mcsBossPlayerId, mcsAid);
         }
 
-        public void RemoveGroupMember(MongoId bossSessionId, int csAid)
+        public void RemoveGroupMember(MongoId mcsBossPlayerId, int mcsAid)
         {
-            raidService.RemoveGroupMember(bossSessionId, csAid);
+            raidService.RemoveGroupMember(mcsBossPlayerId, mcsAid);
         }
 
-        public void ClearGroupMember(MongoId bossSessionId)
+        public void ClearGroupMember(MongoId mcsBossPlayerId)
         {
-            raidService.ClearGroupMember(bossSessionId);
+            raidService.ClearGroupMember(mcsBossPlayerId);
         }
 
-        public bool CheckCSPlayerExist(MongoId bossSessionId, int csAid)
+        public bool CheckCSPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
         {
-            return raidService.CheckCSPlayerExist(bossSessionId, csAid);
+            return raidService.CheckCSPlayerExist(mcsBossPlayerId, mcsAid);
         }
 
-        public void AcceptGroupInvite(MongoId bossSessionId, int csAid)
+        public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
         {
-            raidService.AcceptGroupInvite(bossSessionId, csAid);
+            raidService.AcceptGroupInvite(mcsBossPlayerId, mcsAid);
         }
     }
 }
