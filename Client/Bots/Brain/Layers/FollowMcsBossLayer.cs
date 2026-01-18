@@ -1,8 +1,6 @@
 
 using EFT;
-// using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Datas;
-using UnityEngine;
+using MiyakoCarryService.Client.Bots.Brain.Logics;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -13,12 +11,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         }
 
-        public override AICoreActionResultStruct<BotLogicDecision, BaseIntent> GetDecision()
+        public override Action GetNextAction()
         {
-            throw new System.NotImplementedException();
+            // var mcsBossPlayer = McsPlayerData.BossPlayer;
+            // if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
+            // {
+            //     return new Action(typeof(FollowMcsBossLogic), "too far from the boss");
+            // }
+            // else
+            // {
+            //     return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
+            // }
+            return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
         }
 
-        public override bool ShallUseNow()
+        public override bool IsActive()
         {
             if (IsMcsPlayer)
             {
@@ -27,31 +34,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        // public override Action GetNextAction()
-        // {
-        //     var mcsBossPlayer = McsPlayerData.BossPlayer;
-        //     if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
-        //     {
-        //         return new Action(typeof(FollowMcsBossLogic), "too far from the boss");
-        //     }
-        //     else
-        //     {
-        //         return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
-        //     }
-        // }
-
-        // public override bool IsActive()
-        // {
-        //     if (IsMcsPlayer)
-        //     {
-        //         return true;
-        //     }
-        //     return false;
-        // }
-
-        // public override bool IsCurrentActionEnding()
-        // {
-        //     return true;
-        // }
+        public override bool IsCurrentActionEnding()
+        {
+            return true;
+        }
     }
 }
