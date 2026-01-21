@@ -1,6 +1,7 @@
 
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -13,23 +14,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            // var mcsBossPlayer = McsPlayerData.BossPlayer;
-            // if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
-            // {
-            //     return new Action(typeof(FollowMcsBossLogic), "too far from the boss");
-            // }
-            // else
-            // {
-            //     return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
-            // }
             return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
         }
 
         public override bool IsActive()
         {
-            if (IsMcsBotPlayer)
+            BotOwner.PriorityAxeTarget.FindTarget();
+            if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
             {
-                return true;
+                return false;
+            }
+
+            if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
+            {
+                var mcsBossPlayer = McsBotPlayerData.BossPlayer;
+                if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
+                {
+                    return true;
+                }
             }
             return false;
         }

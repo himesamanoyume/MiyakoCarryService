@@ -18,6 +18,9 @@
 
 ## 低优先级
 
+- 移除Bot的臂章
+- 修改指令系统数组`PredefinedLayoutGroup.PositionsToCenter`
+- - `(-321, 241)，(0, 315)，(321, 241)，(492, 55)，(433, -158)，(171, -296)，(-171, -296)，(-433, -158)，(-492, 55)，(-321, 241)，（0, 150）,（0, -100）`
 - 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
 - 修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息
 - 与护航玩家聊天时Users没有内容
@@ -91,6 +94,11 @@
 ```
 
 - 好友列表显示店长机器人时一并显示头像
+
+## Logic思想指导
+
+- 思想钢印：**跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5大主要行为
+- 当需要吃喝、医疗品时要能够在安全的情况下寻找周围的吃喝、医疗品并使用。因此这也将能够做到你丢出医疗品给他，他会自己去取来用
 
 ## TODO
 
@@ -179,8 +187,8 @@
 开始进入客户端为主的阶段
 - ~~移除Fika，实现原生的开始战局~~
 - - ~~若使用`RaidSettingsLocalPatch`, 则会使原本服务端传来的准备就绪状态不被使用,导致匹配界面的准备按钮无法交互~~
-> 参考friendlyPMC `MatchmakerPlayerControllerClassAddMemberPatch`, `MainMenuControllerPatch`, 特别是 **`MainMenuControllerPatch.GroupPlayers`**
-- **实现在战局中生成拉入小队的护航**
+> 参考friendlyPMC `MatchmakerPlayerControllerClassAddMemberPatch`, `MainMenuControllerPatch`, 特别是`MainMenuControllerPatch.GroupPlayers`
+- ~~实现在战局中生成拉入小队的护航~~
 > 参考friendlyPMC如何实现BOT的生成
 - - ~~应该Patch玩家的邀请入队请求，若对象为护航则应该在`mcsRaidService`中被`AddGroupMember`~~, 本地战局开始时，包括使用Fika联机时，则根据战局中的所有加入玩家调取其sessionId的护航小队成员来依次返回护航的BotBase数据进行生成
 - ~~实现检查Fika是否存在~~
@@ -200,7 +208,7 @@
 - - ~~BUG: 虽然其中一个能做到友好，但一个以上时不会，且会一直盯着我~~
 - - ~~剔除队友无效，说明当前其仍然不是真正意义上的队友，只是其对我态度为友好~~
 - - ~~对其开了一枪之后就会恢复敌意，可能AddEnemyPatch不是那么好用~~
-- ~~以实现AI与我同队，无敌意~~，**会跟随我**~~，能正常攻击其他AI~~ 作为第一阶段目标
+- ~~以实现AI与我同队，无敌意，会跟随我，能正常攻击其他AI~~ 作为第一阶段目标
 - - ~~主机和护航的BotsGroup为null, 需要填补~~
 - - ~~研究SAIN是如何实现屏蔽原生的CombatLayer的?并使用SAINComponents与BotOwner并行执行的~~
 > `StandartBotBrain.Activate()`中有完整的Brain与WildSpawnType的对应关系
@@ -212,11 +220,11 @@
 - ~~BUG: 目前所有人都不会攻击我~~
 - ~~BUG: BotsGroup还是会将老板加入至Enemy中，只是会被清除记忆~~
 - 现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己
-- **具体实现FollowMcsBossLayer**
+- ~~具体实现FollowMcsBossLayer~~
 - - 当前`IsActive`判断相当宽松，只要是护航 就一定会一直停留在这个Layer，需要优化
 - - - ~~如何高性能地判断玩家是否是护航玩家呢?friendlyPmc是通过替换Brain，但我是不打算替换Brain的，这就有可能不太适用`BotOwnerExtensions`获取McsData~~
 - - ~~复用NotCheater`BaseData`及其子类，并用`McsBotPlayerData`继承`PlayerData`~~
-- - 总共需要设计**跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5大主要行为，并且这些都或多或少可从本体代码中得到参考
+- - 总共需要设计跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包5大主要行为，并且这些都或多或少可从本体代码中得到参考
 > 重点从`GClass133`(PatrolAssault Layer)中获取灵感
 - - 参考`PatrollingData`、`PatrolLootPointsData`(巡逻、掠夺有关)；
 - 如果是队友的手雷，AI不会进行躲避
@@ -225,7 +233,10 @@
 > `BotNodeAbstractClass CreateNode`写明有`BotLogicDecision`的对应Logic
 - `friendlyPmc`的`BotFollowerPlayer.Init()`中写有移除`skwizzy.LootingBots`和`SPTQuestingBots`的代码
 - `FollowerPatrolBaseLogic`作为巡逻Logic，但其需要`BotFollower`相关信息，应该不能直接使用。`friendlyPmc`中也是需要先判断`BotFollower.HaveBoss`且`BossToFollow.IsMe`为true才执行的
-- - **找出如何设置BotFollower为McsBossPlayer**
+- - ~~找出如何设置BotFollower为McsBossPlayer~~
 - - - `AIBossPlayer.cs`的`AddFollower`
-- - - **必须要实现McsAIBossPlayer才能设置BotFollower**
+- - - ~~必须要实现McsAIBossPlayer才能设置BotFollower~~
 - ~~BUG:当没有设置护航时，就会造成generate错误~~
+- 复刻`FollowerLayer`的`GetDecision`函数中的决策转换为`Logic`后至`McsBotPlayerCommonLayer`中
+> 其中诸如`BotLogicDecision.runToCover`将得到的决策Action可以从`global using RunToCoverBaseLogic = GClass228;`找到对应原版的基础Logic
+- **NotCheater Debug的Layer不够准确，再去参考一下BotDebug**

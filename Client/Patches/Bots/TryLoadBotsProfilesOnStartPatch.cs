@@ -93,14 +93,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     // {
 
                     _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
-                    botOwner.BotFollower.PatrolDataFollower.InitPlayer(bossPlayer);
-                    // botOwner.BotFollower.Index = Followers.Count - 1;
-                    botOwner.BotFollower.BossToFollow = mcsAIBossPlayer;
-                    var followerMode = PatrolMode.follower;
-                    var simpleMode = PatrolMode.simple;
-                    var pointChooser = PatrollingData.GetPointChooser(botOwner, simpleMode, botOwner.SpawnProfileData);
-                    botOwner.PatrollingData.SetMode(followerMode, pointChooser);
-
                     if (bossPlayer.BotsGroup != null)
                     {
                         // var otherCsPlayers = csProfilesDict[bossPlayer.ProfileId].Select(otherCsPlayerProfile => gameWorld.GetEverExistedPlayerByID(otherCsPlayerProfile.ProfileId));
@@ -182,6 +174,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.GetPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId;
                         botOwner.GetPlayer.Profile.Info.TeamId = bossPlayer.Profile.Info.TeamId;
+
+                        botOwner.BotFollower.PatrolDataFollower.InitPlayer(bossPlayer);
+                        // botOwner.BotFollower.Index = Followers.Count - 1;
+                        botOwner.BotFollower.BossToFollow = mcsAIBossPlayer;
+                        var followerMode = PatrolMode.follower;
+                        var simpleMode = PatrolMode.simple;
+                        var pointChooser = PatrollingData.GetPointChooser(botOwner, simpleMode, botOwner.SpawnProfileData);
+                        botOwner.PatrollingData.SetMode(followerMode, pointChooser);
                     });
 
                     botSpawner.InSpawnProcess += 1;
