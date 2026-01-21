@@ -66,6 +66,7 @@ namespace MiyakoCarryService.Client
         {
             SquadMgr.Enable();
             BrainMgr.Enable();
+            PlayerDataMgr.Enable();
         }
 
         private void Reset()

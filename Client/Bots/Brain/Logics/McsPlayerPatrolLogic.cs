@@ -4,11 +4,11 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    internal sealed class McsPlayerPatrolLogic : McsBaseLogic
+    internal sealed class McsBotPlayerPatrolLogic : McsBotBaseLogic
     {
         private FollowerPatrolBaseLogic _baseLogic;
 
-        public McsPlayerPatrolLogic(BotOwner botOwner) : base(botOwner)
+        public McsBotPlayerPatrolLogic(BotOwner botOwner) : base(botOwner)
         {
             _baseLogic = new(botOwner);
         }

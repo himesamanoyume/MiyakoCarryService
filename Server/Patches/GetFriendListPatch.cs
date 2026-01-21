@@ -28,18 +28,18 @@ namespace MiyakoCarryService.Server.Patches
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var profile = profileHelper.GetFullProfile(sessionId);
 
-            var mcsPlayerProfiles = profileController.GetCSFullProfileByBossId(sessionId);
+            var mcsBotPlayerProfiles = profileController.GetCSFullProfileByBossId(sessionId);
 
-            if (mcsPlayerProfiles is not null)
+            if (mcsBotPlayerProfiles is not null)
             {
-                foreach (var mcsPlayerProfile in mcsPlayerProfiles)
+                foreach (var mcsBotPlayerProfile in mcsBotPlayerProfiles)
                 {
-                    if (mcsPlayerProfile is null)
+                    if (mcsBotPlayerProfile is null)
                     {
                         continue;
                     }
 
-                    var mcsPmcData = mcsPlayerProfile.CharacterData.PmcData;
+                    var mcsPmcData = mcsBotPlayerProfile.CharacterData.PmcData;
                     var searchFriendResponse = new SearchFriendResponse
                     {
                         Id = mcsPmcData.Id.Value,

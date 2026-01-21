@@ -11,18 +11,18 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsBossPlayerIds = new();
-        private HashSet<MongoID> _mcsPlayerIds = new();
+        private HashSet<MongoID> _mcsBotPlayerIds = new();
 
         public sealed override void Start()
         {
             base.Start();
         }
 
-        public void AddMcsSquadMember(MongoID mcsBossSessionId, MongoID mcsPlayerSessionId, BotOwner botOwner)
+        public void AddMcsSquadMember(MongoID mcsBossPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner)
         {
-            _mcsSquadDict.GetOrAdd(mcsBossSessionId, _ => new()).GetOrAdd(mcsPlayerSessionId, botOwner);
-            _mcsBossPlayerIds.Add(mcsBossSessionId);
-            _mcsPlayerIds.Add(mcsPlayerSessionId);
+            _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, botOwner);
+            _mcsBossPlayerIds.Add(mcsBossPlayerId);
+            _mcsBotPlayerIds.Add(mcsBotPlayerId);
         }
 
         public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsBossPlayerId)
@@ -31,21 +31,21 @@ namespace MiyakoCarryService.Client.Mgrs
             return _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).Values;
         }
 
-        public bool IsMcsPlayer(MongoID mcsPlayerSessionId)
+        public bool IsMcsBotPlayer(MongoID mcsBotPlayerId)
         {
-            return _mcsPlayerIds.Contains(mcsPlayerSessionId);
+            return _mcsBotPlayerIds.Contains(mcsBotPlayerId);
         }
 
-        public bool IsMcsBossPlayer(MongoID mcsBossSessionId)
+        public bool IsMcsBossPlayer(MongoID mcsBossPlayerId)
         {
-            return _mcsBossPlayerIds.Contains(mcsBossSessionId);
+            return _mcsBossPlayerIds.Contains(mcsBossPlayerId);
         }
 
-        public Player GetMcsBossPlayerByMcsPlayerId(MongoID mcsPlayerSessionId)
+        public Player GetMcsBossPlayerByMcsBotPlayerId(MongoID mcsBotPlayerId)
         {
             foreach (var mcsSquad in _mcsSquadDict)
             {
-                if (mcsSquad.Value.ContainsKey(mcsPlayerSessionId))
+                if (mcsSquad.Value.ContainsKey(mcsBotPlayerId))
                 {
                     return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsSquad.Key);
                 }
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _mcsSquadDict.Clear();
             _mcsBossPlayerIds.Clear();
-            _mcsPlayerIds.Clear();
+            _mcsBotPlayerIds.Clear();
         }
     }
 }

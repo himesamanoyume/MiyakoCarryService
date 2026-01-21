@@ -13,57 +13,57 @@ namespace MiyakoCarryService.Server.Helper
 
     )
     {
-        public WsGroupMatchInviteDecline GenerateWsGroupMatchInviteDecline(SptProfile mcsPlayerFullProfile)
+        public WsGroupMatchInviteDecline GenerateWsGroupMatchInviteDecline(SptProfile mcsBotPlayerFullProfile)
         {
             return new WsGroupMatchInviteDecline
             {
                 EventType = NotificationEventType.groupMatchInviteDecline,
                 EventIdentifier = new MongoId(),
-                Aid = mcsPlayerFullProfile.ProfileInfo.Aid,
-                Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname
+                Aid = mcsBotPlayerFullProfile.ProfileInfo.Aid,
+                Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname
             };
         }
 
-        public WsGroupMatchInviteAccept GenerateWsGroupMatchInviteAccept(SptProfile mcsPlayerFullProfile)
+        public WsGroupMatchInviteAccept GenerateWsGroupMatchInviteAccept(SptProfile mcsBotPlayerFullProfile)
         {
             return new WsGroupMatchInviteAccept
             {
                 EventType = NotificationEventType.groupMatchInviteAccept,
                 EventIdentifier = new MongoId(),
-                Id = mcsPlayerFullProfile.ProfileInfo.ProfileId,
-                Aid = mcsPlayerFullProfile.ProfileInfo.Aid,
+                Id = mcsBotPlayerFullProfile.ProfileInfo.ProfileId,
+                Aid = mcsBotPlayerFullProfile.ProfileInfo.Aid,
                 Info = new CharacterInfo
                 {
-                    Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
-                    Side = mcsPlayerFullProfile.CharacterData.PmcData.Info.Side,
-                    Level = mcsPlayerFullProfile.CharacterData.PmcData.Info.Level,
-                    MemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                    GameVersion = mcsPlayerFullProfile.CharacterData.PmcData.Info.GameVersion,
-                    SavageLockTime = mcsPlayerFullProfile.CharacterData.ScavData.Info.SavageLockTime,
-                    SavageNickname = mcsPlayerFullProfile.CharacterData.ScavData.Info.Nickname,
-                    HasCoopExtension = mcsPlayerFullProfile.CharacterData.PmcData.Info.HasCoopExtension
+                    Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
+                    Side = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Side,
+                    Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level,
+                    MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                    GameVersion = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.GameVersion,
+                    SavageLockTime = mcsBotPlayerFullProfile.CharacterData.ScavData.Info.SavageLockTime,
+                    SavageNickname = mcsBotPlayerFullProfile.CharacterData.ScavData.Info.Nickname,
+                    HasCoopExtension = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.HasCoopExtension
                 },
                 VisualRepresentation = new PlayerVisualRepresentation
                 {
                     Info = new VisualInfo
                     {
-                        Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
-                        Side = mcsPlayerFullProfile.CharacterData.PmcData.Info.Side,
-                        MemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                        Level = mcsPlayerFullProfile.CharacterData.PmcData.Info.Level,
-                        GameVersion = mcsPlayerFullProfile.CharacterData.PmcData.Info.GameVersion
+                        Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
+                        Side = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Side,
+                        MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                        Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level,
+                        GameVersion = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.GameVersion
                     },
                     Customization = new Customization
                     {
-                        Head = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Head,
-                        Body = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Body,
-                        Feet = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Feet,
-                        Hands = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Hands,
+                        Head = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Head,
+                        Body = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Body,
+                        Feet = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Feet,
+                        Hands = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Hands,
                     },
                     Equipment = new Equipment
                     {
-                        Id = mcsPlayerFullProfile.CharacterData.PmcData.Inventory.Equipment,
-                        Items = mcsPlayerFullProfile.CharacterData.PmcData.Inventory.Items
+                        Id = mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Equipment,
+                        Items = mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Items
                     },
                 },
                 IsLeader = false,
@@ -71,28 +71,28 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public WsFriendsListAccept GenerateWsFriendsListAccept(SptProfile mcsPlayerFullProfile, NotificationEventType eventType)
+        public WsFriendsListAccept GenerateWsFriendsListAccept(SptProfile mcsBotPlayerFullProfile, NotificationEventType eventType)
         {
             return new WsFriendsListAccept
             {
                 EventType = eventType,
                 Profile = new SearchFriendResponse()
                 {
-                    Id = mcsPlayerFullProfile.ProfileInfo.ProfileId.Value,
-                    Aid = mcsPlayerFullProfile.ProfileInfo.Aid,
+                    Id = mcsBotPlayerFullProfile.ProfileInfo.ProfileId.Value,
+                    Aid = mcsBotPlayerFullProfile.ProfileInfo.Aid,
                     Info = new UserDialogDetails
                     {
-                        Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
-                        Side = mcsPlayerFullProfile.CharacterData.PmcData.Info.Side,
-                        Level = mcsPlayerFullProfile.CharacterData.PmcData.Info.Level,
-                        MemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                        SelectedMemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
+                        Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
+                        Side = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Side,
+                        Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level,
+                        MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                        SelectedMemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory
                     }
                 }
             };
         }
 
-        public WsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsPlayerFullProfile)
+        public WsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsBotPlayerFullProfile)
         {
             return new WsGroupMatchRaidReady
             {
@@ -100,40 +100,40 @@ namespace MiyakoCarryService.Server.Helper
                 EventIdentifier = new MongoId(),
                 ExtendedProfile = new GroupCharacter
                 {
-                    Id = mcsPlayerFullProfile.CharacterData.PmcData.Id.Value,
-                    Aid = mcsPlayerFullProfile.CharacterData.PmcData.Aid,
+                    Id = mcsBotPlayerFullProfile.CharacterData.PmcData.Id.Value,
+                    Aid = mcsBotPlayerFullProfile.CharacterData.PmcData.Aid,
                     Info = new CharacterInfo
                     {
-                        Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
-                        Side = mcsPlayerFullProfile.CharacterData.PmcData.Info.Side,
-                        Level = mcsPlayerFullProfile.CharacterData.PmcData.Info.Level,
-                        MemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                        GameVersion = mcsPlayerFullProfile.CharacterData.PmcData.Info.GameVersion,
-                        SavageLockTime = mcsPlayerFullProfile.CharacterData.ScavData.Info.SavageLockTime,
-                        SavageNickname = mcsPlayerFullProfile.CharacterData.ScavData.Info.Nickname,
-                        HasCoopExtension = mcsPlayerFullProfile.CharacterData.PmcData.Info.HasCoopExtension
+                        Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
+                        Side = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Side,
+                        Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level,
+                        MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                        GameVersion = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.GameVersion,
+                        SavageLockTime = mcsBotPlayerFullProfile.CharacterData.ScavData.Info.SavageLockTime,
+                        SavageNickname = mcsBotPlayerFullProfile.CharacterData.ScavData.Info.Nickname,
+                        HasCoopExtension = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.HasCoopExtension
                     },
                     VisualRepresentation = new PlayerVisualRepresentation
                     {
                         Info = new VisualInfo
                         {
-                            Nickname = mcsPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
-                            Side = mcsPlayerFullProfile.CharacterData.PmcData.Info.Side,
-                            MemberCategory = mcsPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
-                            Level = mcsPlayerFullProfile.CharacterData.PmcData.Info.Level,
-                            GameVersion = mcsPlayerFullProfile.CharacterData.PmcData.Info.GameVersion
+                            Nickname = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Nickname,
+                            Side = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Side,
+                            MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory,
+                            Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level,
+                            GameVersion = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.GameVersion
                         },
                         Customization = new Customization
                         {
-                            Head = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Head,
-                            Body = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Body,
-                            Feet = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Feet,
-                            Hands = mcsPlayerFullProfile.CharacterData.PmcData.Customization.Hands,
+                            Head = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Head,
+                            Body = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Body,
+                            Feet = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Feet,
+                            Hands = mcsBotPlayerFullProfile.CharacterData.PmcData.Customization.Hands,
                         },
                         Equipment = new Equipment
                         {
-                            Id = mcsPlayerFullProfile.CharacterData.PmcData.Inventory.Equipment,
-                            Items = mcsPlayerFullProfile.CharacterData.PmcData.Inventory.Items
+                            Id = mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Equipment,
+                            Items = mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Items
                         },
                     },
                     IsLeader = false,
@@ -143,14 +143,14 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public WsGroupMatchUserLeave GenerateWsGroupMatchUserLeave(SptProfile mcsPlayerFullProfile)
+        public WsGroupMatchUserLeave GenerateWsGroupMatchUserLeave(SptProfile mcsBotPlayerFullProfile)
         {
             return new WsGroupMatchUserLeave
             {
                 EventType = NotificationEventType.groupMatchUserLeave,
                 EventIdentifier = new MongoId(),
-                Nickname = mcsPlayerFullProfile.ProfileInfo.Username,
-                Aid = mcsPlayerFullProfile.ProfileInfo.Aid.Value,
+                Nickname = mcsBotPlayerFullProfile.ProfileInfo.Username,
+                Aid = mcsBotPlayerFullProfile.ProfileInfo.Aid.Value,
             };
         }
     }

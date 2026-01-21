@@ -4,9 +4,9 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    internal class FollowMcsBossLayer : McsBaseLayer<FollowMcsBossLayer>
+    internal class McsBotPlayerCommonLayer : McsBotPlayerBaseLayer<McsBotPlayerCommonLayer>
     {
-        public FollowMcsBossLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        public McsBotPlayerCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
 
         }
@@ -22,12 +22,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             // {
             //     return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
             // }
-            return new Action(typeof(McsPlayerPatrolLogic), "nothing to do");
+            return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
         }
 
         public override bool IsActive()
         {
-            if (IsMcsPlayer)
+            if (IsMcsBotPlayer)
             {
                 return true;
             }

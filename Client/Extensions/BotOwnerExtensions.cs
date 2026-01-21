@@ -25,16 +25,16 @@ namespace MiyakoCarryService.Client.Extensions
         
         extension(BotOwner botOwner)
         {
-            public bool IsMcsPlayer => SquadMgr.IsMcsPlayer(botOwner.ProfileId);
+            public bool IsMcsBotPlayer => SquadMgr.IsMcsBotPlayer(botOwner.ProfileId);
 
-            public McsPlayerData GetMcsData()
+            public McsBotPlayerData GetMcsBotData()
             {
-                var mcsPlayerDatas = PlayerDataMgr.GetMcsPlayerDatas();
-                foreach (var mcsPlayerData in mcsPlayerDatas)
+                var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
+                foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                 {
-                    if (mcsPlayerData.BotOwner == botOwner)
+                    if (mcsBotPlayerData.BotOwner == botOwner)
                     {
-                        return mcsPlayerData;
+                        return mcsBotPlayerData;
                     }
                 }
                 return null;

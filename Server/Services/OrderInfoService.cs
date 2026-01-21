@@ -125,10 +125,10 @@ namespace MiyakoCarryService.Server.Services
                 {
                     logger.Info($"准备清除 {orderInfo.McsBossPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
-                    foreach (var mcsPlayerId in orderInfo.PlayerIds)
+                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
-                        logger.Info($"准备清除 {mcsPlayerId} 的Profile");
-                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.McsBossPlayerId, mcsPlayerId);
+                        logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
+                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
                     }
                 }
             }
@@ -142,20 +142,20 @@ namespace MiyakoCarryService.Server.Services
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
-                foreach (var mcsPlayerId in orderInfo.PlayerIds)
+                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                 {
-                    var mcsPlayerFullProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
-                    CompleteOrderQuestSendFriendRequest(mcsPlayerFullProfile, orderInfo.McsBossPlayerId);
+                    var mcsBotPlayerFullProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                    CompleteOrderQuestSendFriendRequest(mcsBotPlayerFullProfile, orderInfo.McsBossPlayerId);
                 }
             }
         }
 
-        private void CompleteOrderQuestSendFriendRequest(SptProfile mcsPlayerFullProfile, MongoId sessionId)
+        private void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerFullProfile, MongoId sessionId)
         {
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsPlayerFullProfile, NotificationEventType.friendListRequestAccept);
+                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerFullProfile, NotificationEventType.friendListRequestAccept);
                     notificationSendHelper.SendMessage(sessionId, notification);
                 },
                 null,

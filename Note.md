@@ -215,8 +215,8 @@
 - **具体实现FollowMcsBossLayer**
 - - 当前`IsActive`判断相当宽松，只要是护航 就一定会一直停留在这个Layer，需要优化
 - - - ~~如何高性能地判断玩家是否是护航玩家呢?friendlyPmc是通过替换Brain，但我是不打算替换Brain的，这就有可能不太适用`BotOwnerExtensions`获取McsData~~
-- - ~~复用NotCheater`BaseData`及其子类，并用`McsPlayerData`继承`PlayerData`~~
-- - 需要设计**跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5种重要Action，并且这些都或多或少可从本体代码中得到参考
+- - ~~复用NotCheater`BaseData`及其子类，并用`McsBotPlayerData`继承`PlayerData`~~
+- - 总共需要设计**跟随、巡逻、掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5大主要行为，并且这些都或多或少可从本体代码中得到参考
 > 重点从`GClass133`(PatrolAssault Layer)中获取灵感
 - - 参考`PatrollingData`、`PatrolLootPointsData`(巡逻、掠夺有关)；
 - 如果是队友的手雷，AI不会进行躲避
@@ -224,3 +224,8 @@
 - 如果AddEnemyPatch执行非常频繁，则应该想办法避免
 > `BotNodeAbstractClass CreateNode`写明有`BotLogicDecision`的对应Logic
 - `friendlyPmc`的`BotFollowerPlayer.Init()`中写有移除`skwizzy.LootingBots`和`SPTQuestingBots`的代码
+- `FollowerPatrolBaseLogic`作为巡逻Logic，但其需要`BotFollower`相关信息，应该不能直接使用。`friendlyPmc`中也是需要先判断`BotFollower.HaveBoss`且`BossToFollow.IsMe`为true才执行的
+- - **找出如何设置BotFollower为McsBossPlayer**
+- - - `AIBossPlayer.cs`的`AddFollower`
+- - - **必须要实现McsAIBossPlayer才能设置BotFollower**
+- ~~BUG:当没有设置护航时，就会造成generate错误~~

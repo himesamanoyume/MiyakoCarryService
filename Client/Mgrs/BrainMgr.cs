@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            BrainManager.AddCustomLayer(typeof(FollowMcsBossLayer), Classification.AllBrainNames, 100);
+            BrainManager.AddCustomLayer(typeof(McsBotPlayerCommonLayer), Classification.AllBrainNames, 75);
         }
 
         protected override void Reset()

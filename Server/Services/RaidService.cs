@@ -59,24 +59,24 @@ namespace MiyakoCarryService.Server.Services
 
         public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
         {
-            var mcsPlayerFullProfile = profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
+            var mcsBotPlayerFullProfile = profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
 
-            if (mcsPlayerFullProfile is null)
+            if (mcsBotPlayerFullProfile is null)
             {
                 return;
             }
 
             if (CheckCSPlayerExist(mcsBossPlayerId, mcsAid))
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsPlayerFullProfile);
+                var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
                 notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
             }
             else
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsPlayerFullProfile);
+                var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
                 notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
 
-                var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsPlayerFullProfile);
+                var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
                 notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
 
                 AddGroupMember(mcsBossPlayerId, mcsAid);

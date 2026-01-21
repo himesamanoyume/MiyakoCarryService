@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Server.Controllers
         CompatibilityService compatibilityService
     )
     {
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsPlayer(MongoId mcsBossPlayerId)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId)
         {
             var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
 
@@ -50,6 +50,10 @@ namespace MiyakoCarryService.Server.Controllers
                 var pmcDatas = await Task.Run(() =>
                 {
                     var profiles = profileController.GetCSFullProfileByBossId(mcsBossPlayerId);
+                    if (profiles == null)
+                    {
+                        return new List<PmcData>();
+                    }
                     return profiles.Select(p => p.CharacterData.PmcData).ToList();
                 });
 

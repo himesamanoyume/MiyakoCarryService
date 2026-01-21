@@ -34,71 +34,71 @@ namespace MiyakoCarryService.Server.Patches
 
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var bossPmcProfile = profileHelper.GetPmcProfile(sessionId);
-            var mcsPlayerPmcProfile = mcsFullProfileToView.CharacterData.PmcData;
-            var mcsPlayerScavProfile = mcsFullProfileToView.CharacterData.ScavData;
+            var mcsBotPlayerPmcProfile = mcsFullProfileToView.CharacterData.PmcData;
+            var mcsBotPlayerScavProfile = mcsFullProfileToView.CharacterData.ScavData;
 
             var hideoutKeys = new HashSet<string>();
-            hideoutKeys.UnionWith(mcsPlayerPmcProfile.Inventory.HideoutAreaStashes.Keys);
-            hideoutKeys.Add(mcsPlayerPmcProfile.Inventory.HideoutCustomizationStashId);
+            hideoutKeys.UnionWith(mcsBotPlayerPmcProfile.Inventory.HideoutAreaStashes.Keys);
+            hideoutKeys.Add(mcsBotPlayerPmcProfile.Inventory.HideoutCustomizationStashId);
 
-            var hideoutRootItems = mcsPlayerPmcProfile.Inventory.Items.Where(x => hideoutKeys.Contains(x.Id));
+            var hideoutRootItems = mcsBotPlayerPmcProfile.Inventory.Items.Where(x => hideoutKeys.Contains(x.Id));
             var itemsToReturn = new List<Item>();
             foreach (var rootItems in hideoutRootItems)
             {
-                var itemWithChildren = mcsPlayerPmcProfile.Inventory.Items.GetItemWithChildren(rootItems.Id);
+                var itemWithChildren = mcsBotPlayerPmcProfile.Inventory.Items.GetItemWithChildren(rootItems.Id);
                 itemsToReturn.AddRange(itemWithChildren);
             }
 
             var profile = new GetOtherProfileResponse
             {
-                Id = mcsPlayerPmcProfile.Id,
-                Aid = mcsPlayerPmcProfile.Aid,
+                Id = mcsBotPlayerPmcProfile.Id,
+                Aid = mcsBotPlayerPmcProfile.Aid,
                 Info = new OtherProfileInfo
                 {
-                    Nickname = mcsPlayerPmcProfile.Info.Nickname,
-                    Side = mcsPlayerPmcProfile.Info.Side,
-                    Experience = mcsPlayerPmcProfile.Info.Experience,
+                    Nickname = mcsBotPlayerPmcProfile.Info.Nickname,
+                    Side = mcsBotPlayerPmcProfile.Info.Side,
+                    Experience = mcsBotPlayerPmcProfile.Info.Experience,
                     MemberCategory = (int)MemberCategory.Group,
-                    BannedState = mcsPlayerPmcProfile.Info.BannedState,
-                    BannedUntil = mcsPlayerPmcProfile.Info.BannedUntil,
-                    RegistrationDate = bossPmcProfile is not null ? bossPmcProfile.Info.RegistrationDate : mcsPlayerPmcProfile.Info.RegistrationDate,
+                    BannedState = mcsBotPlayerPmcProfile.Info.BannedState,
+                    BannedUntil = mcsBotPlayerPmcProfile.Info.BannedUntil,
+                    RegistrationDate = bossPmcProfile is not null ? bossPmcProfile.Info.RegistrationDate : mcsBotPlayerPmcProfile.Info.RegistrationDate,
                 },
                 Customization = new OtherProfileCustomization
                 {
-                    Head = mcsPlayerPmcProfile.Customization.Head,
-                    Body = mcsPlayerPmcProfile.Customization.Body,
-                    Feet = mcsPlayerPmcProfile.Customization.Feet,
-                    Hands = mcsPlayerPmcProfile.Customization.Hands,
-                    Dogtag = mcsPlayerPmcProfile.Customization.DogTag,
-                    Voice = mcsPlayerPmcProfile.Customization.Voice,
+                    Head = mcsBotPlayerPmcProfile.Customization.Head,
+                    Body = mcsBotPlayerPmcProfile.Customization.Body,
+                    Feet = mcsBotPlayerPmcProfile.Customization.Feet,
+                    Hands = mcsBotPlayerPmcProfile.Customization.Hands,
+                    Dogtag = mcsBotPlayerPmcProfile.Customization.DogTag,
+                    Voice = mcsBotPlayerPmcProfile.Customization.Voice,
                 },
-                Skills = mcsPlayerPmcProfile.Skills,
+                Skills = mcsBotPlayerPmcProfile.Skills,
                 Equipment = new OtherProfileEquipment 
                 { 
-                    Id = mcsPlayerPmcProfile.Inventory.Equipment, 
-                    Items = mcsPlayerPmcProfile.Inventory.Items 
+                    Id = mcsBotPlayerPmcProfile.Inventory.Equipment, 
+                    Items = mcsBotPlayerPmcProfile.Inventory.Items 
                 },
-                Achievements = bossPmcProfile is not null ? bossPmcProfile.Achievements : mcsPlayerPmcProfile.Achievements,
-                FavoriteItems = profileHelper.GetOtherProfileFavorites(mcsPlayerPmcProfile),
+                Achievements = bossPmcProfile is not null ? bossPmcProfile.Achievements : mcsBotPlayerPmcProfile.Achievements,
+                FavoriteItems = profileHelper.GetOtherProfileFavorites(mcsBotPlayerPmcProfile),
                 PmcStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats
                     {
-                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : mcsPlayerPmcProfile.Stats.Eft.TotalInGameTime,
-                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : mcsPlayerPmcProfile.Stats.Eft.OverallCounters,
+                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : mcsBotPlayerPmcProfile.Stats.Eft.TotalInGameTime,
+                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : mcsBotPlayerPmcProfile.Stats.Eft.OverallCounters,
                     },
                 },
                 ScavStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats
                     {
-                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : mcsPlayerPmcProfile.Stats.Eft.TotalInGameTime,
-                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : mcsPlayerPmcProfile.Stats.Eft.OverallCounters,
+                        TotalInGameTime = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.TotalInGameTime : mcsBotPlayerPmcProfile.Stats.Eft.TotalInGameTime,
+                        OverAllCounters = bossPmcProfile is not null ? bossPmcProfile.Stats.Eft.OverallCounters : mcsBotPlayerPmcProfile.Stats.Eft.OverallCounters,
                     },
                 },
-                Hideout = mcsPlayerPmcProfile.Hideout,
-                CustomizationStash = mcsPlayerPmcProfile.Inventory.HideoutCustomizationStashId,
-                HideoutAreaStashes = mcsPlayerPmcProfile.Inventory.HideoutAreaStashes,
+                Hideout = mcsBotPlayerPmcProfile.Hideout,
+                CustomizationStash = mcsBotPlayerPmcProfile.Inventory.HideoutCustomizationStashId,
+                HideoutAreaStashes = mcsBotPlayerPmcProfile.Inventory.HideoutAreaStashes,
                 Items = itemsToReturn,
             };
 

@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -20,6 +20,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     internal sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
     {
+        private static SquadMgr _squadMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+            }
+        }
+
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.TryLoadBotsProfilesOnStart));
 
         [PatchPostfix]
@@ -39,10 +47,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             var gameWorld = Singleton<GameWorld>.Instance;
 
-            var gameLoop = GameLoop.Instance;
-            var squadMgr = gameLoop.GetMgr<SquadMgr>();
-
-            var bossPlayers = mcsProfilesDict.Keys.Select(mcsBossPlayerId => gameWorld.GetEverExistedPlayerByID(mcsBossPlayerId)).Where(bossPlayer => bossPlayer != null);
+            var bossPlayers = mcsProfilesDict
+                .Where(kvp => kvp.Value.Length > 0)
+                .Select(kvp => gameWorld.GetEverExistedPlayerByID(kvp.Key))
+                .Where(bossPlayer => bossPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
             var botsController = botGame.BotsController;
@@ -60,6 +68,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     EPlayerSide.Usec => WildSpawnType.pmcUSEC,
                     _ => WildSpawnType.assault
                 };
+
+                var mcsAIBossPlayer = new McsAIBossPlayer(bossPlayer);
 
                 bossPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
 
@@ -82,7 +92,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     // if (myPlayer.Side != EPlayerSide.Savage)
                     // {
 
-                    squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
+                    _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
+                    botOwner.BotFollower.PatrolDataFollower.InitPlayer(bossPlayer);
+                    // botOwner.BotFollower.Index = Followers.Count - 1;
+                    botOwner.BotFollower.BossToFollow = mcsAIBossPlayer;
+                    var followerMode = PatrolMode.follower;
+                    var simpleMode = PatrolMode.simple;
+                    var pointChooser = PatrollingData.GetPointChooser(botOwner, simpleMode, botOwner.SpawnProfileData);
+                    botOwner.PatrollingData.SetMode(followerMode, pointChooser);
 
                     if (bossPlayer.BotsGroup != null)
                     {

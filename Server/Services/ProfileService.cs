@@ -56,12 +56,12 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private List<string> _afdianNames = [];
 
-        public bool RemoveProfile(MongoId mcsBossSessionId, MongoId mcsPlayerSessionId)
+        public bool RemoveProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
         {
-            var file = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsPlayerSessionId}.json");
-            if (_profiles[mcsBossSessionId].ContainsKey(mcsPlayerSessionId))
+            var file = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerSessionId}.json");
+            if (_profiles[mcsBossSessionId].ContainsKey(mcsBotPlayerSessionId))
             {
-                _profiles[mcsBossSessionId].TryRemove(mcsPlayerSessionId, out _);
+                _profiles[mcsBossSessionId].TryRemove(mcsBotPlayerSessionId, out _);
                 if (!fileUtil.DeleteFile(file))
                 {
                     logger.Error($"Unable to delete file, not found: {file}");
@@ -71,18 +71,18 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void ProcessExpiredCarryServiceProfile(MongoId mcsBossSessionId, MongoId mcsPlayerSessionId)
+        public void ProcessExpiredCarryServiceProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
         {
-            var mcsPlayerFullProfile = GetCSFullProfile(mcsBossSessionId, mcsPlayerSessionId);
+            var mcsBotPlayerFullProfile = GetCSFullProfile(mcsBossSessionId, mcsBotPlayerSessionId);
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsPlayerFullProfile);
+                    var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerFullProfile);
                     notificationSendHelper.SendMessage(mcsBossSessionId, notification);
 
-                    var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsPlayerFullProfile, NotificationEventType.youAreRemovedFromFriendList);
+                    var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerFullProfile, NotificationEventType.youAreRemovedFromFriendList);
                     notificationSendHelper.SendMessage(mcsBossSessionId, notification2);
-                    RemoveProfile(mcsBossSessionId, mcsPlayerSessionId);
+                    RemoveProfile(mcsBossSessionId, mcsBotPlayerSessionId);
 
                 },
                 null,
@@ -91,25 +91,25 @@ namespace MiyakoCarryService.Server.Services
             );
         }
 
-        public void SaveCSPlayerProfile(MongoId mcsBossSessionId, SptProfile mcsPlayerFullProfile)
+        public void SaveCSPlayerProfile(MongoId mcsBossSessionId, SptProfile mcsBotPlayerFullProfile)
         {
             Console.WriteLine("保存护航存档");
-            var mcsPlayerId = (MongoId)mcsPlayerFullProfile.ProfileInfo.ProfileId;
-            var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsPlayerId}.json");
-            _profiles.GetOrAdd(mcsBossSessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsPlayerId, mcsPlayerFullProfile);
-            var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossSessionId][mcsPlayerId], true);
+            var mcsBotPlayerId = (MongoId)mcsBotPlayerFullProfile.ProfileInfo.ProfileId;
+            var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerId}.json");
+            _profiles.GetOrAdd(mcsBossSessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerFullProfile);
+            var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossSessionId][mcsBotPlayerId], true);
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
-        private async Task LoadCSPlayerProfileAsync(MongoId mcsBossSessionId, MongoId mcsPlayerSessionId)
+        private async Task LoadCSPlayerProfileAsync(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
         {
-            var filePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsPlayerSessionId}.json");
+            var filePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerSessionId}.json");
             if (fileUtil.FileExists(filePath))
             {
-                var mcsPlayerFullProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
-                if (mcsPlayerFullProfile is not null)
+                var mcsBotPlayerFullProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
+                if (mcsBotPlayerFullProfile is not null)
                 {
-                    _profiles.GetOrAdd(mcsBossSessionId, _ => new()).GetOrAdd(mcsPlayerSessionId, mcsPlayerFullProfile);
+                    _profiles.GetOrAdd(mcsBossSessionId, _ => new()).GetOrAdd(mcsBotPlayerSessionId, mcsBotPlayerFullProfile);
                 }
             }
         }
@@ -125,8 +125,8 @@ namespace MiyakoCarryService.Server.Services
             foreach (var sessionIdFolderPath in sessionIdsFolderPath)
             {
                 var sessionId = System.IO.Path.GetFileNameWithoutExtension(sessionIdFolderPath);
-                var mcsPlayerProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, sessionIdFolderPath);
-                var files = fileUtil.GetFiles(mcsPlayerProfileFolderPath).Where(item => fileUtil.GetFileExtension(item) == "json");
+                var mcsBotPlayerProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, sessionIdFolderPath);
+                var files = fileUtil.GetFiles(mcsBotPlayerProfileFolderPath).Where(item => fileUtil.GetFileExtension(item) == "json");
                 foreach (var file in files)
                 {
                     var filename = System.IO.Path.GetFileNameWithoutExtension(file);
@@ -177,9 +177,9 @@ namespace MiyakoCarryService.Server.Services
             return botBase;
         }
 
-        public SptProfile? GetCSFullProfile(MongoId mcsBossPlayerId, MongoId mcsPlayerId)
+        public SptProfile? GetCSFullProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            return _profiles[mcsBossPlayerId][mcsPlayerId];
+            return _profiles[mcsBossPlayerId][mcsBotPlayerId];
         }
 
         public SptProfile? GetCSFullProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
@@ -216,35 +216,35 @@ namespace MiyakoCarryService.Server.Services
                 {
                     return null;
                 }
-                List<SptProfile> mcsPlayerFullProfles = [.. bossCSPlayerFullProfiles.Values];
-                return mcsPlayerFullProfles;
+                List<SptProfile> mcsBotPlayerFullProfles = [.. bossCSPlayerFullProfiles.Values];
+                return mcsBotPlayerFullProfles;
             }
             return null;
         }
 
-        public SptProfile Generate(MongoId mcsBossPlayerId, MongoId mcsPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
         {
             var mcsPmcBotBase = GeneratePmcBotProfile(mcsBossPlayerId, completeQuestPmcData, carryServiceLevel);
-            mcsPmcBotBase.Id = mcsPlayerId;
-            mcsPmcBotBase.SessionId = mcsPlayerId;
+            mcsPmcBotBase.Id = mcsBotPlayerId;
+            mcsPmcBotBase.SessionId = mcsBotPlayerId;
             mcsPmcBotBase.Aid = hashUtil.GenerateAccountId();
 
-            var mcsPlayerFullProfile = GenerateMcsPlayerFullProfile(mcsPmcBotBase);
-            var mcsPlayerScavBotBase = GenerateMcsScavPlayerFullProfile(mcsBossPlayerId, mcsPlayerFullProfile, carryServiceLevel);
+            var mcsBotPlayerFullProfile = GeneratemcsBotPlayerFullProfile(mcsPmcBotBase);
+            var mcsBotPlayerScavBotBase = GenerateMcsScavPlayerFullProfile(mcsBossPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
 
-            mcsPlayerScavBotBase.SessionId = mcsPmcBotBase.SessionId;
-            mcsPlayerFullProfile.ProfileInfo.Aid = mcsPmcBotBase.Aid;
-            mcsPlayerFullProfile.ProfileInfo.ScavengerId = mcsPlayerScavBotBase.Id;
-            mcsPlayerFullProfile.CharacterData.PmcData.Savage = mcsPlayerScavBotBase.Id;
-            mcsPlayerFullProfile.CharacterData.ScavData = mcsPlayerScavBotBase;
+            mcsBotPlayerScavBotBase.SessionId = mcsPmcBotBase.SessionId;
+            mcsBotPlayerFullProfile.ProfileInfo.Aid = mcsPmcBotBase.Aid;
+            mcsBotPlayerFullProfile.ProfileInfo.ScavengerId = mcsBotPlayerScavBotBase.Id;
+            mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
+            mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
 
-            SaveCSPlayerProfile(mcsBossPlayerId, mcsPlayerFullProfile);
-            return mcsPlayerFullProfile;
+            SaveCSPlayerProfile(mcsBossPlayerId, mcsBotPlayerFullProfile);
+            return mcsBotPlayerFullProfile;
         }
 
-        private PmcData GenerateMcsScavPlayerFullProfile(MongoId mcsBossPlayerId, SptProfile mcsPlayerFullProfile, int carryServiceLevel)
+        private PmcData GenerateMcsScavPlayerFullProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerFullProfile, int carryServiceLevel)
         {
-            var profileCharactersClone = cloner.Clone(mcsPlayerFullProfile.CharacterData);
+            var profileCharactersClone = cloner.Clone(mcsBotPlayerFullProfile.CharacterData);
             var pmcDataClone = cloner.Clone(profileCharactersClone.PmcData);
             var bossFullProfile = saveServer.GetProfile(mcsBossPlayerId);
             var existingScavDataClone = cloner.Clone(bossFullProfile.CharacterData.ScavData);
@@ -321,47 +321,47 @@ namespace MiyakoCarryService.Server.Services
             return scavData;
         }
 
-        private SptProfile GenerateMcsPlayerFullProfile(BotBase mcsPlayerPmcBotBase)
+        private SptProfile GeneratemcsBotPlayerFullProfile(BotBase mcsBotPlayerPmcBotBase)
         {
             return new SptProfile
             {
                 ProfileInfo = new SPTarkov.Server.Core.Models.Eft.Profile.Info
                 {
-                    ProfileId = mcsPlayerPmcBotBase.SessionId,
-                    Username = mcsPlayerPmcBotBase.Info.Nickname
+                    ProfileId = mcsBotPlayerPmcBotBase.SessionId,
+                    Username = mcsBotPlayerPmcBotBase.Info.Nickname
                 },
                 CharacterData = new Characters
                 {
                     PmcData = new PmcData
                     {
-                        Id = mcsPlayerPmcBotBase.Id,
-                        Aid = mcsPlayerPmcBotBase.Aid,
-                        SessionId = mcsPlayerPmcBotBase.SessionId,
-                        KarmaValue = mcsPlayerPmcBotBase.KarmaValue,
-                        Info = mcsPlayerPmcBotBase.Info,
-                        Customization = mcsPlayerPmcBotBase.Customization,
-                        Health = mcsPlayerPmcBotBase.Health,
-                        Inventory = mcsPlayerPmcBotBase.Inventory,
-                        Skills = mcsPlayerPmcBotBase.Skills,
-                        Stats = mcsPlayerPmcBotBase.Stats,
-                        Encyclopedia = mcsPlayerPmcBotBase.Encyclopedia,
-                        TaskConditionCounters = mcsPlayerPmcBotBase.TaskConditionCounters,
-                        InsuredItems = mcsPlayerPmcBotBase.InsuredItems,
-                        Hideout = mcsPlayerPmcBotBase.Hideout,
-                        Quests = mcsPlayerPmcBotBase.Quests,
-                        TradersInfo = mcsPlayerPmcBotBase.TradersInfo,
-                        UnlockedInfo = mcsPlayerPmcBotBase.UnlockedInfo,
-                        RagfairInfo = mcsPlayerPmcBotBase.RagfairInfo,
-                        Achievements = mcsPlayerPmcBotBase.Achievements,
-                        RepeatableQuests = mcsPlayerPmcBotBase.RepeatableQuests,
-                        Bonuses = mcsPlayerPmcBotBase.Bonuses,
-                        Notes = mcsPlayerPmcBotBase.Notes,
-                        CarExtractCounts = mcsPlayerPmcBotBase.CarExtractCounts,
-                        CoopExtractCounts = mcsPlayerPmcBotBase.CoopExtractCounts,
-                        SurvivorClass = mcsPlayerPmcBotBase.SurvivorClass,
-                        WishList = mcsPlayerPmcBotBase.WishList,
-                        MoneyTransferLimitData = mcsPlayerPmcBotBase.MoneyTransferLimitData,
-                        IsPmc = mcsPlayerPmcBotBase.IsPmc,
+                        Id = mcsBotPlayerPmcBotBase.Id,
+                        Aid = mcsBotPlayerPmcBotBase.Aid,
+                        SessionId = mcsBotPlayerPmcBotBase.SessionId,
+                        KarmaValue = mcsBotPlayerPmcBotBase.KarmaValue,
+                        Info = mcsBotPlayerPmcBotBase.Info,
+                        Customization = mcsBotPlayerPmcBotBase.Customization,
+                        Health = mcsBotPlayerPmcBotBase.Health,
+                        Inventory = mcsBotPlayerPmcBotBase.Inventory,
+                        Skills = mcsBotPlayerPmcBotBase.Skills,
+                        Stats = mcsBotPlayerPmcBotBase.Stats,
+                        Encyclopedia = mcsBotPlayerPmcBotBase.Encyclopedia,
+                        TaskConditionCounters = mcsBotPlayerPmcBotBase.TaskConditionCounters,
+                        InsuredItems = mcsBotPlayerPmcBotBase.InsuredItems,
+                        Hideout = mcsBotPlayerPmcBotBase.Hideout,
+                        Quests = mcsBotPlayerPmcBotBase.Quests,
+                        TradersInfo = mcsBotPlayerPmcBotBase.TradersInfo,
+                        UnlockedInfo = mcsBotPlayerPmcBotBase.UnlockedInfo,
+                        RagfairInfo = mcsBotPlayerPmcBotBase.RagfairInfo,
+                        Achievements = mcsBotPlayerPmcBotBase.Achievements,
+                        RepeatableQuests = mcsBotPlayerPmcBotBase.RepeatableQuests,
+                        Bonuses = mcsBotPlayerPmcBotBase.Bonuses,
+                        Notes = mcsBotPlayerPmcBotBase.Notes,
+                        CarExtractCounts = mcsBotPlayerPmcBotBase.CarExtractCounts,
+                        CoopExtractCounts = mcsBotPlayerPmcBotBase.CoopExtractCounts,
+                        SurvivorClass = mcsBotPlayerPmcBotBase.SurvivorClass,
+                        WishList = mcsBotPlayerPmcBotBase.WishList,
+                        MoneyTransferLimitData = mcsBotPlayerPmcBotBase.MoneyTransferLimitData,
+                        IsPmc = mcsBotPlayerPmcBotBase.IsPmc,
                         Prestige = { },
                     }
                 }

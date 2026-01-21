@@ -5,22 +5,22 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    internal abstract class McsBaseLayer<T> : CustomLayer where T : McsBaseLayer<T>
+    internal abstract class McsBotPlayerBaseLayer<T> : CustomLayer where T : McsBotPlayerBaseLayer<T>
     {
-        public McsBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        public McsBotPlayerBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
             
         }
 
-        private bool? _isMcsPlayer = null;
+        private bool? _isMcsBotPlayer = null;
 
-        public bool IsMcsPlayer => _isMcsPlayer ??= BotOwner.IsMcsPlayer;
+        public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
         
-        public McsPlayerData McsPlayerData
+        public McsBotPlayerData McsBotPlayerData
         {
             get
             {
-                return field ??= BotOwner.GetMcsData();
+                return field ??= BotOwner.GetMcsBotData();
             }
         }
 
