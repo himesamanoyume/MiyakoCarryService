@@ -69,18 +69,29 @@ namespace MiyakoCarryService.Server.Services
 
             if (CheckMcsBotPlayerExist(mcsBossPlayerId, mcsAid))
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
-                notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                try
+                {
+                    var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                }
+                finally
+                {
+                    
+                }
             }
             else
             {
-                var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
-                notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
-
-                var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
-                notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
-
-                AddGroupMember(mcsBossPlayerId, mcsAid);
+                try
+                {
+                    var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
+                    var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                }
+                finally
+                {
+                    AddGroupMember(mcsBossPlayerId, mcsAid);
+                }
             }
         }
 

@@ -162,8 +162,15 @@ namespace MiyakoCarryService.Server.Services
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
-                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                    try
+                    {
+                        var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
+                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                    }
+                    catch
+                    {
+                        
+                    }
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),

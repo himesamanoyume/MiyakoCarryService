@@ -240,9 +240,9 @@
 - 复刻`FollowerLayer`的`GetDecision`函数中的决策转换为`Logic`后至`McsBotPlayerCommonLayer`中
 > 其中诸如`BotLogicDecision.runToCover`将得到的决策Action可以从`global using RunToCoverBaseLogic = GClass228;`找到对应原版的基础Logic
 - **生成的护航第一时间Layer是无法获取的，可能需要参考BotDebug来获取BigBrain相关的Layer才行**
-- 如果不加CustomLayer，是否还能正确跟随
+- 如果不加CustomLayer，是否还能正确跟随（可以，但需要自己先遇敌，他们才会跑过来，否则会先在四周巡逻，且会远离boss）
 - ~~BUG：如果发生了异常，会导致某个护航存档未能被删除，然后启动服务端之后还会一直被加载，显示在好友列表中~~
 - - ~~调整加载存档的逻辑，只有在orderinfo中PlayerIds内有的id才能够被加载至服务端，同时还需要检查所有文件夹内的护航存档文件，如果发现其文件名未处于orderinfo内，则需要将该护航存档删除~~
 - - ~~如果不修复，则会导致只要随便放置一个存档在profiles中，就能得到一个永久生效的护航~~
 - ~~BUG：当尝试下订单生成2个护航，哪怕不拉人进队，只要进入战局，就会生成所有好友中的护航~~
-- 生成的护航开局傻傻的，感觉是自定义Layer的问题
+- 生成的护航开局傻傻的，感觉是自定义Layer的问题（是。必须先击中其一枪，他就会从此Layer中离开到原版Layer，但是后续再也没见过回到CustomLayer）
