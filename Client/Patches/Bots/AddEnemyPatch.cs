@@ -31,7 +31,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             if (SquadMgr.IsMcsBossPlayer(person.ProfileId))
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo("正在执行AddEnemy");
+                // MiyakoCarryServicePlugin.Logger.LogInfo("正在执行AddEnemy");
+                // 玩家每次开枪命中敌人，都会让护航想要将我添加为敌人
                 return false;
             }
 

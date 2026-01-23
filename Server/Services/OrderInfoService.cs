@@ -167,7 +167,7 @@ namespace MiyakoCarryService.Server.Services
                         var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
                         notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
                     }
-                    catch
+                    finally
                     {
                         
                     }
