@@ -25,6 +25,7 @@ namespace MiyakoCarryService.Server.Patches
         {
             var configController = ServiceLocator.ServiceProvider.GetService<ConfigController>();
             var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
+            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
             var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var timeUtil = ServiceLocator.ServiceProvider.GetService<TimeUtil>();
@@ -59,7 +60,11 @@ namespace MiyakoCarryService.Server.Patches
 
             Console.WriteLine("将尝试清除过期订单、任务");
             orderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            orderInfoController.ProcessExpiredOrderInfos();
+            var mcsBotPlayerIds = orderInfoController.GetExpiredMcsBotPlayerIds();
+            foreach (var kvp in mcsBotPlayerIds)
+            {
+                profileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+            }
 
             if (currentTime < generatedOrder.EndTime - 1)
             {

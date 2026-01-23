@@ -20,13 +20,19 @@ namespace MiyakoCarryService.Server.Patches
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
         {
             var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
+            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
             var completedQuestId = request.QuestId;
             var orderInfos = orderInfoController.GetOrderInfos(sessionID);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    orderInfoController.SetOrderInfoStarted(orderInfo, pmcData);
+                    orderInfoController.SetOrderInfoStarted(orderInfo);
+                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    {
+                        var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsBossPlayerId, mcsBotPlayerId, pmcData, orderInfo.CarryServiceLevel);
+                        orderInfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsBossPlayerId);
+                    }
                 }
             }
         }

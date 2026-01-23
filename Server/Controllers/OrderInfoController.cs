@@ -5,6 +5,7 @@ using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.Profile;
 
 namespace MiyakoCarryService.Server.Controllers
 {
@@ -28,14 +29,19 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.CreateOrderInfo(mcsBossPlayerId, players, carryServiceLevel, duration, questId);
         }
 
-        public void ProcessExpiredOrderInfos()
+        public Dictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
-            orderInfoService.ProcessExpiredOrderInfos();
+            return orderInfoService.GetExpiredMcsBotPlayerIds();
         }
 
         public void RemoveOrderInfo(OrderInfo orderInfo)
         {
             orderInfoService.RemoveOrderInfo(orderInfo);
+        }
+
+        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsBossPlayerId)
+        {
+            orderInfoService.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, mcsBossPlayerId);
         }
 
         public void SaveOrderInfo()
@@ -48,9 +54,9 @@ namespace MiyakoCarryService.Server.Controllers
             return orderInfoService.GetAllOrderInfos();
         }
 
-        public void SetOrderInfoStarted(OrderInfo orderInfo, PmcData completeQuestPmcData)
+        public void SetOrderInfoStarted(OrderInfo orderInfo)
         {
-            orderInfoService.SetOrderInfoStarted(orderInfo, completeQuestPmcData);
+            orderInfoService.SetOrderInfoStarted(orderInfo);
         }
 
         public List<OrderInfo> GetOrderInfos(MongoId sessionId)

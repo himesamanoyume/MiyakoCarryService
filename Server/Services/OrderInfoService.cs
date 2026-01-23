@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public sealed class OrderInfoService(
         ConfigService configService,
-        ProfileService profileService,
+        // ProfileService profileService,
         NotificationSendHelper notificationSendHelper,
         ISptLogger<OrderInfoService> logger,
         // SaveServer saveServer,
@@ -115,9 +115,11 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void ProcessExpiredOrderInfos()
+        public Dictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
+            var mcsBotPlayerIds = new Dictionary<MongoId, HashSet<MongoId>>();
             var orderInfos = GetAllOrderInfos();
+
             foreach (var orderInfo in orderInfos)
             {
                 var currentTime = timeUtil.GetTimeStamp();
@@ -125,38 +127,41 @@ namespace MiyakoCarryService.Server.Services
                 {
                     logger.Info($"准备清除 {orderInfo.McsBossPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
+                    mcsBotPlayerIds.Add(orderInfo.McsBossPlayerId, new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
                         logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
-                        profileService.ProcessExpiredMcsBotPlayerProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
+                        mcsBotPlayerIds[orderInfo.McsBossPlayerId].Add(mcsBotPlayerId);
+                        // profileService.ProcessExpiredMcsBotPlayerProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
                     }
                 }
             }
             SaveOrderInfo();
+            return mcsBotPlayerIds;
         }
 
-        public void SetOrderInfoStarted(OrderInfo orderInfo, PmcData completeQuestPmcData)
+        public void SetOrderInfoStarted(OrderInfo orderInfo)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
             {
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
-                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
-                {
-                    var mcsBotPlayerFullProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
-                    CompleteOrderQuestSendFriendRequest(mcsBotPlayerFullProfile, orderInfo.McsBossPlayerId);
-                }
+                // foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                // {
+                //     var mcsBotPlayerProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
+                //     CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsBossPlayerId);
+                // }
             }
         }
 
-        private void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerFullProfile, MongoId sessionId)
+        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsBossPlayerId)
         {
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerFullProfile, NotificationEventType.friendListRequestAccept);
-                    notificationSendHelper.SendMessage(sessionId, notification);
+                    var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),

@@ -41,10 +41,14 @@ namespace MiyakoCarryService.Server
             {
                 await localeService.OnPostLoadAsync();
                 await traderService.OnPostLoadAsync();
-                await profileService.OnPostLoadAsync();
                 await orderQuestService.OnPostLoadAsync();
+                await profileService.OnPostLoadAsync();
                 await orderInfoService.OnPostLoadAsync();
-                orderInfoService.ProcessExpiredOrderInfos();
+                var mcsBotPlayerIds = orderInfoService.GetExpiredMcsBotPlayerIds();
+                foreach (var kvp in mcsBotPlayerIds)
+                {
+                    profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                }
             }
         }
     }

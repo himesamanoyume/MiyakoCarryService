@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Server.Controllers
 
         public bool CheckMcsBotPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
         {
-            return raidService.CheckMcsPlayerExist(mcsBossPlayerId, mcsAid);
+            return raidService.CheckMcsBotPlayerExist(mcsBossPlayerId, mcsAid);
         }
 
         public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)

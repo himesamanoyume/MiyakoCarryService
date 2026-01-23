@@ -19,6 +19,11 @@ namespace MiyakoCarryService.Server.Controllers
             profileService.ProcessExpiredMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
         }
 
+        public void ProcessExpiredMcsBotPlayerProfiles(MongoId mcsBossPlayerId, HashSet<MongoId> mcsBotPlayerIds)
+        {
+            profileService.ProcessExpiredMcsBotPlayerProfiles(mcsBossPlayerId, mcsBotPlayerIds);
+        }
+
         public BotBase GeneratePmcBotBaseProfile(MongoId mcsBossPlayerId, PmcData mcsBotPlayerPmcData, int carryServiceLevel)
         {
             return profileService.GeneratePmcBotProfile(mcsBossPlayerId, mcsBotPlayerPmcData, carryServiceLevel);

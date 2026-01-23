@@ -56,12 +56,12 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private List<string> _afdianNames = [];
 
-        public bool RemoveProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
+        public bool RemoveProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            var file = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerSessionId}.json");
-            if (_profiles[mcsBossSessionId].ContainsKey(mcsBotPlayerSessionId))
+            var file = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
+            if (_profiles[mcsBossPlayerId].ContainsKey(mcsBotPlayerId))
             {
-                _profiles[mcsBossSessionId].TryRemove(mcsBotPlayerSessionId, out _);
+                _profiles[mcsBossPlayerId].TryRemove(mcsBotPlayerId, out _);
                 if (!fileUtil.DeleteFile(file))
                 {
                     logger.Error($"Unable to delete file, not found: {file}");
@@ -71,24 +71,31 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
+        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            var mcsBotPlayerFullProfile = GetMcsBotPlayerProfile(mcsBossSessionId, mcsBotPlayerSessionId);
+            var mcsBotPlayerProfile = GetMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
             _ = new Timer(
                 _ =>
                 {
-                    var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerFullProfile);
-                    notificationSendHelper.SendMessage(mcsBossSessionId, notification);
+                    var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
 
-                    var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerFullProfile, NotificationEventType.youAreRemovedFromFriendList);
-                    notificationSendHelper.SendMessage(mcsBossSessionId, notification2);
-                    RemoveProfile(mcsBossSessionId, mcsBotPlayerSessionId);
-
+                    var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
+                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                    RemoveProfile(mcsBossPlayerId, mcsBotPlayerId);
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),
                 Timeout.InfiniteTimeSpan
             );
+        }
+
+        public void ProcessExpiredMcsBotPlayerProfiles(MongoId mcsBossPlayerId, HashSet<MongoId> mcsBotPlayerIds)
+        {
+            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
+            {
+                ProcessExpiredMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
+            }
         }
 
         public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
@@ -101,7 +108,7 @@ namespace MiyakoCarryService.Server.Services
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
-        private async Task LoadMcsPlayerProfileAsync(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
+        private async Task LoadMcsBotPlayerProfileAsync(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
             var filePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
             if (fileUtil.FileExists(filePath))
@@ -114,7 +121,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        private async Task LoadAllCSPlayerProfileAsync()
+        private async Task LoadAllMcsBotPlayerProfileAsync()
         {
             if (!fileUtil.DirectoryExists(_profileFolderDir))
             {
@@ -132,7 +139,7 @@ namespace MiyakoCarryService.Server.Services
                     var filename = System.IO.Path.GetFileNameWithoutExtension(file);
                     if (MongoId.IsValidMongoId(filename))
                     {
-                        await LoadMcsPlayerProfileAsync(sessionId, filename);
+                        await LoadMcsBotPlayerProfileAsync(sessionId, filename);
                     }
                 }
             }
@@ -370,7 +377,7 @@ namespace MiyakoCarryService.Server.Services
 
         public async Task OnPostLoadAsync()
         {
-            await LoadAllCSPlayerProfileAsync();
+            await LoadAllMcsBotPlayerProfileAsync();
             await LoadAfdianPmcName();
         }
     }
