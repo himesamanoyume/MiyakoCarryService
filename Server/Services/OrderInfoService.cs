@@ -10,7 +10,6 @@ using MiyakoCarryService.Server.Models.Enums;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Utils;
@@ -21,10 +20,8 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public sealed class OrderInfoService(
         ConfigService configService,
-        // ProfileService profileService,
         NotificationSendHelper notificationSendHelper,
         ISptLogger<OrderInfoService> logger,
-        // SaveServer saveServer,
         NotificationHelper notificationHelper,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
@@ -32,6 +29,8 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly string _orderFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "orders");
+
+        // 此处的MongoId为QuestId，而不是玩家Id
         private readonly ConcurrentDictionary<MongoId, OrderInfo> _orderInfos = new();
 
         public void AddOrderInfo(OrderInfo orderInfo)
@@ -52,7 +51,19 @@ namespace MiyakoCarryService.Server.Services
             _orderInfos.TryRemove(orderInfo.QuestId, out _);
         }
 
-        public void CreateOrderInfo(MongoId sessionId, int players, int carryServiceLevel, int duration, MongoId questId)
+        public bool CheckMcsBotPlayerExist(MongoId mcsBotPlayerId)
+        {
+            foreach (var orderInfo in _orderInfos.Values)
+            {
+                if (orderInfo.PlayerIds.Contains(mcsBotPlayerId))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void CreateOrderInfo(MongoId mcsBossPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
         {
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
@@ -61,7 +72,7 @@ namespace MiyakoCarryService.Server.Services
             }
             var orderInfo = new OrderInfo()
             {
-                McsBossPlayerId = sessionId,
+                McsBossPlayerId = mcsBossPlayerId,
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
                 CarryServiceLevel = carryServiceLevel,
@@ -95,7 +106,7 @@ namespace MiyakoCarryService.Server.Services
             return targetOrderInfos;
         }
 
-        public List<OrderInfo> GetAllOrderInfos()
+        public List<OrderInfo> GetAllOrderInfo()
         {
             return _orderInfos.Values.ToList();
         }
@@ -109,16 +120,13 @@ namespace MiyakoCarryService.Server.Services
             }
 
             var orderInfos = await jsonUtil.DeserializeFromFileAsync<List<OrderInfo>>(orderPath);
-            foreach (var orderInfo in orderInfos)
-            {
-                _orderInfos[orderInfo.QuestId] = orderInfo;
-            }
+            AddOrderInfos(orderInfos);
         }
 
         public Dictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
             var mcsBotPlayerIds = new Dictionary<MongoId, HashSet<MongoId>>();
-            var orderInfos = GetAllOrderInfos();
+            var orderInfos = GetAllOrderInfo();
 
             foreach (var orderInfo in orderInfos)
             {
@@ -132,7 +140,6 @@ namespace MiyakoCarryService.Server.Services
                     {
                         logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
                         mcsBotPlayerIds[orderInfo.McsBossPlayerId].Add(mcsBotPlayerId);
-                        // profileService.ProcessExpiredMcsBotPlayerProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
                     }
                 }
             }
@@ -147,11 +154,6 @@ namespace MiyakoCarryService.Server.Services
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
                 orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
-                // foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
-                // {
-                //     var mcsBotPlayerProfile = profileService.Generate(orderInfo.McsBossPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo.CarryServiceLevel);
-                //     CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsBossPlayerId);
-                // }
             }
         }
 

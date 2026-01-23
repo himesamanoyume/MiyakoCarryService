@@ -47,7 +47,8 @@ namespace MiyakoCarryService.Server.Services
         BotLootCacheService botLootCacheService,
         BotGenerator botGenerator,
         PlayerScavGenerator playerScavGenerator,
-        ProfileHelper profileHelper
+        ProfileHelper profileHelper,
+        OrderInfoService orderInfoService
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
@@ -56,9 +57,10 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private List<string> _afdianNames = [];
 
-        public bool RemoveProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
+        public bool RemoveMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
             var file = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
+            logger.Error($"正在删除 {mcsBotPlayerId}.json");
             if (_profiles[mcsBossPlayerId].ContainsKey(mcsBotPlayerId))
             {
                 _profiles[mcsBossPlayerId].TryRemove(mcsBotPlayerId, out _);
@@ -74,6 +76,13 @@ namespace MiyakoCarryService.Server.Services
         public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
             var mcsBotPlayerProfile = GetMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
+            if (mcsBotPlayerProfile is null)
+            {
+                var errorInfo = "没能获取到护航玩家存档";
+                logger.Error(errorInfo);
+                throw new NullReferenceException(errorInfo);
+            }
+
             _ = new Timer(
                 _ =>
                 {
@@ -82,7 +91,7 @@ namespace MiyakoCarryService.Server.Services
 
                     var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
                     notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
-                    RemoveProfile(mcsBossPlayerId, mcsBotPlayerId);
+                    RemoveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),
@@ -100,7 +109,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
         {
-            Console.WriteLine("保存护航存档");
+            // Console.WriteLine("保存护航存档");
             var mcsBotPlayerId = (MongoId)mcsBotPlayerProfile.ProfileInfo.ProfileId;
             var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
             _profiles.GetOrAdd(mcsBossPlayerId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
@@ -128,18 +137,24 @@ namespace MiyakoCarryService.Server.Services
                 fileUtil.CreateDirectory(_profileFolderDir);
             }
 
-            var sessionIdsFolderPath = fileUtil.GetDirectories(_profileFolderDir);
-            foreach (var sessionIdFolderPath in sessionIdsFolderPath)
+            var mcsBossPlayerIdsFolderPath = fileUtil.GetDirectories(_profileFolderDir);
+            foreach (var mcsBossPlayerIdFolderPath in mcsBossPlayerIdsFolderPath)
             {
-                var sessionId = System.IO.Path.GetFileNameWithoutExtension(sessionIdFolderPath);
-                var mcsBotPlayerProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, sessionIdFolderPath);
-                var files = fileUtil.GetFiles(mcsBotPlayerProfileFolderPath).Where(item => fileUtil.GetFileExtension(item) == "json");
-                foreach (var file in files)
+                var mcsBossPlayerId = System.IO.Path.GetFileNameWithoutExtension(mcsBossPlayerIdFolderPath);
+                if (MongoId.IsValidMongoId(mcsBossPlayerId))
                 {
-                    var filename = System.IO.Path.GetFileNameWithoutExtension(file);
-                    if (MongoId.IsValidMongoId(filename))
+                    var mcsBossPlayerIdProfileFolderPath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerIdFolderPath);
+                    var files = fileUtil.GetFiles(mcsBossPlayerIdProfileFolderPath).Where(item => fileUtil.GetFileExtension(item) == "json");
+                    foreach (var file in files)
                     {
-                        await LoadMcsBotPlayerProfileAsync(sessionId, filename);
+                        var mcsBotPlayerId = System.IO.Path.GetFileNameWithoutExtension(file);
+                        if (MongoId.IsValidMongoId(mcsBotPlayerId))
+                        {
+                            if (orderInfoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
+                            {
+                                await LoadMcsBotPlayerProfileAsync(mcsBossPlayerId, mcsBotPlayerId);
+                            }
+                        }
                     }
                 }
             }
@@ -186,7 +201,18 @@ namespace MiyakoCarryService.Server.Services
 
         public SptProfile? GetMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            return _profiles[mcsBossPlayerId][mcsBotPlayerId];
+            if (_profiles.ContainsKey(mcsBossPlayerId))
+            {
+                _profiles.TryGetValue(mcsBossPlayerId, out var mcsBotPlayerProfiles);
+                if (mcsBotPlayerProfiles is null)
+                {
+                    logger.Error("mcsBotPlayerProfiles为空");
+                    return null;
+                }
+                return mcsBotPlayerProfiles.FirstOrDefault(p => p.Key == mcsBotPlayerId).Value;
+            }
+            logger.Error($"_profiles没有key {mcsBossPlayerId}");
+            return null;
         }
 
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
@@ -204,12 +230,12 @@ namespace MiyakoCarryService.Server.Services
         {
             if (_profiles.ContainsKey(mcsBossPlayerId))
             {
-                _profiles.TryGetValue(mcsBossPlayerId, out var bossCSPlayerFullProfiles);
-                if (bossCSPlayerFullProfiles is null)
+                _profiles.TryGetValue(mcsBossPlayerId, out var mcsBotPlayerProfiles);
+                if (mcsBotPlayerProfiles is null)
                 {
                     return null;
                 }
-                return bossCSPlayerFullProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == mcsAid).Value;
+                return mcsBotPlayerProfiles.FirstOrDefault(p => p.Value.ProfileInfo.Aid == mcsAid).Value;
             }
             return null;
         }

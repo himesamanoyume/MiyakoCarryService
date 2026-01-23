@@ -35,6 +35,7 @@ namespace MiyakoCarryService.Server.Patches
                     }
                 }
             }
+            orderInfoController.SaveOrderInfo();
         }
     }
 }

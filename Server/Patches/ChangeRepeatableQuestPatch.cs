@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Server.Patches
                 logger.Warning(message);
 
                 var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
-                var orderInfos = orderInfoController.GetAllOrderInfos();
+                var orderInfos = orderInfoController.GetAllOrderInfo();
                 foreach (var orderInfo in orderInfos)
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
