@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Server.Patches
         public static bool Prefix(MongoId sessionId, GetOtherProfileRequest request, ref GetOtherProfileResponse __result)
         {
             var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
-            var mcsFullProfileToView = profileController.GetCSFullProfileByAccountId(sessionId, request.AccountId);
+            var mcsFullProfileToView = profileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
             if (mcsFullProfileToView is null)
             {
                 Console.WriteLine("执行老代码");

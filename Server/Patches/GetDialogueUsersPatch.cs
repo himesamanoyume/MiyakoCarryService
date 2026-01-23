@@ -26,7 +26,7 @@
 //             var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
 //             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
 //             var profile = profileHelper.GetFullProfile(sessionId);
-//             var csProfile = profileController.GetCSFullProfile(sessionId, friendId);
+//             var csProfile = profileController.GetMcsPlayerFullProfile(sessionId, friendId);
 
 //             foreach (var friendId in profile.FriendProfileIds)
 //             {

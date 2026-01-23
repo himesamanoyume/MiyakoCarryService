@@ -71,9 +71,9 @@ namespace MiyakoCarryService.Server.Services
             return !fileUtil.FileExists(file);
         }
 
-        public void ProcessExpiredCarryServiceProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
+        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
         {
-            var mcsBotPlayerFullProfile = GetCSFullProfile(mcsBossSessionId, mcsBotPlayerSessionId);
+            var mcsBotPlayerFullProfile = GetMcsBotPlayerProfile(mcsBossSessionId, mcsBotPlayerSessionId);
             _ = new Timer(
                 _ =>
                 {
@@ -91,25 +91,25 @@ namespace MiyakoCarryService.Server.Services
             );
         }
 
-        public void SaveCSPlayerProfile(MongoId mcsBossSessionId, SptProfile mcsBotPlayerFullProfile)
+        public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
         {
             Console.WriteLine("保存护航存档");
-            var mcsBotPlayerId = (MongoId)mcsBotPlayerFullProfile.ProfileInfo.ProfileId;
-            var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerId}.json");
-            _profiles.GetOrAdd(mcsBossSessionId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerFullProfile);
-            var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossSessionId][mcsBotPlayerId], true);
+            var mcsBotPlayerId = (MongoId)mcsBotPlayerProfile.ProfileInfo.ProfileId;
+            var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
+            _profiles.GetOrAdd(mcsBossPlayerId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
+            var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossPlayerId][mcsBotPlayerId], true);
             fileUtil.WriteFile(profilePath, jsonProfile);
         }
 
-        private async Task LoadCSPlayerProfileAsync(MongoId mcsBossSessionId, MongoId mcsBotPlayerSessionId)
+        private async Task LoadMcsPlayerProfileAsync(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            var filePath = System.IO.Path.Combine(_profileFolderDir, mcsBossSessionId, $"{mcsBotPlayerSessionId}.json");
+            var filePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
             if (fileUtil.FileExists(filePath))
             {
-                var mcsBotPlayerFullProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
-                if (mcsBotPlayerFullProfile is not null)
+                var mcsBotPlayerProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
+                if (mcsBotPlayerProfile is not null)
                 {
-                    _profiles.GetOrAdd(mcsBossSessionId, _ => new()).GetOrAdd(mcsBotPlayerSessionId, mcsBotPlayerFullProfile);
+                    _profiles.GetOrAdd(mcsBossPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
                 }
             }
         }
@@ -132,7 +132,7 @@ namespace MiyakoCarryService.Server.Services
                     var filename = System.IO.Path.GetFileNameWithoutExtension(file);
                     if (MongoId.IsValidMongoId(filename))
                     {
-                        await LoadCSPlayerProfileAsync(sessionId, filename);
+                        await LoadMcsPlayerProfileAsync(sessionId, filename);
                     }
                 }
             }
@@ -177,12 +177,12 @@ namespace MiyakoCarryService.Server.Services
             return botBase;
         }
 
-        public SptProfile? GetCSFullProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
+        public SptProfile? GetMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
             return _profiles[mcsBossPlayerId][mcsBotPlayerId];
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
+        public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
         {
             var isInt = int.TryParse(mcsAid, out var iMcsAid);
             if (!isInt)
@@ -190,10 +190,10 @@ namespace MiyakoCarryService.Server.Services
                 logger.Error($"Account {mcsAid} does not exist");
             }
 
-            return GetCSFullProfileByAccountId(mcsBossPlayerId, iMcsAid);
+            return GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, iMcsAid);
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId mcsBossPlayerId, int mcsAid)
+        public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, int mcsAid)
         {
             if (_profiles.ContainsKey(mcsBossPlayerId))
             {
@@ -207,19 +207,19 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
-        public List<SptProfile>? GetCSFullProfileByBossId(MongoId mcsBossPlayerId)
+        public List<SptProfile> GetMcsPlayerProfileByBossId(MongoId mcsBossPlayerId)
         {
             if (_profiles.ContainsKey(mcsBossPlayerId))
             {
                 _profiles.TryGetValue(mcsBossPlayerId, out var bossCSPlayerFullProfiles);
                 if (bossCSPlayerFullProfiles is null)
                 {
-                    return null;
+                    return new();
                 }
                 List<SptProfile> mcsBotPlayerFullProfles = [.. bossCSPlayerFullProfiles.Values];
                 return mcsBotPlayerFullProfles;
             }
-            return null;
+            return new();
         }
 
         public SptProfile Generate(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
@@ -229,8 +229,8 @@ namespace MiyakoCarryService.Server.Services
             mcsPmcBotBase.SessionId = mcsBotPlayerId;
             mcsPmcBotBase.Aid = hashUtil.GenerateAccountId();
 
-            var mcsBotPlayerFullProfile = GeneratemcsBotPlayerFullProfile(mcsPmcBotBase);
-            var mcsBotPlayerScavBotBase = GenerateMcsScavPlayerFullProfile(mcsBossPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
+            var mcsBotPlayerFullProfile = GenerateMcsBotPlayerFullProfile(mcsPmcBotBase);
+            var mcsBotPlayerScavBotBase = GenerateMcsBotScavPlayerFullProfile(mcsBossPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
 
             mcsBotPlayerScavBotBase.SessionId = mcsPmcBotBase.SessionId;
             mcsBotPlayerFullProfile.ProfileInfo.Aid = mcsPmcBotBase.Aid;
@@ -238,11 +238,11 @@ namespace MiyakoCarryService.Server.Services
             mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
             mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
 
-            SaveCSPlayerProfile(mcsBossPlayerId, mcsBotPlayerFullProfile);
+            SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerFullProfile);
             return mcsBotPlayerFullProfile;
         }
 
-        private PmcData GenerateMcsScavPlayerFullProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerFullProfile, int carryServiceLevel)
+        private PmcData GenerateMcsBotScavPlayerFullProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerFullProfile, int carryServiceLevel)
         {
             var profileCharactersClone = cloner.Clone(mcsBotPlayerFullProfile.CharacterData);
             var pmcDataClone = cloner.Clone(profileCharactersClone.PmcData);
@@ -321,7 +321,7 @@ namespace MiyakoCarryService.Server.Services
             return scavData;
         }
 
-        private SptProfile GeneratemcsBotPlayerFullProfile(BotBase mcsBotPlayerPmcBotBase)
+        private SptProfile GenerateMcsBotPlayerFullProfile(BotBase mcsBotPlayerPmcBotBase)
         {
             return new SptProfile
             {

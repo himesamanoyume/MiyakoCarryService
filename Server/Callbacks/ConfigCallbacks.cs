@@ -12,6 +12,9 @@ namespace MiyakoCarryService.Server.Callbacks
         ConfigController configController
     )
     {
+        /// <summary>
+        /// 处理 居然还没做这个路由
+        /// </summary>
         public ValueTask<string> HandleConfig(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
             return new ValueTask<string>(configController.GetConfig());

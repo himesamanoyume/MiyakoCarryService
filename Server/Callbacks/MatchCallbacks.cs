@@ -12,11 +12,17 @@ namespace MiyakoCarryService.Server.Callbacks
         HttpResponseUtil httpResponseUtil
     )
     {
+        /// <summary>
+        /// 处理 /client/match/raid/ready
+        /// </summary>
         public ValueTask<string> RaidReady(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
             return new ValueTask<string>(httpResponseUtil.GetBody(true));
         }
 
+        /// <summary>
+        /// 处理 /client/match/raid/not-ready
+        /// </summary>
         public ValueTask<string> NotRaidReady(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
             return new ValueTask<string>(httpResponseUtil.GetBody(true));

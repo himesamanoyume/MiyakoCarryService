@@ -128,7 +128,7 @@ namespace MiyakoCarryService.Server.Services
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
                         logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
-                        profileService.ProcessExpiredCarryServiceProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
+                        profileService.ProcessExpiredMcsBotPlayerProfile(orderInfo.McsBossPlayerId, mcsBotPlayerId);
                     }
                 }
             }

@@ -25,9 +25,9 @@ namespace MiyakoCarryService.Server.Controllers
             raidService.ClearGroupMember(mcsBossPlayerId);
         }
 
-        public bool CheckCSPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
+        public bool CheckMcsBotPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
         {
-            return raidService.CheckCSPlayerExist(mcsBossPlayerId, mcsAid);
+            return raidService.CheckMcsPlayerExist(mcsBossPlayerId, mcsAid);
         }
 
         public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)

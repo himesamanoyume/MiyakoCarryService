@@ -14,9 +14,9 @@ namespace MiyakoCarryService.Server.Controllers
         ProfileService profileService
     )
     {
-        public void ProcessExpiredCarryServiceProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
+        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            profileService.ProcessExpiredCarryServiceProfile(mcsBossPlayerId, mcsBotPlayerId);
+            profileService.ProcessExpiredMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
         }
 
         public BotBase GeneratePmcBotBaseProfile(MongoId mcsBossPlayerId, PmcData mcsBotPlayerPmcData, int carryServiceLevel)
@@ -24,33 +24,29 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GeneratePmcBotProfile(mcsBossPlayerId, mcsBotPlayerPmcData, carryServiceLevel);
         }
 
-        public void SaveCSPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
+        public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
         {
-            profileService.SaveCSPlayerProfile(mcsBossPlayerId, mcsBotPlayerProfile);
+            profileService.SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerProfile);
         }
 
         public SptProfile Generate(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
         {
             return profileService.Generate(mcsBossPlayerId, mcsBotPlayerId, completeQuestPmcData, carryServiceLevel);
         }
-        public SptProfile? GetCSFullProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
+
+        public SptProfile? GetMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
         {
-            return profileService.GetCSFullProfile(mcsBossPlayerId, mcsBotPlayerId);
+            return profileService.GetMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
+        public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
         {
-            return profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
+            return profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
         }
 
-        public SptProfile? GetCSFullProfileByAccountId(MongoId mcsBossPlayerId, int mcsAid)
+        public List<SptProfile> GetMcsPlayerProfileByBossId(MongoId mcsBossPlayerId)
         {
-            return profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
-        }
-
-        public List<SptProfile>? GetCSFullProfileByBossId(MongoId mcsBossPlayerId)
-        {
-            return profileService.GetCSFullProfileByBossId(mcsBossPlayerId);
+            return profileService.GetMcsPlayerProfileByBossId(mcsBossPlayerId);
         }
     }
 }

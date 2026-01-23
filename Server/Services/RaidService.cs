@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Server.Services
 
         }
 
-        public bool CheckCSPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
+        public bool CheckMcsPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
         {
             if (_bossMemberGroups.TryGetValue(mcsBossPlayerId, out var mcsAids))
             {
@@ -59,14 +59,14 @@ namespace MiyakoCarryService.Server.Services
 
         public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
         {
-            var mcsBotPlayerFullProfile = profileService.GetCSFullProfileByAccountId(mcsBossPlayerId, mcsAid);
+            var mcsBotPlayerFullProfile = profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
 
             if (mcsBotPlayerFullProfile is null)
             {
                 return;
             }
 
-            if (CheckCSPlayerExist(mcsBossPlayerId, mcsAid))
+            if (CheckMcsPlayerExist(mcsBossPlayerId, mcsAid))
             {
                 var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
                 notificationSendHelper.SendMessage(mcsBossPlayerId, notification);

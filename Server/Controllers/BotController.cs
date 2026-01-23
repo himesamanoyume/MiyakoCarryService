@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Server.Controllers
             {
                 var pmcDatas = await Task.Run(() =>
                 {
-                    var profiles = profileController.GetCSFullProfileByBossId(mcsBossPlayerId);
+                    var profiles = profileController.GetMcsPlayerProfileByBossId(mcsBossPlayerId);
                     if (profiles == null)
                     {
                         return new List<PmcData>();
