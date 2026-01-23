@@ -18,14 +18,13 @@ namespace MiyakoCarryService.Server.Patches
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupPlayerRemoveRequest info, MongoId sessionID)
         {
-            var mcsAid = info.AidToKick;
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            var check = int.TryParse(mcsAid, out var aid);
+            var check = int.TryParse(info.AidToKick, out var mcsAid);
             if (!check)
             {
                 return;
             }
-            raidController.RemoveGroupMember(sessionID, aid);
+            raidController.RemoveGroupMember(sessionID, mcsAid);
         }
     }
 }

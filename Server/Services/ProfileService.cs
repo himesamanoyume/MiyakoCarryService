@@ -184,13 +184,13 @@ namespace MiyakoCarryService.Server.Services
 
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, string mcsAid)
         {
-            var isInt = int.TryParse(mcsAid, out var iMcsAid);
+            var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
                 logger.Error($"Account {mcsAid} does not exist");
             }
 
-            return GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, iMcsAid);
+            return GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, intMcsAid);
         }
 
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsBossPlayerId, int mcsAid)
@@ -207,7 +207,7 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
-        public List<SptProfile> GetMcsPlayerProfileByBossId(MongoId mcsBossPlayerId)
+        public List<SptProfile> GetAllMcsBotPlayerProfileByBossId(MongoId mcsBossPlayerId)
         {
             if (_profiles.ContainsKey(mcsBossPlayerId))
             {

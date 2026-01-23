@@ -44,9 +44,9 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
         }
 
-        public List<SptProfile> GetMcsPlayerProfileByBossId(MongoId mcsBossPlayerId)
+        public List<SptProfile> GetAllMcsBotPlayerProfileByBossId(MongoId mcsBossPlayerId)
         {
-            return profileService.GetMcsPlayerProfileByBossId(mcsBossPlayerId);
+            return profileService.GetAllMcsBotPlayerProfileByBossId(mcsBossPlayerId);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Server.Patches
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var profile = profileHelper.GetFullProfile(sessionId);
 
-            var mcsBotPlayerProfiles = profileController.GetMcsPlayerProfileByBossId(sessionId);
+            var mcsBotPlayerProfiles = profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
 
             if (mcsBotPlayerProfiles is not null)
             {

@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
     public class BotController(
-        ProfileController profileController,
+        RaidController raidController,
         CompatibilityService compatibilityService
     )
     {
@@ -49,11 +49,8 @@ namespace MiyakoCarryService.Server.Controllers
             {
                 var pmcDatas = await Task.Run(() =>
                 {
-                    var profiles = profileController.GetMcsPlayerProfileByBossId(mcsBossPlayerId);
-                    if (profiles == null)
-                    {
-                        return new List<PmcData>();
-                    }
+                    var profiles = raidController.GetAllGroupMemberProfiles(mcsBossPlayerId);
+                    raidController.ClearGroupMember(mcsBossPlayerId);
                     return profiles.Select(p => p.CharacterData.PmcData).ToList();
                 });
 

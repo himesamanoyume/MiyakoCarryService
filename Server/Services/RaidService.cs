@@ -5,6 +5,7 @@ using MiyakoCarryService.Server.Helper;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Profile;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -81,6 +82,21 @@ namespace MiyakoCarryService.Server.Services
 
                 AddGroupMember(mcsBossPlayerId, mcsAid);
             }
+        }
+
+        public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsBossPlayerId)
+        {
+            var members = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            var profiles = new List<SptProfile>();
+            foreach (var mcsAid in members)
+            {
+                var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
+                if (profile is not null)
+                {
+                    profiles.Add(profile);
+                }
+            }
+            return profiles;
         }
     }
 }
