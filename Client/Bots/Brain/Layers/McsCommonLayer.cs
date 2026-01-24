@@ -16,7 +16,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling GetNextAction");
             try
             {
                 if (BotOwner.Medecine.FirstAid.Have2Do || BotOwner.Medecine.SurgicalKit.HaveWork)
@@ -64,11 +63,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 // Do some specific things if we aren't a boss or follower
                 // if (!IsBossOrFollower())
                 // {
-                //     // Do the wiggle
-                //     if (BotOwner.FriendlyTilt.HaveActions())
-                //     {
-                //         return new Action(typeof(FriendlyTiltLogic), "Mcs:FriendlyTil");
-                //     }
 
                 //     // Should we be eating/drinking?
                 //     if (BotOwner.EatDrinkData.HaveActions())
@@ -76,7 +70,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 //         return new Action(typeof(EatDrinkLogic), "Mcs:EatDrinkDat");
                 //     }
 
-                //     // Did a player gesture to us?
+                //     // Did a player 手势 to us?
                 //     if (BotOwner.Gesture.HaveRequest())
                 //     {
                 //         return new Action(typeof(GestureLogic), "Mcs:Gesture");
@@ -128,46 +122,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override bool IsActive()
         {
             BotOwner.PriorityAxeTarget.FindTarget();
-            // if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
-            if (IsMcsBotPlayer)
+            if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
+            {
+                return false;
+            }
+
+            if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
             {
                 return true;
-                // var mcsBossPlayer = McsBotPlayerData.BossPlayer;
-                // var distance = Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position);
-                // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} distance {distance}");
-                // if (distance >= 25)
-                // {
-                //     return true;
-                // }
             }
-            // if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
-            // {
-            //     return false;
-            // }
-
-            // if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
-            // {
-            //     var mcsBossPlayer = McsBotPlayerData.BossPlayer;
-            //     if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
-            //     {
-            //         MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsActive return true!");
-            //         return true;
-            //     }
-            // }
             return false;
         }
 
         public override bool IsCurrentActionEnding()
         {
-            // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsCurrentActionEnding");
-            // var mcsBossPlayer = McsBotPlayerData.BossPlayer;
-            // if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
-            // {
-            //     return false;
-            // }
-            // // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsCurrentActionEnding");
-            // return true;
-
             if (CurrentAction == null)
             {
                 return true;
@@ -240,12 +208,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 BotOwner.PatrollingData.PointChooser.ChooseStartWay();
             }
-
-            // // If we have a boss, return its patrolling data PatrolWay
-            // if (BotOwner.BotFollower.HaveBoss)
-            // {
-            //     return BotOwner.BotFollower.BossToFollow.PatrollingData.Way;
-            // }
 
             return BotOwner.PatrollingData.Way;
         }
