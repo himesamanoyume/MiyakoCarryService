@@ -248,3 +248,5 @@
 - 生成的护航开局傻傻的，感觉是自定义Layer的问题（是。必须先击中其一枪，他就会从此Layer中离开到原版Layer，但是后续再也没见过回到CustomLayer）
 - ~~基本进入到AI的逻辑编写阶段，但还没完全弄清楚这个Layer到底如何生效，是否必须要Remove一个Layer?~~
 - ~~总之模仿`BrainTest.PatrolAssaultLayer`把所有Logic套上去再说~~
+- ~~BUG:BotOwner.BotFollower.BossToFollow.PatrollingData为null~~(没问题，因为本人玩家不是AI，不会有PatrollingData，因此需要避免让Bot调用玩家的PatrollingData)
+- **当前Layer会使护航永远激活，导致不会进入其他Layer来接敌，当然也可以直接让Layer自带接敌Logic以实现高强度的瞄准能力**

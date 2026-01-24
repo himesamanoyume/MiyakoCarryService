@@ -1,4 +1,5 @@
 
+using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
@@ -16,110 +17,119 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override Action GetNextAction()
         {
             // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling GetNextAction");
-            if (BotOwner.Medecine.FirstAid.Have2Do || BotOwner.Medecine.SurgicalKit.HaveWork)
+            try
             {
-                // If we are already in cover, we can heal
-                if (BotOwner.Memory.IsInCover)
+                if (BotOwner.Medecine.FirstAid.Have2Do || BotOwner.Medecine.SurgicalKit.HaveWork)
                 {
-                    return new Action(typeof(HealLogic), "first aid");
+                    // If we are already in cover, we can heal
+                    if (BotOwner.Memory.IsInCover)
+                    {
+                        return new Action(typeof(HealLogic), "Mcs:first aid");
+                    }
+
+                    // If we were hit in the last 20 seconds, run to cover before healing
+                    if (WasHitRecently(20f))
+                    {
+                        return new Action(typeof(RunToCoverLogic), "Mcs:goforheal");
+                    }
+
+                    // Otherwise we can heal
+                    return new Action(typeof(HealLogic), "Mcs:heal now");
                 }
 
-                // If we were hit in the last 20 seconds, run to cover before healing
-                if (WasHitRecently(20f))
+                // If we're in a smoke grenade, go to a cover point
+                if (BotOwner.SmokeGrenade.IsInSmoke)
                 {
-                    return new Action(typeof(RunToCoverLogic), "goforheal");
+                    return new Action(typeof(GoToCoverPointLogic), "Mcs:PeaceSmoke");
                 }
 
-                // Otherwise we can heal
-                return new Action(typeof(HealLogic), "heal now");
-            }
+                // 
+                if (BotOwner.PeaceHardAim.HaveActions())
+                {
+                    return new Action(typeof(PeaceHardAimLogic), "Mcs:PeaceHardAi");
+                }
 
-            // If we're in a smoke grenade, go to a cover point
-            if (BotOwner.SmokeGrenade.IsInSmoke)
+                // 
+                if (BotOwner.PeaceLook.HaveActions())
+                {
+                    return new Action(typeof(PeaceLookLogic), "Mcs:PeaceLook");
+                }
+
+                // 
+                if (BotOwner.SecondWeaponData.HaveActions())
+                {
+                    return new Action(typeof(WatchSecondWeaponLogic), "Mcs:Look2ndWeap");
+                }
+
+                // Do some specific things if we aren't a boss or follower
+                // if (!IsBossOrFollower())
+                // {
+                //     // Do the wiggle
+                //     if (BotOwner.FriendlyTilt.HaveActions())
+                //     {
+                //         return new Action(typeof(FriendlyTiltLogic), "Mcs:FriendlyTil");
+                //     }
+
+                //     // Should we be eating/drinking?
+                //     if (BotOwner.EatDrinkData.HaveActions())
+                //     {
+                //         return new Action(typeof(EatDrinkLogic), "Mcs:EatDrinkDat");
+                //     }
+
+                //     // Did a player gesture to us?
+                //     if (BotOwner.Gesture.HaveRequest())
+                //     {
+                //         return new Action(typeof(GestureLogic), "Mcs:Gesture");
+                //     }
+
+                //     // 
+                //     if (BotOwner.PeacefulActions.HaveActions())
+                //     {
+                //         return new Action(typeof(PeacefulLogic), "Mcs:Peaceful");
+                //     }
+                // }
+
+                // Get patrolling information
+                BotOwner.PatrollingData.SetTargetMoveSpeed();
+                BotOwner.PatrollingData.PointChooser.ShallChangeWay(false);
+                var patrolWay = GetCurrentPatrolWay();
+
+                // If we are not a boss, and we're following a boss, set our action to FollowerPatrol
+                if (!BotOwner.Boss.IamBoss && BotOwner.BotFollower.HaveBoss)
+                {
+                    return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
+                }
+
+                // Reload if we're under 60% ammo, and it's been long enough since our last reload
+                float ammoPercent = BotOwner.WeaponManager.Reload.BulletCount / BotOwner.WeaponManager.Reload.MaxBulletCount;
+                if (ammoPercent < 0.6f && Time.time >= _nextReloadTime)
+                {
+                    _nextReloadTime = Time.time + 30f;
+                    BotOwner.WeaponManager.Reload.TryReload();
+                }
+
+                // If we have a patrol, it's a reserve patrol, and the bot is allowed on reserve patrols, set the action to alternative patrol
+                if (patrolWay != null && patrolWay.PatrolType == PatrolType.reserved && BotOwner.Settings.FileSettings.Patrol.CAN_CHOOSE_RESERV)
+                {
+                    BotOwner.PatrollingData.ComeToPoint();
+                    return new Action(typeof(AlternativePatrolLogic), "Mcs:RESER");
+                }
+
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                // return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
+            }
+            catch (Exception e)
             {
-                return new Action(typeof(GoToCoverPointLogic), "PeaceSmoke");
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
             }
-
-            // 
-            if (BotOwner.PeaceHardAim.HaveActions())
-            {
-                return new Action(typeof(PeaceHardAimLogic), "PeaceHardAi");
-            }
-
-            // 
-            if (BotOwner.PeaceLook.HaveActions())
-            {
-                return new Action(typeof(PeaceLookLogic), "PeaceLook");
-            }
-
-            // 
-            if (BotOwner.SecondWeaponData.HaveActions())
-            {
-                return new Action(typeof(WatchSecondWeaponLogic), "Look2ndWeap");
-            }
-
-            // Do some specific things if we aren't a boss or follower
-            // if (!IsBossOrFollower())
-            // {
-            //     // Do the wiggle
-            //     if (BotOwner.FriendlyTilt.HaveActions())
-            //     {
-            //         return new Action(typeof(FriendlyTiltLogic), "FriendlyTil");
-            //     }
-
-            //     // Should we be eating/drinking?
-            //     if (BotOwner.EatDrinkData.HaveActions())
-            //     {
-            //         return new Action(typeof(EatDrinkLogic), "EatDrinkDat");
-            //     }
-
-            //     // Did a player gesture to us?
-            //     if (BotOwner.Gesture.HaveRequest())
-            //     {
-            //         return new Action(typeof(GestureLogic), "Gesture");
-            //     }
-
-            //     // 
-            //     if (BotOwner.PeacefulActions.HaveActions())
-            //     {
-            //         return new Action(typeof(PeacefulLogic), "Peaceful");
-            //     }
-            // }
-
-            // Get patrolling information
-            BotOwner.PatrollingData.SetTargetMoveSpeed();
-            BotOwner.PatrollingData.PointChooser.ShallChangeWay(false);
-            PatrolWay patrolWay = GetCurrentPatrolWay();
-
-            // If we are not a boss, and we're following a boss, set our action to FollowerPatrol
-            if (!BotOwner.Boss.IamBoss && BotOwner.BotFollower.HaveBoss)
-            {
-                return new Action(typeof(FollowerPatrolLogic), "BossFollow");
-            }
-
-            // Reload if we're under 60% ammo, and it's been long enough since our last reload
-            float ammoPercent = BotOwner.WeaponManager.Reload.BulletCount / BotOwner.WeaponManager.Reload.MaxBulletCount;
-            if (ammoPercent < 0.6f && Time.time >= _nextReloadTime)
-            {
-                _nextReloadTime = Time.time + 30f;
-                BotOwner.WeaponManager.Reload.TryReload();
-            }
-
-            // If we have a patrol, it's a reserve patrol, and the bot is allowed on reserve patrols, set the action to alternative patrol
-            if (patrolWay != null && patrolWay.PatrolType == PatrolType.reserved && BotOwner.Settings.FileSettings.Patrol.CAN_CHOOSE_RESERV)
-            {
-                BotOwner.PatrollingData.ComeToPoint();
-                return new Action(typeof(AlternativePatrolLogic), "RESER");
-            }
-
-            return new Action(typeof(SimplePatrolLogic), "Basic");
-            // return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
         }
 
         public override bool IsActive()
         {
             BotOwner.PriorityAxeTarget.FindTarget();
-            if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
+            // if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
+            if (IsMcsBotPlayer)
             {
                 return true;
                 // var mcsBossPlayer = McsBotPlayerData.BossPlayer;
@@ -150,28 +160,92 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override bool IsCurrentActionEnding()
         {
             // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsCurrentActionEnding");
-            var mcsBossPlayer = McsBotPlayerData.BossPlayer;
-            if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
+            // var mcsBossPlayer = McsBotPlayerData.BossPlayer;
+            // if (Vector3.Distance(BotOwner.Position, mcsBossPlayer.Position) >= 25)
+            // {
+            //     return false;
+            // }
+            // // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsCurrentActionEnding");
+            // return true;
+
+            if (CurrentAction == null)
             {
-                return false;
+                return true;
             }
-            // MiyakoCarryServicePlugin.Logger.LogInfo($"Bot {BotOwner.name} calling IsCurrentActionEnding");
+
+            Type currentActionType = CurrentAction.Type;
+
+            // I don't really know a more elegant way to do this condition than direct comparing the types
+            if (currentActionType == typeof(AlternativePatrolLogic))
+            {
+                return EndAlternativePatrol();
+            }
+            // else if (currentActionType == typeof(EatDrinkLogic))
+            // {
+            //     return EndEatDrink();
+            // }
+            else if (currentActionType == typeof(FollowerPatrolLogic))
+            {
+                return EndFollowerPatrol();
+            }
+            // else if (currentActionType == typeof(FriendlyTiltLogic))
+            // {
+            //     return EndFriendlyTilt();
+            // }
+            // else if (currentActionType == typeof(GestureLogic))
+            // {
+            //     return EndGesture();
+            // }
+            else if (currentActionType == typeof(GoToCoverPointLogic))
+            {
+                return EndGoToCoverPoint();
+            }
+            else if (currentActionType == typeof(HealLogic))
+            {
+                return EndHeal();
+            }
+            // else if (currentActionType == typeof(PeacefulLogic))
+            // {
+            //     return EndPeaceful();
+            // }
+            else if (currentActionType == typeof(PeaceHardAimLogic))
+            {
+                return EndPeaceHardAim();
+            }
+            else if (currentActionType == typeof(PeaceLookLogic))
+            {
+                return EndPeaceLook();
+            }
+            else if (currentActionType == typeof(RunToCoverLogic))
+            {
+                return EndRunToCover();
+            }
+            else if (currentActionType == typeof(SimplePatrolLogic))
+            {
+                return EndSimplePatrol();
+            }
+            else if (currentActionType == typeof(WatchSecondWeaponLogic))
+            {
+                return EndWatchSecondWeapon();
+            }
+
+            // If it's not a logic we handle, end it
             return true;
         }
 
         private PatrolWay GetCurrentPatrolWay()
         {
-            // If we have a boss, return its patrolling data PatrolWay
-            if (BotOwner.BotFollower.HaveBoss)
-            {
-                return BotOwner.BotFollower.BossToFollow.PatrollingData.Way;
-            }
-
             // Otherwise, if we don't have a PatrolWay yet, choose one
             if (BotOwner.PatrollingData.Way == null)
             {
                 BotOwner.PatrollingData.PointChooser.ChooseStartWay();
             }
+
+            // // If we have a boss, return its patrolling data PatrolWay
+            // if (BotOwner.BotFollower.HaveBoss)
+            // {
+            //     return BotOwner.BotFollower.BossToFollow.PatrollingData.Way;
+            // }
 
             return BotOwner.PatrollingData.Way;
         }
