@@ -248,14 +248,17 @@
 - ~~BUG:BotOwner.BotFollower.BossToFollow.PatrollingData为null~~(没问题，因为本人玩家不是AI，不会有PatrollingData，因此需要避免让Bot调用玩家的PatrollingData)
 - ~~当前Layer会使护航永远激活，导致不会进入其他Layer来接敌~~，当然也可以直接让Layer自带接敌Logic以实现高强度的瞄准能力
 ```
-- 让Bot无敌，随后让其与排山倒海敌人战斗，看其是否会自动从安全箱中拿子弹，如果不会，就需要自己手动
-- 让Bot免疫友伤
+- ~~让Bot无敌，随后让其与排山倒海敌人战斗，看其是否会自动从安全箱中拿子弹，如果不会，就需要自己手动~~（会拿，因此子弹还是有限的）
+- ~~让Bot免疫友伤~~
 - ~~参考SAIN实现避免危险Layer~~（既然没有友伤了就不需要此Layer了）
+- **抄袭`SetFollowerSettings`修改Bot的参数**
+- **如何修改Bot的安全箱**
 - 根据思想钢印开始进行Logic细化
 - `AddEnemyPatch`看代码似乎可以移除，但是可能以后还会在联机时被用上
 - 尝试参考`friendlyPmc`看是否有自身处于护航枪线上防止开枪误伤的代码
 - - 将代码上传至github，让deepwiki帮我检查
-- 让护航会发出英语短语
+- 护航是否会说话？如果不会需要让护航会发出英语短语
+> `botOwner_0.BotTalk.TrySay(EPhraseTrigger.FriendlyFire, false);`
 - 实现配置管理器显示默认配置项，其中包含只收集多少价值以上的物品等
 - 实现当将护航拉入小队时，让配置管理器克隆默认配置然后额外显示该护航的单独配置
 - 战局开始前，想办法收集每个人的护航配置，随后由房主接收汇总并使配置生效

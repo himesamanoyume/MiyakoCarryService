@@ -118,6 +118,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TryLoadBotsProfilesOnStartPatch().Enable();
         new AddEnemyPatch().Enable();
         new ManualUpdatePatch().Enable();
+        new ApplyDamagePatch().Enable();
 #if DEBUG
         
 #endif
