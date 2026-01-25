@@ -17,6 +17,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Enums.RaidSettings;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
@@ -187,6 +188,7 @@ namespace MiyakoCarryService.Server.Services
             var pmcNames = new List<string>();
             pmcNames.AddRange(bots["usec"].FirstNames);
             pmcNames.AddRange(bots["bear"].FirstNames);
+            var botDifficulty = (BotDifficulty)carryServiceLevel;
 
             var botBase = botGenerator.PrepareAndGenerateBot(mcsBossPlayerId, new()
             {
@@ -198,7 +200,7 @@ namespace MiyakoCarryService.Server.Services
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
-                BotDifficulty = "hard",
+                BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty.ToString().ToLower() : "impossible",
                 IsPlayerScav = false,
                 AllPmcsHaveSameNameAsPlayer = false
             });
