@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
@@ -210,7 +211,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Cover.SPOTTED_GRENADE_TIME = 7f;
 
                         var botDifficultyInt = (int)botDifficulty;
-                        
+
                         // - faster aiming sett
                         settings.FileSettings.Aiming.COEF_IF_MOVE /= botDifficultyInt + 1;
                         settings.FileSettings.Aiming.BOTTOM_COEF /= botDifficultyInt + 1;
@@ -286,10 +287,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         // - need no food
                         // botOwner.GetPlayer.HealthController.DisableMetabolism();
 
-                        // - have followers share the same groupId as the player
-                        botOwner.GetPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId;
-                        botOwner.GetPlayer.Profile.Info.TeamId = bossPlayer.Profile.Info.TeamId;
-
                         botOwner.Tactic.AggressionChange(1f);
 
                         AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Core.VisibleAngle * 0.017453292f));
@@ -298,6 +295,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         botOwner.LookSensor.method_3(1f);
 
                         botOwner.Settings = settings;
+
+                        if (botOwner.WeaponManager.ShootController.Item != null && botOwner.WeaponManager.ShootController.Item.WeapFireType.Contains(Weapon.EFireMode.fullauto))
+                        {
+                            botOwner.WeaponManager.ShootController.ChangeFireMode(Weapon.EFireMode.fullauto);
+                        }
 
                         _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
 
