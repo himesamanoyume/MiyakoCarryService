@@ -6,6 +6,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Servers.Ws;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -13,6 +14,7 @@ namespace MiyakoCarryService.Server.Services
     public sealed class RaidService(
         NotificationHelper notificationHelper,
         NotificationSendHelper notificationSendHelper,
+        SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         ProfileService profileService
     )
     {
@@ -71,8 +73,11 @@ namespace MiyakoCarryService.Server.Services
             {
                 try
                 {
-                    var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
-                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                    {
+                        var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
+                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                    }
                 }
                 finally
                 {
@@ -83,10 +88,13 @@ namespace MiyakoCarryService.Server.Services
             {
                 try
                 {
-                    var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
-                    var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
-                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
-                    notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                    {
+                        var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
+                        var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
+                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                    }
                 }
                 finally
                 {

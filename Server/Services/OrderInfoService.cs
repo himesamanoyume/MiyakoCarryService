@@ -13,6 +13,7 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -23,6 +24,7 @@ namespace MiyakoCarryService.Server.Services
         NotificationSendHelper notificationSendHelper,
         ISptLogger<OrderInfoService> logger,
         NotificationHelper notificationHelper,
+        SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
@@ -164,8 +166,11 @@ namespace MiyakoCarryService.Server.Services
                 {
                     try
                     {
-                        var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                        if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                        {
+                            var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
+                            notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                        }
                     }
                     finally
                     {

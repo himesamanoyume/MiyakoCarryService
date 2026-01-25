@@ -22,6 +22,7 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
+using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
@@ -48,6 +49,7 @@ namespace MiyakoCarryService.Server.Services
         BotLootCacheService botLootCacheService,
         BotGenerator botGenerator,
         PlayerScavGenerator playerScavGenerator,
+        SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         ProfileHelper profileHelper,
         OrderInfoService orderInfoService
     )
@@ -89,10 +91,13 @@ namespace MiyakoCarryService.Server.Services
                 {
                     try
                     {
-                        var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
-                        var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                        if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                        {
+                            var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
+                            var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
+                            notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                            notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                        }
                     }
                     finally
                     {

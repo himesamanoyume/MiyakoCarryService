@@ -256,6 +256,7 @@
 > `friendlyPmc的AddExtraAmmoForWeapon()`
 - ~~找出让Bot生成时调整其安全箱的代码~~（在服务端生成bot存档时就已经一并生成Boss安全箱和弹药等药品了）
 - **尝试在服务端额外添加针剂包和针剂**
+> 参考服务端`BotInventoryGenerator.GenerateInventory()`
 - **尝试让护航学会使用针剂**
 - `AddEnemyPatch`看代码似乎可以移除，但是可能以后还会在联机时被用上
 - ~~尝试参考`friendlyPmc`看是否有自身处于护航枪线上防止开枪误伤的代码~~
