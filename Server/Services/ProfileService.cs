@@ -18,6 +18,7 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
+using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
@@ -103,7 +104,7 @@ namespace MiyakoCarryService.Server.Services
                     {
                         RemoveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerId);
                     }
-                    
+
                 },
                 null,
                 TimeSpan.FromMicroseconds(1000),
@@ -315,13 +316,66 @@ namespace MiyakoCarryService.Server.Services
             var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
             playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
 
-            var scavData = botGenerator.GeneratePlayerScav(
-                mcsBossPlayerId,
-                playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant(),
-                "hard",
-                baseBotNode,
-                pmcDataClone
-            );
+            // 此处会生成玩家Scav的数据，没有安全箱
+            // var scavData = botGenerator.GeneratePlayerScav(
+            //     mcsBossPlayerId,
+            //     playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant(),
+            //     "hard",
+            //     baseBotNode,
+            //     pmcDataClone
+            // );
+
+            // 以AI Scav的形式生成，带有安全箱
+            var botDifficulty = (BotDifficulty)carryServiceLevel;
+
+            var botBase = botGenerator.PrepareAndGenerateBot(mcsBossPlayerId, new()
+            {
+                IsPmc = false,
+                Side = "Savage",
+                Role = playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant(),
+                PlayerLevel = carryServiceLevel * 10 + 20,
+                BotRelativeLevelDeltaMin = 0,
+                BotRelativeLevelDeltaMax = 0,
+                BotCountToGenerate = 1,
+                BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty.ToString().ToLower() : "impossible",
+                IsPlayerScav = false,
+                ClearBotContainerCacheAfterGeneration = false
+            });
+
+            var scavData = new PmcData
+            {
+                Id = existingScavDataClone.Id ?? pmcDataClone.Savage,
+                Aid = pmcDataClone.Aid,
+                SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId,
+                Savage = null,
+                KarmaValue = botBase.KarmaValue,
+                Info = botBase.Info,
+                Customization = botBase.Customization,
+                Health = botBase.Health,
+                Inventory = botBase.Inventory,
+                Skills = existingScavDataClone.GetSkillsOrDefault(),
+                Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters(),
+                Encyclopedia = botBase.Encyclopedia,
+                TaskConditionCounters = botBase.TaskConditionCounters,
+                InsuredItems = botBase.InsuredItems,
+                Hideout = botBase.Hideout,
+                Quests = botBase.Quests,
+                TradersInfo = pmcDataClone.TradersInfo,
+                UnlockedInfo = pmcDataClone.UnlockedInfo,
+                RagfairInfo = pmcDataClone.RagfairInfo,
+                Achievements = botBase.Achievements,
+                RepeatableQuests = botBase.RepeatableQuests,
+                Bonuses = botBase.Bonuses,
+                Notes = botBase.Notes,
+                CarExtractCounts = botBase.CarExtractCounts,
+                CoopExtractCounts = botBase.CoopExtractCounts,
+                SurvivorClass = botBase.SurvivorClass,
+                WishList = botBase.WishList,
+                MoneyTransferLimitData = botBase.MoneyTransferLimitData,
+                IsPmc = botBase.IsPmc,
+                Variables = existingScavDataClone.Variables ?? new(),
+                Prestige = new Dictionary<string, long>()
+            };
 
             playerScavGeneratorTraverse.Method("AddAdditionalLootToPlayerScavContainers", [
                 scavData.Id.Value,
@@ -333,12 +387,11 @@ namespace MiyakoCarryService.Server.Services
             ]).GetValue();
 
             botInventoryContainerService.ClearCache(scavData.Id.Value);
-
             botLootCacheService.ClearCache();
 
-            scavData.Savage = null;
-            scavData.Aid = pmcDataClone.Aid;
-            scavData.TradersInfo = pmcDataClone.TradersInfo;
+            // scavData.Savage = null;
+            // scavData.Aid = pmcDataClone.Aid;
+            // scavData.TradersInfo = pmcDataClone.TradersInfo;
             scavData.Info.Settings = new();
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcDataClone.Info.RegistrationDate;
@@ -346,24 +399,24 @@ namespace MiyakoCarryService.Server.Services
             scavData.Info.MemberCategory = MemberCategory.UniqueId;
             scavData.Info.LockedMoveCommands = true;
             scavData.Info.MainProfileNickname = pmcDataClone.Info.Nickname;
-            scavData.RagfairInfo = pmcDataClone.RagfairInfo;
-            scavData.UnlockedInfo = pmcDataClone.UnlockedInfo;
+            // scavData.RagfairInfo = pmcDataClone.RagfairInfo;
+            // scavData.UnlockedInfo = pmcDataClone.UnlockedInfo;
 
-            scavData.Id = existingScavDataClone.Id ?? pmcDataClone.Savage;
-            scavData.SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId;
-            scavData.Skills = existingScavDataClone.GetSkillsOrDefault();
-            scavData.Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters(); ;
+            // scavData.Id = existingScavDataClone.Id ?? pmcDataClone.Savage;
+            // scavData.SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId;
+            // scavData.Skills = existingScavDataClone.GetSkillsOrDefault();
+            // scavData.Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters();
             scavData.Info.Level = 1;
             scavData.Info.Experience = 200;
-            scavData.Quests = existingScavDataClone.Quests ?? [];
-            scavData.TaskConditionCounters = existingScavDataClone.TaskConditionCounters ?? new();
-            scavData.Notes = existingScavDataClone.Notes ?? new Notes { DataNotes = [] };
-            scavData.WishList = existingScavDataClone.WishList ?? new();
-            scavData.Encyclopedia = pmcDataClone.Encyclopedia ?? new();
-            scavData.Variables = existingScavDataClone.Variables ?? new();
+            // scavData.Quests = existingScavDataClone.Quests ?? [];
+            // scavData.TaskConditionCounters = existingScavDataClone.TaskConditionCounters ?? new();
+            // scavData.Notes = existingScavDataClone.Notes ?? new Notes { DataNotes = [] };
+            // scavData.WishList = existingScavDataClone.WishList ?? new();
+            // scavData.Encyclopedia = pmcDataClone.Encyclopedia ?? new();
+            // scavData.Variables = existingScavDataClone.Variables ?? new();
 
             // 作为护航, 很可能反而不仅不要移除，甚至还需要放入Boss安全箱
-            scavData = profileHelper.RemoveSecureContainer(scavData);
+            // scavData = profileHelper.RemoveSecureContainer(scavData);
             return scavData;
         }
 
