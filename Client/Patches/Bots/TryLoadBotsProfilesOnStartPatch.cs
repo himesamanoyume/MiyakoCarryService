@@ -218,7 +218,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Aiming.COEF_FROM_COVER /= botDifficultyInt + 1;
                         settings.FileSettings.Aiming.PANIC_COEF /= botDifficultyInt + 1;
 
-                        settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME += botDifficultyInt * 0.2f;
+                        settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME += botDifficultyInt * 1f;
 
                         // - improved shooting settings
                         settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
@@ -292,14 +292,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Core.VisibleAngle * 0.017453292f));
                         AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_LIGHT").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_LIGHT * 0.017453292f));
                         AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_NIGHTVISION").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION * 0.017453292f));
-                        botOwner.LookSensor.method_3(1f);
 
                         botOwner.Settings = settings;
-
-                        if (botOwner.WeaponManager.ShootController.Item != null && botOwner.WeaponManager.ShootController.Item.WeapFireType.Contains(Weapon.EFireMode.fullauto))
-                        {
-                            botOwner.WeaponManager.ShootController.ChangeFireMode(Weapon.EFireMode.fullauto);
-                        }
 
                         _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
 
