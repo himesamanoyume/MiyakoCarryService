@@ -22,6 +22,7 @@ namespace MiyakoCarryService.Server
                 new GetFriendListPatch().Enable();
                 new GameStartPatch().Enable();
                 new SendGroupInvitePatch().Enable();
+                new LeaveGroupPatch().Enable();
                 new RemovePlayerFromGroupPatch().Enable();
                 new EndLocalRaidPatch().Enable();
                 await configService.OnPreLoadAsync();
