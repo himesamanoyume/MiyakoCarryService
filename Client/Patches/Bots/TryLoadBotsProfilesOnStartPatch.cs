@@ -218,7 +218,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Aiming.COEF_FROM_COVER /= botDifficultyInt + 1;
                         settings.FileSettings.Aiming.PANIC_COEF /= botDifficultyInt + 1;
 
-                        settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME += botDifficultyInt * 1f;
+                        settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME /= botDifficultyInt * 2f;
 
                         // - improved shooting settings
                         settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
@@ -226,8 +226,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 5f;
                         settings.FileSettings.Aiming.ANYTIME_LIGHT_WHEN_AIM_100 = 50f;
-                        settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 3;
-                        settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 1;
+                        settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 2;
+                        settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
                         settings.FileSettings.Aiming.FIRST_CONTACT_ADD_CHANCE_100 = 20f;
 
                         // - hit disturbance settings
@@ -353,12 +353,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             botOwner.GetPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId;
                             botOwner.GetPlayer.Profile.Info.TeamId = bossPlayer.Profile.Info.TeamId;
 
+                            botOwner.Boss.IamBoss = false;
+
                             botOwner.BotFollower.PatrolDataFollower.InitPlayer(bossPlayer);
                             botOwner.BotFollower.BossToFollow = mcsAIBossPlayer;
-                            var followerMode = PatrolMode.follower;
-                            var simpleMode = PatrolMode.simple;
-                            var pointChooser = PatrollingData.GetPointChooser(botOwner, simpleMode, botOwner.SpawnProfileData);
-                            botOwner.PatrollingData.SetMode(followerMode, pointChooser);
+                            var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
+                            botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                         });
 
                         botSpawner.InSpawnProcess += 1;

@@ -88,12 +88,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.PatrollingData.PointChooser.ShallChangeWay(false);
                 var patrolWay = GetCurrentPatrolWay();
 
-                // If we are not a boss, and we're following a boss, set our action to FollowerPatrol
-                if (!BotOwner.Boss.IamBoss && BotOwner.BotFollower.HaveBoss)
-                {
-                    return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
-                }
-
                 // Reload if we're under 60% ammo, and it's been long enough since our last reload
                 float ammoPercent = BotOwner.WeaponManager.Reload.BulletCount / BotOwner.WeaponManager.Reload.MaxBulletCount;
                 if (ammoPercent < 0.6f && Time.time >= _nextReloadTime)
@@ -102,11 +96,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.WeaponManager.Reload.TryReload();
                 }
 
-                // If we have a patrol, it's a reserve patrol, and the bot is allowed on reserve patrols, set the action to alternative patrol
-                if (patrolWay != null && patrolWay.PatrolType == PatrolType.reserved && BotOwner.Settings.FileSettings.Patrol.CAN_CHOOSE_RESERV)
+                // // If we have a patrol, it's a reserve patrol, and the bot is allowed on reserve patrols, set the action to alternative patrol
+                // if (patrolWay != null && patrolWay.PatrolType == PatrolType.reserved && BotOwner.Settings.FileSettings.Patrol.CAN_CHOOSE_RESERV)
+                // {
+                //     BotOwner.PatrollingData.ComeToPoint();
+                //     return new Action(typeof(AlternativePatrolLogic), "Mcs:RESER");
+                // }
+
+                // If we are not a boss, and we're following a boss, set our action to FollowerPatrol
+                if (!BotOwner.Boss.IamBoss && BotOwner.BotFollower.HaveBoss)
                 {
-                    BotOwner.PatrollingData.ComeToPoint();
-                    return new Action(typeof(AlternativePatrolLogic), "Mcs:RESER");
+                    return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
                 }
 
                 return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
