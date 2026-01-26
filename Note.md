@@ -269,7 +269,7 @@
 - - ~~将代码上传至github，让deepwiki帮我检查~~
 - ~~检查新的Scav存档是否有安全箱内容，以及修复生成护航Bot时的异常~~
 - ~~尝试移除Layer，看是否即便没有这些普通的Action是否也能正常跟随~~不太能
-- **护航是否会说话？如果不会需要让护航会发出英语短语**
+- 护航是否会说话？如果不会需要让护航会发出英语短语
 > `botOwner_0.BotTalk.TrySay(EPhraseTrigger.FriendlyFire, false);`
 - **根据思想钢印开始进行Logic细化**
 - 参考`friendlyPmc`或`LootingBots`,学习Bot如何进行掠夺
@@ -280,7 +280,8 @@
 - **`BossFollowLogic`不好用，检查为何**
 - - 应以"distToBoss"的Logic为主
 - Layer不要保留待在掩体的
-- 邀请入队后队员的图标都变成默认了，尝试优化
+- ~~邀请入队后队员的图标都变成默认了，尝试优化~~
+- **Bug:如果先将护航拉入小队，再移交队长，自己退出小队后再邀请就会被认为护航仍在小队中，不会接受**
 
 ## Logic思想指导
 

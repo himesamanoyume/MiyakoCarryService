@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Server.Helper
                     },
                 },
                 IsLeader = false,
-                IsReady = false,
+                IsReady = true,
             };
         }
 

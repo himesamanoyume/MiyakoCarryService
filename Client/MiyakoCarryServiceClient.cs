@@ -10,6 +10,7 @@ using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.RefreshQuests;
 using MiyakoCarryService.Client.Patches.Raid;
 using MiyakoCarryService.Client.Patches.Bots;
+using MiyakoCarryService.Client.Patches.Group;
 
 namespace MiyakoCarryService.Client;
 
@@ -119,6 +120,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new AddEnemyPatch().Enable();
         new ManualUpdatePatch().Enable();
         new ApplyDamagePatch().Enable();
+        new GroupPlayerViewModelClassConstructorPatch().Enable();
 #if DEBUG
         
 #endif

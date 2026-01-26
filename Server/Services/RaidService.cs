@@ -91,9 +91,9 @@ namespace MiyakoCarryService.Server.Services
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
-                        var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
+                        // var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
                         notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                        // notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
                     }
                 }
                 finally
