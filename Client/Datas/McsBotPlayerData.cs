@@ -21,5 +21,26 @@ namespace MiyakoCarryService.Client.Datas
             _bossPlayeRef = new(bossPlayer);
             BotBehaviors = [new BotCarryServiceChecker(BotOwner, BossPlayer)];
         }
+
+        public bool WeaponFilter()
+        {
+            return true;
+        }
+
+        public bool EquipmentFilter()
+        {
+            return true;
+        }
+
+        public bool MedecineFilter()
+        {
+            return true;
+        }
+
+        public bool FoodFilter()
+        {
+            return true;
+        }
+        
     }
 }
