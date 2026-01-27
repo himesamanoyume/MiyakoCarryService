@@ -8,7 +8,7 @@ internal sealed class TraderOffer
     public string Name { get; private set; }
     public long Price;
     public string CurrencySignal { get; } = "₽";
-    public ECurrencyType CurrencyType { get; private set; }
+    public ECurrencyType CurrencyType;
 
     public TraderOffer(long price, int totalSlot, ECurrencyType currencyType, string name = "Miyako")
     {

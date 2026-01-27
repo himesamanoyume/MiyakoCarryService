@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     internal sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
     {
-        private static SquadMgr _squadMgr
+        private static SquadMgr SquadMgr
         {
             get
             {
@@ -308,7 +308,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.Settings = settings;
 
-                        _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAIBossPlayer);
+                        SquadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAIBossPlayer);
 
                         if (bossPlayer.BotsGroup != null)
                         {

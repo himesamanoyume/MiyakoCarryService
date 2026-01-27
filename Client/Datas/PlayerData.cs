@@ -1,9 +1,11 @@
 
 
 using System;
+using System.Linq;
 using EFT;
 using EFT.InventoryLogic;
-using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -17,9 +19,37 @@ namespace MiyakoCarryService.Client.Datas
             _playerRef = new(player);
         }
 
-        public override void UpdateAllLootInContainerInfo(McsBotPlayerConfig mcsBotPlayerConfig)
+        public override void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer)
         {
-            throw new NotImplementedException();
+            if (ItemsInContainer == null)
+            {
+                ItemsInContainer = Item.GetAllDatas().ToList();
+            }
+
+            foreach (var itemData in ItemsInContainer)
+            {
+                if (itemData == null)
+                {
+                    continue;
+                }
+
+                if (itemData.Item.Id == Item.Id)
+                {
+                    continue;
+                }
+
+                if (this == itemData)
+                {
+                    continue;
+                }
+
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                lootData.Refresh(mcsAIBossPlayer);
+            }
         }
     }
 }

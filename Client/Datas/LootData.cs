@@ -3,62 +3,71 @@
 using System.Collections.Generic;
 using System.Linq;
 using EFT.InventoryLogic;
-using MiyakoCarryService.Client.Enums;
+using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
-using NotCheater.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Datas
 {
     internal sealed class LootData : ItemData
     {
+        public Dictionary<McsAIBossPlayer, LootProp> LootProps = new();
         public TraderOffer Offer;
-        public bool IsImportantContainer = false;
-        public long TheMostExpensivePrice = 0;
         public bool IsItemInContainer = false;
-        public bool IsWishListItem = false;
-        public bool IsKeywordItem = false;
-        public bool IsQuestNeedItem = false;
         public bool IsMoney = false;
-        public bool IsLowPriceNotNoPriceNonContainerItem = false;
-        public bool IsNoPriceNonContainerItem = false;
-        public bool IsContainerItemAndNotItemInContainer = false;
         public bool IsLabyrinthSolvePuzzleItem = false;
+        public bool IsInSecureContainerItem = false;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
             Offer = offer ?? new TraderOffer();
         }
 
-        public void Reset()
+        public void Refresh(McsAIBossPlayer mcsAIBossPlayer)
         {
-            CheckItemInteresting();
             ResetOffer();
+            CheckItemInteresting(mcsAIBossPlayer);
+            CheckSecureContainerItem();
         }
 
-        public void CheckItemInteresting()
+        public void CheckItemInteresting(McsAIBossPlayer mcsAIBossPlayer)
         {
-            // IsWishListItem = this.CheckWishListItem();
+            if (!LootProps.TryGetValue(mcsAIBossPlayer, out var lootProp))
+            {
+                lootProp = new LootProp(Item, Offer, mcsAIBossPlayer);
+                LootProps[mcsAIBossPlayer] = lootProp;
+            }
+            lootProp.CheckWishListItem();
+            lootProp.CheckHighPriceItem();
+            lootProp.CheckBlockItem(ItemType);
             // IsQuestNeedItem = this.CheckQuestNeedItem();
             // IsKeywordItem = this.CheckKeywordItem();
-            // IsMoney = Item.IsMoney();
         }
 
         public void ResetOffer()
         {
-            // if (Item != null && Item.IsMoney())
-            // {
-            //     this.SetMoneyCurrency();
-            // }
+            IsMoney = Item.IsMoney();
+            if (IsMoney)
+            {
+                SetMoneyCurrency();
+            }
         }
 
-        public override void UpdateAllLootInContainerInfo(McsBotPlayerConfig mcsBotPlayerConfig)
+        public void CheckSecureContainerItem()
         {
-            var theMostExpensivePrice = Offer.Price;
-            IsImportantContainer = IsHighPriceItem;
+            var parentItem = Item.CurrentAddress?.Container?.ParentItem;
+            if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
+            {
+                IsInSecureContainerItem = true;
+            }
+            IsInSecureContainerItem = false;
+        }
+
+        public override void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer)
+        {
             IsItemInContainer = false;
-            ResetOffer();
+            Refresh(mcsAIBossPlayer);
 
             if (ItemsInContainer == null)
             {
@@ -87,68 +96,22 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (Tools.IsBlockItem((EBlockItemType)mcsBotPlayerConfig.BlockItemType, lootData.ItemType))
-                {
-                    continue;
-                }
-
-                if (lootData.IsInSecureContainerItem())
-                {
-                    continue;
-                }
-
-                TraderOffer offer;
-
-                lootData.CheckItemInteresting();
-
-                if (lootData.Item.IsMoney())
-                {
-                    SetMoneyCurrency();
-                    offer = lootData.Offer;
-                }
-                else
-                {
-                    _gameloop.ItemBestPriceDict.TryGetValue(lootData.Item.StringTemplateId, out offer);
-                }
-
-                if (offer == null)
-                {
-                    offer = lootData.Item.ContainsBestPrice();
-                }
-
-                if (lootData.Offer.Price != offer.Price)
-                {
-                    lootData.Offer.Price = offer.Price;
-                }
-
-                if (lootData.Offer.Price > theMostExpensivePrice)
-                {
-                    theMostExpensivePrice = lootData.Offer.Price;
-                }
-
-                if (lootData.IsHighPriceItem)
-                {
-                    IsImportantContainer = true;
-                    IsItemInContainer = true;
-                }
+                lootData.Refresh(mcsAIBossPlayer);
+                IsItemInContainer = true;
             }
-
-            TheMostExpensivePrice = theMostExpensivePrice;
         }
-
-        public bool IsHighPriceItem => Offer.Price >= 100000f;
 
         public void SetMoneyCurrency()
         {
-            var templateId = Item.StringTemplateId;
-            var currency = templateId switch
+            var currency = Item.StringTemplateId switch
             {
                 CommonId.Euros => ECurrencyType.EUR,
                 CommonId.Dollars => ECurrencyType.USD,
                 CommonId.GPCoins => ECurrencyType.GP,
                 _ => ECurrencyType.RUB
             };
-            Offer = new TraderOffer(Item.StackObjectsCount, Item.Height * Item.Width, currency);
+            Offer.Price = Item.StackObjectsCount;
+            Offer.CurrencyType = currency;
         }
     }
 }

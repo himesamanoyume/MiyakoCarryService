@@ -1,11 +1,14 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
-using MiyakoCarryService.Client.Models;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -15,7 +18,6 @@ namespace MiyakoCarryService.Client.Datas
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
-        public List<McsAIBossPlayer> IngoredMcsBossPlayers = new();
 
         public ItemData(Item item)
         {
@@ -23,6 +25,20 @@ namespace MiyakoCarryService.Client.Datas
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
-        public abstract void UpdateAllLootInContainerInfo(McsBotPlayerConfig mcsBotPlayerConfig);
+        public abstract void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer);
+
+        public IEnumerator UpdateContainerInfoData(McsAIBossPlayer mcsAIBossPlayer)
+        {
+            yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
+            try
+            {
+                ItemsInContainer = Item.GetAllDatas().ToList();
+                UpdateAllLootInContainerInfo(mcsAIBossPlayer);
+            }
+            catch
+            {
+
+            }
+        }
     }
 }

@@ -133,6 +133,12 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new ApplyDamagePatch().Enable();
         new GroupPlayerViewModelClassConstructorPatch().Enable();
         new MatchmakerAcceptScreenShowPatch().Enable();
+
+        new TraderControllerClassConstructorPatch().Enable();
+        new TraderControllerClassAddItemEventInvokePatch().Enable();
+        new TraderControllerClassRemoveItemEventInvokePatch().Enable();
+        new TraderControllerClassOutProcessPatch().Enable();
+        new TraderControllerClassInProcessPatch().Enable();
 #if DEBUG
         
 #endif

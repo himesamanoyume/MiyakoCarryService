@@ -198,9 +198,14 @@ namespace MiyakoCarryService.Client.Extensions
             }
 
             var lootData = new LootData(item, ContainsBestPrice(item));
-            lootData.Reset();
+            var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
+            foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
+            {
+                lootData.Refresh(mcsAIBossPlayer);
+            }
             _datas.Add(item, lootData);
             return lootData;
         }
+
     }
 }
