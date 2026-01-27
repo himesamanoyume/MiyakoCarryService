@@ -23,7 +23,7 @@ public sealed class ConfigService(
 )
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
-    public McsConfig McsConfig { get; private set; }
+    public McsPluginConfig McsConfig { get; private set; }
     public OrderConfig OrderConfig { get; private set; }
     private readonly ModMetadata McsModMetadata = new ModMetadata();
     public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
@@ -56,19 +56,19 @@ public sealed class ConfigService(
         var miyakoCarryServicePath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
         if (!fileUtil.FileExists(miyakoCarryServicePath))
         {
-            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new McsConfig
+            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new McsPluginConfig
             {
-                ClientConfig = new McsClientConfig()
+                ClientConfig = new McsPluginClientConfig()
                 {
 
                 },
-                ServerConfig = new McsServerConfig()
+                ServerConfig = new McsPluginServerConfig()
                 {
 
                 }
             }, true));
         }
-        McsConfig = await jsonUtil.DeserializeFromFileAsync<McsConfig>(miyakoCarryServicePath);
+        McsConfig = await jsonUtil.DeserializeFromFileAsync<McsPluginConfig>(miyakoCarryServicePath);
 
         var orderConfigPath = Path.Combine(_configsFolderPath, "order.json");
         if (!fileUtil.FileExists(orderConfigPath))
@@ -166,7 +166,7 @@ public sealed class ConfigService(
         OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
     }
 
-    public McsConfig GetMiyakoCarryServiceConfig()
+    public McsPluginConfig GetMiyakoCarryServiceConfig()
     {
         return McsConfig;
     }

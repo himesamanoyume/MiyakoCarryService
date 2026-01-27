@@ -14,5 +14,13 @@
     "695207e8bcc1dd1e3c80dfcb declinePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "已拒绝订单",
     "695207e8bcc1dd1e3c80dfcb completePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "订单已结算",
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "本订单不支持刷新",
-    "MCS/A.Basic": "A. Basic"
+    "Mcs/A.Basic": "A. Basic",
+    "Mcs/PriceThreshold Key": "Price Threshold",
+    "Mcs/PriceThreshold Description": "Loot below this price will be ignored",
+    "Mcs/ArmorLevelThreshold Key": "Armor Level Threshold",
+    "Mcs/LootingWishlishItem Key": "Looting Wishlish Item",
+    "Mcs/LootingQuestItem Key": "Looting Quest Item",
+    "Mcs/BlockItemType Key": "Blocked Item Type",
+    "Mcs/LoadingLocales": "Attempting to load localization texts. If this persists, ensure the server mod MiyakoCarryServiceServer is installed; otherwise localization cannot be retrieved",
+    "Mcs/OriginalWebsite": "Official website"
 }

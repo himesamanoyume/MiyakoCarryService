@@ -4,23 +4,23 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 
 namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
-    public record McsClientConfig
+    public record McsPluginClientConfig
     {
 
     }
 
-    public record McsServerConfig
+    public record McsPluginServerConfig
     {
 
     }
 
-    public record McsConfig
+    public record McsPluginConfig
     {
         [JsonPropertyName("Client")]
-        public required McsClientConfig ClientConfig { get; set; }
+        public required McsPluginClientConfig ClientConfig { get; set; }
 
         [JsonPropertyName("Server")]
-        public required McsServerConfig ServerConfig { get; set; }
+        public required McsPluginServerConfig ServerConfig { get; set; }
     }
 
     public record OrderConfig

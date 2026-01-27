@@ -29,6 +29,18 @@ namespace MiyakoCarryService.Client.Extensions
                 return _datas.GetValue(item, InitData);
             }
 
+            public IEnumerable<ItemData> GetAllDatas()
+            {
+                foreach (var subItem in item.GetAllItems())
+                {
+                    ItemData data = GetData(subItem);
+                    if (data != null)
+                    {
+                        yield return data;
+                    }
+                }
+            }
+
             public bool IsPlayerInventory => item.StringTemplateId == CommonId.DefaultInventory;
 
             public TraderOffer ContainsBestPrice()
@@ -118,13 +130,13 @@ namespace MiyakoCarryService.Client.Extensions
                 try
                 {
                     var price = trader.GetUserItemPrice(item);
-                    return price.HasValue ? new TraderOffer(
-                        trader.LocalizedName,
+                    return price.HasValue ? new TraderOffer
+                    (
                         price.Value.Amount,
                         item.Width * item.Height,
-                        GetCurrencyType(TraderUtilsClass.GetCurrencyCharById(price.Value.CurrencyId.Value))
+                        GetCurrencyType(TraderUtilsClass.GetCurrencyCharById(price.Value.CurrencyId.Value)),
+                        trader.LocalizedName
                     ) : new TraderOffer();
-
                 }
                 catch
                 {

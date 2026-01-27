@@ -3,7 +3,7 @@
 using System;
 using EFT;
 using EFT.InventoryLogic;
-using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -11,14 +11,13 @@ namespace MiyakoCarryService.Client.Datas
     {
         private WeakReference<Player> _playerRef;
         public Player Player => _playerRef.TryGetTarget(out var player) ? player : null;
-        public EStance Stance = EStance.Enemy;
 
         public PlayerData(Player player, Item item) : base(item)
         {
             _playerRef = new(player);
         }
 
-        public override void UpdateAllLootInContainerInfo()
+        public override void UpdateAllLootInContainerInfo(McsBotPlayerConfig mcsBotPlayerConfig)
         {
             throw new NotImplementedException();
         }

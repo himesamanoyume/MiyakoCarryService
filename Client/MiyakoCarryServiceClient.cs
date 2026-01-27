@@ -11,23 +11,31 @@ using MiyakoCarryService.Client.Patches.RefreshQuests;
 using MiyakoCarryService.Client.Patches.Raid;
 using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Patches.Group;
+using MiyakoCarryService.Client.Patches.BepInEx;
+using MiyakoCarryService.Client.Patches.Events;
 
 namespace MiyakoCarryService.Client;
 
-[BepInPlugin(MiyakoCarryServiceGUID, MiyakoCarryServicePluginName, BepInExClientVersion)]
+[BepInPlugin(McsGUID, McsPluginName, BepInExClientVersion)]
 [BepInProcess("EscapeFromTarkov.exe")]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
     public const string BepInExClientVersion = "0.0.8.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
-    public const string MiyakoCarryServiceGUID = "top.himesamanoyume.miyakocarryservice";
-    public const string MiyakoCarryServicePluginName = "Himesamanoyume.MiyakoCarryService";
+    public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
+    public const string McsPluginName = "Himesamanoyume.MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
     public static bool FikaInstalled = false;
     public static bool IsFikaHeadless = false;
 
     #region BASIC
+
+    public static ConfigEntry<int> PriceThreshold;
+    public static ConfigEntry<int> ArmorLevelThreshold;
+    public static ConfigEntry<bool> LootingWishlishItem;
+    public static ConfigEntry<bool> LootingQuestItem;
+    public static ConfigEntry<EBlockItemType> BlockItemType;
 
     #endregion
 
@@ -42,6 +50,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     void Awake()
     {
         Instance = this;
+        new ContainsSearchStringPatch().Enable();
+        new DrawSinglePluginPatch().Enable();
+        new DrawFlagsFieldPatch().Enable();
     }
 
     void Start()
@@ -121,12 +132,15 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new ManualUpdatePatch().Enable();
         new ApplyDamagePatch().Enable();
         new GroupPlayerViewModelClassConstructorPatch().Enable();
+        new MatchmakerAcceptScreenShowPatch().Enable();
 #if DEBUG
         
 #endif
     }
 
     private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
+    public static readonly List<string> CheaterEditionOnlyList = new();
+    public static readonly List<string> HideList = new();
 
     private class ConfigSection
     {
@@ -149,13 +163,25 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         T defaultValue,
         string description = "",
         AcceptableValueBase acceptableValues = null,
-        ConfigurationManagerAttributes customAttributes = null
-        )
+        ConfigurationManagerAttributes customAttributes = null,
+        bool isCheaterEditionOnly = false,
+        bool isHide = false
+    )
     {
         if (!_sections.TryGetValue(type, out var section))
         {
             section = new ConfigSection(type);
             _sections[type] = section;
+        }
+
+        if (isCheaterEditionOnly)
+        {
+            CheaterEditionOnlyList.Add(key);
+        }
+
+        if (isHide)
+        {
+            HideList.Add(key);
         }
 
         var attributes = customAttributes ?? new ConfigurationManagerAttributes();
@@ -223,6 +249,37 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 
     private void SetupConfig()
     {
-        
+        PriceThreshold = Register(
+            EConfigType.BASIC,
+            Locales.PRICETHRESHOLD_KEY,
+            10000,
+            Locales.PRICETHRESHOLD_DESCRIPTION,
+            new AcceptableValueRange<int>(0, 1500000)
+        ); 
+
+        ArmorLevelThreshold = Register(
+            EConfigType.BASIC,
+            Locales.ARMORLEVELTHRESHOLD_KEY,
+            5,
+            acceptableValues: new AcceptableValueRange<int>(1, 6)
+        ); 
+
+        LootingWishlishItem = Register(
+            EConfigType.BASIC,
+            Locales.LOOTINGWISHLISHITEM_KEY,
+            true
+        ); 
+
+        LootingQuestItem = Register(
+            EConfigType.BASIC,
+            Locales.LOOTINGQUESTITEM_KEY,
+            true
+        ); 
+
+        BlockItemType = Register(
+            EConfigType.BASIC,
+            Locales.BLOCKITEMTYPE_KEY,
+            (EBlockItemType)0
+        );
     }
 }

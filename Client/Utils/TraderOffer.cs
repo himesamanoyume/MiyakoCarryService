@@ -5,16 +5,16 @@ namespace MiyakoCarryService.Client.Utils;
 
 internal sealed class TraderOffer
 {
-    public string Name = "";
+    public string Name { get; private set; }
     public long Price;
     public string CurrencySignal { get; } = "₽";
-    public ECurrencyType CurrencyType;
+    public ECurrencyType CurrencyType { get; private set; }
 
-    public TraderOffer(string name, long price, long totalSlot, ECurrencyType currencyType)
+    public TraderOffer(long price, int totalSlot, ECurrencyType currencyType, string name = "Miyako")
     {
         Name = name;
         CurrencyType = currencyType;
-        Price = ExchangePrice(currencyType, price);
+        Price = ExchangePrice(currencyType, price) / totalSlot;
     }
 
     public long ExchangePrice(ECurrencyType currencyType, long price)

@@ -1,6 +1,9 @@
 
 
+using System;
 using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
 using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -28,6 +31,16 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void Reset()
         {
             throw new System.NotImplementedException();
+        }
+
+        private void OnSettingChanged(object sender, EventArgs e)
+        {
+            OnGameStarted();
+        }
+
+        protected sealed override void OnGameStarted()
+        {
+            
         }
     }
 }

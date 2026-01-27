@@ -2,8 +2,10 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -12,17 +14,19 @@ namespace MiyakoCarryService.Client.Mgrs
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsBossPlayerIds = new();
         private HashSet<MongoID> _mcsBotPlayerIds = new();
+        private ConcurrentDictionary<MongoID, McsAIBossPlayer> _mcsAIBossPlayers = new();
 
         public sealed override void Start()
         {
             base.Start();
         }
 
-        public void AddMcsSquadMember(MongoID mcsBossPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner)
+        public void AddMcsSquadMember(MongoID mcsBossPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAIBossPlayer mcsAIBossPlayer)
         {
             _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, botOwner);
             _mcsBossPlayerIds.Add(mcsBossPlayerId);
             _mcsBotPlayerIds.Add(mcsBotPlayerId);
+            _mcsAIBossPlayers.GetOrAdd(mcsBossPlayerId, _ => mcsAIBossPlayer);
         }
 
         public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsBossPlayerId)
@@ -53,11 +57,31 @@ namespace MiyakoCarryService.Client.Mgrs
             return null;
         }
 
+        public McsAIBossPlayer GetMcsAIBossPlayerByMcsBossId(MongoID mcsBossPlayerId)
+        {
+            if (_mcsAIBossPlayers.TryGetValue(mcsBossPlayerId, out var mcsAIBossPlayer))
+            {
+                return mcsAIBossPlayer;
+            }
+            return null;
+        }
+
+        public List<McsAIBossPlayer> GetAllMcsAIBossPlayer()
+        {
+            return _mcsAIBossPlayers.Values.ToList();
+        }
+
         protected override void Reset()
         {
             _mcsSquadDict.Clear();
             _mcsBossPlayerIds.Clear();
             _mcsBotPlayerIds.Clear();
+            _mcsAIBossPlayers.Clear();
+        }
+
+        protected override void OnGameStarted()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

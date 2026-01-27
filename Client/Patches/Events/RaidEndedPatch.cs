@@ -5,7 +5,7 @@ using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
-namespace MiyakoCarryService.Client.Patches.GameWorldEvent
+namespace MiyakoCarryService.Client.Patches.Events
 {
     /// <summary>
     /// 处理GameWorld结束时事件

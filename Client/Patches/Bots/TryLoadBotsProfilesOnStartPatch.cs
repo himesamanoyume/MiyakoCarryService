@@ -7,10 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -37,7 +37,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             await __result;
 
-            var mcsProfilesDict = await McsRequestHandler.GetCarryServicePlayer();
+            var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers();
+            var mcsBossPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
 
             foreach (var mcsProfileItem in mcsProfilesDict)
             {
@@ -64,7 +65,19 @@ namespace MiyakoCarryService.Client.Patches.Bots
             foreach (var bossPlayer in bossPlayers)
             {
                 var bossPlayerPos = bossPlayer.Position;
-                var mcsAIBossPlayer = new McsAIBossPlayer(bossPlayer);
+                if (!mcsBossPlayerConfigs.TryGetValue(bossPlayer.ProfileId, out var mcsBotPlayerConfig))
+                {
+                    mcsBotPlayerConfig = new McsBotPlayerConfig
+                    {
+                        McsBossPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                        ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
+                        LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
+                        LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+                    };
+                }
+                var mcsAIBossPlayer = new McsAIBossPlayer(bossPlayer, mcsBotPlayerConfig);
                 bossPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
 
                 foreach (var mcsBotPlayerProfile in mcsProfilesDict[bossPlayer.ProfileId])
@@ -295,7 +308,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.Settings = settings;
 
-                        _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner);
+                        _squadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAIBossPlayer);
 
                         if (bossPlayer.BotsGroup != null)
                         {

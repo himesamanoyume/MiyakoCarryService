@@ -14,6 +14,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _gameloop.Mgrs.Add(typeof(T), this);
             _gameloop.OnGameWorldStart += Reset;
             _gameloop.OnGameWorldDestory += Reset;
+            _gameloop.OnGameWorldStart += OnGameStarted;
         }
 
         public static void Enable()
@@ -33,7 +34,10 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _gameloop.OnGameWorldStart -= Reset;
             _gameloop.OnGameWorldDestory -= Reset;
+            _gameloop.OnGameWorldStart -= OnGameStarted;
         }
+
+        protected abstract void OnGameStarted();
 
         protected abstract void Reset();
     }

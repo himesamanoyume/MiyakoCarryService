@@ -3,7 +3,7 @@ using EFT;
 using System;
 using SPT.Reflection.Utils;
 using MiyakoCarryService.Client.Utils;
-using MiyakoCarryService.Client.Patches.GameWorldEvent;
+using MiyakoCarryService.Client.Patches.Events;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EFT;
+using MiyakoCarryService.Client.Models;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 
@@ -22,6 +23,12 @@ namespace MiyakoCarryService.Client.Utils
             var response = await RequestHandler.PostJsonAsync(path, serialized);
             var data = JsonConvert.DeserializeObject<T2>(response);
             return data;
+        }
+
+        private static async Task PostJsonAsync<T1>(string path, T1 t1)
+        {
+            var serialized = JsonConvert.SerializeObject(t1);
+            await RequestHandler.PostJsonAsync(path, serialized);
         }
 
         private static T GetJson<T>(string path)
@@ -48,13 +55,24 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Dictionary<MongoID, Profile[]>> GetCarryServicePlayer()
+        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers()
         {
             var response = await GetJsonAsync<Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate");
             return response.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value.Select(desc => new Profile(desc)).ToArray()
             );
+        }
+
+        public static async Task<Dictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
+        {
+            var response = await GetJsonAsync<Dictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
+            return response;
+        }
+
+        public static async Task UploadMcsBotPlayerConfig(McsBotPlayerConfig mcsBotPlayerConfig)
+        {
+            await PostJsonAsync("/mcs/singleplayer/settings/bot/upload", mcsBotPlayerConfig);
         }
     }
 }

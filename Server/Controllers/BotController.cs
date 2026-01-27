@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HarmonyLib;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -65,6 +66,41 @@ namespace MiyakoCarryService.Server.Controllers
             );
             
             return mcsPmcDatas;
+        }
+    
+        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsBossPlayerId)
+        {
+            var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
+
+            if (compatibilityService.HasFikaServer)
+            {
+                // 暂不进行验证
+                var fikaMatchService = compatibilityService.FikaMatchService;
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsBossPlayerId]);
+
+                if (matchId is not null)
+                {
+                    var fikaMatch = AccessTools.Method(fikaMatchService, "GetMatch")?.Invoke(null, [matchId]);
+
+                    if (fikaMatch is not null)
+                    {
+                        var fikaPlayers = (Dictionary<MongoId, object>)AccessTools.Property(compatibilityService.FikaMatch, "Players")?.GetValue(fikaMatch);
+
+                        foreach (var playerId in fikaPlayers.Keys)
+                        {
+                            if (playerId != mcsBossPlayerId)
+                            {
+                                mcsBossPlayerIds.Add(playerId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)
+        {
+            return;
         }
     }
 }
