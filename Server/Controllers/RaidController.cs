@@ -1,8 +1,11 @@
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 
 namespace MiyakoCarryService.Server.Controllers
@@ -40,6 +43,21 @@ namespace MiyakoCarryService.Server.Controllers
         public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsBossPlayerId)
         {
             return raidService.GetAllGroupMemberProfiles(mcsBossPlayerId);
+        }
+
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId)
+        {
+            return await raidService.SpawnMcsBotPlayer(mcsBossPlayerId);
+        }
+    
+        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsBossPlayerId)
+        {
+            return await raidService.GetMcsBotPlayerConfigs(mcsBossPlayerId);
+        }
+
+        public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)
+        {
+            await raidService.CollectMcsBotPlayerConfig(mcsBotPlayerConfig);
         }
     }
 }

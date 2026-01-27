@@ -26,8 +26,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     public const string McsPluginName = "Himesamanoyume.MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
-    public static bool FikaInstalled = false;
-    public static bool IsFikaHeadless = false;
+    public static bool FikaInstalled { get; private set; }  = false;
+    public static bool IsFikaHeadless { get; private set; } = false;
 
     #region BASIC
 

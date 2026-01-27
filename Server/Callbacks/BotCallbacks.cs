@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Server.Callbacks
     [Injectable]
     public sealed class BotCallbacks(
         HttpResponseUtil httpResponseUtil,
-        BotController botController
+        RaidController raidController
     )
     {
         /// <summary>
@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> SpawnMcsBotPlayer(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
-            return httpResponseUtil.NoBody(await botController.SpawnMcsBotPlayer(mcsBossPlayerId));
+            return httpResponseUtil.NoBody(await raidController.SpawnMcsBotPlayer(mcsBossPlayerId));
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> GetMcsBotPlayerConfigs(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
-            return httpResponseUtil.NoBody(await botController.GetMcsBotPlayerConfigs(mcsBossPlayerId));
+            return httpResponseUtil.NoBody(await raidController.GetMcsBotPlayerConfigs(mcsBossPlayerId));
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> CollectMcsBotPlayerConfig(string url, McsBotPlayerConfigRequestData info, MongoId mcsBossPlayerId)
         {
-            await botController.CollectMcsBotPlayerConfig(info);
+            await raidController.CollectMcsBotPlayerConfig(info);
             return httpResponseUtil.NullResponse();
         }
     }
