@@ -35,12 +35,12 @@ namespace MiyakoCarryService.Client
         {
             get
             {
-                return GameWorldStartPatch.OnGameWorldStart;
+                return OnGameStartedPatch.OnGameWorldStart;
             }
 
             set
             {
-                GameWorldStartPatch.OnGameWorldStart = value;
+                OnGameStartedPatch.OnGameWorldStart = value;
             }
         }
 

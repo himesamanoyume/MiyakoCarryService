@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -38,7 +39,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
             await __result;
 
             var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers();
-            var mcsBossPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+            Dictionary<MongoID, McsBotPlayerConfig> mcsBossPlayerConfigs;
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                mcsBossPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+            }
+            else
+            {
+                mcsBossPlayerConfigs = new();
+            }
 
             foreach (var mcsProfileItem in mcsProfilesDict)
             {

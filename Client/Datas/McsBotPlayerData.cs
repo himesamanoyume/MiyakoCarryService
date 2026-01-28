@@ -6,7 +6,6 @@ using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Misc;
-using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Datas
 {

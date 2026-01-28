@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public ItemData GetData()
             {
-                return _datas.GetValue(item, InitData);
+                return _datas.TryGetValue(item, out ItemData itemData) ? itemData : item.InitData();
             }
 
             public IEnumerable<ItemData> GetAllDatas()
@@ -39,6 +39,47 @@ namespace MiyakoCarryService.Client.Extensions
                         yield return data;
                     }
                 }
+            }
+
+            private ItemData InitData()
+            {
+                if (item.IsPlayerInventory)
+                {
+                    var gameWorld = Singleton<GameWorld>.Instance;
+                    var player = item.Owner switch
+                    {
+                        CorpseTraderControllerClass corpseTraderControllerClass => gameWorld.GetEverExistedPlayerByID(corpseTraderControllerClass.KilledProfileID),
+                        _ => gameWorld.GetEverExistedPlayerByID(item.Owner.ID)
+                    };
+
+                    if (player == null)
+                    {
+                        return null;
+                    }
+
+                    PlayerData playerData;
+                    if (player.IsAI)
+                    {
+                        if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
+                        {
+                            playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossId(player.ProfileId), player, item);
+                            _datas.Add(item, playerData);
+                            return playerData;
+                        }
+                    }
+                    playerData = new PlayerData(player, item);
+                    _datas.Add(item, playerData);
+                    return playerData;
+                }
+
+                var lootData = new LootData(item, ContainsBestPrice(item));
+                var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
+                foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
+                {
+                    lootData.Refresh(mcsAIBossPlayer);
+                }
+                _datas.Add(item, lootData);
+                return lootData;
             }
 
             public bool IsPlayerInventory => item.StringTemplateId == CommonId.DefaultInventory;
@@ -165,47 +206,5 @@ namespace MiyakoCarryService.Client.Extensions
                 _ => ECurrencyType.RUB
             };
         }
-
-        private static ItemData InitData(Item item)
-        {
-            if (item.IsPlayerInventory)
-            {
-                var gameWorld = Singleton<GameWorld>.Instance;
-                var player = item.Owner switch
-                {
-                    CorpseTraderControllerClass corpseTraderControllerClass => gameWorld.GetEverExistedPlayerByID(corpseTraderControllerClass.KilledProfileID),
-                    _ => gameWorld.GetEverExistedPlayerByID(item.Owner.ID)
-                };
-
-                if (player == null)
-                {
-                    return null;
-                }
-
-                PlayerData playerData;
-                if (player.IsAI)
-                {
-                    if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
-                    {
-                        playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossId(player.ProfileId), player, item);
-                        _datas.Add(item, playerData);
-                        return playerData;
-                    }
-                }
-                playerData = new PlayerData(player, item);
-                _datas.Add(item, playerData);
-                return playerData;
-            }
-
-            var lootData = new LootData(item, ContainsBestPrice(item));
-            var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
-            foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
-            {
-                lootData.Refresh(mcsAIBossPlayer);
-            }
-            _datas.Add(item, lootData);
-            return lootData;
-        }
-
     }
 }

@@ -12,10 +12,5 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 75);
         }
-
-        protected override void Refresh()
-        {
-            
-        }
     }
 }

@@ -12,9 +12,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _gameloop = GameLoop.Instance;
             _gameloop.Mgrs.Add(typeof(T), this);
-            _gameloop.OnGameWorldStart += Refresh;
-            _gameloop.OnGameWorldDestory += Refresh;
-            _gameloop.OnGameWorldStart += OnGameStarted;
+            _gameloop.OnGameWorldStart += OnRaidStarted;
+            _gameloop.OnGameWorldDestory += OnRaidEnded;
         }
 
         public static void Enable()
@@ -32,16 +31,18 @@ namespace MiyakoCarryService.Client.Mgrs
 
         protected virtual void OnMgrDestroy()
         {
-            _gameloop.OnGameWorldStart -= Refresh;
-            _gameloop.OnGameWorldDestory -= Refresh;
-            _gameloop.OnGameWorldStart -= OnGameStarted;
+            _gameloop.OnGameWorldStart -= OnRaidStarted;
+            _gameloop.OnGameWorldDestory -= OnRaidEnded;
         }
 
-        protected virtual void OnGameStarted()
+        protected virtual void OnRaidStarted()
         {
             StopAllCoroutines();
         }
 
-        protected abstract void Refresh();
+        protected virtual void OnRaidEnded()
+        {
+            StopAllCoroutines();
+        }
     }
 }

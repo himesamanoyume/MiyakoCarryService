@@ -1,7 +1,6 @@
 using System.Reflection;
 using EFT;
 using HarmonyLib;
-using MiyakoCarryService.Client.Extensions;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots

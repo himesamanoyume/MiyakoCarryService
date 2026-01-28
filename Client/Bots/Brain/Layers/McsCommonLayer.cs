@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private float _holdPositionTime = Time.time;
         private CustomNavigationPoint _pointToShoot = null;
         private bool _haveCoverToShoot = false;
-        private float _tooCloseBossDistance = 5f;
+        private float _closeBossDistance = 10f;
         private bool _isHolding = false;
         private float _lastHoldTime = Time.time;
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
@@ -294,14 +294,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 // {
                 //     return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
                 // }
+                var mcsBossPlayerPos = GetMcsBossPlayerPos();
+                if ((BotOwner.Position - mcsBossPlayerPos).sqrMagnitude > _closeBossDistance)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:sDistCloseB");
+                }
+                else
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
+                }
 
-                return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
-                // return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
+                // return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
             }
         }
 
@@ -567,8 +575,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private bool EndHoldPosition()
         {
             UpdateCoverToShoot();
-            var myPos = GetMyPos();
-            if ((BotOwner.Position - myPos).sqrMagnitude > _tooCloseBossDistance)
+            var mcsBossPlayerPos = GetMcsBossPlayerPos();
+            if ((BotOwner.Position - mcsBossPlayerPos).sqrMagnitude > _closeBossDistance)
             {
                 return true;
             }
@@ -714,13 +722,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSerachData, true);
         }
 
-        private Vector3 GetMyPos()
+        private Vector3 GetMcsBossPlayerPos()
         {
-            if (BotOwner.BotFollower.BossToFollow != null)
-            {
-                return BotOwner.BotFollower.BossToFollow.Position;
-            }
-            return BotOwner.Position;
+            return McsBotPlayerData.BossPlayer.Position;
         }
 
         private bool EndWatchSecondWeapon()

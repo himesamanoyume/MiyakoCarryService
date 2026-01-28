@@ -71,17 +71,19 @@ namespace MiyakoCarryService.Client.Mgrs
             return _mcsAIBossPlayers.Values.ToList();
         }
 
-        protected override void Refresh()
+
+        protected override void OnRaidStarted()
         {
+            base.OnRaidStarted();
+        }
+
+        protected override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
             _mcsSquadDict.Clear();
             _mcsBossPlayerIds.Clear();
             _mcsBotPlayerIds.Clear();
             _mcsAIBossPlayers.Clear();
-        }
-
-        protected override void OnGameStarted()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

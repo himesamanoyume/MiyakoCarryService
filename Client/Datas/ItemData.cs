@@ -3,10 +3,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
 

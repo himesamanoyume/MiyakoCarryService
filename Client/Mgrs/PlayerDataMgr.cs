@@ -31,17 +31,17 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
-        protected override void Refresh()
+        protected sealed override void OnRaidStarted()
         {
-            throw new NotImplementedException();
-        }
-
-        protected sealed override void OnGameStarted()
-        {
-            base.OnGameStarted();
+            base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
+        }
+
+        protected override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
         }
 
         private IEnumerator RefreshMcsBotPlayersInterestingLoop(float time)
