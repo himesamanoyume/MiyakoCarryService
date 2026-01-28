@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Datas
             _playerRef = new(player);
         }
 
-        public override void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer)
+        public override void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer)
         {
             if (ItemsInContainer == null)
             {

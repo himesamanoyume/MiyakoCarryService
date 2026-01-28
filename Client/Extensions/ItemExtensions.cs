@@ -187,7 +187,7 @@ namespace MiyakoCarryService.Client.Extensions
                 {
                     if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
                     {
-                        playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), player, item);
+                        playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossId(player.ProfileId), player, item);
                         _datas.Add(item, playerData);
                         return playerData;
                     }

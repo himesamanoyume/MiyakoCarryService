@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -40,6 +41,34 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnGameStarted();
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
+            StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
+        }
+
+        private IEnumerator RefreshMcsBotPlayersInterestingLoop(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                if (_gameloop.IsVaildGameWorld)
+                {
+                    var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                    var closeOwnerItemDatas = new List<ItemData>();
+                    foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                    {
+                        closeOwnerItemDatas.AddRange(Tools.GetRangeOwnerItemData(mcsBotPlayerData.Transform.position, 50f));
+                    }
+
+                    foreach (var itemData in closeOwnerItemDatas)
+                    {
+                        itemData.ItemsInContainer = itemData.Item.GetAllDatas().ToList();
+                        foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                        {
+                            StartCoroutine(itemData.RefreshRootItemInteresting(mcsBotPlayerData.McsAIBossPlayer));
+                        }
+                    }
+                }
+            }
         }
 
         protected override IEnumerator ReloadDataLoop(float time)
@@ -103,7 +132,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             foreach (var mcsAIBossPlayer in SquadMgr.GetAllMcsAIBossPlayer())
                             {
-                                playerData.UpdateAllLootInContainerInfo(mcsAIBossPlayer);
+                                playerData.RefreshInteresting(mcsAIBossPlayer);
                             }
                         }
                     }

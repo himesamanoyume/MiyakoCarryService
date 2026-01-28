@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                rootParentItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer);
+                                rootParentItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer);
                             }
                         }
                         catch (Exception e)
@@ -86,7 +86,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                         {
-                            gameloop.StartCoroutine(rootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                            gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                         }
                     }
                 }
@@ -102,7 +102,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(toParentRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }
@@ -141,7 +141,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                         {
-                            gameloop.StartCoroutine(rootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                            gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                         }
                     }
                 }
@@ -157,7 +157,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(fromParentRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }
@@ -195,7 +195,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                         {
-                            gameloop.StartCoroutine(instanceRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                            gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                         }
                     }
                 }
@@ -207,7 +207,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                         {
-                            gameloop.StartCoroutine(rootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                            gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                         }
                     }
                 }
@@ -222,7 +222,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(fromParentRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }
@@ -238,7 +238,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(toParentRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }
@@ -276,7 +276,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                         {
-                            gameloop.StartCoroutine(instanceRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                            gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                         }
                     }
                 }
@@ -291,7 +291,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(rootParentItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(rootParentItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }
@@ -307,7 +307,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                gameloop.StartCoroutine(toParentRootItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer));
+                                gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer));
                             }
                         }
                     }

@@ -45,15 +45,14 @@ namespace MiyakoCarryService.Client.Datas
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
-        public abstract void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer);
+        public abstract void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer);
 
-        public IEnumerator UpdateContainerInfoData(McsAIBossPlayer mcsAIBossPlayer)
+        public IEnumerator RefreshRootItemInteresting(McsAIBossPlayer mcsAIBossPlayer)
         {
             yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
             try
             {
-                ItemsInContainer = Item.GetAllDatas().ToList();
-                UpdateAllLootInContainerInfo(mcsAIBossPlayer);
+                RefreshInteresting(mcsAIBossPlayer);
             }
             catch (Exception e)
             {

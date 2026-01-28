@@ -90,7 +90,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             foreach (var mcsAIBossPlayer in SquadMgr.GetAllMcsAIBossPlayer())
                             {
-                                lootData.UpdateAllLootInContainerInfo(mcsAIBossPlayer);
+                                lootData.RefreshInteresting(mcsAIBossPlayer);
                             }
                         }
                     }

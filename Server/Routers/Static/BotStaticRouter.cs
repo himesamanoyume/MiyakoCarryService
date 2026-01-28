@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/game/bot/generate",
-                async (url, info, sessionId, output) => await botCallbacks.SpawnCarryServicePlayer(url, info, sessionId)
+                async (url, info, sessionId, output) => await botCallbacks.SpawnMcsBotPlayer(url, info, sessionId)
             )
         ]
     )

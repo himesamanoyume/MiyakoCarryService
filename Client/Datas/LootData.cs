@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Client.Datas
             IsInSecureContainerItem = false;
         }
 
-        public override void UpdateAllLootInContainerInfo(McsAIBossPlayer mcsAIBossPlayer)
+        public override void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer)
         {
             IsItemInContainer = false;
             Refresh(mcsAIBossPlayer);
