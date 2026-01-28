@@ -9,6 +9,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     internal class McsCommonLayer : McsBaseLayer<McsCommonLayer>
     {
         // private float _nextReloadTime;
+        private float _holdPositionTime = Time.time;
+        private CustomNavigationPoint _pointToShoot = null;
+        private bool _haveCoverToShoot = false;
+        private float _tooCloseBossDistance = 5f;
+        private bool _isHolding = false;
+        private float _lastHoldTime = Time.time;
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
 
@@ -48,7 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (!BotOwner.Medecine.FirstAid.HaveSmth2Use)
                     {
                         // 尝试寻找周围的医疗物品
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                        // return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
                     }
                     else
                     {
@@ -67,7 +73,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (!BotOwner.Medecine.SurgicalKit.HaveSmth2Use)
                     {
                         // 尝试寻找周围的手术包
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                        // return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
                     }
                     else
                     {
@@ -289,13 +295,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 //     return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
                 // }
 
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
                 // return new Action(typeof(McsBotPlayerPatrolLogic), "nothing to do");
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
             }
         }
 
@@ -375,6 +381,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             else if (currentActionType == typeof(WatchSecondWeaponLogic))
             {
                 return EndWatchSecondWeapon();
+            }
+            else if (currentActionType == typeof(HoldPositionLogic))
+            {
+                return EndHoldPosition();
             }
 
             // If it's not a logic we handle, end it
@@ -552,6 +562,165 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
+        }
+
+        private bool EndHoldPosition()
+        {
+            UpdateCoverToShoot();
+            var myPos = GetMyPos();
+            if ((BotOwner.Position - myPos).sqrMagnitude > _tooCloseBossDistance)
+            {
+                return true;
+            }
+            if (_haveCoverToShoot && ProtectWantKill() && ProtectCareKill())
+            {
+                return true;
+            }
+
+            if (IsHolding())
+            {
+                return true;
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (!BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
+            if (goalEnemy == null)
+            {
+                if (CanSearchEnemy())
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (goalEnemy.IsVisible && goalEnemy.CanShoot)
+                {
+                    return true;
+                }
+                if (goalEnemy.IsVisible && goalEnemy.Distance < BotOwner.Settings.FileSettings.Cover.END_HOLD_IF_ENEMY_CLOSE_AND_VISIBLE)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool CanSearchEnemy()
+        {
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            return goalEnemy == null || !WasHitRecently(10f) && !goalEnemy.IsVisible && !goalEnemy.CanShoot && goalEnemy.CanISearch && BotOwner.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack) && BotOwner.Memory.LastEnemyVisionOld(LocalBotSettingsProviderClass.Core.COVER_SECONDS_AFTER_LOSE_VISION);
+        }
+
+        private bool IsHolding()
+        {
+            if (!_isHolding)
+            {
+                return false;
+            }
+            if (_lastHoldTime < Time.time)
+            {
+                _isHolding = false;
+                return true;
+            }
+            return false;
+        }
+
+        private void UpdateCoverToShoot()
+        {
+            if (_holdPositionTime < Time.time)
+            {
+                _holdPositionTime = Time.time + 1f;
+                Vector3 bossPos;
+                if (BotOwner.BotFollower.HaveBoss)
+                {
+                    bossPos = McsBotPlayerData.BossPlayer.Position;
+                }
+                else
+                {
+                    bossPos = BotOwner.Position;
+                }
+                _pointToShoot = FollowerCheckData();
+                if (_pointToShoot != null && _pointToShoot.IsFreeById(BotOwner.Id) && !_pointToShoot.IsSpotted)
+                {
+                    float sqrMagnitude = (bossPos - _pointToShoot.Position).sqrMagnitude;
+                    if (sqrMagnitude >= BotOwner.Settings.FileSettings.Boss.MAX_DIST_COVER_BOSS_SQRT)
+                    {
+                        _haveCoverToShoot = false;
+                        return;
+                    }
+                    if (ProtectCareKill())
+                    {
+                        bool canIShootToEnemy = _pointToShoot.CanIShootToEnemy;
+                        _haveCoverToShoot = canIShootToEnemy;
+                    }
+                    else
+                    {
+                        _haveCoverToShoot = true;
+                    }
+                    if (_haveCoverToShoot && (BotOwner.Memory.CurCustomCoverPoint == null || BotOwner.Memory.CurCustomCoverPoint.Id != _pointToShoot.Id))
+                    {
+                        BotOwner.Memory.BotCurrentCoverInfo.Spotted();
+                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_pointToShoot, true);
+                        return;
+                    }
+                }
+                else
+                {
+                    _haveCoverToShoot = false;
+                }
+            }
+        }
+
+        private bool ProtectCareKill()
+        {
+            return (Time.time - GetEnemyLastSeenTime()) < BotOwner.Settings.FileSettings.Mind.HOLD_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+        }
+
+        private bool ProtectWantKill()
+        {
+            return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+        }
+
+        private float GetEnemyLastSeenTime()
+        {
+            if (BotOwner.Settings.FileSettings.Mind.PROTECT_TIME_REAL)
+            {
+                return BotOwner.BotsGroup.EnemyLastSeenTimeReal;
+            }
+            return BotOwner.BotsGroup.EnemyLastSeenTimeSence;
+        }
+
+        private CustomNavigationPoint FollowerCheckData()
+        {
+            Vector3 bossPos;
+            if (BotOwner.BotFollower.HaveBoss)
+            {
+                bossPos = McsBotPlayerData.BossPlayer.Position;
+            }
+            else
+            {
+                bossPos = BotOwner.Position;
+            }
+            var shootPointClass = BotOwner.CurrentEnemyTargetPosition(true);
+            var coverShootType = CoverShootType.shoot;
+            if (shootPointClass == null)
+            {
+                coverShootType = CoverShootType.hide;
+            }
+            var coverSerachData = new CoverSearchData(bossPos, BotOwner.CoverSearchInfo, coverShootType, LocalBotSettingsProviderClass.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(bossPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true);
+            return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSerachData, true);
+        }
+
+        private Vector3 GetMyPos()
+        {
+            if (BotOwner.BotFollower.BossToFollow != null)
+            {
+                return BotOwner.BotFollower.BossToFollow.Position;
+            }
+            return BotOwner.Position;
         }
 
         private bool EndWatchSecondWeapon()
