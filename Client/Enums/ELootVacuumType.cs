@@ -4,9 +4,6 @@ namespace MiyakoCarryService.Client.Enums
     {
         PRICE,
         QUESTNEED,
-        WISHLIST,
-        AVGSLOTPRICE,
-        KEYWORD,
-        MONEY
+        WISHLIST
     }
 }

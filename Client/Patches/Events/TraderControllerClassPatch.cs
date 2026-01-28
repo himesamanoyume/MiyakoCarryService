@@ -7,6 +7,7 @@ using System.Reflection;
 using MiyakoCarryService.Client.Extensions;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using System;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -45,9 +46,9 @@ namespace MiyakoCarryService.Client.Patches.Events
                                 rootParentItem.GetData().UpdateContainerInfoData(mcsAIBossPlayer);
                             }
                         }
-                        catch
+                        catch (Exception e)
                         {
-
+                            MiyakoCarryServicePlugin.Logger.LogInfo(e);
                         }
                     }
                 }
@@ -172,8 +173,6 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        // protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().Where(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5).FirstOrDefault();
-
         private static SquadMgr SquadMgr
         {
             get
@@ -254,7 +253,6 @@ namespace MiyakoCarryService.Client.Patches.Events
     internal sealed class TraderControllerClassInProcessPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
-        // protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().Where(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5).FirstOrDefault();
 
         private static SquadMgr SquadMgr
         {

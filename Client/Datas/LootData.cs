@@ -2,11 +2,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -112,6 +115,40 @@ namespace MiyakoCarryService.Client.Datas
             };
             Offer.Price = Item.StackObjectsCount;
             Offer.CurrencyType = currency;
+        }
+
+        protected override Transform GetTransfrom()
+        {
+            try
+            {
+                if (Item == null || Item.Owner == null)
+                {
+                    return null;
+                }
+
+                var gameWorld = Singleton<GameWorld>.Instance;
+                if (gameWorld == null)
+                {
+                    return null;
+                }
+
+                if (!gameWorld.ItemOwners.TryGetValue(Item.Owner, out var itemTransform))
+                {
+                    return null;
+                }
+
+                var transform = itemTransform.Transform;
+                if (transform == null)
+                {
+                    return null;
+                }
+
+                return transform;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

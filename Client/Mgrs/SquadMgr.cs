@@ -71,7 +71,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return _mcsAIBossPlayers.Values.ToList();
         }
 
-        protected override void Reset()
+        protected override void Refresh()
         {
             _mcsSquadDict.Clear();
             _mcsBossPlayerIds.Clear();

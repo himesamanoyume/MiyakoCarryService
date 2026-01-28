@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -49,6 +50,18 @@ namespace MiyakoCarryService.Client.Datas
                 }
 
                 lootData.Refresh(mcsAIBossPlayer);
+            }
+        }
+
+        protected override Transform GetTransfrom()
+        {
+            try
+            {
+                return Player.PlayerBones.Ribcage.Original;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

@@ -1,6 +1,11 @@
 
 
+using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -51,6 +56,24 @@ namespace MiyakoCarryService.Client.Utils
                 EItemType.Weapon => blockItemType.HasFlag(EBlockItemType.Weapon),
                 _ => false
             };
+        }
+
+        public static List<ItemData> GetAllOwnerItemData()
+        {
+            var result = new List<ItemData>();
+            var itemOwners = Singleton<GameWorld>.Instance.ItemOwners;
+
+            foreach (var owner in itemOwners)
+            {
+                var itemData = owner.Key.RootItem.GetData();
+
+                if (itemData != null)
+                {
+                    result.Add(itemData);
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -67,6 +67,7 @@ namespace MiyakoCarryService.Client
             SquadMgr.Enable();
             BrainMgr.Enable();
             PlayerDataMgr.Enable();
+            LootDataMgr.Enable();
         }
 
         private void Reset()

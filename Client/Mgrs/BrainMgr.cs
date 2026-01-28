@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Mgrs
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 75);
         }
 
-        protected override void Reset()
+        protected override void Refresh()
         {
             
         }

@@ -18,6 +18,26 @@ namespace MiyakoCarryService.Client.Datas
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
+        private WeakReference<Transform> _transformRef;
+        public Transform Transform
+        {
+            get
+            {
+                if (_transformRef.TryGetTarget(out var transform))
+                {
+                    return transform;
+                }
+                else
+                {
+                    transform = GetTransfrom(); 
+                    if (transform != null)
+                    {
+                        _transformRef = new(transform);
+                    }
+                    return transform;
+                }
+            }
+        }
 
         public ItemData(Item item)
         {
@@ -35,10 +55,12 @@ namespace MiyakoCarryService.Client.Datas
                 ItemsInContainer = Item.GetAllDatas().ToList();
                 UpdateAllLootInContainerInfo(mcsAIBossPlayer);
             }
-            catch
+            catch (Exception e)
             {
-
+                MiyakoCarryServicePlugin.Logger.LogInfo(e);
             }
         }
+
+        protected abstract Transform GetTransfrom();
     }
 }

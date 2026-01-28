@@ -10,21 +10,8 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class PlayerDataMgr : DataMgr<PlayerDataMgr>
+    internal sealed class LootDataMgr : DataMgr<LootDataMgr>
     {
-        public List<McsBotPlayerData> GetMcsBotPlayerDatas()
-        {
-            var result = new List<McsBotPlayerData>();
-            foreach (var baseData in _datas)
-            {
-                if (baseData is McsBotPlayerData mcsBotPlayerData)
-                {
-                    result.Add(mcsBotPlayerData);
-                }
-            }
-            return result;
-        }
-
         public sealed override void Start()
         {
             base.Start();
@@ -51,23 +38,23 @@ namespace MiyakoCarryService.Client.Mgrs
 
                 if (_gameloop.IsVaildGameWorld)
                 {
-                    var datas = new HashSet<PlayerData>();
+                    var datas = new HashSet<LootData>();
                     foreach (var item in Tools.GetAllOwnerItemData())
                     {
-                        if (item is PlayerData playerData)
+                        if (item is LootData lootData)
                         {
-                            datas.Add(playerData);
+                            datas.Add(lootData);
                         }
                     }
-                    var playerLeft = _datas.Except(datas).ToList();
-                    var playerJoined = datas.Except(_datas).ToList();
-                    foreach (var playerData in playerLeft)
+                    var lootLeft = _datas.Except(datas).ToList();
+                    var lootJoined = datas.Except(_datas).ToList();
+                    foreach (var lootData in lootLeft)
                     {
-                        _datas.Remove(playerData);
+                        _datas.Remove(lootData);
                     }
-                    foreach (var playerData in playerJoined)
+                    foreach (var lootData in lootJoined)
                     {
-                        _datas.Add(playerData);
+                        _datas.Add(lootData);
                     }
                 }
                 else
@@ -81,29 +68,29 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override IEnumerator LoadLootData(float time)
         {
             yield return new WaitForSeconds(time);
-            var internalTime = new WaitForSeconds(.2f);
+            var internalTime = new WaitForSeconds(.1f);
             if (_gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
                 datasList.AddRange(_datas);
                 int batchSize = Mathf.Clamp(Mathf.CeilToInt(_datas.Count / 10f), 8, 50);
-                var playerBatches = new List<List<BaseData>>();
+                var lootBatches = new List<List<BaseData>>();
                 for (int i = 0; i < _datas.Count; i += batchSize)
                 {
                     int endIndex = Math.Min(i + batchSize, _datas.Count);
                     var batch = datasList.GetRange(i, endIndex - i);
-                    playerBatches.Add(batch);
+                    lootBatches.Add(batch);
                 }
 
-                foreach (var batch in playerBatches)
+                foreach (var batch in lootBatches)
                 {
                     try
                     {
-                        foreach (PlayerData playerData in batch)
+                        foreach (LootData lootData in batch)
                         {
                             foreach (var mcsAIBossPlayer in SquadMgr.GetAllMcsAIBossPlayer())
                             {
-                                playerData.UpdateAllLootInContainerInfo(mcsAIBossPlayer);
+                                lootData.UpdateAllLootInContainerInfo(mcsAIBossPlayer);
                             }
                         }
                     }
