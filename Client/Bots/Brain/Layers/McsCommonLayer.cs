@@ -3,14 +3,16 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
     internal class McsCommonLayer : McsBaseLayer<McsCommonLayer>
     {
-        // private float _nextReloadTime;
         private float _holdPositionTime = Time.time;
-        private CustomNavigationPoint _pointToShoot = null;
+        private float _goToCoverTime = Time.time;
+        private CustomNavigationPoint _currentNavigationPoint = null;
+        private bool _isInCover = false;
         private bool _haveCoverToShoot = false;
         private float _closeBossDistance = 10f;
         private bool _isHolding = false;
@@ -199,112 +201,46 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
-                if (false)
-                {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
-                }
-
-                // if (BotOwner.Medecine.FirstAid.Have2Do || BotOwner.Medecine.SurgicalKit.HaveWork)
-                // {
-                //     // If we are already in cover, we can heal
-                //     if (BotOwner.Memory.IsInCover)
-                //     {
-                //         return new Action(typeof(HealLogic), "Mcs:first aid");
-                //     }
-
-                //     // If we were hit in the last 20 seconds, run to cover before healing
-                //     if (WasHitRecently(20f))
-                //     {
-                //         return new Action(typeof(RunToCoverLogic), "Mcs:goforheal");
-                //     }
-
-                //     // Otherwise we can heal
-                //     return new Action(typeof(HealLogic), "Mcs:heal now");
-                // }
-
-                // // If we're in a smoke grenade, go to a cover point
-                // if (BotOwner.SmokeGrenade.IsInSmoke)
-                // {
-                //     return new Action(typeof(GoToCoverPointLogic), "Mcs:PeaceSmoke");
-                // }
-
-                // // 
-                // if (BotOwner.PeaceHardAim.HaveActions())
-                // {
-                //     return new Action(typeof(PeaceHardAimLogic), "Mcs:PeaceHardAi");
-                // }
-
-                // // 
-                // if (BotOwner.PeaceLook.HaveActions())
-                // {
-                //     return new Action(typeof(PeaceLookLogic), "Mcs:PeaceLook");
-                // }
-
-                // // 
-                // if (BotOwner.SecondWeaponData.HaveActions())
-                // {
-                //     return new Action(typeof(WatchSecondWeaponLogic), "Mcs:Look2ndWeap");
-                // }
-
-                // Do some specific things if we aren't a boss or follower
-                // if (!IsBossOrFollower())
-                // {
-
-                //     // Should we be eating/drinking?
-                //     if (BotOwner.EatDrinkData.HaveActions())
-                //     {
-                //         return new Action(typeof(EatDrinkLogic), "Mcs:EatDrinkDat");
-                //     }
-
-                //     // Did a player 手势 to us?
-                //     if (BotOwner.Gesture.HaveRequest())
-                //     {
-                //         return new Action(typeof(GestureLogic), "Mcs:Gesture");
-                //     }
-
-                //     // 
-                //     if (BotOwner.PeacefulActions.HaveActions())
-                //     {
-                //         return new Action(typeof(PeacefulLogic), "Mcs:Peaceful");
-                //     }
-                // }
-
-                // // Get patrolling information
-                // BotOwner.PatrollingData.SetTargetMoveSpeed();
-                // BotOwner.PatrollingData.PointChooser.ShallChangeWay(false);
-                // var patrolWay = GetCurrentPatrolWay();
-
-                // // Reload if we're under 60% ammo, and it's been long enough since our last reload
-                // float ammoPercent = BotOwner.WeaponManager.Reload.BulletCount / BotOwner.WeaponManager.Reload.MaxBulletCount;
-                // if (ammoPercent < 0.6f && Time.time >= _nextReloadTime)
-                // {
-                //     _nextReloadTime = Time.time + 30f;
-                //     BotOwner.WeaponManager.Reload.TryReload();
-                // }
-
-                // // If we have a patrol, it's a reserve patrol, and the bot is allowed on reserve patrols, set the action to alternative patrol
-                // if (patrolWay != null && patrolWay.PatrolType == PatrolType.reserved && BotOwner.Settings.FileSettings.Patrol.CAN_CHOOSE_RESERV)
-                // {
-                //     BotOwner.PatrollingData.ComeToPoint();
-                //     return new Action(typeof(AlternativePatrolLogic), "Mcs:RESER");
-                // }
-
-                // // If we are not a boss, and we're following a boss, set our action to FollowerPatrol
-                // if (!BotOwner.Boss.IamBoss && BotOwner.BotFollower.HaveBoss)
-                // {
-                //     return new Action(typeof(FollowerPatrolLogic), "Mcs:BossFollow");
-                // }
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
                 if ((BotOwner.Position - mcsBossPlayerPos).sqrMagnitude > _closeBossDistance)
                 {
-                    return new Action(typeof(HoldPositionLogic), "Mcs:sDistCloseB");
+                    TryFindCover(mcsBossPlayerPos);
+                    if (_isInCover)
+                    {
+                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_currentNavigationPoint, true);
+                        if (BotOwner.CanSprintPlayer)
+                        {
+                            return new Action(typeof(AttackMovingLogic), "Mcs:sDistCloseB");
+                        }
+                        return new Action(typeof(GoToCoverPointLogic), "Mcs:sDistCloseB");
+                    }
+                    else
+                    {
+                        var xOffset = GClass856.Random(0.5f, 2.5f) * GClass856.RandomSing();
+                        var zOffset = GClass856.Random(0.5f, 2.5f) * GClass856.RandomSing();
+                        var newPos = mcsBossPlayerPos + new Vector3(xOffset, 0, zOffset);
+                        var closestPoint = BotOwner.Covers.GetClosestPoint(newPos);
+                        if (closestPoint != null)
+                        {
+                            BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
+                            return new Action(typeof(GoToCoverPointLogic), "Mcs:sDistCloseB");
+                        }
+                        if (Time.time - _goToCoverTime > 10f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
+                            return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB");
+                        }
+                        if (BotOwner.Memory.IsInCover)
+                        {
+                            return new Action(typeof(HoldPositionLogic), "Mcs:sDistCloseB");
+                        }
+                        return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB");
+                    }
                 }
                 else
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
                 }
-
-                // return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
             }
             catch (Exception e)
             {
@@ -338,45 +274,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             Type currentActionType = CurrentAction.Type;
 
             // I don't really know a more elegant way to do this condition than direct comparing the types
-            if (currentActionType == typeof(AlternativePatrolLogic))
-            {
-                return EndAlternativePatrol();
-            }
-            // else if (currentActionType == typeof(EatDrinkLogic))
-            // {
-            //     return EndEatDrink();
-            // }
-            else if (currentActionType == typeof(FollowerPatrolLogic))
-            {
-                return EndFollowerPatrol();
-            }
-            // else if (currentActionType == typeof(FriendlyTiltLogic))
-            // {
-            //     return EndFriendlyTilt();
-            // }
-            // else if (currentActionType == typeof(GestureLogic))
-            // {
-            //     return EndGesture();
-            // }
-            else if (currentActionType == typeof(GoToCoverPointLogic))
+            if (currentActionType == typeof(GoToCoverPointLogic))
             {
                 return EndGoToCoverPoint();
             }
             else if (currentActionType == typeof(HealLogic))
             {
                 return EndHeal();
-            }
-            // else if (currentActionType == typeof(PeacefulLogic))
-            // {
-            //     return EndPeaceful();
-            // }
-            else if (currentActionType == typeof(PeaceHardAimLogic))
-            {
-                return EndPeaceHardAim();
-            }
-            else if (currentActionType == typeof(PeaceLookLogic))
-            {
-                return EndPeaceLook();
             }
             else if (currentActionType == typeof(RunToCoverLogic))
             {
@@ -386,17 +290,45 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return EndSimplePatrol();
             }
-            else if (currentActionType == typeof(WatchSecondWeaponLogic))
-            {
-                return EndWatchSecondWeapon();
-            }
             else if (currentActionType == typeof(HoldPositionLogic))
             {
                 return EndHoldPosition();
             }
+            else if (currentActionType == typeof(GoToPointLogic))
+            {
+                return EndGoToPoint();
+            }
+            else if (currentActionType == typeof(AttackMovingLogic))
+            {
+                return EndAttackMoving();
+            }
 
             // If it's not a logic we handle, end it
             return true;
+        }
+
+        private void TryFindCover(Vector3 mcsBossPlayerPos)
+        {
+            if (_goToCoverTime < Time.time)
+            {
+                _goToCoverTime = Time.time + 1f;
+                var coverSearchData = new CoverSearchData(mcsBossPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, _closeBossDistance, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsBossPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true, null, null, "Default");
+                _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
+                if (_currentNavigationPoint != null)
+                {
+                    if ((mcsBossPlayerPos - _currentNavigationPoint.Position).sqrMagnitude < _closeBossDistance && !_currentNavigationPoint.IsSpotted)
+                    {
+                        _isInCover = true;
+                        return;
+                    }
+                    _isInCover = false;
+                    return;
+                }
+                else
+                {
+                    _isInCover = false;
+                }
+            }
         }
 
         private PatrolWay GetCurrentPatrolWay()
@@ -460,16 +392,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        private bool EndFriendlyTilt()
-        {
-            return true;
-        }
-
-        private bool EndGesture()
-        {
-            return true;
-        }
-
         private bool EndGoToCoverPoint()
         {
             // If we're in cover, end going to cover
@@ -497,27 +419,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
-        }
-
-        private bool EndPeaceful()
-        {
-            // If we have peaceful actions to do, end Peaceful
-            if (BotOwner.PeacefulActions.HaveActions())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool EndPeaceHardAim()
-        {
-            return true;
-        }
-
-        private bool EndPeaceLook()
-        {
-            return true;
         }
 
         private bool EndRunToCover()
@@ -569,6 +470,32 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
+            return false;
+        }
+
+        private bool EndGoToPoint()
+        {
+            if (BotOwner.GoToSomePointData.IsCome())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool EndAttackMoving()
+        {
+            if (Time.time - BotOwner.ShootData.LastTriggerPressd > 9f)
+            {
+                return true;
+            }
+            if (BotOwner.DogFight.DogFightState > BotDogFightStatus.none)
+            {
+                return true;
+            }
+            if (BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
             return false;
         }
 
@@ -650,10 +577,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     bossPos = BotOwner.Position;
                 }
-                _pointToShoot = FollowerCheckData();
-                if (_pointToShoot != null && _pointToShoot.IsFreeById(BotOwner.Id) && !_pointToShoot.IsSpotted)
+                _currentNavigationPoint = FollowerCheckData();
+                if (_currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
                 {
-                    float sqrMagnitude = (bossPos - _pointToShoot.Position).sqrMagnitude;
+                    float sqrMagnitude = (bossPos - _currentNavigationPoint.Position).sqrMagnitude;
                     if (sqrMagnitude >= BotOwner.Settings.FileSettings.Boss.MAX_DIST_COVER_BOSS_SQRT)
                     {
                         _haveCoverToShoot = false;
@@ -661,17 +588,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     if (ProtectCareKill())
                     {
-                        bool canIShootToEnemy = _pointToShoot.CanIShootToEnemy;
+                        bool canIShootToEnemy = _currentNavigationPoint.CanIShootToEnemy;
                         _haveCoverToShoot = canIShootToEnemy;
                     }
                     else
                     {
                         _haveCoverToShoot = true;
                     }
-                    if (_haveCoverToShoot && (BotOwner.Memory.CurCustomCoverPoint == null || BotOwner.Memory.CurCustomCoverPoint.Id != _pointToShoot.Id))
+                    if (_haveCoverToShoot && (BotOwner.Memory.CurCustomCoverPoint == null || BotOwner.Memory.CurCustomCoverPoint.Id != _currentNavigationPoint.Id))
                     {
                         BotOwner.Memory.BotCurrentCoverInfo.Spotted();
-                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_pointToShoot, true);
+                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_currentNavigationPoint, true);
                         return;
                     }
                 }
@@ -718,13 +645,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 coverShootType = CoverShootType.hide;
             }
-            var coverSerachData = new CoverSearchData(bossPos, BotOwner.CoverSearchInfo, coverShootType, LocalBotSettingsProviderClass.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(bossPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true);
-            return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSerachData, true);
+            var coverSearchData = new CoverSearchData(bossPos, BotOwner.CoverSearchInfo, coverShootType, LocalBotSettingsProviderClass.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(bossPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true);
+            return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
         }
 
         private Vector3 GetMcsBossPlayerPos()
         {
-            return McsBotPlayerData.BossPlayer.Position;
+            if (BotOwner.BotFollower.HaveBoss)
+            {
+                return McsBotPlayerData.BossPlayer.Position;
+            }
+            else
+            {
+                return BotOwner.Position;
+            }
         }
 
         private bool EndWatchSecondWeapon()
@@ -743,26 +677,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             // if (!IsBossOrFollower())
             // {
             //     if (BotOwner.EatDrinkData.HaveActions())
-            //     {
-            //         return true;
-            //     }
-
-            //     if (BotOwner.FriendlyTilt.HaveActions())
-            //     {
-            //         return true;
-            //     }
-
-            //     if (BotOwner.Gesture.HaveRequest())
-            //     {
-            //         return true;
-            //     }
-
-            //     if (BotOwner.SecondWeaponData.HaveActions())
-            //     {
-            //         return true;
-            //     }
-
-            //     if (BotOwner.PeacefulActions.HaveActions())
             //     {
             //         return true;
             //     }
