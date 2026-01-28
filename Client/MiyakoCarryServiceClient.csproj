@@ -27,37 +27,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony" HintPath=".\Ref\0Harmony.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath=".\Ref\Assembly-CSharp.dll" Private="false" />
     <Reference Include="BepInEx" HintPath=".\Ref\BepInEx.dll" Private="false" />
+    <Reference Include="Comfort" HintPath=".\Ref\Comfort.dll" Private="false" />
+    <Reference Include="Comfort.Unity" HintPath=".\Ref\Comfort.Unity.dll" Private="false" />
     <Reference Include="ConfigurationManager" HintPath=".\Ref\ConfigurationManager.dll" Private="false" />
+    <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
+    <Reference Include="DrakiaXYZ-BigBrain" HintPath=".\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />
+    <Reference Include="Newtonsoft.Json" HintPath=".\Ref\Newtonsoft.Json.dll" Private="false" />
+    <Reference Include="Sirenix.Serialization" HintPath=".\Ref\Sirenix.Serialization.dll" Private="false" />
     <Reference Include="spt-common" HintPath=".\Ref\spt-common.dll" Private="false" />
     <Reference Include="spt-core" HintPath=".\Ref\spt-core.dll" Private="false" />
     <Reference Include="spt-custom" HintPath=".\Ref\spt-custom.dll" Private="false" />
     <Reference Include="spt-debugging" HintPath=".\Ref\spt-debugging.dll" Private="false" />
-    <Reference Include="spt-singleplayer" HintPath=".\Ref\spt-singleplayer.dll" Private="false" />
     <Reference Include="spt-reflection" HintPath=".\Ref\spt-reflection.dll" Private="false" />
-    <Reference Include="0Harmony" HintPath=".\Ref\0Harmony.dll" Private="false" />
-    <Reference Include="Assembly-CSharp" HintPath=".\Ref\Assembly-CSharp.dll" Private="false" />
-    <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
+    <Reference Include="spt-singleplayer" HintPath=".\Ref\spt-singleplayer.dll" Private="false" />
+    <Reference Include="UnityEngine.AIModule" HintPath=".\Ref\UnityEngine.AIModule.dll" Private="false" />
     <Reference Include="UnityEngine.CoreModule" HintPath=".\Ref\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.IMGUIModule" HintPath=".\Ref\UnityEngine.IMGUIModule.dll" Private="false" />
-    <Reference Include="UnityEngine.AudioModule" HintPath=".\Ref\UnityEngine.AudioModule.dll" Private="false" />
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule" HintPath=".\Ref\UnityEngine.UnityWebRequestAudioModule.dll" Private="false" />
-    <Reference Include="UnityEngine.UnityWebRequestModule" HintPath=".\Ref\UnityEngine.UnityWebRequestModule.dll" Private="false" />
-    <Reference Include="UnityEngine.TextRenderingModule" HintPath=".\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
-    <Reference Include="Comfort" HintPath=".\Ref\Comfort.dll" Private="false" />
-    <Reference Include="Comfort.Unity" HintPath=".\Ref\Comfort.Unity.dll" Private="false" />
-    <Reference Include="Unity.Postprocessing.Runtime" HintPath=".\Ref\Unity.Postprocessing.Runtime.dll" Private="false" />
-    <Reference Include="UnityEngine.PhysicsModule" HintPath=".\Ref\UnityEngine.PhysicsModule.dll" Private="false" />
-    <Reference Include="UnityEngine.AssetBundleModule" HintPath=".\Ref\UnityEngine.AssetBundleModule.dll" Private="false" />
-    <Reference Include="ItemComponent.Types" HintPath=".\Ref\ItemComponent.Types.dll" Private="false" />
     <Reference Include="UnityEngine.InputLegacyModule" HintPath=".\Ref\UnityEngine.InputLegacyModule.dll" Private="false" />
-    <Reference Include="Sirenix.Serialization" HintPath=".\Ref\Sirenix.Serialization.dll" Private="false" />
-    <Reference Include="Unity.TextMeshPro" HintPath=".\Ref\Unity.TextMeshPro.dll" Private="false" />
-    <Reference Include="UnityEngine.UI" HintPath=".\Ref\UnityEngine.UI.dll" Private="false" />
-    <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
-    <Reference Include="Newtonsoft.Json" HintPath=".\Ref\Newtonsoft.Json.dll" Private="false" />
-    <Reference Include="DrakiaXYZ-BigBrain" HintPath=".\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />
-    <Reference Include="DrakiaXYZ-Waypoints" HintPath=".\Ref\DrakiaXYZ-Waypoints.dll" Private="false" />
+    <Reference Include="UnityEngine.TextRenderingModule" HintPath=".\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
     <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)') And '$(Configuration)' == 'Debug'" />
