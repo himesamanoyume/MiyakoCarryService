@@ -314,13 +314,15 @@
 - ~~还是没有实现好跟随~~
 - 护航总是对近在咫尺的敌人视而不见
 - **护航攻击性太低，不应该总是待在老板附近，而是应该主动出击**
-- - **现在变成不攻击了**
+- 借鉴`FollowerAssaultLayer`
+- - ~~现在变成不攻击了~~
 - ~~学习以下Patch~~
 ```cs
 new HearingSensorPatch().Enable();
 new BulletImpactPatch().Enable();
 new PlayerSayPatch().Enable();
 ```
+- ~~应该替换GoToXX改为RunToXX~~
 
 ## Logic思想指导
 

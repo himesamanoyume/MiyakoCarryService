@@ -133,13 +133,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     {
                         var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, true);
 
-                        settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = bossPlayer.Side == EPlayerSide.Savage;
+                        settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
                         settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = bossPlayer.Side != EPlayerSide.Savage;
 
                         var oldReasons = settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
 
-                        settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
-                        settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
+                        // settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
+                        // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
                         settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
                         settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
                         settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
@@ -151,8 +151,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9f;
                         settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
-                        settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 30f;
-                        settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 0.1f;
+                        settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 40f;
+                        settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 30f;
                         settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = 100f;
                         settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 50f;
 
@@ -185,19 +185,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Mind.GROUP_ANY_PHRASE_DELAY = 2f;
                         settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
                         settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
-
-                        if (bossPlayer.Side == EPlayerSide.Savage)
-                        {
-                            settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
-                            settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = false;
-                        }
-                        else
-                        {
-                            settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
-                            settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = true;
-                        }
-
                         settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
+                        settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
                         settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
 
                         // force follower loyality
@@ -286,12 +275,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
                         settings.FileSettings.Look.LightOnVisionDistance = 50f;
                         settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
-                        settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 50f;
+                        settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 55f;
                         settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 80f;
                         settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
                         settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
                         settings.FileSettings.Look.LOOK_THROUGH_GRASS = false;
-                        settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 150.0f;
+                        settings.FileSettings.Look.DIST_REPEATED_SEEN = 100.0f;
+                        settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 0.01f;
+                        settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = 0.01f;
                         settings.FileSettings.Look.NO_GREEN_DIST = 100.0f;
                         settings.FileSettings.Look.NO_GRASS_DIST = 100.0f;
                         settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
@@ -314,7 +305,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
-                        botOwner.ENEMY_LOOK_AT_ME = 270f;
+                        botOwner.ENEMY_LOOK_AT_ME = Mathf.Cos(settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG * 0.017453292f);
                         botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(settings.FileSettings.Core.DamageCoeff);
 
                         // counter SAIN
@@ -330,13 +321,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.Tactic.AggressionChange(1f);
 
-                        settings.FileSettings.Core.VisibleAngle = 270f;
-                        settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 270f;
-                        settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 270f;
-
-                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE").SetValue(botOwner.LookSensor, settings.FileSettings.Core.VisibleAngle);
-                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_LIGHT").SetValue(botOwner.LookSensor, settings.FileSettings.Look.VISIBLE_ANG_LIGHT);
-                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_NIGHTVISION").SetValue(botOwner.LookSensor, settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION);
+                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Core.VisibleAngle * 0.017453292f));
+                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_LIGHT").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_LIGHT * 0.017453292f));
+                        AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_NIGHTVISION").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION * 0.017453292f));
 
                         botOwner.Settings = settings;
 
@@ -344,8 +331,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         if (bossPlayer.BotsGroup != null)
                         {
-                            botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-                            botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
+                            // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
+                            // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
                             return bossPlayer.BotsGroup;
                         }
 
@@ -384,8 +371,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         bossPlayer.BotsGroup = botsGroup;
                         bossPlayer.BotsGroup.Lock();
 
-                        botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-                        botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
+                        // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
+                        // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
 
                         return botsGroup;
                     });

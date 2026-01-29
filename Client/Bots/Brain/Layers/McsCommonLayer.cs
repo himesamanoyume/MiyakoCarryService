@@ -217,7 +217,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             return new Action(typeof(AttackMovingLogic), "Mcs:sDistCloseB:AttackMovingLogic");
                         }
-                        return new Action(typeof(GoToCoverPointLogic), "Mcs:sDistCloseB:GoToCoverPointLogic1");
+                        return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic1");
                     }
                     else
                     {
@@ -228,7 +228,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         if (closestPoint != null)
                         {
                             BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
-                            return new Action(typeof(GoToCoverPointLogic), "Mcs:sDistCloseB:GoToCoverPointLogic2");
+                            return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic2");
                         }
                         if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
                         {
@@ -382,6 +382,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         private bool EndRunToCover()
         {
+            var mcsBossPlayerPos = GetMcsBossPlayerPos();
+            if (mcsBossPlayerPos != null)
+            {
+                TryFindCover(mcsBossPlayerPos);
+                UpdateCoverToShoot();
+                if (!_isInCover && !_haveCoverToShoot)
+                {
+                    return true;
+                }
+            }
+            
             // If we're in cover, end running to cover
             if (BotOwner.Memory.IsInCover)
             {
