@@ -1,6 +1,5 @@
 
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -11,10 +10,10 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     internal sealed class SquadMgr : BaseMgr<SquadMgr>
     {
-        private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, BotOwner>> _mcsSquadDict = new();
+        private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsBossPlayerIds = new();
         private HashSet<MongoID> _mcsBotPlayerIds = new();
-        private ConcurrentDictionary<MongoID, McsAIBossPlayer> _mcsAIBossPlayers = new();
+        private Dictionary<MongoID, McsAIBossPlayer> _mcsAIBossPlayers = new();
 
         public sealed override void Start()
         {
@@ -23,16 +22,28 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void AddMcsSquadMember(MongoID mcsBossPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAIBossPlayer mcsAIBossPlayer)
         {
-            _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, botOwner);
+            if (!_mcsSquadDict.TryGetValue(mcsBossPlayerId, out var squadMembers))
+            {
+                squadMembers = new(){{mcsBotPlayerId, botOwner}};
+                _mcsSquadDict.Add(mcsBossPlayerId, squadMembers);
+            }
+            else
+            {
+                squadMembers.Add(mcsBotPlayerId, botOwner);
+            }
             _mcsBossPlayerIds.Add(mcsBossPlayerId);
             _mcsBotPlayerIds.Add(mcsBotPlayerId);
-            _mcsAIBossPlayers.GetOrAdd(mcsBossPlayerId, _ => mcsAIBossPlayer);
+            _mcsAIBossPlayers[mcsBossPlayerId] = mcsAIBossPlayer;
         }
 
         public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsBossPlayerId)
         {
             _mcsBossPlayerIds.Add(mcsBossPlayerId);
-            return _mcsSquadDict.GetOrAdd(mcsBossPlayerId, _ => new()).Values;
+            if (_mcsSquadDict.TryGetValue(mcsBossPlayerId, out var squadMembers))
+            {
+                return squadMembers.Values;
+            }
+            return null;
         }
 
         public bool IsMcsBotPlayer(MongoID mcsBotPlayerId)
@@ -63,12 +74,14 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 return mcsAIBossPlayer;
             }
+            MiyakoCarryServicePlugin.Logger.LogError("mcsAIBossPlayer 返回空");
             return null;
         }
 
         public List<McsAIBossPlayer> GetAllMcsAIBossPlayer()
         {
-            return _mcsAIBossPlayers.Values.ToList();
+            var mcsAIBossPlayers = _mcsAIBossPlayers.Values.ToList();
+            return mcsAIBossPlayers;
         }
 
 

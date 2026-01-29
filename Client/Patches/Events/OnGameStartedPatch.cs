@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPostfix]
         public static void Postfix()
         {
+            GameLoop.Instance.IsGameStarted = true;
             GameLoop.Instance.CheckVaildGameWorld();
             OnGameWorldStart?.Invoke();
         }

@@ -14,6 +14,7 @@ namespace MiyakoCarryService.Client
     {
         public Dictionary<Type, IMgr> Mgrs { get; private set; } = new();
         public Dictionary<string, TraderOffer> ItemBestPriceDict { get; private set; } = new();
+        public bool IsGameStarted = false;
 
         public ISession Session
         {
@@ -27,7 +28,7 @@ namespace MiyakoCarryService.Client
 
         public bool CheckVaildGameWorld()
         {
-            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
+            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld && IsGameStarted;
             return IsVaildGameWorld;
         }
 

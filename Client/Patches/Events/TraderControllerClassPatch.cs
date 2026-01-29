@@ -43,7 +43,8 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
                             {
-                                rootParentItem.GetData().RefreshRootItemInteresting(mcsAIBossPlayer);
+                                var itemData = rootParentItem.GetData();
+                                itemData.RefreshRootItemInteresting(mcsAIBossPlayer);
                             }
                         }
                         catch (Exception e)

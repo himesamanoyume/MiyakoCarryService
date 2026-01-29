@@ -306,8 +306,16 @@
 - - - 搜索过的战利品打上忽略属性，当其TraderController被触发过之后意味着其物品有变动，此时取消忽略属性。但是在联机状态下，不同老板的需求不同，所以不能简单的设置一个bool值来标记忽略，而是标记McsAIBossPlayer列表，当列表内有对应的老板时，说明这个物品对该老板来说应该被忽视，而其他老板则不一定
 - **护航会因为战局时间自己跑去撤离，可能还是得自己实现一遍对单独BotOwner执行的Layer添加**
 - ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
-- **在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常**
+- ~~BUG:在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常~~
+- ~~BUG：`McsBotPlayerData`的`McsAIBossPlayer`为null, 其实是因为`GetMcsAIBossPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
+- **BUG:还会异常**
+```log
+System.NullReferenceException: Object reference not set to an instance of an object
+  at MiyakoCarryService.Client.Patches.Events.TraderControllerClassConstructorPatch.Postfix (TraderControllerClass __instance)
+```
+- 在周围巡逻时应该尽量让护航与老板处于同一高度
 - **需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处**
+- **检查`GetRangeOwnerItemData`**
 
 ## Logic思想指导
 

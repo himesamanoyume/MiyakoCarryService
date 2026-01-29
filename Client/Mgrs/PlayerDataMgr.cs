@@ -56,6 +56,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     var closeOwnerItemDatas = new List<ItemData>();
                     foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                     {
+                        if (mcsBotPlayerData.Transform == null)
+                        {
+                            continue;
+                        }
                         closeOwnerItemDatas.AddRange(Tools.GetRangeOwnerItemData(mcsBotPlayerData.Transform.position, 50f));
                     }
 

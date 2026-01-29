@@ -21,6 +21,11 @@ namespace MiyakoCarryService.Client.Datas
         {
             get
             {
+                if (_transformRef == null)
+                {
+                    _transformRef = new(null);
+                }
+
                 if (_transformRef.TryGetTarget(out var transform))
                 {
                     return transform;
@@ -40,6 +45,7 @@ namespace MiyakoCarryService.Client.Datas
         public ItemData(Item item)
         {
             _itemRef = new(item);
+            _transformRef = new(GetTransfrom());
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
