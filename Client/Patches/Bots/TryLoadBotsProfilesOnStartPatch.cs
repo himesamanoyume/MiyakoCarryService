@@ -75,11 +75,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 bossPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
                 {
-                    var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
-                    if (damageInfo.Player == null || !damageInfo.Player.IsAI || damageInfo.Player.AIData == null || enemyBotOwner == null)
+                    if (damageInfo.Player == null || !damageInfo.Player.IsAI || damageInfo.Player.AIData == null || damageInfo.Player.AIData.BotOwner == null)
                     {
                         return;
                     }
+
+                    var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
 
                     if (SquadMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
                     {
@@ -88,7 +89,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     if (bossPlayer.BotsGroup != null)
                     {
-                        bossPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.addPlayerToBoss);
+                        bossPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
                         bossPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsBossId(bossPlayer.ProfileId).FirstOrDefault());
                     }
                 };

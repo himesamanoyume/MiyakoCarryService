@@ -314,13 +314,12 @@
 - ~~还是没有实现好跟随~~
 - 护航总是对近在咫尺的敌人视而不见
 - **护航攻击性太低，不应该总是待在老板附近，而是应该主动出击**
-- 学习以下Patch
+- - **现在变成不攻击了**
+- ~~学习以下Patch~~
 ```cs
 new HearingSensorPatch().Enable();
-new FootstepSoundPatch().Enable();
 new BulletImpactPatch().Enable();
 new PlayerSayPatch().Enable();
-new GamePlayerOwnerPatch().Enable();
 ```
 
 ## Logic思想指导

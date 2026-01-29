@@ -84,6 +84,15 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsAIBossPlayers;
         }
 
+        public List<BotOwner> GetAllMcsBotPlayer()
+        {
+            var mcsBotPlayers = new List<BotOwner>();
+            foreach (var botOwners in _mcsSquadDict.Values)
+            {
+                mcsBotPlayers.AddRange(botOwners.Values);
+            }
+            return mcsBotPlayers;
+        }
 
         protected override void OnRaidStarted()
         {

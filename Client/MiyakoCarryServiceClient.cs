@@ -141,6 +141,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TraderControllerClassRemoveItemEventInvokePatch().Enable();
         new TraderControllerClassOutProcessPatch().Enable();
         new TraderControllerClassInProcessPatch().Enable();
+        new BotHearingSensorPatch().Enable();
+        new PlayerSayPatch().Enable();
+        new PlayHitEffectPatch().Enable();
 #if DEBUG
         
 #endif
