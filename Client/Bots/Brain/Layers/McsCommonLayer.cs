@@ -202,6 +202,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
+                if (mcsBossPlayerPos == null)
+                {
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                }
+
                 if ((BotOwner.Position - mcsBossPlayerPos).sqrMagnitude > _closeBossDistance)
                 {
                     TryFindCover(mcsBossPlayerPos);
@@ -273,7 +278,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             Type currentActionType = CurrentAction.Type;
 
-            // I don't really know a more elegant way to do this condition than direct comparing the types
             if (currentActionType == typeof(GoToCoverPointLogic))
             {
                 return EndGoToCoverPoint();
@@ -303,7 +307,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return EndAttackMoving();
             }
 
-            // If it's not a logic we handle, end it
             return true;
         }
 
@@ -331,65 +334,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        private PatrolWay GetCurrentPatrolWay()
-        {
-            // Otherwise, if we don't have a PatrolWay yet, choose one
-            if (BotOwner.PatrollingData.Way == null)
-            {
-                BotOwner.PatrollingData.PointChooser.ChooseStartWay();
-            }
-
-            return BotOwner.PatrollingData.Way;
-        }
-
         private bool WasHitRecently(float timeframe)
         {
             return (Time.time - BotOwner.Memory.LastTimeHit) < timeframe;
         }
 
-        private bool EndAlternativePatrol()
-        {
-            // If we should generally end the patrol, due so
-            if (ShouldEndPatrol())
-            {
-                return true;
-            }
-
-            // If we're still patrolling a reserved patrol, don't end
-            if (BotOwner.PatrollingData.Way.PatrolType == PatrolType.reserved)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         private bool EndEatDrink()
         {
             return true;
-        }
-
-        private bool EndFollowerPatrol()
-        {
-            // If we've switched to a reserved patrol, stop our follower patrol
-            if (BotOwner.PatrollingData.Way.PatrolType == PatrolType.reserved)
-            {
-                return true;
-            }
-
-            // If we are now a boss, end our follower patrol
-            if (BotOwner.Boss.IamBoss)
-            {
-                return true;
-            }
-
-            // If we no longer have a boss, end our follower patrol
-            if (!BotOwner.BotFollower.HaveBoss)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         private bool EndGoToCoverPoint()
@@ -659,17 +611,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return BotOwner.Position;
             }
-        }
-
-        private bool EndWatchSecondWeapon()
-        {
-            // When our second weapon has actions, stop watching it? What?
-            if (BotOwner.SecondWeaponData.HaveActions())
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private bool ShouldEndPatrol()

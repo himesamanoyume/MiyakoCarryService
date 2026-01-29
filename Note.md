@@ -305,8 +305,9 @@
 - - 战利品需要存在忽视属性，否则可能导致重复被检查
 - - - 搜索过的战利品打上忽略属性，当其TraderController被触发过之后意味着其物品有变动，此时取消忽略属性。但是在联机状态下，不同老板的需求不同，所以不能简单的设置一个bool值来标记忽略，而是标记McsAIBossPlayer列表，当列表内有对应的老板时，说明这个物品对该老板来说应该被忽视，而其他老板则不一定
 - **护航会因为战局时间自己跑去撤离，可能还是得自己实现一遍对单独BotOwner执行的Layer添加**
-- **HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`**
-- **`ItemData.get_Transform`还是可能异常**
+- ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
+- **在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常**
+- **需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处**
 
 ## Logic思想指导
 

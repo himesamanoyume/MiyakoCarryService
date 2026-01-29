@@ -83,11 +83,13 @@ namespace MiyakoCarryService.Client.Utils
             var result = new List<ItemData>();
             var itemOwners = Singleton<GameWorld>.Instance.ItemOwners;
 
+            // 需要弄清此处itemData中是否也包含了PlayerData，若有，则下方的PlayerData是没必要重复添加的
+            // 此外，还需要检查PlayerData是否是老板，若是则也需要跳过
             foreach (var owner in itemOwners)
             {
                 var itemData = owner.Key.RootItem.GetData();
 
-                if (itemData == null)
+                if (itemData == null || itemData.Transform == null)
                 {
                     continue;
                 }
@@ -102,7 +104,7 @@ namespace MiyakoCarryService.Client.Utils
 
             foreach (var playerData in playerDatas)
             {
-                if (playerData is McsBotPlayerData)
+                if (playerData is McsBotPlayerData || playerData.Transform == null)
                 {
                     continue;
                 }

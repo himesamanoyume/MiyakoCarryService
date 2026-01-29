@@ -23,7 +23,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     public const string BepInExClientVersion = "0.1.0.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
-    public const string McsPluginName = "Himesamanoyume.MiyakoCarryService";
+    public const string McsPluginName = "姫様の夢 MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
     public static bool FikaInstalled { get; private set; }  = false;
