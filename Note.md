@@ -310,7 +310,8 @@
 - ~~BUG：`McsBotPlayerData`的`McsAIBossPlayer`为null, 其实是因为`GetMcsAIBossPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
 - 在周围巡逻时应该尽量让护航与老板处于同一高度
 - **需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处**
-- **检查`GetRangeOwnerItemData`**
+- ~~检查`GetRangeOwnerItemData`~~(会重复)
+- 还是没有实现好跟随
 
 ## Logic思想指导
 

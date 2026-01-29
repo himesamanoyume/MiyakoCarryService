@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Extensions
 
                     if (player == null)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogError("player 为空");
+                        // MiyakoCarryServicePlugin.Logger.LogError("player 为空");
                         return null;
                     }
 

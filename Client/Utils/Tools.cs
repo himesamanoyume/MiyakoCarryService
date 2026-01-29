@@ -13,6 +13,13 @@ namespace MiyakoCarryService.Client.Utils
 {
     internal static class Tools
     {
+        private static SquadMgr SquadMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+            }
+        }
         public static bool IsPlayerInventory(string stringTemplateId)
         {
             return stringTemplateId == CommonId.DefaultInventory;
@@ -83,8 +90,6 @@ namespace MiyakoCarryService.Client.Utils
             var result = new List<ItemData>();
             var itemOwners = Singleton<GameWorld>.Instance.ItemOwners;
 
-            // 需要弄清此处itemData中是否也包含了PlayerData，若有，则下方的PlayerData是没必要重复添加的
-            // 此外，还需要检查PlayerData是否是老板，若是则也需要跳过
             foreach (var owner in itemOwners)
             {
                 var itemData = owner.Key.RootItem.GetData();
@@ -94,27 +99,19 @@ namespace MiyakoCarryService.Client.Utils
                     continue;
                 }
 
+                if (itemData is PlayerData playerData)
+                {
+                    if (SquadMgr.IsMcsBossPlayer(playerData.Player.ProfileId) || SquadMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
+                    {
+                        continue;
+                    }
+                }
+
                 if ((itemData.Transform.position - mcsBotPlayerPos).sqrMagnitude <= distance)
                 {
                     result.Add(itemData);
                 }
             }
-
-            var playerDatas = GameLoop.Instance.GetMgr<PlayerDataMgr>().GetDatas<PlayerData>();
-
-            foreach (var playerData in playerDatas)
-            {
-                if (playerData is McsBotPlayerData || playerData.Transform == null)
-                {
-                    continue;
-                }
-
-                if ((playerData.Transform.position - mcsBotPlayerPos).sqrMagnitude <= distance)
-                {
-                    result.Add(playerData);
-                }
-            }
-
             return result;
         }
     }
