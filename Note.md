@@ -311,7 +311,17 @@
 - 在周围巡逻时应该尽量让护航与老板处于同一高度
 - **需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处**
 - ~~检查`GetRangeOwnerItemData`~~(会重复)
-- 还是没有实现好跟随
+- ~~还是没有实现好跟随~~
+- 护航总是对近在咫尺的敌人视而不见
+- **护航攻击性太低，不应该总是待在老板附近，而是应该主动出击**
+- 学习以下Patch
+```cs
+new HearingSensorPatch().Enable();
+new FootstepSoundPatch().Enable();
+new BulletImpactPatch().Enable();
+new PlayerSayPatch().Enable();
+new GamePlayerOwnerPatch().Enable();
+```
 
 ## Logic思想指导
 

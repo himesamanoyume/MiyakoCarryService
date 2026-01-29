@@ -246,6 +246,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
                 }
+                // end
             }
             catch (Exception e)
             {
@@ -324,13 +325,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         _isInCover = true;
                         return;
                     }
-                    _isInCover = false;
-                    return;
                 }
-                else
-                {
-                    _isInCover = false;
-                }
+                _isInCover = false;
             }
         }
 
