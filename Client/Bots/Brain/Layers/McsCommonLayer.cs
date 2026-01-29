@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private CustomNavigationPoint _currentNavigationPoint = null;
         private bool _isInCover = false;
         private bool _haveCoverToShoot = false;
-        private float _closeBossDistance = 10f;
+        private float _closeBossDistance = 5f;
         private bool _isHolding = false;
         private float _lastHoldTime = Time.time;
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
                             return new Action(typeof(GoToCoverPointLogic), "Mcs:sDistCloseB");
                         }
-                        if (Time.time - _goToCoverTime > 10f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                        if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
                         {
                             BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
                             return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB");
@@ -487,7 +487,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return true;
                 }
-                if (goalEnemy.IsVisible && goalEnemy.Distance < BotOwner.Settings.FileSettings.Cover.END_HOLD_IF_ENEMY_CLOSE_AND_VISIBLE)
+                if (goalEnemy.IsVisible && goalEnemy.Distance < 75f)
                 {
                     return true;
                 }
@@ -532,16 +532,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentNavigationPoint = FollowerCheckData();
                 if (_currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
                 {
-                    float sqrMagnitude = (bossPos - _currentNavigationPoint.Position).sqrMagnitude;
-                    if (sqrMagnitude >= BotOwner.Settings.FileSettings.Boss.MAX_DIST_COVER_BOSS_SQRT)
+                    var sqrMagnitude = (bossPos - _currentNavigationPoint.Position).sqrMagnitude;
+                    if (sqrMagnitude >= 75f)
                     {
                         _haveCoverToShoot = false;
                         return;
                     }
                     if (ProtectCareKill())
                     {
-                        bool canIShootToEnemy = _currentNavigationPoint.CanIShootToEnemy;
-                        _haveCoverToShoot = canIShootToEnemy;
+                        _haveCoverToShoot = _currentNavigationPoint.CanIShootToEnemy;
                     }
                     else
                     {
@@ -563,7 +562,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         private bool ProtectCareKill()
         {
-            return (Time.time - GetEnemyLastSeenTime()) < BotOwner.Settings.FileSettings.Mind.HOLD_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+            return (Time.time - GetEnemyLastSeenTime()) < 10f;
         }
 
         private bool ProtectWantKill()
@@ -605,6 +604,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.BotFollower.HaveBoss)
             {
+                if (McsBotPlayerData == null)
+                {
+                    return BotOwner.Position;
+                }
+
                 return McsBotPlayerData.BossPlayer.Position;
             }
             else
