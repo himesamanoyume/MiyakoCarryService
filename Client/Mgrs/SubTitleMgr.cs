@@ -1,7 +1,10 @@
 
+using System.Collections;
 using System.Collections.Generic;
 using EFT;
 using EFT.UI;
+using HarmonyLib;
+using TMPro;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -15,17 +18,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-        }
-
-        void Update()
-        {
-            foreach (var subTitle in _subTitles.Values)
-            {
-                if (Time.time - subTitle.ShowTime > 4)
-                {
-                    subTitle.Hide();
-                }
-            }
         }
 
         private void Init()
@@ -44,9 +36,14 @@ namespace MiyakoCarryService.Client.Mgrs
                     var childContainer = _mcsDialogScreen.transform.GetChild(i);
                     if (childContainer.transform.name == "DialogContainer")
                     {
-                        childContainer.gameObject.SetActive(false);
+                        // 以下代码会导致报错
+                        // Can't remove RectTransform because VerticalLayoutGroup (Script), VerticalLayoutGroup (Script), VerticalLayoutGroup (Script) depends on it
+
+                        childContainer.gameObject.SetActive(false); // 暂时替代方案
                         // childContainer.SetParent(null);
                         // Destroy(childContainer);
+
+                        // end
                         break;
                     }
                 }
@@ -72,22 +69,16 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, string msg)
         {
-            var subtitleData = new List<GClass4073>
+            // 暂时不显示字幕
+            return;
+            // end
+            if (string.IsNullOrEmpty(msg))
             {
-                new GClass4073()
-                {
-                    Key = msg
-                }
-            };
-
+                return;
+            }
             if (_subTitles.TryGetValue(mcsBotPlayerId, out var subTitle))
             {
-                subTitle.SubtitlesView.method_0(new GClass3564()
-                {
-                    SubtitlesSource = ESubtitlesSource.None,
-                    CcData = subtitleData
-                });
-                subTitle.Show();
+                subTitle.Show(msg);
             }
         }
 
@@ -103,8 +94,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             cloneSubtitleViewGameObject.transform.SetParent(_subsContainer);
 
-            var cloneSubTitle = new SubTitle(cloneSubtitleView);
-            cloneSubTitle.Hide();
+            var cloneSubTitle = new SubTitle(_gameloop, cloneSubtitleView);
+            cloneSubTitle.Hide(0f);
             _subTitles[mcsBotPlayerId] = cloneSubTitle;
         }
 
@@ -120,22 +111,34 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public class SubTitle
         {
-            public float ShowTime = Time.time;
             public SubtitlesView SubtitlesView;
+            private TMP_Text _textField;
+            private GameLoop _gameLoop;
+            private Coroutine _coroutine;
 
-            public SubTitle(SubtitlesView subtitlesView)
+            public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView)
             {
                 SubtitlesView = subtitlesView;
+                _gameLoop = gameLoop;
+                var subtitlesViewTraverse = Traverse.Create(subtitlesView);
+                _textField = subtitlesViewTraverse.Field<TMP_Text>("_textField").Value;
             }
 
-            public void Show()
+            public void Show(string msg)
             {
-                ShowTime = Time.time;
+                Hide(0f);
+                if (_coroutine != null)
+                {
+                    _gameLoop.StopCoroutine(_coroutine);
+                }
+                _textField.text = msg;
                 SubtitlesView.ShowGameObject();
+                _coroutine = _gameLoop.StartCoroutine(Hide(4f));
             }
 
-            public void Hide()
+            public IEnumerator Hide(float time)
             {
+                yield return new WaitForSeconds(time);
                 SubtitlesView.HideGameObject();
             }
         }

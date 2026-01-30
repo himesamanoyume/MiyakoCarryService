@@ -43,6 +43,7 @@
     <Reference Include="spt-debugging" HintPath=".\Ref\spt-debugging.dll" Private="false" />
     <Reference Include="spt-reflection" HintPath=".\Ref\spt-reflection.dll" Private="false" />
     <Reference Include="spt-singleplayer" HintPath=".\Ref\spt-singleplayer.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath=".\Ref\Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="UnityEngine.AIModule" HintPath=".\Ref\UnityEngine.AIModule.dll" Private="false" />
     <Reference Include="UnityEngine.CoreModule" HintPath=".\Ref\UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
