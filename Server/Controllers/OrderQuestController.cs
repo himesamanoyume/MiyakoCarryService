@@ -4,6 +4,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Spt.Config;
 
 namespace MiyakoCarryService.Server.Controllers
 {
@@ -20,6 +21,11 @@ namespace MiyakoCarryService.Server.Controllers
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
         {
             orderQuestService.ProcessExpiredQuests(generatedRepeatables, bossPmcData);
+        }
+
+        public PmcDataRepeatableQuest GetRepeatableQuestSubTypeFromProfile(RepeatableQuestConfig repeatableConfig, PmcData pmcData)
+        {
+            return orderQuestService.GetRepeatableQuestSubTypeFromProfile(repeatableConfig, pmcData);
         }
     }
 }

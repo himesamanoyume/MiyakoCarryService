@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Server.Patches
         public static Dictionary<MongoId, Queue<RepeatableQuest>> OrderQuestsQueueDict = new();
 
         [PatchPostfix]
-        public static void Postfix(RepeatableQuestController __instance, MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
+        public static void Postfix(MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
         {
             var configController = ServiceLocator.ServiceProvider.GetService<ConfigController>();
             var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
@@ -33,8 +33,7 @@ namespace MiyakoCarryService.Server.Patches
             var fullProfile = profileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
             var orderConfig = configController.GetOrderConfig().OrderQuests.First();
-            var repeatableQuestControllerTraverse = Traverse.Create(__instance);
-            var generatedOrder = repeatableQuestControllerTraverse.Method("GetRepeatableQuestSubTypeFromProfile", [orderConfig, pmcData]).GetValue<PmcDataRepeatableQuest>();
+            var generatedOrder = orderQuestController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
 
             if (OrderQuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
             {
@@ -44,14 +43,13 @@ namespace MiyakoCarryService.Server.Patches
                     var quest = orderQuestsQueue.Dequeue();
                     Console.WriteLine("加入新任务");
                     quest.Side = Enum.GetName(orderConfig.Side);
-                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == "5449016a4bdc2d6f028b456f").Count = (int?)(currentTime + orderConfig.ResetTime);
+                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == "5449016a4bdc2d6f028b456f").Count = (int)(currentTime + orderConfig.ResetTime);
                     generatedOrder.ActiveQuests.Add(quest);
-                    generatedOrder.ChangeRequirement.TryAdd(
+                    generatedOrder.ChangeRequirement.Add(
                         quest.Id,
                         new ChangeRequirement
                         {
-                            ChangeCost = quest.ChangeCost,
-                            ChangeStandingCost = 0
+                            ChangeCost = quest.ChangeCost
                         }
                     );
                 }

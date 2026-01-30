@@ -10,6 +10,7 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -195,6 +196,28 @@ namespace MiyakoCarryService.Server.Services
 
             return quest;
         }
-    }
 
+        public PmcDataRepeatableQuest GetRepeatableQuestSubTypeFromProfile(RepeatableQuestConfig repeatableConfig, PmcData pmcData)
+        {
+            var repeatableQuestDetails = pmcData.RepeatableQuests.FirstOrDefault(repeatable => repeatable.Name == repeatableConfig.Name);
+
+            if (repeatableQuestDetails is null)
+            {
+                repeatableQuestDetails = new PmcDataRepeatableQuest
+                {
+                    Id = repeatableConfig.Id,
+                    Name = repeatableConfig.Name,
+                    ActiveQuests = [],
+                    InactiveQuests = [],
+                    EndTime = 0,
+                    FreeChanges = 0,
+                    FreeChangesAvailable = 0,
+                    ChangeRequirement = new(),
+                };
+
+                pmcData.RepeatableQuests.Add(repeatableQuestDetails);
+            }
+            return repeatableQuestDetails;
+        }
+    }
 }
