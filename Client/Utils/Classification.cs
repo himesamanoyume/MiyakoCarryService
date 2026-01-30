@@ -75,6 +75,23 @@ namespace MiyakoCarryService.Client.Utils
             CommonId.GPCoins
         };
 
+        public static HashSet<WildSpawnType> FriendlyTypes = new()
+        {
+            WildSpawnType.shooterBTR,
+            WildSpawnType.gifter,
+            WildSpawnType.peacefullZryachiyEvent,
+            WildSpawnType.bossZryachiy,
+            WildSpawnType.followerZryachiy
+        };
+
+        public static HashSet<EBotEnemyCause> InitialBotEnemyCauses = new()
+        {
+            EBotEnemyCause.initial,
+            EBotEnemyCause.AddNewMember,
+            EBotEnemyCause.warn,
+            EBotEnemyCause.addBotNoGroup
+        };
+
         public static List<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
     }
 }

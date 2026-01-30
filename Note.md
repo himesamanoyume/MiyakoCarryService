@@ -31,6 +31,7 @@
 
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
+- 需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处
 - 修改指令系统数组`PredefinedLayoutGroup.PositionsToCenter`
 - - `(-321, 241)，(0, 315)，(321, 241)，(492, 55)，(433, -158)，(171, -296)，(-171, -296)，(-433, -158)，(-492, 55)，(-321, 241)，（0, 150）,（0, -100）`
 - - *关于指令系统和字幕系统，需要等待到有合适的联机同步方法后，才可继续推进*
@@ -304,17 +305,13 @@
 - - 其他物品则需要优先判断价值
 - - 战利品需要存在忽视属性，否则可能导致重复被检查
 - - - 搜索过的战利品打上忽略属性，当其TraderController被触发过之后意味着其物品有变动，此时取消忽略属性。但是在联机状态下，不同老板的需求不同，所以不能简单的设置一个bool值来标记忽略，而是标记McsAIBossPlayer列表，当列表内有对应的老板时，说明这个物品对该老板来说应该被忽视，而其他老板则不一定
-- **护航会因为战局时间自己跑去撤离，可能还是得自己实现一遍对单独BotOwner执行的Layer添加**
 - ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
 - ~~BUG:在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常~~
 - ~~BUG：`McsBotPlayerData`的`McsAIBossPlayer`为null, 其实是因为`GetMcsAIBossPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
 - 在周围巡逻时应该尽量让护航与老板处于同一高度
-- **需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处**
 - ~~检查`GetRangeOwnerItemData`~~(会重复)
 - ~~还是没有实现好跟随~~
-- 护航总是对近在咫尺的敌人视而不见
-- **护航攻击性太低，不应该总是待在老板附近，而是应该主动出击**
-- 借鉴`FollowerAssaultLayer`
+- ~~护航总是对近在咫尺的敌人视而不见~~
 - - ~~现在变成不攻击了~~
 - ~~学习以下Patch~~
 ```cs
@@ -323,6 +320,11 @@ new BulletImpactPatch().Enable();
 new PlayerSayPatch().Enable();
 ```
 - ~~应该替换GoToXX改为RunToXX~~
+- ~~补全`AddEnemyPatch`使其可以阻止不合理的敌对关系建立、并建立双向敌对关系~~
+- **护航攻击性太低，不应该总是待在老板附近，而是应该主动出击**
+- - 借鉴`FollowerAssaultLayer`
+- **护航会因为战局时间自己跑去撤离，可能还是得自己实现一遍对单独BotOwner执行的Layer添加**
+- 完成以上两点就开始实现掠夺相关Logic
 
 ## Logic思想指导
 
