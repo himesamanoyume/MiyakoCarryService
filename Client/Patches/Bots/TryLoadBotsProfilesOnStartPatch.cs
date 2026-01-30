@@ -31,6 +31,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
         }
 
+        private static SubTitleMgr SubTitleMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
+            }
+        }
+
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.TryLoadBotsProfilesOnStart));
 
         [PatchPostfix]
@@ -328,6 +336,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         botOwner.Settings = settings;
 
                         SquadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAIBossPlayer);
+                        SubTitleMgr.CreateSubTitle(botOwner.ProfileId);
 
                         if (bossPlayer.BotsGroup != null)
                         {

@@ -22,6 +22,14 @@ namespace MiyakoCarryService.Client.Extensions
                 return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
             }
         }
+
+        private static SubTitleMgr SubTitleMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
+            }
+        }
         
         extension(BotOwner botOwner)
         {
@@ -38,6 +46,11 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
                 return null;
+            }
+
+            public void ShowSubtitleMsg(string msg)
+            {
+                SubTitleMgr.ShowMcsBotPlayerMsg(botOwner.ProfileId, msg);
             }
         }
     }
