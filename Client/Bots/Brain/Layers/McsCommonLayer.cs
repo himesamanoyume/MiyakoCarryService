@@ -260,11 +260,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             BotOwner.PriorityAxeTarget.FindTarget();
             if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
             {
+                if (IsMcsBotPlayer)
+                {
+                    BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Attack);
+                }
                 return false;
             }
 
-            if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
+            if (IsMcsBotPlayer)
             {
+                BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Protect);
                 return true;
             }
             return false;
