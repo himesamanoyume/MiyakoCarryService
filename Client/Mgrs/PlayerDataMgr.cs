@@ -47,29 +47,87 @@ namespace MiyakoCarryService.Client.Mgrs
         private IEnumerator RefreshMcsBotPlayersInterestingLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
+            var internalTime = new WaitForSeconds(.2f);
             while (true)
             {
                 yield return waitTime;
                 if (_gameloop.IsVaildGameWorld)
                 {
+                    // 收集护航周围的根战利品信息
                     var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
-                    var closeOwnerItemDatas = new List<ItemData>();
+                    var closeRootItemDataDict = new Dictionary<McsBotPlayerData, List<ItemData>>();
                     foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                     {
                         if (mcsBotPlayerData.Transform == null)
                         {
                             continue;
                         }
-                        closeOwnerItemDatas.AddRange(Tools.GetRangeOwnerItemData(mcsBotPlayerData.Transform.position, 50f));
+
+                        // 若当前有掠夺目标，则不进行获取新的掠夺目标
+                        if (mcsBotPlayerData.LootingTarget != null)
+                        {
+                            continue;
+                        }
+
+                        closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.Transform.position, 50f);
                     }
 
-                    foreach (var itemData in closeOwnerItemDatas)
+                    // 收集分批所需数据
+                    var totalRootItemCount = 0;
+                    foreach (var list in closeRootItemDataDict.Values)
                     {
-                        itemData.ItemsInContainer = itemData.Item.GetAllDatas().ToList();
-                        foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                        totalRootItemCount += list.Count;
+                    }
+
+                    var totalRootItemDatas = new List<ItemData>();
+                    foreach (var list in closeRootItemDataDict.Values)
+                    {
+                        totalRootItemDatas.AddRange(list);
+                    }
+
+                    // 为各批次填充数据
+                    var batchSize = Mathf.Clamp(Mathf.CeilToInt(totalRootItemCount / 10f), 100, 2000);
+                    var itemBatches = new List<List<ItemData>>();
+
+                    for(int i = 0; i < totalRootItemCount; i += batchSize)
+                    {
+                        var batch = new List<ItemData>();
+                        int endIndex = Math.Min(i + batchSize, totalRootItemCount);
+                        for (int j = i; j < endIndex; j++)
                         {
-                            StartCoroutine(itemData.RefreshRootItemInteresting(mcsBotPlayerData.McsAIBossPlayer));
+                            batch.Add(totalRootItemDatas[j]);
                         }
+                        itemBatches.Add(batch);
+                    }
+
+                    // 分批次、依据每位老板的设置进行刷新
+                    var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
+                    foreach (var batch in itemBatches)
+                    {
+                        foreach (var rootItemData in batch)
+                        {
+                            foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
+                            {
+                                rootItemData.RefreshInteresting(mcsAIBossPlayer);
+                            }
+                        }
+                        yield return internalTime;
+                    }
+
+                    // 让每位护航都获取到当前范围内最高优先级的战利品
+                    foreach (var keyValuePair in closeRootItemDataDict)
+                    {
+                        var mcsBotPlayerData = keyValuePair.Key;
+                        var closeRootItemDatas = keyValuePair.Value;
+
+                        var closeAllLootData = new List<ItemData>();
+                        foreach (var closeRootItem in closeRootItemDatas)
+                        {
+                            closeAllLootData.AddRange(closeRootItem.ItemsInContainer);
+                        }
+
+                        mcsBotPlayerData.SetLootingTarget(closeAllLootData);
+                        yield return internalTime;
                     }
                 }
             }
