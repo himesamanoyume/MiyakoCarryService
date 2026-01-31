@@ -22,6 +22,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Update(CustomLayer.ActionData data)
         {
             var lootingData = data as LootingData;
+            if (!lootingData.McsBotPlayerData.IsRunningCoroutine)
+            {
+                return;
+            }
+            
             lootingData.McsBotPlayerData.IsLooting = true;
             if (_lastTimeCheckDistance < Time.time)
             {
@@ -33,20 +38,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - targetPos;
                 var distance = offset.sqrMagnitude;
 
-                if (distance > 1f && distance <= 5f)
+                if (!lootingData.McsBotPlayerData.IsRunningCoroutine)
                 {
-                    BotOwner.SetTargetMoveSpeed(1f);
-                    BotOwner.SetPose(1f);
-                    BotOwner.Steering.LookToMovingDirection();
+                    if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
+                    {
+                        BotOwner.SetTargetMoveSpeed(0f);
+                        BotOwner.SetPose(0f);
+                        BotOwner.Steering.LookToPoint(targetPos);
+                        lootingData.McsBotPlayerData.StartLooting();
+                        _currentStuckRetries = 0;
+                        _lastTimeDistance = 0;
+                        return;
+                    }
+                    else if (distance > 1f && distance <= 5f)
+                    {
+                        BotOwner.SetTargetMoveSpeed(1f);
+                        BotOwner.SetPose(1f);
+                        BotOwner.Steering.LookToMovingDirection();
+                    }
                 }
-                else if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
+
+                if (lootingData.McsBotPlayerData.IsRunningCoroutine)
                 {
-                    BotOwner.SetTargetMoveSpeed(0f);
-                    BotOwner.SetPose(0f);
-                    BotOwner.Steering.LookToPoint(targetPos);
-                    // 开始掠夺
-                    
-                    // 
                     return;
                 }
 

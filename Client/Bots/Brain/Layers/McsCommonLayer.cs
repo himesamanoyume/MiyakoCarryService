@@ -21,6 +21,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
+            InitActionMap();
+        }
+
+        protected override void InitActionMap()
+        {
             _endActionMap = new()
             {
                 { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
@@ -29,7 +34,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(SimplePatrolLogic), EndSimplePatrol },
                 { typeof(HoldPositionLogic), EndHoldPosition },
                 { typeof(GoToPointLogic), EndGoToPoint },
-                { typeof(AttackMovingLogic), EndAttackMoving }
+                { typeof(AttackMovingLogic), EndAttackMoving },
+                { typeof(LootingTargetLogic), EndLootingTarget }
             };
         }
 
@@ -208,7 +214,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData.LootingTarget != null)
                 {
                     // 尝试去拿战利品
-                    return new Action(typeof(LootingTargetLogic), "Mcs:looting", new LootingData
+                    return new Action(typeof(LootingTargetLogic), "Mcs:looting default", new LootingData
                     {
                         McsBotPlayerData = McsBotPlayerData
                     });
@@ -637,6 +643,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private bool IsDogFighting()
         {
             return BotOwner.DogFight.DogFightState > BotDogFightStatus.none;
+        }
+
+        private bool EndLootingTarget()
+        {
+            return !McsBotPlayerData.IsRunningCoroutine && !McsBotPlayerData.IsLooting;
         }
     }
 }

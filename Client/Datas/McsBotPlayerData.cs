@@ -1,12 +1,14 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -19,6 +21,7 @@ namespace MiyakoCarryService.Client.Datas
         public List<BotBehavior> BotBehaviors { get; private set; }
         private WeakReference<McsAIBossPlayer> _mcsAIBossPlayerRef;
         public McsAIBossPlayer McsAIBossPlayer => _mcsAIBossPlayerRef.TryGetTarget(out var mcsAIBossPlayer) ? mcsAIBossPlayer : null;
+        private List<LootData> _filtedLootDatas;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
         public LootData LootingTarget
@@ -52,6 +55,7 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         private LootDataMgr _lootDataMgr = null;
+        public bool IsRunningCoroutine = false;
         public McsBotPlayerData(Player bossPlayer, McsAIBossPlayer mcsAIBossPlayer, Player player, Item item) : base(player, item)
         {
             _botOwnerRef = new(player.AIData.BotOwner);
@@ -69,7 +73,8 @@ namespace MiyakoCarryService.Client.Datas
                 return;
             }
 
-            var filtedItemDatas = new List<LootData>(itemDatas.Count);
+            var filtedLootDatas = new List<LootData>(itemDatas.Count);
+            // 只要是符合条件的，都先筛选出来
             foreach (var itemData in itemDatas)
             {
                 if (itemData == null)
@@ -97,8 +102,19 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-
                 if (!lootProp.IsWishListItem && !lootProp.IsHighPriceItem && !lootProp.IsQuestNeedItem)
+                {
+                    continue;
+                }
+
+                filtedLootDatas.Add(lootData);
+            }
+
+            filtedLootDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
+            _filtedLootDatas = filtedLootDatas;
+            foreach (var lootData in _filtedLootDatas)
+            {
+                if (!_lootDataMgr.IsLootingTarget(lootData))
                 {
                     continue;
                 }
@@ -118,17 +134,6 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                filtedItemDatas.Add(lootData);
-            }
-
-            filtedItemDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
-            foreach (var lootData in filtedItemDatas)
-            {
-                if (!_lootDataMgr.IsLootingTarget(lootData))
-                {
-                    continue;
-                }
-
                 _lootDataMgr.LockLootItemToTarget(lootData);
                 LootingTarget = lootData;
                 return;
@@ -139,6 +144,20 @@ namespace MiyakoCarryService.Client.Datas
         public void UnlockLootingTarget()
         {
             IsLooting = false;
+        }
+
+        public void StartLooting()
+        {
+            _gameloop.StartCoroutine(InternalStartLooting());
+        }
+
+        private IEnumerator InternalStartLooting()
+        {
+            IsRunningCoroutine = true;
+            // 未实现掠夺代码
+            yield return null;
+            // end
+            IsRunningCoroutine = false;
         }
     }
 }

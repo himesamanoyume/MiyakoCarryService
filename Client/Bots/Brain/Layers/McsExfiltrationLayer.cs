@@ -10,6 +10,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
+            InitActionMap();
+        }
+
+        protected override void InitActionMap()
+        {
             _endActionMap = new()
             {
                 { typeof(HoldPositionLogic), EndHoldPosition },

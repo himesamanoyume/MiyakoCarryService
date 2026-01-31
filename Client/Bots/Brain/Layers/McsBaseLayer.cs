@@ -44,5 +44,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
+
+        protected abstract void InitActionMap();
     }
 }
