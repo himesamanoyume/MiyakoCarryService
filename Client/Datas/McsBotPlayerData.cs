@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Datas
@@ -18,17 +19,44 @@ namespace MiyakoCarryService.Client.Datas
         public List<BotBehavior> BotBehaviors { get; private set; }
         private WeakReference<McsAIBossPlayer> _mcsAIBossPlayerRef;
         public McsAIBossPlayer McsAIBossPlayer => _mcsAIBossPlayerRef.TryGetTarget(out var mcsAIBossPlayer) ? mcsAIBossPlayer : null;
-        public ItemData LootingTarget = null;
+        public LootData LootingTarget = null;
+        public bool IsLooting
+        {
+            get
+            {
+                return field;
+            }
+            set
+            {
+                if (!value)
+                {
+                    if (LootingTarget != null)
+                    {
+                        _lootDataMgr.UnlockLootingTarget(LootingTarget);
+                        LootingTarget = null;
+                    }
+                }
+                field = value;
+            }
+        }
+        private LootDataMgr _lootDataMgr = null;
         public McsBotPlayerData(Player bossPlayer, McsAIBossPlayer mcsAIBossPlayer, Player player, Item item) : base(player, item)
         {
             _botOwnerRef = new(player.AIData.BotOwner);
             _mcsAIBossPlayerRef = new(mcsAIBossPlayer);
             _bossPlayeRef = new(bossPlayer);
             BotBehaviors = [new BotCarryServiceChecker(BotOwner, BossPlayer)];
+            _lootDataMgr = _gameloop.GetMgr<LootDataMgr>();
         }
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
+            if (!IsLooting)
+            {
+                LootingTarget = null;
+                return;
+            }
+
             var filtedItemDatas = new List<LootData>(itemDatas.Count);
             foreach (var itemData in itemDatas)
             {
@@ -62,34 +90,22 @@ namespace MiyakoCarryService.Client.Datas
             filtedItemDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
             foreach (var lootData in filtedItemDatas)
             {
-                if (!lootData.IsLootingTarget)
+                if (!_lootDataMgr.IsLootingTarget(lootData))
                 {
-                    lootData.IsLootingTarget = true;
+                    _lootDataMgr.LockLootItemToTarget(lootData);
                     LootingTarget = lootData;
-                    break;
+                    return;
                 }
             }
+            LootingTarget = null;
         }
 
-        private bool WeaponFilter()
+        public void UnlockLootingTarget()
         {
-            return true;
+            if (LootingTarget != null)
+            {
+                _lootDataMgr.UnlockLootingTarget(LootingTarget);
+            }
         }
-
-        private bool EquipmentFilter()
-        {
-            return true;
-        }
-
-        private bool MedecineFilter()
-        {
-            return true;
-        }
-
-        private bool FoodFilter()
-        {
-            return true;
-        }
-
     }
 }

@@ -1,4 +1,5 @@
 
+using System.Runtime.CompilerServices;
 using EFT;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
@@ -30,6 +31,8 @@ namespace MiyakoCarryService.Client.Extensions
                 return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
             }
         }
+
+        private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
         
         extension(BotOwner botOwner)
         {
@@ -37,12 +40,18 @@ namespace MiyakoCarryService.Client.Extensions
 
             public McsBotPlayerData GetMcsBotData()
             {
-                var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
-                foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                if (_datas.TryGetValue(botOwner, out var mcsBotPlayerData))
                 {
-                    if (mcsBotPlayerData.BotOwner == botOwner)
+                    return mcsBotPlayerData;
+                }
+
+                var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
+                foreach (var _mcsBotPlayerData in mcsBotPlayerDatas)
+                {
+                    if (_mcsBotPlayerData.BotOwner == botOwner)
                     {
-                        return mcsBotPlayerData;
+                        _datas.Add(botOwner, _mcsBotPlayerData);
+                        return _mcsBotPlayerData;
                     }
                 }
                 return null;

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using MiyakoCarryService.Client.Datas;
@@ -10,6 +12,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private bool? _isMcsBotPlayer = null;
 
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
+        protected Dictionary<Type, Func<bool>> _endActionMap;
         
         public McsBotPlayerData McsBotPlayerData
         {
@@ -30,6 +33,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override string GetName()
         {
             return Name;
+        }
+
+        public override bool IsCurrentActionEnding()
+        {
+            if (CurrentAction == null)
+            {
+                return true;
+            }
+
+            return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
     }
 }

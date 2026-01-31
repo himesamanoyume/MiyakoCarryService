@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -114,7 +113,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         yield return internalTime;
                     }
 
-                    // 让每位护航都获取到当前范围内最高优先级的战利品
+                    // 让每位护航都获取到当前范围内未被锁定的最高优先级的战利品
                     foreach (var keyValuePair in closeRootItemDataDict)
                     {
                         var mcsBotPlayerData = keyValuePair.Key;

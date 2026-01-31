@@ -12,9 +12,25 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     internal sealed class LootDataMgr : DataMgr<LootDataMgr>
     {
+        public HashSet<LootData> LootingTarget = new();
         public sealed override void Start()
         {
             base.Start();
+        }
+
+        public bool IsLootingTarget(LootData lootData)
+        {
+            return LootingTarget.Contains(lootData);
+        }
+
+        public void LockLootItemToTarget(LootData lootData)
+        {
+            LootingTarget.Add(lootData);
+        }
+
+        public void UnlockLootingTarget(LootData lootData)
+        {
+            LootingTarget.Remove(lootData);
         }
 
         protected sealed override void OnRaidStarted()
@@ -22,11 +38,13 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
+            LootingTarget.Clear();
         }
 
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
+            LootingTarget.Clear();
         }
 
         protected override IEnumerator ReloadDataLoop(float time)

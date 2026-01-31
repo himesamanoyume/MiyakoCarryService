@@ -17,7 +17,6 @@ namespace MiyakoCarryService.Client.Datas
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         private WeakReference<Transform> _transformRef;
-        public bool IsLootingTarget = false;
         public Transform Transform
         {
             get

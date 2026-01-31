@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -68,7 +69,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return null;
         }
 
-        public McsAIBossPlayer GetMcsAIBossPlayerByMcsBossId(MongoID mcsBossPlayerId)
+        public McsAIBossPlayer GetMcsAIBossPlayerByMcsBossPlayerId(MongoID mcsBossPlayerId)
         {
             if (_mcsAIBossPlayers.TryGetValue(mcsBossPlayerId, out var mcsAIBossPlayer))
             {

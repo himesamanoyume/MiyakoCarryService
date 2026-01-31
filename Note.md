@@ -297,7 +297,6 @@
 - ~~先实现全场的战利品数据更新、护航的检索相关功能~~
 - - ~~实现LootDataMgr和PlayerDataMgr的allDatas更新~~
 - - ~~先让代码正常运作~~
-```
 - ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
 - ~~BUG:在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常~~
 - ~~BUG：`McsBotPlayerData`的`McsAIBossPlayer`为null, 其实是因为`GetMcsAIBossPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
@@ -307,22 +306,21 @@
 - ~~护航总是对近在咫尺的敌人视而不见~~
 - - ~~现在变成不攻击了~~
 - ~~学习以下Patch~~
-```cs
-new HearingSensorPatch().Enable();
-new BulletImpactPatch().Enable();
-new PlayerSayPatch().Enable();
-```
+- - HearingSensorPatch()
+- - BulletImpactPatch()
+- - PlayerSayPatch()
 - ~~应该替换GoToXX改为RunToXX~~
 - ~~补全`AddEnemyPatch`使其可以阻止不合理的敌对关系建立、并建立双向敌对关系~~
 - ~~护航攻击性太低，不应该总是待在老板附近，而是应该主动出击~~
 - ~~护航会因为战局时间自己跑去撤离~~
-- 对Action继承，以实现字幕检查当前Type是否未变化，变化时才会出字幕
+- ~~对Action继承，以实现字幕检查当前Type是否未变化，变化时才会出字幕~~
 - ~~实现单人下的字幕系统~~
 - - ~~对每个McsBotPlayer都实例化一个专用的字幕~~
 - - ~~就剩下字幕内容没有正确显示，以及位置和展示时机可能有问题~~
+```
 - **实现护航获取掠夺目标**（掠夺第一阶段）
-- - 1. 让护航获取当前范围内的第一优先级战利品（即便是敌人身上的物品也算在内）
-- - - 完成了当前无掠夺目标战利品时获取新目标的部分（未经测试）、还剩下当前掠夺目标战利品因某种原因而解除的部分（比如掠夺完成、或超出距离等）
+- - 1. ~~让护航获取当前范围内的第一优先级战利品（即便是敌人身上的物品也算在内）~~
+- - - ~~完成了当前无掠夺目标战利品时获取新目标的部分（未经测试）、还剩下当前掠夺目标战利品因某种原因而解除的部分（比如掠夺完成、或超出距离等）~~
 - - 2. 让护航前往第一优先级战利品的位置
 - - 3. 护航执行掠夺
 - 实现护航根据已掠夺的战利品做出后续行为（掠夺第二阶段）

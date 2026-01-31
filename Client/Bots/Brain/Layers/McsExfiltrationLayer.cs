@@ -1,5 +1,4 @@
 
-using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
@@ -11,7 +10,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-
+            _endActionMap = new()
+            {
+                { typeof(HoldPositionLogic), EndHoldPosition },
+                { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint }
+            };
         }
 
         private float _lastPositionUpdateTime = 0f;
@@ -56,27 +59,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        public override bool IsCurrentActionEnding()
-        {
-            if (CurrentAction == null)
-            {
-                return true;
-            }
-
-            Type currentActionType = CurrentAction.Type;
-
-            if (currentActionType == typeof(HoldPositionLogic))
-            {
-                return true;
-            }
-            else if (currentActionType == typeof(GoToExfiltrationPointNodeLogic))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         private bool IsWannaLeave()
         {
             if (BotOwner.Boss.IamBoss || BotOwner.BotFollower == null || BotOwner.BotFollower.BossToFollow == null)
@@ -89,6 +71,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return player.AIData.BotOwner.Exfiltration.WannaLeave();
             }
             return BotOwner.Exfiltration.WannaLeave();
+        }
+
+        private bool EndHoldPosition()
+        {
+            return true;
+        }
+
+        private bool EndGoToExfiltrationPoint()
+        {
+            return true;
         }
     }
 }

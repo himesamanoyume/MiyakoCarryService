@@ -17,9 +17,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private float _closeBossDistance = 5f;
         private bool _isHolding = false;
         private float _lastHoldTime = Time.time;
+
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-
+            _endActionMap = new()
+            {
+                { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
+                { typeof(HealLogic), EndHeal },
+                { typeof(RunToCoverLogic), EndRunToCover },
+                { typeof(SimplePatrolLogic), EndSimplePatrol },
+                { typeof(HoldPositionLogic), EndHoldPosition },
+                { typeof(GoToPointLogic), EndGoToPoint },
+                { typeof(AttackMovingLogic), EndAttackMoving }
+            };
         }
 
         public override Action GetNextAction()
@@ -200,6 +210,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
                 }
 
+                // 取消当前锁定的目标战利品
+                McsBotPlayerData.UnlockLootingTarget();
                 // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
                 if (mcsBossPlayerPos == null)
@@ -257,11 +269,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            BotOwner.PriorityAxeTarget.FindTarget();
             if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
             {
                 if (IsMcsBotPlayer)
                 {
+                    BotOwner.PriorityAxeTarget.FindTarget();
                     BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Attack);
                 }
                 return false;
@@ -269,51 +281,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (IsMcsBotPlayer)
             {
+                BotOwner.PriorityAxeTarget.FindTarget();
                 BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Protect);
                 return true;
             }
             return false;
-        }
-
-        public override bool IsCurrentActionEnding()
-        {
-            if (CurrentAction == null)
-            {
-                return true;
-            }
-
-            Type currentActionType = CurrentAction.Type;
-
-            if (currentActionType == typeof(GoToCoverPointLogic))
-            {
-                return EndGoToCoverPoint();
-            }
-            else if (currentActionType == typeof(HealLogic))
-            {
-                return EndHeal();
-            }
-            else if (currentActionType == typeof(RunToCoverLogic))
-            {
-                return EndRunToCover();
-            }
-            else if (currentActionType == typeof(SimplePatrolLogic))
-            {
-                return EndSimplePatrol();
-            }
-            else if (currentActionType == typeof(HoldPositionLogic))
-            {
-                return EndHoldPosition();
-            }
-            else if (currentActionType == typeof(GoToPointLogic))
-            {
-                return EndGoToPoint();
-            }
-            else if (currentActionType == typeof(AttackMovingLogic))
-            {
-                return EndAttackMoving();
-            }
-
-            return true;
         }
 
         private void TryFindCover(Vector3 mcsBossPlayerPos)
@@ -397,7 +369,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
             }
-            
+
             // If we're in cover, end running to cover
             if (BotOwner.Memory.IsInCover)
             {

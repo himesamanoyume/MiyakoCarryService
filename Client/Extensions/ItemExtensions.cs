@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public ItemData GetData()
             {
-                return _datas.TryGetValue(item, out ItemData itemData) ? itemData : item.InitData();
+                return _datas.TryGetValue(item, out var itemData) ? itemData : item.InitData();
             }
 
             public IEnumerable<ItemData> GetAllDatas()
@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Client.Extensions
                         if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
                         {
                             var mcsBossPlayer = SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId);
-                            playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossId(mcsBossPlayer.ProfileId), player, item);
+                            playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossPlayerId(mcsBossPlayer.ProfileId), player, item);
                             _datas.Add(item, playerData);
                             return playerData;
                         }
