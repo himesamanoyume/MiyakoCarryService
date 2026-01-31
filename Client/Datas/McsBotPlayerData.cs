@@ -19,24 +19,36 @@ namespace MiyakoCarryService.Client.Datas
         public List<BotBehavior> BotBehaviors { get; private set; }
         private WeakReference<McsAIBossPlayer> _mcsAIBossPlayerRef;
         public McsAIBossPlayer McsAIBossPlayer => _mcsAIBossPlayerRef.TryGetTarget(out var mcsAIBossPlayer) ? mcsAIBossPlayer : null;
-        public LootData LootingTarget = null;
-        public bool IsLooting
+        private LootData _lootingTarget = null;
+        private bool _isLooting = false;
+        public LootData LootingTarget
         {
-            get
-            {
-                return field;
-            }
+            get => _lootingTarget;
             set
             {
-                if (!value)
+                if (_lootingTarget != null)
                 {
-                    if (LootingTarget != null)
-                    {
-                        _lootDataMgr.UnlockLootingTarget(LootingTarget);
-                        LootingTarget = null;
-                    }
+                    _lootDataMgr.UnlockLootingTarget(_lootingTarget);
                 }
-                field = value;
+                _lootingTarget = value;
+            }
+        }
+        public bool IsLooting
+        {
+            get => _isLooting;
+            set
+            {
+                if (_isLooting == value)
+                {
+                    return;
+                }
+
+                _isLooting = value;
+                if (!_isLooting && _lootingTarget != null)
+                {
+                    _lootDataMgr.UnlockLootingTarget(_lootingTarget);
+                    _lootingTarget  = null;
+                }
             }
         }
         private LootDataMgr _lootDataMgr = null;
@@ -70,6 +82,11 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                if (lootData.IsNonNavigableItem)
+                {
+                    continue;
+                }
+
                 if (!lootData.LootProps.TryGetValue(McsAIBossPlayer, out var lootProp))
                 {
                     continue;
@@ -80,21 +97,14 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                // 此处不够完善，比如如果一个战利品是任务物品，但价值很低，会导致其优先级很低，后续仍需完善
-                if (lootProp.IsWishListItem || lootProp.IsHighPriceItem || lootProp.IsQuestNeedItem)
-                {
-                    filtedItemDatas.Add(lootData);
-                }
-            }
 
-            filtedItemDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
-            foreach (var lootData in filtedItemDatas)
-            {
-                if (!_lootDataMgr.IsLootingTarget(lootData))
+                if (!lootProp.IsWishListItem && !lootProp.IsHighPriceItem && !lootProp.IsQuestNeedItem)
                 {
                     continue;
                 }
 
+                // 此处不够完善，比如如果一个战利品是任务物品，但价值很低，会导致其优先级很低，后续仍需完善
+                // 以及还有剩余的武器、护甲等类型物品的筛选未实现
                 if (!Player.HandsController.SupportPickup())
                 {
                     continue;
@@ -108,6 +118,17 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                filtedItemDatas.Add(lootData);
+            }
+
+            filtedItemDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
+            foreach (var lootData in filtedItemDatas)
+            {
+                if (!_lootDataMgr.IsLootingTarget(lootData))
+                {
+                    continue;
+                }
+
                 _lootDataMgr.LockLootItemToTarget(lootData);
                 LootingTarget = lootData;
                 return;
@@ -117,10 +138,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public void UnlockLootingTarget()
         {
-            if (LootingTarget != null)
-            {
-                _lootDataMgr.UnlockLootingTarget(LootingTarget);
-            }
+            IsLooting = false;
         }
     }
 }

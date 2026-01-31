@@ -1,6 +1,7 @@
 
 using System;
 using EFT;
+using MiyakoCarryService.Client.Bots.Brain.Datas;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -204,10 +205,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 // 检测周围是否有符合条件的战利品
-                if (false)
+                if (McsBotPlayerData.LootingTarget != null)
                 {
                     // 尝试去拿战利品
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic");
+                    return new Action(typeof(LootingTargetLogic), "Mcs:looting", new LootingData
+                    {
+                        McsBotPlayerData = McsBotPlayerData
+                    });
                 }
 
                 // 取消当前锁定的目标战利品

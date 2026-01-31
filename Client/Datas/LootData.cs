@@ -21,6 +21,36 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsMoney = false;
         public bool IsLabyrinthSolvePuzzleItem = false;
         public bool IsInSecureContainerItem = false;
+        private Vector3 _lastPos = new();
+        public bool IsNonNavigableItem
+        {
+            get
+            {
+                if (field)
+                {
+                    if (Transform.position == _lastPos)
+                    {
+                        field = true;
+                        return field;
+                    }
+                    else
+                    {
+                        field = false;
+                        return field;
+                    }
+                }
+                field = false;
+                return field;
+            }
+            set
+            {
+                field = value;
+                if (field)
+                {
+                    _lastPos = Transform.position;
+                }
+            }
+        }
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
