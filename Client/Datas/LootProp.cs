@@ -1,7 +1,6 @@
 
 
 using EFT.InventoryLogic;
-using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;

@@ -2,7 +2,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -64,7 +63,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         // 进行治疗前先跑去掩体
                         if (!BotOwner.Memory.IsInCover)
                         {
-                            BotOwner.ShowSubtitleMsg("Mcs:goforheal:RunToCoverLogic1");
                             return new Action(typeof(RunToCoverLogic), "Mcs:goforheal:RunToCoverLogic1");
                         }
                     }
@@ -84,7 +82,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         // 进行治疗前先跑去掩体
                         if (!BotOwner.Memory.IsInCover)
                         {
-                            BotOwner.ShowSubtitleMsg("Mcs:goforheal:RunToCoverLogic2");
                             return new Action(typeof(RunToCoverLogic), "Mcs:goforheal:RunToCoverLogic2");
                         }
                     }
@@ -93,7 +90,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 // 老板健康无大碍，且医疗物品和掩体也都准备就绪后，才治疗自己
                 if (BotOwner.Medecine.FirstAid.Damaged || BotOwner.Medecine.SurgicalKit.Damaged)
                 {
-                    BotOwner.ShowSubtitleMsg("Mcs:first aid");
                     return new Action(typeof(HealLogic), "Mcs:first aid");
                 }
 
@@ -208,7 +204,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
                 if (mcsBossPlayerPos == null)
                 {
-                    BotOwner.ShowSubtitleMsg("Mcs:Basic:bossPosNull");
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:bossPosNull");
                 }
 
@@ -220,10 +215,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         BotOwner.Memory.BotCurrentCoverInfo.SetCover(_currentNavigationPoint, true);
                         if (BotOwner.CanSprintPlayer)
                         {
-                            BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:AttackMovingLogic");
                             return new Action(typeof(AttackMovingLogic), "Mcs:sDistCloseB:AttackMovingLogic");
                         }
-                        BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:RunToCoverLogic1");
                         return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic1");
                     }
                     else
@@ -235,27 +228,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         if (closestPoint != null)
                         {
                             BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
-                            BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:RunToCoverLogic2");
                             return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic2");
                         }
                         if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
                         {
                             BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
-                            BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:GoToPointLogic");
                             return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB:GoToPointLogic");
                         }
                         if (BotOwner.Memory.IsInCover)
                         {
-                            BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:HoldPositionLogic");
                             return new Action(typeof(HoldPositionLogic), "Mcs:sDistCloseB:HoldPositionLogic");
                         }
-                        BotOwner.ShowSubtitleMsg("Mcs:sDistCloseB:RunToCoverLogic");
                         return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic");
                     }
                 }
                 else
                 {
-                    BotOwner.ShowSubtitleMsg("Mcs:distToBoss");
                     return new Action(typeof(HoldPositionLogic), "Mcs:distToBoss");
                 }
                 // end
@@ -263,7 +251,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                BotOwner.ShowSubtitleMsg("Mcs:Basic:Exception");
                 return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:Exception");
             }
         }

@@ -69,15 +69,18 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, string msg)
         {
-            // 暂时不显示字幕
-            return;
-            // end
             if (string.IsNullOrEmpty(msg))
             {
                 return;
             }
+            
             if (_subTitles.TryGetValue(mcsBotPlayerId, out var subTitle))
             {
+                if (subTitle.CurrentMsg() == msg)
+                {
+                    return;
+                }
+
                 subTitle.Show(msg);
             }
         }
@@ -136,10 +139,16 @@ namespace MiyakoCarryService.Client.Mgrs
                 _coroutine = _gameLoop.StartCoroutine(Hide(4f));
             }
 
+            public string CurrentMsg()
+            {
+                return _textField.text;
+            }
+
             public IEnumerator Hide(float time)
             {
                 yield return new WaitForSeconds(time);
                 SubtitlesView.HideGameObject();
+                _textField.text = string.Empty;
             }
         }
     }

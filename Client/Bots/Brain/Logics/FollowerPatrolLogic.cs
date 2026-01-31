@@ -1,21 +1,21 @@
 
-using DrakiaXYZ.BigBrain.Brains;
-using EFT;
+// using DrakiaXYZ.BigBrain.Brains;
+// using EFT;
 
-namespace MiyakoCarryService.Client.Bots.Brain.Logics
-{
-    internal sealed class FollowerPatrolLogic : McsBotBaseLogic
-    {
-        private FollowerPatrolBaseLogic _baseLogic;
+// namespace MiyakoCarryService.Client.Bots.Brain.Logics
+// {
+//     internal sealed class FollowerPatrolLogic : McsBotBaseLogic
+//     {
+//         private FollowerPatrolBaseLogic _baseLogic;
 
-        public FollowerPatrolLogic(BotOwner botOwner) : base(botOwner)
-        {
-            _baseLogic = new(botOwner);
-        }
+//         public FollowerPatrolLogic(BotOwner botOwner) : base(botOwner)
+//         {
+//             _baseLogic = new(botOwner);
+//         }
 
-        public override void Update(CustomLayer.ActionData data)
-        {
-            _baseLogic.UpdateNodeByMain(data);
-        }
-    }
-}
+//         public override void Update(CustomLayer.ActionData data)
+//         {
+//             _baseLogic.UpdateNodeByMain(data);
+//         }
+//     }
+// }

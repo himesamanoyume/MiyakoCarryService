@@ -10,8 +10,8 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            BrainManager.RemoveLayer("Exfiltration", ["pmcUSEC", "pmcBEAR"]);
-            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), ["pmcUSEC", "pmcBEAR"], 79);
+            BrainManager.RemoveLayer("Exfiltration", ["PmcUsec", "PmcBear"]);
+            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), ["PmcUsec", "PmcBear"], 79);
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 75);
         }
     }
