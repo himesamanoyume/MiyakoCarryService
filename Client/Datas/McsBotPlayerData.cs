@@ -92,10 +92,25 @@ namespace MiyakoCarryService.Client.Datas
             {
                 if (!_lootDataMgr.IsLootingTarget(lootData))
                 {
-                    _lootDataMgr.LockLootItemToTarget(lootData);
-                    LootingTarget = lootData;
-                    return;
+                    continue;
                 }
+
+                if (!Player.HandsController.SupportPickup())
+                {
+                    continue;
+                }
+
+                // 这里只判断了当前是否可拿，但如果是特殊情况的话，比如没空位了需要拿医疗物品，就还需要进行物品交换
+                var pickUpResult = InteractionsHandlerClass.QuickFindAppropriatePlace(lootData.Item, Player.InventoryController, Player.InventoryController.Inventory.Equipment.ToEnumerable(), InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
+
+                if (!pickUpResult.Succeeded || !Player.InventoryController.CanExecute(pickUpResult.Value))
+                {
+                    continue;
+                }
+
+                _lootDataMgr.LockLootItemToTarget(lootData);
+                LootingTarget = lootData;
+                return;
             }
             LootingTarget = null;
         }
