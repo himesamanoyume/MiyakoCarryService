@@ -1,7 +1,6 @@
 
 using System;
 using EFT;
-using MiyakoCarryService.Client.Bots.Brain.Datas;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
 using UnityEngine.AI;
@@ -210,18 +209,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                // 检测周围是否有符合条件的战利品
-                if (McsBotPlayerData.LootingTarget != null)
+                if (McsBotPlayerData != null)
                 {
-                    // 尝试去拿战利品
-                    return new Action(typeof(LootingTargetLogic), "Mcs:looting default", new LootingData
+                    // 检测周围是否有符合条件的战利品
+                    if (McsBotPlayerData.LootingTarget != null)
                     {
-                        McsBotPlayerData = McsBotPlayerData
-                    });
+                        // 尝试去拿战利品
+                        return new Action(typeof(LootingTargetLogic), "Mcs:looting default");
+                    }
+
+                    // 取消当前锁定的目标战利品
+                    McsBotPlayerData.UnlockLootingTarget();
                 }
 
-                // 取消当前锁定的目标战利品
-                McsBotPlayerData.UnlockLootingTarget();
                 // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
                 if (mcsBossPlayerPos == null)

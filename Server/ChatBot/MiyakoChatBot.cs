@@ -26,12 +26,12 @@ namespace MiyakoCarryService.Server.ChatBot
             return new UserDialogInfo
             {
                 Id = _miyakoId,
-                Aid = 10107,
+                Aid = 1560107,
                 Info = new()
                 {
-                    Level = 999,
-                    MemberCategory = MemberCategory.Trader,
-                    SelectedMemberCategory = MemberCategory.Trader,
+                    Level = 15,
+                    MemberCategory = MemberCategory.Developer,
+                    SelectedMemberCategory = MemberCategory.Developer,
                     Nickname = "Miyako",
                     Side = "Usec",
                 },

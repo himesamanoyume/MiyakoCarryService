@@ -55,9 +55,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            var isInitialBotEnemyCauses = Classification.InitialBotEnemyCauses.Contains(cause);
-
-            if (isInitialBotEnemyCauses || Classification.FriendlyTypes.Contains(personRole.Value))
+            if (Classification.InitialBotEnemyCauses.Contains(cause) || Classification.FriendlyTypes.Contains(personRole.Value))
             {
                 __result = false;
                 return false;

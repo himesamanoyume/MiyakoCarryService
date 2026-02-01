@@ -28,6 +28,11 @@ internal sealed class InteractionsHandlerClassPatch : ModulePatch
     public static bool Prefix(Item item, out Error error, ref bool __result)
     {
 		error = null;
+		if (!GameLoop.Instance.IsVaildGameWorld)
+		{
+			return true;
+		}
+
 		if (item.GetData() is LootData lootData)
 		{
 			var isLootingTarget = LootDataMgr.IsLootingTarget(lootData);

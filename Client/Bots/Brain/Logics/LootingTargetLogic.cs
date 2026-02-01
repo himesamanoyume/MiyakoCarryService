@@ -2,7 +2,7 @@
 using System;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using MiyakoCarryService.Client.Bots.Brain.Datas;
+using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,21 +21,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            var lootingData = data as LootingData;
-            if (lootingData.McsBotPlayerData.IsRunningCoroutine)
+            var mcsBotPlayerData = BotOwner.GetMcsBotData();
+            if (mcsBotPlayerData.IsRunningCoroutine)
             {
                 return;
             }
 
-            lootingData.McsBotPlayerData.IsLooting = true;
+            mcsBotPlayerData.IsLooting = true;
 
             if (_lastTimeCheckDistance < Time.time)
             {
                 _currentLootingRetries++;
                 if (_currentLootingRetries > 30)
                 {
-                    lootingData.McsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                    lootingData.McsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
+                    mcsBotPlayerData.IsLooting = false;
                     _currentStuckRetries = 0;
                     _currentLootingRetries = 0;
 
@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 _lastTimeCheckDistance = Time.time + 2f;
 
-                var targetPos = lootingData.McsBotPlayerData.LootingTarget.RootTransform.position;
+                var targetPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
                 var offset = BotOwner.Position - targetPos;
                 var distance = offset.sqrMagnitude;
 
@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(targetPos);
-                    lootingData.McsBotPlayerData.StartLooting();
+                    mcsBotPlayerData.StartLooting();
                     _currentStuckRetries = 0;
                     _lastTimeDistance = -1f; // 重置卡脚检测
                     return;
@@ -74,8 +74,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
                     if (pathStatus != NavMeshPathStatus.PathComplete)
                     {
-                        lootingData.McsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                        lootingData.McsBotPlayerData.IsLooting = false;
+                        mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
+                        mcsBotPlayerData.IsLooting = false;
                         _currentStuckRetries = 0;
                         return;
                     }
@@ -92,8 +92,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 if (_currentStuckRetries > 2)
                 {
-                    lootingData.McsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                    lootingData.McsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
+                    mcsBotPlayerData.IsLooting = false;
                     _currentStuckRetries = 0;
                     return;
                 }
