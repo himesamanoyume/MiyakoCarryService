@@ -13,6 +13,7 @@ using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Patches.Group;
 using MiyakoCarryService.Client.Patches.BepInEx;
 using MiyakoCarryService.Client.Patches.Events;
+using MiyakoCarryService.Client.Patches.Loot;
 
 namespace MiyakoCarryService.Client;
 
@@ -144,6 +145,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new BotHearingSensorPatch().Enable();
         new PlayerSayPatch().Enable();
         new PlayHitEffectPatch().Enable();
+        new InteractionsHandlerClassPatch().Enable();
 #if DEBUG
         
 #endif

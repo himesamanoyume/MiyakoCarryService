@@ -35,6 +35,7 @@
     <Reference Include="ConfigurationManager" HintPath=".\Ref\ConfigurationManager.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
     <Reference Include="DrakiaXYZ-BigBrain" HintPath=".\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />
+    <Reference Include="ItemComponent.Types" HintPath=".\Ref\ItemComponent.Types.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath=".\Ref\Newtonsoft.Json.dll" Private="false" />
     <Reference Include="Sirenix.Serialization" HintPath=".\Ref\Sirenix.Serialization.dll" Private="false" />
     <Reference Include="spt-common" HintPath=".\Ref\spt-common.dll" Private="false" />
