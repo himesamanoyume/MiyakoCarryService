@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Mgrs;
@@ -153,11 +154,53 @@ namespace MiyakoCarryService.Client.Datas
 
         private IEnumerator InternalStartLooting()
         {
-            IsRunningCoroutine = true;
-            // 未实现掠夺代码
-            yield return null;
-            // end
+            if (LootingTarget != null)
+            {
+                var internalSearchTime = new WaitForSeconds(0.5f);
+                IsRunningCoroutine = true;
+                // 模拟打开容器的时间
+                yield return new WaitForSeconds(2f);
+                var rootItem = LootingTarget.Item.GetRootItem();
+                if (rootItem.IsContainer && rootItem is SearchableItemItemClass searchableItemItemClass)
+                {
+                    var lockedItems = new List<Item>();
+                    if (searchableItemItemClass is CompoundItem compoundItem && compoundItem.Slots != null)
+                    {
+                        foreach (var slot in compoundItem.Slots)
+                        {
+                            if (slot.Locked && slot.Items != null)
+                            {
+                                lockedItems.AddRange(slot.Items);
+                            }
+                        }
+                    }
+                    
+                    foreach (var nestedItem in searchableItemItemClass.GetFirstLevelItems())
+                    {
+                        // 模拟搜索单格物品等待时间
+                        yield return internalSearchTime;
+                        if (nestedItem.Id != LootingTarget.Item.Id)
+                        {
+                            continue;
+                        }
+
+                        if (!lockedItems.Contains(nestedItem))
+                        {
+                            TakeTargetLoot(nestedItem);
+                        }
+
+                        UnlockLootingTarget();
+                        break;
+                    }
+                }
+            }
             IsRunningCoroutine = false;
+            yield return null;
+        }
+
+        private void TakeTargetLoot(Item target)
+        {
+            
         }
     }
 }
