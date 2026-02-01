@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Datas
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         private WeakReference<Transform> _transformRef;
-        public Transform Transform
+        public Transform RootTransform
         {
             get
             {
@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Datas
                 }
                 else
                 {
-                    transform = GetTransfrom(); 
+                    transform = GetRootTransfrom(); 
                     if (transform != null)
                     {
                         _transformRef = new(transform);
@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Datas
         public ItemData(Item item)
         {
             _itemRef = new(item);
-            _transformRef = new(GetTransfrom());
+            _transformRef = new(GetRootTransfrom());
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
@@ -64,6 +64,6 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        protected abstract Transform GetTransfrom();
+        protected abstract Transform GetRootTransfrom();
     }
 }

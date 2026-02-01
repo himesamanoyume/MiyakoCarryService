@@ -173,11 +173,18 @@ namespace MiyakoCarryService.Client.Extensions
                 try
                 {
                     var price = trader.GetUserItemPrice(item);
+                    var currency = TraderUtilsClass.GetCurrencyCharById(price.Value.CurrencyId.Value) switch
+                    {
+                        "€" => ECurrencyType.EUR,
+                        "$" => ECurrencyType.USD,
+                        "<sprite=0>" or "GP" => ECurrencyType.GP,
+                        _ => ECurrencyType.RUB
+                    };
                     return price.HasValue ? new TraderOffer
                     (
                         price.Value.Amount,
                         item.Width * item.Height,
-                        GetCurrencyType(TraderUtilsClass.GetCurrencyCharById(price.Value.CurrencyId.Value)),
+                        currency,
                         trader.LocalizedName
                     ) : new TraderOffer();
                 }
@@ -196,17 +203,36 @@ namespace MiyakoCarryService.Client.Extensions
                 }
                 return false;
             }
-        }
 
-        private static ECurrencyType GetCurrencyType(string currency)
-        {
-            return currency switch
+            public IEnumerable<Item> GetAllChildItemsOnly()
             {
-                "€" => ECurrencyType.EUR,
-                "$" => ECurrencyType.USD,
-                "<sprite=0>" or "GP" => ECurrencyType.GP,
-                _ => ECurrencyType.RUB
-            };
+                if (item is ContainerClass collection)
+                {
+                    foreach (var container in collection.Containers)
+                    {
+                        foreach (var child in container.Items)
+                        {
+                            foreach (var descendant in child.GetAllItems())
+                            {
+                                yield return descendant;
+                            }
+                        }
+                    }
+                }
+            }
+
+            public bool IncludeTargetItem(Item target)
+            {
+                var items = item.GetAllChildItemsOnly();
+                foreach (var _item in items)
+                {
+                    if (_item.Id == target.Id)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
     }
 }

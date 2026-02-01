@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Datas
             {
                 if (field)
                 {
-                    if (Transform.position == _lastPos)
+                    if (RootTransform.position == _lastPos)
                     {
                         field = true;
                         return field;
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Datas
                 field = value;
                 if (field)
                 {
-                    _lastPos = Transform.position;
+                    _lastPos = RootTransform.position;
                 }
             }
         }
@@ -147,11 +147,17 @@ namespace MiyakoCarryService.Client.Datas
             Offer.CurrencyType = currency;
         }
 
-        protected override Transform GetTransfrom()
+        protected override Transform GetRootTransfrom()
         {
             try
             {
-                if (Item == null || Item.Owner == null)
+                if (Item == null)
+                {
+                    return null;
+                }
+
+                var rootItem = Item.GetRootItem();
+                if (rootItem == null || rootItem.Owner == null)
                 {
                     return null;
                 }
@@ -162,7 +168,7 @@ namespace MiyakoCarryService.Client.Datas
                     return null;
                 }
 
-                if (!gameWorld.ItemOwners.TryGetValue(Item.Owner, out var itemTransform))
+                if (!gameWorld.ItemOwners.TryGetValue(rootItem.Owner, out var itemTransform))
                 {
                     return null;
                 }

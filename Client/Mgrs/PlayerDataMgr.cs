@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var closeRootItemDataDict = new Dictionary<McsBotPlayerData, List<ItemData>>();
                     foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                     {
-                        if (mcsBotPlayerData.Transform == null)
+                        if (mcsBotPlayerData.RootTransform == null)
                         {
                             continue;
                         }
@@ -68,7 +68,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             continue;
                         }
 
-                        closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.Transform.position, 50f);
+                        closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.RootTransform.position, 50f);
                     }
 
                     // 收集分批所需数据

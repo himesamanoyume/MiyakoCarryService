@@ -94,7 +94,7 @@ namespace MiyakoCarryService.Client.Utils
             {
                 var itemData = owner.Key.RootItem.GetData();
 
-                if (itemData == null || itemData.Transform == null)
+                if (itemData == null || itemData.RootTransform == null)
                 {
                     continue;
                 }
@@ -107,7 +107,7 @@ namespace MiyakoCarryService.Client.Utils
                     }
                 }
 
-                if ((itemData.Transform.position - mcsBotPlayerPos).sqrMagnitude <= distance)
+                if ((itemData.RootTransform.position - mcsBotPlayerPos).sqrMagnitude <= distance)
                 {
                     result.Add(itemData);
                 }

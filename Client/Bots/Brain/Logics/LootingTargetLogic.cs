@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 _lastTimeCheckDistance = Time.time + 2f;
 
-                var targetPos = lootingData.McsBotPlayerData.LootingTarget.Transform.position;
+                var targetPos = lootingData.McsBotPlayerData.LootingTarget.RootTransform.position;
                 var offset = BotOwner.Position - targetPos;
                 var distance = offset.sqrMagnitude;
 

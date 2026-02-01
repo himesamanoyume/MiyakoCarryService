@@ -2,6 +2,7 @@ global using SessionBackendClass = Class308;
 global using CorpseTraderControllerClass = GClass3385;
 global using TraderUtilsClass = GClass3130;
 global using IOperationClass = GInterface438;
+global using ContainerClass = GClass3248;
 
 // 意图
 global using BaseIntent = GClass26;

@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        protected override Transform GetTransfrom()
+        protected override Transform GetRootTransfrom()
         {
             try
             {
