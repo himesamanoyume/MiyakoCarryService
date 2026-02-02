@@ -1,5 +1,6 @@
 
 using EFT.InventoryLogic;
+using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Extensions
 {
@@ -7,7 +8,7 @@ namespace MiyakoCarryService.Client.Extensions
     {
         extension(InventoryController inventoryController)
         {
-            public void TakeLoot(Item item, bool isTargetItem)
+            public void TakeLoot(McsBotPlayerConfig mcsBotPlayerConfig, Item item, bool isTargetItem)
             {
                 if (item is Weapon)
                 {
@@ -17,13 +18,16 @@ namespace MiyakoCarryService.Client.Extensions
                 {
                     
                 }
-                else if (item is VestItemClass && item.IsArmorMod())
-                {
-                    
-                }
                 else if (item is VestItemClass)
                 {
-                    
+                    if (item.IsArmorMod())
+                    {
+                        
+                    }
+                    else
+                    {
+                        
+                    }
                 }
                 else if (item is HeadwearItemClass)
                 {
@@ -47,9 +51,14 @@ namespace MiyakoCarryService.Client.Extensions
                 }
             }
 
-            public bool ShouldSwap(Item equippedItem, Item toSwapItem)
+            public bool ShouldSwap(McsBotPlayerConfig mcsBotPlayerConfig, Item equippedItem, Item toSwapItem)
             {
                 return true;
+            }
+
+            public void ThrowAndEquip()
+            {
+                
             }
         }
     }

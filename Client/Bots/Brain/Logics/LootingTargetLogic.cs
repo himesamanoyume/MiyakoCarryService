@@ -21,6 +21,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            if (UnityEngine.Random.Range(0, 100) > 90)
+            {
+                BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:尝试搜刮战利品...".McsLocalized(), BotOwner.Profile.Nickname));
+            }
             var mcsBotPlayerData = BotOwner.GetMcsBotData();
             if (mcsBotPlayerData.IsRunningCoroutine)
             {
@@ -51,6 +55,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 // 到达判定
                 if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
                 {
+                    BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置".McsLocalized(), BotOwner.Profile.Nickname));
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(targetPos);

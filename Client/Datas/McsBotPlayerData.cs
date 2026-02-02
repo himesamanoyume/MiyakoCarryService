@@ -177,7 +177,7 @@ namespace MiyakoCarryService.Client.Datas
                             yield return internalSearchTime;
                             if (!lockedItems.Contains(nestedItem))
                             {
-                                // Player.InventoryController.TakeLoot(nestedItem, nestedItem.IncludeTargetItem(LootingTarget.Item));
+                                // Player.InventoryController.TakeLoot(McsAIBossPlayer.McsBotPlayerConfig, nestedItem, nestedItem.IncludeTargetItem(LootingTarget.Item));
                             }
                         }
                     }

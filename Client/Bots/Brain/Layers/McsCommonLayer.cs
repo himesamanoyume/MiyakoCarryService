@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private CustomNavigationPoint _currentNavigationPoint = null;
         private bool _isInCover = false;
         private bool _haveCoverToShoot = false;
-        private float _closeBossDistance = 5f;
+        private float _closeBossDistance = 15f;
         private bool _isHolding = false;
         private float _lastHoldTime = Time.time;
 

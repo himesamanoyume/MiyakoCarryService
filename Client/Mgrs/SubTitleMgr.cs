@@ -18,53 +18,42 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
+            StartCoroutine(Init());
         }
 
-        private void Init()
+        private IEnumerator Init()
         {
-            if (MonoBehaviourSingleton<CommonUI>.Instantiated)
+            var internalTime = new WaitForSeconds(1f);
+            while (true)
             {
-                var traderDialogScreen = MonoBehaviourSingleton<CommonUI>.Instance.TraderDialogScreen;
-                var oldTraderDialogScreenGameObject = traderDialogScreen.gameObject;
-                _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject);
-                _mcsDialogScreen.transform.position = traderDialogScreen.transform.position;
-                _mcsDialogScreen.transform.localScale = new(1, 1, 1);
-                var _traderDialogScreen = _mcsDialogScreen.transform.GetComponentInChildren<TraderDialogScreen>();
-                Destroy(_traderDialogScreen);
-                for (int i = 0; i < _mcsDialogScreen.transform.childCount; i++)
+                yield return internalTime;
+                if (MonoBehaviourSingleton<CommonUI>.Instantiated)
                 {
-                    var childContainer = _mcsDialogScreen.transform.GetChild(i);
-                    if (childContainer.transform.name == "DialogContainer")
+                    var traderDialogScreen = MonoBehaviourSingleton<CommonUI>.Instance.TraderDialogScreen;
+                    var oldTraderDialogScreenGameObject = traderDialogScreen.gameObject;
+                    _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject, MonoBehaviourSingleton<CommonUI>.Instance.transform.GetChild(0));
+                    var _traderDialogScreen = _mcsDialogScreen.transform.GetComponentInChildren<TraderDialogScreen>();
+                    Destroy(_traderDialogScreen);
+                    _mcsDialogScreen.name = "Mcs SubTitle Screen";
+                    for (int i = 0; i < _mcsDialogScreen.transform.childCount; i++)
                     {
-                        // 以下代码会导致报错
-                        // Can't remove RectTransform because VerticalLayoutGroup (Script), VerticalLayoutGroup (Script), VerticalLayoutGroup (Script) depends on it
-
-                        childContainer.gameObject.SetActive(false); // 暂时替代方案
-                        // childContainer.SetParent(null);
-                        // Destroy(childContainer);
-
-                        // end
-                        break;
+                        var childContainer = _mcsDialogScreen.transform.GetChild(i);
+                        if (childContainer.transform.name == "SubsContainer")
+                        {
+                            _subsContainer = childContainer;
+                            break;
+                        }
                     }
-                }
-                _mcsDialogScreen.name = "Mcs SubTitle Screen";
-                for (int i = 0; i < _mcsDialogScreen.transform.childCount; i++)
-                {
-                    var childContainer = _mcsDialogScreen.transform.GetChild(i);
-                    if (childContainer.transform.name == "SubsContainer")
-                    {
-                        _subsContainer = childContainer;
-                        break;
-                    }
-                }
 
-                var subtitlesView = _subsContainer.GetChild(0).GetComponent<SubtitlesView>();
-                _subtitlesViewTemplate = subtitlesView.gameObject;
-                _subtitlesViewTemplate.transform.name = "McsBotPlayerSubtitle";
-                _mcsDialogScreen.transform.SetParent(MonoBehaviourSingleton<CommonUI>.Instance.transform.GetChild(0));
-                _mcsDialogScreen.SetActive(true);
-                subtitlesView.HideGameObject();
+                    var subtitlesView = _subsContainer.GetChild(0).GetComponent<SubtitlesView>();
+                    _subtitlesViewTemplate = subtitlesView.gameObject;
+                    _subtitlesViewTemplate.transform.name = "McsBotPlayerSubtitle";
+                    _mcsDialogScreen.SetActive(true);
+                    subtitlesView.HideGameObject();
+                    break;
+                }
             }
+
         }
 
         public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, string msg)
@@ -87,11 +76,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void CreateSubTitle(MongoID mcsBotPlayerId)
         {
-            if (_mcsDialogScreen == null)
-            {
-                Init();
-            }
-
             var cloneSubtitleViewGameObject = Instantiate(_subtitlesViewTemplate);
             var cloneSubtitleView = cloneSubtitleViewGameObject.GetComponentInChildren<SubtitlesView>();
 
