@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
@@ -21,7 +22,6 @@ namespace MiyakoCarryService.Client.Datas
         public List<BotBehavior> BotBehaviors { get; private set; }
         private WeakReference<McsAIBossPlayer> _mcsAIBossPlayerRef;
         public McsAIBossPlayer McsAIBossPlayer => _mcsAIBossPlayerRef.TryGetTarget(out var mcsAIBossPlayer) ? mcsAIBossPlayer : null;
-        private List<LootData> _filtedLootDatas;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
         public LootData LootingTarget
@@ -32,6 +32,7 @@ namespace MiyakoCarryService.Client.Datas
                 if (_lootingTarget != null)
                 {
                     _lootDataMgr.UnlockLootingTarget(_lootingTarget);
+                    _lootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
                 }
                 _lootingTarget = value;
             }
@@ -50,6 +51,7 @@ namespace MiyakoCarryService.Client.Datas
                 if (!_isLooting && _lootingTarget != null)
                 {
                     _lootDataMgr.UnlockLootingTarget(_lootingTarget);
+                    _lootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
                     _lootingTarget  = null;
                 }
             }
@@ -105,15 +107,20 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             filtedLootDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
-            _filtedLootDatas = filtedLootDatas;
-            foreach (var lootData in _filtedLootDatas)
+            foreach (var lootData in filtedLootDatas)
             {
-                if (_lootDataMgr.IsLootingTarget(lootData))
+                if (_lootDataMgr.IsLockedLootingTarget(lootData))
+                {
+                    continue;
+                }
+
+                if (_lootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
                 {
                     continue;
                 }
 
                 _lootDataMgr.LockLootItemToTarget(lootData);
+                _lootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                 LootingTarget = lootData;
                 return;
             }
@@ -139,6 +146,7 @@ namespace MiyakoCarryService.Client.Datas
                     IsRunningCoroutine = true;
                     // 模拟打开容器的时间
                     yield return new WaitForSeconds(2f);
+                    BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, LootingTarget.Item.ShortName.McsLocalized()));
                 }
             }
             finally

@@ -21,10 +21,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            if (UnityEngine.Random.Range(0, 100) > 90)
-            {
-                BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:尝试搜刮战利品...".McsLocalized(), BotOwner.Profile.Nickname));
-            }
             var mcsBotPlayerData = BotOwner.GetMcsBotData();
             if (mcsBotPlayerData.IsRunningCoroutine)
             {
@@ -55,11 +51,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 // 到达判定
                 if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
                 {
-                    BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()));
+                    // BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()));
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(targetPos);
-                    // mcsBotPlayerData.StartLooting();
+                    mcsBotPlayerData.StartLooting();
                     _currentStuckRetries = 0;
                     _lastTimeDistance = -1f; // 重置卡脚检测
                     return;

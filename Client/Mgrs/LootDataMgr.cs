@@ -12,25 +12,41 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     internal sealed class LootDataMgr : DataMgr<LootDataMgr>
     {
-        public HashSet<LootData> LootingTarget = new();
+        public HashSet<LootData> LockedLootingTarget = new();
+        public HashSet<Transform> LockedLootingTargetRootTransform = new();
         public sealed override void Start()
         {
             base.Start();
         }
 
-        public bool IsLootingTarget(LootData lootData)
+        public bool IsLockedLootingTarget(LootData lootData)
         {
-            return LootingTarget.Contains(lootData);
+            return LockedLootingTarget.Contains(lootData);
+        }
+
+        public bool IsLockedLootingTargetRootTransform(Transform transform)
+        {
+            return LockedLootingTargetRootTransform.Contains(transform);
         }
 
         public void LockLootItemToTarget(LootData lootData)
         {
-            LootingTarget.Add(lootData);
+            LockedLootingTarget.Add(lootData);
+        }
+
+        public void LockLootingTargetRootTransform(Transform transform)
+        {
+            LockedLootingTargetRootTransform.Add(transform);
         }
 
         public void UnlockLootingTarget(LootData lootData)
         {
-            LootingTarget.Remove(lootData);
+            LockedLootingTarget.Remove(lootData);
+        }
+
+        public void UnlockLootingTargetRootTransform(Transform transform)
+        {
+            LockedLootingTargetRootTransform.Remove(transform);
         }
 
         protected sealed override void OnRaidStarted()
@@ -38,13 +54,15 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
-            LootingTarget.Clear();
+            LockedLootingTarget.Clear();
+            LockedLootingTargetRootTransform.Clear();
         }
 
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            LootingTarget.Clear();
+            LockedLootingTarget.Clear();
+            LockedLootingTargetRootTransform.Clear();
         }
 
         protected override IEnumerator ReloadDataLoop(float time)
