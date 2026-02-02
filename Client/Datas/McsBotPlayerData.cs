@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
@@ -114,16 +113,6 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                // 此处不够完善，比如如果一个战利品是任务物品，但价值很低，会导致其优先级很低，后续仍需完善
-                // 以及还有剩余的武器、护甲等类型物品的筛选未实现
-                // 这里只判断了当前是否可拿，但如果是特殊情况的话，比如没空位了需要拿医疗物品，就还需要进行物品交换
-                var pickUpResult = InteractionsHandlerClass.QuickFindAppropriatePlace(lootData.Item, Player.InventoryController, Player.InventoryController.Inventory.Equipment.ToEnumerable(), InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
-
-                if (!pickUpResult.Succeeded || !Player.InventoryController.CanExecute(pickUpResult.Value))
-                {
-                    continue;
-                }
-
                 _lootDataMgr.LockLootItemToTarget(lootData);
                 LootingTarget = lootData;
                 return;
@@ -147,44 +136,9 @@ namespace MiyakoCarryService.Client.Datas
             {
                 if (LootingTarget != null)
                 {
-                    var internalSearchTime = new WaitForSeconds(0.5f);
                     IsRunningCoroutine = true;
                     // 模拟打开容器的时间
                     yield return new WaitForSeconds(2f);
-                    var rootItem = LootingTarget.Item.GetRootItem();
-                    if (rootItem.IsContainer && rootItem is SearchableItemItemClass searchableItemItemClass)
-                    {
-                        var lockedItems = new List<Item>();
-                        if (searchableItemItemClass is CompoundItem compoundItem && compoundItem.Slots != null)
-                        {
-                            foreach (var slot in compoundItem.Slots)
-                            {
-                                if (slot.Locked && slot.Items != null)
-                                {
-                                    lockedItems.AddRange(slot.Items);
-                                }
-                            }
-                        }
-                        
-                        foreach (var nestedItem in searchableItemItemClass.GetFirstLevelItems())
-                        {
-                            if (BotOwner.Memory.HaveEnemy)
-                            {
-                                break;
-                            }
-
-                            // 模拟搜索单格物品等待时间
-                            yield return internalSearchTime;
-                            if (!lockedItems.Contains(nestedItem))
-                            {
-                                // Player.InventoryController.TakeLoot(McsAIBossPlayer.McsBotPlayerConfig, nestedItem, nestedItem.IncludeTargetItem(LootingTarget.Item));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        
-                    }
                 }
             }
             finally

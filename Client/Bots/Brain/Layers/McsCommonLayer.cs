@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(HoldPositionLogic), EndHoldPosition },
                 { typeof(GoToPointLogic), EndGoToPoint },
                 { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(LootingTargetLogic), EndLootingTarget }
+                { typeof(GoToLootTargetLogic), EndLootingTarget }
             };
         }
 
@@ -215,7 +215,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (McsBotPlayerData.LootingTarget != null)
                     {
                         // 尝试去拿战利品
-                        return new Action(typeof(LootingTargetLogic), "Mcs:looting default");
+                        return new Action(typeof(GoToLootTargetLogic), "Mcs:going to loot target");
                     }
 
                     // 取消当前锁定的目标战利品
