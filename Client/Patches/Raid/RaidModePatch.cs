@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Patches.Raid
     /// <summary>
     /// 使匹配界面的准备按钮在进行了RaidSettingsLocalPatch后仍可以点击
     /// </summary>
-    internal sealed class MatchMakerAcceptScreenPatch : ModulePatch
+    internal sealed class MatchMakerAcceptScreenReadyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_16));
 
@@ -33,6 +33,21 @@ namespace MiyakoCarryService.Client.Patches.Raid
         public static void Prefix(ref EMatchingStatus matchingStatus)
         {
             matchingStatus = EMatchingStatus.Ready;
+        }
+    }
+
+    /// <summary>
+    /// 如果有小队成员，先让其正常加载组队的界面，再将设置调整为本地战局，否则即便调整了战局设置也不会生效
+    /// </summary>
+    internal sealed class MatchMakerAcceptScreenShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)]);
+
+        [PatchPostfix]
+        public static void Postfix(ref ERaidMode ___eraidMode_0, ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+        {
+            ___eraidMode_0 = ERaidMode.Local;
+            raidSettings.RaidMode = ERaidMode.Local;
         }
     }
 }

@@ -126,7 +126,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         }
         new TraderScreensGroupShowPatch().Enable();
         new RaidSettingsLocalPatch().Enable();
-        new MatchMakerAcceptScreenPatch().Enable();
+        new MatchMakerAcceptScreenReadyPatch().Enable();
+        new MatchMakerAcceptScreenShowPatch().Enable();
         new TryLoadBotsProfilesOnStartPatch().Enable();
         new AddEnemyPatch().Enable();
         new ManualUpdatePatch().Enable();
