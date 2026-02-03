@@ -8,7 +8,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Events
 {
     /// <summary>
-    /// 处理GameWorld结束时事件
+    /// 处理GameWorld结束时事件，只在非转移的情况下才执行
     /// </summary>
     internal sealed class RaidEndedPatch : ModulePatch
     {
@@ -18,9 +18,12 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPrefix]
         public static void Prefix(LocalRaidSettings settings, RaidEndDescriptorClass results, FlatItemsDataClass[] lostInsuredItems, Dictionary<string, FlatItemsDataClass[]> transferItems)
         {
-            GameLoop.Instance.IsVaildGameWorld = false;
-            GameLoop.Instance.IsGameStarted = false;
-            OnGameWorldDestory?.Invoke();
+            if (results.result != ExitStatus.Transit)
+            {
+                GameLoop.Instance.IsVaildGameWorld = false;
+                GameLoop.Instance.IsGameStarted = false;
+                OnGameWorldDestory?.Invoke();
+            }
         }
     }
 }

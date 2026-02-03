@@ -120,6 +120,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                 foreach (var mcsBotPlayerProfile in mcsProfilesDict[bossPlayer.ProfileId])
                 {
+                    if (SquadMgr.IsMcsBotPlayerDead(mcsBotPlayerProfile.ProfileId))
+                    {
+                        continue;
+                    }
+                    
                     var wildSpawnType = mcsBotPlayerProfile.Info.Settings.Role;
                     var botDifficulty = mcsBotPlayerProfile.Info.Settings.BotDifficulty;
 

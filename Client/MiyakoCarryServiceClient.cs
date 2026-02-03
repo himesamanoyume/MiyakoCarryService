@@ -127,10 +127,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TraderScreensGroupShowPatch().Enable();
         new RaidSettingsLocalPatch().Enable();
         new MatchMakerAcceptScreenReadyPatch().Enable();
-        new MatchMakerAcceptScreenShowPatch().Enable();
         new TryLoadBotsProfilesOnStartPatch().Enable();
         new AddEnemyPatch().Enable();
-        new ManualUpdatePatch().Enable();
+        // new ManualUpdatePatch().Enable();
         new ApplyDamagePatch().Enable();
         new GroupPlayerViewModelClassConstructorPatch().Enable();
         new MatchmakerAcceptScreenShowPatch().Enable();
@@ -145,6 +144,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new BotHearingSensorPatch().Enable();
         new PlayerSayPatch().Enable();
         new PlayHitEffectPatch().Enable();
+        new TransitPointPatch().Enable();
+        new MatchmakerTimeHasComePatch().Enable();
 #if DEBUG
         
 #endif
