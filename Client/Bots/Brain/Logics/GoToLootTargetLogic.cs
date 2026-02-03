@@ -54,6 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     // BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()));
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
+                    // MiyakoCarryServicePlugin.Logger.LogInfo($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");
                     BotOwner.Steering.LookToPoint(targetPos);
                     mcsBotPlayerData.StartLooting();
                     _currentStuckRetries = 0;

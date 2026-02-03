@@ -209,18 +209,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (McsBotPlayerData != null)
-                {
-                    // 检测周围是否有符合条件的战利品
-                    if (McsBotPlayerData.LootingTarget != null)
-                    {
-                        // 尝试去拿战利品
-                        return new Action(typeof(GoToLootTargetLogic), "Mcs:going to loot target");
-                    }
+                // if (McsBotPlayerData != null)
+                // {
+                //     // 检测周围是否有符合条件的战利品
+                //     if (McsBotPlayerData.LootingTarget != null)
+                //     {
+                //         // 尝试去拿战利品
+                //         return new Action(typeof(GoToLootTargetLogic), "Mcs:going to loot target");
+                //     }
 
-                    // 取消当前锁定的目标战利品
-                    McsBotPlayerData.UnlockLootingTarget();
-                }
+                //     // 取消当前锁定的目标战利品
+                //     McsBotPlayerData.UnlockLootingTarget();
+                // }
 
                 // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
                 var mcsBossPlayerPos = GetMcsBossPlayerPos();
@@ -288,6 +288,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 return false;
             }
+            // try
+            // {
+            // }
+            // catch (Exception e)
+            // {
+            //     MiyakoCarryServicePlugin.Logger.LogError(e);
+            //     return false;
+            // }
 
             if (IsMcsBotPlayer)
             {

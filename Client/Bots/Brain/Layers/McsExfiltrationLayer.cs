@@ -44,8 +44,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (IsWannaLeave() && !BotOwner.Memory.HaveEnemy && BotOwner.PatrollingData.ExfiltrationData.HaveActions())
             {
                 BotOwner.Exfiltration.ResetLeaveTime();
-                return false;
+                return true;
             }
+            // try
+            // {
+                
+            // }
+            // catch (Exception e)
+            // {
+            //     MiyakoCarryServicePlugin.Logger.LogError(e);
+            //     return false;
+            // }
+
 
             var timeSinceLastPositionUpdate = Time.time - _lastPositionUpdateTime;
 
@@ -61,7 +71,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _lastPositionUpdateTime = Time.time;
             }
 
-            return true;
+            return false;
         }
 
         private bool IsWannaLeave()
