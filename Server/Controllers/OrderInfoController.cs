@@ -1,6 +1,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
@@ -44,9 +45,9 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, mcsBossPlayerId);
         }
 
-        public void SaveOrderInfo()
+        public async Task SaveOrderInfo()
         {
-            orderInfoService.SaveOrderInfo();
+            await orderInfoService.SaveOrderInfo();
         }
 
         public List<OrderInfo> GetAllOrderInfo()

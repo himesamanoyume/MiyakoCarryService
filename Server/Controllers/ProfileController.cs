@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -29,9 +30,9 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GeneratePmcBotProfile(mcsBossPlayerId, mcsBotPlayerPmcData, carryServiceLevel);
         }
 
-        public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
+        public async Task SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
         {
-            profileService.SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerProfile);
+            await profileService.SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerProfile);
         }
 
         public SptProfile Generate(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)

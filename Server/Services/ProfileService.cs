@@ -18,7 +18,6 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
-using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
@@ -59,6 +58,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly string _afdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
 
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
+        private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
         private List<string> _afdianNames = [];
 
         public bool RemoveMcsBotPlayerProfile(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
@@ -120,14 +120,29 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
+        public async Task SaveMcsBotPlayerProfile(MongoId mcsBossPlayerId, SptProfile mcsBotPlayerProfile)
         {
-            // Console.WriteLine("保存护航存档");
-            var mcsBotPlayerId = (MongoId)mcsBotPlayerProfile.ProfileInfo.ProfileId;
-            var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
-            _profiles.GetOrAdd(mcsBossPlayerId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
-            var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossPlayerId][mcsBotPlayerId], true);
-            fileUtil.WriteFile(profilePath, jsonProfile);
+            var mcsBotPlayerId = mcsBotPlayerProfile.ProfileInfo.ProfileId.Value;
+            var saveLock = _saveLocks.GetOrAdd(mcsBotPlayerId, _ => new(1, 1));
+            await saveLock.WaitAsync();
+            try
+            {
+                try
+                {
+                    var profilePath = System.IO.Path.Combine(_profileFolderDir, mcsBossPlayerId, $"{mcsBotPlayerId}.json");
+                    _profiles.GetOrAdd(mcsBossPlayerId, _ => new ConcurrentDictionary<MongoId, SptProfile>()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
+                    var jsonProfile = jsonUtil.Serialize(_profiles[mcsBossPlayerId][mcsBotPlayerId], true);
+                    await fileUtil.WriteFileAsync(profilePath, jsonProfile);
+                }
+                catch (Exception e)
+                {
+                    logger.Error("保存护航存档异常", e);
+                }
+            }
+            finally
+            {
+                saveLock.Release();
+            }
         }
 
         private async Task LoadMcsBotPlayerProfileAsync(MongoId mcsBossPlayerId, MongoId mcsBotPlayerId)
@@ -286,7 +301,7 @@ namespace MiyakoCarryService.Server.Services
             mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
             mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
 
-            SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerFullProfile);
+            _ = SaveMcsBotPlayerProfile(mcsBossPlayerId, mcsBotPlayerFullProfile);
             return mcsBotPlayerFullProfile;
         }
 

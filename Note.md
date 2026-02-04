@@ -367,42 +367,7 @@ Error handling request: /client/match/group/delete
 Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData' to type 'DeleteGroupRequest'.
 ```
 - ~~当同一个老板有两个订单时导致字典重复添加~~
-- 清除存档报错
-```log
-[客户端请求] /client/repeatalbeQuests/activityPeriods
-准备清除 68fc96b7dd043e81bc7a506c 的一个过期订单
-准备清除 6983bcab6054a12c0cbefd60 的Profile
-准备清除 6983bcab6054a12c0cbefd60 的Profile
-Error handling request: /client/repeatalbeQuests/activityPeriods
-The process cannot access the file 'D:\OtherGames\SPT4.0.X\Server-4.0.X\SPT\user\mods\MiyakoCarryServiceServer\Assets\database\orders\orderinfo.json' because it is being used by another process.
-正在删除 6983bcab6054a12c0cbefd60.json
-   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
-   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
-   at System.IO.File.WriteToFile(String path, FileMode mode, ReadOnlySpan`1 contents, Encoding encoding)
-   at System.IO.File.WriteAllText(String path, String contents, Encoding encoding)
-   at SPTarkov.Server.Core.Utils.FileUtil.WriteFile(String filePath, String fileContent)
-   at MiyakoCarryService.Server.Services.OrderInfoService.SaveOrderInfo()
-   at MiyakoCarryService.Server.Services.OrderInfoService.GetExpiredMcsBotPlayerIds()
-   at MiyakoCarryService.Server.Controllers.OrderInfoController.GetExpiredMcsBotPlayerIds()
-   at MiyakoCarryService.Server.Patches.GetClientRepeatableQuestsPatch.Postfix(MongoId sessionID, List`1& __result)
-   at DMD<DMD<>?56693057::SPTarkov.Server.Core.Controllers.RepeatableQuestController::GetClientRepeatableQuests>(RepeatableQuestController this, MongoId sessionID)
-   at SyncProxy<System.Collections.Generic.List`1[[SPTarkov.Server.Core.Models.Eft.Common.Tables.PmcDataRepeatableQuest, SPTarkov.Server.Core, Version=4.0.11.0, Culture=neutral, PublicKeyToken=null]] SPTarkov.Server.Core.Controllers.RepeatableQuestController:GetClientRepeatableQuests(SPTarkov.Server.Core.Models.Common.MongoId)>(RepeatableQuestController , MongoId )
-   at SPTarkov.Server.Core.Callbacks.QuestCallbacks.ActivityPeriods(String url, EmptyRequestData _, MongoId sessionID)
-   at SPTarkov.Server.Core.Routers.Static.QuestStaticRouter.<>c__DisplayClass0_0.<<-ctor>b__1>d.MoveNext()
---- End of stack trace from previous location ---
-   at SPTarkov.Server.Core.DI.RouteAction`1.<>c__DisplayClass0_0.<<-ctor>b__0>d.MoveNext()
---- End of stack trace from previous location ---
-   at SPTarkov.Server.Core.DI.StaticRouter.HandleStatic(String url, String body, MongoId sessionId, String output)
-   at SPTarkov.Server.Core.Routers.HttpRouter.HandleRoute(HttpRequest request, MongoId sessionID, ResponseWrapper wrapper, IEnumerable`1 routers, Boolean dynamic, String body)
-   at SPTarkov.Server.Core.Routers.HttpRouter.GetResponse(HttpRequest req, MongoId sessionID, String body)
-   at SPTarkov.Server.Core.Servers.Http.SptHttpListener.GetResponse(MongoId sessionId, HttpContext context, String body)
-   at SPTarkov.Server.Core.Servers.Http.SptHttpListener.Handle(MongoId sessionId, HttpContext context)
-   at SPTarkov.Server.Core.Servers.HttpServer.HandleRequest(HttpContext context, RequestDelegate next)
-   at SPTarkov.Server.Program.<>c.<<ConfigureWebApp>b__3_0>d.MoveNext()
---- End of stack trace from previous location ---
-   at SPTarkov.Server.Services.NoGCRegionMiddleware.InvokeAsync(HttpContext context)
-   at SPTarkov.Server.Logger.SptLoggerMiddleware.InvokeAsync(HttpContext context)
-```
+- ~~清除存档报错~~(已尝试修复，但效果难以验证)
 
 ## Logic思想指导
 

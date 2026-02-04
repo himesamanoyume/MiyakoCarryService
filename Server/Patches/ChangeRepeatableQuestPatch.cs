@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Server.Patches
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
                         orderInfoController.RemoveOrderInfo(orderInfo);
-                        orderInfoController.SaveOrderInfo();
+                        _ = orderInfoController.SaveOrderInfo();
                         break;
                     }
                 }

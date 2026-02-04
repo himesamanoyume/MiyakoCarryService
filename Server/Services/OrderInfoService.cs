@@ -34,6 +34,7 @@ namespace MiyakoCarryService.Server.Services
 
         // 此处的MongoId为QuestId，而不是玩家Id
         private readonly ConcurrentDictionary<MongoId, OrderInfo> _orderInfos = new();
+        private SemaphoreSlim _saveLock = new(1, 1);
 
         public void AddOrderInfo(OrderInfo orderInfo)
         {
@@ -85,12 +86,32 @@ namespace MiyakoCarryService.Server.Services
             AddOrderInfo(orderInfo);
         }
 
-        public void SaveOrderInfo()
+        public async Task SaveOrderInfo()
         {
-            var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
-            var orderInfos = _orderInfos.Values.ToList();
-            var jsonOrderInfos = jsonUtil.Serialize(orderInfos, true);
-            fileUtil.WriteFile(orderPath, jsonOrderInfos);
+            if (_saveLock is null)
+            {
+                _saveLock = new(1, 1);
+            }
+            
+            await _saveLock.WaitAsync();
+            try
+            {
+                try
+                {
+                    var orderPath = System.IO.Path.Combine(_orderFolderDir, "orderinfo.json");
+                    var orderInfos = _orderInfos.Values.ToList();
+                    var jsonOrderInfos = jsonUtil.Serialize(orderInfos, true);
+                    await fileUtil.WriteFileAsync(orderPath, jsonOrderInfos);
+                }
+                catch (Exception e)
+                {
+                    logger.Error("保存订单信息异常", e);
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
         }
 
         public List<OrderInfo> GetOrderInfos(MongoId mcsBossPlayerId)
@@ -145,7 +166,7 @@ namespace MiyakoCarryService.Server.Services
                     }
                 }
             }
-            SaveOrderInfo();
+            _ = SaveOrderInfo();
             return mcsBotPlayerIds;
         }
 
