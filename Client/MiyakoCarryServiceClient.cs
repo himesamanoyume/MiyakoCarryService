@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client;
 [BepInProcess("EscapeFromTarkov.exe")]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
-    public const string BepInExClientVersion = "0.1.2.0";
+    public const string BepInExClientVersion = "0.1.3.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
     public const string McsPluginName = "姫様の夢 MiyakoCarryService";
