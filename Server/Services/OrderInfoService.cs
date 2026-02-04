@@ -125,9 +125,9 @@ namespace MiyakoCarryService.Server.Services
             AddOrderInfos(orderInfos);
         }
 
-        public Dictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
-            var mcsBotPlayerIds = new Dictionary<MongoId, HashSet<MongoId>>();
+            var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
             var orderInfos = GetAllOrderInfo();
 
             foreach (var orderInfo in orderInfos)
@@ -137,7 +137,7 @@ namespace MiyakoCarryService.Server.Services
                 {
                     logger.Info($"准备清除 {orderInfo.McsBossPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
-                    mcsBotPlayerIds.Add(orderInfo.McsBossPlayerId, new());
+                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsBossPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
                         logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");

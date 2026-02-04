@@ -1,4 +1,5 @@
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
@@ -28,7 +29,7 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.CreateOrderInfo(mcsBossPlayerId, players, carryServiceLevel, duration, questId);
         }
 
-        public Dictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
             return orderInfoService.GetExpiredMcsBotPlayerIds();
         }
