@@ -158,7 +158,6 @@ namespace MiyakoCarryService.Server.Services
                 var pmcDatas = await Task.Run(() =>
                 {
                     var profiles = GetAllGroupMemberProfiles(mcsBossPlayerId);
-                    // ClearGroupMember(mcsBossPlayerId);
                     return profiles.Select(p => p.CharacterData.PmcData).ToList();
                 });
 

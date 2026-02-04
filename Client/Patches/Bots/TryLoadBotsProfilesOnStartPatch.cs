@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     {
                         continue;
                     }
-                    
+
                     var wildSpawnType = mcsBotPlayerProfile.Info.Settings.Role;
                     var botDifficulty = mcsBotPlayerProfile.Info.Settings.BotDifficulty;
 

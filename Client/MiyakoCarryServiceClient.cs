@@ -129,23 +129,25 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new MatchMakerAcceptScreenReadyPatch().Enable();
         new TryLoadBotsProfilesOnStartPatch().Enable();
         new AddEnemyPatch().Enable();
-        // new ManualUpdatePatch().Enable();
-        new ApplyDamagePatch().Enable();
-        new GroupPlayerViewModelClassConstructorPatch().Enable();
-        new MatchmakerAcceptScreenShowPatch().Enable();
-        new OnGameStartedPatch().Enable();
-        new RaidEndedPatch().Enable();
         new TraderClassConstructorPatch().Enable();
         new TraderControllerClassConstructorPatch().Enable();
         new TraderControllerClassAddItemEventInvokePatch().Enable();
         new TraderControllerClassRemoveItemEventInvokePatch().Enable();
         new TraderControllerClassOutProcessPatch().Enable();
         new TraderControllerClassInProcessPatch().Enable();
+        new ApplyDamagePatch().Enable();
+        new OnGameStartedPatch().Enable();
+        new RaidEndedPatch().Enable();
         new BotHearingSensorPatch().Enable();
         new PlayerSayPatch().Enable();
         new PlayHitEffectPatch().Enable();
         new TransitPointPatch().Enable();
         new MatchmakerTimeHasComePatch().Enable();
+        new MatchMakerAcceptScreenCallbackPatch().Enable();
+        new GroupPlayerViewModelClassConstructorPatch().Enable();
+        // new ManualUpdatePatch().Enable();
+
+        new MatchmakerAcceptScreenShowPatch().Enable();
 #if DEBUG
         
 #endif

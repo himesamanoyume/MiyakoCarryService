@@ -8,7 +8,6 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
-using static SPTarkov.Server.Core.Services.MatchLocationService;
 
 namespace MiyakoCarryService.Server.Patches
 {

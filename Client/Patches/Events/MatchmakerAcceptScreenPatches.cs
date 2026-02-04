@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 		public static void Postfix(ref ERaidMode ___eraidMode_0, ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			___eraidMode_0 = ERaidMode.Local;
-			raidSettings.RaidMode = ERaidMode.Local;
+			// raidSettings.RaidMode = ERaidMode.Local;
 		}
 	}
 
@@ -54,6 +54,20 @@ namespace MiyakoCarryService.Client.Patches.Events
 		public static void Prefix(ref EMatchingStatus matchingStatus)
 		{
 			matchingStatus = EMatchingStatus.Ready;
+		}
+	}
+
+	/// <summary>
+	/// 如果不Patch该函数，就会导致护航准备完成后立即回退到战局设置界面
+	/// </summary>
+	internal sealed class MatchMakerAcceptScreenCallbackPatch : ModulePatch
+	{
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_10));
+
+		[PatchPrefix]
+		public static bool Prefix(GroupPlayerViewModelClass player, bool status)
+		{
+			return false;
 		}
 	}
 }
