@@ -7,6 +7,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -23,11 +24,15 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
+        ISptLogger<TraderService> logger,
         ConfigService configService
     )
     {
         private readonly string _traderFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "traders", MiyakoTraderId);
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
+
+        // 因为SPT会检查行动任务的商人Id是否存在，为了防止频繁提示存档被标记为不合法，因此创建任务时临时使用此商人Id
+        public const string TempOrderTraderId = "6864e812f9fe664cb8b8e152";
 
         public async Task OnPostLoadAsync()
         {
@@ -68,9 +73,9 @@ namespace MiyakoCarryService.Server.Services
                 Dialogue = []
             };
 
-            if (!databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
+            if (databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
             {
-                
+                logger.Info("已加载宫子商人");
             }
         }
 

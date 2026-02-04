@@ -27,8 +27,8 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         )
         {
             var traderInfos = pmcData.TradersInfo;
-            var miyakoTraderInfo = traderInfos[Services.TraderService.MiyakoTraderId];
-            var loyaltyLevel = miyakoTraderInfo.LoyaltyLevel;
+            traderInfos.TryGetValue(Services.TraderService.MiyakoTraderId, out var miyakoTraderInfo);
+            var loyaltyLevel = miyakoTraderInfo is null ? 1 : miyakoTraderInfo.LoyaltyLevel;
             var discount = loyaltyLevel switch
             {
                 1 => 1.0f,

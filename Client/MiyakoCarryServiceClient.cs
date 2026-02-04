@@ -145,9 +145,10 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new MatchmakerTimeHasComePatch().Enable();
         new MatchMakerAcceptScreenCallbackPatch().Enable();
         new GroupPlayerViewModelClassPatch().Enable();
+        new GetDailyQuestsPatch().Enable();
+        new MatchmakerAcceptScreenShowPatch().Enable();
         // new ManualUpdatePatch().Enable();
 
-        new MatchmakerAcceptScreenShowPatch().Enable();
 #if DEBUG
         
 #endif

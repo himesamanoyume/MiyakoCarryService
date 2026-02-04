@@ -26,6 +26,7 @@ namespace MiyakoCarryService.Server
                 new RemovePlayerFromGroupPatch().Enable();
                 new EndLocalRaidPatch().Enable();
                 new GetGroupStatusPatch().Enable();
+                new SendLocalisedNpcMessageToPlayerPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }

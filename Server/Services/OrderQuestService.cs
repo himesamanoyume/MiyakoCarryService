@@ -110,7 +110,7 @@ namespace MiyakoCarryService.Server.Services
             MongoId traderId,
             MongoId sessionId)
         {
-            var questData = GetClonedQuestTemplateForType(type, traderId);
+            var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
             if (questData is null)
             {
                 logger.Error(serverLocalisationService.GetText("repeatable-quest_helper_template_not_found", type));

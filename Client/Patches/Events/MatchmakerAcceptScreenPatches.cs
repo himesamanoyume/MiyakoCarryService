@@ -39,7 +39,8 @@ namespace MiyakoCarryService.Client.Patches.Events
 		public static void Postfix(ref ERaidMode ___eraidMode_0, ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			___eraidMode_0 = ERaidMode.Local;
-			// raidSettings.RaidMode = ERaidMode.Local;
+			// 调试看Show函数中profile_0最终是scav的存档，还是pmc的存档
+			raidSettings.RaidMode = ERaidMode.Local;
 		}
 	}
 

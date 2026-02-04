@@ -165,6 +165,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (orderInfoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
                             {
+                                logger.Info($"加载订单中存在的 {mcsBotPlayerId} 存档");
                                 await LoadMcsBotPlayerProfileAsync(mcsBossPlayerId, mcsBotPlayerId);
                             }
                         }
