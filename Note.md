@@ -354,14 +354,18 @@
 - ~~为什么现在进不了准备界面?~~
 - - **当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入**
 - - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`raidSettings.RaidMode = ERaidMode.Local;`导致的
-- 重新加载玩家模型资源后图标又会消失
-- - 应该可以靠`public void UpdateFromAnotherItem(GroupPlayerDataClass other)`中再次设置`SelectedMemberCategory`来解决
+- ~~重新加载玩家模型资源后图标又会消失~~
 - 开始战局又取消时应该发送请求清理小队
 - 正常情况下护航是会死的，此时不应该在转移后还能完整生成，必须记录下死亡情况，当再次获取小队信息时则跳过死亡的成员
 - Scav模式下，似乎会由于无法获取到bossPlayers，而导致无护航生成
 - - 由于Scav模式下bossPlayerId是Pmc的Id，因此无法从GameWorld中获取到scavId的Player
 - - 生成Bot时要根据是否是scav状态来发送对应Profile，老板的id也需要是Scav的Id
 - 如果在没开启服务端的时候订单任务过期了，就会导致服务端认为有删除的商人而使存档被标记
+- 解散小队报错
+```log
+Error handling request: /client/match/group/delete
+Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData' to type 'DeleteGroupRequest'.
+```
 
 ## Logic思想指导
 

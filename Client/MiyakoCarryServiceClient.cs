@@ -144,7 +144,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TransitPointPatch().Enable();
         new MatchmakerTimeHasComePatch().Enable();
         new MatchMakerAcceptScreenCallbackPatch().Enable();
-        new GroupPlayerViewModelClassConstructorPatch().Enable();
+        new GroupPlayerViewModelClassPatch().Enable();
         // new ManualUpdatePatch().Enable();
 
         new MatchmakerAcceptScreenShowPatch().Enable();
