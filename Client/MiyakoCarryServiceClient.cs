@@ -147,6 +147,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new GroupPlayerViewModelClassPatch().Enable();
         new GetDailyQuestsPatch().Enable();
         new MatchmakerAcceptScreenShowPatch().Enable();
+        new MainMenuControllerClassPatch().Enable();
         // new ManualUpdatePatch().Enable();
 
 #if DEBUG

@@ -33,14 +33,18 @@ namespace MiyakoCarryService.Client.Patches.Events
 		}
 		
 		/// <summary>
-		/// 如果有小队成员，先让其正常加载组队的界面，再将设置调整为本地战局，否则即便调整了战局设置也不会生效
+		/// 这可能反而是问题最轻的一种方式了。仅仅只是不要在选了Scav后又切换成Pmc才进图，就不会发生选择Pmc却以Scav进入战局的问题，并且战局设置也能正常生效
+		/// 以下是搭配MainMenuControllerClassPatch并对___eraidMode_0、___raidSettings_0.RaidMode都设为Local时的效果
+		/// 1. 当前不论是直接以Scav组队进入，还是先选Pmc再选Scav，队友都为Scav人物。(符合预期)
+		/// 2. 当前直接以Pmc组队进入，队友都为Pmc人物。(符合预期)
 		/// </summary>
 		[PatchPostfix]
-		public static void Postfix(ref ERaidMode ___eraidMode_0, ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Postfix(ref ERaidMode ___eraidMode_0, ref RaidSettings ___raidSettings_0, ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
-			___eraidMode_0 = ERaidMode.Local;
-			// 调试看Show函数中profile_0最终是scav的存档，还是pmc的存档
-			raidSettings.RaidMode = ERaidMode.Local;
+			// ___eraidMode_0 = ERaidMode.Local;
+			// ___raidSettings_0.RaidMode = ERaidMode.Local;
+			// -----------
+			
 		}
 	}
 

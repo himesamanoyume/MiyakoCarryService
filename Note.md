@@ -28,6 +28,11 @@
 - Discord 爱发电webhook
 - Discord Bangumi动态webhook
 
+## 已知问题
+
+1. 解散队伍会报错
+2. 在组了护航的情况下，Pmc模式调整战局设置不会生效，Scav忘了
+
 ## 低优先级 | IDEA
 
 - 将客户端的大量机器人Setting配置项放入服务端Config中（若为空则还是原来的默认值），实现Fika联机全局玩家统一的护航设置
@@ -353,7 +358,17 @@
 - ~~拉护航进队时不要直接准备就绪，而是等到进入准备界面再准备就绪~~
 - ~~为什么现在进不了准备界面?~~
 - - **当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入**
-- - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`raidSettings.RaidMode = ERaidMode.Local;`导致的
+- - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
+- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
+- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`, 有`MatchMakerAcceptScreenReadyStatusPatch`时，战局设置不生效
+- 有`___raidSettings_0.RaidMode = ERaidMode.Local`和`___eraidMode_0 = ERaidMode.Local`时，先选scav再选pmc会以scav进
+- - 单人状态不论pmc/scav下不改设置RaidMode为Online，改了战局设置就会变成Local
+- - 组队状态scav不改设置为Online，改设置为Local，pmc则改不改都是online
+- - 那么理论上scav组队改设置进战局，应该是不会刷新bot的（确实）
+- - ~~而pmc因为组队时无论如何改设置都是online，所以战局设置无法生效，而强行设置为Local就会触发scav的Local设置而以scav进入~~即便让组队时不强制为Online也无效
+- **`GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因**
+- **其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置**
+- - 只要是`RaidSettings.Apply`被调用的都有可能
 - ~~重新加载玩家模型资源后图标又会消失~~
 - 开始战局又取消时应该发送请求清理小队
 - 正常情况下护航是会死的，此时不应该在转移后还能完整生成，必须记录下死亡情况，当再次获取小队信息时则跳过死亡的成员
@@ -368,6 +383,7 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 ```
 - ~~当同一个老板有两个订单时导致字典重复添加~~
 - ~~清除存档报错~~(已尝试修复，但效果难以验证)
+- 已经拒绝的入队邀请还会额外发送一个已邀请成功，这不应该
 
 ## Logic思想指导
 
