@@ -12,11 +12,13 @@ namespace MiyakoCarryService.Client.Patches.Events
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)]);
 
+		public static ESideType CurrentType = ESideType.Pmc;
+
 		/// <summary>
 		/// 在准备开始匹配前发送配置文件
 		/// </summary>
 		[PatchPrefix]
-		public static void Prefix(ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Prefix(ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			if (MiyakoCarryServicePlugin.FikaInstalled)
 			{
@@ -30,6 +32,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
 				});
 			}
+			CurrentType = raidSettings.Side;
 		}
 		
 		// /// <summary>

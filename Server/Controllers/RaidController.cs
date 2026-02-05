@@ -7,6 +7,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Enums;
 
 namespace MiyakoCarryService.Server.Controllers
 {
@@ -45,9 +46,9 @@ namespace MiyakoCarryService.Server.Controllers
             return raidService.GetAllGroupMemberProfiles(mcsBossPlayerId);
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId, SideType side)
         {
-            return await raidService.SpawnMcsBotPlayer(mcsBossPlayerId);
+            return await raidService.SpawnMcsBotPlayer(mcsBossPlayerId, side);
         }
     
         public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsBossPlayerId)
