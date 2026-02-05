@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Server
                 public override string Author { get; init; } = "Himesamanoyume";
                 public override List<string> Contributors { get; init; }
                 public override SemanticVersioning.Version Version { get; init; } = new(string.Join('.', CurrentVersion.Split('.', System.StringSplitOptions.None).Take(3)));
-                public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.11");
+                public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.0");
                 public override List<string> Incompatibilities { get; init; }
                 public override Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
                 public override string Url { get; init; } = "https://sns.oddba.cn/163832.html";

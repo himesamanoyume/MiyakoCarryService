@@ -65,6 +65,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 foreach (var mcsProfile in mcsProfileItem.Value)
                 {
+                    // MiyakoCarryServicePlugin.Logger.LogError(mcsProfile.ProfileId);
                     await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
                 }
             }

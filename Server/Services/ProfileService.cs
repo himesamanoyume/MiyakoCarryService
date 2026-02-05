@@ -360,7 +360,7 @@ namespace MiyakoCarryService.Server.Services
 
             var scavData = new PmcData
             {
-                Id = existingScavDataClone.Id ?? pmcDataClone.Savage,
+                Id = new(),
                 Aid = pmcDataClone.Aid,
                 SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId,
                 Savage = null,

@@ -377,9 +377,11 @@
 - ~~开始战局又取消时应该发送请求清理小队~~
 - **护航死后，不应该在转移后还能再次生成，应记录下死亡情况，当再次获取小队信息时则跳过死亡的成员**
 - ~~Scav模式下，似乎会由于无法获取到bossPlayers，而导致无护航生成~~
-- - 由于Scav模式下bossPlayerId是Pmc的Id，因此无法从GameWorld中获取到scavId的Player
-- - 生成Bot时要根据是否是scav状态来发送对应Profile，老板的id也需要是Scav的Id
-- **现在是会生成一个与老板完全相同的Bot，同时无法生成护航**
+- - ~~由于Scav模式下bossPlayerId是Pmc的Id，因此无法从GameWorld中获取到scavId的Player~~
+- - ~~生成Bot时要根据是否是scav状态来发送对应Profile，老板的id也需要是Scav的Id~~
+- ~~现在是会生成一个与老板完全相同的Bot，同时无法生成护航~~
+- - ~~原因是现在生成的Scav Id跟老板的Scav Id是相同的。需要调整Scav生成的方式~~
+- **当前Scav已可以正常生成护航，但是转移时似乎没有正确获取到护航成员`TransitPointPatch`**
 - ~~如果在没开启服务端的时候订单任务过期了，就会导致服务端认为有删除的商人而使存档被标记~~
 - 解散小队报错
 ```log
