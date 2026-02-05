@@ -10,6 +10,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Servers.Ws;
 
 namespace MiyakoCarryService.Server.Services
@@ -20,6 +21,7 @@ namespace MiyakoCarryService.Server.Services
         NotificationSendHelper notificationSendHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         CompatibilityService compatibilityService,
+        ProfileHelper profileHelper,
         ProfileService profileService
     )
     {
@@ -124,7 +126,7 @@ namespace MiyakoCarryService.Server.Services
             return profiles;
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId, SideType side)
         {
             var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
 
@@ -155,13 +157,16 @@ namespace MiyakoCarryService.Server.Services
 
             var tasks = mcsBossPlayerIds.Select(async mcsBossPlayerId =>
             {
+                var isPmc = side is SideType.Pmc;
                 var pmcDatas = await Task.Run(() =>
                 {
                     var profiles = GetAllGroupMemberProfiles(mcsBossPlayerId);
-                    return profiles.Select(p => p.CharacterData.PmcData).ToList();
+                    return profiles.Select(p => isPmc ? p.CharacterData.PmcData : p.CharacterData.ScavData).ToList();
                 });
 
-                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(mcsBossPlayerId, pmcDatas);
+                var mcsBossPlayerProfile = profileHelper.GetFullProfile(mcsBossPlayerId);
+
+                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(isPmc ? mcsBossPlayerProfile.ProfileInfo.ProfileId.Value : mcsBossPlayerProfile.ProfileInfo.ScavengerId.Value, pmcDatas);
             });
 
             var results = await Task.WhenAll(tasks);

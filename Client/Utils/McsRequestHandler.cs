@@ -31,6 +31,11 @@ namespace MiyakoCarryService.Client.Utils
             await RequestHandler.PostJsonAsync(path, serialized);
         }
 
+        private static async Task PostJsonAsync(string path)
+        {
+            await RequestHandler.PostJsonAsync(path, "");
+        }
+
         private static T GetJson<T>(string path)
         {
             return Task.Run(() => GetJsonAsync<T>(path)).GetAwaiter().GetResult();
@@ -55,9 +60,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers()
+        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(SpawnMcsBotPlayerType spawnMcsBotPlayerType)
         {
-            var response = await GetJsonAsync<Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate");
+            var response = await PostJsonAsync<SpawnMcsBotPlayerType, Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate", spawnMcsBotPlayerType);
             return response.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value.Select(desc => new Profile(desc)).ToArray()
@@ -73,6 +78,11 @@ namespace MiyakoCarryService.Client.Utils
         public static async Task UploadMcsBotPlayerConfig(McsBotPlayerConfig mcsBotPlayerConfig)
         {
             await PostJsonAsync("/mcs/singleplayer/settings/bot/upload", mcsBotPlayerConfig);
+        }
+
+        public static async Task ClearGroupMember()
+        {
+            await PostJsonAsync("/mcs/client/match/raid/abort");
         }
     }
 }

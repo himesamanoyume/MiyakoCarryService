@@ -12,6 +12,7 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -45,8 +46,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static async void Postfix(Task __result)
         {
             await __result;
-
-            var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers();
+            var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
+            var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers(new()
+            {
+                Side = currentType
+            });
             Dictionary<MongoID, McsBotPlayerConfig> mcsBossPlayerConfigs;
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
