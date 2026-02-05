@@ -1,5 +1,6 @@
 
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Controllers;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -9,7 +10,8 @@ namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
     public sealed class MatchCallbacks(
-        HttpResponseUtil httpResponseUtil
+        HttpResponseUtil httpResponseUtil,
+        RaidController raidController
     )
     {
         /// <summary>
@@ -25,6 +27,15 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public ValueTask<string> NotRaidReady(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
         {
+            return new ValueTask<string>(httpResponseUtil.GetBody(true));
+        }
+
+        /// <summary>
+        /// 处理 /mcs/client/match/raid/abort
+        /// </summary>
+        public ValueTask<string> MatchingAbort(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
+        {
+            raidController.ClearGroupMember(mcsBossPlayerId);
             return new ValueTask<string>(httpResponseUtil.GetBody(true));
         }
     }
