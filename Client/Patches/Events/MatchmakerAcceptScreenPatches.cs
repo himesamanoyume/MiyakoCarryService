@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 		/// 在准备开始匹配前发送配置文件
 		/// </summary>
 		[PatchPrefix]
-		public static void Prefix(ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Prefix(ISession session, ref RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			if (MiyakoCarryServicePlugin.FikaInstalled)
 			{
@@ -32,20 +32,19 @@ namespace MiyakoCarryService.Client.Patches.Events
 			}
 		}
 		
-		/// <summary>
-		/// 这可能反而是问题最轻的一种方式了。仅仅只是不要在选了Scav后又切换成Pmc才进图，就不会发生选择Pmc却以Scav进入战局的问题，并且战局设置也能正常生效
-		/// 以下是搭配MainMenuControllerClassPatch并对___eraidMode_0、___raidSettings_0.RaidMode都设为Local时的效果
-		/// 1. 当前不论是直接以Scav组队进入，还是先选Pmc再选Scav，队友都为Scav人物。(符合预期)
-		/// 2. 当前直接以Pmc组队进入，队友都为Pmc人物。(符合预期)
-		/// </summary>
-		[PatchPostfix]
-		public static void Postfix(ref ERaidMode ___eraidMode_0, ref RaidSettings ___raidSettings_0, ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
-		{
-			// ___eraidMode_0 = ERaidMode.Local;
-			// ___raidSettings_0.RaidMode = ERaidMode.Local;
-			// -----------
-			
-		}
+		// /// <summary>
+		// /// 这可能反而是问题最轻的一种方式了。仅仅只是不要在选了Scav后又切换成Pmc才进图，就不会发生选择Pmc却以Scav进入战局的问题，并且战局设置也能正常生效
+		// /// 以下是搭配MainMenuControllerClassPatch并对___eraidMode_0、___raidSettings_0.RaidMode都设为Local时的效果
+		// /// 1. 当前不论是直接以Scav组队进入，还是先选Pmc再选Scav，队友都为Scav人物。(符合预期)
+		// /// 2. 当前直接以Pmc组队进入，队友都为Pmc人物。(符合预期)
+		// /// 3. 唯一的问题：先选Scav再以Pmc进入，会以Scav进入
+		// /// </summary>
+		// [PatchPostfix]
+		// public static void Postfix(ref ERaidMode ___eraidMode_0, ref RaidSettings ___raidSettings_0, ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		// {
+		// 	___eraidMode_0 = ERaidMode.Local;
+		// 	___raidSettings_0.RaidMode = ERaidMode.Local;
+		// }
 	}
 
 	/// <summary>

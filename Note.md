@@ -31,7 +31,7 @@
 ## 已知问题
 
 1. 解散队伍会报错
-2. 在组了护航的情况下，Pmc模式调整战局设置不会生效，Scav忘了
+2. 在组了护航的情况下，无法调整战局设置。（因为使用了塔科夫的组队系统，会触发与之相关的一系列代码）
 
 ## 低优先级 | IDEA
 
@@ -357,7 +357,7 @@
 - ~~转移时会导致小队成员信息丢失，战局开始时也不会生成小队成员~~
 - ~~拉护航进队时不要直接准备就绪，而是等到进入准备界面再准备就绪~~
 - ~~为什么现在进不了准备界面?~~
-- - **当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入**
+- - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
 - - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
 - - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
 - - 无`___raidSettings_0.RaidMode = ERaidMode.Local`, 有`MatchMakerAcceptScreenReadyStatusPatch`时，战局设置不生效
@@ -366,9 +366,14 @@
 - - 组队状态scav不改设置为Online，改设置为Local，pmc则改不改都是online
 - - 那么理论上scav组队改设置进战局，应该是不会刷新bot的（确实）
 - - ~~而pmc因为组队时无论如何改设置都是online，所以战局设置无法生效，而强行设置为Local就会触发scav的Local设置而以scav进入~~即便让组队时不强制为Online也无效
-- **`GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因**
-- **其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置**
-- - 只要是`RaidSettings.Apply`被调用的都有可能
+- `GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因
+- 其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置
+- - `MainMenuControllerClass.method_27`中因为`if (this.RaidSettings_0.RaidMode != ERaidMode.Online && !this.RaidSettings_0.IsPveOffline)`因此最终调用了一次`this.RaidSettings_0.Apply(this.RaidSettings_1);`导致覆盖了Scav的设置
+- 目前打算是弄清楚在不将RaidMode设为Local，组队不强制为Online的情况下，是什么原因导致战局设置无效
+- - 观察`MatchMakerAcceptScreen.Show`在不设Local，不强制Online的情况下，会传进来什么raidSettings的RaidMode,正常来说组队调整设置的情况下应该为Local，如果还是传入Online那可能局势会明朗很多（确实还是Online）
+- 打断点`UpdateMatchmakerSettings`可最清晰观察到点击开始战局后的一次该函数调用
+- ~~尝试记录`MatchMakerPlayerPreview`中的玩家Side，只根据此阵营来在`GClass3926<RaidSettings>.UpdateMatchmakerSettings`选择RaidSettings~~
+- **借鉴friendlyPmc在组队时将小队成员清除，在小队模型展示界面处再将其重新加载**
 - ~~重新加载玩家模型资源后图标又会消失~~
 - 开始战局又取消时应该发送请求清理小队
 - 正常情况下护航是会死的，此时不应该在转移后还能完整生成，必须记录下死亡情况，当再次获取小队信息时则跳过死亡的成员
