@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 		[PatchPrefix]
 		public static void Prefix(ISession session, RaidSettings raidSettings, MatchmakerPlayerControllerClass matchmaker)
 		{
-			if (SquadMgr.McsTransitBotPlayers.TryGetValue(session.Profile.Id, out var groupPlayerViewModelClasses))
+			if (SquadMgr.McsTransitBotPlayers.TryGetValue(MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id, out var groupPlayerViewModelClasses))
 			{
 				foreach (var groupPlayerViewModelClass in groupPlayerViewModelClasses.Values)
 				{

@@ -358,6 +358,8 @@ namespace MiyakoCarryService.Server.Services
                 ClearBotContainerCacheAfterGeneration = false
             });
 
+            
+
             var scavData = new PmcData
             {
                 Id = new(),
@@ -412,7 +414,8 @@ namespace MiyakoCarryService.Server.Services
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcDataClone.Info.RegistrationDate;
             scavData.Info.GameVersion = pmcDataClone.Info.GameVersion;
-            scavData.Info.MemberCategory = MemberCategory.UniqueId;
+            scavData.Info.MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory;
+            scavData.Info.SelectedMemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory;
             scavData.Info.LockedMoveCommands = true;
             scavData.Info.MainProfileNickname = pmcDataClone.Info.Nickname;
             // scavData.RagfairInfo = pmcDataClone.RagfairInfo;
@@ -422,8 +425,8 @@ namespace MiyakoCarryService.Server.Services
             // scavData.SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId;
             // scavData.Skills = existingScavDataClone.GetSkillsOrDefault();
             // scavData.Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters();
-            scavData.Info.Level = 1;
-            scavData.Info.Experience = 200;
+            // scavData.Info.Level = 1;
+            // scavData.Info.Experience = 200;
             // scavData.Quests = existingScavDataClone.Quests ?? [];
             // scavData.TaskConditionCounters = existingScavDataClone.TaskConditionCounters ?? new();
             // scavData.Notes = existingScavDataClone.Notes ?? new Notes { DataNotes = [] };

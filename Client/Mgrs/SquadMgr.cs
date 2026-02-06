@@ -49,33 +49,34 @@ namespace MiyakoCarryService.Client.Mgrs
                 McsTransitBotPlayers.Add(mcsBossPlayerId, transitMembers);
             }
 
-            if (!transitMembers.TryGetValue(botOwner.ProfileId, out var groupPlayerViewModelClasses))
+            if (!transitMembers.TryGetValue(botOwner.ProfileId, out var groupPlayerViewModelClass))
             {
-                var groupPlayerViewModelClass = new GroupPlayerViewModelClass(new GroupPlayerDataClass
+                var info = botOwner.Profile.Info;
+                groupPlayerViewModelClass = new GroupPlayerViewModelClass(new GroupPlayerDataClass
                 {
                     AccountId = botOwner.AccountId,
                     Id = botOwner.ProfileId,
                     Info = new()
                     {
-                        Level = botOwner.Profile.Info.Level,
-                        PrestigeLevel = botOwner.Profile.Info.PrestigeLevel,
-                        MemberCategory = botOwner.Profile.Info.MemberCategory,
-                        SelectedMemberCategory = botOwner.Profile.Info.SelectedMemberCategory,
-                        Nickname = botOwner.Profile.Info.Nickname,
-                        Side = botOwner.Profile.Info.Side,
-                        SavageLockTime = botOwner.Profile.Info.SavageLockTime,
-                        SavageNickname = botOwner.Profile.Info.Nickname,
-                        GameVersion = botOwner.Profile.Info.GameVersion,
-                        HasCoopExtension = botOwner.Profile.Info.HasCoopExtension,
+                        Level = info.Level,
+                        PrestigeLevel = info.PrestigeLevel,
+                        MemberCategory = info.MemberCategory,
+                        SelectedMemberCategory = info.SelectedMemberCategory,
+                        Nickname = info.Side == EPlayerSide.Savage ? info.MainProfileNickname : info.Nickname,
+                        Side = info.Side,
+                        SavageLockTime = info.SavageLockTime,
+                        SavageNickname = info.Nickname,
+                        GameVersion = info.GameVersion,
+                        HasCoopExtension = info.HasCoopExtension,
                         Health = botOwner.Profile.Health
                     },
                     PlayerVisualRepresentation = new(new()
                     {
-                        Level = botOwner.Profile.Info.Level,
-                        MemberCategory = botOwner.Profile.Info.MemberCategory,
-                        SelectedMemberCategory = botOwner.Profile.Info.SelectedMemberCategory,
-                        Nickname = botOwner.Profile.Info.Nickname,
-                        Side = botOwner.Profile.Info.Side,
+                        Level = info.Level,
+                        MemberCategory = info.MemberCategory,
+                        SelectedMemberCategory = info.SelectedMemberCategory,
+                        Nickname = info.Side == EPlayerSide.Savage ? info.MainProfileNickname : info.Nickname,
+                        Side = info.Side,
                         Health = botOwner.Profile.Health
                     }, botOwner.Profile.Customization, botOwner.Profile.Inventory.Equipment)
                 });
