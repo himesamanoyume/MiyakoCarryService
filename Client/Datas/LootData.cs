@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Datas
 {
     internal sealed class LootData : ItemData
     {
-        public Dictionary<McsAIBossPlayer, LootProp> LootProps = new();
+        public Dictionary<McsAILeadPlayer, LootProp> LootProps = new();
         public TraderOffer Offer;
         public bool IsItemInContainer = false;
         public bool IsMoney = false;
@@ -57,19 +57,19 @@ namespace MiyakoCarryService.Client.Datas
             Offer = offer ?? new TraderOffer();
         }
 
-        public void Refresh(McsAIBossPlayer mcsAIBossPlayer)
+        public void Refresh(McsAILeadPlayer mcsAILeadPlayer)
         {
             ResetOffer();
-            CheckItemInteresting(mcsAIBossPlayer);
+            CheckItemInteresting(mcsAILeadPlayer);
             CheckSecureContainerItem();
         }
 
-        public void CheckItemInteresting(McsAIBossPlayer mcsAIBossPlayer)
+        public void CheckItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
-            if (!LootProps.TryGetValue(mcsAIBossPlayer, out var lootProp))
+            if (!LootProps.TryGetValue(mcsAILeadPlayer, out var lootProp))
             {
-                lootProp = new LootProp(Item, Offer, mcsAIBossPlayer);
-                LootProps[mcsAIBossPlayer] = lootProp;
+                lootProp = new LootProp(Item, Offer, mcsAILeadPlayer);
+                LootProps[mcsAILeadPlayer] = lootProp;
             }
             lootProp.CheckWishListItem();
             lootProp.CheckHighPriceItem();
@@ -97,10 +97,10 @@ namespace MiyakoCarryService.Client.Datas
             IsInSecureContainerItem = false;
         }
 
-        public override void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer)
+        public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             IsItemInContainer = false;
-            Refresh(mcsAIBossPlayer);
+            Refresh(mcsAILeadPlayer);
 
             if (ItemsInContainer == null)
             {
@@ -129,7 +129,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                lootData.Refresh(mcsAIBossPlayer);
+                lootData.Refresh(mcsAILeadPlayer);
                 IsItemInContainer = true;
             }
         }

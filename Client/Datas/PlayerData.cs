@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Datas
             _playerRef = new(player);
         }
 
-        public override void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer)
+        public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             if (ItemsInContainer == null)
             {
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                lootData.Refresh(mcsAIBossPlayer);
+                lootData.Refresh(mcsAILeadPlayer);
             }
         }
 

@@ -527,7 +527,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 Vector3 bossPos;
                 if (BotOwner.BotFollower.HaveBoss)
                 {
-                    bossPos = McsBotPlayerData.BossPlayer.Position;
+                    bossPos = McsBotPlayerData.LeadPlayer.Position;
                 }
                 else
                 {
@@ -588,7 +588,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             Vector3 bossPos;
             if (BotOwner.BotFollower.HaveBoss)
             {
-                bossPos = McsBotPlayerData.BossPlayer.Position;
+                bossPos = McsBotPlayerData.LeadPlayer.Position;
             }
             else
             {
@@ -613,7 +613,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return BotOwner.Position;
                 }
 
-                return McsBotPlayerData.BossPlayer.Position;
+                return McsBotPlayerData.LeadPlayer.Position;
             }
             else
             {

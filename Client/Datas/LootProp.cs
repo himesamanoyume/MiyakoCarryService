@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Datas
     internal class LootProp
     {
         public Item Item;
-        public McsAIBossPlayer McsAIBossPlayer;
+        public McsAILeadPlayer McsAILeadPlayer;
         public TraderOffer Offer;
         public bool IsHighPriceItem = false;
         public bool IsWishListItem = false;
@@ -18,21 +18,21 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsBlockItem = false;
         
 
-        public LootProp(Item item, TraderOffer offer, McsAIBossPlayer mcsAIBossPlayer)
+        public LootProp(Item item, TraderOffer offer, McsAILeadPlayer mcsAILeadPlayer)
         {
             Item = item;
             Offer = offer;
-            McsAIBossPlayer = mcsAIBossPlayer;
+            McsAILeadPlayer = mcsAILeadPlayer;
         }
 
         public void CheckHighPriceItem()
         {
-            IsHighPriceItem = Offer.Price >= McsAIBossPlayer.McsBotPlayerConfig.PriceThreshold;
+            IsHighPriceItem = Offer.Price >= McsAILeadPlayer.McsBotPlayerConfig.PriceThreshold;
         }
 
         public void CheckWishListItem()
         {
-            var wishlistManager = McsAIBossPlayer.Player().Profile.WishlistManager;
+            var wishlistManager = McsAILeadPlayer.Player().Profile.WishlistManager;
             if (wishlistManager != null)
             {
                 IsWishListItem = wishlistManager.IsInWishlist(Item.TemplateId, true, out _);
@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public void CheckBlockItem(EItemType itemType)
         {
-            IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAIBossPlayer.McsBotPlayerConfig.BlockItemType, itemType);
+            IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, itemType);
         }
 
         // public bool CheckQuestNeedItem()

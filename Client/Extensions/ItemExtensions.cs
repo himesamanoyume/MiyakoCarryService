@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Client.Extensions
                         if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
                         {
                             var McsLeadPlayer = SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
-                            playerData = new McsBotPlayerData(SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
+                            playerData = new McsBotPlayerData(SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
                             _datas.Add(item, playerData);
                             return playerData;
                         }
@@ -75,10 +75,10 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var lootData = new LootData(item, ContainsBestPrice(item));
-                var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
-                foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
+                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                 {
-                    lootData.Refresh(mcsAIBossPlayer);
+                    lootData.Refresh(mcsAILeadPlayer);
                 }
                 _datas.Add(item, lootData);
                 return lootData;

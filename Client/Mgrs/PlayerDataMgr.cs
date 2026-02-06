@@ -100,14 +100,14 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
 
                     // 分批次、依据每位老板的设置进行刷新
-                    var mcsAIBossPlayers = SquadMgr.GetAllMcsAIBossPlayer();
+                    var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
                     foreach (var batch in itemBatches)
                     {
                         foreach (var rootItemData in batch)
                         {
-                            foreach (var mcsAIBossPlayer in mcsAIBossPlayers)
+                            foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                rootItemData.RefreshInteresting(mcsAIBossPlayer);
+                                rootItemData.RefreshInteresting(mcsAILeadPlayer);
                             }
                         }
                         yield return internalTime;
@@ -191,9 +191,9 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         foreach (PlayerData playerData in batch)
                         {
-                            foreach (var mcsAIBossPlayer in SquadMgr.GetAllMcsAIBossPlayer())
+                            foreach (var mcsAILeadPlayer in SquadMgr.GetAllMcsAILeadPlayer())
                             {
-                                playerData.RefreshInteresting(mcsAIBossPlayer);
+                                playerData.RefreshInteresting(mcsAILeadPlayer);
                             }
                         }
                     }

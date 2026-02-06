@@ -49,14 +49,14 @@ namespace MiyakoCarryService.Client.Datas
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
-        public abstract void RefreshInteresting(McsAIBossPlayer mcsAIBossPlayer);
+        public abstract void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer);
 
-        public IEnumerator RefreshRootItemInteresting(McsAIBossPlayer mcsAIBossPlayer)
+        public IEnumerator RefreshRootItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
             try
             {
-                RefreshInteresting(mcsAIBossPlayer);
+                RefreshInteresting(mcsAILeadPlayer);
             }
             catch (Exception e)
             {

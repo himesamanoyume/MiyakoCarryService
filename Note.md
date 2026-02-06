@@ -260,7 +260,7 @@
 - `FollowerPatrolBaseLogic`作为巡逻Logic，但其需要`BotFollower`相关信息，应该不能直接使用。`friendlyPmc`中也是需要先判断`BotFollower.HaveBoss`且`BossToFollow.IsMe`为true才执行的
 - - ~~找出如何设置BotFollower为McsLeadPlayer~~
 - - - `AIBossPlayer.cs`的`AddFollower`
-- - - ~~必须要实现McsAIBossPlayer才能设置BotFollower~~
+- - - ~~必须要实现McsAILeadPlayer才能设置BotFollower~~
 - ~~BUG:当没有设置护航时，就会造成generate错误~~
 - 复刻`FollowerLayer`的`GetDecision`函数中的决策转换为`Logic`后至`McsBotPlayerCommonLayer`中
 > 其中诸如`BotLogicDecision.runToCover`将得到的决策Action可以从`global using RunToCoverBaseLogic = GClass228;`找到对应原版的基础Logic
@@ -308,7 +308,7 @@
 - - ~~先让代码正常运作~~
 - ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
 - ~~BUG:在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常~~
-- ~~BUG：`McsBotPlayerData`的`McsAIBossPlayer`为null, 其实是因为`GetMcsAIBossPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
+- ~~BUG：`McsBotPlayerData`的`McsAILeadPlayer`为null, 其实是因为`GetMcsAILeadPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
 - 在周围巡逻时应该尽量让护航与老板处于同一高度
 - ~~检查`GetRangeOwnerItemData`~~(会重复)
 - ~~还是没有实现好跟随~~

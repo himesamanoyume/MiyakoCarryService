@@ -17,11 +17,11 @@ namespace MiyakoCarryService.Client.Datas
     {
         private WeakReference<BotOwner> _botOwnerRef;
         public BotOwner BotOwner => _botOwnerRef.TryGetTarget(out var botOwner) ? botOwner : null;
-        private WeakReference<Player> _bossPlayeRef;
-        public Player BossPlayer => _bossPlayeRef.TryGetTarget(out var bossPlayer) ? bossPlayer : null;
+        private WeakReference<Player> _leadPlayeRef;
+        public Player LeadPlayer => _leadPlayeRef.TryGetTarget(out var leadPlayer) ? leadPlayer : null;
         public List<BotBehavior> BotBehaviors { get; private set; }
-        private WeakReference<McsAIBossPlayer> _mcsAIBossPlayerRef;
-        public McsAIBossPlayer McsAIBossPlayer => _mcsAIBossPlayerRef.TryGetTarget(out var mcsAIBossPlayer) ? mcsAIBossPlayer : null;
+        private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
+        public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
         public LootData LootingTarget
@@ -58,12 +58,12 @@ namespace MiyakoCarryService.Client.Datas
         }
         private LootDataMgr _lootDataMgr = null;
         public bool IsRunningCoroutine = false;
-        public McsBotPlayerData(Player bossPlayer, McsAIBossPlayer mcsAIBossPlayer, Player player, Item item) : base(player, item)
+        public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
             _botOwnerRef = new(player.AIData.BotOwner);
-            _mcsAIBossPlayerRef = new(mcsAIBossPlayer);
-            _bossPlayeRef = new(bossPlayer);
-            BotBehaviors = [new BotCarryServiceChecker(BotOwner, BossPlayer)];
+            _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
+            _leadPlayeRef = new(bossPlayer);
+            BotBehaviors = [new BotCarryServiceChecker(BotOwner, LeadPlayer)];
             _lootDataMgr = _gameloop.GetMgr<LootDataMgr>();
         }
 
@@ -88,7 +88,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (!lootData.LootProps.TryGetValue(McsAIBossPlayer, out var lootProp))
+                if (!lootData.LootProps.TryGetValue(McsAILeadPlayer, out var lootProp))
                 {
                     continue;
                 }

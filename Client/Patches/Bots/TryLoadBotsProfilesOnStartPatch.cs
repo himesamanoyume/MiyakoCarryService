@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             var gameWorld = Singleton<GameWorld>.Instance;
 
-            var bossPlayers = mcsProfilesDict
+            var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
                 .Select(kvp => gameWorld.GetEverExistedPlayerByID(kvp.Key))
                 .Where(bossPlayer => bossPlayer != null);
@@ -82,11 +82,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var botSpawner = botsController.BotSpawner;
             var botCreator = botSpawner.BotCreator;
 
-            MiyakoCarryServicePlugin.Logger.LogInfo("bossPlayer Count: " + bossPlayers.Count());
+            MiyakoCarryServicePlugin.Logger.LogInfo("leadPlayer Count: " + leadPlayers.Count());
 
-            foreach (var bossPlayer in bossPlayers)
+            foreach (var leadPlayer in leadPlayers)
             {
-                bossPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
+                leadPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
                 {
                     if (damageInfo.Player == null || !damageInfo.Player.IsAI || damageInfo.Player.AIData == null || damageInfo.Player.AIData.BotOwner == null)
                     {
@@ -100,15 +100,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         return;
                     }
 
-                    if (bossPlayer.BotsGroup != null)
+                    if (leadPlayer.BotsGroup != null)
                     {
-                        bossPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
-                        bossPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsBossId(bossPlayer.ProfileId).FirstOrDefault());
+                        leadPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
+                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsBossId(leadPlayer.ProfileId).FirstOrDefault());
                     }
                 };
 
-                var bossPlayerPos = bossPlayer.Position;
-                if (!mcsLeadPlayerConfigs.TryGetValue(bossPlayer.ProfileId, out var mcsBotPlayerConfig))
+                var bossPlayerPos = leadPlayer.Position;
+                if (!mcsLeadPlayerConfigs.TryGetValue(leadPlayer.ProfileId, out var mcsBotPlayerConfig))
                 {
                     mcsBotPlayerConfig = new McsBotPlayerConfig
                     {
@@ -120,10 +120,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     };
                 }
-                var mcsAIBossPlayer = new McsAIBossPlayer(bossPlayer, mcsBotPlayerConfig);
-                bossPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
+                var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer, mcsBotPlayerConfig);
+                leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
 
-                foreach (var mcsBotPlayerProfile in mcsProfilesDict[bossPlayer.ProfileId])
+                foreach (var mcsBotPlayerProfile in mcsProfilesDict[leadPlayer.ProfileId])
                 {
                     if (SquadMgr.IsMcsBotPlayerDead(mcsBotPlayerProfile.ProfileId))
                     {
@@ -136,7 +136,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var botSpawnParams = new BotSpawnParams();
                     botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
 
-                    var botProfileDataClass = new BotProfileDataClass(bossPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
+                    var botProfileDataClass = new BotProfileDataClass(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
 
                     var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
 
@@ -152,9 +152,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, true);
 
                         settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
-                        settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = bossPlayer.Side != EPlayerSide.Savage;
+                        settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = leadPlayer.Side != EPlayerSide.Savage;
 
-                        var oldReasons = settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
+                        // var oldReasons = settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
 
                         // settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
                         // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
@@ -208,9 +208,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
 
                         // force follower loyality
-                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_SAVAGE = bossPlayer.Side == EPlayerSide.Savage;
-                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_BEAR = bossPlayer.Side == EPlayerSide.Bear;
-                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_USEC = bossPlayer.Side == EPlayerSide.Usec;
+                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_SAVAGE = leadPlayer.Side == EPlayerSide.Savage;
+                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_BEAR = leadPlayer.Side == EPlayerSide.Bear;
+                        settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_USEC = leadPlayer.Side == EPlayerSide.Usec;
                         settings.FileSettings.Mind.CAN_EXECUTE_REQUESTS = true;
 
                         settings.FileSettings.Mind.FRIEND_AGR_KILL = 0.3f;
@@ -345,14 +345,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.Settings = settings;
 
-                        SquadMgr.AddMcsSquadMember(bossPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAIBossPlayer);
+                        SquadMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
                         SubTitleMgr.CreateSubTitle(botOwner.ProfileId);
 
-                        if (bossPlayer.BotsGroup != null)
+                        if (leadPlayer.BotsGroup != null)
                         {
                             // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
                             // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
-                            return bossPlayer.BotsGroup;
+                            return leadPlayer.BotsGroup;
                         }
 
                         var enemyTypes = botOwner.Settings.GetEnemyBotTypes();
@@ -372,14 +372,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
                         {
-                            if (enemy.ProfileId == bossPlayer.ProfileId)
+                            if (enemy.ProfileId == leadPlayer.ProfileId)
                             {
                                 return;
                             }
                             botsGroup.CheckAndAddEnemy(enemy);
                         };
 
-                        foreach (var _bossPlayer in bossPlayers)
+                        foreach (var _bossPlayer in leadPlayers)
                         {
                             botsGroup.RemoveEnemy(_bossPlayer);
                             botsGroup.AddAlly(_bossPlayer);
@@ -387,8 +387,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botSpawner.Groups.AddNoKey(botsGroup, botZone);
 
-                        bossPlayer.BotsGroup = botsGroup;
-                        bossPlayer.BotsGroup.Lock();
+                        leadPlayer.BotsGroup = botsGroup;
+                        leadPlayer.BotsGroup.Lock();
 
                         // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
                         // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
@@ -405,18 +405,18 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                             botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
 
-                            botOwner.Memory.DeleteInfoAboutEnemy(bossPlayer);
+                            botOwner.Memory.DeleteInfoAboutEnemy(leadPlayer);
 
                             botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
                             botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
 
-                            botOwner.GetPlayer.Profile.Info.GroupId = bossPlayer.Profile.Info.GroupId;
-                            botOwner.GetPlayer.Profile.Info.TeamId = bossPlayer.Profile.Info.TeamId;
+                            botOwner.GetPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId;
+                            botOwner.GetPlayer.Profile.Info.TeamId = leadPlayer.Profile.Info.TeamId;
 
                             botOwner.Boss.IamBoss = false;
 
-                            botOwner.BotFollower.PatrolDataFollower.InitPlayer(bossPlayer);
-                            botOwner.BotFollower.BossToFollow = mcsAIBossPlayer;
+                            botOwner.BotFollower.PatrolDataFollower.InitPlayer(leadPlayer);
+                            botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
                             var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
                             botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                         });
