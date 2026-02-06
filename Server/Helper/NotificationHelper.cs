@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Helper
             return new WsGroupMatchInviteDecline
             {
                 EventType = NotificationEventType.groupMatchInviteDecline,
-                EventIdentifier = new MongoId(),
+                EventIdentifier = new(),
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
                 Nickname = mcsBotPlayerProfile.CharacterData.PmcData.Info.Nickname
             };
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Server.Helper
             return new WsGroupMatchInviteAccept
             {
                 EventType = NotificationEventType.groupMatchInviteAccept,
-                EventIdentifier = new MongoId(),
+                EventIdentifier = new(),
                 Id = mcsBotPlayerProfile.ProfileInfo.ProfileId,
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
                 Info = new CharacterInfo
@@ -128,7 +128,7 @@ namespace MiyakoCarryService.Server.Helper
             return new WsGroupMatchUserLeave
             {
                 EventType = NotificationEventType.groupMatchUserLeave,
-                EventIdentifier = new MongoId(),
+                EventIdentifier = new(),
                 Nickname = mcsBotPlayerProfile.ProfileInfo.Username,
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid.Value,
             };

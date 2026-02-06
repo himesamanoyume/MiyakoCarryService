@@ -38,7 +38,6 @@ namespace MiyakoCarryService.Server.Services
         ISptLogger<ProfileService> logger,
         ConfigService configService,
         RandomUtil randomUtil,
-        DatabaseService databaseService,
         HashUtil hashUtil,
         ICloner cloner,
         ConfigServer configServer,
@@ -205,20 +204,13 @@ namespace MiyakoCarryService.Server.Services
 
         public BotBase GeneratePmcBotProfile(MongoId mcsBossPlayerId, PmcData pmcData, int carryServiceLevel)
         {
-            var playerName = randomUtil.GetArrayValue(_afdianNames);
-            var bots = databaseService.GetBots().Types;
-            var pmcNames = new List<string>();
-            pmcNames.AddRange(bots["usec"].FirstNames);
-            pmcNames.AddRange(bots["bear"].FirstNames);
             var botDifficulty = (BotDifficulty)carryServiceLevel;
-
             var botBase = botGenerator.PrepareAndGenerateBot(mcsBossPlayerId, new()
             {
                 IsPmc = true,
                 Side = pmcData.Info.Side,
                 Role = pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR",
                 PlayerLevel = carryServiceLevel * 10 + 20,
-                PlayerName = playerName is null ? randomUtil.GetArrayValue(pmcNames) : playerName,
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
@@ -226,6 +218,14 @@ namespace MiyakoCarryService.Server.Services
                 IsPlayerScav = false,
                 AllPmcsHaveSameNameAsPlayer = false
             });
+            
+            var playerName = randomUtil.GetArrayValue(_afdianNames);
+            if (playerName is not null)
+            {
+                botBase.Info.Nickname = playerName;
+                botBase.Info.LowerNickname = playerName.ToLower();
+            }
+
             return botBase;
         }
 
@@ -425,8 +425,8 @@ namespace MiyakoCarryService.Server.Services
             // scavData.SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId;
             // scavData.Skills = existingScavDataClone.GetSkillsOrDefault();
             // scavData.Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters();
-            // scavData.Info.Level = 1;
-            // scavData.Info.Experience = 200;
+            scavData.Info.Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level;
+            scavData.Info.Experience = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Experience;
             // scavData.Quests = existingScavDataClone.Quests ?? [];
             // scavData.TaskConditionCounters = existingScavDataClone.TaskConditionCounters ?? new();
             // scavData.Notes = existingScavDataClone.Notes ?? new Notes { DataNotes = [] };

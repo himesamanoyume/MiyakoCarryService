@@ -279,28 +279,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
+            if (IsMcsBotPlayer)
             {
-                if (IsMcsBotPlayer)
+                if (BotOwner.Memory.HaveEnemy || BotOwner.Memory.IsUnderFire)
                 {
                     BotOwner.PriorityAxeTarget.FindTarget();
                     BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Attack);
+                    return false;
                 }
-                return false;
-            }
-            // try
-            // {
-            // }
-            // catch (Exception e)
-            // {
-            //     MiyakoCarryServicePlugin.Logger.LogError(e);
-            //     return false;
-            // }
-
-            if (IsMcsBotPlayer)
-            {
-                BotOwner.PriorityAxeTarget.FindTarget();
-                BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Protect);
+                else
+                {
+                    BotOwner.PriorityAxeTarget.FindTarget();
+                    BotOwner.Tactic.SetTactic(BotsGroup.BotCurrentTactic.Protect);
+                }
                 return true;
             }
             return false;
