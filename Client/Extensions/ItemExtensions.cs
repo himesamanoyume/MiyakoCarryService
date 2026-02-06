@@ -63,8 +63,8 @@ namespace MiyakoCarryService.Client.Extensions
                     {
                         if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
                         {
-                            var mcsBossPlayer = SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId);
-                            playerData = new McsBotPlayerData(SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsBossPlayerId(mcsBossPlayer.ProfileId), player, item);
+                            var McsLeadPlayer = SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
+                            playerData = new McsBotPlayerData(SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAIBossPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
                             _datas.Add(item, playerData);
                             return playerData;
                         }

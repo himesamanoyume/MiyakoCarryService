@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 if (SquadMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
-                    if (SquadMgr.IsMcsBossPlayer(person.ProfileId) || SquadMgr.IsMcsBotPlayer(person.ProfileId))
+                    if (SquadMgr.IsMcsLeadPlayer(person.ProfileId) || SquadMgr.IsMcsBotPlayer(person.ProfileId))
                     {
                         __result = false;
                         return false;
@@ -51,22 +51,22 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            string mcsBossPlayerId = null;
-            if (SquadMgr.IsMcsBossPlayer(person.ProfileId))
+            string mcsLeadPlayerId = null;
+            if (SquadMgr.IsMcsLeadPlayer(person.ProfileId))
             {
-                mcsBossPlayerId = person.ProfileId;
+                mcsLeadPlayerId = person.ProfileId;
             }
             else if (SquadMgr.IsMcsBotPlayer(person.ProfileId))
             {
-                mcsBossPlayerId = SquadMgr.GetMcsBossPlayerByMcsBotPlayerId(person.ProfileId).GetPlayer.ProfileId;
+                mcsLeadPlayerId = SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(person.ProfileId).GetPlayer.ProfileId;
             }
 
-            if (mcsBossPlayerId == null)
+            if (mcsLeadPlayerId == null)
             {
                 return;
             }
             
-            var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsBossId(mcsBossPlayerId);
+            var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsBossId(mcsLeadPlayerId);
     
             foreach (var member in allMcsMembers)
             {

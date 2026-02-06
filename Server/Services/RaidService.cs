@@ -33,9 +33,9 @@ namespace MiyakoCarryService.Server.Services
 
         }
 
-        public bool CheckMcsBotPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
+        public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            if (_bossMemberGroups.TryGetValue(mcsBossPlayerId, out var mcsAids))
+            if (_bossMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
             {
                 if (mcsAids.Contains(mcsAid))
                 {
@@ -45,46 +45,46 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
-        public void AddGroupMember(MongoId mcsBossPlayerId, int mcsAid)
+        public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (!mcsAids.Contains(mcsAid))
             {
                 mcsAids.Add(mcsAid);
             }
         }
 
-        public void RemoveGroupMember(MongoId mcsBossPlayerId, int mcsAid)
+        public void RemoveGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (mcsAids.Contains(mcsAid))
             {
                 mcsAids.Remove(mcsAid);
             }
         }
 
-        public void ClearGroupMember(MongoId mcsBossPlayerId)
+        public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>()).Clear();
+            _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>()).Clear();
         }
 
-        public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
+        public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsBotPlayerFullProfile = profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
+            var mcsBotPlayerFullProfile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
 
             if (mcsBotPlayerFullProfile is null)
             {
                 return;
             }
 
-            if (CheckMcsBotPlayerExist(mcsBossPlayerId, mcsAid))
+            if (CheckMcsBotPlayerExist(mcsLeadPlayerId, mcsAid))
             {
                 try
                 {
-                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                     }
                 }
                 finally
@@ -96,28 +96,28 @@ namespace MiyakoCarryService.Server.Services
             {
                 try
                 {
-                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
                         // var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
-                        notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
-                        // notificationSendHelper.SendMessage(mcsBossPlayerId, notification2);
+                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                        // notificationSendHelper.SendMessage(mcsLeadPlayerId, notification2);
                     }
                 }
                 finally
                 {
-                    AddGroupMember(mcsBossPlayerId, mcsAid);
+                    AddGroupMember(mcsLeadPlayerId, mcsAid);
                 }
             }
         }
 
-        public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsBossPlayerId)
+        public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)
         {
-            var members = _bossMemberGroups.GetOrAdd(mcsBossPlayerId, _ => new List<int>());
+            var members = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             var profiles = new List<SptProfile>();
             foreach (var mcsAid in members)
             {
-                var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsBossPlayerId, mcsAid);
+                var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
                 if (profile is not null)
                 {
                     profiles.Add(profile);
@@ -126,15 +126,15 @@ namespace MiyakoCarryService.Server.Services
             return profiles;
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId, SideType side)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsLeadPlayerId, SideType side)
         {
-            var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
+            var mcsLeadPlayerIds = new HashSet<MongoId> { mcsLeadPlayerId };
 
             if (compatibilityService.HasFikaServer)
             {
                 // 暂不进行验证
                 var fikaMatchService = compatibilityService.FikaMatchService;
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsBossPlayerId]);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsLeadPlayerId]);
 
                 if (matchId is not null)
                 {
@@ -146,27 +146,27 @@ namespace MiyakoCarryService.Server.Services
 
                         foreach (var playerId in fikaPlayers.Keys)
                         {
-                            if (playerId != mcsBossPlayerId)
+                            if (playerId != mcsLeadPlayerId)
                             {
-                                mcsBossPlayerIds.Add(playerId);
+                                mcsLeadPlayerIds.Add(playerId);
                             }
                         }
                     }
                 }
             }
 
-            var tasks = mcsBossPlayerIds.Select(async mcsBossPlayerId =>
+            var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
                 var isPmc = side is SideType.Pmc;
                 var pmcDatas = await Task.Run(() =>
                 {
-                    var profiles = GetAllGroupMemberProfiles(mcsBossPlayerId);
+                    var profiles = GetAllGroupMemberProfiles(mcsLeadPlayerId);
                     return profiles.Select(p => isPmc ? p.CharacterData.PmcData : p.CharacterData.ScavData).ToList();
                 });
 
-                var mcsBossPlayerProfile = profileHelper.GetFullProfile(mcsBossPlayerId);
+                var mcsLeadPlayerProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
 
-                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(isPmc ? mcsBossPlayerProfile.ProfileInfo.ProfileId.Value : mcsBossPlayerProfile.ProfileInfo.ScavengerId.Value, pmcDatas);
+                return new KeyValuePair<MongoId, IEnumerable<PmcData>>(isPmc ? mcsLeadPlayerProfile.ProfileInfo.ProfileId.Value : mcsLeadPlayerProfile.ProfileInfo.ScavengerId.Value, pmcDatas);
             });
 
             var results = await Task.WhenAll(tasks);
@@ -179,15 +179,15 @@ namespace MiyakoCarryService.Server.Services
             return mcsPmcDatas;
         }
 
-        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsBossPlayerId)
+        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)
         {
-            var mcsBossPlayerIds = new HashSet<MongoId> { mcsBossPlayerId };
+            var mcsLeadPlayerIds = new HashSet<MongoId> { mcsLeadPlayerId };
 
             if (compatibilityService.HasFikaServer)
             {
                 // 暂不进行验证
                 var fikaMatchService = compatibilityService.FikaMatchService;
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsBossPlayerId]);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsLeadPlayerId]);
 
                 if (matchId is not null)
                 {
@@ -199,20 +199,20 @@ namespace MiyakoCarryService.Server.Services
 
                         foreach (var playerId in fikaPlayers.Keys)
                         {
-                            if (playerId != mcsBossPlayerId)
+                            if (playerId != mcsLeadPlayerId)
                             {
-                                mcsBossPlayerIds.Add(playerId);
+                                mcsLeadPlayerIds.Add(playerId);
                             }
                         }
                     }
                 }
             }
 
-            var tasks = mcsBossPlayerIds.Select(async mcsBossPlayerId =>
+            var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
                 var mcsBotPlayerConfig = await Task.Run(() =>
                 {
-                    if (_mcsBotPlayerConfigs.TryGetValue(mcsBossPlayerId, out var mcsBotPlayerConfig))
+                    if (_mcsBotPlayerConfigs.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerConfig))
                     {
                         return mcsBotPlayerConfig;
                     }
@@ -220,7 +220,7 @@ namespace MiyakoCarryService.Server.Services
                     {
                         return new McsBotPlayerConfigRequestData
                         {
-                            McsBossPlayerId = mcsBossPlayerId,
+                            McsLeadPlayerId = mcsLeadPlayerId,
                             PriceThreshold = 50000,
                             ArmorLevelThreshold = 5,
                             LootingWishlishItem = true,
@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Server.Services
                     }
                 });
 
-                return new KeyValuePair<MongoId, McsBotPlayerConfigRequestData>(mcsBossPlayerId, mcsBotPlayerConfig);
+                return new KeyValuePair<MongoId, McsBotPlayerConfigRequestData>(mcsLeadPlayerId, mcsBotPlayerConfig);
             });
 
             var results = await Task.WhenAll(tasks);
@@ -243,7 +243,7 @@ namespace MiyakoCarryService.Server.Services
 
         public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)
         {
-            _mcsBotPlayerConfigs[mcsBotPlayerConfig.McsBossPlayerId] = mcsBotPlayerConfig;
+            _mcsBotPlayerConfigs[mcsBotPlayerConfig.McsLeadPlayerId] = mcsBotPlayerConfig;
         }
     }
 }

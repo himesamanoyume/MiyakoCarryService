@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Mgrs
     internal sealed class SquadMgr : BaseMgr<SquadMgr>
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
-        private HashSet<MongoID> _mcsBossPlayerIds = new();
+        private HashSet<MongoID> _mcsLeadPlayerIds = new();
         private HashSet<MongoID> _mcsBotPlayerIds = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAIBossPlayer> _mcsAIBossPlayers = new();
@@ -22,12 +22,12 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
-        public void AddMcsSquadMember(MongoID mcsBossPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAIBossPlayer mcsAIBossPlayer)
+        public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAIBossPlayer mcsAIBossPlayer)
         {
-            if (!_mcsSquadDict.TryGetValue(mcsBossPlayerId, out var squadMembers))
+            if (!_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
             {
                 squadMembers = new() { { mcsBotPlayerId, botOwner } };
-                _mcsSquadDict.Add(mcsBossPlayerId, squadMembers);
+                _mcsSquadDict.Add(mcsLeadPlayerId, squadMembers);
             }
             else
             {
@@ -36,17 +36,17 @@ namespace MiyakoCarryService.Client.Mgrs
                     squadMembers.Add(mcsBotPlayerId, botOwner);
                 }
             }
-            _mcsBossPlayerIds.Add(mcsBossPlayerId);
+            _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
             _mcsBotPlayerIds.Add(mcsBotPlayerId);
-            _mcsAIBossPlayers[mcsBossPlayerId] = mcsAIBossPlayer;
+            _mcsAIBossPlayers[mcsLeadPlayerId] = mcsAIBossPlayer;
         }
 
-        public void AddMcsSquadMemberToTransit(MongoID mcsBossPlayerId, BotOwner botOwner)
+        public void AddMcsSquadMemberToTransit(MongoID mcsLeadPlayerId, BotOwner botOwner)
         {
-            if (!McsTransitBotPlayers.TryGetValue(mcsBossPlayerId, out var transitMembers))
+            if (!McsTransitBotPlayers.TryGetValue(mcsLeadPlayerId, out var transitMembers))
             {
                 transitMembers = new();
-                McsTransitBotPlayers.Add(mcsBossPlayerId, transitMembers);
+                McsTransitBotPlayers.Add(mcsLeadPlayerId, transitMembers);
             }
 
             if (!transitMembers.TryGetValue(botOwner.ProfileId, out var groupPlayerViewModelClass))
@@ -84,10 +84,10 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsBossPlayerId)
+        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsLeadPlayerId)
         {
-            _mcsBossPlayerIds.Add(mcsBossPlayerId);
-            if (_mcsSquadDict.TryGetValue(mcsBossPlayerId, out var squadMembers))
+            _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
+            if (_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
             {
                 return squadMembers.Values;
             }
@@ -109,12 +109,12 @@ namespace MiyakoCarryService.Client.Mgrs
             _mcsDeadBotPlayerIds.Add(mcsBotPlayerId);
         }
 
-        public bool IsMcsBossPlayer(MongoID mcsBossPlayerId)
+        public bool IsMcsLeadPlayer(MongoID mcsLeadPlayerId)
         {
-            return _mcsBossPlayerIds.Contains(mcsBossPlayerId);
+            return _mcsLeadPlayerIds.Contains(mcsLeadPlayerId);
         }
 
-        public Player GetMcsBossPlayerByMcsBotPlayerId(MongoID mcsBotPlayerId)
+        public Player GetMcsLeadPlayerByMcsBotPlayerId(MongoID mcsBotPlayerId)
         {
             foreach (var mcsSquad in _mcsSquadDict)
             {
@@ -126,9 +126,9 @@ namespace MiyakoCarryService.Client.Mgrs
             return null;
         }
 
-        public McsAIBossPlayer GetMcsAIBossPlayerByMcsBossPlayerId(MongoID mcsBossPlayerId)
+        public McsAIBossPlayer GetMcsAIBossPlayerByMcsLeadPlayerId(MongoID mcsLeadPlayerId)
         {
-            if (_mcsAIBossPlayers.TryGetValue(mcsBossPlayerId, out var mcsAIBossPlayer))
+            if (_mcsAIBossPlayers.TryGetValue(mcsLeadPlayerId, out var mcsAIBossPlayer))
             {
                 return mcsAIBossPlayer;
             }
@@ -162,7 +162,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
             _mcsDeadBotPlayerIds.Clear();
             _mcsSquadDict.Clear();
-            _mcsBossPlayerIds.Clear();
+            _mcsLeadPlayerIds.Clear();
             _mcsBotPlayerIds.Clear();
             _mcsAIBossPlayers.Clear();
             foreach (var transitMembers in McsTransitBotPlayers.Values)

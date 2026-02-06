@@ -6,11 +6,11 @@ namespace MiyakoCarryService.Client.Bots.BotBehaviors
     internal abstract class BotBehavior
     {
         public BotOwner BotOwner { get; private set; }
-        public Player McsBossPlayer { get; private set; }
-        public BotBehavior(BotOwner botOwner, Player mcsBossPlayer)
+        public Player McsLeadPlayer { get; private set; }
+        public BotBehavior(BotOwner botOwner, Player mcsLeadPlayer)
         {
             BotOwner = botOwner;
-            McsBossPlayer = mcsBossPlayer;
+            McsLeadPlayer = mcsLeadPlayer;
         }
 
         public abstract void ManualUpdate();

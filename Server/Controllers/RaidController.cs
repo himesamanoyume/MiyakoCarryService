@@ -16,44 +16,44 @@ namespace MiyakoCarryService.Server.Controllers
         RaidService raidService
     )
     {
-        public void AddGroupMember(MongoId mcsBossPlayerId, int mcsAid)
+        public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            raidService.AddGroupMember(mcsBossPlayerId, mcsAid);
+            raidService.AddGroupMember(mcsLeadPlayerId, mcsAid);
         }
 
-        public void RemoveGroupMember(MongoId mcsBossPlayerId, int mcsAid)
+        public void RemoveGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            raidService.RemoveGroupMember(mcsBossPlayerId, mcsAid);
+            raidService.RemoveGroupMember(mcsLeadPlayerId, mcsAid);
         }
 
-        public void ClearGroupMember(MongoId mcsBossPlayerId)
+        public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            raidService.ClearGroupMember(mcsBossPlayerId);
+            raidService.ClearGroupMember(mcsLeadPlayerId);
         }
 
-        public bool CheckMcsBotPlayerExist(MongoId mcsBossPlayerId, int mcsAid)
+        public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            return raidService.CheckMcsBotPlayerExist(mcsBossPlayerId, mcsAid);
+            return raidService.CheckMcsBotPlayerExist(mcsLeadPlayerId, mcsAid);
         }
 
-        public void AcceptGroupInvite(MongoId mcsBossPlayerId, int mcsAid)
+        public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            raidService.AcceptGroupInvite(mcsBossPlayerId, mcsAid);
+            raidService.AcceptGroupInvite(mcsLeadPlayerId, mcsAid);
         }
 
-        public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsBossPlayerId)
+        public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)
         {
-            return raidService.GetAllGroupMemberProfiles(mcsBossPlayerId);
+            return raidService.GetAllGroupMemberProfiles(mcsLeadPlayerId);
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsBossPlayerId, SideType side)
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsLeadPlayerId, SideType side)
         {
-            return await raidService.SpawnMcsBotPlayer(mcsBossPlayerId, side);
+            return await raidService.SpawnMcsBotPlayer(mcsLeadPlayerId, side);
         }
     
-        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsBossPlayerId)
+        public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)
         {
-            return await raidService.GetMcsBotPlayerConfigs(mcsBossPlayerId);
+            return await raidService.GetMcsBotPlayerConfigs(mcsLeadPlayerId);
         }
 
         public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)

@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             foreach (var playerId in players)
             {
-                if (SquadMgr.IsMcsBossPlayer(playerId))
+                if (SquadMgr.IsMcsLeadPlayer(playerId))
                 {
                     foreach (var botOwner in SquadMgr.GetAllMcsSquadMembersByMcsBossId(playerId))
                     {

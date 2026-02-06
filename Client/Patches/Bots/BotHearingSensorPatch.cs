@@ -27,7 +27,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static void Postfix(BotHearingSensor __instance, IPlayer player, Vector3 position, float power, AISoundType type)
         {
             var thisBotOwner = __instance.BotOwner;
-            if (SquadMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !SquadMgr.IsMcsBossPlayer(player.ProfileId))
+            if (SquadMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !SquadMgr.IsMcsLeadPlayer(player.ProfileId))
             {
                 if (player.IsAI && SquadMgr.IsMcsBotPlayer(player.ProfileId))
                 {

@@ -258,7 +258,7 @@
 > `BotNodeAbstractClass CreateNode`写明有`BotLogicDecision`的对应Logic
 - `friendlyPmc`的`BotFollowerPlayer.Init()`中写有移除`skwizzy.LootingBots`和`SPTQuestingBots`的代码
 - `FollowerPatrolBaseLogic`作为巡逻Logic，但其需要`BotFollower`相关信息，应该不能直接使用。`friendlyPmc`中也是需要先判断`BotFollower.HaveBoss`且`BossToFollow.IsMe`为true才执行的
-- - ~~找出如何设置BotFollower为McsBossPlayer~~
+- - ~~找出如何设置BotFollower为McsLeadPlayer~~
 - - - `AIBossPlayer.cs`的`AddFollower`
 - - - ~~必须要实现McsAIBossPlayer才能设置BotFollower~~
 - ~~BUG:当没有设置护航时，就会造成generate错误~~
@@ -391,10 +391,11 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 ```
 - ~~当同一个老板有两个订单时导致字典重复添加~~
 - ~~清除存档报错~~(已尝试修复，但效果难以验证)
-- **已经拒绝的入队邀请还会额外发送一个已邀请成功，这不应该**
+- 已经拒绝的入队邀请还会额外发送一个已邀请成功，这不应该
 - ~~生成的护航存档名称不是指定名单中的人~~
-- 由于SAIN的加入，导致很多Layer被删除，此时非常容易进入`PatrolFollower`、`Utility peace`Layer，一旦进入就会很傻不开枪
-- - 怀疑可能是因为SAIN的组队战斗Layer需要到老板的AI决策，但由于老板不是AI，所以都无法执行
+- 由于SAIN的加入，组队战斗会非常依赖LeaderComponent组件，此时非常容易进入`PatrolFollower`、`Utility peace`Layer，一旦进入就会很傻不开枪
+- - **因此也许可以设定玩家作为领队（Lead ）和副领队（Deputy Leader，同时是BotsGroup的Boss）**
+- - 让护航中等级最高的其中一人担任BotsGroup的Boss
 
 ## Logic思想指导
 

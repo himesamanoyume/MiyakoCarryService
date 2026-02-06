@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (SquadMgr.IsMcsBossPlayer(shooter.iPlayer.ProfileId) || SquadMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
+            if (SquadMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || SquadMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
             {
                 return;
             }

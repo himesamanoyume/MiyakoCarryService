@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(Player __instance, EPhraseTrigger phrase, bool demand = false, float delay = 0f, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
         {
-            if (SquadMgr.IsMcsBossPlayer(__instance.ProfileId) || SquadMgr.IsMcsBotPlayer(__instance.ProfileId))
+            if (SquadMgr.IsMcsLeadPlayer(__instance.ProfileId) || SquadMgr.IsMcsBotPlayer(__instance.ProfileId))
             {
                 return;
             }

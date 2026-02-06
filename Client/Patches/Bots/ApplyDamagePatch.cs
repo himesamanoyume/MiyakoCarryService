@@ -40,7 +40,7 @@ internal sealed class ApplyDamagePatch : ModulePatch
         //     return;
         // }
 
-        // if (damageInfo.Player.iPlayer == null || SquadMgr.IsMcsBossPlayer(damageInfo.Player.iPlayer.ProfileId))
+        // if (damageInfo.Player.iPlayer == null || SquadMgr.IsMcsLeadPlayer(damageInfo.Player.iPlayer.ProfileId))
         // {
         //     return;
         // }

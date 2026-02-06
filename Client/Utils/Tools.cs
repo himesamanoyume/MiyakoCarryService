@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Client.Utils
 
                 if (itemData is PlayerData playerData)
                 {
-                    if (SquadMgr.IsMcsBossPlayer(playerData.Player.ProfileId) || SquadMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
+                    if (SquadMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || SquadMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
                     {
                         continue;
                     }

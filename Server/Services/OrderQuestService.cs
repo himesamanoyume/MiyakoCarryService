@@ -49,26 +49,26 @@ namespace MiyakoCarryService.Server.Services
             return _orderTemplate;
         }
 
-        public void CreateOrderQuest(MongoId mcsBossPlayerId, int players, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, int carryServiceLevel, int duration)
         {
-            var fullProfile = profileHelper.GetFullProfile(mcsBossPlayerId);
+            var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info("开始创建任务");
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion,
                 TraderService.MiyakoTraderId,
-                mcsBossPlayerId
+                mcsLeadPlayerId
             ));
             logger.Info("任务插入等待创建队列");
-            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsBossPlayerId, out var orderQuestsQueue))
+            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);
             }
             else
             {
-                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(mcsBossPlayerId, new([orderQuest]));
+                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
             }
-            orderInfoService.CreateOrderInfo(mcsBossPlayerId, players, carryServiceLevel, duration, orderQuest.Id);
+            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, carryServiceLevel, duration, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)

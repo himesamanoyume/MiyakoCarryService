@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /client/match/raid/ready
         /// </summary>
-        public ValueTask<string> RaidReady(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
+        public ValueTask<string> RaidReady(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
             return new ValueTask<string>(httpResponseUtil.GetBody(true));
         }
@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /client/match/raid/not-ready
         /// </summary>
-        public ValueTask<string> NotRaidReady(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
+        public ValueTask<string> NotRaidReady(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
             return new ValueTask<string>(httpResponseUtil.GetBody(true));
         }
@@ -33,9 +33,9 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/match/raid/abort
         /// </summary>
-        public ValueTask<string> MatchingAbort(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
+        public ValueTask<string> MatchingAbort(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
-            raidController.ClearGroupMember(mcsBossPlayerId);
+            raidController.ClearGroupMember(mcsLeadPlayerId);
             return new ValueTask<string>(httpResponseUtil.GetBody(true));
         }
     }

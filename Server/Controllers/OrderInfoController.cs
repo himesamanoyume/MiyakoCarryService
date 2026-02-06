@@ -25,9 +25,9 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.AddOrderInfos(orderInfos);
         }
 
-        public void CreateOrderInfo(MongoId mcsBossPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
+        public void CreateOrderInfo(MongoId mcsLeadPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
         {
-            orderInfoService.CreateOrderInfo(mcsBossPlayerId, players, carryServiceLevel, duration, questId);
+            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, carryServiceLevel, duration, questId);
         }
 
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
@@ -40,9 +40,9 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.RemoveOrderInfo(orderInfo);
         }
 
-        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsBossPlayerId)
+        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsLeadPlayerId)
         {
-            orderInfoService.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, mcsBossPlayerId);
+            orderInfoService.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, mcsLeadPlayerId);
         }
 
         public async Task SaveOrderInfo()

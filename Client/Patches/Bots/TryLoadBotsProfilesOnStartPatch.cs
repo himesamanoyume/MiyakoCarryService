@@ -51,14 +51,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 Side = currentType
             });
-            Dictionary<MongoID, McsBotPlayerConfig> mcsBossPlayerConfigs;
+            Dictionary<MongoID, McsBotPlayerConfig> mcsLeadPlayerConfigs;
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
-                mcsBossPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+                mcsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
             }
             else
             {
-                mcsBossPlayerConfigs = new();
+                mcsLeadPlayerConfigs = new();
             }
 
             foreach (var mcsProfileItem in mcsProfilesDict)
@@ -108,11 +108,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 };
 
                 var bossPlayerPos = bossPlayer.Position;
-                if (!mcsBossPlayerConfigs.TryGetValue(bossPlayer.ProfileId, out var mcsBotPlayerConfig))
+                if (!mcsLeadPlayerConfigs.TryGetValue(bossPlayer.ProfileId, out var mcsBotPlayerConfig))
                 {
                     mcsBotPlayerConfig = new McsBotPlayerConfig
                     {
-                        McsBossPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
                         LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,

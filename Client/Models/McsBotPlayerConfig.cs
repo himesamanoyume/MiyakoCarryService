@@ -7,8 +7,8 @@ namespace MiyakoCarryService.Client.Models
     [DataContract]
     public class McsBotPlayerConfig
     {
-        [DataMember(Name = "McsBossPlayerId")]
-        public MongoID McsBossPlayerId;
+        [DataMember(Name = "McsLeadPlayerId")]
+        public MongoID McsLeadPlayerId;
 
         [DataMember(Name = "PriceThreshold")]
         public int PriceThreshold;

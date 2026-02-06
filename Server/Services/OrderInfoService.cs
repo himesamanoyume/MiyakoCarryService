@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
-        public void CreateOrderInfo(MongoId mcsBossPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
+        public void CreateOrderInfo(MongoId mcsLeadPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
         {
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Server.Services
             }
             var orderInfo = new OrderInfo()
             {
-                McsBossPlayerId = mcsBossPlayerId,
+                McsLeadPlayerId = mcsLeadPlayerId,
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
                 CarryServiceLevel = carryServiceLevel,
@@ -114,13 +114,13 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public List<OrderInfo> GetOrderInfos(MongoId mcsBossPlayerId)
+        public List<OrderInfo> GetOrderInfos(MongoId mcsLeadPlayerId)
         {
             List<OrderInfo> targetOrderInfos = new();
 
             foreach (var orderInfo in _orderInfos.Values.ToList())
             {
-                if (orderInfo.McsBossPlayerId == mcsBossPlayerId)
+                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId)
                 {
                     targetOrderInfos.Add(orderInfo);
                 }
@@ -156,13 +156,13 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    logger.Info($"准备清除 {orderInfo.McsBossPlayerId} 的一个过期订单");
+                    logger.Info($"准备清除 {orderInfo.McsLeadPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
-                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsBossPlayerId, _ => new());
+                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
                         logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
-                        mcsBotPlayerIds[orderInfo.McsBossPlayerId].Add(mcsBotPlayerId);
+                        mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
                     }
                 }
             }
@@ -180,17 +180,17 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsBossPlayerId)
+        public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsLeadPlayerId)
         {
             _ = new Timer(
                 _ =>
                 {
                     try
                     {
-                        if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsBossPlayerId))
+                        if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                         {
                             var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
-                            notificationSendHelper.SendMessage(mcsBossPlayerId, notification);
+                            notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                         }
                     }
                     finally

@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 			{
 				_ = McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
 				{
-					McsBossPlayerId = session.Profile.Id,
+					McsLeadPlayerId = session.Profile.Id,
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
 					ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
 					LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,

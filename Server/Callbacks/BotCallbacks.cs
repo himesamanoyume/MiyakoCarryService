@@ -18,23 +18,23 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/bot/generate
         /// </summary>
-        public async ValueTask<string> SpawnMcsBotPlayer(string url, SpawnMcsBotPlayerTypeRequestData info, MongoId mcsBossPlayerId)
+        public async ValueTask<string> SpawnMcsBotPlayer(string url, SpawnMcsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.NoBody(await raidController.SpawnMcsBotPlayer(mcsBossPlayerId, info.Side));
+            return httpResponseUtil.NoBody(await raidController.SpawnMcsBotPlayer(mcsLeadPlayerId, info.Side));
         }
 
         /// <summary>
         /// 处理 /mcs/singleplayer/settings/bot/get
         /// </summary>
-        public async ValueTask<string> GetMcsBotPlayerConfigs(string url, EmptyRequestData _, MongoId mcsBossPlayerId)
+        public async ValueTask<string> GetMcsBotPlayerConfigs(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.NoBody(await raidController.GetMcsBotPlayerConfigs(mcsBossPlayerId));
+            return httpResponseUtil.NoBody(await raidController.GetMcsBotPlayerConfigs(mcsLeadPlayerId));
         }
 
         /// <summary>
         /// 处理 /mcs/singleplayer/settings/bot/upload
         /// </summary>
-        public async ValueTask<string> CollectMcsBotPlayerConfig(string url, McsBotPlayerConfigRequestData info, MongoId mcsBossPlayerId)
+        public async ValueTask<string> CollectMcsBotPlayerConfig(string url, McsBotPlayerConfigRequestData info, MongoId mcsLeadPlayerId)
         {
             await raidController.CollectMcsBotPlayerConfig(info);
             return httpResponseUtil.NullResponse();
