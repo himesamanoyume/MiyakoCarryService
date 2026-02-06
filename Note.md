@@ -245,7 +245,7 @@
 - ~~BUG: 目前所有人都不会攻击我~~
 - ~~BUG: BotsGroup还是会将老板加入至Enemy中，只是会被清除记忆~~
 - 现在看来的想法是：不添加任何Brain，创建自己的自定义Layer，~~只收集属于Mcs生成的BotOwner，然后借鉴`BigBrain.BrainManager`的做法再将Layer添加至这几个BotOwner当中~~(长远来看可以让所有Brain都加入Layer)，以实现对AI能够兼容SAIN的战斗Layer的同时，还能执行自己的一些Layer以实现会跟随自己
-- ~~具体实现FollowMcsBossLayer~~
+- ~~具体实现FollowMcsLeadLayer~~
 - - 当前`IsActive`判断相当宽松，只要是护航 就一定会一直停留在这个Layer，需要优化
 - - - ~~如何高性能地判断玩家是否是护航玩家呢?friendlyPmc是通过替换Brain，但我是不打算替换Brain的，这就有可能不太适用`BotOwnerExtensions`获取McsData~~
 - - ~~复用NotCheater`BaseData`及其子类，并用`McsBotPlayerData`继承`PlayerData`~~
@@ -308,7 +308,7 @@
 - - ~~先让代码正常运作~~
 - ~~HoldPosition不能完全满足要求, 额外参考`GClass145.method_18()`~~
 - ~~BUG:在`PlayerDataMgr.RefreshMcsBotPlayersInterestingLoop`中`ItemData.get_Transform`可能异常~~
-- ~~BUG：`McsBotPlayerData`的`McsAILeadPlayer`为null, 其实是因为`GetMcsAILeadPlayerByMcsBossId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
+- ~~BUG：`McsBotPlayerData`的`McsAILeadPlayer`为null, 其实是因为`GetMcsAILeadPlayerByMcsLeadId`没有正确传递bossId的参数，而是传成了此player自身的Id~~
 - 在周围巡逻时应该尽量让护航与老板处于同一高度
 - ~~检查`GetRangeOwnerItemData`~~(会重复)
 - ~~还是没有实现好跟随~~
@@ -396,6 +396,7 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 - 由于SAIN的加入，组队战斗会非常依赖LeaderComponent组件，此时非常容易进入`PatrolFollower`、`Utility peace`Layer，一旦进入就会很傻不开枪
 - - **因此也许可以设定玩家作为领队（Lead ）和副领队（Deputy Leader，同时是BotsGroup的Boss）**
 - - 让护航中等级最高的其中一人担任BotsGroup的Boss
+- 找出与SAIN共通的最佳平衡点
 
 ## Logic思想指导
 

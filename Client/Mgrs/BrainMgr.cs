@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
             BrainManager.RemoveLayer("Exfiltration", ["PmcUsec", "PmcBear"]);
             BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), ["PmcUsec", "PmcBear"], 79);
-            BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 75);
+            BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 15);
         }
     }
 }

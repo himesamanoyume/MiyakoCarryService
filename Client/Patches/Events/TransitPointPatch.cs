@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             {
                 if (SquadMgr.IsMcsLeadPlayer(playerId))
                 {
-                    foreach (var botOwner in SquadMgr.GetAllMcsSquadMembersByMcsBossId(playerId))
+                    foreach (var botOwner in SquadMgr.GetAllMcsSquadMembersByMcsLeadId(playerId))
                     {
                         if (botOwner.HealthController.IsAlive)
                         {

@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
                 .Select(kvp => gameWorld.GetEverExistedPlayerByID(kvp.Key))
-                .Where(bossPlayer => bossPlayer != null);
+                .Where(leadPlayer => leadPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
             var botsController = botGame.BotsController;
@@ -103,11 +103,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     if (leadPlayer.BotsGroup != null)
                     {
                         leadPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
-                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsBossId(leadPlayer.ProfileId).FirstOrDefault());
+                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
                     }
                 };
 
-                var bossPlayerPos = leadPlayer.Position;
+                var leadPlayerPos = leadPlayer.Position;
                 if (!mcsLeadPlayerConfigs.TryGetValue(leadPlayer.ProfileId, out var mcsBotPlayerConfig))
                 {
                     mcsBotPlayerConfig = new McsBotPlayerConfig
@@ -123,7 +123,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer, mcsBotPlayerConfig);
                 leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
 
-                foreach (var mcsBotPlayerProfile in mcsProfilesDict[leadPlayer.ProfileId])
+                if (mcsProfilesDict[leadPlayer.ProfileId].Count() == 0)
+                {
+                    continue;
+                }
+
+                var mcsBotPlayerProfiles = mcsProfilesDict[leadPlayer.ProfileId].ToList();
+                mcsBotPlayerProfiles.Sort((a, b) => b.Info.Level.CompareTo(a.Info.Level));
+
+                foreach (var mcsBotPlayerProfile in mcsBotPlayerProfiles)
                 {
                     if (SquadMgr.IsMcsBotPlayerDead(mcsBotPlayerProfile.ProfileId))
                     {
@@ -133,8 +141,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var wildSpawnType = mcsBotPlayerProfile.Info.Settings.Role;
                     var botDifficulty = mcsBotPlayerProfile.Info.Settings.BotDifficulty;
 
-                    var botSpawnParams = new BotSpawnParams();
-                    botSpawnParams.ShallBeGroup = new ShallBeGroupParams(true, false, 5);
+                    var botSpawnParams = new BotSpawnParams
+                    {
+                        ShallBeGroup = new ShallBeGroupParams(true, false, 5)
+                    };
 
                     var botProfileDataClass = new BotProfileDataClass(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
 
@@ -142,10 +152,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     botCreationDataClass.AddProfile(mcsBotPlayerProfile);
 
-                    var closestGroupPoint = botsController.CoversData.GetClosest(bossPlayerPos);
-                    botCreationDataClass.AddPosition(bossPlayerPos, closestGroupPoint.CorePointInGame.Id);
+                    var closestGroupPoint = botsController.CoversData.GetClosest(leadPlayerPos);
+                    botCreationDataClass.AddPosition(leadPlayerPos, closestGroupPoint.CorePointInGame.Id);
 
-                    var closestZone = botSpawner.GetClosestZone(bossPlayerPos, out _);
+                    var closestZone = botSpawner.GetClosestZone(leadPlayerPos, out _);
 
                     var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
                     {
@@ -352,6 +362,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         {
                             // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
                             // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
+                            
+                            botOwner.BotFollower.BossToFollow = mcsAILeadPlayer.DeputyLeader.AIData.AIBossPlayer;
+                            botOwner.Boss.IamBoss = false;
+                            leadPlayer.BotsGroup.AddMember(botOwner, false);
                             return leadPlayer.BotsGroup;
                         }
 
@@ -383,9 +397,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         {
                             botsGroup.RemoveEnemy(_bossPlayer);
                             botsGroup.AddAlly(_bossPlayer);
+                            
                         }
 
                         botSpawner.Groups.AddNoKey(botsGroup, botZone);
+                        botsGroup.AddMember(botOwner, false);
+                        mcsAILeadPlayer.SetDeputyLeader(botOwner);
 
                         leadPlayer.BotsGroup = botsGroup;
                         leadPlayer.BotsGroup.Lock();
@@ -413,18 +430,26 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             botOwner.GetPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId;
                             botOwner.GetPlayer.Profile.Info.TeamId = leadPlayer.Profile.Info.TeamId;
 
-                            botOwner.Boss.IamBoss = false;
+                            if (mcsAILeadPlayer.DeputyLeader == botOwner)
+                            {
+                                botOwner.BotFollower.PatrolDataFollower.InitPlayer(leadPlayer);
+                                var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
+                                botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
+                            }
+                            else
+                            {
+                                mcsAILeadPlayer.DeputyLeader.AIData.AIBossPlayer.OfferBot(botOwner);
+                            }
 
-                            botOwner.BotFollower.PatrolDataFollower.InitPlayer(leadPlayer);
-                            botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
-                            var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
-                            botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
+                            // botOwner.Boss.IamBoss = false;
+                            // botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
+                            
                         });
 
                         botSpawner.InSpawnProcess += 1;
 
                         var cancellationToken = new CancellationToken();
-                        await botCreator.ActivateBot(profile, new GClass682(bossPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
+                        await botCreator.ActivateBot(profile, new GClass682(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
                     });
                 }
 

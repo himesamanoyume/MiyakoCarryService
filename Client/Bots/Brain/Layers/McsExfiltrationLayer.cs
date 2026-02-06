@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            if (BotOwner.BotFollower.HaveBoss && IsMcsBotPlayer)
+            if (IsMcsBotPlayer)
             {
                 return false;
             }

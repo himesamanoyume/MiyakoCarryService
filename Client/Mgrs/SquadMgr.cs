@@ -84,7 +84,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsBossId(MongoID mcsLeadPlayerId)
+        public IEnumerable<BotOwner> GetAllMcsSquadMembersByMcsLeadId(MongoID mcsLeadPlayerId)
         {
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
             if (_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))

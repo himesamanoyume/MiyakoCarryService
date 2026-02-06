@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
             
-            var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsBossId(mcsLeadPlayerId);
+            var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
     
             foreach (var member in allMcsMembers)
             {
