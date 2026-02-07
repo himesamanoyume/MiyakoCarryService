@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private CustomNavigationPoint _currentNavigationPoint = null;
         private bool _isInCover = false;
         private bool _haveCoverToShoot = false;
-        private float _closeLeadDistance = 15f;
+        private float _closeLeadDistance = 20f;
         private bool _isHolding = false;
         private float _lastHoldTime = Time.time;
 
@@ -243,8 +243,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        var xOffset = GClass856.Random(1f, 2.5f) * GClass856.RandomSing();
-                        var zOffset = GClass856.Random(1f, 2.5f) * GClass856.RandomSing();
+                        var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                        var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
                         var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
                         var closestPoint = BotOwner.Covers.GetClosestPoint(newPos);
                         if (closestPoint != null)
@@ -252,7 +252,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
                             return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic2");
                         }
-                        if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                        if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 15f, -1))
                         {
                             BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
                             return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB:GoToPointLogic");
@@ -281,11 +281,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (IsMcsBotPlayer)
             {
-                // if (BotOwner.Memory.HaveEnemy)
-                // {
-                //     BotOwner.Memory.SetUnderFire(BotOwner.Memory.GoalEnemy.Person);
-                //     return false;
-                // }
                 if (BotOwner.Memory.IsUnderFire)
                 {
                     return false;

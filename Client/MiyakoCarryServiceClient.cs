@@ -13,7 +13,6 @@ using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Patches.Group;
 using MiyakoCarryService.Client.Patches.BepInEx;
 using MiyakoCarryService.Client.Patches.Events;
-using MiyakoCarryService.Client.Patches.SAIN;
 
 namespace MiyakoCarryService.Client;
 
@@ -133,8 +132,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         }
         if (SAINInstalled)
         {
-            new IsPlayerFriendlyPatch().Enable();
-            new TryAddEnemyPatch().Enable();
+            
         }
 #if CHEATERCARRY
 
