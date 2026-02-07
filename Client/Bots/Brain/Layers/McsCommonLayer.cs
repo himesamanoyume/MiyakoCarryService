@@ -281,6 +281,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (IsMcsBotPlayer)
             {
+                // if (BotOwner.Memory.HaveEnemy)
+                // {
+                //     BotOwner.Memory.SetUnderFire(BotOwner.Memory.GoalEnemy.Person);
+                //     return false;
+                // }
                 if (BotOwner.Memory.IsUnderFire)
                 {
                     return false;

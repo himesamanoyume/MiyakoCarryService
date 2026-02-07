@@ -1,6 +1,8 @@
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EFT;
+using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 
@@ -60,6 +62,11 @@ namespace MiyakoCarryService.Client.Extensions
             public void ShowSubtitleMsg(string msg)
             {
                 SubTitleMgr.ShowMcsBotPlayerMsg(botOwner.ProfileId, msg);
+            }
+
+            public List<BotBehavior> GetBotBehaviors()
+            {
+                return botOwner.GetMcsBotData().BotBehaviors;
             }
         }
     }

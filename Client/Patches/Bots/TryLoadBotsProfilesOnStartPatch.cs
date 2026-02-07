@@ -202,7 +202,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             botOwner.BotTalk.Priority.Add(EPhraseTrigger.DontKnow, 142f);
                         }
 
-                        settings.FileSettings.Mind.CAN_STAND_BY = true;
+                        // 此项如果不为false，就会导致SAIN无法进入Combat Layer
+                        settings.FileSettings.Mind.CAN_STAND_BY = false;
                         settings.FileSettings.Mind.CAN_TAKE_ANY_ITEM = true;
                         settings.FileSettings.Mind.CAN_TAKE_ITEMS = true;
                         settings.FileSettings.Mind.CAN_THROW_REQUESTS = true;
@@ -363,7 +364,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
                             // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
                             
-                            botOwner.BotFollower.BossToFollow = mcsAILeadPlayer.DeputyLeader.AIData.AIBossPlayer;
                             botOwner.Boss.IamBoss = false;
                             leadPlayer.BotsGroup.AddMember(botOwner, false);
                             return leadPlayer.BotsGroup;
@@ -393,16 +393,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             botsGroup.CheckAndAddEnemy(enemy);
                         };
 
-                        foreach (var _bossPlayer in leadPlayers)
+                        foreach (var _leadPlayer in leadPlayers)
                         {
-                            botsGroup.RemoveEnemy(_bossPlayer);
-                            botsGroup.AddAlly(_bossPlayer);
-                            
+                            botsGroup.RemoveEnemy(_leadPlayer);
+                            botsGroup.AddAlly(_leadPlayer);
                         }
 
                         botSpawner.Groups.AddNoKey(botsGroup, botZone);
                         botsGroup.AddMember(botOwner, false);
-                        mcsAILeadPlayer.SetDeputyLeader(botOwner);
 
                         leadPlayer.BotsGroup = botsGroup;
                         leadPlayer.BotsGroup.Lock();
@@ -430,20 +428,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             botOwner.GetPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId;
                             botOwner.GetPlayer.Profile.Info.TeamId = leadPlayer.Profile.Info.TeamId;
 
-                            if (mcsAILeadPlayer.DeputyLeader == botOwner)
-                            {
-                                botOwner.BotFollower.PatrolDataFollower.InitPlayer(leadPlayer);
-                                var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
-                                botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
-                            }
-                            else
-                            {
-                                mcsAILeadPlayer.DeputyLeader.AIData.AIBossPlayer.OfferBot(botOwner);
-                            }
-
-                            // botOwner.Boss.IamBoss = false;
-                            // botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
-                            
+                            botOwner.BotFollower.PatrolDataFollower.InitPlayer(leadPlayer);
+                            var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
+                            botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
+                            botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
                         });
 
                         botSpawner.InSpawnProcess += 1;

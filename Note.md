@@ -393,10 +393,8 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 - ~~清除存档报错~~(已尝试修复，但效果难以验证)
 - 已经拒绝的入队邀请还会额外发送一个已邀请成功，这不应该
 - ~~生成的护航存档名称不是指定名单中的人~~
-- 由于SAIN的加入，组队战斗会非常依赖LeaderComponent组件，此时非常容易进入`PatrolFollower`、`Utility peace`Layer，一旦进入就会很傻不开枪
-- - **因此也许可以设定玩家作为领队（Lead ）和副领队（Deputy Leader，同时是BotsGroup的Boss）**
-- - 让护航中等级最高的其中一人担任BotsGroup的Boss
-- 找出与SAIN共通的最佳平衡点
+- 似乎是因为SAIN会把我当成敌人，而AddEnemyPatch一直在发力导致没能获取到，于是就卡住了
+- - **尝试检测SAIN模组是否加载，然后Patch`tryAddEnemy`或`IsPlayerFriendly`函数来防止SAIN侧的敌人添加**
 
 ## Logic思想指导
 

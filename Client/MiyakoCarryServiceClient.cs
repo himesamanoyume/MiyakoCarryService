@@ -13,6 +13,7 @@ using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Patches.Group;
 using MiyakoCarryService.Client.Patches.BepInEx;
 using MiyakoCarryService.Client.Patches.Events;
+using MiyakoCarryService.Client.Patches.SAIN;
 
 namespace MiyakoCarryService.Client;
 
@@ -26,6 +27,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     public const string McsPluginName = "姫様の夢 MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
+    public static bool SAINInstalled { get; private set; }  = false;
     public static bool FikaInstalled { get; private set; }  = false;
     public static bool IsFikaHeadless { get; private set; } = false;
 
@@ -59,6 +61,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
         CheckFikaPlugin();
         CheckFikaHeadlessPlugin();
+        CheckSAINPlugin();
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
         EnableAllPatches();
@@ -97,6 +100,17 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         return FikaInstalled;
     }
 
+    public static bool CheckSAINPlugin()
+    {
+        var sainPlugin = new List<string>()
+        {
+            "me.sol.sain"
+        };
+
+        SAINInstalled = !CheckPlugin(sainPlugin);
+        return SAINInstalled;
+    }
+
     private static bool CheckPlugin(List<string> pluginList)
     {
         var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
@@ -116,6 +130,11 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         if (FikaInstalled)
         {
 
+        }
+        if (SAINInstalled)
+        {
+            new IsPlayerFriendlyPatch().Enable();
+            new TryAddEnemyPatch().Enable();
         }
 #if CHEATERCARRY
 
@@ -138,9 +157,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new ApplyDamagePatch().Enable();
         new OnGameStartedPatch().Enable();
         new RaidEndedPatch().Enable();
-        new BotHearingSensorPatch().Enable();
-        new PlayerSayPatch().Enable();
-        new PlayHitEffectPatch().Enable();
+        // new BotHearingSensorPatch().Enable();
+        // new PlayerSayPatch().Enable();
+        // new PlayHitEffectPatch().Enable();
         new TransitPointPatch().Enable();
         new MatchmakerTimeHasComePatch().Enable();
         new MatchMakerAcceptScreenCallbackPatch().Enable();
