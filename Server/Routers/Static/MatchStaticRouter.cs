@@ -25,6 +25,10 @@ namespace MiyakoCarryService.Server.Routers.Static
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/match/raid/abort",
                 async (url, info, sessionId, output) => await matchCallbacks.MatchingAbort(url, info, sessionId)
+            ),
+            new RouteAction<EmptyRequestData>(
+                "/mcs/client/match/group/delete",
+                async (url, info, sessionId, output) => await matchCallbacks.DeleteGroup(url, info, sessionId)
             )
         ]
     )

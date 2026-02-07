@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 5 => 0.92f,
                 _ => 1f,
             };
-            logger.Info("开始生成订单");
+            // logger.Info("开始生成订单");
             var order = Generate(players, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate);
             return order;
         }
@@ -99,7 +99,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
             questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
-            logger.Info("订单任务信息构建结束");
+            // logger.Info("订单任务信息构建结束");
             return questTemplate;
         }
     }

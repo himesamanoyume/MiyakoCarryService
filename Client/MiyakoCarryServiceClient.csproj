@@ -32,6 +32,7 @@
     <Reference Include="BepInEx" HintPath=".\Ref\BepInEx.dll" Private="false" />
     <Reference Include="Comfort" HintPath=".\Ref\Comfort.dll" Private="false" />
     <Reference Include="Comfort.Unity" HintPath=".\Ref\Comfort.Unity.dll" Private="false" />
+    <Reference Include="CommonExtensions" HintPath=".\Ref\CommonExtensions.dll" Private="false" />
     <Reference Include="ConfigurationManager" HintPath=".\Ref\ConfigurationManager.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath=".\Ref\DissonanceVoip.dll" Private="false" />
     <Reference Include="DrakiaXYZ-BigBrain" HintPath=".\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />

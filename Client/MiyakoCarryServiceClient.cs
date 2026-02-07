@@ -152,7 +152,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TraderControllerClassRemoveItemEventInvokePatch().Enable();
         new TraderControllerClassOutProcessPatch().Enable();
         new TraderControllerClassInProcessPatch().Enable();
-        new ApplyDamagePatch().Enable();
+        // new ApplyDamagePatch().Enable();
         new OnGameStartedPatch().Enable();
         new RaidEndedPatch().Enable();
         new BotHearingSensorPatch().Enable();
@@ -165,6 +165,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new GetDailyQuestsPatch().Enable();
         new MatchmakerAcceptScreenShowPatch().Enable();
         new MatchingAbortPatch().Enable();
+        new DisbandRaidGroupPatch().Enable();
         // new ManualUpdatePatch().Enable();
 
 #if DEBUG

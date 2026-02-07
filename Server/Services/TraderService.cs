@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Server.Services
 
             if (databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
             {
-                logger.Info("已加载宫子商人");
+                // logger.Info("已加载宫子商人");
             }
         }
 

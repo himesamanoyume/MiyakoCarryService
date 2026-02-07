@@ -53,13 +53,13 @@ namespace MiyakoCarryService.Server.Services
         {
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
-            logger.Info("开始创建任务");
+            // logger.Info("开始创建任务");
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion,
                 TraderService.MiyakoTraderId,
                 mcsLeadPlayerId
             ));
-            logger.Info("任务插入等待创建队列");
+            // logger.Info("任务插入等待创建队列");
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);

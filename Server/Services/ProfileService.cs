@@ -63,13 +63,13 @@ namespace MiyakoCarryService.Server.Services
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             var file = System.IO.Path.Combine(_profileFolderDir, mcsLeadPlayerId, $"{mcsBotPlayerId}.json");
-            logger.Error($"正在删除 {mcsBotPlayerId}.json");
+            // logger.Error($"正在删除 {mcsBotPlayerId}.json");
             if (_profiles[mcsLeadPlayerId].ContainsKey(mcsBotPlayerId))
             {
                 _profiles[mcsLeadPlayerId].TryRemove(mcsBotPlayerId, out _);
                 if (!fileUtil.DeleteFile(file))
                 {
-                    logger.Error($"Unable to delete file, not found: {file}");
+                    // logger.Error($"Unable to delete file, not found: {file}");
                 }
             }
 
@@ -82,7 +82,7 @@ namespace MiyakoCarryService.Server.Services
             if (mcsBotPlayerProfile is null)
             {
                 var errorInfo = "没能获取到护航玩家存档";
-                logger.Error(errorInfo);
+                // logger.Error(errorInfo);
                 throw new NullReferenceException(errorInfo);
             }
 
@@ -135,7 +135,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 catch (Exception e)
                 {
-                    logger.Error("保存护航存档异常", e);
+                    // logger.Error("保存护航存档异常", e);
                 }
             }
             finally
@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (orderInfoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
                             {
-                                logger.Info($"加载订单中存在的 {mcsBotPlayerId} 存档");
+                                // logger.Info($"加载订单中存在的 {mcsBotPlayerId} 存档");
                                 await LoadMcsBotPlayerProfileAsync(mcsLeadPlayerId, mcsBotPlayerId);
                             }
                         }
@@ -236,12 +236,12 @@ namespace MiyakoCarryService.Server.Services
                 _profiles.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerProfiles);
                 if (mcsBotPlayerProfiles is null)
                 {
-                    logger.Error("mcsBotPlayerProfiles为空");
+                    // logger.Error("mcsBotPlayerProfiles为空");
                     return null;
                 }
                 return mcsBotPlayerProfiles.FirstOrDefault(p => p.Key == mcsBotPlayerId).Value;
             }
-            logger.Error($"_profiles没有key {mcsLeadPlayerId}");
+            // logger.Error($"_profiles没有key {mcsLeadPlayerId}");
             return null;
         }
 
@@ -250,7 +250,7 @@ namespace MiyakoCarryService.Server.Services
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
-                logger.Error($"Account {mcsAid} does not exist");
+                // logger.Error($"Account {mcsAid} does not exist");
             }
 
             return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);

@@ -105,7 +105,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 catch (Exception e)
                 {
-                    logger.Error("保存订单信息异常", e);
+                    // logger.Error("保存订单信息异常", e);
                 }
             }
             finally
@@ -156,12 +156,12 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    logger.Info($"准备清除 {orderInfo.McsLeadPlayerId} 的一个过期订单");
+                    // logger.Info($"准备清除 {orderInfo.McsLeadPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
                     mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
-                        logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
+                        // logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
                         mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
                     }
                 }

@@ -44,8 +44,8 @@ namespace MiyakoCarryService.Server.Patches
                 return false;
             }
 
-            logger.Info(repeatables.RepeatableType.Name);
-            logger.Info(questToReplace.Name);
+            // logger.Info(repeatables.RepeatableType.Name);
+            // logger.Info(questToReplace.Name);
             
             if (repeatables.RepeatableType.Name == "Order")
             {

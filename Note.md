@@ -30,13 +30,12 @@
 
 ## 已知问题
 
-1. 解散队伍会报错
-2. 在组了护航的情况下，Pmc模式无法调整战局设置。（因为使用了塔科夫的组队系统，会触发与之相关的一系列代码，再加上SPT为了能够单人开始战局所做的一些补丁，最终导致的结果，我怕随意修改可能会造成连锁反应，所以就不管了）
-3. 邀请入队时即便返回了接受邀请的消息，也还是显示着正在邀请
+- 在组了护航的情况下，Pmc模式无法调整战局设置。（因为使用了塔科夫的组队系统，会触发与之相关的一系列代码，再加上SPT为了能够单人开始战局所做的一些补丁，最终导致的结果，我怕随意修改可能会造成连锁反应，所以就不管了）
+- 邀请入队时即便返回了接受邀请的消息，也还是显示着正在邀请（小问题）
 
 ## 低优先级 | IDEA
 
-- 将客户端的大量机器人Setting配置项放入服务端Config中（若为空则还是原来的默认值），实现Fika联机全局玩家统一的护航设置
+- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
@@ -125,6 +124,50 @@
 - - 实现配置管理器调整护甲过滤内部/插板的防护等级，武器筛选只要其中某几种武器类型
 - - 战局开始前，想办法收集每个人的护航配置，随后由房主接收汇总并使配置生效
 
+- 掠夺第一阶段重做
+- 1. 绿护需要逐个对每个物品的RootItem进行一次检视，检视会将内部的物品全部记录，检视情况全队共通
+- 2. 实际上还是根据战利品价值优先顺序去走，走到并检视后，说话提醒，在老板处于安全距离内只要敌人不出现，就停留在此直到老板接近，当然如果老板走远了就只停留2秒
+- 3. 检视过的物品如果被要求带路，则先判断当前可以选择的目标其RootTransform是否还在，不在说明已经变动，则将此LootData从已检视过的物品中移除
+- 4. 可以通过快捷键触发多个Action选项来选择全体护航或单个护航(后期实现: 也可以通过对着活着的护航)，并以此对指定护航下达指令，如带我找高价值战利品，此时指定数量的护航就会去带路找出已检视过的其中内含目标战利品的RootItem位置，然后说话：这里有符合XX条件的战利品，XX
+- - 最顶部选项除非已是最顶层否则固定为上一级，最底部选项一定是取消
+- 实现护航根据已检视过的战利品做出后续行为（掠夺第二阶段）
+- - 1. 根据自身是否缺医疗物品、手术包去进行掠夺对应物品
+- - 1. 根据自身是否缺水缺能量、去进行掠夺对应物品
+- - 3. 根据自身已掠夺的战利品价值，判断是否应该上贡
+- 实现太接近老板时自己让开
+- 实现阵型系统，可以在配置管理器里自定义新阵型，每格间隔
+- - `-1`代表自身，`1,2,3,4`代表
+```
+[
+  0, 1, 0, 0, 0,
+  0, 0, 2, 0, 0,
+  0, 0, 0, 3, 0,
+  0, -1, 0, 0, 4,
+  0, 0, 0, 0, 0
+]
+```
+
+## 疑难杂症
+
+- 解散队伍报错，我觉得可能是因为当前的流程并不算真正建立了队伍，导致无法发送带有小队id的请求
+---
+- - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
+- - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
+- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
+- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`, 有`MatchMakerAcceptScreenReadyStatusPatch`时，战局设置不生效
+- 有`___raidSettings_0.RaidMode = ERaidMode.Local`和`___eraidMode_0 = ERaidMode.Local`时，先选scav再选pmc会以scav进
+- - 单人状态不论pmc/scav下不改设置RaidMode为Online，改了战局设置就会变成Local
+- - 组队状态scav不改设置为Online，改设置为Local，pmc则改不改都是online
+- - 那么理论上scav组队改设置进战局，应该是不会刷新bot的（确实）
+- - ~~而pmc因为组队时无论如何改设置都是online，所以战局设置无法生效，而强行设置为Local就会触发scav的Local设置而以scav进入~~即便让组队时不强制为Online也无效
+- `GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因
+- 其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置
+- - `MainMenuControllerClass.method_27`中因为`if (this.RaidSettings_0.RaidMode != ERaidMode.Online && !this.RaidSettings_0.IsPveOffline)`因此最终调用了一次`this.RaidSettings_0.Apply(this.RaidSettings_1);`导致覆盖了Scav的设置
+- 目前打算是弄清楚在不将RaidMode设为Local，组队不强制为Online的情况下，是什么原因导致战局设置无效
+- - 观察`MatchMakerAcceptScreen.Show`在不设Local，不强制Online的情况下，会传进来什么raidSettings的RaidMode,正常来说组队调整设置的情况下应该为Local，如果还是传入Online那可能局势会明朗很多（确实还是Online）
+- 打断点`UpdateMatchmakerSettings`可最清晰观察到点击开始战局后的一次该函数调用
+- ~~尝试记录`MatchMakerPlayerPreview`中的玩家Side，只根据此阵营来在`GClass3926<RaidSettings>.UpdateMatchmakerSettings`选择RaidSettings~~
+
 ## TODO
 
 ```md
@@ -136,15 +179,8 @@
 > 参考`GenerateAvailableForFinish`
 - - ~~别忘了修改任务接取过期时长为15分钟~~
 - - 新的AI队友处于好友列表的时长才为指定的时间
-> 参考[江湖](https://github.com/Hiokree/Jiang-Hu/tree/main/JiangHu.Server)的`new quest`,`new trader`,`quest generator`
-
-> 参考[AddTraderWithAssortJson](https://github.com/sp-tarkov/server-mod-examples/tree/main/13AddTraderWithAssortJson)
-
-> 参考[RepeatableQuestController](https://github.com/sp-tarkov/server-csharp/blob/main/Libraries/SPTarkov.Server.Core/Controllers/RepeatableQuestController.cs#L68)
-
 - ~~能否改掉寻物上交这些内容~~
-- **`RemoveInvalidRepeatableQuests`可能有必要打补丁防止删除订单任务**
-- ~~确认一下现在的Order类型任务是否还能更改任务~~**可以，需要进行处理**
+- ~~确认一下现在的Order类型任务是否还能更改任务~~
 - ~~确认一下现在的Order类型任务是否能够同时存在两个(可以，但完成一个同时也会完成同池子下其他任务)弄清为何会导致这种情况~~
 - ~~条件还是改为多个上交~~
 - ~~`QuestListItem.UpdateTimer`似乎可以触发`/client/repeatalbeQuests/activityPeriods`~~
@@ -290,10 +326,7 @@
 - - ~~将代码上传至github，让deepwiki帮我检查~~
 - ~~检查新的Scav存档是否有安全箱内容，以及修复生成护航Bot时的异常~~
 - ~~尝试移除Layer，看是否即便没有这些普通的Action是否也能正常跟随~~不太能
-- 护航是否会说话？如果不会需要让护航会发出英语短语
-> `botOwner_0.BotTalk.TrySay(EPhraseTrigger.FriendlyFire, false);`
 - ~~根据思想钢印开始进行Logic细化~~
-- 参考`friendlyPmc`或`LootingBots`,学习Bot如何进行掠夺
 - - ~~继续学习Bot如何对物品进行操作~~
 - GameLoop间隔对每个护航进行一次周围检测
 - ~~Aiming设置仍需调整~~
@@ -315,9 +348,6 @@
 - ~~护航总是对近在咫尺的敌人视而不见~~
 - - ~~现在变成不攻击了~~
 - ~~学习以下Patch~~
-- - HearingSensorPatch()
-- - BulletImpactPatch()
-- - PlayerSayPatch()
 - ~~应该替换GoToXX改为RunToXX~~
 - ~~补全`AddEnemyPatch`使其可以阻止不合理的敌对关系建立、并建立双向敌对关系~~
 - ~~护航攻击性太低，不应该总是待在老板附近，而是应该主动出击~~
@@ -326,54 +356,14 @@
 - ~~实现单人下的字幕系统~~
 - - ~~对每个McsBotPlayer都实例化一个专用的字幕~~
 - - ~~就剩下字幕内容没有正确显示，以及位置和展示时机可能有问题~~
-
-- 掠夺第一阶段重做
-- 1. 绿护需要逐个对每个物品的RootItem进行一次检视，检视会将内部的物品全部记录，检视情况全队共通
-- 2. 实际上还是根据战利品价值优先顺序去走，走到并检视后，说话提醒，在老板处于安全距离内只要敌人不出现，就停留在此直到老板接近，当然如果老板走远了就只停留2秒
-- 3. 检视过的物品如果被要求带路，则先判断当前可以选择的目标其RootTransform是否还在，不在说明已经变动，则将此LootData从已检视过的物品中移除
-- 4. 可以通过快捷键触发多个Action选项来选择全体护航或单个护航(后期实现: 也可以通过对着活着的护航)，并以此对指定护航下达指令，如带我找高价值战利品，此时指定数量的护航就会去带路找出已检视过的其中内含目标战利品的RootItem位置，然后说话：这里有符合XX条件的战利品，XX
-- - 最顶部选项除非已是最顶层否则固定为上一级，最底部选项一定是取消
-- 实现护航根据已检视过的战利品做出后续行为（掠夺第二阶段）
-- - 1. 根据自身是否缺医疗物品、手术包去进行掠夺对应物品
-- - 1. 根据自身是否缺水缺能量、去进行掠夺对应物品
-- - 3. 根据自身已掠夺的战利品价值，判断是否应该上贡
-- 实现太接近老板时自己让开
-- 实现阵型系统，可以在配置管理器里自定义新阵型，每格间隔
-- - `-1`代表自身，`1,2,3,4`代表
-```
-[
-  0, 1, 0, 0, 0,
-  0, 0, 2, 0, 0,
-  0, 0, 0, 3, 0,
-  0, -1, 0, 0, 4,
-  0, 0, 0, 0, 0
-]
-```
-```
-- 到达战利品位置有bug, 可能是RootTransform根本不存在，所以直接低头看了
 - ~~BUG:当前非常容易出现Memory异常~~(好像与McsExfiltrationLayer有关)
 - ~~BUG:非常容易出现持续射击尸体的情况~~(计算敌人bug没了后这个也没了)
 - ~~BUG:似乎带护航开无Bot生成会导致Bot依旧生成~~
+```
 - ~~先修复Bug，再适配转移、Scav模式、SAIN适配、完成Fika适配、~~**服务端全局配置，先做成能用的再说**
 - ~~转移时会导致小队成员信息丢失，战局开始时也不会生成小队成员~~
 - ~~拉护航进队时不要直接准备就绪，而是等到进入准备界面再准备就绪~~
 - ~~为什么现在进不了准备界面?~~
-- - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
-- - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
-- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
-- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`, 有`MatchMakerAcceptScreenReadyStatusPatch`时，战局设置不生效
-- 有`___raidSettings_0.RaidMode = ERaidMode.Local`和`___eraidMode_0 = ERaidMode.Local`时，先选scav再选pmc会以scav进
-- - 单人状态不论pmc/scav下不改设置RaidMode为Online，改了战局设置就会变成Local
-- - 组队状态scav不改设置为Online，改设置为Local，pmc则改不改都是online
-- - 那么理论上scav组队改设置进战局，应该是不会刷新bot的（确实）
-- - ~~而pmc因为组队时无论如何改设置都是online，所以战局设置无法生效，而强行设置为Local就会触发scav的Local设置而以scav进入~~即便让组队时不强制为Online也无效
-- `GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因
-- 其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置
-- - `MainMenuControllerClass.method_27`中因为`if (this.RaidSettings_0.RaidMode != ERaidMode.Online && !this.RaidSettings_0.IsPveOffline)`因此最终调用了一次`this.RaidSettings_0.Apply(this.RaidSettings_1);`导致覆盖了Scav的设置
-- 目前打算是弄清楚在不将RaidMode设为Local，组队不强制为Online的情况下，是什么原因导致战局设置无效
-- - 观察`MatchMakerAcceptScreen.Show`在不设Local，不强制Online的情况下，会传进来什么raidSettings的RaidMode,正常来说组队调整设置的情况下应该为Local，如果还是传入Online那可能局势会明朗很多（确实还是Online）
-- 打断点`UpdateMatchmakerSettings`可最清晰观察到点击开始战局后的一次该函数调用
-- ~~尝试记录`MatchMakerPlayerPreview`中的玩家Side，只根据此阵营来在`GClass3926<RaidSettings>.UpdateMatchmakerSettings`选择RaidSettings~~
 - ~~重新加载玩家模型资源后图标又会消失~~
 - ~~开始战局又取消时应该发送请求清理小队~~
 - **护航死后，不应该在转移后还能再次生成，应记录下死亡情况，当再次获取小队信息时则跳过死亡的成员**
@@ -384,11 +374,7 @@
 - - ~~原因是现在生成的Scav Id跟老板的Scav Id是相同的。需要调整Scav生成的方式~~
 - ~~当前Scav已可以正常生成护航，但是转移时明明正确完成了转移成员的添加，却依然不会展示Scav成员~~
 - ~~如果在没开启服务端的时候订单任务过期了，就会导致服务端认为有删除的商人而使存档被标记~~
-- 解散小队报错
-```log
-Error handling request: /client/match/group/delete
-Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyRequestData' to type 'DeleteGroupRequest'.
-```
+- ~~解散小队报错~~
 - ~~当同一个老板有两个订单时导致字典重复添加~~
 - ~~清除存档报错~~(已尝试修复，但效果难以验证)
 - 已经拒绝的入队邀请还会额外发送一个已邀请成功，这不应该
@@ -397,7 +383,7 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 - ~~健壮客户端没成功接收到机器人存档时的异常处理~~
 - ~~Fika副机报错~~
 - ~~fika下AddEnemyPatch会导致溢出~~
-- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
+- 将客户端的大量机器人Setting配置项放入服务端Config中（若为空则还是原来的默认值），实现Fika联机全局玩家统一的护航设置
 
 ## Logic思想指导
 
