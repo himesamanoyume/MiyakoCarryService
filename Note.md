@@ -354,7 +354,7 @@
 - ~~BUG:当前非常容易出现Memory异常~~(好像与McsExfiltrationLayer有关)
 - ~~BUG:非常容易出现持续射击尸体的情况~~(计算敌人bug没了后这个也没了)
 - ~~BUG:似乎带护航开无Bot生成会导致Bot依旧生成~~
-- ~~先修复Bug，再适配转移、Scav模式、SAIN适配、~~**完成Fika适配、服务端全局配置，先做成能用的再说**
+- ~~先修复Bug，再适配转移、Scav模式、SAIN适配、完成Fika适配、~~**服务端全局配置，先做成能用的再说**
 - ~~转移时会导致小队成员信息丢失，战局开始时也不会生成小队成员~~
 - ~~拉护航进队时不要直接准备就绪，而是等到进入准备界面再准备就绪~~
 - ~~为什么现在进不了准备界面?~~
@@ -395,19 +395,9 @@ Unable to cast object of type 'SPTarkov.Server.Core.Models.Eft.Common.EmptyReque
 - ~~生成的护航存档名称不是指定名单中的人~~
 - ~~Fika下生成Bot报错~~
 - ~~健壮客户端没成功接收到机器人存档时的异常处理~~
-- Fika副机报错
-```log
-System.ArgumentNullException: Value cannot be null.
-Parameter name: key
-  at System.Collections.Generic.Dictionary`2[TKey,TValue].FindEntry (TKey key) [0x00008] in <8ce0bd04a7a04b4b9395538239d3fdd8>:0
-  at System.Collections.Generic.Dictionary`2[TKey,TValue].TryGetValue (TKey key, TValue& value) [0x00000] in <8ce0bd04a7a04b4b9395538239d3fdd8>:0
-  at EFT.GameWorld.GetEverExistedPlayerByID (System.String profileID) [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at MiyakoCarryService.Client.Extensions.ItemExtensions.InitData (EFT.InventoryLogic.Item item) [0x00022] in <58b1fc2491d5406a8ab0f2926ea135db>:0
-  at MiyakoCarryService.Client.Extensions.ItemExtensions.GetData (EFT.InventoryLogic.Item item) [0x0000f] in <58b1fc2491d5406a8ab0f2926ea135db>:0
-  at MiyakoCarryService.Client.Patches.Events.TraderControllerClassConstructorPatch.Postfix (TraderControllerClass __instance) [0x0003d] in <58b1fc2491d5406a8ab0f2926ea135db>:0
-```
-- fika下AddEnemyPatch会导致溢出
-- fika下第8个护航会获取不到Brain
+- ~~Fika副机报错~~
+- ~~fika下AddEnemyPatch会导致溢出~~
+- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
 
 ## Logic思想指导
 

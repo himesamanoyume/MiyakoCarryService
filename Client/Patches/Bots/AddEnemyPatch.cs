@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
@@ -20,6 +21,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
             }
         }
+
+        [ThreadStatic]
+        private static bool _isPropagating;
 
         [PatchPrefix]
         public static bool Prefix(BotsGroup __instance, IPlayer person, EBotEnemyCause cause, ref bool __result)
@@ -46,7 +50,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(BotsGroup __instance, IPlayer person, EBotEnemyCause cause)
         {
-            if (person == null)
+            if (person == null || _isPropagating)
             {
                 return;
             }
@@ -67,20 +71,29 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
             
             var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
-    
-            foreach (var member in allMcsMembers)
-            {
-                var botGroup = member.AIData?.BotOwner?.BotsGroup;
-                if (botGroup == null || botGroup == __instance)
-                {
-                    continue;
-                }
 
-                foreach (var attacker in __instance.Members)
+            _isPropagating = true;
+            try
+            {
+                foreach (var member in allMcsMembers)
                 {
-                    botGroup.AddEnemy(attacker, EBotEnemyCause.addPlayerToBoss);
+                    var botGroup = member.AIData?.BotOwner?.BotsGroup;
+                    if (botGroup == null || botGroup == __instance)
+                    {
+                        continue;
+                    }
+
+                    foreach (var attacker in __instance.Members)
+                    {
+                        botGroup.AddEnemy(attacker, EBotEnemyCause.addPlayerToBoss);
+                    }
                 }
             }
+            finally
+            {
+                _isPropagating = false;
+            }
+    
         }
     }
 }

@@ -46,15 +46,17 @@ namespace MiyakoCarryService.Client.Extensions
                 if (item.IsPlayerInventory)
                 {
                     var gameWorld = Singleton<GameWorld>.Instance;
-                    var player = item.Owner switch
+
+                    var profileId = item.Owner switch
                     {
-                        CorpseTraderControllerClass corpseTraderControllerClass => gameWorld.GetEverExistedPlayerByID(corpseTraderControllerClass.KilledProfileID),
-                        _ => gameWorld.GetEverExistedPlayerByID(item.Owner.ID)
+                        CorpseTraderControllerClass c => c?.KilledProfileID,
+                        _ => item.Owner?.ID
                     };
+                    
+                    var player = !string.IsNullOrEmpty(profileId) ? gameWorld.GetEverExistedPlayerByID(profileId) : null;
 
                     if (player == null)
                     {
-                        // MiyakoCarryServicePlugin.Logger.LogError("player 为空");
                         return null;
                     }
 
