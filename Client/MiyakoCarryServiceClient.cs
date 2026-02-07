@@ -155,9 +155,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new ApplyDamagePatch().Enable();
         new OnGameStartedPatch().Enable();
         new RaidEndedPatch().Enable();
-        // new BotHearingSensorPatch().Enable();
-        // new PlayerSayPatch().Enable();
-        // new PlayHitEffectPatch().Enable();
+        new BotHearingSensorPatch().Enable();
+        new PlayerSayPatch().Enable();
+        new PlayHitEffectPatch().Enable();
         new TransitPointPatch().Enable();
         new MatchmakerTimeHasComePatch().Enable();
         new MatchMakerAcceptScreenCallbackPatch().Enable();

@@ -63,6 +63,12 @@ namespace MiyakoCarryService.Client.Utils
         public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(SpawnMcsBotPlayerType spawnMcsBotPlayerType)
         {
             var response = await PostJsonAsync<SpawnMcsBotPlayerType, Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate", spawnMcsBotPlayerType);
+
+            if (response == null)
+            {
+                return new();
+            }
+
             return response.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value.Select(desc => new Profile(desc)).ToArray()
@@ -72,6 +78,12 @@ namespace MiyakoCarryService.Client.Utils
         public static async Task<Dictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
         {
             var response = await GetJsonAsync<Dictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
+
+            if (response == null)
+            {
+                return new();
+            }
+            
             return response;
         }
 

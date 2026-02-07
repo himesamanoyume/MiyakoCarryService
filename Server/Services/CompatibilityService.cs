@@ -13,8 +13,8 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         public bool HasFikaServer { get; private set; } = false;
-        public Type FikaMatchService { get; private set; } = null;
-        public Type FikaMatch { get; private set; } = null;
+        public Type FikaMatchServiceType { get; private set; } = null;
+        public Type FikaMatchType { get; private set; } = null;
 
         public async Task OnPostLoadAsync()
         {
@@ -23,9 +23,9 @@ namespace MiyakoCarryService.Server.Services
 
         private void CheckFikaServerPlugins()
         {
-            FikaMatchService = Type.GetType("FikaServer.Services.MatchService, FikaServer");
-            HasFikaServer = FikaMatchService is not null;
-            FikaMatch = Type.GetType("FikaServer.Models.Fika.FikaMatch, FikaServer");
+            FikaMatchServiceType = Type.GetType("FikaServer.Services.MatchService, FikaServer");
+            HasFikaServer = FikaMatchServiceType is not null;
+            FikaMatchType = Type.GetType("FikaServer.Models.Fika.FikaMatch, FikaServer");
         }
     }
 }

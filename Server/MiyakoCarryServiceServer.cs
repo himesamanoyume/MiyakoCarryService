@@ -37,7 +37,8 @@ namespace MiyakoCarryService.Server
             OrderQuestService orderQuestService,
             TraderService traderService,
             ProfileService profileService,
-            OrderInfoService orderInfoService
+            OrderInfoService orderInfoService,
+            CompatibilityService compatibilityService
         ) : IOnLoad
         {
             public async Task OnLoad()
@@ -47,6 +48,7 @@ namespace MiyakoCarryService.Server
                 await orderInfoService.OnPostLoadAsync();
                 await profileService.OnPostLoadAsync();
                 await orderQuestService.OnPostLoadAsync();
+                await compatibilityService.OnPostLoadAsync();
                 await Task.Run(() =>
                 {
                     var mcsBotPlayerIds = orderInfoService.GetExpiredMcsBotPlayerIds();

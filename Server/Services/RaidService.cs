@@ -6,6 +6,7 @@ using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -132,19 +133,20 @@ namespace MiyakoCarryService.Server.Services
 
             if (compatibilityService.HasFikaServer)
             {
-                // 暂不进行验证
-                var fikaMatchService = compatibilityService.FikaMatchService;
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsLeadPlayerId]);
+                var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
+                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
 
                 if (matchId is not null)
                 {
-                    var fikaMatch = AccessTools.Method(fikaMatchService, "GetMatch")?.Invoke(null, [matchId]);
+                    var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
 
                     if (fikaMatch is not null)
                     {
-                        var fikaPlayers = (Dictionary<MongoId, object>)AccessTools.Property(compatibilityService.FikaMatch, "Players")?.GetValue(fikaMatch);
+                        var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
+                        var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
 
-                        foreach (var playerId in fikaPlayers.Keys)
+                        foreach (MongoId playerId in fikaPlayerIds)
                         {
                             if (playerId != mcsLeadPlayerId)
                             {
@@ -185,19 +187,20 @@ namespace MiyakoCarryService.Server.Services
 
             if (compatibilityService.HasFikaServer)
             {
-                // 暂不进行验证
-                var fikaMatchService = compatibilityService.FikaMatchService;
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchService, "GetMatchIdByPlayer")?.Invoke(null, [mcsLeadPlayerId]);
+                var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
+                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
 
                 if (matchId is not null)
                 {
-                    var fikaMatch = AccessTools.Method(fikaMatchService, "GetMatch")?.Invoke(null, [matchId]);
+                    var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
 
                     if (fikaMatch is not null)
                     {
-                        var fikaPlayers = (Dictionary<MongoId, object>)AccessTools.Property(compatibilityService.FikaMatch, "Players")?.GetValue(fikaMatch);
+                        var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
+                        var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
 
-                        foreach (var playerId in fikaPlayers.Keys)
+                        foreach (MongoId playerId in fikaPlayerIds)
                         {
                             if (playerId != mcsLeadPlayerId)
                             {

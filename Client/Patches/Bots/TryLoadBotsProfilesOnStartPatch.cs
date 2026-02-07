@@ -121,7 +121,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     };
                 }
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer, mcsBotPlayerConfig);
-                leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "fika" ? "fika" : "mcs";
+                leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "Fika" ? "Fika" : "Mcs";
 
                 if (mcsProfilesDict[leadPlayer.ProfileId].Count() == 0)
                 {
@@ -159,6 +159,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
                     {
+                        botOwner.GetPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId;
+                        botOwner.GetPlayer.Profile.Info.TeamId = leadPlayer.Profile.Info.TeamId;
+
                         var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, true);
 
                         settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
