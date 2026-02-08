@@ -42,5 +42,8 @@
     "Mcs/BlockItemTypeAll": "Select/Deselect All",
     "Mcs/OriginalWebsite": "Official website",
     "Mcs/MiyakoTraderWelcome": "Welcome to Miyako Carry Service ~",
-    "Mcs/MiyakoTraderCommandError": "Command Error"
+    "Mcs/MiyakoTraderCommandError": "Command Error",
+    "Mcs/MiyakoTraderOrderNewQuest": "You have successfully placed your order! You can view your order details in the Trader Tasks menu.\nJust accept the order and proceed with payment!",
+    "Mcs/MiyakoTraderUnrecognizedCommand": "Unknown command! Type \"help\" to see available commands.",
+    "Mcs/MiyakoTraderAvailableCommandsList": "The available commands will be listed below:"
 }

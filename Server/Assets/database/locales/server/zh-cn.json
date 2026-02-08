@@ -7,5 +7,8 @@
     "Mcs/CannotDeleteFileNotFound": "无法删除未找到的文件: {0}",
     "Mcs/FailedLoadMcsPlayerProfile": "没有获取到护航玩家存档",
     "Mcs/AccountidIsInvaild": "账号Id {0} 不合法",
-    "Mcs/MiyakoTraderOrderDescription": "订单信息:\n护航人数: {0}人\n护航级别: {1}级\n持续时长: {2}小时"
+    "Mcs/MiyakoTraderOrderDescription": "订单信息:\n护航人数: {0}人\n护航级别: {1}级\n持续时长: {2}小时",
+    "Mcs/MiyakoTraderSubCommand": "子指令 {0}:\n{1}",
+    "Mcs/MiyakoTraderAvailableCommandsPrefix": "可用的 \"{0}\" 指令前缀:",
+    "Mcs/MiyakoTraderCommandHelp": "mcs {0}\n下单指令:\nmcs {1} {{人数}} {{护航级别}} {{时间}}\n护航级别: 1~4\n时长: 整数, 单位为小时\n示例: mcs {2} 4 4 24"
 }

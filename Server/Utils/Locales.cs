@@ -15,5 +15,10 @@ namespace MiyakoCarryService.Server.Utils
         public const string MIYAKOTRADERCOMMANDERROR = "Mcs/MiyakoTraderCommandError";
         public const string MIYAKOTRADERORDERNEWQUEST = "Mcs/MiyakoTraderOrderNewQuest";
         public const string MIYAKOTRADERORDERDESCRIPTION = "Mcs/MiyakoTraderOrderDescription";
+        public const string MIYAKOTRADERUNRECOGNIZEDCOMMAND = "Mcs/MiyakoTraderUnrecognizedCommand";
+        public const string MIYAKOTRADERSUBCOMMAND = "Mcs/MiyakoTraderSubCommand";
+        public const string MIYAKOTRADERAVAILABLECOMMANDSLIST = "Mcs/MiyakoTraderAvailableCommandsList";
+        public const string MIYAKOTRADERAVAILABLECOMMANDSPREFIX = "Mcs/MiyakoTraderAvailableCommandsPrefix";
+        public const string MIYAKOTRADERCOMMANDHELP = "Mcs/MiyakoTraderCommandHelp";
     }
 }

@@ -43,5 +43,7 @@
     "Mcs/OriginalWebsite": "官方发布地址",
     "Mcs/MiyakoTraderWelcome": "欢迎来到宫子护航店 ~",
     "Mcs/MiyakoTraderCommandError": "指令错误",
-    "Mcs/MiyakoTraderOrderNewQuest": "您已成功下单！您的订单信息可到看商人任务界面查看\n接取订单并进行付款即可~"
+    "Mcs/MiyakoTraderOrderNewQuest": "您已成功下单！您的订单信息可到看商人任务界面查看\n接取订单并进行付款即可~",
+    "Mcs/MiyakoTraderUnrecognizedCommand": "未知指令! 输入 \"help\" 来查看可用指令",
+    "Mcs/MiyakoTraderAvailableCommandsList": "以下将列出可用的指令:"
 }

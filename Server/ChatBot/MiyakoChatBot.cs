@@ -1,9 +1,14 @@
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using MiyakoCarryService.Server.Services;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialogue;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Utils;
@@ -13,15 +18,17 @@ namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
     public class MiyakoChatBot(
-        ISptLogger<AbstractDialogChatBot> logger, 
-        MailSendService mailSendService, 
-        ServerLocalisationService localisationService, 
+        ISptLogger<MiyakoChatBot> logger,
+        MailSendService mailSendService,
+        ServerLocalisationService serverLocalisationService,
         IEnumerable<MiyakoChatBotCommands> chatCommands
-    ) : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
+    ) : IDialogueChatBot
     {
         private static readonly MongoId _miyakoId = new(TraderService.MiyakoTraderId);
 
-        public override UserDialogInfo GetChatBot()
+        protected readonly IDictionary<string, MiyakoChatBotCommands> _chatCommands = chatCommands.ToDictionary(command => command.CommandPrefix);
+
+        public UserDialogInfo GetChatBot()
         {
             return new UserDialogInfo
             {
@@ -38,9 +45,81 @@ namespace MiyakoCarryService.Server.ChatBot
             };
         }
 
-        protected override string GetUnrecognizedCommandMessage()
+        public async ValueTask<string> HandleMessage(MongoId sessionId, SendMessageRequest request)
         {
-            return "未知指令! 输入 \"help\" 来查看可用指令。";
+            if (request.Text.Length == 0)
+            {
+                logger.Error(serverLocalisationService.GetText("chatbot-command_was_empty"));
+
+                return request.DialogId;
+            }
+
+            var splitCommand = request.Text.Split(" ");
+
+            if (
+                splitCommand.Length > 1
+                && _chatCommands.TryGetValue(splitCommand[0], out var commando)
+                && commando.Commands.Contains(splitCommand[1])
+            )
+            {
+                return await commando.Handle(splitCommand[1], GetChatBot(), sessionId, request);
+            }
+
+            if (string.Equals(splitCommand.FirstOrDefault(), "help", StringComparison.OrdinalIgnoreCase))
+            {
+                return await SendPlayerHelpMessage(sessionId, request);
+            }
+
+            mailSendService.SendLocalisedNpcMessageToPlayer(
+                sessionId, 
+                TraderService.MiyakoTraderId, 
+                MessageType.NpcTraderMessage, 
+                Locales.MIYAKOTRADERUNRECOGNIZEDCOMMAND, 
+                null
+            );
+
+            return string.Empty;
+        }
+
+        protected async ValueTask<string> SendPlayerHelpMessage(MongoId sessionId, SendMessageRequest request)
+        {
+            mailSendService.SendLocalisedNpcMessageToPlayer(
+                sessionId, 
+                TraderService.MiyakoTraderId, 
+                MessageType.NpcTraderMessage, 
+                Locales.MIYAKOTRADERAVAILABLECOMMANDSLIST, 
+                null
+            );
+
+            foreach (var chatCommand in _chatCommands.Values)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                mailSendService.SendDirectNpcMessageToPlayer(
+                    sessionId, 
+                    TraderService.MiyakoTraderId, 
+                    MessageType.NpcTraderMessage, 
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERAVAILABLECOMMANDSPREFIX), chatCommand.CommandPrefix), 
+                    null
+                );
+
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                foreach (var subCommand in chatCommand.Commands)
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId, 
+                        TraderService.MiyakoTraderId, 
+                        MessageType.NpcTraderMessage, 
+                        string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSUBCOMMAND), subCommand, chatCommand.GetCommandHelp(subCommand)), 
+                        null
+                    );
+
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+            }
+
+            return request.DialogId;
         }
     }
 }

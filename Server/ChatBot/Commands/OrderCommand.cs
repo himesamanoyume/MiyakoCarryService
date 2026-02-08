@@ -15,6 +15,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
 {
     [Injectable]
     public partial class OrderCommand(
+        ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
         OrderQuestController orderQuestController
     ) : ICommand
@@ -34,7 +35,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         {
             get
             {
-                return $"mcs {Command}\n下单指令:\nmcs {Command} {{人数}} {{护航级别}} {{时间}}\n护航级别: 1~5\n时长: 整数, 单位为小时\n示例: mcs {Command} 4 5 24";
+                return string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP), Command, Command, Command);
             }
         }
 
