@@ -63,6 +63,10 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         CheckSAINPlugin();
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
+        foreach (var kvp in LocalLocales.LoadingLocales)
+        {
+            LocaleManagerClass.LocaleManagerClass.UpdateLocales(kvp.Key, kvp.Value);
+        }
         EnableAllPatches();
         GameLoop.Instance.Init();
     }

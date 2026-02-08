@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
 using MiyakoCarryService.Server.Patches;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -53,13 +54,12 @@ namespace MiyakoCarryService.Server.Services
         {
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
-            // logger.Info("开始创建任务");
+            logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion,
                 TraderService.MiyakoTraderId,
                 mcsLeadPlayerId
             ));
-            // logger.Info("任务插入等待创建队列");
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);

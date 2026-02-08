@@ -1,0 +1,10 @@
+{
+    "Mcs/starting_order_generation": "开始生成订单",
+    "Mcs/starting_quest_creation": "开始创建任务",
+    "Mcs/save_order_info_exception": "保存订单信息异常",
+    "Mcs/save_mcs_player_profile_exception": "保存护航玩家存档异常",
+    "Mcs/cleaning_up_outdated_mcs_player_profile": "正在清理过期的护航玩家存档 {0}",
+    "Mcs/cannot_delete_file_not_found": "无法删除未找到的文件: {0}",
+    "Mcs/failed_load_mcs_player_profile": "没有获取到护航玩家存档",
+    "Mcs/accountid_is_invaild": "账号Id {0} 不合法"
+}

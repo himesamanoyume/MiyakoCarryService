@@ -7,6 +7,8 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.Server.Core.Services;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
@@ -14,7 +16,8 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
     public class OrderQuestGenerator(
         ISptLogger<OrderQuestGenerator> logger,
         RandomUtil randomUtil,
-        OrderQuestRewardGenerator orderQuestRewardGenerator
+        OrderQuestRewardGenerator orderQuestRewardGenerator,
+        ServerLocalisationService serverLocalisationService
     )
     {
         public RepeatableQuest GenerateOrderQuest(
@@ -38,7 +41,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 5 => 0.92f,
                 _ => 1f,
             };
-            // logger.Info("开始生成订单");
+            logger.Info(serverLocalisationService.GetText(Locales.STARTINGORDERGENERATION));
             var order = Generate(players, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate);
             return order;
         }
@@ -99,7 +102,6 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
             questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
-            // logger.Info("订单任务信息构建结束");
             return questTemplate;
         }
     }

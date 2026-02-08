@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -14,6 +15,7 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers.Ws;
+using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -25,6 +27,7 @@ namespace MiyakoCarryService.Server.Services
         ISptLogger<OrderInfoService> logger,
         NotificationHelper notificationHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
+        ServerLocalisationService serverLocalisationService,
         TimeUtil timeUtil,
         JsonUtil jsonUtil,
         FileUtil fileUtil
@@ -105,7 +108,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 catch (Exception e)
                 {
-                    // logger.Error("保存订单信息异常", e);
+                    logger.Error(serverLocalisationService.GetText(Locales.SAVEORDERINFOEXCEPTION), e);
                 }
             }
             finally
@@ -156,12 +159,10 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    // logger.Info($"准备清除 {orderInfo.McsLeadPlayerId} 的一个过期订单");
                     RemoveOrderInfo(orderInfo);
                     mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
-                        // logger.Info($"准备清除 {mcsBotPlayerId} 的Profile");
                         mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
                     }
                 }
@@ -176,7 +177,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 orderInfo.Status = EOrderInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
-                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 60; // 记得改回3600
+                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
             }
         }
 

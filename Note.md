@@ -45,7 +45,6 @@
 - - *关于指令系统和字幕系统，需要等待到有合适的联机同步方法后，才可继续推进*
 - 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
 - 修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息
-- 与护航玩家聊天时存档json的对应Users没有内容
 > 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
 - - 错误情况
 ```json
@@ -149,8 +148,6 @@
 
 ## 疑难杂症
 
-- 解散队伍报错，我觉得可能是因为当前的流程并不算真正建立了队伍，导致无法发送带有小队id的请求
----
 - - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
 - - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
 - - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
@@ -383,7 +380,10 @@
 - ~~健壮客户端没成功接收到机器人存档时的异常处理~~
 - ~~Fika副机报错~~
 - ~~fika下AddEnemyPatch会导致溢出~~
+- ~~实现服务端本地化~~
 - 将客户端的大量机器人Setting配置项放入服务端Config中（若为空则还是原来的默认值），实现Fika联机全局玩家统一的护航设置
+- 修复与护航聊天时存档json的对应Users没有内容
+- 让聊天机器人能够有头像
 
 ## Logic思想指导
 

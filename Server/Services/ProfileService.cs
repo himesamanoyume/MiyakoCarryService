@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Generators;
@@ -63,13 +64,13 @@ namespace MiyakoCarryService.Server.Services
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             var file = System.IO.Path.Combine(_profileFolderDir, mcsLeadPlayerId, $"{mcsBotPlayerId}.json");
-            // logger.Error($"正在删除 {mcsBotPlayerId}.json");
+            logger.Error(string.Format(serverLocalisationService.GetText(Locales.CLEANINGUPOUTDATEDMCSPLAYERPROFILE), mcsBotPlayerId));
             if (_profiles[mcsLeadPlayerId].ContainsKey(mcsBotPlayerId))
             {
                 _profiles[mcsLeadPlayerId].TryRemove(mcsBotPlayerId, out _);
                 if (!fileUtil.DeleteFile(file))
                 {
-                    // logger.Error($"Unable to delete file, not found: {file}");
+                    logger.Error(string.Format(serverLocalisationService.GetText(Locales.CANNOTDELETEFILENOTFOUND), file));
                 }
             }
 
@@ -81,8 +82,8 @@ namespace MiyakoCarryService.Server.Services
             var mcsBotPlayerProfile = GetMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
             if (mcsBotPlayerProfile is null)
             {
-                var errorInfo = "没能获取到护航玩家存档";
-                // logger.Error(errorInfo);
+                var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
+                logger.Error(errorInfo);
                 throw new NullReferenceException(errorInfo);
             }
 
@@ -135,7 +136,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 catch (Exception e)
                 {
-                    // logger.Error("保存护航存档异常", e);
+                    logger.Error(serverLocalisationService.GetText(Locales.SAVEMCSPLAYERPROFILEEXCEPTION), e);
                 }
             }
             finally
@@ -179,7 +180,6 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (orderInfoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
                             {
-                                // logger.Info($"加载订单中存在的 {mcsBotPlayerId} 存档");
                                 await LoadMcsBotPlayerProfileAsync(mcsLeadPlayerId, mcsBotPlayerId);
                             }
                         }
@@ -236,12 +236,10 @@ namespace MiyakoCarryService.Server.Services
                 _profiles.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerProfiles);
                 if (mcsBotPlayerProfiles is null)
                 {
-                    // logger.Error("mcsBotPlayerProfiles为空");
                     return null;
                 }
                 return mcsBotPlayerProfiles.FirstOrDefault(p => p.Key == mcsBotPlayerId).Value;
             }
-            // logger.Error($"_profiles没有key {mcsLeadPlayerId}");
             return null;
         }
 
@@ -250,7 +248,7 @@ namespace MiyakoCarryService.Server.Services
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
-                // logger.Error($"Account {mcsAid} does not exist");
+                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
             }
 
             return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
@@ -320,11 +318,6 @@ namespace MiyakoCarryService.Server.Services
             )
             {
                 logger.Error(serverLocalisationService.GetText("scav-missing_karma_settings", scavKarmaLevel));
-            }
-
-            if (logger.IsLogEnabled(LogLevel.Debug))
-            {
-                logger.Debug($"Generated player scav load out with karma level: {scavKarmaLevel}");
             }
 
             var baseBotNode = cloner.Clone(botHelper.GetBotTemplate("assault"));

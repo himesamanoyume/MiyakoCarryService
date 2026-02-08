@@ -7,7 +7,7 @@
             "types": [
                 "Completion"
             ],
-            "resetTime": 180,
+            "resetTime": 900,
             "numQuests": 100,
             "minPlayerLevel": 0,
             "rewardScaling": {

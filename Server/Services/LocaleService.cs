@@ -18,18 +18,20 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly string _globalLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "global");
+        private readonly string _serverLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "server");
         Dictionary<string, Dictionary<string, string>> _globalLocales = [];
+        Dictionary<string, Dictionary<string, string>> _serverLocales = [];
 
         public async Task OnPostLoadAsync()
         {
-            await LoadGlobalLocales();
-            LoadServerLocales();
+            _globalLocales = await RecursiveLoadFiles(_globalLocaleFolderDir);
+            _serverLocales = await RecursiveLoadFiles(_serverLocaleFolderDir);
+            await UpdateGlobalLocales(_globalLocales);
+            await UpdateGlobalLocales(_serverLocales);
         }
 
-        private async Task LoadGlobalLocales()
+        private async Task UpdateGlobalLocales(Dictionary<string, Dictionary<string, string>> locales)
         {
-            _globalLocales = await RecursiveLoadFiles(_globalLocaleFolderDir);
-
             foreach ((var locale, var lazyLoadedValue) in databaseService.GetLocales().Global)
             {
                 lazyLoadedValue.AddTransformer(localeData =>
@@ -39,13 +41,13 @@ namespace MiyakoCarryService.Server.Services
                         return localeData;
                     }
 
-                    _globalLocales.TryGetValue(locale, out var MiyakoCarryServiceLocales);
-                    if (MiyakoCarryServiceLocales is null)
+                    locales.TryGetValue(locale, out var miyakoCarryServiceLocales);
+                    if (miyakoCarryServiceLocales is null)
                     {
                         return localeData;
                     }
 
-                    foreach (var locale in MiyakoCarryServiceLocales)
+                    foreach (var locale in miyakoCarryServiceLocales)
                     {
                         if (localeData.ContainsKey(locale.Key))
                         {
@@ -60,11 +62,6 @@ namespace MiyakoCarryService.Server.Services
                     return localeData;
                 });
             }
-        }
-
-        private void LoadServerLocales()
-        {
-
         }
 
         private async Task<Dictionary<string, Dictionary<string, string>>> RecursiveLoadFiles(string path)

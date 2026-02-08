@@ -43,14 +43,10 @@ namespace MiyakoCarryService.Server.Patches
                 __result = httpResponseUtil.AppendErrorToOutput(output, message);
                 return false;
             }
-
-            // logger.Info(repeatables.RepeatableType.Name);
-            // logger.Info(questToReplace.Name);
             
             if (repeatables.RepeatableType.Name == "Order")
             {
-                var message = serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
-                logger.Warning(message);
+                logger.Warning(serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace"));
 
                 var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
                 var orderInfos = orderInfoController.GetAllOrderInfo();

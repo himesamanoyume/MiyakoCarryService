@@ -8,13 +8,13 @@
     "695207e8bcc1dd1e3c80dfcb failMessageText 6952ced4bcc1dd1e3c80dfcb 0": "订单已取消",
     "695207e8bcc1dd1e3c80dfcb name 6952ced4bcc1dd1e3c80dfcb 0": "护航订单",
     "695207e8bcc1dd1e3c80dfcb note 6952ced4bcc1dd1e3c80dfcb 0": "护航订单",
-    "695207e8bcc1dd1e3c80dfcb startedMessageText 6952ced4bcc1dd1e3c80dfcb 0": " ",
+    "695207e8bcc1dd1e3c80dfcb startedMessageText 6952ced4bcc1dd1e3c80dfcb 0": "",
     "695207e8bcc1dd1e3c80dfcb successMessageText 6952ced4bcc1dd1e3c80dfcb 0": "订单已付款",
     "695207e8bcc1dd1e3c80dfcb acceptPlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "已确认下单",
     "695207e8bcc1dd1e3c80dfcb declinePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "已拒绝订单",
     "695207e8bcc1dd1e3c80dfcb completePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "订单已结算",
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "本订单不支持刷新",
-    "Mcs/A.Basic": "A. 基础",
+    "Mcs/A.Basic": "A. 基础 | 暂不生效",
     "Mcs/PriceThreshold Key": "价值阈值",
     "Mcs/PriceThreshold Description": "低于该值的战利品会被忽略",
     "Mcs/ArmorLevelThreshold Key": "防护等级阈值",
@@ -41,6 +41,5 @@
     "Mcs/BlockItemTypeSpecial": "屏蔽特殊物品",
     "Mcs/BlockItemTypeWeapon": "屏蔽枪械",
     "Mcs/BlockItemTypeAll": "全选/取消全选",
-    "Mcs/LoadingLocales": "当前正在尝试加载本地化文本, 如果您发现长期处于当前状态, 请确保您已正确安装服务端Mod MiyakoCarryServiceServer, 否则无法获取到本地化文本",
     "Mcs/OriginalWebsite": "官方发布地址"
 }
