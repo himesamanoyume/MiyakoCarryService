@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            foreach (var botOwner in SquadMgr.GetAllMcsBotPlayer())
+            foreach (var botOwner in SquadMgr.GetAllAliveMcsBotPlayer())
             {
                 if (botOwner.HearingSensor.method_6(__instance.Transform.position, 50f, out var dist))
                 {

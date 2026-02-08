@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             if (!__instance.IsHitPointAlreadyProcessed(info.HitPoint))
             {
-                foreach (var botOwner in SquadMgr.GetAllMcsBotPlayer())
+                foreach (var botOwner in SquadMgr.GetAllAliveMcsBotPlayer())
                 {
                     if ((botOwner.Position - info.HitPoint).sqrMagnitude <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                     {

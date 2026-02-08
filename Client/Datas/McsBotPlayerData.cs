@@ -146,7 +146,7 @@ namespace MiyakoCarryService.Client.Datas
                     IsRunningCoroutine = true;
                     // 模拟打开容器的时间
                     yield return new WaitForSeconds(2f);
-                    BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, LootingTarget.Item.ShortName.McsLocalized()));
+                    // BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, LootingTarget.Item.ShortName.McsLocalized()));
                 }
             }
             finally

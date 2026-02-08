@@ -142,12 +142,31 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsAILeadPlayers;
         }
 
+        /// <summary>
+        /// 注意：即便是死亡的BotOwner也会获取
+        /// </summary>
         public List<BotOwner> GetAllMcsBotPlayer()
         {
             var mcsBotPlayers = new List<BotOwner>();
             foreach (var botOwners in _mcsSquadDict.Values)
             {
                 mcsBotPlayers.AddRange(botOwners.Values);
+            }
+            return mcsBotPlayers;
+        }
+
+        public List<BotOwner> GetAllAliveMcsBotPlayer()
+        {
+            var mcsBotPlayers = new List<BotOwner>();
+            foreach (var botOwners in _mcsSquadDict.Values)
+            {
+                foreach (var botOwner in botOwners.Values)
+                {
+                    if (!botOwner.IsDead)
+                    {
+                        mcsBotPlayers.Add(botOwner);
+                    }
+                }
             }
             return mcsBotPlayers;
         }
