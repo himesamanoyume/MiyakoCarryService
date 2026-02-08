@@ -1,10 +1,11 @@
 {
-    "Mcs/starting_order_generation": "Starting order generation",
-    "Mcs/starting_quest_creation": "Starting quest creation",
-    "Mcs/save_order_info_exception": "Exception while saving order information",
-    "Mcs/save_mcs_player_profile_exception": "Exception while saving Mcs player profile",
-    "Mcs/cleaning_up_outdated_mcs_player_profile": "Cleaning up outdated Mcs player profile {0}",
-    "Mcs/cannot_delete_file_not_found": "Cannot delete file not found: {0}",
-    "Mcs/failed_load_mcs_player_profile": "Failed to load Mcs player profile",
-    "Mcs/accountid_is_invaild": "Account ID {0} is invalid"
+    "Mcs/StartingOrderGeneration": "Starting order generation",
+    "Mcs/StartingQuestCreation": "Starting quest creation",
+    "Mcs/SaveOrderInfoException": "Exception while saving order information",
+    "Mcs/SaveMcsPlayerProfileException": "Exception while saving Mcs player profile",
+    "Mcs/CleaningUpOutdatedMcsPlayerProfile": "Cleaning up outdated Mcs player profile {0}",
+    "Mcs/CannotDeleteFileNotFound": "Cannot delete file not found: {0}",
+    "Mcs/FailedLoadMcsPlayerProfile": "Failed to load Mcs player profile",
+    "Mcs/AccountidIsInvaild": "Account ID {0} is invalid",
+    "Mcs/MiyakoTraderOrderDescription": "Order information:\nNumber of Carry Service player: {0}\nCarry Service level: {1}\nDuration: {2} hours"
 }

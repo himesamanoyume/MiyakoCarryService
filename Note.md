@@ -383,7 +383,23 @@
 - ~~实现服务端本地化~~
 - 将客户端的大量机器人Setting配置项放入服务端Config中（若为空则还是原来的默认值），实现Fika联机全局玩家统一的护航设置
 - 修复与护航聊天时存档json的对应Users没有内容
-- 让聊天机器人能够有头像
+- ~~让宫子的聊天消息能够有头像~~
+- - **继承`IDialogueChatBot`重新实现一个机器人**
+```json
+{
+  "_id": "68fd64e576b0eed9c0350afb",
+  "uid": "54cb50c76803fa8b248b4571",
+  "type": 10,
+  "dt": 1761436901,
+  "templateId": "59674eb386f774539f14813a description",
+  "text": "",
+  "hasRewards": false,
+  "rewardCollected": false,
+  "items": {}
+}
+
+
+```
 
 ## Logic思想指导
 

@@ -56,9 +56,8 @@ namespace MiyakoCarryService.Server.Services
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
-                RepeatableQuestType.Completion,
-                TraderService.MiyakoTraderId,
-                mcsLeadPlayerId
+                RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
+                mcsLeadPlayerId, players, carryServiceLevel, duration
             ));
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
@@ -106,9 +105,9 @@ namespace MiyakoCarryService.Server.Services
         }
 
         public RepeatableQuest GenerateOrderTemplate(
-            RepeatableQuestType type,
-            MongoId traderId,
-            MongoId sessionId)
+            RepeatableQuestType type, MongoId traderId, MongoId sessionId,
+            int players, int carryServiceLevel, int duration
+        )
         {
             var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
             if (questData is null)
@@ -135,7 +134,7 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = questData.Description.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
+            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, carryServiceLevel, duration);
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)

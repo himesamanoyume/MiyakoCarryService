@@ -2,10 +2,13 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
+using MiyakoCarryService.Server.Services;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Services;
 
 namespace MiyakoCarryService.Server.ChatBot.Commands
@@ -45,16 +48,24 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                 int level = int.Parse(match.Groups[2].Value);
                 int duration = int.Parse(match.Groups[3].Value);
 
-                mailSendService.SendUserMessageToPlayer(sessionId, commandHandler,
-                    $"已成功下单！您的订单信息: \n护航{players}人, 护航{level}级, 时长{duration}小时\n请到商人界面接取订单并付款~"
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId, 
+                    TraderService.MiyakoTraderId, 
+                    MessageType.NpcTraderMessage, 
+                    Locales.MIYAKOTRADERORDERNEWQUEST,
+                    null
                 );
 
                 orderQuestController.CreateOrderQuest(sessionId, players, level, duration);
             }
             else
             {
-                mailSendService.SendUserMessageToPlayer(sessionId, commandHandler,
-                    "指令错误"
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId, 
+                    TraderService.MiyakoTraderId, 
+                    MessageType.NpcTraderMessage, 
+                    Locales.MIYAKOTRADERCOMMANDERROR,
+                    null
                 );
             }
             return new(value);

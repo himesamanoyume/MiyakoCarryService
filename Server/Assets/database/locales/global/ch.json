@@ -4,7 +4,6 @@
     "6952ced4bcc1dd1e3c80dfcb FirstName": "月雪宫子",
     "6952ced4bcc1dd1e3c80dfcb FullName": "月雪宫子",
     "6952ced4bcc1dd1e3c80dfcb Location": "基沃托斯",
-    "695207e8bcc1dd1e3c80dfcb description 6952ced4bcc1dd1e3c80dfcb 0": "订单信息:\n护航人数: {0}人\n护航级别: {1}级\n持续时长: {2}小时",
     "695207e8bcc1dd1e3c80dfcb failMessageText 6952ced4bcc1dd1e3c80dfcb 0": "订单已取消",
     "695207e8bcc1dd1e3c80dfcb name 6952ced4bcc1dd1e3c80dfcb 0": "护航订单",
     "695207e8bcc1dd1e3c80dfcb note 6952ced4bcc1dd1e3c80dfcb 0": "护航订单",
@@ -41,5 +40,8 @@
     "Mcs/BlockItemTypeSpecial": "屏蔽特殊物品",
     "Mcs/BlockItemTypeWeapon": "屏蔽枪械",
     "Mcs/BlockItemTypeAll": "全选/取消全选",
-    "Mcs/OriginalWebsite": "官方发布地址"
+    "Mcs/OriginalWebsite": "官方发布地址",
+    "Mcs/MiyakoTraderWelcome": "欢迎来到宫子护航店 ~",
+    "Mcs/MiyakoTraderCommandError": "指令错误",
+    "Mcs/MiyakoTraderOrderNewQuest": "您已成功下单！您的订单信息可到看商人任务界面查看\n接取订单并进行付款即可~"
 }

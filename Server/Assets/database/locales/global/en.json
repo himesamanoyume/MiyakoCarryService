@@ -4,7 +4,6 @@
     "6952ced4bcc1dd1e3c80dfcb FirstName": "Tsukiyuki Miyako",
     "6952ced4bcc1dd1e3c80dfcb FullName": "Tsukiyuki Miyako",
     "6952ced4bcc1dd1e3c80dfcb Location": "Kivotos",
-    "695207e8bcc1dd1e3c80dfcb description 6952ced4bcc1dd1e3c80dfcb 0": "Order information:\nNumber of Carry Service player: {0}\nCarry Service level: {1}\nDuration: {2} hours",
     "695207e8bcc1dd1e3c80dfcb failMessageText 6952ced4bcc1dd1e3c80dfcb 0": "Order cancelled",
     "695207e8bcc1dd1e3c80dfcb name 6952ced4bcc1dd1e3c80dfcb 0": "Carry Service Order",
     "695207e8bcc1dd1e3c80dfcb note 6952ced4bcc1dd1e3c80dfcb 0": "Carry Service Order",
@@ -41,5 +40,7 @@
     "Mcs/BlockItemTypeSpecial": "Block Special",
     "Mcs/BlockItemTypeWeapon": "Block Weapon",
     "Mcs/BlockItemTypeAll": "Select/Deselect All",
-    "Mcs/OriginalWebsite": "Official website"
+    "Mcs/OriginalWebsite": "Official website",
+    "Mcs/MiyakoTraderWelcome": "Welcome to Miyako Carry Service ~",
+    "Mcs/MiyakoTraderCommandError": "Command Error"
 }
