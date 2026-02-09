@@ -1,0 +1,1101 @@
+<html>
+    <head>
+        <link rel='stylesheet' id='classic-theme-styles-css'
+            href='https://sns.oddba.cn/wp-includes/css/classic-themes.min.css?ver=1' type='text/css' media='all' />
+        <link rel='stylesheet' id='iconfont-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/assets/fonts/iconfont.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='iconfont_0-css'
+            href='https:////at.alicdn.com/t/c/font_3773192_7cp0piblroa.css?ver=1.6.89.2.31' type='text/css' media='all' />
+        <link rel='stylesheet' id='fancybox-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/assets/css/jquery.fancybox.min.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='awesome-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/assets/css/font-awesome.min.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='Swiper-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/assets/css/swiper.min.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='layui-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/extend/layui/css/layui.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='jinsom-css'
+            href='https://sns.oddba.cn/wp-content/themes/LightSNS/cdn/assets/css/jinsom.min.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <link rel='stylesheet' id='ueditor-Highlighter-css-css'
+            href='https://sns.oddba.cn/Extend/editor/pc/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css?ver=1.6.89.2.31'
+            type='text/css' media='all' />
+        <style type="text/css">
+            .aplayer-narrow {
+                width: 66px;
+            }
+
+            .aplayer-narrow .aplayer-info {
+                display: none;
+            }
+
+            .aplayer-withlrc.aplayer-narrow {
+                width: 90px;
+            }
+
+            .aplayer-withlrc.aplayer .aplayer-pic {
+                height: 90px;
+                width: 90px;
+            }
+
+            .aplayer-withlrc.aplayer .aplayer-info {
+                margin-left: 90px;
+                height: 90px;
+            }
+
+            .aplayer-withlrc.aplayer .aplayer-lrc {
+                display: block;
+            }
+
+            .aplayer-withlrc.aplayer .aplayer-info {
+                padding: 10px 7px 0 7px;
+            }
+
+            .aplayer-withlist.aplayer .aplayer-info {
+                border-bottom: 1px solid #e9e9e9;
+            }
+
+            .aplayer-withlist.aplayer .aplayer-list {
+                display: block;
+            }
+
+            .aplayer-withlist.aplayer .aplayer-icon-menu {
+                display: inline !important;
+            }
+
+            .aplayer {
+                font-family: Arial, Helvetica, sans-serif;
+                margin: 5px;
+                max-width: 500px;
+                box-shadow: 0 0 2px #ccc;
+                border: 1px solid #D2D2D2;
+                border-radius: 2px;
+                overflow: hidden;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                line-height: initial;
+            }
+
+            .aplayer * {
+                -webkit-box-sizing: content-box;
+                box-sizing: content-box;
+            }
+
+            .aplayer .aplayer-icon {
+                width: 15px;
+                height: 15px;
+                border: none;
+                background-color: transparent;
+                outline: none;
+                cursor: pointer;
+                opacity: .8;
+                vertical-align: middle;
+                padding: 0;
+                font-size: 12px;
+                margin: 0;
+                display: inline;
+            }
+
+            .aplayer .aplayer-icon .aplayer-fill {
+                -webkit-transition: all .2s ease-in-out;
+                transition: all .2s ease-in-out;
+            }
+
+            .aplayer .aplayer-lrc-content {
+                display: none;
+            }
+
+            .aplayer .aplayer-pic {
+                position: relative;
+                float: left;
+                height: 66px;
+                width: 66px;
+                background-image: url(data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAeAAD/4QMfaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJBZG9iZSBYTVAgQ29yZSA1LjYtYzA2NyA3OS4xNTc3NDcsIDIwMTUvMDMvMzAtMjM6NDA6NDIgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjE2NjQ3NUZBM0Y4RDExRTY4NzJCRDdCNkZCQTQ0MjNBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjE2NjQ3NUY5M0Y4RDExRTY4NzJCRDdCNkZCQTQ0MjNBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSI5OENEMEFFRjM0NTI1NjE0NEREQkU4RjkxRjAwNjM3NiIgc3RSZWY6ZG9jdW1lbnRJRD0iOThDRDBBRUYzNDUyNTYxNDREREJFOEY5MUYwMDYzNzYiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7/7gAOQWRvYmUAZMAAAAAB/9sAhAAQCwsLDAsQDAwQFw8NDxcbFBAQFBsfFxcXFxcfHhca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);
+                background-size: 100%;
+                -webkit-transition: all 0.3s ease;
+                transition: all 0.3s ease;
+            }
+
+            .aplayer .aplayer-pic .aplayer-button {
+                position: absolute;
+                border-radius: 50%;
+                opacity: 0.8;
+                cursor: pointer;
+                text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+                -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.2);
+                -webkit-transition: all 0.1s ease;
+                transition: all 0.1s ease;
+            }
+
+            .aplayer .aplayer-pic .aplayer-button:hover {
+                opacity: 1;
+            }
+
+            .aplayer .aplayer-pic .aplayer-button .aplayer-fill {
+                fill: #fff;
+            }
+
+            .aplayer .aplayer-pic .aplayer-hide {
+                display: none;
+            }
+
+            .aplayer .aplayer-pic .aplayer-play {
+                width: 26px;
+                height: 26px;
+                border: 2px solid #fff;
+                bottom: 50%;
+                right: 50%;
+                margin: 0 -15px -15px 0;
+            }
+
+            .aplayer .aplayer-pic .aplayer-play .aplayer-icon-play {
+                position: absolute;
+                top: 3px;
+                left: 4px;
+                height: 20px;
+                width: 20px;
+            }
+
+            .aplayer .aplayer-pic .aplayer-pause {
+                width: 26px;
+                height: 26px;
+                border: 2px solid #fff;
+                bottom: 50%;
+                right: 50%;
+                margin: 0 -15px -15px 0;
+            }
+
+            .aplayer .aplayer-pic .aplayer-pause .aplayer-icon-pause {
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                height: 20px;
+                width: 20px;
+            }
+
+            .aplayer .aplayer-info {
+                margin-left: 66px;
+                padding: 14px 7px 0 10px;
+                height: 66px;
+                -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+
+            .aplayer .aplayer-info .aplayer-music {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                margin: 0 0 13px 5px;
+                -webkit-user-select: text;
+                -moz-user-select: text;
+                -ms-user-select: text;
+                user-select: text;
+                cursor: default;
+                padding-bottom: 2px;
+            }
+
+            .aplayer .aplayer-info .aplayer-music .aplayer-title {
+                font-size: 14px;
+            }
+
+            .aplayer .aplayer-info .aplayer-music .aplayer-author {
+                font-size: 12px;
+                color: #666;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller {
+                position: relative;
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap {
+                margin: 0 0 0 5px;
+                padding: 4px 0;
+                cursor: pointer !important;
+                -webkit-box-flex: 1;
+                -ms-flex: 1;
+                flex: 1;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+                position: relative;
+                height: 2px;
+                width: 100%;
+                background: #cdcdcd;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                background: #aaa;
+                height: 2px;
+                -webkit-transition: all 0.5s ease;
+                transition: all 0.5s ease;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played {
+                position: absolute;
+                background: #e12828 !important;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                height: 2px;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb {
+                position: absolute;
+                border: 1px solid #aaa !important;
+                top: 0;
+                right: 5px;
+                margin-top: -4px;
+                margin-right: -10px;
+                height: 8px;
+                width: 8px;
+                border-radius: 50%;
+                background: #fff;
+                cursor: pointer !important;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time {
+                position: relative;
+                right: 0;
+                bottom: 3px;
+                height: 17px;
+                color: #999;
+                font-size: 11px;
+                padding-left: 7px;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-time-inner {
+                vertical-align: middle;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon {
+                cursor: pointer;
+                -webkit-transition: all 0.2s ease;
+                transition: all 0.2s ease;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon .aplayer-fill {
+                fill: #666;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon.aplayer-icon-mode {
+                margin-right: 4px;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon:hover .aplayer-fill {
+                fill: #000;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon.aplayer-icon-menu {
+                display: none;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time.aplayer-time-narrow .aplayer-icon-mode {
+                display: none;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-time.aplayer-time-narrow .aplayer-icon-menu {
+                display: none;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap {
+                position: relative;
+                display: inline-block;
+                margin-left: 3px;
+                cursor: pointer !important;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap:hover .aplayer-volume-bar-wrap {
+                display: block;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap .aplayer-volume-bar-wrap {
+                display: none;
+                position: absolute;
+                bottom: 15px;
+                right: -3px;
+                width: 25px;
+                height: 40px;
+                z-index: 99;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap .aplayer-volume-bar-wrap .aplayer-volume-bar {
+                position: absolute;
+                bottom: 0;
+                right: 10px;
+                width: 5px;
+                height: 35px;
+                background: #aaa;
+            }
+
+            .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap .aplayer-volume-bar-wrap .aplayer-volume-bar .aplayer-volume {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 5px;
+                -webkit-transition: all 0.1s ease;
+                transition: all 0.1s ease;
+            }
+
+            .aplayer .aplayer-lrc {
+                display: none;
+                position: relative;
+                height: 30px;
+                text-align: center;
+                overflow: hidden;
+                margin: -10px 0 7px;
+            }
+
+            .aplayer .aplayer-lrc:before {
+                position: absolute;
+                top: 0;
+                z-index: 1;
+                display: block;
+                overflow: hidden;
+                width: 100%;
+                height: 10%;
+                content: ' ';
+                background: -webkit-gradient(linear, left top, left bottom, from(white), to(rgba(255, 255, 255, 0)));
+                background: linear-gradient(to bottom, white 0%, rgba(255, 255, 255, 0) 100%);
+                filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#00ffffff', GradientType=0);
+            }
+
+            .aplayer .aplayer-lrc:after {
+                position: absolute;
+                bottom: 0;
+                z-index: 1;
+                display: block;
+                overflow: hidden;
+                width: 100%;
+                height: 33%;
+                content: ' ';
+                background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(rgba(255, 255, 255, 0.8)));
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 100%);
+                filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ccffffff', GradientType=0);
+            }
+
+            .aplayer .aplayer-lrc p {
+                font-size: 12px;
+                color: #666;
+                line-height: 16px !important;
+                height: 16px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-transition: all 0.5s ease-out;
+                transition: all 0.5s ease-out;
+                opacity: 0.4;
+                overflow: hidden;
+            }
+
+            .aplayer .aplayer-lrc p.aplayer-lrc-current {
+                opacity: 1;
+                overflow: visible;
+                height: initial !important;
+            }
+
+            .aplayer .aplayer-lrc .aplayer-lrc-contents {
+                width: 100%;
+                -webkit-transition: all 0.5s ease-out;
+                transition: all 0.5s ease-out;
+                -webkit-user-select: text;
+                -moz-user-select: text;
+                -ms-user-select: text;
+                user-select: text;
+                cursor: default;
+            }
+
+            .aplayer .aplayer-list {
+                overflow: auto;
+                -webkit-transition: all 0.5s ease;
+                transition: all 0.5s ease;
+                will-change: height;
+                display: none;
+            }
+
+            .aplayer .aplayer-list.aplayer-list-hide {
+                height: 0 !important;
+            }
+
+            .aplayer .aplayer-list::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .aplayer .aplayer-list::-webkit-scrollbar-track {
+                background-color: #f9f9f9;
+            }
+
+            .aplayer .aplayer-list::-webkit-scrollbar-thumb {
+                border-radius: 3px;
+                background-color: #eee;
+            }
+
+            .aplayer .aplayer-list::-webkit-scrollbar-thumb:hover {
+                background-color: #ccc;
+            }
+
+            .aplayer .aplayer-list ol {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .aplayer .aplayer-list ol li {
+                position: relative;
+                height: 32px;
+                line-height: 32px;
+                padding: 0 15px;
+                font-size: 12px;
+                border-top: 1px solid #e9e9e9;
+                cursor: pointer;
+                -webkit-transition: all 0.2s ease;
+                transition: all 0.2s ease;
+                overflow: hidden;
+            }
+
+            .aplayer .aplayer-list ol li:hover {
+                background: #efefef;
+            }
+
+            .aplayer .aplayer-list ol li.aplayer-list-light {
+                background: #e9e9e9;
+            }
+
+            .aplayer .aplayer-list ol li.aplayer-list-light .aplayer-list-cur {
+                display: inline-block;
+            }
+
+            .aplayer .aplayer-list ol li .aplayer-list-cur {
+                display: none;
+                width: 3px;
+                height: 22px;
+                position: absolute;
+                left: 0;
+                top: 5px;
+                cursor: pointer;
+            }
+
+            .aplayer .aplayer-list ol li .aplayer-list-index {
+                color: #666;
+                margin-right: 12px;
+                cursor: pointer;
+            }
+
+            .aplayer .aplayer-list ol li .aplayer-list-author {
+                color: #666;
+                float: right;
+                cursor: pointer;
+            }
+
+            @-webkit-keyframes aplayer-roll {
+                0% {
+                    left: 0;
+                }
+
+                100% {
+                    left: -100%;
+                }
+            }
+
+            @keyframes aplayer-roll {
+                0% {
+                    left: 0;
+                }
+
+                100% {
+                    left: -100%;
+                }
+            }
+        </style>
+        <style type="text/css">
+            .jinsom-info-card .btn span {
+                padding: 10px 14px;
+                margin: 0px 5px;
+            }
+
+            .jinsom-user-info-card {
+                width: 0;
+                height: 0;
+                overflow: hidden;
+                box-shadow: none;
+            }
+
+            .yxyhgylzz {
+                margin-bottom: 20px;
+            }
+
+            .yxyhgylzx {
+                font-size: 18px;
+                color: #888;
+                letter-spacing: 0;
+                text-align: center;
+                line-height: 22px;
+                font-weight: 700;
+                border: none !important;
+            }
+
+            .yxyhgylzx span {
+                position: relative;
+                display: inline-block;
+                vertical-align: middle;
+                width: 50px;
+                margin: 0;
+            }
+
+            .yxyhgylzx span:after {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 1px;
+                -webkit-transform: scaleY(1);
+                transform: scaleY(1);
+                background: #e6e6e6;
+            }
+
+            .yxyhgylzz li {
+                width: 260px;
+                margin: 0 auto;
+                max-height: 25px;
+                overflow: hidden;
+                text-align: left;
+                line-height: 25px;
+            }
+
+            .yxyhgylzz li a {
+                color: #888;
+                position: absolute;
+                overflow: hidden;
+                width: 235px;
+                left: 45px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .yxyhgylxh i {
+                padding: 0px 4px;
+                border-radius: 50%;
+                text-align: center;
+                transform: rotate(10deg);
+                font-style: normal;
+                font-size: 10px;
+            }
+
+            .yxyhgylxh li:nth-child(1) i {
+                border: 1px solid rgba(244, 67, 54, 0.5);
+                border-right-color: transparent;
+                color: #F44336;
+            }
+
+            .yxyhgylxh li:nth-child(2) i {
+                border: 1px solid rgba(255, 193, 7, 0.5);
+                border-right-color: transparent;
+                color: #FFC107;
+            }
+
+            .yxyhgylxh li:nth-child(3) i {
+                border: 1px solid rgba(33, 150, 243, 0.5);
+                border-right-color: transparent;
+                color: #2196F3;
+            }
+
+            .yxyhgylxh li:nth-child(4) i {
+                border: 1px solid rgba(76, 175, 80, 0.5);
+                border-right-color: transparent;
+                color: #4CAF50;
+            }
+
+            .yxyhgylxh li:nth-child(5) i {
+                border: 1px solid rgba(189, 100, 204, 0.5);
+                border-right-color: transparent;
+                color: #c47dd0;
+            }
+
+            .yxyhgylxh li:nth-child(6) i {
+                border: 1px solid rgba(72, 199, 187, 0.5);
+                border-right-color: transparent;
+                color: #4bc9be;
+            }
+
+            .yxyhgylxh li:nth-child(n+6) i {
+                border: 1px solid #999;
+                border-right-color: transparent;
+                color: #999;
+            }
+
+            .jinsom-info-card-bg .desc {
+                white-space: unset;
+                margin: 5px;
+                width: auto;
+                text-align: center;
+            }
+
+            .jinsom-info-card-bg .desc em,
+            .jinsom-info-card-bg .rza em {
+                font-style: normal;
+                font-weight: bold;
+                color: #00BCD4;
+            }
+
+            .jinsom-info-card-bg .desc span {
+                width: auto;
+                float: left;
+                font-style: normal;
+                max-width: 210px;
+            }
+
+            .jinsom-info-card-bg {
+                height: auto;
+                padding-bottom: 3px;
+            }
+
+            .jinsom-info-card-bg .rza {
+                color: #fff;
+                margin-top: 5px;
+                font-size: 12px;
+            }
+
+            .jinsom-info-card-avatar .bjlk {
+                display: block;
+                width: 66px;
+                height: 66px;
+                position: absolute;
+                bottom: 0;
+            }
+
+            .yxyhgylzz li:nth-child(10) i {
+                padding: 0 1px;
+            }
+        </style>
+        <style type="text/css">
+            .jinsom-slider {
+                margin-top: 10px;
+                width: var(--jinsom-width);
+            }
+
+            .jinsom-slider .swiper-slide {
+                border-radius: var(--jinsom-border-radius);
+            }
+
+            .jinsom-slider {
+                height: 330px;
+            }
+
+            /* 夜间模式 */
+            .theme-dark {
+                --head-background: rgba(50, 51, 53, 0.7);
+            }
+
+            /* 日间模式 */
+            .theme-light {
+                --head-normal-color: #565656;
+                --head-hover-color: #fff;
+                --head-menu-two-normal: #565656;
+                --head-menu-one-normal: #ffffff;
+                --head-background: rgba(62, 53, 132, 0.7);
+                --head-search-color: #ffffff;
+                --head-username-color: #ffffff;
+            }
+
+            /*全站宽度*/
+            :root {
+                --jinsom-width: 1250px;
+                --jinsom-color: #3e3584;
+                --jinsom-border-radius: 5px;
+            }
+
+
+            /*折叠高度*/
+            .jinsom-post-content.hidden {
+                max-height: 300px;
+            }
+
+
+            body {
+                background-image: url(https://sns.oddba.cn/static/images/bg/bg4.jpg);
+                background-repeat: repeat;
+                background-attachment: fixed;
+                background-position: center center;
+                background-color: #e8e8e8;
+                background-size: cover;
+            }
+
+            .jinsom-header {
+                background-image: url();
+                background-repeat: repeat-x;
+                background-attachment: none;
+                background-position: center center;
+                background-color: var(--head-background);
+                background-size: cover;
+            }
+
+            /*一级菜单导航*/
+            .jinsom-menu ul li a {
+                font-size: 17px;
+                color: var(--head-menu-one-normal);
+            }
+
+            .jinsom-menu ul li.current-menu-item a {
+                color: #d6c91d;
+            }
+
+            .jinsom-menu ul li.menu-item a:hover {
+                color: #d6c91d;
+            }
+
+            /*右上角按钮颜色*/
+            .jinsom-header-right .search i {
+                color: var(--head-search-color);
+            }
+
+            .jinsom-header-right .jinsom-notice i {
+                color: var(--head-notice-color);
+            }
+
+            .jinsom-header-right .publish {
+                color: var(--head-publish-color);
+            }
+
+
+            .jinsom-header-menu-avatar>p {
+                color: var(--head-username-color);
+            }
+
+            .jinsom-header-right .login {
+                color: #ffffff;
+                background: #6D89BB;
+            }
+
+            .jinsom-header-right .reg {
+                color: #ffffff;
+                background: #5FB878;
+            }
+
+            .jinsom-menu ul li.menu-item-has-children ul li a,
+            .jinsom-menu>ul>li.menu-item-has-children>ul>li:hover>ul>li>a {
+                color: var(--head-menu-two-normal);
+                font-size: 14px
+            }
+
+            .jinsom-menu ul li ul li:hover {
+                background-color: #3e3584;
+            }
+
+            .jinsom-menu ul li.menu-item ul li a:hover,
+            .jinsom-menu>ul>li.menu-item-has-children>ul>li:hover a,
+            .jinsom-menu>ul>li.menu-item-has-children>ul>li:hover>ul>li:hover>a {
+                color: #fff;
+            }
+
+            .jinsom-menu ul li.menu-item-has-children ul li.current-menu-item a,
+            .jinsom-menu ul li.menu-item-has-children ul li ul li.current-menu-item a {
+                color: #000000;
+            }
+
+            .jinsom-header-menu-avatar>ul li a {
+                color: var(--head-normal-color);
+            }
+
+            .jinsom-header-menu-avatar>ul li:hover a {
+                color: var(--head-hover-color);
+                background-color: #3e3584;
+            }
+
+            /*下载统计查看隐藏*/
+            .jinsom-file-download .download-note {
+                display: none;
+            }
+
+            /*夜晚白天*/
+            .theme-dark {
+                --oddba-lbdl-color: #5fb878;
+                --oddba-lhdl-color: #5fb878;
+                --oddba-lzdh-bg: #323335;
+                --jinsom-color: #5fb878 !important;
+                --oddba-lzdh-footerbg: rgba(50, 51, 53, 0.7);
+            }
+
+            .theme-light {
+                --oddba-lbdl-color: #ffffff;
+                --oddba-lhdl-color: #ff0000;
+                --oddba-lzdh-bg: #3e3584;
+                --jinsom-color: #3e3584 !important;
+                --oddba-lzdh-footerbg: rgba(62, 53, 132, 0.7);
+            }
+
+            .chongye-show-author-box {
+                background-color: var(--main-bg-color) !important;
+            }
+
+            .jinsom-footer {
+                background-color: var(--oddba-lzdh-footerbg) !important;
+            }
+
+            /*回复改色*/
+            .jinsom-comments-btn.opacity {
+                background-color: #000;
+                animation: bg-color 6s infinite
+            }
+
+            /*登录注册忘记密码*/
+            .jinsom-sidebar-login-btn {
+                width: 91px !important;
+            }
+
+            .jinsom-sidebar-login span {
+                width: 90px !important;
+                height: 38px !important;
+                line-height: 38px !important;
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                text-align: center !important;
+                border-radius: 3px !important;
+                cursor: pointer !important;
+                display: inline-block !important;
+                background-color: #ff5722 !important;
+                color: #fff !important;
+                margin: 0 !important;
+                z-index: 0 !important;
+                position: static !important;
+            }
+
+            .jinsom-sidebar-login span::before {
+                content: '忘记密码' !important;
+            }
+
+            .jinsom-sidebar-reg-btn {
+                width: 91px !important;
+            }
+
+            /*超链下划线*/
+            .jinsom-bbs-single-content p a {
+                text-decoration: underline;
+                color: blue;
+            }
+
+            /*电脑端头部发布按钮美化*/
+            .jinsom-header-right .search {
+                border-radius: 5px;
+                color: white !important;
+                width: 60px;
+                height: 26px;
+                background-color: var(--oddba-lzdh-footerbg);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 13px 13px 0 10px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+            }
+
+            .jinsom-header-right .search:hover {
+                opacity: 0.7;
+            }
+
+            .jinsom-header-right .search i:after {
+                content: '搜索';
+                margin-left: 5px;
+                font-size: 13px;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" charset="utf-8" href="https://sns.oddba.cn/static/css/pczdy.css">
+        <link rel="stylesheet" type="text/css" charset="utf-8" href="https://sns.oddba.cn/static/css/pctoux.css">
+        <link rel="stylesheet" type="text/css" charset="utf-8" href="https://sns.oddba.cn/static/style/bianjik/bianjik.css">
+        <link rel="stylesheet" type="text/css" charset="utf-8" href="https://sns.oddba.cn/static/style/sousuo/acg-lt.css">
+        <link href="https://sns.oddba.cn/Extend/editor/pc/ueditor/themes/default/css/ueditor.css" type="text/css"
+            rel="stylesheet">
+        <style id="theia-sticky-sidebar-stylesheet-TSS">
+            .JinsomSidebarFixed:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+        <style id="m9ameznp.mz">
+            rt.katakana-terminator-rt::before {
+                content: attr(data-rt);
+            }
+        </style>
+    </head>
+    <body type=""
+        class="post-template-default single single-post postid-163832 single-format-standard logged-in theme-light"
+        style="transform: none;">
+        <div class="jinsom-main-content bbs-default single clear" style="transform: none;">
+            <div class="jinsom-content-left">
+                <div class="jinsom-bbs-single-box main clear">
+                    <div class="left"></div>
+                    <div class="right">
+                        <div class="jinsom-bbs-single-content">
+<div>
+    <p>
+        <span style="font-size: 20px;"><b>宫子护航店</b> (MiyakoCarryService) 是一个生成AI队友的模组，以高兼容性为目标，允许Fika联机使用，允许所有联机玩家使用各自的护航配置参数进行生成，允许护航使用SAIN的战斗层级。</span>
+    </p>
+    &nbsp;&nbsp;
+    <div style="background-color: var(--body-bg-color);box-shadow: 3px 0 0 0 #d85959 inset; margin: 10px 0 0 0;padding: 5px;">
+        <ol class="list-paddingleft-2">
+            <li>
+                <p><b>本模组目前仍处于究极早期测试阶段（Early Access），暂时仅在我的<span style="color: rgb(192, 0, 0);">Discord频道</span>里发布，回复后可见</b></p>
+            </li>
+            <li>
+                <p>至于为何先发在Discord里，首先Oddba帖子刷新一周后除非再次刷新否则就没法编辑内容，对于模组早期版本频繁更新来说并不方便，更别说每层楼只能显示100个回复，对于问题收集十分麻烦</p>
+            </li>
+            <li>
+                <p>并且我本人不希望过多被动接收模组相关的讯息，如果开的是QQ群，那我可能要不停地收到各种人发的消息、问题，我只希望在想看的时候才看</p>
+            </li>
+            <li>
+                <p>本模组目标是免费版开源并上架Forge，看情况以后可能会开放给国际友人进来交流，所以国内社区平台基本难以胜任</p>
+            </li>
+            <li>
+                <p>Discord还可以关联爱发电等账号，对于赞助者来说上身份标识更方便，而且Discord的可玩性比QQ群啥的高出不止一个档次，很利好开发者做各种定制化</p>
+            </li>
+            <li>
+                <p>因此Discord是介于Oddba和Q群之间十分完美的选择，至于科学上网问题还请各位自己解决，因为这就是我设下的一个初步的门槛机制</p>
+            </li>
+            <li>
+                <p>宫子护航店 是免费的，如果您为此付了钱，说明您被骗了，请举报卖家并退款</p>
+            </li>
+        </ol>
+    </div>
+    &nbsp;&nbsp;
+    <p>
+        <span style="font-size: 25px;"><strong>Q&A</strong></span>
+    </p>
+    
+    <ul style="list-style-type: disc;">
+        <li>
+            <p>Q: 宫子护航店 的相关设定</p>
+        </li>
+        <li>
+            <p>A: 本文会使用 Mcs 作为 宫子护航店（Miyako Carry Service）的简称；真人玩家会被称为 老板，Mcs 生成的AI队友会被称为 护航，Mcs 以后可能会实现的AI Boss队友会被称为 护航Boss，月雪宫子 会被称为 店长，本作者 会被称为 副店长，本人的 Discord频道 会被称为 Rabbit1电竞（Rabbit1 Gaming、R1G），赞助者 会被称为 打手，老板下单时就会从打手中随机抽取来作为护航生成，只要你成为过至少一次赞助者，你就可以加入到打手名单中，打手名单会在合适的时候更新</p>
+        </li>
+    </ul>
+    
+    <ul style="list-style-type: disc;">
+        <li>
+            <p>Q: 与 FriendlyPMC 有何区别</p>
+        </li>
+        <li>
+            <p>A: FriendlyPMC 可以随意生成指定数量的AI队友，而 Mcs (MiyakoCarryService 缩写) 在Pmc模式下最大仅支持4位，Scav模式下最大仅支持3位，符合原版组队设定；FriendlyPMC 功能更完善，比如能对AI队友下达指令，修改AI队友的装备，这些 Mcs 都还不支持，但这只是迟早的事；FriendlyPMC 不主动适配 Fika ，Mcs 会主动适配 Fika；FriendlyPMC 使用的是其专门编写的独立大脑来控制AI， Mcs 则是在使用原版大脑的基础上编写额外的层级来控制AI，因为 SAIN 的战斗层级只对原版的大脑进行了修改，因此 Mcs 的护航队友就可以使用 SAIN 的层级进行战斗，而 FriendlyPMC就不行，并且 FriendlyPMC 的三狗AI Boss 也是同理，其必须单独为这些AI编写新的大脑，而 Mcs 不用，所以理论上 Mcs 有希望将所有Boss都作为护航来生成，时机成熟后就会尝试实现</p>
+        </li>
+    </ul>
+    <ul style="list-style-type: disc;">
+        <li>
+            <p>Q: 当前 Mcs 的现状、更新计划</p>
+        </li>
+        <li>
+            <p>A: 目前 Mcs 的护航在行为上仅实现了简单的跟随老板，为了适配 Fika 有些技术问题还需要攻克，比如联机时副机如何给自己的护航下达指令。然后 Mcs 计划是先解决技术问题，再实现指令系统，再实现护航更丰富的非战斗行为，再完善护航的配装</p>
+        </li>
+    </ul>
+    <p>
+        <span style="font-size: 25px;"><strong>食用方式</strong></span>
+    </p>
+    <img src="https://ods5.oddba.cn/user_files/23687/bbs/81209917_1770549779.png"/>
+    <img src="https://ods5.oddba.cn/user_files/23687/bbs/91986568_1770549789.png"/>
+    <p>
+        <span style="font-size: 25px;"><strong>服务端</strong></span>
+    </p>
+    <ol>
+        <li>
+            <p>自带提供中/英两种本地化语言。 <span style="color: rgb(192, 0, 0);">但需要确保您已正确安装MiyakoCarryServiceServer，否则无法加载本地化。</span></p>
+        </li>
+    </ol>
+    <p>
+        <br />
+    </p>
+    <p>
+        <span style="font-size: 25px;"><strong>客户端</strong></span>
+    </p>
+    <p>
+        <br />
+    </p>
+    <details>
+        <summary id="summary"><span
+                style="font-size: 18px;"><strong>基础功能</strong></span></summary>
+        <table style="margin: 15px;
+            width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>所以预先写有一些配置项，但是当前版本的所有配置项均不会生效</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+    <hr style="background-color: var(--font-color); margin: 40px auto; max-width: 150px; width: 30%; height: 2px; opacity: .55; border: 0; box-sizing: content-box; overflow: visible;" />
+    <p>
+        安装方法与其他MOD相同，MiyakoCarryServiceClient放在BepInEx/plugins里，MiyakoCarryServiceServer放在SPT/user/mods里，实在不会b站上大把多教程。
+    </p>
+    <p>
+        <span style="font-size: 20px; color: rgb(192, 0, 0);">本MOD需要前置MOD：BigBrain</span>
+    </p>
+    &nbsp;&nbsp;
+</div>
+<style>
+    .jinsom-bbs-single-box .right {
+        padding: 0;
+    }
+    p {
+        padding: 0 15px 0 15px;
+    }
+    .jinsom-bbs-single-content img {
+        padding: 0;
+        border-radius: 0;
+        box-sizing: content-box;
+        border: none;
+        max-height: 450px;
+    }
+    #afadian {
+        animation: colorChange 1.5s infinite;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 15px;
+    }
+    @keyframes colorChange {
+        0% { color: #ff6b6b; }
+        33% { color: #4ecdc4; }
+        66% { color: #45b7d1; }
+        100% { color: #ff6b6b; }
+    }
+    td {
+        width: 415px;
+    }
+    #summary {
+        padding: 0 15px 0 15px;
+    }
+    .video-iframe {
+        width: 100%;
+        margin: 16px auto;
+        border: none;
+        border-radius: 5px;
+    }
+</style>
+                        </div>
+                        <div class="jinsom-hide-content">
+<div>
+    <p>
+        <a href="https://afdian.com/a/himesamanoyume" target="_blank" id="afadian">[爱发电]简简单单恰个米 [s-44]</a>
+    </p>
+    <p><a href="https://discord.gg/vXCXzAyd" target="_blank">Discord邀请链接</a></p>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

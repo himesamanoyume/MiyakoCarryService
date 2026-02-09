@@ -299,6 +299,28 @@ namespace MiyakoCarryService.Server.Services
             mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
             mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
 
+            // foreach (var item in mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Items)
+            // {
+            //     item.AddUpd();
+            //     item.Upd.Lockable = new LockableComponent
+            //     {
+            //         Locked = true,
+            //         KeyIds = item.Upd.Lockable?.KeyIds,  
+            //         KeyComponent = item.Upd.Lockable?.KeyComponent 
+            //     };
+            // }
+
+            // foreach (var item in mcsBotPlayerFullProfile.CharacterData.ScavData.Inventory.Items)
+            // {
+            //     item.AddUpd();
+            //     item.Upd.Lockable = new LockableComponent
+            //     {
+            //         Locked = true,
+            //         KeyIds = item.Upd.Lockable?.KeyIds,  
+            //         KeyComponent = item.Upd.Lockable?.KeyComponent 
+            //     };
+            // }
+
             _ = SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile);
             return mcsBotPlayerFullProfile;
         }
