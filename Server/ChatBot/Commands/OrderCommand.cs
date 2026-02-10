@@ -1,7 +1,10 @@
 
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
+using MiyakoCarryService.Server.Interface;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
@@ -18,9 +21,9 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
         OrderQuestController orderQuestController
-    ) : ICommand
+    ) : IMcsCommand
     {
-        [GeneratedRegex(@"^mcs\s+order\s+(\d+)\s+([1-5])\s+(\d+)$")]
+        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]|1\d|20)\s+([1-4])\s+([1-9]\d*)$")]
         private static partial Regex OrderCommandRegex();
 
         public string Command
@@ -31,11 +34,14 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             }
         }
 
-        public string CommandHelp
+        public string[] CommandHelps
         {
             get
             {
-                return string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP), Command, Command, Command);
+                return [
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), Command, Command, Command), 
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), serverLocalisationService.GetText(Locales.BOTTYPECOMMON))
+                    ];
             }
         }
 
@@ -46,8 +52,10 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             if (match.Success)
             {
                 int players = int.Parse(match.Groups[1].Value);
-                int level = int.Parse(match.Groups[2].Value);
-                int duration = int.Parse(match.Groups[3].Value);
+                int intBotType = int.Parse(match.Groups[2].Value);
+                EBotType botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
+                int level = int.Parse(match.Groups[3].Value);
+                int duration = int.Parse(match.Groups[4].Value);
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId, 
@@ -57,7 +65,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     null
                 );
 
-                orderQuestController.CreateOrderQuest(sessionId, players, level, duration);
+                orderQuestController.CreateOrderQuest(sessionId, players, botType, level, duration);
             }
             else
             {

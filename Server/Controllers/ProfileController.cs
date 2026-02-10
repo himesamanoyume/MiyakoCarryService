@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -25,19 +26,14 @@ namespace MiyakoCarryService.Server.Controllers
             profileService.ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, mcsBotPlayerIds);
         }
 
-        public BotBase GeneratePmcBotBaseProfile(MongoId mcsLeadPlayerId, PmcData mcsBotPlayerPmcData, int carryServiceLevel)
-        {
-            return profileService.GeneratePmcBotProfile(mcsLeadPlayerId, mcsBotPlayerPmcData, carryServiceLevel);
-        }
-
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
         {
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, EBotType botType, int carryServiceLevel)
         {
-            return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, carryServiceLevel);
+            return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, botType, carryServiceLevel);
         }
 
         public SptProfile? GetMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)

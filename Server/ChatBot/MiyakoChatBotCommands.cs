@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MiyakoCarryService.Server.Interface;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Helpers.Dialog.Commando;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -10,13 +10,13 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
-    public class MiyakoChatBotCommands(IEnumerable<ICommand> miyakoCommands) : IChatCommand
+    public class MiyakoChatBotCommands(IEnumerable<IMcsCommand> miyakoCommands) : IMcsChatCommand
     {
-        protected readonly IDictionary<string, ICommand> _miyakoCommands = miyakoCommands.ToDictionary(c => c.Command);
+        protected readonly IDictionary<string, IMcsCommand> _miyakoCommands = miyakoCommands.ToDictionary(c => c.Command);
 
-        public string GetCommandHelp(string command)
+        public string[] GetCommandHelps(string command)
         {
-            return _miyakoCommands.TryGetValue(command, out ICommand value) ? value.CommandHelp : string.Empty;
+            return _miyakoCommands.TryGetValue(command, out IMcsCommand value) ? value.CommandHelps : [];
         }
 
         public string CommandPrefix
@@ -39,12 +39,5 @@ namespace MiyakoCarryService.Server.ChatBot
         {
             return await _miyakoCommands[command].PerformAction(commandHandler, sessionId, request);
         }
-    }
-
-    public interface ICommand
-    {
-        public string Command { get; }
-        public string CommandHelp { get; }
-        public ValueTask<string> PerformAction(UserDialogInfo commandHandler, MongoId sessionId, SendMessageRequest request);
     }
 }

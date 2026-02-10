@@ -71,10 +71,10 @@ namespace MiyakoCarryService.Server.ChatBot
             }
 
             mailSendService.SendLocalisedNpcMessageToPlayer(
-                sessionId, 
-                TraderService.MiyakoTraderId, 
-                MessageType.NpcTraderMessage, 
-                Locales.MIYAKOTRADERUNRECOGNIZEDCOMMAND, 
+                sessionId,
+                TraderService.MiyakoTraderId,
+                MessageType.NpcTraderMessage,
+                Locales.MIYAKOTRADERUNRECOGNIZEDCOMMAND,
                 null
             );
 
@@ -84,10 +84,10 @@ namespace MiyakoCarryService.Server.ChatBot
         protected async ValueTask<string> SendPlayerHelpMessage(MongoId sessionId, SendMessageRequest request)
         {
             mailSendService.SendLocalisedNpcMessageToPlayer(
-                sessionId, 
-                TraderService.MiyakoTraderId, 
-                MessageType.NpcTraderMessage, 
-                Locales.MIYAKOTRADERAVAILABLECOMMANDSLIST, 
+                sessionId,
+                TraderService.MiyakoTraderId,
+                MessageType.NpcTraderMessage,
+                Locales.MIYAKOTRADERAVAILABLECOMMANDSLIST,
                 null
             );
 
@@ -96,24 +96,28 @@ namespace MiyakoCarryService.Server.ChatBot
                 await Task.Delay(TimeSpan.FromSeconds(1));
 
                 mailSendService.SendDirectNpcMessageToPlayer(
-                    sessionId, 
-                    TraderService.MiyakoTraderId, 
-                    MessageType.NpcTraderMessage, 
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERAVAILABLECOMMANDSPREFIX), chatCommand.CommandPrefix), 
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERAVAILABLECOMMANDSPREFIX), chatCommand.CommandPrefix),
                     null
                 );
 
-                await Task.Delay(TimeSpan.FromSeconds(1));
-
                 foreach (var subCommand in chatCommand.Commands)
                 {
-                    mailSendService.SendDirectNpcMessageToPlayer(
-                        sessionId, 
-                        TraderService.MiyakoTraderId, 
-                        MessageType.NpcTraderMessage, 
-                        string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSUBCOMMAND), subCommand, chatCommand.GetCommandHelp(subCommand)), 
-                        null
-                    );
+                    foreach (var commandHelp in chatCommand.GetCommandHelps(subCommand))
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+
+                        mailSendService.SendDirectNpcMessageToPlayer(
+                            sessionId,
+                            TraderService.MiyakoTraderId,
+                            MessageType.NpcTraderMessage,
+                            string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSUBCOMMAND), subCommand, commandHelp),
+                            null
+                        );
+
+                    }
 
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
