@@ -205,14 +205,15 @@ namespace MiyakoCarryService.Server.Services
 
         public BotBase GeneratePmcBotProfile(MongoId mcsLeadPlayerId, PmcData pmcData, EBotType botType, int carryServiceLevel)
         {
+            var isCommon = botType == EBotType.common;
             var botDifficulty = (BotDifficulty)carryServiceLevel;
-            var role = botType == EBotType.common ? (pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR" ): botType.ToString();
+            var role = isCommon ? (pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR" ): botType.ToString();
             var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, new()
             {
-                IsPmc = true,
-                Side = pmcData.Info.Side,
+                IsPmc = isCommon,
+                Side = isCommon ? pmcData.Info.Side : "Savage",
                 Role = role,
-                PlayerLevel = carryServiceLevel * 10 + 20 + (botType != EBotType.common ? 30 : 0),
+                PlayerLevel = 1,
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
@@ -289,6 +290,7 @@ namespace MiyakoCarryService.Server.Services
         {
             var isCommon = botType == EBotType.common;
             var mcsPmcBotBase = GeneratePmcBotProfile(mcsLeadPlayerId, completeQuestPmcData, botType, carryServiceLevel);
+            mcsPmcBotBase.Info.Level = carryServiceLevel * 10 + 20 + (!isCommon ? 30 : 0);
             mcsPmcBotBase.Id = mcsBotPlayerId;
             mcsPmcBotBase.SessionId = mcsBotPlayerId;
             mcsPmcBotBase.Aid = hashUtil.GenerateAccountId();
@@ -391,9 +393,6 @@ namespace MiyakoCarryService.Server.Services
             botInventoryContainerService.ClearCache(scavData.Id.Value);
             botLootCacheService.ClearCache();
 
-            // scavData.Savage = null;
-            // scavData.Aid = pmcDataClone.Aid;
-            // scavData.TradersInfo = pmcDataClone.TradersInfo;
             scavData.Info.Settings = new();
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcDataClone.Info.RegistrationDate;
@@ -402,24 +401,8 @@ namespace MiyakoCarryService.Server.Services
             scavData.Info.SelectedMemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory;
             scavData.Info.LockedMoveCommands = true;
             scavData.Info.MainProfileNickname = pmcDataClone.Info.Nickname;
-            // scavData.RagfairInfo = pmcDataClone.RagfairInfo;
-            // scavData.UnlockedInfo = pmcDataClone.UnlockedInfo;
-
-            // scavData.Id = existingScavDataClone.Id ?? pmcDataClone.Savage;
-            // scavData.SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId;
-            // scavData.Skills = existingScavDataClone.GetSkillsOrDefault();
-            // scavData.Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters();
             scavData.Info.Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level;
             scavData.Info.Experience = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Experience;
-            // scavData.Quests = existingScavDataClone.Quests ?? [];
-            // scavData.TaskConditionCounters = existingScavDataClone.TaskConditionCounters ?? new();
-            // scavData.Notes = existingScavDataClone.Notes ?? new Notes { DataNotes = [] };
-            // scavData.WishList = existingScavDataClone.WishList ?? new();
-            // scavData.Encyclopedia = pmcDataClone.Encyclopedia ?? new();
-            // scavData.Variables = existingScavDataClone.Variables ?? new();
-
-            // 作为护航, 很可能反而不仅不要移除，甚至还需要放入Boss安全箱
-            // scavData = profileHelper.RemoveSecureContainer(scavData);
             return scavData;
         }
 
