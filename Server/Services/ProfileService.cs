@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Extensions;
@@ -202,15 +203,16 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public BotBase GeneratePmcBotProfile(MongoId mcsLeadPlayerId, PmcData pmcData, int carryServiceLevel)
+        public BotBase GeneratePmcBotProfile(MongoId mcsLeadPlayerId, PmcData pmcData, EBotType botType, int carryServiceLevel)
         {
             var botDifficulty = (BotDifficulty)carryServiceLevel;
+            var role = botType == EBotType.common ? (pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR" ): botType.ToString();
             var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, new()
             {
                 IsPmc = true,
                 Side = pmcData.Info.Side,
-                Role = pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR",
-                PlayerLevel = carryServiceLevel * 10 + 20,
+                Role = role,
+                PlayerLevel = carryServiceLevel * 10 + 20 + (botType != EBotType.common ? 30 : 0),
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
@@ -283,43 +285,22 @@ namespace MiyakoCarryService.Server.Services
             return new();
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, EBotType botType, int carryServiceLevel)
         {
-            var mcsPmcBotBase = GeneratePmcBotProfile(mcsLeadPlayerId, completeQuestPmcData, carryServiceLevel);
+            var isCommon = botType == EBotType.common;
+            var mcsPmcBotBase = GeneratePmcBotProfile(mcsLeadPlayerId, completeQuestPmcData, botType, carryServiceLevel);
             mcsPmcBotBase.Id = mcsBotPlayerId;
             mcsPmcBotBase.SessionId = mcsBotPlayerId;
             mcsPmcBotBase.Aid = hashUtil.GenerateAccountId();
 
             var mcsBotPlayerFullProfile = GenerateMcsBotPlayerFullProfile(mcsPmcBotBase);
-            var mcsBotPlayerScavBotBase = GenerateMcsBotScavPlayerFullProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
+            var mcsBotPlayerScavBotBase = isCommon ? mcsBotPlayerFullProfile.CharacterData.PmcData : GenerateMcsBotScavPlayerFullProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
 
             mcsBotPlayerScavBotBase.SessionId = mcsPmcBotBase.SessionId;
             mcsBotPlayerFullProfile.ProfileInfo.Aid = mcsPmcBotBase.Aid;
             mcsBotPlayerFullProfile.ProfileInfo.ScavengerId = mcsBotPlayerScavBotBase.Id;
             mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
             mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
-
-            // foreach (var item in mcsBotPlayerFullProfile.CharacterData.PmcData.Inventory.Items)
-            // {
-            //     item.AddUpd();
-            //     item.Upd.Lockable = new LockableComponent
-            //     {
-            //         Locked = true,
-            //         KeyIds = item.Upd.Lockable?.KeyIds,  
-            //         KeyComponent = item.Upd.Lockable?.KeyComponent 
-            //     };
-            // }
-
-            // foreach (var item in mcsBotPlayerFullProfile.CharacterData.ScavData.Inventory.Items)
-            // {
-            //     item.AddUpd();
-            //     item.Upd.Lockable = new LockableComponent
-            //     {
-            //         Locked = true,
-            //         KeyIds = item.Upd.Lockable?.KeyIds,  
-            //         KeyComponent = item.Upd.Lockable?.KeyComponent 
-            //     };
-            // }
 
             _ = SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile);
             return mcsBotPlayerFullProfile;
@@ -347,16 +328,6 @@ namespace MiyakoCarryService.Server.Services
             var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
             playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
 
-            // 此处会生成玩家Scav的数据，没有安全箱
-            // var scavData = botGenerator.GeneratePlayerScav(
-            //     mcsLeadPlayerId,
-            //     playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant(),
-            //     "hard",
-            //     baseBotNode,
-            //     pmcDataClone
-            // );
-
-            // 以AI Scav的形式生成，带有安全箱
             var botDifficulty = (BotDifficulty)carryServiceLevel;
 
             var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, new()
@@ -372,8 +343,6 @@ namespace MiyakoCarryService.Server.Services
                 IsPlayerScav = false,
                 ClearBotContainerCacheAfterGeneration = false
             });
-
-            
 
             var scavData = new PmcData
             {

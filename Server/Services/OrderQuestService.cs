@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Patches;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
@@ -50,7 +51,7 @@ namespace MiyakoCarryService.Server.Services
             return _orderTemplate;
         }
 
-        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, EBotType botType, int carryServiceLevel, int duration)
         {
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
@@ -67,7 +68,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
             }
-            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, carryServiceLevel, duration, orderQuest.Id);
+            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, botType, carryServiceLevel, duration, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)

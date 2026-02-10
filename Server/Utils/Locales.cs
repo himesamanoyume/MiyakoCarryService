@@ -19,6 +19,8 @@ namespace MiyakoCarryService.Server.Utils
         public const string MIYAKOTRADERSUBCOMMAND = "Mcs/MiyakoTraderSubCommand";
         public const string MIYAKOTRADERAVAILABLECOMMANDSLIST = "Mcs/MiyakoTraderAvailableCommandsList";
         public const string MIYAKOTRADERAVAILABLECOMMANDSPREFIX = "Mcs/MiyakoTraderAvailableCommandsPrefix";
-        public const string MIYAKOTRADERCOMMANDHELP = "Mcs/MiyakoTraderCommandHelp";
+        public const string BOTTYPECOMMON = "Mcs/BotTypeCommon";
+        public const string MIYAKOTRADERCOMMANDHELP1 = "Mcs/MiyakoTraderCommandHelp1";
+        public const string MIYAKOTRADERCOMMANDHELP2 = "Mcs/MiyakoTraderCommandHelp2";
     }
 }

@@ -15,21 +15,6 @@ namespace MiyakoCarryService.Server.Controllers
         OrderInfoService orderInfoService
     )
     {
-        public void AddOrderInfo(OrderInfo orderInfo)
-        {
-            orderInfoService.AddOrderInfo(orderInfo);
-        }
-
-        public void AddOrderInfos(List<OrderInfo> orderInfos)
-        {
-            orderInfoService.AddOrderInfos(orderInfos);
-        }
-
-        public void CreateOrderInfo(MongoId mcsLeadPlayerId, int players, int carryServiceLevel, int duration, MongoId questId)
-        {
-            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, carryServiceLevel, duration, questId);
-        }
-
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
             return orderInfoService.GetExpiredMcsBotPlayerIds();
