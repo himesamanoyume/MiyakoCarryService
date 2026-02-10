@@ -20,8 +20,8 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
+using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Spt.Logging;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Servers.Ws;
@@ -33,7 +33,6 @@ namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
     public sealed class ProfileService(
-        SaveServer saveServer,
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,
@@ -51,7 +50,7 @@ namespace MiyakoCarryService.Server.Services
         BotGenerator botGenerator,
         PlayerScavGenerator playerScavGenerator,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
-        ProfileHelper profileHelper,
+        BotNameService botNameService,
         OrderInfoService orderInfoService
     )
     {
@@ -203,35 +202,6 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public BotBase GeneratePmcBotProfile(MongoId mcsLeadPlayerId, PmcData pmcData, EBotType botType, int carryServiceLevel)
-        {
-            var isCommon = botType == EBotType.common;
-            var botDifficulty = (BotDifficulty)carryServiceLevel;
-            var role = isCommon ? (pmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR" ): botType.ToString();
-            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, new()
-            {
-                IsPmc = isCommon,
-                Side = isCommon ? pmcData.Info.Side : "Savage",
-                Role = role,
-                PlayerLevel = 1,
-                BotRelativeLevelDeltaMin = 0,
-                BotRelativeLevelDeltaMax = 0,
-                BotCountToGenerate = 1,
-                BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty.ToString().ToLower() : "impossible",
-                IsPlayerScav = false,
-                AllPmcsHaveSameNameAsPlayer = false
-            });
-            
-            var playerName = randomUtil.GetArrayValue(_afdianNames);
-            if (playerName is not null)
-            {
-                botBase.Info.Nickname = playerName;
-                botBase.Info.LowerNickname = playerName.ToLower();
-            }
-
-            return botBase;
-        }
-
         public SptProfile? GetMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             if (_profiles.ContainsKey(mcsLeadPlayerId))
@@ -289,84 +259,79 @@ namespace MiyakoCarryService.Server.Services
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, EBotType botType, int carryServiceLevel)
         {
             var isCommon = botType == EBotType.common;
-            var mcsPmcBotBase = GeneratePmcBotProfile(mcsLeadPlayerId, completeQuestPmcData, botType, carryServiceLevel);
-            mcsPmcBotBase.Info.Level = carryServiceLevel * 10 + 20 + (!isCommon ? 30 : 0);
-            mcsPmcBotBase.Id = mcsBotPlayerId;
-            mcsPmcBotBase.SessionId = mcsBotPlayerId;
-            mcsPmcBotBase.Aid = hashUtil.GenerateAccountId();
-
-            var mcsBotPlayerFullProfile = GenerateMcsBotPlayerFullProfile(mcsPmcBotBase);
-            var mcsBotPlayerScavBotBase = isCommon ? mcsBotPlayerFullProfile.CharacterData.PmcData : GenerateMcsBotScavPlayerFullProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile, carryServiceLevel);
-
-            mcsBotPlayerScavBotBase.SessionId = mcsPmcBotBase.SessionId;
-            mcsBotPlayerFullProfile.ProfileInfo.Aid = mcsPmcBotBase.Aid;
-            mcsBotPlayerFullProfile.ProfileInfo.ScavengerId = mcsBotPlayerScavBotBase.Id;
-            mcsBotPlayerFullProfile.CharacterData.PmcData.Savage = mcsBotPlayerScavBotBase.Id;
-            mcsBotPlayerFullProfile.CharacterData.ScavData = mcsBotPlayerScavBotBase;
-
-            _ = SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerFullProfile);
-            return mcsBotPlayerFullProfile;
-        }
-
-        private PmcData GenerateMcsBotScavPlayerFullProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerFullProfile, int carryServiceLevel)
-        {
-            var profileCharactersClone = cloner.Clone(mcsBotPlayerFullProfile.CharacterData);
-            var pmcDataClone = cloner.Clone(profileCharactersClone.PmcData);
-            var bossFullProfile = saveServer.GetProfile(mcsLeadPlayerId);
-            var existingScavDataClone = cloner.Clone(bossFullProfile.CharacterData.ScavData);
-
-            var scavKarmaLevel = carryServiceLevel + 2;
-            var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
-
-            if (
-                !playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings)
-            )
-            {
-                logger.Error(serverLocalisationService.GetText("scav-missing_karma_settings", scavKarmaLevel));
-            }
-
-            var baseBotNode = cloner.Clone(botHelper.GetBotTemplate("assault"));
-
-            var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
-            playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
-
             var botDifficulty = (BotDifficulty)carryServiceLevel;
-
-            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, new()
+            var role = isCommon ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : botType.ToString();
+            var botGenerationDetails = new BotGenerationDetails()
             {
-                IsPmc = false,
-                Side = "Savage",
-                Role = playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant(),
-                PlayerLevel = carryServiceLevel * 10 + 20,
+                IsPmc = isCommon,
+                Side = isCommon ? completeQuestPmcData.Info.Side : "Savage",
+                Role = role,
+                PlayerLevel = carryServiceLevel * 10 + 20 + (!isCommon ? 30 : 0),
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
                 BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty.ToString().ToLower() : "impossible",
                 IsPlayerScav = false,
-                ClearBotContainerCacheAfterGeneration = false
-            });
+                AllPmcsHaveSameNameAsPlayer = false
+            };
 
-            var scavData = new PmcData
+            var pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+            pmcData.Info.Level = botGenerationDetails.PlayerLevel;
+
+            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, botGenerationDetails, pmcData) : GenerateScavData(pmcData, botGenerationDetails);
+
+            scavData.Info.Settings = new();
+            scavData.Info.Bans = [];
+            scavData.Info.RegistrationDate = pmcData.Info.RegistrationDate;
+            scavData.Info.GameVersion = pmcData.Info.GameVersion;
+            scavData.Info.MemberCategory = pmcData.Info.MemberCategory;
+            scavData.Info.SelectedMemberCategory = pmcData.Info.SelectedMemberCategory;
+            scavData.Info.LockedMoveCommands = true;
+            scavData.Info.MainProfileNickname = pmcData.Info.Nickname;
+            scavData.Info.Level = pmcData.Info.Level;
+            scavData.Info.Experience = pmcData.Info.Experience;
+
+            var fullProfile = GenerateFullProfile(pmcData, scavData);
+            _ = SaveMcsBotPlayerProfile(mcsLeadPlayerId, fullProfile);
+            return fullProfile;
+        }
+
+        private PmcData GeneratePmcData(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, BotGenerationDetails botGenerationDetails)
+        {
+            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+
+            var playerName = randomUtil.GetArrayValue(_afdianNames);
+            if (playerName is not null)
             {
-                Id = new(),
-                Aid = pmcDataClone.Aid,
-                SessionId = existingScavDataClone.SessionId ?? pmcDataClone.SessionId,
-                Savage = null,
+                botBase.Info.Nickname = playerName;
+                botBase.Info.LowerNickname = playerName.ToLower();
+            }
+
+            botBase.Info.Level = botGenerationDetails.PlayerLevel;
+            botBase.Id = mcsBotPlayerId;
+            botBase.SessionId = mcsBotPlayerId;
+            botBase.Aid = hashUtil.GenerateAccountId();
+
+            var pmcData = new PmcData
+            {
+                Id = botBase.Id,
+                Aid = botBase.Aid,
+                SessionId = botBase.SessionId,
                 KarmaValue = botBase.KarmaValue,
                 Info = botBase.Info,
                 Customization = botBase.Customization,
                 Health = botBase.Health,
                 Inventory = botBase.Inventory,
-                Skills = existingScavDataClone.GetSkillsOrDefault(),
-                Stats = existingScavDataClone.Stats ?? profileHelper.GetDefaultCounters(),
+                Skills = botBase.Skills,
+                Stats = botBase.Stats,
                 Encyclopedia = botBase.Encyclopedia,
                 TaskConditionCounters = botBase.TaskConditionCounters,
                 InsuredItems = botBase.InsuredItems,
                 Hideout = botBase.Hideout,
                 Quests = botBase.Quests,
-                TradersInfo = pmcDataClone.TradersInfo,
-                UnlockedInfo = pmcDataClone.UnlockedInfo,
-                RagfairInfo = pmcDataClone.RagfairInfo,
+                TradersInfo = botBase.TradersInfo,
+                UnlockedInfo = botBase.UnlockedInfo,
+                RagfairInfo = botBase.RagfairInfo,
                 Achievements = botBase.Achievements,
                 RepeatableQuests = botBase.RepeatableQuests,
                 Bonuses = botBase.Bonuses,
@@ -377,8 +342,82 @@ namespace MiyakoCarryService.Server.Services
                 WishList = botBase.WishList,
                 MoneyTransferLimitData = botBase.MoneyTransferLimitData,
                 IsPmc = botBase.IsPmc,
-                Variables = existingScavDataClone.Variables ?? new(),
-                Prestige = new Dictionary<string, long>()
+                Prestige = new(),
+            };
+            return pmcData;
+        }
+
+        private PmcData GenerateScavData(PmcData pmcData, BotGenerationDetails botGenerationDetails)
+        {
+            var scavData = cloner.Clone(pmcData);
+            scavData.Id = new();
+
+            botGenerationDetails.IsPmc = false;
+            botGenerationDetails.Side = "Savage";
+
+            scavData.Info.Nickname = botNameService.GenerateUniqueBotNickname(
+                cloner.Clone(botHelper.GetBotTemplate("assault")),
+                botGenerationDetails,
+                configServer.GetConfig<BotConfig>().BotRolesThatMustHaveUniqueName
+            );
+
+            return scavData;
+        }
+
+        private PmcData GenerateScavData(MongoId mcsLeadPlayerId, int carryServiceLevel, BotGenerationDetails botGenerationDetails, PmcData pmcData)
+        {
+            var scavKarmaLevel = carryServiceLevel + 2;
+            var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
+
+            if (!playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings))
+            {
+                logger.Error(serverLocalisationService.GetText("scav-missing_karma_settings", scavKarmaLevel));
+            }
+
+            botGenerationDetails.IsPmc = false;
+            botGenerationDetails.Side = "Savage";
+            botGenerationDetails.Role = playerScavKarmaSettings.BotTypeForLoot.ToLowerInvariant();
+
+            var baseBotNode = cloner.Clone(botHelper.GetBotTemplate("assault"));
+
+            var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
+            playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
+
+            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+
+            var scavData = new PmcData
+            {
+                Id = new(),
+                Aid = pmcData.Aid,
+                SessionId = pmcData.SessionId,
+                Savage = null,
+                KarmaValue = botBase.KarmaValue,
+                Info = botBase.Info,
+                Customization = botBase.Customization,
+                Health = botBase.Health,
+                Inventory = botBase.Inventory,
+                Skills = botBase.Skills,
+                Stats = botBase.Stats,
+                Encyclopedia = botBase.Encyclopedia,
+                TaskConditionCounters = botBase.TaskConditionCounters,
+                InsuredItems = botBase.InsuredItems,
+                Hideout = botBase.Hideout,
+                Quests = botBase.Quests,
+                TradersInfo = pmcData.TradersInfo,
+                UnlockedInfo = pmcData.UnlockedInfo,
+                RagfairInfo = pmcData.RagfairInfo,
+                Achievements = botBase.Achievements,
+                RepeatableQuests = botBase.RepeatableQuests,
+                Bonuses = botBase.Bonuses,
+                Notes = botBase.Notes,
+                CarExtractCounts = botBase.CarExtractCounts,
+                CoopExtractCounts = botBase.CoopExtractCounts,
+                SurvivorClass = botBase.SurvivorClass,
+                WishList = botBase.WishList,
+                MoneyTransferLimitData = botBase.MoneyTransferLimitData,
+                IsPmc = botBase.IsPmc,
+                Variables = new(),
+                Prestige = new()
             };
 
             playerScavGeneratorTraverse.Method("AddAdditionalLootToPlayerScavContainers", [
@@ -393,62 +432,26 @@ namespace MiyakoCarryService.Server.Services
             botInventoryContainerService.ClearCache(scavData.Id.Value);
             botLootCacheService.ClearCache();
 
-            scavData.Info.Settings = new();
-            scavData.Info.Bans = [];
-            scavData.Info.RegistrationDate = pmcDataClone.Info.RegistrationDate;
-            scavData.Info.GameVersion = pmcDataClone.Info.GameVersion;
-            scavData.Info.MemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.MemberCategory;
-            scavData.Info.SelectedMemberCategory = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.SelectedMemberCategory;
-            scavData.Info.LockedMoveCommands = true;
-            scavData.Info.MainProfileNickname = pmcDataClone.Info.Nickname;
-            scavData.Info.Level = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Level;
-            scavData.Info.Experience = mcsBotPlayerFullProfile.CharacterData.PmcData.Info.Experience;
             return scavData;
         }
 
-        private SptProfile GenerateMcsBotPlayerFullProfile(BotBase mcsBotPlayerPmcBotBase)
+        private SptProfile GenerateFullProfile(PmcData pmcData, PmcData scavData)
         {
+            pmcData.Savage = scavData.Id;
+            scavData.SessionId = pmcData.SessionId;
             return new SptProfile
             {
                 ProfileInfo = new SPTarkov.Server.Core.Models.Eft.Profile.Info
                 {
-                    ProfileId = mcsBotPlayerPmcBotBase.SessionId,
-                    Username = mcsBotPlayerPmcBotBase.Info.Nickname
+                    ProfileId = pmcData.SessionId,
+                    Username = pmcData.Info.Nickname,
+                    Aid = pmcData.Aid,
+                    ScavengerId = scavData.Id
                 },
                 CharacterData = new Characters
                 {
-                    PmcData = new PmcData
-                    {
-                        Id = mcsBotPlayerPmcBotBase.Id,
-                        Aid = mcsBotPlayerPmcBotBase.Aid,
-                        SessionId = mcsBotPlayerPmcBotBase.SessionId,
-                        KarmaValue = mcsBotPlayerPmcBotBase.KarmaValue,
-                        Info = mcsBotPlayerPmcBotBase.Info,
-                        Customization = mcsBotPlayerPmcBotBase.Customization,
-                        Health = mcsBotPlayerPmcBotBase.Health,
-                        Inventory = mcsBotPlayerPmcBotBase.Inventory,
-                        Skills = mcsBotPlayerPmcBotBase.Skills,
-                        Stats = mcsBotPlayerPmcBotBase.Stats,
-                        Encyclopedia = mcsBotPlayerPmcBotBase.Encyclopedia,
-                        TaskConditionCounters = mcsBotPlayerPmcBotBase.TaskConditionCounters,
-                        InsuredItems = mcsBotPlayerPmcBotBase.InsuredItems,
-                        Hideout = mcsBotPlayerPmcBotBase.Hideout,
-                        Quests = mcsBotPlayerPmcBotBase.Quests,
-                        TradersInfo = mcsBotPlayerPmcBotBase.TradersInfo,
-                        UnlockedInfo = mcsBotPlayerPmcBotBase.UnlockedInfo,
-                        RagfairInfo = mcsBotPlayerPmcBotBase.RagfairInfo,
-                        Achievements = mcsBotPlayerPmcBotBase.Achievements,
-                        RepeatableQuests = mcsBotPlayerPmcBotBase.RepeatableQuests,
-                        Bonuses = mcsBotPlayerPmcBotBase.Bonuses,
-                        Notes = mcsBotPlayerPmcBotBase.Notes,
-                        CarExtractCounts = mcsBotPlayerPmcBotBase.CarExtractCounts,
-                        CoopExtractCounts = mcsBotPlayerPmcBotBase.CoopExtractCounts,
-                        SurvivorClass = mcsBotPlayerPmcBotBase.SurvivorClass,
-                        WishList = mcsBotPlayerPmcBotBase.WishList,
-                        MoneyTransferLimitData = mcsBotPlayerPmcBotBase.MoneyTransferLimitData,
-                        IsPmc = mcsBotPlayerPmcBotBase.IsPmc,
-                        Prestige = { },
-                    }
+                    PmcData = pmcData,
+                    ScavData = scavData
                 }
             };
         }
