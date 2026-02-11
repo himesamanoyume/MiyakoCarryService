@@ -18,15 +18,20 @@ namespace MiyakoCarryService.Client;
 
 [BepInPlugin(McsGUID, McsPluginName, BepInExClientVersion)]
 [BepInProcess("EscapeFromTarkov.exe")]
+[BepInDependency(BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
+[BepInDependency(FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
     public const string BepInExClientVersion = "0.1.6.0";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
+    public const string FikaGUID = "com.fika.core";
+    public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
+    public const string BigBrainGUID = "xyz.drakia.bigbrain";
     public const string McsPluginName = "姫様の夢 MiyakoCarryService";
     public static MiyakoCarryServicePlugin Instance;
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
-    public static bool SAINInstalled { get; private set; }  = false;
     public static bool FikaInstalled { get; private set; }  = false;
     public static bool IsFikaHeadless { get; private set; } = false;
 
@@ -60,7 +65,6 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
         CheckFikaPlugin();
         CheckFikaHeadlessPlugin();
-        CheckSAINPlugin();
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
         foreach (var kvp in LocalLocales.LoadingLocales)
@@ -96,22 +100,11 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
         var fikaPlugin = new List<string>()
         {
-            "com.fika.core"
+            FikaGUID
         };
 
         FikaInstalled = !CheckPlugin(fikaPlugin);
         return FikaInstalled;
-    }
-
-    public static bool CheckSAINPlugin()
-    {
-        var sainPlugin = new List<string>()
-        {
-            "me.sol.sain"
-        };
-
-        SAINInstalled = !CheckPlugin(sainPlugin);
-        return SAINInstalled;
     }
 
     private static bool CheckPlugin(List<string> pluginList)
@@ -134,17 +127,9 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         {
 
         }
-        if (SAINInstalled)
-        {
-            
-        }
 #if CHEATERCARRY
 
 #endif
-        if (IsFikaHeadless)
-        {
-            return;
-        }
         new TraderScreensGroupShowPatch().Enable();
         new RaidSettingsLocalPatch().Enable();
         new MatchMakerAcceptScreenReadyPatch().Enable();
