@@ -32,77 +32,6 @@
 - 修改指令系统数组`PredefinedLayoutGroup.PositionsToCenter`
 - - `(-321, 241)，(0, 315)，(321, 241)，(492, 55)，(433, -158)，(171, -296)，(-171, -296)，(-433, -158)，(-492, 55)，(-321, 241)，（0, 150）,（0, -100）`
 - - *关于指令系统和字幕系统，需要等待到有合适的联机同步方法后，才可继续推进*
-- 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
-- 修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息
-> 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
-- - 错误情况
-```json
-"6957491d2df471f9a85e4de9": {
-  "attachmentsNew": 0,
-  "new": 0,
-  "type": 1,
-  "Users": [],
-  "pinned": false,
-  "messages": [
-    {
-      "_id": "6957498c2df471f9a85e4e98",
-      "uid": "68fc96b7dd043e81bc7a506c",
-      "type": 1,
-      "dt": 1767328140,
-      "text": "哎哟我",
-      "hasRewards": false,
-      "rewardCollected": false,
-      "items": {}
-    }
-  ],
-  "_id": "6957491d2df471f9a85e4de9"
-}
-```
-- - 正常情况
-```json
-"692edf66bfcd227424bceb4d": {
-  "attachmentsNew": 0,
-  "new": 0,
-  "type": 1,
-  "Users": [
-    {
-      "_id": "692edf66bfcd227424bceb4d",
-      "aid": 0,
-      "Info": {
-        "Nickname": "TrueOMGer",
-        "Side": "Bear",
-        "Level": 7,
-        "MemberCategory": 0,
-        "SelectedMemberCategory": 0
-      }
-    },
-    {
-      "_id": "68fc96b7dd043e81bc7a506c",
-      "aid": 1665585,
-      "Info": {
-        "Nickname": "tester1",
-        "Side": "Bear",
-        "Level": 23,
-        "MemberCategory": 1026,
-        "SelectedMemberCategory": 1024
-      }
-    }
-  ],
-  "pinned": false,
-  "messages": [
-    {
-      "_id": "692ee153bfcd227424bd5ece",
-      "uid": "692edf66bfcd227424bceb4d",
-      "type": 1,
-      "dt": 1764680019,
-      "text": "你是个很强的对手 我的兄弟",
-      "items": {}
-    }
-  ],
-  "_id": "692edf66bfcd227424bceb4d"
-}
-```
-
 - `GClass117`为AI掠夺战利品的Layer，需要适时进行参考学习
 - 尝试使好友列表显示店长机器人时一并显示头像
 - 适配联机部分时
@@ -376,6 +305,76 @@
 - ~~换个头像再发布~~
 - ~~实现生成Boss~~
 - - ~~Scav的存档没有变成Boss存档~~
+- **当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行**
+- **修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息**
+> 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
+- - 错误情况
+```json
+"6957491d2df471f9a85e4de9": {
+  "attachmentsNew": 0,
+  "new": 0,
+  "type": 1,
+  "Users": [],
+  "pinned": false,
+  "messages": [
+    {
+      "_id": "6957498c2df471f9a85e4e98",
+      "uid": "68fc96b7dd043e81bc7a506c",
+      "type": 1,
+      "dt": 1767328140,
+      "text": "哎哟我",
+      "hasRewards": false,
+      "rewardCollected": false,
+      "items": {}
+    }
+  ],
+  "_id": "6957491d2df471f9a85e4de9"
+}
+```
+- - 正常情况
+```json
+"692edf66bfcd227424bceb4d": {
+  "attachmentsNew": 0,
+  "new": 0,
+  "type": 1,
+  "Users": [
+    {
+      "_id": "692edf66bfcd227424bceb4d",
+      "aid": 0,
+      "Info": {
+        "Nickname": "TrueOMGer",
+        "Side": "Bear",
+        "Level": 7,
+        "MemberCategory": 0,
+        "SelectedMemberCategory": 0
+      }
+    },
+    {
+      "_id": "68fc96b7dd043e81bc7a506c",
+      "aid": 1665585,
+      "Info": {
+        "Nickname": "tester1",
+        "Side": "Bear",
+        "Level": 23,
+        "MemberCategory": 1026,
+        "SelectedMemberCategory": 1024
+      }
+    }
+  ],
+  "pinned": false,
+  "messages": [
+    {
+      "_id": "692ee153bfcd227424bd5ece",
+      "uid": "692edf66bfcd227424bceb4d",
+      "type": 1,
+      "dt": 1764680019,
+      "text": "你是个很强的对手 我的兄弟",
+      "items": {}
+    }
+  ],
+  "_id": "692edf66bfcd227424bceb4d"
+}
+```
 
 ## Logic思想指导
 

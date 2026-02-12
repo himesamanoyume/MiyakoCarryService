@@ -47,15 +47,16 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
 
         public ValueTask<string> PerformAction(UserDialogInfo commandHandler, MongoId sessionId, SendMessageRequest request)
         {
-            string value = request.DialogId;
+            var dialogId = request.DialogId;
             var match = OrderCommandRegex().Match(request.Text);
             if (match.Success)
             {
-                int players = int.Parse(match.Groups[1].Value);
-                int intBotType = int.Parse(match.Groups[2].Value);
-                EBotType botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
-                int level = int.Parse(match.Groups[3].Value);
-                int duration = int.Parse(match.Groups[4].Value);
+                var players = int.Parse(match.Groups[1].Value);
+                // var intBotType = int.Parse(match.Groups[2].Value);
+                // var botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
+                var botType = EBotType.common;
+                var level = int.Parse(match.Groups[3].Value);
+                var duration = int.Parse(match.Groups[4].Value);
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId, 
@@ -77,7 +78,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     null
                 );
             }
-            return new(value);
+            return new(dialogId);
         }
     }
 }
