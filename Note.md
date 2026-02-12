@@ -1,32 +1,19 @@
 # MiyakoCarryService / 宫子护航店
 
-- 好友位自带一个TsukiyukiMiyako，通过她来进行下单（最初直接通过指令）
+- ~~好友位自带一个TsukiyukiMiyako，通过她来进行下单~~（最初直接通过指令）
 - 最好能使用上大模型，语音识别。游戏中通过语音识别、或扩展指令系统来发出指令
-- 拉去好友进队后能够在匹配界面显示
-> 参考[FriendlyPMC](https://bitbucket.org/pitvenin/friendlypmc/src/version-4/)
-- （最好是通过商人来交，给的是临时任务）交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同
+- ~~拉去好友进队后能够在匹配界面显示~~
+- ~~交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同~~
 > 可参考ABPS这种根据玩家等级提升装备和等级
 - AI增加套包收益最大化
 > 可以参考游戏对物品排序的功能是如何修改物品位置的
-- 最好支持BOSS、BOSS+小弟护航
-- 兼容SAIN、Fika
+- ~~最好支持BOSS、~~BOSS+小弟护航
+- ~~兼容SAIN、Fika~~
 - 最好是自带一部分QuestingBots和LootingBots的功能，可根据交互来选择帮助你。比如我想要什么物品，他就会去帮你找
 - **赞助版**：解锁红护/挂护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资
 - - 如果是红护根据价位有不同的概率（通过封号系数决定，可关闭）可能被封号，然后根据你本局的战利品收益进行追缴（可关闭）
-- 图标：宫子头饰, 后面一个光环
-- 根据好感度等级能够打折扣
-
-## Discord
-
-1. 首先Oddba帖子刷新一周后除非再次刷新否则就没法编辑内容，对于模组早期版本频繁更新来说并不方便，更别说每层楼只能显示100个回复，对于问题收集十分麻烦
-2. 而我本人不希望过多被动接收模组相关的讯息，如果开的是QQ群，那我可能要不停地收到各种人发的消息、问题，我只希望在想看的时候才看
-3. 本模组目标是免费版开源并上架Forge，看情况以后可能会开放给国际友人进来交流，所以国内大多平台不能胜任
-4. Discord也可以关联爱发电等账号，对于赞助者来说上身份标识更方便
-5. Discord的可玩性比QQ群啥的高出不止一个档次，很利好开发者做各种定制化
-6. 因此Discord是介于Oddba和Q群之间十分完美的选择，至于科学上网问题还请各位自己解决，实在不行就请您继续在Oddba留言即可
-
-- Discord 爱发电webhook
-- Discord Bangumi动态webhook
+- ~~图标：宫子头饰, 后面一个光环~~
+- ~~根据好感度等级能够打折扣~~
 
 ## 已知问题
 
@@ -36,6 +23,8 @@
 ## 低优先级 | IDEA
 
 - `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
+- - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
+> 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
@@ -43,77 +32,6 @@
 - 修改指令系统数组`PredefinedLayoutGroup.PositionsToCenter`
 - - `(-321, 241)，(0, 315)，(321, 241)，(492, 55)，(433, -158)，(171, -296)，(-171, -296)，(-433, -158)，(-492, 55)，(-321, 241)，（0, 150）,（0, -100）`
 - - *关于指令系统和字幕系统，需要等待到有合适的联机同步方法后，才可继续推进*
-- 当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行
-- 修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息
-> 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
-- - 错误情况
-```json
-"6957491d2df471f9a85e4de9": {
-  "attachmentsNew": 0,
-  "new": 0,
-  "type": 1,
-  "Users": [],
-  "pinned": false,
-  "messages": [
-    {
-      "_id": "6957498c2df471f9a85e4e98",
-      "uid": "68fc96b7dd043e81bc7a506c",
-      "type": 1,
-      "dt": 1767328140,
-      "text": "哎哟我",
-      "hasRewards": false,
-      "rewardCollected": false,
-      "items": {}
-    }
-  ],
-  "_id": "6957491d2df471f9a85e4de9"
-}
-```
-- - 正常情况
-```json
-"692edf66bfcd227424bceb4d": {
-  "attachmentsNew": 0,
-  "new": 0,
-  "type": 1,
-  "Users": [
-    {
-      "_id": "692edf66bfcd227424bceb4d",
-      "aid": 0,
-      "Info": {
-        "Nickname": "TrueOMGer",
-        "Side": "Bear",
-        "Level": 7,
-        "MemberCategory": 0,
-        "SelectedMemberCategory": 0
-      }
-    },
-    {
-      "_id": "68fc96b7dd043e81bc7a506c",
-      "aid": 1665585,
-      "Info": {
-        "Nickname": "tester1",
-        "Side": "Bear",
-        "Level": 23,
-        "MemberCategory": 1026,
-        "SelectedMemberCategory": 1024
-      }
-    }
-  ],
-  "pinned": false,
-  "messages": [
-    {
-      "_id": "692ee153bfcd227424bd5ece",
-      "uid": "692edf66bfcd227424bceb4d",
-      "type": 1,
-      "dt": 1764680019,
-      "text": "你是个很强的对手 我的兄弟",
-      "items": {}
-    }
-  ],
-  "_id": "692edf66bfcd227424bceb4d"
-}
-```
-
 - `GClass117`为AI掠夺战利品的Layer，需要适时进行参考学习
 - 尝试使好友列表显示店长机器人时一并显示头像
 - 适配联机部分时
@@ -363,7 +281,7 @@
 - ~~为什么现在进不了准备界面?~~
 - ~~重新加载玩家模型资源后图标又会消失~~
 - ~~开始战局又取消时应该发送请求清理小队~~
-- **护航死后，不应该在转移后还能再次生成，应记录下死亡情况，当再次获取小队信息时则跳过死亡的成员**
+- ~~护航死后，不应该在转移后还能再次生成，应记录下死亡情况，当再次获取小队信息时则跳过死亡的成员~~
 - ~~Scav模式下，似乎会由于无法获取到bossPlayers，而导致无护航生成~~
 - - ~~由于Scav模式下bossPlayerId是Pmc的Id，因此无法从GameWorld中获取到scavId的Player~~
 - - ~~生成Bot时要根据是否是scav状态来发送对应Profile，老板的id也需要是Scav的Id~~
@@ -386,7 +304,77 @@
 - - ~~继承`IDialogueChatBot`重新实现一个机器人~~
 - ~~换个头像再发布~~
 - ~~实现生成Boss~~
-- - Scav的存档没有变成Boss存档（需要整理一下生成Profile的流程了，现在太稀碎）
+- - ~~Scav的存档没有变成Boss存档~~
+- **当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行**
+- **修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息**
+> 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
+- - 错误情况
+```json
+"6957491d2df471f9a85e4de9": {
+  "attachmentsNew": 0,
+  "new": 0,
+  "type": 1,
+  "Users": [],
+  "pinned": false,
+  "messages": [
+    {
+      "_id": "6957498c2df471f9a85e4e98",
+      "uid": "68fc96b7dd043e81bc7a506c",
+      "type": 1,
+      "dt": 1767328140,
+      "text": "哎哟我",
+      "hasRewards": false,
+      "rewardCollected": false,
+      "items": {}
+    }
+  ],
+  "_id": "6957491d2df471f9a85e4de9"
+}
+```
+- - 正常情况
+```json
+"692edf66bfcd227424bceb4d": {
+  "attachmentsNew": 0,
+  "new": 0,
+  "type": 1,
+  "Users": [
+    {
+      "_id": "692edf66bfcd227424bceb4d",
+      "aid": 0,
+      "Info": {
+        "Nickname": "TrueOMGer",
+        "Side": "Bear",
+        "Level": 7,
+        "MemberCategory": 0,
+        "SelectedMemberCategory": 0
+      }
+    },
+    {
+      "_id": "68fc96b7dd043e81bc7a506c",
+      "aid": 1665585,
+      "Info": {
+        "Nickname": "tester1",
+        "Side": "Bear",
+        "Level": 23,
+        "MemberCategory": 1026,
+        "SelectedMemberCategory": 1024
+      }
+    }
+  ],
+  "pinned": false,
+  "messages": [
+    {
+      "_id": "692ee153bfcd227424bd5ece",
+      "uid": "692edf66bfcd227424bceb4d",
+      "type": 1,
+      "dt": 1764680019,
+      "text": "你是个很强的对手 我的兄弟",
+      "items": {}
+    }
+  ],
+  "_id": "692edf66bfcd227424bceb4d"
+}
+```
 
 ## Logic思想指导
 
