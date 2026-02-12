@@ -16,8 +16,11 @@ using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.OrderQuest
 {
+    /// <summary>
+    /// 如果是Order类型更换任务请求，直接将此任务删除并删除订单
+    /// </summary>
     public sealed class ChangeRepeatableQuestPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.ChangeRepeatableQuest));

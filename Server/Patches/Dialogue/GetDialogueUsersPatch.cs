@@ -16,6 +16,9 @@
 
 // namespace MiyakoCarryService.Server.Patches
 // {
+//     /// <summary>
+//     /// 确保当对护航发送消息时能够生成正确的数据格式
+//     /// </summary>
 //     public sealed class GetDialogueUsersPatch : AbstractPatch
 //     {
 //         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetDialogueUsers));

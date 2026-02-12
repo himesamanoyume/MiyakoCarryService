@@ -9,10 +9,10 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Services;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Dialogue
 {
     /// <summary>
-    /// 让临时商人消息以宫子商人Id发送
+    /// 每当宫子发送消息时，都将原本的临时商人Id改为以宫子Id发送
     /// </summary>
     public sealed class SendLocalisedNpcMessageToPlayerPatch : AbstractPatch
     {

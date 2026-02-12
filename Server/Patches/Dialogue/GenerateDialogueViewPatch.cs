@@ -1,7 +1,5 @@
 
-using System;
 using System.Reflection;
-using System.Threading;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Services;
@@ -14,10 +12,10 @@ using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Services;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Dialogue
 {
     /// <summary>
-    /// 对宫子好友首次开始聊天时以商人消息类型创建
+    /// 对宫子好友首次获取聊天消息内容时都以商人消息类型发送一条问候语，保证玩家存档中与宫子的聊天类型一定以商人类型创建
     /// </summary>
     public sealed class GenerateDialogueViewPatch : AbstractPatch
     {
