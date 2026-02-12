@@ -12,8 +12,11 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Friend
 {
+    /// <summary>
+    /// 修复获取好友列表时的一些bug，并实现护航作为好友显示
+    /// </summary>
     public sealed class GetFriendListPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetFriendList));

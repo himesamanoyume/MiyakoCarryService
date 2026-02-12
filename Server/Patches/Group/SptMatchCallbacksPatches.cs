@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Group
 {
     /// <summary>
     /// 向护航发送组队邀请时自动接受

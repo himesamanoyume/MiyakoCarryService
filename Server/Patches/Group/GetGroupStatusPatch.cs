@@ -11,8 +11,11 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Group
 {
+    /// <summary>
+    /// 使玩家进入匹配界面时能够自动加载其他队友的模型
+    /// </summary>
     public sealed class GetGroupStatusPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchCallbacks), nameof(MatchCallbacks.GetGroupStatus));

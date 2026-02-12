@@ -10,8 +10,11 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Quests;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.OrderQuest
 {
+    /// <summary>
+    /// 对应的Order任务完成时，根据订单信息生成对应的护航存档
+    /// </summary>
     public sealed class CompleteQuestPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.CompleteQuest));

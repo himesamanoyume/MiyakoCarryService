@@ -2,7 +2,10 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Services;
-using MiyakoCarryService.Server.Patches;
+using MiyakoCarryService.Server.Patches.Dialogue;
+using MiyakoCarryService.Server.Patches.Group;
+using MiyakoCarryService.Server.Patches.Friend;
+using MiyakoCarryService.Server.Patches.OrderQuest;
 
 namespace MiyakoCarryService.Server
 {

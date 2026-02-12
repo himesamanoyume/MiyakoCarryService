@@ -15,8 +15,11 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
 
-namespace MiyakoCarryService.Server.Patches
+namespace MiyakoCarryService.Server.Patches.Friend
 {
+    /// <summary>
+    /// 实现玩家能够查看护航的资料
+    /// </summary>
     public sealed class GetOtherProfilePatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Controllers.ProfileController), nameof(SPTarkov.Server.Core.Controllers.ProfileController.GetOtherProfile));
@@ -28,7 +31,6 @@ namespace MiyakoCarryService.Server.Patches
             var mcsFullProfileToView = profileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
             if (mcsFullProfileToView is null)
             {
-                Console.WriteLine("执行老代码");
                 return true;
             }
 
