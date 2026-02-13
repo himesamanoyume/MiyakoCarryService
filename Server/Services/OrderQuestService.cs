@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
 using MiyakoCarryService.Server.Models.Enums;
-using MiyakoCarryService.Server.Patches;
+using MiyakoCarryService.Server.Patches.OrderQuest;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
