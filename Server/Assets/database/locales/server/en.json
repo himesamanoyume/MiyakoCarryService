@@ -12,5 +12,5 @@
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "Commands available for \"{0}\" prefix:",
     "Mcs/BotTypeCommon": "Common Player",
     "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n order command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\ncarry service level: 1~4\nduration: integer, in hours\nexample: mcs {2} 4 4 24",
-    "Mcs/MiyakoTraderCommandHelp2": "Bot type list:\n0: {0}\n1: Kaban\n2: Reshala\n3: Glukhar\n4: Killa\n5: Knight\n6: BigPipe\n7: BirdEye\n8: Kollontay\n9: Shturman\n10: Sanitar\n11: Tagilla\n12: Partisan\n13: Zryachiy\n14: Tagilla Agro\n15: Killa Agro\n16: Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider"
+    "Mcs/MiyakoTraderCommandHelp2": "Bot type list:\n0: {0}\n[Disabled]\n1: Kaban\n2: Reshala\n3: Glukhar\n4: Killa\n5: Knight\n6: BigPipe\n7: BirdEye\n8: Kollontay\n9: Shturman\n10: Sanitar\n11: Tagilla\n12: Partisan\n13: Zryachiy\n14: Tagilla Agro\n15: Killa Agro\n16: Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider"
 }
