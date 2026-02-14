@@ -273,10 +273,13 @@ namespace MiyakoCarryService.Server.Services
                 AllPmcsHaveSameNameAsPlayer = false
             };
 
+            // 适配APBS重复添加Tier
+            var clonedBotGenerationDetails = cloner.Clone(botGenerationDetails);
+
             var pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
-            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, botGenerationDetails, pmcData) : GenerateScavData(pmcData, botGenerationDetails);
+            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
 
             scavData.Info.Settings = new();
             scavData.Info.Bans = [];
