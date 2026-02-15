@@ -22,6 +22,7 @@
 
 ## 低优先级 | IDEA
 
+- 每误杀一个护航，宫子好感-0.5，低于0，下单价格翻50倍
 - `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
 - - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
 > 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
@@ -378,6 +379,7 @@
 
 - ~~APBS生成Bot时添加额外字段Tier报错~~
 - ~~BUG:第二次进行动任务就完成不了下单的任务~~(无法复现)
+- Mcs也新增一个大调查，点击直接复制错误日志到剪贴板
 
 ## Logic思想指导
 

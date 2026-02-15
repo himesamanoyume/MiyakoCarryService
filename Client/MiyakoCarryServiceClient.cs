@@ -13,6 +13,8 @@ using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Patches.Group;
 using MiyakoCarryService.Client.Patches.BepInEx;
 using MiyakoCarryService.Client.Patches.Events;
+using System.Text.RegularExpressions;
+using MiyakoCarryService.Client.Patches.BigSurvey;
 
 namespace MiyakoCarryService.Client;
 
@@ -23,7 +25,7 @@ namespace MiyakoCarryService.Client;
 [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 {
-    public const string BepInExClientVersion = "0.1.6.0";
+    public const string BepInExClientVersion = "0.1.5.2";
     public static Version ClientVersion { get; } = new(BepInExClientVersion);
     public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
     public const string FikaGUID = "com.fika.core";
@@ -34,6 +36,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
     public static bool FikaInstalled { get; private set; }  = false;
     public static bool IsFikaHeadless { get; private set; } = false;
+    private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
+    public static LogBuffer LogBuffer = new LogBuffer();
 
     #region BASIC
 
@@ -63,6 +67,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 
     void Start()
     {
+        Application.logMessageReceived += OnLog;
         CheckFikaPlugin();
         CheckFikaHeadlessPlugin();
         SetupConfig();
@@ -73,6 +78,19 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         }
         EnableAllPatches();
         GameLoop.Instance.Init();
+    }
+
+    private void OnLog(string condition, string stackTrace, LogType type)
+    {
+        if (LogBuffer == null)
+        {
+            return;
+        }
+
+        if (type == LogType.Exception || type == LogType.Error)
+        {
+            LogBuffer.AddEntryIfNotFull(condition, _stackRegex.Replace(stackTrace, ""));
+        }
     }
 
     public static string DefaultLang = "en";
@@ -156,6 +174,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new MatchingAbortPatch().Enable();
         new DisbandRaidGroupPatch().Enable();
         // new ManualUpdatePatch().Enable();
+        new MenuTaskBarAwakePatch().Enable();
+        new NewNewsCountPatch().Enable();
 
 #if DEBUG
         
