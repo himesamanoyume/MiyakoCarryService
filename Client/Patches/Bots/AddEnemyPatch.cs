@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 if (SquadMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
-                    if (SquadMgr.IsMcsLeadPlayer(person.ProfileId) || SquadMgr.IsMcsBotPlayer(person.ProfileId))
+                    if (person.Profile.Info.GroupId == "Mcs" || person.Profile.Info.GroupId == "Fika")
                     {
                         __result = false;
                         return false;
@@ -51,6 +51,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static void Postfix(BotsGroup __instance, IPlayer person, EBotEnemyCause cause)
         {
             if (person == null || _isPropagating)
+            {
+                return;
+            }
+
+            if (person.Profile.Info.GroupId == "Mcs" || person.Profile.Info.GroupId == "Fika")
             {
                 return;
             }
