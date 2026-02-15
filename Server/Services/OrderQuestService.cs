@@ -13,10 +13,10 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Server.Services
     public sealed class OrderQuestService(
         ModHelper modHelper,
         ConfigService configService,
-        ISptLogger<OrderQuestService> logger,
+        SptLogger<OrderQuestService> logger,
         OrderQuestGenerator orderQuestGenerator,
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,

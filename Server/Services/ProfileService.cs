@@ -20,12 +20,12 @@ using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Services
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<ProfileService> logger,
+        SptLogger<ProfileService> logger,
         ConfigService configService,
         RandomUtil randomUtil,
         HashUtil hashUtil,

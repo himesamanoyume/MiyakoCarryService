@@ -4,18 +4,17 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services;
-using MiyakoCarryService.Server.Models.Enums;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
     public class OrderQuestGenerator(
-        ISptLogger<OrderQuestGenerator> logger,
+        SptLogger<OrderQuestGenerator> logger,
         RandomUtil randomUtil,
         OrderQuestRewardGenerator orderQuestRewardGenerator,
         ServerLocalisationService serverLocalisationService

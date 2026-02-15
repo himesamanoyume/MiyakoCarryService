@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Server.Services
         ProfileService profileService
     )
     {
-        private readonly ConcurrentDictionary<MongoId, List<int>> _bossMemberGroups = new();
+        private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
 
         public async Task OnPostLoadAsync()
@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Server.Services
 
         public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            if (_bossMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
+            if (_leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
             {
                 if (mcsAids.Contains(mcsAid))
                 {
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (!mcsAids.Contains(mcsAid))
             {
                 mcsAids.Add(mcsAid);
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void RemoveGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (mcsAids.Contains(mcsAid))
             {
                 mcsAids.Remove(mcsAid);
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>()).Clear();
+            _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>()).Clear();
         }
 
         public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
@@ -114,7 +114,7 @@ namespace MiyakoCarryService.Server.Services
 
         public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)
         {
-            var members = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var members = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             var profiles = new List<SptProfile>();
             foreach (var mcsAid in members)
             {
