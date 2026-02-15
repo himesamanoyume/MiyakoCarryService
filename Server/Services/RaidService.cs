@@ -27,6 +27,7 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
+        private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
 
         public async Task OnPostLoadAsync()
@@ -64,9 +65,20 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        public void AddMatchPlayer(MongoId mcsLeadPlayerId, MongoId otherPlayerId)
+        {
+            var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
+            matchPlayerIds.Add(otherPlayerId);
+        }
+
         public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>()).Clear();
+            _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
+            var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
+            foreach (var matchPlayerId in matchPlayerIds)
+            {
+                _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
+            }
         }
 
         public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
@@ -150,6 +162,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (playerId != mcsLeadPlayerId)
                             {
+                                AddMatchPlayer(mcsLeadPlayerId, playerId);
                                 mcsLeadPlayerIds.Add(playerId);
                             }
                         }
@@ -204,6 +217,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (playerId != mcsLeadPlayerId)
                             {
+                                AddMatchPlayer(mcsLeadPlayerId, playerId);
                                 mcsLeadPlayerIds.Add(playerId);
                             }
                         }

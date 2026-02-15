@@ -95,7 +95,7 @@ internal sealed class MenuTaskBarAwakePatch : ModulePatch
                     foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())
                     {
                         stringBuilder.Append(logEntry.Condition).Append("\n");
-                        stringBuilder.Append(logEntry.StackTrace.Replace(")", ")\n"));
+                        stringBuilder.Append(logEntry.StackTrace);
                     }
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
