@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Server
 {
         public record ModMetadata : AbstractModMetadata
         {
-                private const string CurrentVersion = "0.1.5.4";
+                private const string CurrentVersion = "0.1.5.5";
 #if CHEATERCARRY
                 public override string Name { get; init; } = "MiyakoCarryServiceServer 红护版";
 #else
