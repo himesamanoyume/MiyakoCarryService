@@ -4,10 +4,9 @@
 - 最好能使用上大模型，语音识别。游戏中通过语音识别、或扩展指令系统来发出指令
 - ~~拉去好友进队后能够在匹配界面显示~~
 - ~~交一点卢布获取好友位，一段时间后会自动删除好友。不同价位的装备、准度也不同~~
-> 可参考ABPS这种根据玩家等级提升装备和等级
-- AI增加套包收益最大化
+> 可参考APBS这种根据玩家等级提升装备和等级
 > 可以参考游戏对物品排序的功能是如何修改物品位置的
-- ~~最好支持BOSS、~~BOSS+小弟护航
+- ~~最好支持BOSS护航~~
 - ~~兼容SAIN、Fika~~
 - 最好是自带一部分QuestingBots和LootingBots的功能，可根据交互来选择帮助你。比如我想要什么物品，他就会去帮你找
 - **赞助版**：解锁红护/挂护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资
@@ -307,7 +306,7 @@
 - ~~实现生成Boss~~
 - - ~~Scav的存档没有变成Boss存档~~
 - **当玩家处于战局中时，依然会触发护航退队相关的通知，此时应该暂缓处于小队中的护航离队，仅让非小队的过期护航删好友，待到战局结束再一并进行**
-- **修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息**
+- ~~修改聊天机器人的名称，然后Patch(如果有必要)名称使其以本地化内容显示聊天信息~~
 > 参考`GetDialogueUsers`, `GetDialogByIdFromProfile`
 - - 错误情况
 ```json
@@ -382,7 +381,104 @@
 - ~~Mcs也新增一个大调查，点击直接复制错误日志到剪贴板~~
 - ~~BUG:其他人没拉护航就不会被判定为老板，导致护航攻击联机玩家~~
 - 快速压弹可能导致触发更新Data数据过于频繁
-- BUG:一准备就服务器繁忙
+- ~~BUG:一准备就服务器繁忙~~
+```log
+NullReferenceException: Object reference not set to an instance of an object
+  at QuestBookClass.method_14 () [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at CompositeDisposableClass.Dispose () [0x00044] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at QuestBookClass.Dispose () [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at GClass3999`1[T].Dispose () [0x00068] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at GClass4005.Dispose () [0x0002f] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at MainMenuControllerClass.Unsubscribe () [0x001a6] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at (wrapper dynamic-method) EFT.TarkovApplication+Struct388.DMD<EFT.TarkovApplication+Struct388::MoveNext>(EFT.TarkovApplication/Struct388&)
+--- End of stack trace from previous location where exception was thrown ---
+
+  at (wrapper dynamic-method) EFT.TarkovApplication+Struct389.DMD<EFT.TarkovApplication+Struct389::MoveNext>(EFT.TarkovApplication/Struct389&)
+--- End of stack trace from previous location where exception was thrown ---
+
+  at EFT.TarkovApplication.method_37 () [0x001c4] in <ad47400a25db462cbf0a531df654c3c3>:0 
+UnityEngine.DebugLogHandler:Internal_LogException(Exception, Object)
+UnityEngine.DebugLogHandler:LogException(Exception, Object)
+Class412:LogException(Exception, Object)
+Class412:method_2(Exception)
+LoggerClass:LogException(Exception)
+EFT.TarkovApplication:method_39(String, Exception)
+EFT.Struct398:MoveNext()
+System.Runtime.CompilerServices.MoveNextRunner:InvokeMoveNext(Object)
+System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+System.Threading.ExecutionContext:Run(ExecutionContext, ContextCallback, Object, Boolean)
+System.Runtime.CompilerServices.MoveNextRunner:Run()
+System.Threading.Tasks.AwaitTaskContinuation:InvokeAction(Object)
+System.Threading.Tasks.AwaitTaskContinuation:RunCallback(ContextCallback, Object, Task&)
+System.Threading.Tasks.SynchronizationContextAwaitTaskContinuation:Run(Task, Boolean)
+System.Threading.Tasks.Task:FinishContinuations()
+System.Threading.Tasks.Task:FinishStageThree()
+System.Threading.Tasks.Task:FinishStageTwo()
+System.Threading.Tasks.Task:Finish(Boolean)
+System.Threading.Tasks.Task:TrySetException(Object)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1:SetException(Exception)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder:SetException(Exception)
+EFT.Struct389:DMD<EFT.TarkovApplication+Struct389::MoveNext>(Struct389&)
+System.Runtime.CompilerServices.MoveNextRunner:InvokeMoveNext(Object)
+System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+System.Threading.ExecutionContext:Run(ExecutionContext, ContextCallback, Object, Boolean)
+System.Runtime.CompilerServices.MoveNextRunner:Run()
+System.Threading.Tasks.AwaitTaskContinuation:InvokeAction(Object)
+System.Threading.Tasks.AwaitTaskContinuation:RunCallback(ContextCallback, Object, Task&)
+System.Threading.Tasks.SynchronizationContextAwaitTaskContinuation:Run(Task, Boolean)
+System.Threading.Tasks.Task:FinishContinuations()
+System.Threading.Tasks.Task:FinishStageThree()
+System.Threading.Tasks.Task:FinishStageTwo()
+System.Threading.Tasks.Task:Finish(Boolean)
+System.Threading.Tasks.Task:TrySetException(Object)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1:SetException(Exception)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder:SetException(Exception)
+EFT.Struct388:DMD<EFT.TarkovApplication+Struct388::MoveNext>(Struct388&)
+System.Runtime.CompilerServices.MoveNextRunner:InvokeMoveNext(Object)
+System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+System.Threading.ExecutionContext:Run(ExecutionContext, ContextCallback, Object, Boolean)
+System.Runtime.CompilerServices.MoveNextRunner:Run()
+System.Threading.Tasks.AwaitTaskContinuation:InvokeAction(Object)
+System.Threading.Tasks.AwaitTaskContinuation:RunCallback(ContextCallback, Object, Task&)
+System.Threading.Tasks.SynchronizationContextAwaitTaskContinuation:Run(Task, Boolean)
+System.Threading.Tasks.Task:FinishContinuations()
+System.Threading.Tasks.Task:FinishStageThree()
+System.Threading.Tasks.Task`1:TrySetResult(VoidTaskResult)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1:SetResult(VoidTaskResult)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1:SetResult(Task`1)
+System.Runtime.CompilerServices.AsyncTaskMethodBuilder:SetResult()
+EFT.Struct532:MoveNext()
+System.Runtime.CompilerServices.MoveNextRunner:InvokeMoveNext(Object)
+System.Threading.ExecutionContext:RunInternal(ExecutionContext, ContextCallback, Object, Boolean)
+System.Threading.ExecutionContext:Run(ExecutionContext, ContextCallback, Object, Boolean)
+System.Runtime.CompilerServices.MoveNextRunner:Run()
+System.Threading.Tasks.AwaitTaskContinuation:InvokeAction(Object)
+System.Threading.Tasks.AwaitTaskContinuation:RunCallback(ContextCallback, Object, Task&)
+System.Threading.Tasks.SynchronizationContextAwaitTaskContinuation:Run(Task, Boolean)
+System.Threading.Tasks.Task:FinishContinuations()
+System.Threading.Tasks.Task:FinishStageThree()
+System.Threading.Tasks.Task`1:TrySetResult(Boolean)
+System.Threading.Tasks.TaskCompletionSource`1:TrySetResult(Boolean)
+System.Threading.Tasks.TaskCompletionSource`1:SetResult(Boolean)
+TaskCompletionSource:Complete()
+EFT.Class1638:MoveNext()
+UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr)
+
+NullReferenceException: Object reference not set to an instance of an object
+  at BotHearingSensor.method_1 (EFT.IPlayer player, UnityEngine.Vector3 position, System.Single power, AISoundType type) [0x00019] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at BotHearingSensor.method_0 (EFT.IPlayer player, UnityEngine.Vector3 position, System.Single power, AISoundType type) [0x0004f] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at (wrapper delegate-invoke) <Module>.invoke_void_IPlayer_Vector3_single_AISoundType(EFT.IPlayer,UnityEngine.Vector3,single,AISoundType)
+  at BotEventHandler.PlaySound (EFT.IPlayer person, UnityEngine.Vector3 position, System.Single power, AISoundType type) [0x0000a] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at EFT.MovementContext.method_1 (UnityEngine.Vector3 motion) [0x0012c] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at EFT.MovementContext.DirectApplyMotion (UnityEngine.Vector3 motion, System.Single deltaTime) [0x00087] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at EFT.MovementContext.AnimatorStatesLateUpdate () [0x0000f] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at EFT.Player.LateUpdate () [0x0000a] in <ad47400a25db462cbf0a531df654c3c3>:0 
+UnityEngine.DebugLogHandler:Internal_LogException(Exception, Object)
+UnityEngine.DebugLogHandler:LogException(Exception, Object)
+Class412:LogException(Exception, Object)
+UnityEngine.Logger:LogException(Exception, Object)
+UnityEngine.Debug:CallOverridenDebugHandler(Exception, Object)
+```
 
 ## Logic思想指导
 
