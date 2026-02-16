@@ -14,10 +14,18 @@ namespace MiyakoCarryService.Client.Patches.Raid
         protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(RaidSettings), nameof(RaidSettings.Local));
 
         [PatchPrefix]
+        [HarmonyPriority(Priority.First)]
         public static bool Prefix(ref bool __result)
         {
             __result = true;
             return false;
+        }
+
+        [PatchPostfix]
+        [HarmonyPriority(Priority.Last)]
+        public static void Postfix(ref bool __result)
+        {
+            __result = true;
         }
     }
 }
