@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Server.Services
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
-                mcsLeadPlayerId, players, carryServiceLevel, duration
+                mcsLeadPlayerId, players, botType, carryServiceLevel, duration
             ));
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
@@ -107,7 +107,7 @@ namespace MiyakoCarryService.Server.Services
 
         public RepeatableQuest GenerateOrderTemplate(
             RepeatableQuestType type, MongoId traderId, MongoId sessionId,
-            int players, int carryServiceLevel, int duration
+            int players, EBotType botType, int carryServiceLevel, int duration
         )
         {
             var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
@@ -135,7 +135,7 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, carryServiceLevel, duration);
+            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, botType == EBotType.common ? serverLocalisationService.GetText(Locales.BOTTYPECOMMON) : Tools.GetBotTypeName(botType), carryServiceLevel, duration);
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)
