@@ -56,7 +56,7 @@ namespace MiyakoCarryService.Server.Services
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
-            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, botType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
                 mcsLeadPlayerId, players, botType, carryServiceLevel, duration
             ));
@@ -170,7 +170,7 @@ namespace MiyakoCarryService.Server.Services
                 return null;
             }
 
-            questData.QuestStatus.Id = new MongoId();
+            questData.QuestStatus.Id = new();
             questData.QuestStatus.Uid = sessionId;
             questData.QuestStatus.QId = questData.Id;
 
@@ -191,7 +191,7 @@ namespace MiyakoCarryService.Server.Services
                 return null;
             }
 
-            quest.Id = new MongoId();
+            quest.Id = new();
             quest.TraderId = traderId;
 
             return quest;

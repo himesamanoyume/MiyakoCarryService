@@ -7,12 +7,13 @@ using SPTarkov.Server.Core.Models.Enums;
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class OrderQuestRewardGenerator()
+    public class OrderQuestRewardGenerator
     {
         public Dictionary<string, List<Reward>> GenerateReward(
             int players,
             int carryServiceLevel,
-            MongoId traderId
+            MongoId traderId,
+            double traderStanding
         )
         {
             var rewards = new Dictionary<string, List<Reward>>
@@ -24,7 +25,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             Reward reward = new()
             {
-                Id = new MongoId(),
+                Id = new(),
                 Unknown = false,
                 GameMode = [],
                 AvailableInGameEditions = [],
@@ -38,7 +39,17 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
-                reward.Value += 0.01 * carryServiceLevel;
+                reward.Value += 0.01f * carryServiceLevel;
+            }
+
+            if (reward.Value >= 0.03f)
+            {
+                reward.Value = 0.03f;
+            }
+
+            if (traderStanding < 0)
+            {
+                reward.Value *= 2;
             }
 
             return rewards;

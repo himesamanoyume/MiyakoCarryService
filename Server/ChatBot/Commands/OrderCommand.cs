@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         OrderQuestController orderQuestController
     ) : IMcsCommand
     {
-        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]|1\d|20)\s+([1-4])\s+([1-9]\d*)$")]
+        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]|1\d|20)\s+([1-5])\s+([1-9]\d*)$")]
         private static partial Regex OrderCommandRegex();
 
         public string Command
@@ -40,7 +40,8 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             {
                 return [
                     string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), Command, Command, Command), 
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), serverLocalisationService.GetText(Locales.BOTTYPECOMMON))
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), serverLocalisationService.GetText(Locales.BOTTYPECOMMON)),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3)
                     ];
             }
         }

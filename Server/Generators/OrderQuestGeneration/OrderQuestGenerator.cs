@@ -9,6 +9,7 @@ using SPTarkov.Server.Core.Utils.Json;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils.Logger;
+using MiyakoCarryService.Server.Models.Enums;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
@@ -23,6 +24,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         public RepeatableQuest GenerateOrderQuest(
             PmcData pmcData,
             int players,
+            EBotType botType,
             int carryServiceLevel,
             int duration,
             CompletionConfig completionConfig,
@@ -42,50 +44,56 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGORDERGENERATION));
-            var order = Generate(players, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate);
+            var order = Generate(players, botType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, miyakoTraderInfo.Standing.HasValue ? miyakoTraderInfo.Standing.Value : 0f);
             return order;
         }
 
         private RepeatableQuest Generate(
             int players,
+            EBotType botType,
             int carryServiceLevel,
             int duration,
             float discount,
             MongoId traderId,
             CompletionConfig completionConfig,
-            RepeatableQuest questTemplate
+            RepeatableQuest questTemplate,
+            double traderStanding
         )
         {
             var requestedItemCount = completionConfig.RequestedItemCount;
             questTemplate.Conditions.AvailableForFinish = [];
+
+            var isBossType = !Classification.BossTypes.Contains(botType);
+            var additionMulti = isBossType ? 2f : 1f;
+            var standingMulti = traderStanding < 0 ? 10.7f : 1f;
 
             for (int i = 0; i < players; i++)
             {
                 var currentRequestedItemCount = carryServiceLevel switch
                 {
                     1 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.18f),
-                        (int)(requestedItemCount.Max * discount * 0.22f) + 1),
+                        (int)(requestedItemCount.Max * discount * 0.18f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 0.22f * additionMulti * standingMulti) + 1),
                     2 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.38f),
-                        (int)(requestedItemCount.Max * discount * 0.42f) + 1),
+                        (int)(requestedItemCount.Max * discount * 0.38f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 0.42f * additionMulti * standingMulti) + 1),
                     3 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.58f),
-                        (int)(requestedItemCount.Max * discount * 0.62f) + 1),
+                        (int)(requestedItemCount.Max * discount * 0.58f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 0.62f * additionMulti * standingMulti) + 1),
                     4 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.78f),
-                        (int)(requestedItemCount.Max * discount * 0.82f) + 1),
+                        (int)(requestedItemCount.Max * discount * 0.78f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 0.82f * additionMulti * standingMulti) + 1),
                     5 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.98f),
-                        (int)(requestedItemCount.Max * discount * 1.02f) + 1),
+                        (int)(requestedItemCount.Max * discount * 0.98f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 1.02f * additionMulti * standingMulti) + 1),
                     _ => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.98f),
-                        (int)(requestedItemCount.Max * discount * 1.02f) + 1)
+                        (int)(requestedItemCount.Max * discount * 0.98f * additionMulti * standingMulti),
+                        (int)(requestedItemCount.Max * discount * 1.02f * additionMulti * standingMulti) + 1)
                 };
 
                 var handoverItemCondition = new QuestCondition
                 {
-                    Id = new MongoId(),
+                    Id = new(),
                     Index = i,
                     ParentId = string.Empty,
                     DynamicLocale = true,
@@ -101,7 +109,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 };
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
-            questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
+            questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId, traderStanding);
             return questTemplate;
         }
     }

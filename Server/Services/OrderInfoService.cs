@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Server.Services
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
             {
-                hashSetPlayers.Add(new MongoId());
+                hashSetPlayers.Add(new());
             }
             var orderInfo = new OrderInfo()
             {

@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Server.Helper
             return new WsGroupMatchRaidReady
             {
                 EventType = NotificationEventType.groupMatchRaidReady,
-                EventIdentifier = new MongoId(),
+                EventIdentifier = new(),
                 ExtendedProfile = new GroupCharacter
                 {
                     Id = data.Id.Value,

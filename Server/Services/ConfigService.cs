@@ -91,8 +91,8 @@ public sealed class ConfigService(
                         Roubles = [0],
                         GpCoins = [0],
                         Items = [0],
-                        Reputation = [0.01],
-                        RewardSpread = 0.01,
+                        Reputation = [0],
+                        RewardSpread = 0,
                         SkillRewardChance = [0],
                         SkillPointReward = [0]
                     },
@@ -120,7 +120,7 @@ public sealed class ConfigService(
                         {
                             LevelRange = new MinMax<int> {Min = 0, Max = 9999},
                             PossibleSkillRewards = [],
-                            RequestedItemCount = new MinMax<int> {Min = 300000, Max = 300000},
+                            RequestedItemCount = new MinMax<int> {Min = 500000, Max = 500000},
                             UniqueItemCount = new MinMax<int> {Min = 0, Max = 0},
                             RequestedBulletCount = new MinMax<int> {Min = 0, Max = 0},
                             UseWhitelist = false,
