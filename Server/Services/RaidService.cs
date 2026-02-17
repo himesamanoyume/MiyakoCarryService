@@ -73,10 +73,12 @@ namespace MiyakoCarryService.Server.Services
 
         public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
+            // logger.Info($"正在清除 {mcsLeadPlayerId} 的小队成员");
             _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
             var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
             foreach (var matchPlayerId in matchPlayerIds)
             {
+                // logger.Info($"正在清除房主 {mcsLeadPlayerId} 的联机队友 {matchPlayerId} 的小队成员");
                 _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
             }
         }

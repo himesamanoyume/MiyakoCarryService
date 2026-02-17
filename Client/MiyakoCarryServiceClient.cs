@@ -101,43 +101,22 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         {
 
         };
-        return CheckPlugin(unsupportedPluginList);
+        return Tools.CheckPlugin(unsupportedPluginList);
     }
 
     public static bool CheckFikaHeadlessPlugin()
     {
-        var unsupportedPluginList = new List<string>()
-        {
-            "com.fika.headless"
-        };
-        IsFikaHeadless = !CheckPlugin(unsupportedPluginList);
+        IsFikaHeadless = !Tools.CheckPlugin(["com.fika.headless"]);
         return IsFikaHeadless;
     }
 
     public static bool CheckFikaPlugin()
     {
-        var fikaPlugin = new List<string>()
-        {
-            FikaGUID
-        };
-
-        FikaInstalled = !CheckPlugin(fikaPlugin);
+        FikaInstalled = !Tools.CheckPlugin([FikaGUID]);
         return FikaInstalled;
     }
 
-    private static bool CheckPlugin(List<string> pluginList)
-    {
-        var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
-
-        foreach (PluginInfo Info in pluginInfos)
-        {
-            if (pluginList.Contains(Info.Metadata.GUID))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+    
 
     private void EnableAllPatches()
     {

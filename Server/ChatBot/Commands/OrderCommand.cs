@@ -1,4 +1,5 @@
 
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
@@ -51,9 +52,8 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             if (match.Success)
             {
                 var players = int.Parse(match.Groups[1].Value);
-                // var intBotType = int.Parse(match.Groups[2].Value);
-                // var botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
-                var botType = EBotType.common;
+                var intBotType = int.Parse(match.Groups[2].Value);
+                var botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
                 var level = int.Parse(match.Groups[3].Value);
                 var duration = int.Parse(match.Groups[4].Value);
 

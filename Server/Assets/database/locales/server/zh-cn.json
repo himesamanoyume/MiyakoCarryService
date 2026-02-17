@@ -12,5 +12,5 @@
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "可用的 \"{0}\" 指令前缀:",
     "Mcs/BotTypeCommon": "普通玩家",
     "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n下单指令:\nmcs {1} {{人数}} {{类型}} {{护航级别}} {{时间}}\n护航级别: 1~4\n时长: 整数, 单位为小时\n示例: mcs {2} 4 0 4 24",
-    "Mcs/MiyakoTraderCommandHelp2": "类型列表:\n0: {0}\n[以下不可用]\n1: Kaban\n2: Reshala\n3: Glukhar\n4: Killa\n5: Knight\n6: BigPipe\n7: BirdEye\n8: Kollontay\n9: Shturman\n10: Sanitar\n11: Tagilla\n12: Partisan\n13: Zryachiy\n14: Tagilla Agro\n15: Killa Agro\n16: Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider"
+    "Mcs/MiyakoTraderCommandHelp2": "类型列表:\n0: {0}\n1: Kaban\n2: Reshala\n3: Glukhar\n4: Killa\n5: Knight\n6: BigPipe\n7: BirdEye\n8: Kollontay\n9: Shturman\n10: Sanitar\n11: Tagilla\n12: Partisan\n13: Zryachiy\n14: Tagilla Agro\n15: Killa Agro\n16: Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider"
 }
