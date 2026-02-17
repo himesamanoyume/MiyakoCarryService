@@ -25,14 +25,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
                 mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
             }
-            try
-            {
-                mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.InitRepeatableQuests(GameLoop.Instance.Session);
-            }
-            catch
-            {
-                MiyakoCarryServicePlugin.Logger.LogError("无法获取行动任务");
-            }
+            _ = mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.Gclass4059_0.Run();
         }
     }
 }
