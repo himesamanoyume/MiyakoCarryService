@@ -50,10 +50,10 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         ), 
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), 
-                        completionConfig.RequestedItemCount.Max * (1 / 5), 
-                        completionConfig.RequestedItemCount.Max * (2 / 5), 
-                        completionConfig.RequestedItemCount.Max * (3 / 5), 
-                        completionConfig.RequestedItemCount.Max * (4 / 5), 
+                        (int)(completionConfig.RequestedItemCount.Max * .2f), 
+                        (int)(completionConfig.RequestedItemCount.Max * .4f), 
+                        (int)(completionConfig.RequestedItemCount.Max * .6f), 
+                        (int)(completionConfig.RequestedItemCount.Max * .8f), 
                         completionConfig.RequestedItemCount.Max
                         ),
                     string.Format(

@@ -7,7 +7,6 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -20,6 +19,8 @@ namespace MiyakoCarryService.Server.Services
     public sealed class TraderService(
         ModHelper modHelper,
         ICloner cloner,
+        TraderHelper traderHelper,
+        ProfileHelper profileHelper,
         ImageRouter imageRouter,
         ConfigServer configServer,
         TimeUtil timeUtil,
@@ -96,6 +97,24 @@ namespace MiyakoCarryService.Server.Services
             };
 
             traderConfig.UpdateTime.Add(traderRefreshRecord);
+        }
+
+        public void AddTraderStanding(MongoId mcsLeadPlayerId, double dif)
+        {
+            var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
+            var pmcData = fullProfile.CharacterData.PmcData;
+            var traderInfos = pmcData.TradersInfo;
+            if (traderInfos.TryGetValue(MiyakoTraderId, out var miyakoTraderInfo))
+            {
+                var isNonNegativeNum = miyakoTraderInfo.Standing > 0;
+                miyakoTraderInfo.Standing += dif;
+                traderHelper.LevelUp(MiyakoTraderId, pmcData);
+
+                if (isNonNegativeNum && miyakoTraderInfo.Standing < 0)
+                {
+                    // 此id的护航全部主动删除好友
+                }
+            }
         }
     }
 }
