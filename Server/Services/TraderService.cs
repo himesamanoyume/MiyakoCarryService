@@ -10,6 +10,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -30,6 +31,7 @@ namespace MiyakoCarryService.Server.Services
         DatabaseService databaseService,
         ProfileService profileService,
         CompatibilityService compatibilityService,
+        ISptLogger<TraderService> logger,
         ConfigService configService
     )
     {
@@ -128,6 +130,7 @@ namespace MiyakoCarryService.Server.Services
 
             if (info.PunishEveryone && compatibilityService.HasFikaServer)
             {
+                logger.Info($"尝试惩罚 {info.FriendlyFireLeadPlayerId} 但其并不是老板, 转而惩罚房间内全体Mcs老板");
                 var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
                 var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
                 var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
@@ -154,6 +157,7 @@ namespace MiyakoCarryService.Server.Services
 
             foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
             {
+                logger.Info($"对 {_mcsLeadPlayerId} 进行 {info.StandingDiff} 的信用惩罚");
                 AddTraderStanding(_mcsLeadPlayerId, info.StandingDiff);
             }
         }

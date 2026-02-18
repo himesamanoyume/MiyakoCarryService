@@ -1,5 +1,6 @@
 
 
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -176,9 +179,43 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsBotPlayers;
         }
 
+        public void AddPunish(MongoID friendlyFireLeadPlayerId, double diff, bool punishEveryone)
+        {
+            FriendlyFirePenalty friendlyFirePenalty;
+            if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFireLeadPlayerId, out friendlyFirePenalty))
+            {
+                friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFireLeadPlayerId, _ => new());
+            }
+            friendlyFirePenalty.FriendlyFireLeadPlayerId = friendlyFireLeadPlayerId;
+            friendlyFirePenalty.StandingDiff += diff;
+            friendlyFirePenalty.PunishEveryone = punishEveryone;
+        }
+
+        private IEnumerator SendPunishRequest(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                if (_gameloop.IsVaildGameWorld)
+                {
+                    foreach (var kvp in _mcsFriendlyFirePenalties)
+                    {
+                        if (kvp.Value != null)
+                        {
+                            yield return McsRequestHandler.SendPunishRequest(kvp.Value);
+                        }
+                    }
+                    _mcsFriendlyFirePenalties.Clear();
+                }
+                yield return null;
+            }
+        }
+
         protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            StartCoroutine(SendPunishRequest(10f));
         }
 
         protected override void OnRaidEnded()

@@ -96,5 +96,10 @@ namespace MiyakoCarryService.Client.Utils
         {
             await PostJsonAsync("/mcs/client/match/raid/abort");
         }
+
+        public static async Task SendPunishRequest(FriendlyFirePenalty friendlyFirePenalty)
+        {
+            await PostJsonAsync("/mcs/client/trading/api/friendlyFirePenalty", friendlyFirePenalty);
+        }
     }
 }
