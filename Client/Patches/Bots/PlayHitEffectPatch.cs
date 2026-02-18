@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EffectsCommutator), nameof(EffectsCommutator.PlayHitEffect));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -33,14 +33,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     return;
                 }
 
-                if (SquadMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || SquadMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
+                if (McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
                 {
                     return;
                 }
 
                 if (!__instance.IsHitPointAlreadyProcessed(info.HitPoint))
                 {
-                    foreach (var botOwner in SquadMgr.GetAllAliveMcsBotPlayer())
+                    foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
                     {
                         if ((botOwner.Position - info.HitPoint).sqrMagnitude <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                         {

@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.Say));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -27,12 +27,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             try
             {
-                if (SquadMgr.IsMcsLeadPlayer(__instance.ProfileId) || SquadMgr.IsMcsBotPlayer(__instance.ProfileId))
+                if (McsMgr.IsMcsLeadPlayer(__instance.ProfileId) || McsMgr.IsMcsBotPlayer(__instance.ProfileId))
                 {
                     return;
                 }
 
-                foreach (var botOwner in SquadMgr.GetAllAliveMcsBotPlayer())
+                foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
                 {
                     if (botOwner.HearingSensor.method_6(__instance.Transform.position, 50f, out var dist))
                     {

@@ -65,7 +65,7 @@ namespace MiyakoCarryService.Client
 
         public void Init()
         {
-            SquadMgr.Enable();
+            McsMgr.Enable();
             BrainMgr.Enable();
             PlayerDataMgr.Enable();
             LootDataMgr.Enable();

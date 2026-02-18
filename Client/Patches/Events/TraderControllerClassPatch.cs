@@ -19,11 +19,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetConstructors()[0];
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 if (rootItem != null)
                 {
                     var rootParentItems = rootItem.GetAllParentItemsAndSelf();
-                    var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                    var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                     foreach (var rootParentItem in rootParentItems)
                     {
                         try
@@ -68,11 +68,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_0").FieldType, "Invoke");
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -83,7 +83,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             if (GameLoop.Instance.IsVaildGameWorld)
             {
                 var item = obj.Item;
-                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (item != null)
                 {
                     var parentItems = item.GetAllParentItemsAndSelf();
@@ -123,11 +123,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_1").FieldType, "Invoke");
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -138,7 +138,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             if (GameLoop.Instance.IsVaildGameWorld)
             {
                 var item = obj.Item;
-                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (item != null)
                 {
                     var parentItems = item.GetAllParentItemsAndSelf();
@@ -178,11 +178,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -192,7 +192,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             var gameloop = GameLoop.Instance;
             if (GameLoop.Instance.IsVaildGameWorld)
             {
-                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (__instance != null)
                 {
                     var instanceRootItem = __instance.RootItem;
@@ -259,11 +259,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -273,7 +273,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             var gameloop = GameLoop.Instance;
             if (GameLoop.Instance.IsVaildGameWorld)
             {
-                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (__instance != null)
                 {
                     var instanceRootItem = __instance.RootItem;

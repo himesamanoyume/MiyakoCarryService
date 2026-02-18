@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             foreach (var botOwner in __instance.Members)
             {
-                if (SquadMgr.IsMcsBotPlayer(botOwner.ProfileId))
+                if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
                     if (person.Profile.Info.GroupId == "Mcs" || person.Profile.Info.GroupId == "Fika")
                     {
@@ -61,13 +61,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             string mcsLeadPlayerId = null;
-            if (SquadMgr.IsMcsLeadPlayer(person.ProfileId))
+            if (McsMgr.IsMcsLeadPlayer(person.ProfileId))
             {
                 mcsLeadPlayerId = person.ProfileId;
             }
-            else if (SquadMgr.IsMcsBotPlayer(person.ProfileId))
+            else if (McsMgr.IsMcsBotPlayer(person.ProfileId))
             {
-                mcsLeadPlayerId = SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(person.ProfileId).GetPlayer.ProfileId;
+                mcsLeadPlayerId = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(person.ProfileId).GetPlayer.ProfileId;
             }
 
             if (mcsLeadPlayerId == null)
@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
             
-            var allMcsMembers = SquadMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
+            var allMcsMembers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
 
             _isPropagating = true;
             try

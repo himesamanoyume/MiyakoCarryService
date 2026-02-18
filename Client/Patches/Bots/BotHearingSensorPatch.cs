@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.method_0));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -35,9 +35,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     return;
                 }
 
-                if (SquadMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !SquadMgr.IsMcsLeadPlayer(player.ProfileId))
+                if (McsMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !McsMgr.IsMcsLeadPlayer(player.ProfileId))
                 {
-                    if (player.IsAI && SquadMgr.IsMcsBotPlayer(player.ProfileId))
+                    if (player.IsAI && McsMgr.IsMcsBotPlayer(player.ProfileId))
                     {
                         return;
                     }

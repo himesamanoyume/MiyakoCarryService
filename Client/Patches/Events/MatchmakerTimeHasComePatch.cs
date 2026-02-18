@@ -14,18 +14,18 @@ namespace MiyakoCarryService.Client.Patches.Events
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass)]);
 
-		private static SquadMgr SquadMgr
+		private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
 		[PatchPrefix]
 		public static void Prefix(ISession session, RaidSettings raidSettings, MatchmakerPlayerControllerClass matchmaker)
 		{
-			if (SquadMgr.McsTransitBotPlayers.TryGetValue(MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id, out var groupPlayerViewModelClasses))
+			if (McsMgr.McsTransitBotPlayers.TryGetValue(MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id, out var groupPlayerViewModelClasses))
 			{
 				foreach (var groupPlayerViewModelClass in groupPlayerViewModelClasses.Values)
 				{

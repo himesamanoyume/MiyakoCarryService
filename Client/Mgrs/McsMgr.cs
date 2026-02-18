@@ -1,14 +1,16 @@
 
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class SquadMgr : BaseMgr<SquadMgr>
+    internal sealed class McsMgr : BaseMgr<McsMgr>
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
@@ -16,6 +18,9 @@ namespace MiyakoCarryService.Client.Mgrs
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
+        private ConcurrentDictionary<MongoID, FriendlyFirePenalty> _mcsFriendlyFirePenalties = new();
+
+        public bool IsHost = false;
 
         public sealed override void Start()
         {
@@ -188,6 +193,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 transitMembers.Clear();
             }
+            IsHost = false;
         }
     }
 }

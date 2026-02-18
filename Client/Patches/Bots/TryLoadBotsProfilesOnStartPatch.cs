@@ -24,11 +24,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     internal sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
     {
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -46,6 +46,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static async void Postfix(Task __result)
         {
             await __result;
+            McsMgr.IsHost = true;
             var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
             var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers(new()
             {
@@ -95,7 +96,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
 
-                    if (SquadMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
+                    if (McsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
                     {
                         return;
                     }
@@ -103,7 +104,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     if (leadPlayer.BotsGroup != null)
                     {
                         leadPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
-                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, SquadMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
+                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
                     }
                 };
 
@@ -133,7 +134,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                 foreach (var mcsBotPlayerProfile in mcsBotPlayerProfiles)
                 {
-                    if (SquadMgr.IsMcsBotPlayerDead(mcsBotPlayerProfile.ProfileId))
+                    if (McsMgr.IsMcsBotPlayerDead(mcsBotPlayerProfile.ProfileId))
                     {
                         continue;
                     }
@@ -166,7 +167,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         botOwner.Settings = settings;
 
-                        SquadMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
+                        McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
                         SubTitleMgr.CreateSubTitle(botOwner.ProfileId);
 
                         if (leadPlayer.BotsGroup != null)

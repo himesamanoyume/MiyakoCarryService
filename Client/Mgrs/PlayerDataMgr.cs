@@ -100,7 +100,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
 
                     // 分批次、依据每位老板的设置进行刷新
-                    var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                    var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                     foreach (var batch in itemBatches)
                     {
                         foreach (var rootItemData in batch)
@@ -191,7 +191,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         foreach (PlayerData playerData in batch)
                         {
-                            foreach (var mcsAILeadPlayer in SquadMgr.GetAllMcsAILeadPlayer())
+                            foreach (var mcsAILeadPlayer in McsMgr.GetAllMcsAILeadPlayer())
                             {
                                 playerData.RefreshInteresting(mcsAILeadPlayer);
                             }
