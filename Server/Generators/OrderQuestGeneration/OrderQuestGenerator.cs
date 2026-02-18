@@ -63,15 +63,15 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             var requestedItemCount = completionConfig.RequestedItemCount;
             questTemplate.Conditions.AvailableForFinish = [];
 
-            var isBossType = !Classification.BossTypes.Contains(botType);
+            var isBossType = Classification.BossTypes.Contains(botType);
             var additionMulti = isBossType ? 2f : 1f;
             var standingMulti = traderStanding < 0 ? 10.7f : 1f;
 
             for (int i = 0; i < players; i++)
             {
                 var currentRequestedItemCount = randomUtil.RandInt(
-                    (int)(requestedItemCount.Max * discount * (1 / carryServiceLevel - 0.02f) * additionMulti * standingMulti),
-                    (int)(requestedItemCount.Max * discount * (1 / carryServiceLevel + 0.02f) * additionMulti * standingMulti) + 1
+                    (int)(requestedItemCount.Max * discount * (0.2f * carryServiceLevel - 0.02f) * additionMulti * standingMulti),
+                    (int)(requestedItemCount.Max * discount * (0.2f * carryServiceLevel + 0.02f) * additionMulti * standingMulti) + 1
                     );
 
                 var handoverItemCondition = new QuestCondition
@@ -83,9 +83,6 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                     VisibilityConditions = [],
                     Target = new ListOrT<string>([new ("5449016a4bdc2d6f028b456f")], null),
                     Value = currentRequestedItemCount * duration,
-                    MinDurability = 0,
-                    MaxDurability = 100,
-                    DogtagLevel = 0,
                     OnlyFoundInRaid = false,
                     IsEncoded = false,
                     ConditionType = "HandoverItem",

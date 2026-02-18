@@ -199,11 +199,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 yield return waitTime;
                 if (_gameloop.IsVaildGameWorld)
                 {
+                    MiyakoCarryServicePlugin.Logger.LogInfo("尝试发送惩罚");
                     foreach (var kvp in _mcsFriendlyFirePenalties)
                     {
                         if (kvp.Value != null)
                         {
-                            yield return McsRequestHandler.SendPunishRequest(kvp.Value);
+                            _ = McsRequestHandler.SendPunishRequest(kvp.Value);
                         }
                     }
                     _mcsFriendlyFirePenalties.Clear();

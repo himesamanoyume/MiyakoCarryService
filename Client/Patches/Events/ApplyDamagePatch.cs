@@ -27,23 +27,27 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             if (___Player == null)
             {
+                MiyakoCarryServicePlugin.Logger.LogInfo("自身玩家为null");
                 return;
             }
 
             if (!McsMgr.IsHost || damage <= 0)
             {
+                MiyakoCarryServicePlugin.Logger.LogInfo("并非主机 或 伤害低于0");
                 return;
             }
 
             var player = damageInfo.Player?.iPlayer;
 
-            if (player != null)
+            if (player == null)
             {
+                MiyakoCarryServicePlugin.Logger.LogInfo("敌人为null");
                 return;
             }
 
             if (McsMgr.IsMcsBotPlayer(___Player.ProfileId))
             {
+                MiyakoCarryServicePlugin.Logger.LogInfo("触发添加惩罚");
                 var isMcsLeadPlayer = McsMgr.IsMcsLeadPlayer(player.ProfileId);
                 var notMcsLeaderButIsFikaPlayer = player.Profile.Info.GroupId == "Fika" && !isMcsLeadPlayer;
                 var commonHp = __instance.GetBodyPartHealth(EBodyPart.Common);

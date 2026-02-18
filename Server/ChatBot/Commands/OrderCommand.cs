@@ -60,7 +60,6 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3), 
                         serverLocalisationService.GetText(Locales.BOTTYPECOMMON)
                         ),
-                    serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP4)
                     ];
             }
         }

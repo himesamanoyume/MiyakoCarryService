@@ -257,14 +257,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
         private static BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {
-            var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, true);
+            var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
 
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = leadPlayer.Side != EPlayerSide.Savage;
 
             // var oldReasons = settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
 
-            // settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = true;
+            settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
             // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
             settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
