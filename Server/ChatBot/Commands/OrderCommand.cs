@@ -1,5 +1,6 @@
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
@@ -20,7 +21,8 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
     public partial class OrderCommand(
         ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
-        OrderQuestController orderQuestController
+        OrderQuestController orderQuestController,
+        ConfigService configService
     ) : IMcsCommand
     {
         [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]|1\d|20)\s+([1-5])\s+([1-9]\d*)$")]
@@ -38,10 +40,27 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         {
             get
             {
+                var completionConfig = configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First();
                 return [
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), Command, Command, Command), 
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), serverLocalisationService.GetText(Locales.BOTTYPECOMMON)),
-                    serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3)
+                    string.Format(
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), 
+                        Command, 
+                        Command, 
+                        Command
+                        ), 
+                    string.Format(
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), 
+                        completionConfig.RequestedItemCount.Max * (1 / 5), 
+                        completionConfig.RequestedItemCount.Max * (2 / 5), 
+                        completionConfig.RequestedItemCount.Max * (3 / 5), 
+                        completionConfig.RequestedItemCount.Max * (4 / 5), 
+                        completionConfig.RequestedItemCount.Max
+                        ),
+                    string.Format(
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3), 
+                        serverLocalisationService.GetText(Locales.BOTTYPECOMMON)
+                        ),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP4)
                     ];
             }
         }

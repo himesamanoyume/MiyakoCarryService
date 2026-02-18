@@ -69,27 +69,10 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
-                var currentRequestedItemCount = carryServiceLevel switch
-                {
-                    1 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.18f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 0.22f * additionMulti * standingMulti) + 1),
-                    2 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.38f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 0.42f * additionMulti * standingMulti) + 1),
-                    3 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.58f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 0.62f * additionMulti * standingMulti) + 1),
-                    4 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.78f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 0.82f * additionMulti * standingMulti) + 1),
-                    5 => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.98f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 1.02f * additionMulti * standingMulti) + 1),
-                    _ => randomUtil.RandInt(
-                        (int)(requestedItemCount.Max * discount * 0.98f * additionMulti * standingMulti),
-                        (int)(requestedItemCount.Max * discount * 1.02f * additionMulti * standingMulti) + 1)
-                };
+                var currentRequestedItemCount = randomUtil.RandInt(
+                    (int)(requestedItemCount.Max * discount * (1 / carryServiceLevel - 0.02f) * additionMulti * standingMulti),
+                    (int)(requestedItemCount.Max * discount * (1 / carryServiceLevel + 0.02f) * additionMulti * standingMulti) + 1
+                    );
 
                 var handoverItemCondition = new QuestCondition
                 {

@@ -23,5 +23,6 @@ namespace MiyakoCarryService.Server.Utils
         public const string MIYAKOTRADERCOMMANDHELP1 = "Mcs/MiyakoTraderCommandHelp1";
         public const string MIYAKOTRADERCOMMANDHELP2 = "Mcs/MiyakoTraderCommandHelp2";
         public const string MIYAKOTRADERCOMMANDHELP3 = "Mcs/MiyakoTraderCommandHelp3";
+        public const string MIYAKOTRADERCOMMANDHELP4 = "Mcs/MiyakoTraderCommandHelp4";
     }
 }
