@@ -172,6 +172,27 @@ namespace MiyakoCarryService.Server.Services
             return mcsBotPlayerIds;
         }
 
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)
+        {
+            var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
+            var orderInfos = GetAllOrderInfo();
+
+            foreach (var orderInfo in orderInfos)
+            {
+                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId)
+                {
+                    RemoveOrderInfo(orderInfo);
+                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
+                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    {
+                        mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
+                    }
+                }
+            }
+            _ = SaveOrderInfo();
+            return mcsBotPlayerIds;
+        }
+
         public void SetOrderInfoStarted(OrderInfo orderInfo)
         {
             if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)

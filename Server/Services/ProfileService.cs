@@ -118,6 +118,15 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        public void LowTraderStandingPunish(MongoId mcsLeadPlayerId)
+        {
+            var mcsBotPlayerIds = orderInfoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
+            foreach (var kvp in mcsBotPlayerIds)
+            {
+                ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+            }
+        }
+
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
         {
             var mcsBotPlayerId = mcsBotPlayerProfile.ProfileInfo.ProfileId.Value;

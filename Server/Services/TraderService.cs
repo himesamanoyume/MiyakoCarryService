@@ -8,7 +8,6 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
-using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Routers;
@@ -29,6 +28,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
+        ProfileService profileService,
         CompatibilityService compatibilityService,
         ConfigService configService
     )
@@ -117,7 +117,7 @@ namespace MiyakoCarryService.Server.Services
 
                 if (isNonNegativeNum && miyakoTraderInfo.Standing < 0)
                 {
-                    // 此id的护航全部主动删除好友
+                    profileService.LowTraderStandingPunish(mcsLeadPlayerId);
                 }
             }
         }

@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Models.Eft.Trader;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Callbacks
 {
+    [Injectable]
     public sealed class TraderCallbacks(
         HttpResponseUtil httpResponseUtil,
         TraderController traderController
