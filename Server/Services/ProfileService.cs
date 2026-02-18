@@ -376,7 +376,7 @@ namespace MiyakoCarryService.Server.Services
 
         private PmcData GenerateScavData(MongoId mcsLeadPlayerId, int carryServiceLevel, BotGenerationDetails botGenerationDetails, PmcData pmcData)
         {
-            var scavKarmaLevel = carryServiceLevel + 2;
+            var scavKarmaLevel = Math.Clamp(carryServiceLevel + 2, -7, 6);
             var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
 
             if (!playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings))

@@ -17,10 +17,10 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/trading/api/friendlyFirePenalty
         /// </summary>
-        public ValueTask<string> FriendlyFirePenalty(string url, FriendlyFirePenaltyRequestData info, MongoId mcsLeadPlayerId)
+        public async ValueTask<string> FriendlyFirePenalty(string url, FriendlyFirePenaltyRequestData info, MongoId mcsLeadPlayerId)
         {
             traderController.FriendlyFirePenalty(mcsLeadPlayerId, info);
-            return new ValueTask<string>(httpResponseUtil.NoBody(true));
+            return httpResponseUtil.NullResponse();
         }
     }
 }
