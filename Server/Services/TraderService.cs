@@ -2,9 +2,13 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HarmonyLib;
+using MiyakoCarryService.Server.Models.Eft.Trader;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Routers;
@@ -25,6 +29,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
+        CompatibilityService compatibilityService,
         ConfigService configService
     )
     {
@@ -114,6 +119,42 @@ namespace MiyakoCarryService.Server.Services
                 {
                     // 此id的护航全部主动删除好友
                 }
+            }
+        }
+
+        public void FriendlyFirePenalty(MongoId mcsLeadPlayerId, FriendlyFirePenaltyRequestData info)
+        {
+            var mcsLeadPlayerIds = new HashSet<MongoId> { info.FriendlyFireLeadPlayerId };
+
+            if (info.PunishEveryone && compatibilityService.HasFikaServer)
+            {
+                var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
+                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
+
+                if (matchId is not null)
+                {
+                    var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
+
+                    if (fikaMatch is not null)
+                    {
+                        var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
+                        var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
+
+                        foreach (MongoId playerId in fikaPlayerIds)
+                        {
+                            if (playerId != mcsLeadPlayerId)
+                            {
+                                mcsLeadPlayerIds.Add(playerId);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
+            {
+                AddTraderStanding(_mcsLeadPlayerId, info.StandingDiff);
             }
         }
     }
