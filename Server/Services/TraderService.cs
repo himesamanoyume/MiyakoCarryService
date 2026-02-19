@@ -142,7 +142,7 @@ namespace MiyakoCarryService.Server.Services
 
                 if (isNonNegativeNum && miyakoTraderInfo.Standing < 0)
                 {
-                    profileService.LowTraderStandingPunish(mcsLeadPlayerId);
+                    profileService.TeamKillPunish(mcsLeadPlayerId);
                 }
             }
         }
@@ -184,20 +184,18 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void FriendlyFirePenalty(MongoId mcsLeadPlayerId, FriendlyFirePenaltyRequestData info)
+        public void FriendlyFirePenalty(MongoId playerId, FriendlyFirePenaltyRequestData info)
         {
-            var mcsLeadPlayerIds = new HashSet<MongoId>();
-
             if (info.TeamKill)
             {
-                mcsLeadPlayerIds.Add(info.FriendlyFireLeadPlayerId);
-
-                if (compatibilityService.HasFikaServer)
+                var tkPunishPlayerIds = new HashSet<MongoId>() { info.FriendlyFirePlayerId, playerId };
+                
+                if (info.PunishEveryone && compatibilityService.HasFikaServer)
                 {
-                    logger.Info($"尝试惩罚 {info.FriendlyFireLeadPlayerId} 但其并不是老板, 转而惩罚房间内全体Mcs老板");
+                    logger.Info($"尝试惩罚 {info.FriendlyFirePlayerId} 但其并不是老板, 转而惩罚房间内全体玩家");
                     var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
                     var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
-                    var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
+                    var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [playerId]);
 
                     if (matchId is not null)
                     {
@@ -208,23 +206,20 @@ namespace MiyakoCarryService.Server.Services
                             var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
                             var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
 
-                            foreach (MongoId playerId in fikaPlayerIds)
+                            foreach (MongoId fikaPlayerId in fikaPlayerIds)
                             {
-                                if (playerId != mcsLeadPlayerId)
-                                {
-                                    mcsLeadPlayerIds.Add(playerId);
-                                }
+                                tkPunishPlayerIds.Add(fikaPlayerId);
                             }
                         }
                     }
                 }
+
+                foreach (var tkPunishPlayerId in tkPunishPlayerIds)
+                {
+                    profileService.TeamKillPunish(tkPunishPlayerId);
+                }
             }
 
-            foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
-            {
-                profileService.LowTraderStandingPunish(_mcsLeadPlayerId);
-            }
-            
             logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
             AddPunishmentMulti(info.Diff);
         }

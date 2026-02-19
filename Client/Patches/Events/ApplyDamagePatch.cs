@@ -44,8 +44,9 @@ namespace MiyakoCarryService.Client.Patches.Events
 
             if (McsMgr.IsMcsBotPlayer(___Player.ProfileId))
             {
-                var needPunish = McsMgr.IsMcsLeadPlayer(player.ProfileId) || player.Profile.Info.GroupId == "Fika";
-                if (!needPunish)
+                var isMcsLeadPlayer = McsMgr.IsMcsLeadPlayer(player.ProfileId);
+                var notMcsLeaderButIsFikaPlayer = player.Profile.Info.GroupId == "Fika" && !isMcsLeadPlayer;
+                if (!(isMcsLeadPlayer || notMcsLeaderButIsFikaPlayer))
                 {
                     return;
                 }
@@ -53,7 +54,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
                 var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
                 var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
-                McsMgr.AddPunish(player.ProfileId, isDead ? 0.1560d : 0.0107d, isDead);
+                McsMgr.AddPunish(player.ProfileId, isDead ? 0.1560d : 0.0107d, isDead, notMcsLeaderButIsFikaPlayer);
             }
         }
     }

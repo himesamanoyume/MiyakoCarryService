@@ -118,7 +118,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void LowTraderStandingPunish(MongoId mcsLeadPlayerId)
+        public void TeamKillPunish(MongoId mcsLeadPlayerId)
         {
             var mcsBotPlayerIds = orderInfoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
             foreach (var kvp in mcsBotPlayerIds)

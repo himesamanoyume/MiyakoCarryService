@@ -7,13 +7,16 @@ namespace MiyakoCarryService.Server.Models.Eft.Trader
 {
     public record FriendlyFirePenaltyRequestData : IRequestData
     {
-        [JsonPropertyName("FriendlyFireLeadPlayerId")]
-        public required MongoId FriendlyFireLeadPlayerId { get; set; }
+        [JsonPropertyName("FriendlyFirePlayerId")]
+        public required MongoId FriendlyFirePlayerId { get; set; }
         
         [JsonPropertyName("Diff")]
         public required double Diff { get; set; }
 
         [JsonPropertyName("TeamKill")]
         public required bool TeamKill { get; set; }
+
+        [JsonPropertyName("PunishEveryone")]
+        public required bool PunishEveryone { get; set; }
     }
 }

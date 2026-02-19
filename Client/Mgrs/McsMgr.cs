@@ -179,17 +179,18 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsBotPlayers;
         }
 
-        public void AddPunish(MongoID friendlyFireLeadPlayerId, double diff, bool teamKill)
+        public void AddPunish(MongoID friendlyFirePlayerId, double diff, bool teamKill, bool punishEveryone)
         {
-            MiyakoCarryServicePlugin.Logger.LogInfo($"触发惩罚: {diff}");
+            // MiyakoCarryServicePlugin.Logger.LogInfo($"触发惩罚: {diff}");
             FriendlyFirePenalty friendlyFirePenalty;
-            if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFireLeadPlayerId, out friendlyFirePenalty))
+            if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFirePlayerId, out friendlyFirePenalty))
             {
-                friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFireLeadPlayerId, _ => new());
+                friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFirePlayerId, _ => new());
             }
-            friendlyFirePenalty.FriendlyFireLeadPlayerId = friendlyFireLeadPlayerId;
+            friendlyFirePenalty.FriendlyFirePlayerId = friendlyFirePlayerId;
             friendlyFirePenalty.Diff += diff;
             friendlyFirePenalty.TeamKill = teamKill;
+            friendlyFirePenalty.PunishEveryone = punishEveryone;
         }
 
         private IEnumerator SendPunishRequest(float time)
@@ -200,7 +201,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 yield return waitTime;
                 if (_gameloop.IsVaildGameWorld)
                 {
+                    if (!IsHost)
+                    {
+                        continue;
+                    }
                     // MiyakoCarryServicePlugin.Logger.LogInfo("尝试发送惩罚");
+
                     foreach (var kvp in _mcsFriendlyFirePenalties)
                     {
                         if (kvp.Value != null)

@@ -13,6 +13,6 @@
     "Mcs/BotTypeCommon": "普通玩家",
     "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n下单指令:\nmcs {1} {{人数}} {{类型}} {{护航级别}} {{时间}}\n护航级别: 1~5\n时长: 整数, 单位为小时\n示例: mcs {2} 4 0 4 24",
     "Mcs/MiyakoTraderCommandHelp2": "基准价格:\n普通玩家类型:\n护航级别1: {0} 卢布/小时\n护航级别2: {1} 卢布/小时\n护航级别3: {2} 卢布/小时\n护航级别4: {3} 卢布/小时\n护航级别5: {4} 卢布/小时\nBoss护航类型价格翻倍",
-    "Mcs/MiyakoTraderCommandHelp3": "类型列表:\n0: {0}\n1: [Boss]Kaban\n2: [Boss]Reshala\n3: [Boss]Glukhar\n4: [Boss]Killa\n5: [Boss]Knight\n6: [Boss]BigPipe\n7: [Boss]BirdEye\n8: [Boss]Kollontay\n9: [Boss]Shturman\n10: [Boss]Sanitar\n11: [Boss]Tagilla\n12: [Boss]Partisan\n13: [Boss]Zryachiy\n14: [Boss]Tagilla Agro\n15: [Boss]Killa Agro\n16: [Boss]Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider",
+    "Mcs/MiyakoTraderCommandHelp3": "类型列表:\n0: {0}\n1: [Boss] Kaban\n2: [Boss] Reshala\n3: [Boss] Glukhar\n4: [Boss] Killa\n5: [Boss] Knight\n6: [Boss] BigPipe\n7: [Boss] BirdEye\n8: [Boss] Kollontay\n9: [Boss] Shturman\n10: [Boss] Sanitar\n11: [Boss] Tagilla\n12: [Boss] Partisan\n13: [Boss] Zryachiy\n14: [Boss] Tagilla Agro\n15: [Boss] Killa Agro\n16: [Boss] Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider",
     "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！\n当前永久涨价: {0}%"
 }
