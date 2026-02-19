@@ -1,14 +1,19 @@
 
 
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class SquadMgr : BaseMgr<SquadMgr>
+    internal sealed class McsMgr : BaseMgr<McsMgr>
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
@@ -16,6 +21,9 @@ namespace MiyakoCarryService.Client.Mgrs
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
+        private ConcurrentDictionary<MongoID, FriendlyFirePenalty> _mcsFriendlyFirePenalties  = new();
+
+        public bool IsHost = false;
 
         public sealed override void Start()
         {
@@ -171,9 +179,51 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsBotPlayers;
         }
 
+        public void AddPunish(MongoID friendlyFirePlayerId, double diff, bool teamKill, bool punishEveryone)
+        {
+            // MiyakoCarryServicePlugin.Logger.LogInfo($"触发惩罚: {diff}");
+            FriendlyFirePenalty friendlyFirePenalty;
+            if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFirePlayerId, out friendlyFirePenalty))
+            {
+                friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFirePlayerId, _ => new());
+            }
+            friendlyFirePenalty.FriendlyFirePlayerId = friendlyFirePlayerId;
+            friendlyFirePenalty.Diff += diff;
+            friendlyFirePenalty.TeamKill = teamKill;
+            friendlyFirePenalty.PunishEveryone = punishEveryone;
+        }
+
+        private IEnumerator SendPunishRequest(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                if (_gameloop.IsVaildGameWorld)
+                {
+                    if (!IsHost)
+                    {
+                        continue;
+                    }
+                    // MiyakoCarryServicePlugin.Logger.LogInfo("尝试发送惩罚");
+
+                    foreach (var kvp in _mcsFriendlyFirePenalties)
+                    {
+                        if (kvp.Value != null)
+                        {
+                            _ = McsRequestHandler.SendPunishRequest(kvp.Value);
+                        }
+                    }
+                    _mcsFriendlyFirePenalties.Clear();
+                }
+                yield return null;
+            }
+        }
+
         protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            StartCoroutine(SendPunishRequest(10f));
         }
 
         protected override void OnRaidEnded()
@@ -188,6 +238,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 transitMembers.Clear();
             }
+            IsHost = false;
         }
     }
 }

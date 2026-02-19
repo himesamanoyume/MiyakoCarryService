@@ -21,13 +21,13 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             return result;
         }
-        protected SquadMgr SquadMgr {get; private set;}
+        protected McsMgr McsMgr {get; private set;}
 
         public override void Start()
         {
             base.Start();
             _datas = new HashSet<BaseData>();
-            SquadMgr = _gameloop.GetMgr<SquadMgr>();
+            McsMgr = _gameloop.GetMgr<McsMgr>();
         }
 
         protected abstract IEnumerator ReloadDataLoop(float time);

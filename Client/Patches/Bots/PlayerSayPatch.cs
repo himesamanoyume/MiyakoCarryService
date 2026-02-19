@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
@@ -13,28 +14,35 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.Say));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
         [PatchPostfix]
         public static void Postfix(Player __instance, EPhraseTrigger phrase, bool demand = false, float delay = 0f, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
         {
-            if (SquadMgr.IsMcsLeadPlayer(__instance.ProfileId) || SquadMgr.IsMcsBotPlayer(__instance.ProfileId))
+            try
             {
-                return;
-            }
-
-            foreach (var botOwner in SquadMgr.GetAllAliveMcsBotPlayer())
-            {
-                if (botOwner.HearingSensor.method_6(__instance.Transform.position, 50f, out var dist))
+                if (McsMgr.IsMcsLeadPlayer(__instance.ProfileId) || McsMgr.IsMcsBotPlayer(__instance.ProfileId))
                 {
-                    botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Sence, botOwner);
+                    return;
                 }
+
+                foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
+                {
+                    if (botOwner.HearingSensor.method_6(__instance.Transform.position, 50f, out var dist))
+                    {
+                        botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Sence, botOwner);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError($"PlayerSayPatch 报错: {e}");
             }
         }
     }

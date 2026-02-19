@@ -1,6 +1,8 @@
 
 
 using System.Collections.Generic;
+using BepInEx;
+using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Datas;
@@ -13,11 +15,11 @@ namespace MiyakoCarryService.Client.Utils
 {
     internal static class Tools
     {
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
         public static bool IsPlayerInventory(string stringTemplateId)
@@ -101,7 +103,7 @@ namespace MiyakoCarryService.Client.Utils
 
                 if (itemData is PlayerData playerData)
                 {
-                    if (SquadMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || SquadMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
+                    if (McsMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
                     {
                         continue;
                     }
@@ -113,6 +115,20 @@ namespace MiyakoCarryService.Client.Utils
                 }
             }
             return result;
+        }
+
+        public static bool CheckPlugin(List<string> pluginList)
+        {
+            var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
+
+            foreach (PluginInfo Info in pluginInfos)
+            {
+                if (pluginList.Contains(Info.Metadata.GUID))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

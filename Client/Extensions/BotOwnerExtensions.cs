@@ -18,11 +18,11 @@ namespace MiyakoCarryService.Client.Extensions
             }
         }
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Extensions
         
         extension(BotOwner botOwner)
         {
-            public bool IsMcsBotPlayer => SquadMgr.IsMcsBotPlayer(botOwner.ProfileId);
+            public bool IsMcsBotPlayer => McsMgr.IsMcsBotPlayer(botOwner.ProfileId);
 
             public McsBotPlayerData GetMcsBotData()
             {

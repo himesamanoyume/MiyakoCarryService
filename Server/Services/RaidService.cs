@@ -26,7 +26,8 @@ namespace MiyakoCarryService.Server.Services
         ProfileService profileService
     )
     {
-        private readonly ConcurrentDictionary<MongoId, List<int>> _bossMemberGroups = new();
+        private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
+        private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
 
         public async Task OnPostLoadAsync()
@@ -36,7 +37,7 @@ namespace MiyakoCarryService.Server.Services
 
         public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            if (_bossMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
+            if (_leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
             {
                 if (mcsAids.Contains(mcsAid))
                 {
@@ -48,7 +49,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (!mcsAids.Contains(mcsAid))
             {
                 mcsAids.Add(mcsAid);
@@ -57,16 +58,29 @@ namespace MiyakoCarryService.Server.Services
 
         public void RemoveGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             if (mcsAids.Contains(mcsAid))
             {
                 mcsAids.Remove(mcsAid);
             }
         }
 
+        public void AddMatchPlayer(MongoId mcsLeadPlayerId, MongoId otherPlayerId)
+        {
+            var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
+            matchPlayerIds.Add(otherPlayerId);
+        }
+
         public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>()).Clear();
+            // logger.Info($"正在清除 {mcsLeadPlayerId} 的小队成员");
+            _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
+            var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
+            foreach (var matchPlayerId in matchPlayerIds)
+            {
+                // logger.Info($"正在清除房主 {mcsLeadPlayerId} 的联机队友 {matchPlayerId} 的小队成员");
+                _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
+            }
         }
 
         public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
@@ -114,7 +128,7 @@ namespace MiyakoCarryService.Server.Services
 
         public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)
         {
-            var members = _bossMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+            var members = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
             var profiles = new List<SptProfile>();
             foreach (var mcsAid in members)
             {
@@ -150,6 +164,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (playerId != mcsLeadPlayerId)
                             {
+                                AddMatchPlayer(mcsLeadPlayerId, playerId);
                                 mcsLeadPlayerIds.Add(playerId);
                             }
                         }
@@ -204,6 +219,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (playerId != mcsLeadPlayerId)
                             {
+                                AddMatchPlayer(mcsLeadPlayerId, playerId);
                                 mcsLeadPlayerIds.Add(playerId);
                             }
                         }

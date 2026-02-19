@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -15,32 +16,44 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.method_0));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
         [PatchPrefix]
         public static void Postfix(BotHearingSensor __instance, IPlayer player, Vector3 position, float power, AISoundType type)
         {
-            var thisBotOwner = __instance.BotOwner;
-            if (SquadMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !SquadMgr.IsMcsLeadPlayer(player.ProfileId))
+            try
             {
-                if (player.IsAI && SquadMgr.IsMcsBotPlayer(player.ProfileId))
+                var thisBotOwner = __instance.BotOwner;
+                if (thisBotOwner == null)
                 {
                     return;
                 }
 
-                var shouldReact = __instance.method_6(position, power, out var distance);
-
-                var enemy = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(player.ProfileId);
-                if (enemy != null && shouldReact)
+                if (McsMgr.IsMcsBotPlayer(thisBotOwner.ProfileId) && player != null && !McsMgr.IsMcsLeadPlayer(player.ProfileId))
                 {
-                    thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Sence, __instance.BotOwner);
+                    if (player.IsAI && McsMgr.IsMcsBotPlayer(player.ProfileId))
+                    {
+                        return;
+                    }
+
+                    var shouldReact = __instance.method_6(position, power, out var distance);
+
+                    var enemy = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(player.ProfileId);
+                    if (enemy != null && shouldReact)
+                    {
+                        thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Sence, __instance.BotOwner);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError($"BotHearingSensorPatch 报错: {e}");
             }
         }
     }

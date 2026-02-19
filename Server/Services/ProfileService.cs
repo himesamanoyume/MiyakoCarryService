@@ -10,24 +10,22 @@ using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -36,7 +34,7 @@ namespace MiyakoCarryService.Server.Services
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<ProfileService> logger,
+        SptLogger<ProfileService> logger,
         ConfigService configService,
         RandomUtil randomUtil,
         HashUtil hashUtil,
@@ -117,6 +115,15 @@ namespace MiyakoCarryService.Server.Services
             foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
                 ProcessExpiredMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            }
+        }
+
+        public void TeamKillPunish(MongoId mcsLeadPlayerId)
+        {
+            var mcsBotPlayerIds = orderInfoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
+            foreach (var kvp in mcsBotPlayerIds)
+            {
+                ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
             }
         }
 
@@ -275,10 +282,13 @@ namespace MiyakoCarryService.Server.Services
                 AllPmcsHaveSameNameAsPlayer = false
             };
 
+            // 适配APBS重复添加Tier
+            var clonedBotGenerationDetails = cloner.Clone(botGenerationDetails);
+
             var pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
-            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, botGenerationDetails, pmcData) : GenerateScavData(pmcData, botGenerationDetails);
+            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
 
             scavData.Info.Settings = new();
             scavData.Info.Bans = [];
@@ -366,7 +376,7 @@ namespace MiyakoCarryService.Server.Services
 
         private PmcData GenerateScavData(MongoId mcsLeadPlayerId, int carryServiceLevel, BotGenerationDetails botGenerationDetails, PmcData pmcData)
         {
-            var scavKarmaLevel = carryServiceLevel + 2;
+            var scavKarmaLevel = Math.Clamp(carryServiceLevel + 2, -7, 6);
             var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
 
             if (!playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings))

@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
     public sealed class CompatibilityService(
-        // ISptLogger<CompatibilityService> logger
+        // SptLogger<CompatibilityService> logger
     )
     {
         public bool HasFikaServer { get; private set; } = false;

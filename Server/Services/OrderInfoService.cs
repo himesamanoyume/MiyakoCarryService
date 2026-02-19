@@ -13,10 +13,10 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Server.Services
     public sealed class OrderInfoService(
         ConfigService configService,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<OrderInfoService> logger,
+        SptLogger<OrderInfoService> logger,
         NotificationHelper notificationHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         ServerLocalisationService serverLocalisationService,
@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Server.Services
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
             {
-                hashSetPlayers.Add(new MongoId());
+                hashSetPlayers.Add(new());
             }
             var orderInfo = new OrderInfo()
             {
@@ -159,6 +159,32 @@ namespace MiyakoCarryService.Server.Services
             {
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
+                {
+                    RemoveOrderInfo(orderInfo);
+                    if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+                    {
+                        continue;
+                    }
+                    
+                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
+                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    {
+                        mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
+                    }
+                }
+            }
+            _ = SaveOrderInfo();
+            return mcsBotPlayerIds;
+        }
+
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)
+        {
+            var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
+            var orderInfos = GetAllOrderInfo();
+
+            foreach (var orderInfo in orderInfos)
+            {
+                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId)
                 {
                     RemoveOrderInfo(orderInfo);
                     mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());

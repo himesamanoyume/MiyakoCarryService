@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         foreach (LootData lootData in batch)
                         {
-                            foreach (var mcsAILeadPlayer in SquadMgr.GetAllMcsAILeadPlayer())
+                            foreach (var mcsAILeadPlayer in McsMgr.GetAllMcsAILeadPlayer())
                             {
                                 lootData.RefreshInteresting(mcsAILeadPlayer);
                             }

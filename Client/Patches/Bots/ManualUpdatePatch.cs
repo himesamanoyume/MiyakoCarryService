@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(BotOwner __instance)
         {
-            if (__instance.GroupId == "mcs" || __instance.GroupId == "fika")
+            if (__instance.GroupId == "Mcs" || __instance.GroupId == "Fika")
             {
                 foreach(var botBehavior in __instance.GetBotBehaviors())
                 {

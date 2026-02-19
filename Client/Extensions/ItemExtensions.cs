@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Client.Extensions
     {
         private static readonly ConditionalWeakTable<Item, ItemData> _datas = new();
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         {
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -63,10 +63,10 @@ namespace MiyakoCarryService.Client.Extensions
                     PlayerData playerData;
                     if (player.IsAI)
                     {
-                        if (SquadMgr.IsMcsBotPlayer(player.ProfileId))
+                        if (McsMgr.IsMcsBotPlayer(player.ProfileId))
                         {
-                            var McsLeadPlayer = SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
-                            playerData = new McsBotPlayerData(SquadMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), SquadMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
+                            var McsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
+                            playerData = new McsBotPlayerData(McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
                             _datas.Add(item, playerData);
                             return playerData;
                         }
@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var lootData = new LootData(item, ContainsBestPrice(item));
-                var mcsAILeadPlayers = SquadMgr.GetAllMcsAILeadPlayer();
+                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                 {
                     lootData.Refresh(mcsAILeadPlayer);

@@ -25,7 +25,8 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
                 mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
             }
-            mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.InitRepeatableQuests(GameLoop.Instance.Session);
+
+            _ = mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0?.Run();
         }
     }
 }

@@ -7,10 +7,12 @@
     "Mcs/CannotDeleteFileNotFound": "Cannot delete file not found: {0}",
     "Mcs/FailedLoadMcsPlayerProfile": "Failed to load Mcs player profile",
     "Mcs/AccountidIsInvaild": "Account ID {0} is invalid",
-    "Mcs/MiyakoTraderOrderDescription": "Order information:\nNumber of Carry Service player: {0}\nCarry Service level: {1}\nDuration: {2} hours",
+    "Mcs/MiyakoTraderOrderDescription": "Order information:\nNumber of Carry Service player: {0}\nBot Type: {1}\nCarry Service level: {2}\nDuration: {3} hours\nOrder price increase: {4}%",
     "Mcs/MiyakoTraderSubCommand": "Subcommand {0}:\n{1}",
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "Commands available for \"{0}\" prefix:",
     "Mcs/BotTypeCommon": "Common Player",
-    "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n order command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\ncarry service level: 1~4\nduration: integer, in hours\nexample: mcs {2} 4 4 24",
-    "Mcs/MiyakoTraderCommandHelp2": "Bot type list:\n0: {0}\n[Disabled]\n1: Kaban\n2: Reshala\n3: Glukhar\n4: Killa\n5: Knight\n6: BigPipe\n7: BirdEye\n8: Kollontay\n9: Shturman\n10: Sanitar\n11: Tagilla\n12: Partisan\n13: Zryachiy\n14: Tagilla Agro\n15: Killa Agro\n16: Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider"
+    "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n order command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\ncarry service level: 1~5\nduration: integer, in hours\nexample: mcs {2} 4 4 24",
+    "Mcs/MiyakoTraderCommandHelp2": "Base Prices:\nCommon Player Type:\nCarry Service Level 1: {0} Rubles/hour\nCarry Service Level 2: {1} Rubles/hour\nCarry Service Level 3: {2} Rubles/hour\nCarry Service Level 4: {3} Rubles/hour\nCarry Service Level 5: {4} Rubles/hour\nBoss carry service type prices doubled",
+    "Mcs/MiyakoTraderCommandHelp3": "Bot type list:\n0: {0}\n1: [Boss] Kaban\n2: [Boss] Reshala\n3: [Boss] Glukhar\n4: [Boss] Killa\n5: [Boss] Knight\n6: [Boss] BigPipe\n7: [Boss] BirdEye\n8: [Boss] Kollontay\n9: [Boss] Shturman\n10: [Boss] Sanitar\n11: [Boss] Tagilla\n12: [Boss] Partisan\n13: [Boss] Zryachiy\n14: [Boss] Tagilla Agro\n15: [Boss] Killa Agro\n16: [Boss] Infected Tagilla\n17: Rouge\n18: Infected Pmc\n19: Infected Assault\n20: Raider",
+    "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!\nCurrent permanent price increase: {0}%"
 }

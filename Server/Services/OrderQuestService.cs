@@ -13,10 +13,10 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -24,13 +24,14 @@ namespace MiyakoCarryService.Server.Services
     public sealed class OrderQuestService(
         ModHelper modHelper,
         ConfigService configService,
-        ISptLogger<OrderQuestService> logger,
+        SptLogger<OrderQuestService> logger,
         OrderQuestGenerator orderQuestGenerator,
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,
         OrderInfoService orderInfoService,
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
+        TraderService traderService,
         ProfileHelper profileHelper
     )
     {
@@ -56,10 +57,11 @@ namespace MiyakoCarryService.Server.Services
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
-            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+            var punishmentMulti = traderService.GetGlobalPunishmentMulti();
+            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, botType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
-                mcsLeadPlayerId, players, carryServiceLevel, duration
-            ));
+                mcsLeadPlayerId, players, botType, carryServiceLevel, duration
+            ), punishmentMulti);
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);
@@ -107,7 +109,7 @@ namespace MiyakoCarryService.Server.Services
 
         public RepeatableQuest GenerateOrderTemplate(
             RepeatableQuestType type, MongoId traderId, MongoId sessionId,
-            int players, int carryServiceLevel, int duration
+            int players, EBotType botType, int carryServiceLevel, int duration
         )
         {
             var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
@@ -135,7 +137,7 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, carryServiceLevel, duration);
+            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, botType == EBotType.common ? serverLocalisationService.GetText(Locales.BOTTYPECOMMON) : Tools.GetBotTypeName(botType), carryServiceLevel, duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)
@@ -170,7 +172,7 @@ namespace MiyakoCarryService.Server.Services
                 return null;
             }
 
-            questData.QuestStatus.Id = new MongoId();
+            questData.QuestStatus.Id = new();
             questData.QuestStatus.Uid = sessionId;
             questData.QuestStatus.QId = questData.Id;
 
@@ -191,7 +193,7 @@ namespace MiyakoCarryService.Server.Services
                 return null;
             }
 
-            quest.Id = new MongoId();
+            quest.Id = new();
             quest.TraderId = traderId;
 
             return quest;

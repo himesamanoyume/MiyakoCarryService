@@ -15,11 +15,11 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.method_7));
 
-        private static SquadMgr SquadMgr
+        private static McsMgr McsMgr
         { 
             get
             {
-                return field ??= GameLoop.Instance.GetMgr<SquadMgr>();
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
             }
         }
 
@@ -28,17 +28,17 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             foreach (var playerId in players)
             {
-                if (SquadMgr.IsMcsLeadPlayer(playerId))
+                if (McsMgr.IsMcsLeadPlayer(playerId))
                 {
-                    foreach (var botOwner in SquadMgr.GetAllMcsSquadMembersByMcsLeadId(playerId))
+                    foreach (var botOwner in McsMgr.GetAllMcsSquadMembersByMcsLeadId(playerId))
                     {
                         if (botOwner.HealthController.IsAlive)
                         {
-                            SquadMgr.AddMcsSquadMemberToTransit(playerId, botOwner);
+                            McsMgr.AddMcsSquadMemberToTransit(playerId, botOwner);
                         }
                         else
                         {
-                            SquadMgr.McsBotPlayerDead(botOwner.ProfileId);
+                            McsMgr.McsBotPlayerDead(botOwner.ProfileId);
                         }
                     }
                 }

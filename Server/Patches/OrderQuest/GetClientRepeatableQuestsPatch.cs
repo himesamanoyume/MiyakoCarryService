@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 OrderQuestsQueueDict.Remove(sessionID);
             }
 
-            Console.WriteLine("将尝试清除过期订单、任务");
+            // Console.WriteLine("将尝试清除过期订单、任务");
             orderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
             var mcsBotPlayerIds = orderInfoController.GetExpiredMcsBotPlayerIds();
             foreach (var kvp in mcsBotPlayerIds)
@@ -69,7 +69,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
 
             if (currentTime < generatedOrder.EndTime - 1)
             {
-                Console.WriteLine("旧任务数据仍合法");
+                // Console.WriteLine("旧任务数据仍合法");
                 __result.Add(generatedOrder);
                 return;
             }
