@@ -61,6 +61,11 @@ namespace MiyakoCarryService.Server.Services
         {
             foreach (var orderInfo in _orderInfos.Values)
             {
+                if (orderInfo.Status is not EOrderInfoStatus.Started)
+                {
+                    continue;
+                }
+                
                 if (orderInfo.PlayerIds.Contains(mcsBotPlayerId))
                 {
                     return true;
