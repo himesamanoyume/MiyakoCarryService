@@ -26,8 +26,6 @@ namespace MiyakoCarryService.Server.Services
     public sealed class TraderService(
         ModHelper modHelper,
         ICloner cloner,
-        TraderHelper traderHelper,
-        ProfileHelper profileHelper,
         ImageRouter imageRouter,
         ConfigServer configServer,
         TimeUtil timeUtil,
@@ -127,24 +125,6 @@ namespace MiyakoCarryService.Server.Services
             };
 
             traderConfig.UpdateTime.Add(traderRefreshRecord);
-        }
-
-        public void AddTraderStanding(MongoId mcsLeadPlayerId, double dif)
-        {
-            var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
-            var pmcData = fullProfile.CharacterData.PmcData;
-            var traderInfos = pmcData.TradersInfo;
-            if (traderInfos.TryGetValue(MiyakoTraderId, out var miyakoTraderInfo))
-            {
-                var isNonNegativeNum = miyakoTraderInfo.Standing > 0;
-                miyakoTraderInfo.Standing += dif;
-                traderHelper.LevelUp(MiyakoTraderId, pmcData);
-
-                if (isNonNegativeNum && miyakoTraderInfo.Standing < 0)
-                {
-                    profileService.TeamKillPunish(mcsLeadPlayerId);
-                }
-            }
         }
 
         private void AddPunishmentMulti(double diff)

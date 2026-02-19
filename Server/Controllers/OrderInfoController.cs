@@ -45,9 +45,14 @@ namespace MiyakoCarryService.Server.Controllers
             orderInfoService.SetOrderInfoStarted(orderInfo);
         }
 
-        public List<OrderInfo> GetOrderInfos(MongoId sessionId)
+        public List<OrderInfo> GetOrderInfos(MongoId mcsLeadPlayerId)
         {
-            return orderInfoService.GetOrderInfos(sessionId);
+            return orderInfoService.GetOrderInfos(mcsLeadPlayerId);
+        }
+
+        public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId)
+        {
+            return orderInfoService.CheckMcsBotPlayerExist(mcsLeadPlayerId);
         }
     }
 }

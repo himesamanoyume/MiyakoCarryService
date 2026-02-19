@@ -223,6 +223,21 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
+        public SptProfile? GetMcsBotPlayerProfileByBotId(MongoId mcsBotPlayerId)
+        {
+            foreach (var kvp in _profiles.Values)
+            {
+                foreach (var profile in kvp.Values)
+                {
+                    if (profile.CharacterData.PmcData.SessionId.Value == mcsBotPlayerId)
+                    {
+                        return profile;
+                    }
+                }
+            }
+            return null;
+        }
+
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
         {
             var isInt = int.TryParse(mcsAid, out var intMcsAid);

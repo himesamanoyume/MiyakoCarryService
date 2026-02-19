@@ -31,6 +31,7 @@ namespace MiyakoCarryService.Server
                 new GetGroupStatusPatch().Enable();
                 new SendLocalisedNpcMessageToPlayerPatch().Enable();
                 new GenerateDialogueViewPatch().Enable();
+                new GetDialogueUsersPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }
