@@ -161,6 +161,11 @@ namespace MiyakoCarryService.Server.Services
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
                     RemoveOrderInfo(orderInfo);
+                    if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+                    {
+                        continue;
+                    }
+                    
                     mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {

@@ -11,11 +11,6 @@ namespace MiyakoCarryService.Server.Controllers
         TraderService traderService
     )
     {
-        public void AddTraderStanding(MongoId mcsLeadPlayerId, double dif)
-        {
-            traderService.AddTraderStanding(mcsLeadPlayerId, dif);
-        }
-
         public void FriendlyFirePenalty(MongoId mcsLeadPlayerId, FriendlyFirePenaltyRequestData info)
         {
             traderService.FriendlyFirePenalty(mcsLeadPlayerId, info);

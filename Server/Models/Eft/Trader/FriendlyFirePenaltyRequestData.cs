@@ -9,11 +9,11 @@ namespace MiyakoCarryService.Server.Models.Eft.Trader
     {
         [JsonPropertyName("FriendlyFireLeadPlayerId")]
         public required MongoId FriendlyFireLeadPlayerId { get; set; }
+        
+        [JsonPropertyName("Diff")]
+        public required double Diff { get; set; }
 
-        [JsonPropertyName("StandingDiff")]
-        public required double StandingDiff { get; set; }
-
-        [JsonPropertyName("PunishEveryone")]
-        public required bool PunishEveryone { get; set; }
+        [JsonPropertyName("TeamKill")]
+        public required bool TeamKill { get; set; }
     }
 }

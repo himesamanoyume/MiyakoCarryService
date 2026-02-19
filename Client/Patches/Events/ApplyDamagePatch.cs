@@ -27,13 +27,11 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             if (___Player == null)
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo("自身玩家为null");
                 return;
             }
 
             if (!McsMgr.IsHost || damage <= 0)
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo("并非主机 或 伤害低于0");
                 return;
             }
 
@@ -41,17 +39,21 @@ namespace MiyakoCarryService.Client.Patches.Events
 
             if (player == null)
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo("敌人为null");
                 return;
             }
 
             if (McsMgr.IsMcsBotPlayer(___Player.ProfileId))
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo("触发添加惩罚");
-                var isMcsLeadPlayer = McsMgr.IsMcsLeadPlayer(player.ProfileId);
-                var notMcsLeaderButIsFikaPlayer = player.Profile.Info.GroupId == "Fika" && !isMcsLeadPlayer;
+                var needPunish = McsMgr.IsMcsLeadPlayer(player.ProfileId) || player.Profile.Info.GroupId == "Fika";
+                if (!needPunish)
+                {
+                    return;
+                }
                 var commonHp = __instance.GetBodyPartHealth(EBodyPart.Common);
-                McsMgr.AddPunish(player.ProfileId, commonHp.AtMinimum ? -1.56f : -0.15f, notMcsLeaderButIsFikaPlayer);
+                var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
+                var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
+                var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
+                McsMgr.AddPunish(isDead ? -1.56f : -0.15f);
             }
         }
     }

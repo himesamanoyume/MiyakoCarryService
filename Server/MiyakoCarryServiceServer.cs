@@ -6,7 +6,6 @@ using MiyakoCarryService.Server.Patches.Dialogue;
 using MiyakoCarryService.Server.Patches.Group;
 using MiyakoCarryService.Server.Patches.Friend;
 using MiyakoCarryService.Server.Patches.OrderQuest;
-using MiyakoCarryService.Server.Patches.Trader;
 
 namespace MiyakoCarryService.Server
 {
@@ -32,7 +31,6 @@ namespace MiyakoCarryService.Server
                 new GetGroupStatusPatch().Enable();
                 new SendLocalisedNpcMessageToPlayerPatch().Enable();
                 new GenerateDialogueViewPatch().Enable();
-                new AddStandingToTraderPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }

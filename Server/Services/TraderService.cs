@@ -1,9 +1,13 @@
 
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Eft.Trader;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
@@ -30,7 +34,9 @@ namespace MiyakoCarryService.Server.Services
         TimeUtil timeUtil,
         DatabaseService databaseService,
         ProfileService profileService,
+        JsonUtil jsonUtil,
         CompatibilityService compatibilityService,
+        FileUtil fileUtil,
         ISptLogger<TraderService> logger,
         ConfigService configService
     )
@@ -40,10 +46,13 @@ namespace MiyakoCarryService.Server.Services
 
         // 因为SPT会检查行动任务的商人Id是否存在，为了防止频繁提示存档被标记为不合法，因此创建任务时临时使用此商人Id
         public const string TempOrderTraderId = "6864e812f9fe664cb8b8e152";
+        private Punish _punishmentMulti;
+        private SemaphoreSlim _saveLock = new(1, 1);
 
         public async Task OnPostLoadAsync()
         {
             await LoadTrader();
+            await LoadPunish();
         }
 
         private Task LoadTrader()
@@ -56,6 +65,21 @@ namespace MiyakoCarryService.Server.Services
             OverwriteTraderAssort(traderBase.Id, assort);
             SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
             return Task.CompletedTask;
+        }
+
+        private async Task LoadPunish()
+        {
+            var punishPath = System.IO.Path.Combine(_traderFolderDir, "punish.json");
+            if (!fileUtil.FileExists(punishPath))
+            {
+                await fileUtil.WriteFileAsync(punishPath, jsonUtil.Serialize(new Punish(){ PunishmentMulti = 0}));
+            }
+            _punishmentMulti = await jsonUtil.DeserializeFromFileAsync<Punish>(punishPath);
+        }
+
+        public double GetGlobalPunishmentMulti()
+        {
+            return _punishmentMulti.PunishmentMulti;
         }
 
         private void AddTraderWithEmptyAssortToDb(TraderBase traderDetailsToAdd)
@@ -124,31 +148,73 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        private void AddPunishmentMulti(double diff)
+        {
+            _punishmentMulti.PunishmentMulti += diff;
+            if (_punishmentMulti.PunishmentMulti < 0)
+            {
+                _punishmentMulti.PunishmentMulti = 100d;
+            }
+            _ = SavePunishmentMulti();
+        }
+
+        private async Task SavePunishmentMulti()
+        {
+            if (_saveLock is null)
+            {
+                _saveLock = new(1, 1);
+            }
+            
+            await _saveLock.WaitAsync();
+            try
+            {
+                try
+                {
+                    var punishPath = System.IO.Path.Combine(_traderFolderDir, "punish.json");
+                    var jsonPunish = jsonUtil.Serialize(_punishmentMulti, true);
+                    await fileUtil.WriteFileAsync(punishPath, jsonPunish);
+                }
+                catch
+                {
+                    
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
+        }
+
         public void FriendlyFirePenalty(MongoId mcsLeadPlayerId, FriendlyFirePenaltyRequestData info)
         {
-            var mcsLeadPlayerIds = new HashSet<MongoId> { info.FriendlyFireLeadPlayerId };
+            var mcsLeadPlayerIds = new HashSet<MongoId>();
 
-            if (info.PunishEveryone && compatibilityService.HasFikaServer)
+            if (info.TeamKill)
             {
-                logger.Info($"尝试惩罚 {info.FriendlyFireLeadPlayerId} 但其并不是老板, 转而惩罚房间内全体Mcs老板");
-                var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
-                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
+                mcsLeadPlayerIds.Add(info.FriendlyFireLeadPlayerId);
 
-                if (matchId is not null)
+                if (compatibilityService.HasFikaServer)
                 {
-                    var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
+                    logger.Info($"尝试惩罚 {info.FriendlyFireLeadPlayerId} 但其并不是老板, 转而惩罚房间内全体Mcs老板");
+                    var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
+                    var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                    var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
 
-                    if (fikaMatch is not null)
+                    if (matchId is not null)
                     {
-                        var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
-                        var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
+                        var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
 
-                        foreach (MongoId playerId in fikaPlayerIds)
+                        if (fikaMatch is not null)
                         {
-                            if (playerId != mcsLeadPlayerId)
+                            var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
+                            var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
+
+                            foreach (MongoId playerId in fikaPlayerIds)
                             {
-                                mcsLeadPlayerIds.Add(playerId);
+                                if (playerId != mcsLeadPlayerId)
+                                {
+                                    mcsLeadPlayerIds.Add(playerId);
+                                }
                             }
                         }
                     }
@@ -157,9 +223,11 @@ namespace MiyakoCarryService.Server.Services
 
             foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
             {
-                logger.Info($"对 {_mcsLeadPlayerId} 进行 {info.StandingDiff} 的信用惩罚");
-                AddTraderStanding(_mcsLeadPlayerId, info.StandingDiff);
+                profileService.LowTraderStandingPunish(_mcsLeadPlayerId);
             }
+            
+            logger.Info($"进行全局 {Math.Round(info.Diff * 100, 2)}% 的涨价惩罚");
+            AddPunishmentMulti(info.Diff);
         }
     }
 }

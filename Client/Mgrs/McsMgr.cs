@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
-        private ConcurrentDictionary<MongoID, FriendlyFirePenalty> _mcsFriendlyFirePenalties = new();
+        private FriendlyFirePenalty _friendlyFirePenaltie = new();
 
         public bool IsHost = false;
 
@@ -179,16 +179,9 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsBotPlayers;
         }
 
-        public void AddPunish(MongoID friendlyFireLeadPlayerId, double diff, bool punishEveryone)
+        public void AddPunish(double diff)
         {
-            FriendlyFirePenalty friendlyFirePenalty;
-            if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFireLeadPlayerId, out friendlyFirePenalty))
-            {
-                friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFireLeadPlayerId, _ => new());
-            }
-            friendlyFirePenalty.FriendlyFireLeadPlayerId = friendlyFireLeadPlayerId;
-            friendlyFirePenalty.StandingDiff += diff;
-            friendlyFirePenalty.PunishEveryone = punishEveryone;
+            _friendlyFirePenaltie.Diff += diff;
         }
 
         private IEnumerator SendPunishRequest(float time)
@@ -200,14 +193,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (_gameloop.IsVaildGameWorld)
                 {
                     MiyakoCarryServicePlugin.Logger.LogInfo("尝试发送惩罚");
-                    foreach (var kvp in _mcsFriendlyFirePenalties)
-                    {
-                        if (kvp.Value != null)
-                        {
-                            _ = McsRequestHandler.SendPunishRequest(kvp.Value);
-                        }
-                    }
-                    _mcsFriendlyFirePenalties.Clear();
+                    _ = McsRequestHandler.SendPunishRequest(_friendlyFirePenaltie);
+                    _friendlyFirePenaltie.Diff = 0;
                 }
                 yield return null;
             }
