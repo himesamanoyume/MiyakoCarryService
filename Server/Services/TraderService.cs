@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Eft.Trader;
-using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
@@ -150,8 +149,8 @@ namespace MiyakoCarryService.Server.Services
 
         private void AddPunishmentMulti(double diff)
         {
-            _punishmentMulti.PunishmentMulti += diff;
-            if (_punishmentMulti.PunishmentMulti < 0)
+            _punishmentMulti.PunishmentMulti = Math.Round(_punishmentMulti.PunishmentMulti + diff, 4);
+            if (_punishmentMulti.PunishmentMulti < -0.1)
             {
                 _punishmentMulti.PunishmentMulti = 100d;
             }
@@ -226,7 +225,7 @@ namespace MiyakoCarryService.Server.Services
                 profileService.LowTraderStandingPunish(_mcsLeadPlayerId);
             }
             
-            logger.Info($"进行全局 {Math.Round(info.Diff * 100, 2)}% 的涨价惩罚");
+            logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
             AddPunishmentMulti(info.Diff);
         }
     }

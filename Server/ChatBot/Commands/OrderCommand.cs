@@ -22,6 +22,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
         OrderQuestController orderQuestController,
+        TraderService traderService,
         ConfigService configService
     ) : IMcsCommand
     {
@@ -41,6 +42,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             get
             {
                 var completionConfig = configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First();
+                var punishmentMulti = traderService.GetGlobalPunishmentMulti();
                 return [
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), 
@@ -50,11 +52,11 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         ), 
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP2), 
-                        (int)(completionConfig.RequestedItemCount.Max * .2f), 
-                        (int)(completionConfig.RequestedItemCount.Max * .4f), 
-                        (int)(completionConfig.RequestedItemCount.Max * .6f), 
-                        (int)(completionConfig.RequestedItemCount.Max * .8f), 
-                        completionConfig.RequestedItemCount.Max
+                        (int)(completionConfig.RequestedItemCount.Max * .8f * (1 + punishmentMulti)), 
+                        (int)(completionConfig.RequestedItemCount.Max * .85f * (1 + punishmentMulti)), 
+                        (int)(completionConfig.RequestedItemCount.Max * .9f * (1 + punishmentMulti)), 
+                        (int)(completionConfig.RequestedItemCount.Max * .95f * (1 + punishmentMulti)), 
+                        (int)(completionConfig.RequestedItemCount.Max * (1 + punishmentMulti))
                         ),
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3), 

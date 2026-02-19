@@ -12,8 +12,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         public Dictionary<string, List<Reward>> GenerateReward(
             int players,
             int carryServiceLevel,
-            MongoId traderId,
-            double traderStanding
+            MongoId traderId
         )
         {
             var rewards = new Dictionary<string, List<Reward>>
@@ -45,11 +44,6 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             if (reward.Value >= 0.03f)
             {
                 reward.Value = 0.03f;
-            }
-
-            if (traderStanding < 0)
-            {
-                reward.Value *= 2;
             }
 
             return rewards;

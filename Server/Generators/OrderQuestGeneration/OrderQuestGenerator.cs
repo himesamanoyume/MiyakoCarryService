@@ -28,7 +28,8 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             int carryServiceLevel,
             int duration,
             CompletionConfig completionConfig,
-            RepeatableQuest questTemplate
+            RepeatableQuest questTemplate,
+            double punishmentMulti
         )
         {
             var traderInfos = pmcData.TradersInfo;
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGORDERGENERATION));
-            var order = Generate(players, botType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, miyakoTraderInfo.Standing.HasValue ? miyakoTraderInfo.Standing.Value : 0f);
+            var order = Generate(players, botType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, punishmentMulti);
             return order;
         }
 
@@ -57,7 +58,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             MongoId traderId,
             CompletionConfig completionConfig,
             RepeatableQuest questTemplate,
-            double traderStanding
+            double punishmentMulti
         )
         {
             var requestedItemCount = completionConfig.RequestedItemCount;
@@ -65,13 +66,12 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             var isBossType = Classification.BossTypes.Contains(botType);
             var additionMulti = isBossType ? 2f : 1f;
-            var standingMulti = traderStanding < 0 ? 10.7f : 1f;
 
             for (int i = 0; i < players; i++)
             {
                 var currentRequestedItemCount = randomUtil.RandInt(
-                    (int)(requestedItemCount.Max * discount * (0.2f * carryServiceLevel - 0.02f) * additionMulti * standingMulti),
-                    (int)(requestedItemCount.Max * discount * (0.2f * carryServiceLevel + 0.02f) * additionMulti * standingMulti) + 1
+                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * additionMulti * (1 + punishmentMulti)),
+                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * additionMulti * (1 + punishmentMulti)) + 1
                     );
 
                 var handoverItemCondition = new QuestCondition
@@ -89,7 +89,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 };
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
-            questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId, traderStanding);
+            questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
             return questTemplate;
         }
     }

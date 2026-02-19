@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
                 var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
                 var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
-                McsMgr.AddPunish(isDead ? -1.56f : -0.15f);
+                McsMgr.AddPunish(player.ProfileId, isDead ? 0.1560d : 0.0107d, isDead);
             }
         }
     }

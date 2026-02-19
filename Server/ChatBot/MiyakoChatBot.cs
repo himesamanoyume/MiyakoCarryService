@@ -21,6 +21,7 @@ namespace MiyakoCarryService.Server.ChatBot
         SptLogger<MiyakoChatBot> logger,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
+        TraderService traderService,
         IEnumerable<MiyakoChatBotCommands> chatCommands
     ) : IDialogueChatBot
     {
@@ -122,11 +123,11 @@ namespace MiyakoCarryService.Server.ChatBot
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
 
-                mailSendService.SendLocalisedNpcMessageToPlayer(
+                mailSendService.SendDirectNpcMessageToPlayer(
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    Locales.MIYAKOTRADERSPECIALHELP,
+                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSPECIALHELP), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
             }

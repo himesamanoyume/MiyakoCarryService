@@ -31,6 +31,7 @@ namespace MiyakoCarryService.Server.Services
         OrderInfoService orderInfoService,
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
+        TraderService traderService,
         ProfileHelper profileHelper
     )
     {
@@ -56,10 +57,11 @@ namespace MiyakoCarryService.Server.Services
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
+            var punishmentMulti = traderService.GetGlobalPunishmentMulti();
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, botType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
                 mcsLeadPlayerId, players, botType, carryServiceLevel, duration
-            ));
+            ), punishmentMulti);
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
                 orderQuestsQueue.Enqueue(orderQuest);
@@ -135,7 +137,7 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, botType == EBotType.common ? serverLocalisationService.GetText(Locales.BOTTYPECOMMON) : Tools.GetBotTypeName(botType), carryServiceLevel, duration);
+            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, botType == EBotType.common ? serverLocalisationService.GetText(Locales.BOTTYPECOMMON) : Tools.GetBotTypeName(botType), carryServiceLevel, duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)

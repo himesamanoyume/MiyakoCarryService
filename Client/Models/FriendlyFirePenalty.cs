@@ -11,18 +11,7 @@ namespace MiyakoCarryService.Client.Models
         public MongoID FriendlyFireLeadPlayerId;
 
         [DataMember(Name = "Diff")]
-        public double Diff
-        {
-            get;
-            set
-            {
-                field += value;
-                if (field < 0)
-                {
-                    field = 0;
-                }
-            }
-        }
+        public double Diff;
 
         [DataMember(Name = "TeamKill")]
         public bool TeamKill = false;
