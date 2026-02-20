@@ -123,11 +123,21 @@ namespace MiyakoCarryService.Server.ChatBot
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
 
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    Locales.MIYAKOTRADERSPECIALHELP,
+                    null
+                );
+
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
                 mailSendService.SendDirectNpcMessageToPlayer(
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSPECIALHELP), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
+                    string.Format(serverLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
             }

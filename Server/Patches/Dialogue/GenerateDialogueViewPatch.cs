@@ -1,4 +1,5 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,11 +28,22 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
             if (request.DialogId == TraderService.MiyakoTraderId)
             {
                 var mailSendService = ServiceLocator.ServiceProvider.GetService<MailSendService>();
+                var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
+                var traderService = ServiceLocator.ServiceProvider.GetService<TraderService>();
+
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId, 
                     TraderService.MiyakoTraderId, 
                     MessageType.NpcTraderMessage, 
                     Locales.MIYAKOTRADERWELCOME,
+                    null
+                );
+
+                mailSendService.SendDirectNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    string.Format(serverLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
                 request.Type = MessageType.NpcTraderMessage;
