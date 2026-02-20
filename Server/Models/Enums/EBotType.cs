@@ -2,7 +2,7 @@ namespace MiyakoCarryService.Server.Models.Enums
 {
     public enum EBotType
     {
-        common,
+        common = 0,
         bossBoar,
         bossBully,
         bossGluhar,

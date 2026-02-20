@@ -1,32 +1,37 @@
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
 public sealed class ConfigService(
-    ConfigServer configServer,
     ModHelper modHelper,
+    ISptLogger<ConfigService> logger,
     JsonUtil jsonUtil,
     FileUtil fileUtil
 )
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
-    public McsPluginConfig McsConfig { get; private set; }
-    public OrderConfig OrderConfig { get; private set; }
-    private readonly ModMetadata McsModMetadata = new ModMetadata();
-    public static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
+    private McsPluginConfig _mcsConfig;
+    private OrderConfig _orderConfig;
+    private ConcurrentDictionary<int, BotType> _botTypes = new();
+    private readonly ModMetadata McsModMetadata = new();
+    public static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
     public string GetModPath()
     {
@@ -48,15 +53,12 @@ public sealed class ConfigService(
         return McsModMetadata.Url;
     }
 
-    public async Task OnPreLoadAsync()
+    private async Task LoadMcsConfig()
     {
-        var coreConfig = configServer.GetConfig<CoreConfig>();
-        coreConfig.Fixes.RemoveInvalidTradersFromProfile = true;
-
-        var miyakoCarryServicePath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
-        if (!fileUtil.FileExists(miyakoCarryServicePath))
+        var mcsConfigPath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
+        if (!fileUtil.FileExists(mcsConfigPath))
         {
-            await fileUtil.WriteFileAsync(miyakoCarryServicePath, jsonUtil.Serialize(new McsPluginConfig
+            await fileUtil.WriteFileAsync(mcsConfigPath, jsonUtil.Serialize(new McsPluginConfig
             {
                 ClientConfig = new McsPluginClientConfig()
                 {
@@ -68,12 +70,15 @@ public sealed class ConfigService(
                 }
             }, true));
         }
-        McsConfig = await jsonUtil.DeserializeFromFileAsync<McsPluginConfig>(miyakoCarryServicePath);
+        _mcsConfig = await jsonUtil.DeserializeFromFileAsync<McsPluginConfig>(mcsConfigPath);
+    }
 
-        var orderConfigPath = Path.Combine(_configsFolderPath, "order.json");
-        if (!fileUtil.FileExists(orderConfigPath))
+    private async Task LoadOrderConfig()
+    {
+        var orderPath = Path.Combine(_configsFolderPath, "order.json");
+        if (!fileUtil.FileExists(orderPath))
         {
-            await fileUtil.WriteFileAsync(orderConfigPath, jsonUtil.Serialize(new OrderConfig
+            await fileUtil.WriteFileAsync(orderPath, jsonUtil.Serialize(new OrderConfig
             {
                 OrderQuests = [new RepeatableQuestConfig
                 {
@@ -163,16 +168,190 @@ public sealed class ConfigService(
                 }]
             }, true));
         }
-        OrderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderConfigPath);
+        _orderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderPath);
+    }
+
+    private async Task LoadBotTypeConfig()
+    {
+        var botTypeConfigPath = Path.Combine(_configsFolderPath, "bottype.json");
+        if (!fileUtil.FileExists(botTypeConfigPath))
+        {
+            var botTypeList = new List<BotType>
+            {
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossBoar.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Kaban"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossBully.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Reshala"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossGluhar.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Gluhar"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossKilla.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Killa"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossKnight.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Knight"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.followerBigPipe.ToString(),
+                    IsBoss = true,
+                    DisplayName = "BigPipe"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.followerBirdEye.ToString(),
+                    IsBoss = true,
+                    DisplayName = "BirdEye"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossKolontay.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Kolontay"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossKojaniy.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Shturman"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossSanitar.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Sanitar"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossTagilla.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Tagilla"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossPartisan.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Partisan"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossZryachiy.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Zryachiy"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossTagillaAgro.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Tagilla Agro"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.bossKillaAgro.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Killa Agro"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.infectedTagilla.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Infected Tagilla"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.exUsec.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Rouge"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.infectedPmc.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Infected Pmc"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.infectedAssault.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Infected Scav"
+                },
+                new BotType
+                {
+                    WildSpawnType = WildSpawnType.pmcBot.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Raider"
+                },
+            };
+            await fileUtil.WriteFileAsync(botTypeConfigPath, jsonUtil.Serialize(botTypeList, true));
+        }
+
+        var botTypes = await jsonUtil.DeserializeFromFileAsync<List<BotType>>(botTypeConfigPath);
+        botTypes.Insert(0, GenerateCommonBotType(false));
+
+        for (int i = 0; i < botTypes.Count; i++)
+        {
+            _botTypes.TryAdd(i, botTypes[i]);
+        }
+    }
+
+    public async Task OnPreLoadAsync()
+    {
+        // var coreConfig = configServer.GetConfig<CoreConfig>();
+        // coreConfig.Fixes.RemoveInvalidTradersFromProfile = true;
+        await LoadMcsConfig();
+        await LoadOrderConfig();
+        await LoadBotTypeConfig();
     }
 
     public McsPluginConfig GetMiyakoCarryServiceConfig()
     {
-        return McsConfig;
+        return _mcsConfig;
     }
 
     public OrderConfig GetOrderConfig()
     {
-        return OrderConfig;
+        return _orderConfig;
+    }
+
+    public ConcurrentDictionary<int, BotType> GetBotTypeConfig()
+    {
+        return _botTypes;
+    }
+
+    public BotType TryGetBotType(int index)
+    {
+        return _botTypes.GetOrAdd(index, _ => GenerateCommonBotType(true));
+    }
+
+    private BotType GenerateCommonBotType(bool log)
+    {
+        if (log)
+        {
+            logger.Warning($"你正在尝试获取一个不存在的BotType, 将返回默认类型");
+        }
+
+        return new BotType
+        {
+            WildSpawnType = "common",
+            IsBoss = false,
+            DisplayName = Locales.BOTTYPECOMMON
+        };
     }
 }
