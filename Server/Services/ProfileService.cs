@@ -300,11 +300,33 @@ namespace MiyakoCarryService.Server.Services
             // 适配APBS重复添加Tier
             var clonedBotGenerationDetails = cloner.Clone(botGenerationDetails);
 
-            var pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+            PmcData pmcData;
+            try
+            {
+                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+            
+            }
+            catch (Exception e)
+            {
+                logger.Error(string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), botGenerationDetails.Role) + $"\n{e.Message}");
+                botGenerationDetails.Role = completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR";
+                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+            }
+
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
-            var scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
-
+            PmcData scavData;
+            try
+            {
+                scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+            }
+            catch (Exception e)
+            {
+                logger.Error(string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), clonedBotGenerationDetails.Role) + $"\n{e.Message}");
+                clonedBotGenerationDetails.Role = "assault";
+                scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+            }
+            
             scavData.Info.Settings = new();
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcData.Info.RegistrationDate;

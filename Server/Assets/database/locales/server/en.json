@@ -14,5 +14,6 @@
     "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n order command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\ncarry service level: 1~5\nduration: integer, in hours\nexample: mcs {2} 4 4 24",
     "Mcs/MiyakoTraderCommandHelp2": "Base Prices:\nCommon Player Type:\nCarry Service Level 1: {0} Rubles/hour\nCarry Service Level 2: {1} Rubles/hour\nCarry Service Level 3: {2} Rubles/hour\nCarry Service Level 4: {3} Rubles/hour\nCarry Service Level 5: {4} Rubles/hour\nBoss carry service type prices doubled",
     "Mcs/MiyakoTraderCommandHelp3": "Bot type list:\n",
-    "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!\nCurrent permanent price increase: {0}%"
+    "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!\nCurrent permanent price increase: {0}%",
+    "Mcs/GenerateProfileError": "Exception generating carry service profile for {0}, default profile has been created instead"
 }

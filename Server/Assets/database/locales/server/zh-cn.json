@@ -14,5 +14,6 @@
     "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n下单指令:\nmcs {1} {{人数}} {{类型}} {{护航级别}} {{时间}}\n护航级别: 1~5\n时长: 整数, 单位为小时\n示例: mcs {2} 4 0 4 24",
     "Mcs/MiyakoTraderCommandHelp2": "基准价格:\n普通玩家类型:\n护航级别1: {0} 卢布/小时\n护航级别2: {1} 卢布/小时\n护航级别3: {2} 卢布/小时\n护航级别4: {3} 卢布/小时\n护航级别5: {4} 卢布/小时\nBoss护航类型价格翻倍",
     "Mcs/MiyakoTraderCommandHelp3": "类型列表:\n",
-    "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！\n当前永久涨价: {0}%"
+    "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！\n当前永久涨价: {0}%",
+    "Mcs/GenerateProfileError": "生成护航的 {0} 存档异常，已生成对应默认存档"
 }
