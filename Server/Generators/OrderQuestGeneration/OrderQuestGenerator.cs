@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Utils.Json;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils.Logger;
-using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         public RepeatableQuest GenerateOrderQuest(
             PmcData pmcData,
             int players,
-            EBotType botType,
+            SpawnType spawnType,
             int carryServiceLevel,
             int duration,
             CompletionConfig completionConfig,
@@ -45,13 +45,13 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 _ => 1f,
             };
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGORDERGENERATION));
-            var order = Generate(players, botType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, punishmentMulti);
+            var order = Generate(players, spawnType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, punishmentMulti);
             return order;
         }
 
         private RepeatableQuest Generate(
             int players,
-            EBotType botType,
+            SpawnType spawnType,
             int carryServiceLevel,
             int duration,
             float discount,
@@ -64,8 +64,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             var requestedItemCount = completionConfig.RequestedItemCount;
             questTemplate.Conditions.AvailableForFinish = [];
 
-            var isBossType = Classification.BossTypes.Contains(botType);
-            var additionMulti = isBossType ? 2f : 1f;
+            var additionMulti = spawnType.IsBoss ? 2f : 1f;
 
             for (int i = 0; i < players; i++)
             {

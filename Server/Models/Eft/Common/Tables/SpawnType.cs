@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
-    public record BotType
+    public record SpawnType
     {
         [JsonPropertyName("WildSpawnType")]
         public required string WildSpawnType { get; set; }

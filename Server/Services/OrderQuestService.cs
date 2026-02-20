@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
-using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Patches.OrderQuest;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
@@ -52,15 +52,15 @@ namespace MiyakoCarryService.Server.Services
             return _orderTemplate;
         }
 
-        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, EBotType botType, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, SpawnType spawnType, int carryServiceLevel, int duration)
         {
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
             var punishmentMulti = traderService.GetGlobalPunishmentMulti();
-            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, botType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, spawnType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
-                mcsLeadPlayerId, players, botType, carryServiceLevel, duration
+                mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration
             ), punishmentMulti);
             if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
             {
@@ -70,7 +70,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
             }
-            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, botType, carryServiceLevel, duration, orderQuest.Id);
+            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration, orderQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Server.Services
 
         public RepeatableQuest GenerateOrderTemplate(
             RepeatableQuestType type, MongoId traderId, MongoId sessionId,
-            int players, EBotType botType, int carryServiceLevel, int duration
+            int players, SpawnType spawnType, int carryServiceLevel, int duration
         )
         {
             var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
@@ -137,7 +137,7 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, botType == EBotType.common ? serverLocalisationService.GetText(Locales.BOTTYPECOMMON) : Tools.GetBotTypeName(botType), carryServiceLevel, duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
+            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, serverLocalisationService.GetText(spawnType.DisplayName), carryServiceLevel, duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)

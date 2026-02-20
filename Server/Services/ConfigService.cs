@@ -29,7 +29,7 @@ public sealed class ConfigService(
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
     private McsPluginConfig _mcsConfig;
     private OrderConfig _orderConfig;
-    private ConcurrentDictionary<int, BotType> _botTypes = new();
+    private ConcurrentDictionary<int, SpawnType> _spawnTypes = new();
     private readonly ModMetadata McsModMetadata = new();
     public static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
 
@@ -171,143 +171,143 @@ public sealed class ConfigService(
         _orderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderPath);
     }
 
-    private async Task LoadBotTypeConfig()
+    private async Task LoadSpawnTypeConfig()
     {
-        var botTypeConfigPath = Path.Combine(_configsFolderPath, "bottype.json");
-        if (!fileUtil.FileExists(botTypeConfigPath))
+        var spawnTypeConfigPath = Path.Combine(_configsFolderPath, "spawntype.json");
+        if (!fileUtil.FileExists(spawnTypeConfigPath))
         {
-            var botTypeList = new List<BotType>
+            var spawnTypeList = new List<SpawnType>
             {
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossBoar.ToString(),
                     IsBoss = true,
                     DisplayName = "Kaban"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossBully.ToString(),
                     IsBoss = true,
                     DisplayName = "Reshala"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossGluhar.ToString(),
                     IsBoss = true,
                     DisplayName = "Gluhar"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossKilla.ToString(),
                     IsBoss = true,
                     DisplayName = "Killa"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossKnight.ToString(),
                     IsBoss = true,
                     DisplayName = "Knight"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.followerBigPipe.ToString(),
                     IsBoss = true,
                     DisplayName = "BigPipe"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.followerBirdEye.ToString(),
                     IsBoss = true,
                     DisplayName = "BirdEye"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossKolontay.ToString(),
                     IsBoss = true,
                     DisplayName = "Kolontay"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossKojaniy.ToString(),
                     IsBoss = true,
                     DisplayName = "Shturman"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossSanitar.ToString(),
                     IsBoss = true,
                     DisplayName = "Sanitar"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossTagilla.ToString(),
                     IsBoss = true,
                     DisplayName = "Tagilla"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossPartisan.ToString(),
                     IsBoss = true,
                     DisplayName = "Partisan"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossZryachiy.ToString(),
                     IsBoss = true,
                     DisplayName = "Zryachiy"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossTagillaAgro.ToString(),
                     IsBoss = true,
                     DisplayName = "Tagilla Agro"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.bossKillaAgro.ToString(),
                     IsBoss = true,
                     DisplayName = "Killa Agro"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.infectedTagilla.ToString(),
                     IsBoss = true,
                     DisplayName = "Infected Tagilla"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.exUsec.ToString(),
                     IsBoss = false,
                     DisplayName = "Rouge"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.infectedPmc.ToString(),
                     IsBoss = false,
                     DisplayName = "Infected Pmc"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.infectedAssault.ToString(),
                     IsBoss = false,
                     DisplayName = "Infected Scav"
                 },
-                new BotType
+                new SpawnType
                 {
                     WildSpawnType = WildSpawnType.pmcBot.ToString(),
                     IsBoss = false,
                     DisplayName = "Raider"
                 },
             };
-            await fileUtil.WriteFileAsync(botTypeConfigPath, jsonUtil.Serialize(botTypeList, true));
+            await fileUtil.WriteFileAsync(spawnTypeConfigPath, jsonUtil.Serialize(spawnTypeList, true));
         }
 
-        var botTypes = await jsonUtil.DeserializeFromFileAsync<List<BotType>>(botTypeConfigPath);
-        botTypes.Insert(0, GenerateCommonBotType(false));
+        var spawnTypes = await jsonUtil.DeserializeFromFileAsync<List<SpawnType>>(spawnTypeConfigPath);
+        spawnTypes.Insert(0, GenerateCommonSpawnType(false));
 
-        for (int i = 0; i < botTypes.Count; i++)
+        for (int i = 0; i < spawnTypes.Count; i++)
         {
-            _botTypes.TryAdd(i, botTypes[i]);
+            _spawnTypes.TryAdd(i, spawnTypes[i]);
         }
     }
 
@@ -317,7 +317,7 @@ public sealed class ConfigService(
         // coreConfig.Fixes.RemoveInvalidTradersFromProfile = true;
         await LoadMcsConfig();
         await LoadOrderConfig();
-        await LoadBotTypeConfig();
+        await LoadSpawnTypeConfig();
     }
 
     public McsPluginConfig GetMiyakoCarryServiceConfig()
@@ -330,28 +330,28 @@ public sealed class ConfigService(
         return _orderConfig;
     }
 
-    public ConcurrentDictionary<int, BotType> GetBotTypeConfig()
+    public ConcurrentDictionary<int, SpawnType> GetSpawnTypes()
     {
-        return _botTypes;
+        return _spawnTypes;
     }
 
-    public BotType TryGetBotType(int index)
+    public SpawnType TryGetSpawnType(int index)
     {
-        return _botTypes.GetOrAdd(index, _ => GenerateCommonBotType(true));
+        return _spawnTypes.GetOrAdd(index, _ => GenerateCommonSpawnType(true));
     }
 
-    private BotType GenerateCommonBotType(bool log)
+    private SpawnType GenerateCommonSpawnType(bool log)
     {
         if (log)
         {
-            logger.Warning($"你正在尝试获取一个不存在的BotType, 将返回默认类型");
+            logger.Warning($"你正在尝试获取一个不存在的SpawnType, 将返回默认类型");
         }
 
-        return new BotType
+        return new SpawnType
         {
             WildSpawnType = "common",
             IsBoss = false,
-            DisplayName = Locales.BOTTYPECOMMON
+            DisplayName = Locales.SPAWNTYPECOMMON
         };
     }
 }

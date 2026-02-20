@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Server.Controllers
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, EBotType botType, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, SpawnType botType, int carryServiceLevel)
         {
             return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, botType, carryServiceLevel);
         }

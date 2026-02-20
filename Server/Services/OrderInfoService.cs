@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
-        public void CreateOrderInfo(MongoId mcsLeadPlayerId, int players, EBotType botType, int carryServiceLevel, int duration, MongoId questId)
+        public void CreateOrderInfo(MongoId mcsLeadPlayerId, int players, SpawnType spawnType, int carryServiceLevel, int duration, MongoId questId)
         {
             var hashSetPlayers = new HashSet<MongoId>();
             for (int i = 0; i < players; i++)
@@ -86,7 +86,7 @@ namespace MiyakoCarryService.Server.Services
                 McsLeadPlayerId = mcsLeadPlayerId,
                 QuestId = questId,
                 PlayerIds = hashSetPlayers,
-                BotType = botType,
+                SpawnType = spawnType,
                 CarryServiceLevel = carryServiceLevel,
                 Duration = duration,
                 Status = EOrderInfoStatus.AvailableForStart,

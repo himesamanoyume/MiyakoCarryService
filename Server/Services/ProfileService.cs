@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
-using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
@@ -278,11 +278,11 @@ namespace MiyakoCarryService.Server.Services
             return new();
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, EBotType botType, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, SpawnType spawnType, int carryServiceLevel)
         {
-            var isCommon = botType == EBotType.common;
+            var isCommon = spawnType.WildSpawnType == "common";
             var botDifficulty = (BotDifficulty)carryServiceLevel;
-            var role = isCommon ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : botType.ToString();
+            var role = isCommon ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : spawnType.WildSpawnType;
             var botGenerationDetails = new BotGenerationDetails()
             {
                 IsPmc = isCommon,
@@ -466,7 +466,7 @@ namespace MiyakoCarryService.Server.Services
             scavData.SessionId = pmcData.SessionId;
             return new SptProfile
             {
-                ProfileInfo = new SPTarkov.Server.Core.Models.Eft.Profile.Info
+                ProfileInfo = new Info
                 {
                     ProfileId = pmcData.SessionId,
                     Username = pmcData.Info.Nickname,

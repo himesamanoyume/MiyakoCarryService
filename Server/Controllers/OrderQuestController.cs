@@ -1,5 +1,5 @@
 
-using MiyakoCarryService.Server.Models.Enums;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
@@ -14,9 +14,9 @@ namespace MiyakoCarryService.Server.Controllers
         OrderQuestService orderQuestService
     )
     {
-        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, EBotType botType, int carryServiceLevel, int duration)
+        public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, SpawnType spawnType, int carryServiceLevel, int duration)
         {
-            orderQuestService.CreateOrderQuest(mcsLeadPlayerId, players, botType, carryServiceLevel, duration);
+            orderQuestService.CreateOrderQuest(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)

@@ -1,11 +1,10 @@
 
-using System;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Interface;
-using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Services;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
@@ -26,7 +25,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         ConfigService configService
     ) : IMcsCommand
     {
-        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]|1\d|20)\s+([1-5])\s+([1-9]\d*)$")]
+        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]\d*)\s+([1-5])\s+([1-9]\d*)$")]
         private static partial Regex OrderCommandRegex();
 
         public string Command
@@ -43,6 +42,13 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             {
                 var completionConfig = configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First();
                 var punishmentMulti = traderService.GetGlobalPunishmentMulti();
+
+                var sb = new StringBuilder();
+                foreach (var kvp in configService.GetSpawnTypes())
+                {
+                    sb.Append(kvp.Key).Append(": ").Append(kvp.Value.IsBoss ? "[Boss] " : "").Append(serverLocalisationService.GetText(kvp.Value.DisplayName)).Append('\n');
+                }
+
                 return [
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP1), 
@@ -58,10 +64,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         (int)(completionConfig.RequestedItemCount.Max * .95f * (1 + punishmentMulti)), 
                         (int)(completionConfig.RequestedItemCount.Max * (1 + punishmentMulti))
                         ),
-                    string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3), 
-                        serverLocalisationService.GetText(Locales.BOTTYPECOMMON)
-                        ),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERCOMMANDHELP3) + sb.ToString(),
                     ];
             }
         }
@@ -74,7 +77,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             {
                 var players = int.Parse(match.Groups[1].Value);
                 var intBotType = int.Parse(match.Groups[2].Value);
-                var botType = Enum.IsDefined(typeof(EBotType), intBotType) ? (EBotType)intBotType : EBotType.common;
+                var spawnType = configService.TryGetSpawnType(intBotType);
                 var level = int.Parse(match.Groups[3].Value);
                 var duration = int.Parse(match.Groups[4].Value);
 
@@ -86,7 +89,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     null
                 );
 
-                orderQuestController.CreateOrderQuest(sessionId, players, botType, level, duration);
+                orderQuestController.CreateOrderQuest(sessionId, players, spawnType, level, duration);
             }
             else
             {

@@ -17,8 +17,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("PlayerIds")]
         public required HashSet<MongoId> PlayerIds { get; set; }
 
-        [JsonPropertyName("BotType")]
-        public required EBotType BotType { get; set; }
+        [JsonPropertyName("SpawnType")]
+        public required SpawnType SpawnType { get; set; }
 
         [JsonPropertyName("CarryServiceLevel")]
         public required int CarryServiceLevel { get; set; }
