@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using MiyakoCarryService.Server.ChatBot;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Utils;
@@ -49,6 +50,7 @@ namespace MiyakoCarryService.Server.Services
         PlayerScavGenerator playerScavGenerator,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         BotNameService botNameService,
+        MailSendService mailSendService,
         OrderInfoService orderInfoService
     )
     {
@@ -308,7 +310,17 @@ namespace MiyakoCarryService.Server.Services
             }
             catch (Exception e)
             {
-                logger.Error(string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), botGenerationDetails.Role) + $"\n{e.Message}");
+                var msg = string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), botGenerationDetails.Role);
+                logger.Error(msg, e);
+
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    mcsLeadPlayerId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    msg + $"\n{e.Message}",
+                    null
+                );
+                botGenerationDetails.Side = completeQuestPmcData.Info.Side;
                 botGenerationDetails.Role = completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR";
                 pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
             }
@@ -322,7 +334,17 @@ namespace MiyakoCarryService.Server.Services
             }
             catch (Exception e)
             {
-                logger.Error(string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), clonedBotGenerationDetails.Role) + $"\n{e.Message}");
+                var msg = string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), clonedBotGenerationDetails.Role);
+                logger.Error(msg, e);
+
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    mcsLeadPlayerId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    msg + $"\n{e.Message}",
+                    null
+                );
+
                 clonedBotGenerationDetails.Role = "assault";
                 scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }

@@ -11,17 +11,16 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.ChatBot
 {
     [Injectable]
     public class MiyakoChatBot(
-        SptLogger<MiyakoChatBot> logger,
+        ISptLogger<MiyakoChatBot> logger,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
-        TraderService traderService,
         IEnumerable<MiyakoChatBotCommands> chatCommands
     ) : IDialogueChatBot
     {
@@ -128,16 +127,6 @@ namespace MiyakoCarryService.Server.ChatBot
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
                     Locales.MIYAKOTRADERSPECIALHELP,
-                    null
-                );
-
-                await Task.Delay(TimeSpan.FromSeconds(1));
-
-                mailSendService.SendDirectNpcMessageToPlayer(
-                    sessionId,
-                    TraderService.MiyakoTraderId,
-                    MessageType.NpcTraderMessage,
-                    string.Format(serverLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
             }
