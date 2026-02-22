@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 
         private static McsMgr McsMgr
-        { 
+        {
             get
             {
                 return field ??= GameLoop.Instance.GetMgr<McsMgr>();
@@ -33,11 +33,20 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
+            if (__instance.DefWildSpawnType == WildSpawnType.shooterBTR)
+            {
+                if (McsMgr.IsMcsBotPlayer(person.ProfileId))
+                {
+                    __result = false;
+                    return false;
+                }
+            }
+
             foreach (var botOwner in __instance.Members)
             {
                 if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
-                    if (person.Profile.Info.GroupId == "Mcs" || person.Profile.Info.GroupId == "Fika")
+                    if (person.Profile.Info.GroupId is "Mcs" or "Fika" || person.Profile.Info.Settings.Role == WildSpawnType.shooterBTR)
                     {
                         __result = false;
                         return false;
@@ -55,7 +64,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (person.Profile.Info.GroupId == "Mcs" || person.Profile.Info.GroupId == "Fika")
+            if (person.Profile.Info.GroupId is "Mcs" or "Fika")
             {
                 return;
             }
@@ -74,7 +83,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 return;
             }
-            
+
             var allMcsMembers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
 
             _isPropagating = true;
@@ -98,7 +107,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 _isPropagating = false;
             }
-    
         }
     }
 }
