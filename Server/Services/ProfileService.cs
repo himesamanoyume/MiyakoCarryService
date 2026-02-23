@@ -280,17 +280,17 @@ namespace MiyakoCarryService.Server.Services
             return new();
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, SpawnType spawnType, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)
         {
-            var isCommon = spawnType.WildSpawnType == "common";
-            var botDifficulty = (BotDifficulty)carryServiceLevel;
-            var role = isCommon ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : spawnType.WildSpawnType;
+            var isPmc = orderInfo.SpawnType.WildSpawnType is "common" or "pmcUSEC" or "pmcBEAR";
+            var botDifficulty = (BotDifficulty)orderInfo.CarryServiceLevel;
+            var role = isPmc ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : orderInfo.SpawnType.WildSpawnType;
             var botGenerationDetails = new BotGenerationDetails()
             {
-                IsPmc = isCommon,
-                Side = isCommon ? completeQuestPmcData.Info.Side : "Savage",
+                IsPmc = isPmc,
+                Side = isPmc ? completeQuestPmcData.Info.Side : "Savage",
                 Role = role,
-                PlayerLevel = carryServiceLevel * 10 + 20 + (!isCommon ? 30 : 0),
+                PlayerLevel = orderInfo.CarryServiceLevel * 10 + 20 + (orderInfo.SpawnType.IsBoss ? 30 : 0),
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
@@ -330,7 +330,7 @@ namespace MiyakoCarryService.Server.Services
             PmcData scavData;
             try
             {
-                scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
             catch (Exception e)
             {
@@ -346,7 +346,7 @@ namespace MiyakoCarryService.Server.Services
                 );
 
                 clonedBotGenerationDetails.Role = "assault";
-                scavData = isCommon ? GenerateScavData(mcsLeadPlayerId, carryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
             
             scavData.Info.Settings = new();

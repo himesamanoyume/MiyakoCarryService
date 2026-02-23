@@ -30,9 +30,9 @@ namespace MiyakoCarryService.Server.Controllers
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
         }
 
-        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, SpawnType botType, int carryServiceLevel)
+        public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)
         {
-            return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, botType, carryServiceLevel);
+            return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo);
         }
 
         public SptProfile? GetMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)

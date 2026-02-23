@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                     orderInfoController.SetOrderInfoStarted(orderInfo);
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
-                        var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo.SpawnType, orderInfo.CarryServiceLevel);
+                        var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
                         orderInfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
                     }
                 }
