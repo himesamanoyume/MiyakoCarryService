@@ -321,6 +321,7 @@
 - ~~取消信用机制，该为下单永久全局涨价~~
 - ~~对机器人可用护航类型的用json加载，以此实现非硬编码的列表展示~~
 - **Boss类型是Scav，Pmc玩家召唤Scav类型护航时似乎不会主动攻击Scav**
+- ~~优化`Side`的选择逻辑，当前支持其他类型的`WildSpawnType`后，Common已经不足以反应Side是否该为`Savage`和`Bear`,`Usec`了~~
 
 ## Logic思想指导
 
@@ -420,7 +421,7 @@
 - infectedTagilla
 - bossTagillaAgro
 - bossKillaAgro
-- tagillaHelperAgr
+- tagillaHelperAgro
 
 ## WTT - Black Division Home
 
