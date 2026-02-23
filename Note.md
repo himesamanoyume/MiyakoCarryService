@@ -350,3 +350,103 @@
 - 修复Fika联机时，副机的真人玩家如果没有点护航就会被其他护航攻击的问题
 - 尝试修复Fika联机下副机护航在第一次撤离后第二次无法被邀请入队的问题（如果解决了记得发出来告知我）
 - 修复战局开始报错问题
+
+# WildSpawnType
+
+每个类型对应谁自己查
+
+## 原版
+
+- marksman
+- assault
+- bossTest
+- bossBully
+- followerTest
+- followerBully
+- bossKilla
+- bossKojaniy
+- followerKojaniy
+- pmcBot
+- cursedAssault
+- bossGluhar
+- followerGluharAssault
+- followerGluharSecurity
+- followerGluharScout
+- followerGluharSnipe
+- followerSanitar
+- bossSanitar
+- test
+- assaultGroup
+- sectantWarrior
+- sectantPriest
+- bossTagilla
+- followerTagilla
+- exUsec
+- gifter
+- bossKnight
+- followerBigPipe
+- followerBirdEye
+- bossZryachiy
+- followerZryachiy
+- bossBoar
+- followerBoar
+- arenaFighter
+- arenaFighterEvent
+- bossBoarSniper
+- crazyAssaultEvent
+- peacefullZryachiyEvent
+- sectactPriestEvent
+- ravangeZryachiyEvent
+- followerBoarClose1
+- followerBoarClose2
+- bossKolontay
+- followerKolontayAssault
+- followerKolontaySecurity
+- shooterBTR
+- bossPartisan
+- spiritWinter
+- spiritSpring
+- peacemaker
+- pmcBEAR
+- pmcUSEC
+- skier
+- sectantPredvestnik
+- sectantPrizrak
+- sectantOni
+- infectedAssault
+- infectedPmc
+- infectedCivil
+- infectedLaborant
+- infectedTagilla
+- bossTagillaAgro
+- bossKillaAgro
+- tagillaHelperAgr
+
+## WTT - Black Division Home
+
+> Author: TacticalToaster [Forge](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)
+
+- blackDivLead
+- blackDivAssault
+- blackDivBreacher
+- blackDivSupport
+
+## UNTAR Go Home!
+
+> Author: TacticalToaster [Forge](https://forge.sp-tarkov.com/mod/2342/untar-go-home)
+
+- followeruntar
+- bossuntarlead
+- followeruntarmarksman
+- bossuntaroffice
+
+## RUAF Come Home!
+
+> Author: TacticalToaster [Forge](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)
+
+- ruafRifleman
+- ruafRiflemanSenior
+- ruafAutorifleman
+- ruafGrenadier
+- ruafMarksman
+- ruafMachinegunne

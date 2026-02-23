@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server
                 public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.0");
                 public override List<string> Incompatibilities { get; init; }
                 public override Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
-                public override string Url { get; init; } = "https://sns.oddba.cn/184167.html";
+                public override string Url { get; init; } = "https://sns.oddba.cn/184517.html";
                 public override bool? IsBundleMod { get; init; } = false;
                 public override string License { get; init; } = "CC BY-NC-SA 4.0";
                 public override string ModGuid { get; init; } = "MiyakoCarryService";
