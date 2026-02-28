@@ -294,7 +294,7 @@ namespace MiyakoCarryService.Server.Services
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
-                BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty.ToString().ToLower() : "impossible",
+                BotDifficulty = botDifficulty <= BotDifficulty.Impossible && botDifficulty > BotDifficulty.AsOnline ? botDifficulty is BotDifficulty.Medium ? "normal" : botDifficulty.ToString().ToLower() : "impossible",
                 IsPlayerScav = false,
                 AllPmcsHaveSameNameAsPlayer = false
             };
