@@ -26,6 +26,8 @@
 - `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
 - - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
 > 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
+
+> 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
@@ -326,6 +328,9 @@
 - **Boss类型是Scav，Pmc玩家召唤Scav类型护航时似乎不会主动攻击Scav**
 - ~~优化`Side`的选择逻辑，当前支持其他类型的`WildSpawnType`后，Common已经不足以反应Side是否该为`Savage`和`Bear`,`Usec`了~~
 - **先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划**
+- Zryachiy似乎会攻击护航
+- 护航TK护航会惩罚老板
+- ~~修复小队邀请面板的Aid重复问题`~~
 
 ## Logic思想指导
 

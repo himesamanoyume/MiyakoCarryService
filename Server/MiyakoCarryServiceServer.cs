@@ -32,6 +32,7 @@ namespace MiyakoCarryService.Server
                 new SendLocalisedNpcMessageToPlayerPatch().Enable();
                 new GenerateDialogueViewPatch().Enable();
                 new GetDialogByIdFromProfilePatch().Enable();
+                new SptDialogueChatBotPatch().Enable();
                 await configService.OnPreLoadAsync();
             }
         }
