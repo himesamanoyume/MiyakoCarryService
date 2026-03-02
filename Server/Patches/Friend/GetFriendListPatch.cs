@@ -1,5 +1,4 @@
 
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,6 @@ using MiyakoCarryService.Server.ChatBot;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -28,9 +26,6 @@ namespace MiyakoCarryService.Server.Patches.Friend
             __result.Friends.Add(miyakoChatBot.GetChatBot());
 
             var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-            var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
-            var profile = profileHelper.GetFullProfile(sessionId);
-
             var mcsBotPlayerProfiles = profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
 
             if (mcsBotPlayerProfiles is not null)
@@ -70,11 +65,6 @@ namespace MiyakoCarryService.Server.Patches.Friend
                     }
                 }
             }
-
-            __result.Friends = __result.Friends
-                .GroupBy(u => u.Aid)
-                .Select(x => x.First())
-                .ToList();
         }
     }
 }

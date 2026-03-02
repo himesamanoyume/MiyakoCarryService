@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Server
                 public override string Url { get; init; } = "https://sns.oddba.cn/184517.html";
                 public override bool? IsBundleMod { get; init; } = false;
                 public override string License { get; init; } = "CC BY-NC-SA 4.0";
-                public override string ModGuid { get; init; } = "MiyakoCarryService";
+                public override string ModGuid { get; init; } = "top.himesamanoyume.miyakocarryservice";
                 public System.Version ClientVersion { get; init; } = new(CurrentVersion);
         }
 }
