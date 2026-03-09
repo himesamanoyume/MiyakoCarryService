@@ -1,4 +1,5 @@
 
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,19 @@ namespace MiyakoCarryService.Server.Patches.Friend
                             }
                         );
                     }
+
+                    __result.Friends = __result.Friends
+                        .GroupBy(u => u.Aid)
+                        .SelectMany(g =>
+                        {
+                            var list = g.ToList();
+                            for (int i = 1; i < list.Count; i++)
+                            {
+                                list[i].Aid = g.Key + i;
+                            }
+                            return list;
+                        })
+                        .ToList();
                 }
             }
         }
