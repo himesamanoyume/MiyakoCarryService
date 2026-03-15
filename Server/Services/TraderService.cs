@@ -72,6 +72,16 @@ namespace MiyakoCarryService.Server.Services
                 await fileUtil.WriteFileAsync(punishPath, jsonUtil.Serialize(new Punish(){ PunishmentMulti = 0}));
             }
             _punishmentMulti = await jsonUtil.DeserializeFromFileAsync<Punish>(punishPath);
+            if (_punishmentMulti.PunishmentMulti < 0d)
+            {
+                _punishmentMulti.PunishmentMulti = 0d;
+                _ = SavePunishmentMulti();
+            }
+            else if (_punishmentMulti.PunishmentMulti > 5d)
+            {
+                _punishmentMulti.PunishmentMulti = 5d;
+                _ = SavePunishmentMulti();
+            }
         }
 
         public double GetGlobalPunishmentMulti()
@@ -130,9 +140,13 @@ namespace MiyakoCarryService.Server.Services
         private void AddPunishmentMulti(double diff)
         {
             _punishmentMulti.PunishmentMulti = Math.Round(_punishmentMulti.PunishmentMulti + diff, 4);
-            if (_punishmentMulti.PunishmentMulti < -0.1)
+            if (_punishmentMulti.PunishmentMulti < 0d)
             {
-                _punishmentMulti.PunishmentMulti = 100d;
+                _punishmentMulti.PunishmentMulti = 0d;
+            }
+            else if (_punishmentMulti.PunishmentMulti > 5d)
+            {
+                _punishmentMulti.PunishmentMulti = 5d;
             }
             _ = SavePunishmentMulti();
         }
