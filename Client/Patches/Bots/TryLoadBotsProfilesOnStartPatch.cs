@@ -182,6 +182,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         var enemyTypes = botOwner.Settings.GetEnemyBotTypes();
 
+                        if (leadPlayer.Side != EPlayerSide.Savage)
+                        {
+                            foreach (WildSpawnType wst in Enum.GetValues(typeof(WildSpawnType)))
+                            {
+                                enemyTypes.Add(wst);
+                            }
+                        }
                         if (!enemyTypes.Contains(WildSpawnType.pmcBEAR))
                         {
                             enemyTypes.Add(WildSpawnType.pmcBEAR);
@@ -313,7 +320,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
+            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 60f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
 
             // force follower loyality
@@ -393,11 +400,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 30f;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 300f;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 80f + 10f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
-            settings.FileSettings.Look.NIGHT_VISION_ON = 100.0f;
-            settings.FileSettings.Look.NIGHT_VISION_OFF = 110.0f;
-            settings.FileSettings.Look.NIGHT_VISION_DIST = 160.0f;
+            settings.FileSettings.Look.NIGHT_VISION_ON = 150.0f;
+            settings.FileSettings.Look.NIGHT_VISION_OFF = 100.0f;
+            settings.FileSettings.Look.NIGHT_VISION_DIST = 150.0f;
             settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
             settings.FileSettings.Look.LightOnVisionDistance = 50f;
@@ -415,11 +422,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
-            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
+            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.7f;
             settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
             settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST * botDifficultyInt + 20f;
-            settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 5f;
+            settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
+            settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 2f;
             settings.FileSettings.Hearing.SOUND_DIR_DEEFREE *= botDifficultyInt;
             settings.FileSettings.Hearing.LOOK_ONLY_DANGER = true;
             settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
@@ -432,7 +439,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
-            botOwner.ENEMY_LOOK_AT_ME = Mathf.Cos(settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG * 0.017453292f);
+            // botOwner.ENEMY_LOOK_AT_ME = Mathf.Cos(settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG * 0.017453292f);
             botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(settings.FileSettings.Core.DamageCoeff);
 
             // counter SAIN
@@ -440,11 +447,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.SHOOT_FROM_EYES = true;
 
             // - friendly bot never gets tired
-            // botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
-            // botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
+            botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
+            botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
 
             // - need no food
-            // botOwner.GetPlayer.HealthController.DisableMetabolism();
+            botOwner.GetPlayer.HealthController.DisableMetabolism();
 
             botOwner.Tactic.AggressionChange(1f);
 

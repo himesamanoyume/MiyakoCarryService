@@ -12,7 +12,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private float _holdPositionTime = Time.time;
         private float _goToCoverTime = Time.time;
         private CustomNavigationPoint _currentNavigationPoint = null;
-        private bool _isInCover = false;
         private bool _haveCoverToShoot = false;
         private float _closeLeadDistance = 20f;
         private bool _isHolding = false;
@@ -229,39 +228,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
                 }
 
-                if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude > _closeLeadDistance)
+                if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
                 {
-                    TryFindCover(mcsLeadPlayerPos);
-                    if (_isInCover)
+                    // var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                    // var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                    // var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
+                    if (NavMesh.SamplePosition(mcsLeadPlayerPos, out var navMeshHit, 7f, -1))
                     {
-                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_currentNavigationPoint, true);
-                        if (BotOwner.CanSprintPlayer)
-                        {
-                            return new Action(typeof(AttackMovingLogic), "Mcs:sDistCloseB:AttackMovingLogic");
-                        }
-                        return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic1");
+                        BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
+                        return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB:GoToPointLogic");
                     }
                     else
                     {
-                        var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                        var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                        var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
-                        var closestPoint = BotOwner.Covers.GetClosestPoint(newPos);
-                        if (closestPoint != null)
-                        {
-                            BotOwner.Memory.BotCurrentCoverInfo.SetCover(closestPoint, true);
-                            return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic2");
-                        }
-                        if (Time.time - _goToCoverTime > 5f && NavMesh.SamplePosition(newPos, out var navMeshHit, 15f, -1))
-                        {
-                            BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
-                            return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB:GoToPointLogic");
-                        }
-                        if (BotOwner.Memory.IsInCover)
-                        {
-                            return new Action(typeof(HoldPositionLogic), "Mcs:sDistCloseB:HoldPositionLogic");
-                        }
-                        return new Action(typeof(RunToCoverLogic), "Mcs:sDistCloseB:RunToCoverLogic");
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath");
                     }
                 }
                 else
@@ -301,11 +280,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if ((mcsLeadPlayerPos - _currentNavigationPoint.Position).sqrMagnitude < _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
                     {
-                        _isInCover = true;
+                        BotOwner.Memory.IsInCover = true;
                         return;
                     }
                 }
-                _isInCover = false;
+                BotOwner.Memory.IsInCover = false;
             }
         }
 
@@ -326,7 +305,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 TryFindCover(mcsLeadPlayerPos);
                 UpdateCoverToShoot();
-                if (!_isInCover && !_haveCoverToShoot)
+                if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
                 {
                     return true;
                 }
@@ -366,7 +345,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 TryFindCover(mcsLeadPlayerPos);
                 UpdateCoverToShoot();
-                if (!_isInCover && !_haveCoverToShoot)
+                if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
                 {
                     return true;
                 }
