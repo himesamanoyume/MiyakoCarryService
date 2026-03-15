@@ -41,7 +41,7 @@
 						],
 					},
 					{
-						"label": "package: NME",
+						"label": "package: CC",
 						"type": "shell",
 						"command": "powershell",
 						"args": [
@@ -63,7 +63,7 @@
 						}
 					},
 					{
-						"label": "client: build NME",
+						"label": "client: build CC",
 						"type": "shell",
 						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
@@ -73,7 +73,7 @@
 						}
 					},
 					{
-						"label": "client: debug build NME",
+						"label": "client: debug build CC",
 						"type": "shell",
 						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
 						"dependsOrder": "sequence",
@@ -93,7 +93,7 @@
 						}
 					},
 					{
-						"label": "server: build NME",
+						"label": "server: build CC",
 						"type": "shell",
 						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
@@ -125,12 +125,12 @@
 						"group": "build"
 					},
 					{
-						"label": "all: build NME",
+						"label": "all: build CC",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"build: clean",
-							"server: build NME",
-							"client: build NME"
+							"server: build CC",
+							"client: build CC"
 						],
 						"group": "build"
 					},
@@ -177,10 +177,10 @@
 						"group": "build"
 					},
 					{
-						"label": "all: NME (build & move)",
+						"label": "all: CC (build & move)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"all: build NME",
+							"all: build CC",
 							"all: move"
 						],
 						"group": "build"
@@ -195,11 +195,11 @@
 						"group": "build"
 					},
 					{
-						"label": "all: NME (build & package)",
+						"label": "all: CC (build & package)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"all: build NME",
-							"package: NME"
+							"all: build CC",
+							"package: CC"
 						],
 						"group": "build"
 					},
@@ -214,11 +214,11 @@
 						"group": "build"
 					},
 					{
-						"label": "all: NME (build & package & move)",
+						"label": "all: CC (build & package & move)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"all: build NME",
-							"package: NME",
+							"all: build CC",
+							"package: CC",
 							"all: move"
 						],
 						"group": "build"
@@ -233,19 +233,19 @@
 						"group": "build"
 					},
 					{
-						"label": "client: NME (build & move)",
+						"label": "client: CC (build & move)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"client: build NME",
+							"client: build CC",
 							"client: move"
 						],
 						"group": "build"
 					},
 					{
-						"label": "client: NME (debug build & move)",
+						"label": "client: CC (debug build & move)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"client: debug build NME",
+							"client: debug build CC",
 							"client: move"
 						],
 						"group": "build"
@@ -260,20 +260,20 @@
 						"group": "build"
 					},
 					{
-						"label": "server: NME (build & move)",
+						"label": "server: CC (build & move)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"server: build NME",
+							"server: build CC",
 							"server: move"
 						],
 						"group": "build"
 					},
 					{
-						"label": "all: standard & NME (build & package)",
+						"label": "all: standard & CC (build & package)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"all: (build & package)",
-							"all: NME (build & package)"
+							"all: CC (build & package)"
 						],
 						"group": "build"
 					}
