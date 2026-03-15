@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
@@ -29,6 +30,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
         private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
+        private SemaphoreSlim _saveLock = new(1, 1);
 
         public async Task OnPostLoadAsync()
         {
@@ -37,31 +39,77 @@ namespace MiyakoCarryService.Server.Services
 
         public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            if (_leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
+            if (_saveLock is null)
             {
-                if (mcsAids.Contains(mcsAid))
-                {
-                    return true;
-                }
+                _saveLock = new(1, 1);
             }
-            return false;
+
+            _saveLock.Wait();
+
+            try
+            {
+                if (_leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
+                {
+                    if (mcsAids.Contains(mcsAid))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
         }
 
         public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
-            if (!mcsAids.Contains(mcsAid))
+            if (_saveLock is null)
             {
-                mcsAids.Add(mcsAid);
+                _saveLock = new(1, 1);
+            }
+
+            _saveLock.Wait();
+
+            try
+            {
+                var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+                if (!mcsAids.Contains(mcsAid))
+                {
+                    if (mcsAids.Count >= 4)
+                    {
+                        mcsAids.Clear();
+                    }
+                    mcsAids.Add(mcsAid);
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
             }
         }
 
         public void RemoveGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
-            if (mcsAids.Contains(mcsAid))
+            if (_saveLock is null)
             {
-                mcsAids.Remove(mcsAid);
+                _saveLock = new(1, 1);
+            }
+
+            _saveLock.Wait();
+
+            try
+            {
+                var mcsAids = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+                if (mcsAids.Contains(mcsAid))
+                {
+                    mcsAids.Remove(mcsAid);
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
             }
         }
 
@@ -73,13 +121,27 @@ namespace MiyakoCarryService.Server.Services
 
         public void ClearGroupMember(MongoId mcsLeadPlayerId)
         {
-            // logger.Info($"正在清除 {mcsLeadPlayerId} 的小队成员");
-            _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
-            var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
-            foreach (var matchPlayerId in matchPlayerIds)
+            if (_saveLock is null)
             {
-                // logger.Info($"正在清除房主 {mcsLeadPlayerId} 的联机队友 {matchPlayerId} 的小队成员");
-                _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
+                _saveLock = new(1, 1);
+            }
+
+            _saveLock.Wait();
+
+            try
+            {
+                // logger.Info($"正在清除 {mcsLeadPlayerId} 的小队成员");
+                _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
+                var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
+                foreach (var matchPlayerId in matchPlayerIds)
+                {
+                    // logger.Info($"正在清除房主 {mcsLeadPlayerId} 的联机队友 {matchPlayerId} 的小队成员");
+                    _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
             }
         }
 
@@ -128,17 +190,31 @@ namespace MiyakoCarryService.Server.Services
 
         public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)
         {
-            var members = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
-            var profiles = new List<SptProfile>();
-            foreach (var mcsAid in members)
+            if (_saveLock is null)
             {
-                var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
-                if (profile is not null)
-                {
-                    profiles.Add(profile);
-                }
+                _saveLock = new(1, 1);
             }
-            return profiles;
+
+            _saveLock.Wait();
+
+            try
+            {
+                var members = _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new List<int>());
+                var profiles = new List<SptProfile>();
+                foreach (var mcsAid in members)
+                {
+                    var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
+                    if (profile is not null)
+                    {
+                        profiles.Add(profile);
+                    }
+                }
+                return profiles;
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
         }
 
         public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsLeadPlayerId, SideType side)
