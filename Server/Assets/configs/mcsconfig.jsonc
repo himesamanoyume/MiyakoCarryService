@@ -3,6 +3,7 @@
 
     },
     "Server": {
-        
+        "CheckUpdate": true,
+        "CheckAfdian": true
     }
 }

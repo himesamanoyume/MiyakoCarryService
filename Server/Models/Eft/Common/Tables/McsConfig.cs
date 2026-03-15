@@ -11,7 +11,10 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
     public record McsPluginServerConfig
     {
-
+        [JsonPropertyName("CheckUpdate")]
+        public bool CheckUpdate { get; set; } = true;
+        [JsonPropertyName("CheckAfdian")]
+        public bool CheckAfdian { get; set; } = true;
     }
 
     public record McsPluginConfig

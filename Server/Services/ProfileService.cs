@@ -6,9 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
-using MiyakoCarryService.Server.ChatBot;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Models.Mcs;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
@@ -60,6 +60,8 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
         private List<string> _afdianNames = [];
+        private Afdian _afdian; 
+        private SemaphoreSlim _saveLock = new(1, 1);
 
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
@@ -204,10 +206,40 @@ namespace MiyakoCarryService.Server.Services
                 fileUtil.CreateDirectory(_afdianFolderDir);
             }
 
-            var files = fileUtil.GetFiles(_afdianFolderDir).Where(item => fileUtil.GetFileExtension(item) == "json");
-            foreach (var file in files)
+            var afdianFilePath = System.IO.Path.Join(_afdianFolderDir, "afdian.json");
+            _afdian = await jsonUtil.DeserializeFromFileAsync<Afdian>(afdianFilePath);
+            _afdianNames = _afdian.Supporter;
+        }
+
+        public Afdian GetAfdian()
+        {
+            return _afdian;
+        }
+
+        public async Task SaveAfdian()
+        {
+            if (_saveLock is null)
             {
-                _afdianNames = await jsonUtil.DeserializeFromFileAsync<List<string>>(file);
+                _saveLock = new(1, 1);
+            }
+            
+            await _saveLock.WaitAsync();
+            try
+            {
+                try
+                {
+                    var afdianString = jsonUtil.Serialize(_afdian, true);
+                    var afdianFilePath = System.IO.Path.Join(_afdianFolderDir, "afdian.json");
+                    await fileUtil.WriteFileAsync(afdianFilePath, afdianString);
+                }
+                catch
+                {
+                    
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
             }
         }
 
