@@ -58,10 +58,10 @@ namespace MiyakoCarryService.Server
                     var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
 
                     var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.0.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
-                    var match1 = versionPattern.Match(data);
-                    if (match1.Success)
+                    var match = versionPattern.Match(data);
+                    if (match.Success)
                     {
-                        var latestVersion = new System.Version(match1.Groups[1].Value.Trim());
+                        var latestVersion = new System.Version(match.Groups[1].Value.Trim());
                         // logger.Info("尝试检测更新:" + latestVersion);
                         if (latestVersion.CompareTo(currentVersion) > 0)
                         {

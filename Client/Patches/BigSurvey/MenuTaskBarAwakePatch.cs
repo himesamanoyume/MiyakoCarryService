@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT.UI;
 using HarmonyLib;
@@ -11,6 +12,8 @@ using SPT.Custom.Models;
 using SPT.Reflection.Patching;
 using TMPro;
 using UnityEngine;
+using System.Linq;
+using BepInEx;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -90,6 +93,11 @@ internal sealed class MenuTaskBarAwakePatch : ModulePatch
                         .Append("CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("核心)\n")
                         .Append("内存: ").Append(SystemInfo.systemMemorySize).Append(" MB\n")
                         .Append("显卡: ").Append(" ").Append(SystemInfo.graphicsDeviceName).Append(" (").Append(SystemInfo.graphicsMemorySize).Append(" MB显存)\n")
+                        .Append("全部Client模组:\n")
+                        .Append(string.Join(", ", Chainloader.PluginInfos.Values.Select(x => x.Instance)
+                                .Where(plugin => plugin != null)
+                                .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => p.Info.Metadata.Name)
+                                .ToArray())).Append("\n")
                         .Append("总计异常: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())
@@ -99,7 +107,7 @@ internal sealed class MenuTaskBarAwakePatch : ModulePatch
                     }
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
-                    NotificationManagerClass.DisplayMessageNotification($"共捕获到 {MiyakoCarryServicePlugin.LogBuffer.GetLogCount} 个错误，已复制错误日志文本，请直接粘贴并发送到Discord中");
+                    NotificationManagerClass.DisplayMessageNotification($"共捕获到 {MiyakoCarryServicePlugin.LogBuffer.GetLogCount} 个错误，已复制错误日志文本，可直接粘贴并发送到Discord频道 Rabbit1 Gaming 中（注意：此日志会捕获任何报错，并不一定与宫子护航店有关）");
                     NewBigSurveyCount = 0;
                     _animatedToggle.ToggleSilent(false);
                 });
