@@ -42,6 +42,11 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
+            if (McsMgr.IsMcsBotPlayer(player.ProfileId))
+            {
+                return;
+            }
+
             if (McsMgr.IsMcsBotPlayer(___Player.ProfileId))
             {
                 var isMcsLeadPlayer = McsMgr.IsMcsLeadPlayer(player.ProfileId);

@@ -328,7 +328,7 @@
 - **Boss类型是Savage，Pmc玩家召唤Savage类型护航时似乎不会主动攻击Scav**
 - ~~优化`Side`的选择逻辑，当前支持其他类型的`WildSpawnType`后，Common已经不足以反应Side是否该为`Savage`和`Bear`,`Usec`了~~
 - *Zryachiy似乎会攻击护航（已尝试修复）*
-- **护航TK护航会惩罚老板**
+- ~~护航TK护航会惩罚老板~~
 - ~~修复小队邀请面板的Aid重复问题~~
 - ~~更新赞助者名单~~
 - **BUG:惩罚的值小于负一时会报错**
