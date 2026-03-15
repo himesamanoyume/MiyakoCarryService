@@ -62,7 +62,7 @@ namespace MiyakoCarryService.Server
                     if (match1.Success)
                     {
                         var latestVersion = new System.Version(match1.Groups[1].Value.Trim());
-                        logger.Info("尝试检测更新:" + latestVersion);
+                        // logger.Info("尝试检测更新:" + latestVersion);
                         if (latestVersion.CompareTo(currentVersion) > 0)
                         {
                             logger.Success($"MiyakoCarryService 有新版本: {currentVersion} ---> {latestVersion} | 目前请在Discord频道获取更新");

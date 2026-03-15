@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (__instance.DefWildSpawnType == WildSpawnType.shooterBTR)
+            if (__instance.DefWildSpawnType is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
             {
                 if (McsMgr.IsMcsBotPlayer(person.ProfileId))
                 {
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
-                    if (person.Profile.Info.GroupId is "Mcs" or "Fika" || person.Profile.Info.Settings.Role == WildSpawnType.shooterBTR)
+                    if (person.Profile.Info.GroupId is "Mcs" or "Fika" || person.Profile.Info.Settings.Role is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
                     {
                         __result = false;
                         return false;
