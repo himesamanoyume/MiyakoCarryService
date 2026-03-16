@@ -50,6 +50,7 @@
     <Reference Include="UnityEngine.CoreModule" HintPath=".\Ref\UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.IMGUIModule" HintPath=".\Ref\UnityEngine.IMGUIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.PhysicsModule" HintPath=".\Ref\UnityEngine.PhysicsModule.dll" Private="false" />
     <Reference Include="UnityEngine.InputLegacyModule" HintPath=".\Ref\UnityEngine.InputLegacyModule.dll" Private="false" />
     <Reference Include="UnityEngine.TextRenderingModule" HintPath=".\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath=".\Ref\UnityEngine.UI.dll" Private="false" />
