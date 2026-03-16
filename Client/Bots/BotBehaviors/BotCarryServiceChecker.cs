@@ -12,7 +12,18 @@ namespace MiyakoCarryService.Client.Bots.BotBehaviors
 
         public override void ManualUpdate()
         {
-            BotOwner.Memory.DeleteInfoAboutEnemy(McsLeadPlayer);
+            if (BotOwner.Memory.GoalEnemy == null)
+            {
+                return;
+            }
+
+            // BotOwner.Memory.DeleteInfoAboutEnemy(McsLeadPlayer);
+
+            if (!BotOwner.Memory.GoalEnemy.Person.HealthController.IsAlive)
+            {
+                BotOwner.Memory.GoalTarget.Clear();
+                BotOwner.Memory.GoalEnemy = null;
+            }
         }
     }
 }

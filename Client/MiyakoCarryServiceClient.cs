@@ -67,8 +67,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     void Start()
     {
         Application.logMessageReceived += OnLog;
-        CheckFikaPlugin();
-        CheckFikaHeadlessPlugin();
+        FikaInstalled = !Tools.CheckPlugin([FikaGUID]);
+        IsFikaHeadless = !Tools.CheckPlugin(["com.fika.headless"]);
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
         foreach (var kvp in LocalLocales.LoadingLocales)
@@ -96,26 +96,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 
     public static bool CheckUnsupportedPlugin()
     {
-        var unsupportedPluginList = new List<string>()
-        {
-
-        };
-        return Tools.CheckPlugin(unsupportedPluginList);
+        return Tools.CheckPlugin([]);
     }
-
-    public static bool CheckFikaHeadlessPlugin()
-    {
-        IsFikaHeadless = !Tools.CheckPlugin(["com.fika.headless"]);
-        return IsFikaHeadless;
-    }
-
-    public static bool CheckFikaPlugin()
-    {
-        FikaInstalled = !Tools.CheckPlugin([FikaGUID]);
-        return FikaInstalled;
-    }
-
-    
 
     private void EnableAllPatches()
     {
@@ -151,7 +133,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new MatchmakerAcceptScreenShowPatch().Enable();
         new MatchingAbortPatch().Enable();
         new DisbandRaidGroupPatch().Enable();
-        // new ManualUpdatePatch().Enable();
+        new ManualUpdatePatch().Enable();
         new MenuTaskBarAwakePatch().Enable();
         new NewNewsCountPatch().Enable();
         new SetGoalEnemyPatch().Enable();
