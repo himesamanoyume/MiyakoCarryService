@@ -1,8 +1,6 @@
 
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using MiyakoCarryService.Client.Extensions;
-using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {

@@ -9,13 +9,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
     internal class McsCommonLayer : McsBaseLayer<McsCommonLayer>
     {
-        private float _holdPositionTime = Time.time;
+        private float _lastHoldPositionTime = Time.time;
         private float _goToCoverTime = Time.time;
         private CustomNavigationPoint _currentNavigationPoint = null;
         private bool _haveCoverToShoot = false;
         private float _closeLeadDistance = 20f;
-        private bool _isHolding = false;
-        private float _lastHoldTime = Time.time;
+        private float _lastPatrolTime = Time.time;
+        private float _lastGoToPointTime = Time.time;
+        private int _tryGoToPoint = 0;
 
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -33,7 +34,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(HoldPositionLogic), EndHoldPosition },
                 { typeof(GoToPointLogic), EndGoToPoint },
                 { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(GoToLootTargetLogic), EndLootingTarget }
+                { typeof(GoToLootTargetLogic), EndLootingTarget },
             };
         }
 
@@ -230,22 +231,41 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
                 {
-                    // var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                    // var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                    // var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
-                    if (NavMesh.SamplePosition(mcsLeadPlayerPos, out var navMeshHit, 7f, -1))
+                    var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                    var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                    var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
+                    if (NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
                     {
                         BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
-                        return new Action(typeof(GoToPointLogic), "Mcs:sDistCloseB:GoToPointLogic");
+                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                     }
                     else
                     {
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath");
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
                     }
                 }
                 else
                 {
-                    return new Action(typeof(HoldPositionLogic), "Mcs:distToLead");
+                    if (_lastPatrolTime + 8f < Time.time)
+                    {
+                        _lastPatrolTime = Time.time + 8f;
+                        var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                        var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
+                        var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
+                        if (NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
+                            return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
+                        }
+                        else
+                        {
+                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
+                        }
+                    }
+                    else
+                    {
+                        return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
+                    }
                 }
                 // end
             }
@@ -410,9 +430,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.GoToSomePointData.IsCome())
             {
+                _tryGoToPoint = 0;
                 return true;
             }
-            return false;
+            else
+            {
+                if (_lastGoToPointTime + 1f < Time.time)
+                {
+                    _tryGoToPoint += 1;
+                    _lastGoToPointTime = Time.time + 1f;
+                }
+
+                if (_tryGoToPoint > 10)
+                {
+                    _tryGoToPoint = 0;
+                    return true;
+                }
+                return false;
+            }
         }
 
         private bool EndAttackMoving()
@@ -440,12 +475,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            if (_haveCoverToShoot && ProtectWantKill() && ProtectCareKill())
-            {
-                return true;
-            }
 
-            if (IsHolding())
+            if (_haveCoverToShoot && ProtectWantKill() && ProtectCareKill())
             {
                 return true;
             }
@@ -482,25 +513,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return goalEnemy == null || !WasHitRecently(10f) && !goalEnemy.IsVisible && !goalEnemy.CanShoot && goalEnemy.CanISearch && BotOwner.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack) && BotOwner.Memory.LastEnemyVisionOld(LocalBotSettingsProviderClass.Core.COVER_SECONDS_AFTER_LOSE_VISION);
         }
 
-        private bool IsHolding()
-        {
-            if (!_isHolding)
-            {
-                return false;
-            }
-            if (_lastHoldTime < Time.time)
-            {
-                _isHolding = false;
-                return true;
-            }
-            return false;
-        }
-
         private void UpdateCoverToShoot()
         {
-            if (_holdPositionTime < Time.time)
+            if (_lastHoldPositionTime < Time.time)
             {
-                _holdPositionTime = Time.time + 1f;
+                _lastHoldPositionTime = Time.time + 1f;
                 Vector3 leadPos;
                 if (McsBotPlayerData.LeadPlayer != null && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
@@ -601,6 +618,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             else
             {
+                if (BotOwner.Position == null)
+                {
+                    return new();
+                }
                 return BotOwner.Position;
             }
         }

@@ -422,7 +422,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
-            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.7f;
+            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.4f;
             settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
             settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
             settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
