@@ -320,7 +320,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 60f;
+            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
 
             // force follower loyality
@@ -349,7 +349,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Patrol.CHANCE_TO_PLAY_VOICE_WHEN_CLOSE = 50f;
             settings.FileSettings.Patrol.CHANCE_TO_PLAY_GESTURE_WHEN_CLOSE = 100f;
             settings.FileSettings.Patrol.CAN_PEACEFUL_LOOK = true;
-            settings.FileSettings.Patrol.FRIEND_SEARCH_SEC = 60f;
+            settings.FileSettings.Patrol.FRIEND_SEARCH_SEC = 30f;
             settings.FileSettings.Patrol.FOLLOWER_START_MOVE_DELAY = 0.5f;
             settings.FileSettings.Patrol.CAN_FRIENDLY_TILT = true;
             settings.FileSettings.Patrol.VISION_DIST_COEF_PEACE = 1f;

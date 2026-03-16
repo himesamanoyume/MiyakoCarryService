@@ -103,9 +103,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 // 老板健康无大碍，且医疗物品和掩体也都准备就绪后，才治疗自己
-                if (BotOwner.Medecine.FirstAid.Damaged || BotOwner.Medecine.SurgicalKit.Damaged)
+                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                 {
-                    return new Action(typeof(HealLogic), "Mcs:first aid");
+                    return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
 
                 // 检查老板的吃喝状态是否低于阈值且老板身上没有吃喝

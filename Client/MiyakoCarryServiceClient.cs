@@ -154,6 +154,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         // new ManualUpdatePatch().Enable();
         new MenuTaskBarAwakePatch().Enable();
         new NewNewsCountPatch().Enable();
+        new SetGoalEnemyPatch().Enable();
 
 #if DEBUG
         
