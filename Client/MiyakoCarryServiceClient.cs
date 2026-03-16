@@ -35,6 +35,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
     public static bool FikaInstalled { get; private set; }  = false;
     public static bool IsFikaHeadless { get; private set; } = false;
+    public static bool SAINInstalled { get; private set; }  = false;
     private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
     public static LogBuffer LogBuffer = new LogBuffer();
 
@@ -69,6 +70,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         Application.logMessageReceived += OnLog;
         FikaInstalled = !Tools.CheckPlugin([FikaGUID]);
         IsFikaHeadless = !Tools.CheckPlugin(["com.fika.headless"]);
+        SAINInstalled = !Tools.CheckPlugin(["me.sol.sain"]);
         SetupConfig();
         DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
         foreach (var kvp in LocalLocales.LoadingLocales)

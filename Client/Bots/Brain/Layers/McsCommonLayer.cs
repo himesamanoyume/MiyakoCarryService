@@ -14,21 +14,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
-        protected override void InitActionMap()
-        {
-            _endActionMap = new()
-            {
-                { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
-                { typeof(HealLogic), EndHeal },
-                { typeof(RunToCoverLogic), EndRunToCover },
-                { typeof(SimplePatrolLogic), EndSimplePatrol },
-                { typeof(HoldPositionLogic), EndHoldPosition },
-                { typeof(GoToPointLogic), EndGoToPoint },
-                { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(GoToLootTargetLogic), EndLootingTarget },
-            };
-        }
-
         public override Action GetNextAction()
         {
             try

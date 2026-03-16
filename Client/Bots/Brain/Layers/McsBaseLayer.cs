@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
@@ -55,7 +56,26 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
 
-        protected abstract void InitActionMap();
+        protected virtual void InitActionMap()
+        {
+            _endActionMap = new()
+            {
+                { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
+                { typeof(HealLogic), EndHeal },
+                { typeof(RunToCoverLogic), EndRunToCover },
+                { typeof(SimplePatrolLogic), EndSimplePatrol },
+                { typeof(HoldPositionLogic), EndHoldPosition },
+                { typeof(GoToPointLogic), EndGoToPoint },
+                { typeof(GoToEnemyLogic), EndGoToEnemy },
+                { typeof(AttackMovingLogic), EndAttackMoving },
+                { typeof(GoToLootTargetLogic), EndLootingTarget },
+                { typeof(ShootFromPlaceLogic), EndShootFromPlace },
+                { typeof(ShootFromCoverLogic), EndShootFromCover },
+                { typeof(ShootToSmokeLogic), EndShootToSmoke },
+                { typeof(ShootFromStationaryLogic), EndShootFromStationary },
+                { typeof(RunToEnemyLogic), EndRunToEnemy },
+            };
+        }
 
         protected Vector3 GetMcsLeadPlayerPos()
         {
@@ -189,6 +209,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
         }
+
         protected virtual bool WasHitRecently(float timeframe)
         {
             return (Time.time - BotOwner.Memory.LastTimeHit) < timeframe;
@@ -266,7 +287,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _lastGoToPointTime = Time.time + 1f;
                 }
 
-                if (_tryGoToPoint > 10)
+                if (_tryGoToPoint > 6)
                 {
                     _tryGoToPoint = 0;
                     return true;
@@ -457,7 +478,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return GClass369.GetCrossPoint(gclass.a, gclass.b, vector2, vector3) != null;
         }
 
-        protected virtual bool CanSeeEnemy(EnemyInfo info)
+        protected virtual bool CannotSeeEnemy(EnemyInfo info)
         {
             if (info == null)
             {
@@ -551,6 +572,69 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 20f)
             {
                 BotOwner.Memory.GoalEnemy = null;
+                return true;
+            }
+            return false;
+        }
+
+        protected virtual bool EndShootToSmoke()
+        {
+            if (!BotOwner.SmokeGrenade.ShallShoot())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        protected virtual bool EndRunToEnemy()
+        {
+            if (BotOwner.DogFight.ShallStartCauseHavePlace())
+            {
+                return true;
+            }
+            if (IsEnemyPosLost())
+            {
+                return true;
+            }
+            
+            if (BotOwner.Mover.IsComeTo(BotOwner.Settings.FileSettings.Move.REACH_DIST, false, null))
+            {
+                return false;
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy != null && (!goalEnemy.IsVisible || !goalEnemy.CanShoot))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        protected virtual bool EndShootFromStationary()
+        {
+            if (BotOwner.Medecine.FirstAid.Have2Do)
+            {
+                return true;
+            }
+            var curLink = BotOwner.WeaponManager.Stationary.CurLink;
+            if (curLink == null)
+            {
+                return true;
+            }
+            if (!curLink.HaveAmmo())
+            {
+                return true;
+            }
+            if (WasHitRecently(4f))
+            {
+                return true;
+            }
+            if (!curLink.IsFree(BotOwner.Id))
+            {
+                return true;
+            }
+            if (BotOwner.SuppressStationary.CurUsingLogic.IsReady() && BotOwner.SuppressStationary.CurUsingLogic.CanStartSupressEnemy(BotOwner.Memory.GoalEnemy))
+            {
                 return true;
             }
             return false;

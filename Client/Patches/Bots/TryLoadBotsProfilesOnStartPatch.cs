@@ -293,7 +293,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.TALK_WITH_QUERY = true;
             botOwner.BotTalk.CanSay = true;
 
-            // - fix missing phrases (bug appeared in 0.16)
             if (!botOwner.BotTalk.Priority.Any(x => x.Key == EPhraseTrigger.Ready))
             {
                 botOwner.BotTalk.Priority.Add(EPhraseTrigger.Ready, 140f);
@@ -309,6 +308,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             // 此项如果不为false，就会导致SAIN无法进入Combat Layer
             settings.FileSettings.Mind.CAN_STAND_BY = false;
+            // end
             settings.FileSettings.Mind.CAN_TAKE_ANY_ITEM = true;
             settings.FileSettings.Mind.CAN_TAKE_ITEMS = true;
             settings.FileSettings.Mind.CAN_THROW_REQUESTS = true;
@@ -335,6 +335,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             // follower can turn enemy to anyone and cares only for the boss
             settings.GetWarnBotTypes().Clear();
+            settings.GetFriendlyBotTypes().Clear();
+            settings.FileSettings.Mind.FRIENDLY_BOT_TYPES = [];
             settings.FileSettings.Mind.WARN_BOT_TYPES = [];
             settings.FileSettings.Mind.REVENGE_BOT_TYPES = [];
 
@@ -344,6 +346,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.DOG_FIGHT_OUT = 0f;
             settings.FileSettings.Mind.SHOOT_INSTEAD_DOG_FIGHT = 0f;
             settings.FileSettings.Mind.MIN_DAMAGE_SCARE = 10f;
+            settings.FileSettings.Mind.AVOID_BTR_RADIUS_SQR = 1f;
 
             settings.FileSettings.Patrol.PICKUP_ITEMS_TO_BACKPACK_OR_CONTAINER = true;
             settings.FileSettings.Patrol.CHANCE_TO_PLAY_VOICE_WHEN_CLOSE = 50f;
@@ -400,14 +403,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 30f;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 80f + 10f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 250f + 20f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
-            settings.FileSettings.Look.NIGHT_VISION_ON = 150.0f;
-            settings.FileSettings.Look.NIGHT_VISION_OFF = 100.0f;
-            settings.FileSettings.Look.NIGHT_VISION_DIST = 150.0f;
+            settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
+            settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
+            settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
-            settings.FileSettings.Look.LightOnVisionDistance = 50f;
+            settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
             settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 55f;
             settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 80f;

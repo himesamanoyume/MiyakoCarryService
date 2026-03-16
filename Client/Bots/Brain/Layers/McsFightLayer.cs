@@ -13,74 +13,52 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
-        protected override void InitActionMap()
-        {
-            _endActionMap = new()
-            {
-                { typeof(HoldPositionLogic), EndHoldPosition },
-                { typeof(SimplePatrolLogic), EndSimplePatrol },
-                { typeof(ShootFromPlaceLogic), EndShootFromPlace },
-                { typeof(ShootFromCoverLogic), EndShootFromCover },
-                { typeof(RunToCoverLogic), EndRunToCover },
-                { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(GoToEnemyLogic), EndGoToEnemy },
-                { typeof(HealLogic), EndHeal },
-                { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
-            };
-        }
-
         public override Action GetNextAction()
         {
-            if (ShouldShootImmediately())
-            {
-                return new Action(typeof(ShootFromPlaceLogic), "Mcs:ShootImmediately");
-            }
-
-            if (IsShootFromCoverConditionAllFine())
-            {
-                return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
-            }
-
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy == null)
-            {
-                return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
-            }
-
-            if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
-            {
-                BotOwner.Memory.Spotted(false, null, null);
-            }
-
             try
             {
+                if (ShouldShootImmediately())
+                {
+                    return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");
+                }
+
+                if (IsShootFromCoverConditionAllFine())
+                {
+                    return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
+                }
+
+                var goalEnemy = BotOwner.Memory.GoalEnemy;
+                if (goalEnemy == null)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
+                }
+
+                if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
+                {
+                    BotOwner.Memory.Spotted(false, null, null);
+                }
+
                 var canShoot = goalEnemy.CanShoot;
                 var isProtectWantKill = ProtectWantKill();
                 var isProtectCareKill = ProtectCareKill();
+
                 UpdateCoverToShoot();
-                if (!goalEnemy.IsVisible && BotOwner.SmokeGrenade.ShallShoot())
+
+                if (!goalEnemy.IsVisible && BotOwner.SmokeGrenade.ShallShoot() && (BotOwner.Position - goalEnemy.Person.Position).sqrMagnitude <= 30f)
                 {
                     return new Action(typeof(ShootToSmokeLogic), "Mcs:SmokeGrenad");
                 }
                 else if (_haveCoverToShoot && isProtectWantKill)
                 {
-                    var canSeeEnemy = CanSeeEnemy(goalEnemy);
+                    var cannotSeeEnemy = CannotSeeEnemy(goalEnemy);
                     var canShootNow = CanShootNow();
-                    if (canSeeEnemy && !canShootNow && Time.time - goalEnemy.PersonalSeenTime < 3f)
+                    if (cannotSeeEnemy && !canShootNow && Time.time - goalEnemy.PersonalSeenTime < 3f)
                     {
-                        return new Action(typeof(HoldPositionLogic), "Mcs:canShootLas");
+                        return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy1");
                     }
                     else if (!canShootNow && goalEnemy.Distance > 10f)
                     {
-                        BotOwner.Memory.BotCurrentCoverInfo.SetCover(_currentNavigationPoint, true);
-                        if (BotOwner.CanSprintPlayer)
-                        {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:goalEnemy.D");
-                        }
-                        else
-                        {
-                            return new Action(typeof(AttackMovingLogic), "Mcs:goal.D");
-                        }
+                        return new Action(typeof(AttackMovingLogic), "Mcs:goal.D");
                     }
                     else if (BotOwner.Memory.IsInCover && BotOwner.Memory.CurCustomCoverPoint.Id == _currentNavigationPoint.Id)
                     {
@@ -96,8 +74,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     var safeFire = false;
                     if (canShoot)
                     {
-                        var closestFriend = BotOwner.Covers.GetClosestFriend(out var num);
-                        safeFire = num >= LocalBotSettingsProviderClass.Core.MIN_DIST_CLOSE_DEF || !(closestFriend != null) || closestFriend.Id > BotOwner.Id;
+                        var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
+                        safeFire = sqrDist >= 3f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                     }
 
                     if (safeFire)
@@ -106,13 +84,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             return new Action(typeof(ShootFromPlaceLogic), "Mcs:goalEnemy.V");
                         }
-                        else if (!WasHitRecently(BotOwner.Settings.FileSettings.Boss.IF_I_HITTED_GO_AWAY_SEC_HIT) && !BotOwner.Memory.IsUnderFire)
-                        {
-                            return new Action(typeof(HoldPositionLogic), "Mcs:deltaLastHi");
-                        }
                         else
                         {
-                            return new Action(typeof(AttackMovingLogic), "Mcs:deltaLastHi");
+                            return new Action(typeof(RunToEnemyLogic), "Mcs:deltaLastHi");
                         }
                     }
                     else
@@ -121,37 +95,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (!CanShootNow() && Time.time - goalEnemy.PersonalSeenTime < 3f)
                             {
-                                return new Action(typeof(HoldPositionLogic), "Mcs:goalEnemy.P");
+                                return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy2");
                             }
-
-                            if (isProtectWantKill)
-                            {
-                                return new Action(typeof(GoToEnemyLogic), "Mcs:wantKill");
-                            }
-
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:null1");
                         }
 
-                        if (BotOwner.Memory.IsInCover)
-                        {
-                            if (BotOwner.Medecine.FirstAid.Have2Do && (BotOwner.Memory.LastEnemy == null || Time.time - BotOwner.Memory.LastEnemyTimeSeen > BotOwner.Settings.FileSettings.Mind.PROTECT_DELTA_HEAL_SEC))
-                            {
-                                return new Action(typeof(HealLogic), "Mcs:PROTECTDELT");
-                            }
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:null2");
-                        }
-                        else if (_haveCoverToShoot)
-                        {
-                            if (BotOwner.Memory.IsInCover)
-                            {
-                                return new Action(typeof(HoldPositionLogic), "Mcs:HaveCoverSh1");
-                            }
-                            return new Action(typeof(GoToCoverPointLogic), "Mcs:HaveCoverSh2");
-                        }
-                        else
-                        {
-                            return new Action(typeof(HoldPositionLogic), "Mcs:HaveCoverSh3");
-                        }
+                        return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy3");
                     }
                 }
             }
