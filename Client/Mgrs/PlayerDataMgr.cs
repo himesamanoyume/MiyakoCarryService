@@ -37,6 +37,13 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
+            StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(2f));
+            var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+            foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+            {
+                mcsBotPlayerData.Player.AIData.BotOwner.Memory.GoalTarget.Clear();
+                mcsBotPlayerData.Player.AIData.BotOwner.Memory.GoalEnemy = null;
+            }
         }
 
         protected override void OnRaidEnded()

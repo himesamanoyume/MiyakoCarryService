@@ -1,6 +1,8 @@
 
+using System.Linq;
 using DrakiaXYZ.BigBrain.Brains;
 using MiyakoCarryService.Client.Bots.Brain.Layers;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -10,12 +12,12 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            BrainManager.RemoveLayer("Exfiltration", ["PmcUsec", "PmcBear"]);
-            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), ["PmcUsec", "PmcBear"], 79);
+            BrainManager.RemoveLayer("Exfiltration", [EBrainName.PmcUsec.ToString(), EBrainName.PmcBear.ToString()]);
+            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), [EBrainName.PmcUsec.ToString(), EBrainName.PmcBear.ToString()], 79);
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 15);
             if (!MiyakoCarryServicePlugin.SAINInstalled)
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames, 65);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except(["BossZryachiy"]).ToList(), 65);
             }
         }
     }
