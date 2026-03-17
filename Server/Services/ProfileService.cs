@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using MiyakoCarryService.Server.Generators.CustomGeneration;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Mcs;
@@ -46,7 +47,7 @@ namespace MiyakoCarryService.Server.Services
         NotificationHelper notificationHelper,
         BotInventoryContainerService botInventoryContainerService,
         BotLootCacheService botLootCacheService,
-        BotGenerator botGenerator,
+        McsBotGenerator mcsBotGenerator,
         PlayerScavGenerator playerScavGenerator,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         BotNameService botNameService,
@@ -317,12 +318,14 @@ namespace MiyakoCarryService.Server.Services
             var isPmc = orderInfo.SpawnType.WildSpawnType is "common" or "pmcUSEC" or "pmcBEAR";
             var botDifficulty = (BotDifficulty)orderInfo.CarryServiceLevel;
             var role = isPmc ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : orderInfo.SpawnType.WildSpawnType;
+            var level = orderInfo.CarryServiceLevel * 10 + 20 + (orderInfo.SpawnType.IsBoss ? 30 : 0);
             var botGenerationDetails = new BotGenerationDetails()
             {
                 IsPmc = isPmc,
                 Side = isPmc ? completeQuestPmcData.Info.Side : "Savage",
                 Role = role,
-                PlayerLevel = orderInfo.CarryServiceLevel * 10 + 20 + (orderInfo.SpawnType.IsBoss ? 30 : 0),
+                BotLevel = level,
+                PlayerLevel = level,
                 BotRelativeLevelDeltaMin = 0,
                 BotRelativeLevelDeltaMax = 0,
                 BotCountToGenerate = 1,
@@ -399,7 +402,7 @@ namespace MiyakoCarryService.Server.Services
 
         private PmcData GeneratePmcData(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, BotGenerationDetails botGenerationDetails)
         {
-            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
             var playerName = randomUtil.GetArrayValue(_afdianNames);
             if (playerName is not null)
@@ -484,7 +487,7 @@ namespace MiyakoCarryService.Server.Services
             var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
             playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
 
-            var botBase = botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
             var scavData = new PmcData
             {
