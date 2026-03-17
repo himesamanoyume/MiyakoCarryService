@@ -260,8 +260,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             if (!blocked)
                             {
-                                leadPlayer.BotsGroup.AddEnemy(playerData.Player.AIData.BotOwner, EBotEnemyCause.AddEnemyToAllGroups);
-                                leadPlayer.BotsGroup.ReportAboutEnemy(playerData.Player.AIData.BotOwner, EEnemyPartVisibleType.Sence, McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
+                                mcsAILeadPlayer.CalcGoalEnemy();
                             }
                         }
 

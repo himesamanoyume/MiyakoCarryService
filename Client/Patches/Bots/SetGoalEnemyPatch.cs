@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Misc;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -112,8 +113,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var leadPlayer = mcsAILeadPlayer.Player() as Player;
                     if (leadPlayer.BotsGroup != null)
                     {
-                        leadPlayer.BotsGroup.AddEnemy(__instance.BotOwner_0, EBotEnemyCause.AddEnemyToAllGroups);
-                        leadPlayer.BotsGroup.ReportAboutEnemy(__instance.BotOwner_0, EEnemyPartVisibleType.Sence, McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
+                        mcsAILeadPlayer.CalcGoalEnemy();
                     }
                 }
             }

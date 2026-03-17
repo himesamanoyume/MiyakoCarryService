@@ -103,8 +103,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     if (leadPlayer.BotsGroup != null)
                     {
-                        leadPlayer.BotsGroup.AddEnemy(enemyBotOwner, EBotEnemyCause.AddEnemyToAllGroups);
-                        leadPlayer.BotsGroup.ReportAboutEnemy(enemyBotOwner, EEnemyPartVisibleType.Sence, McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
+                        var mcsBotPlayer = McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault();
+                        if (mcsBotPlayer.BotFollower.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
+                        {
+                            mcsAILeadPlayer.CalcGoalEnemy();
+                        }
                     }
                 };
 
@@ -403,7 +406,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 30f;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 250f + 20f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 200f + 20f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
@@ -425,16 +428,17 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
-            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.4f;
-            settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
-            settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
-            settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 2f;
-            settings.FileSettings.Hearing.SOUND_DIR_DEEFREE *= botDifficultyInt;
-            settings.FileSettings.Hearing.LOOK_ONLY_DANGER = true;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.1f;
-            settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
+            // 此选项会让护航将发现很远且没见到的敌人，可能需要下调数值或者一直注释掉
+            // settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.4f;
+            // settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
+            // settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
+            // settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
+            // settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 2f;
+            // settings.FileSettings.Hearing.SOUND_DIR_DEEFREE *= botDifficultyInt;
+            // settings.FileSettings.Hearing.LOOK_ONLY_DANGER = true;
+            // settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
+            // settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.1f;
+            // settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
 
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;
