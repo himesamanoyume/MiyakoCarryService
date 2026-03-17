@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using EFT;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -207,6 +208,64 @@ namespace MiyakoCarryService.Client.Mgrs
             else
             {
                 yield return null;
+            }
+        }
+
+        private IEnumerator CheckMcsLeadPlayerSeenEnemiesLoop(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            var internalTime = new WaitForSeconds(.2f);
+            while (true)
+            {
+                yield return waitTime;
+                if (_gameloop.IsVaildGameWorld)
+                {
+                    var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
+                    foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
+                    {
+                        var leadPlayer = mcsAILeadPlayer.Player() as Player;
+                        var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
+                        var playerDatas = GetDatas<PlayerData>();
+                        foreach (var playerData in playerDatas)
+                        {
+                            if (playerData.Player.IsAI && !McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
+                            {
+                                continue;
+                            }
+
+                            if (!playerData.Player.IsAI)
+                            {
+                                continue;
+                            }
+
+                            var angle = Vector3.Angle(leadPlayer.LookDirection, playerData.Player.Position);
+                            if (angle > 45f)
+                            {
+                                continue;
+                            }
+
+                            var blocked = Physics.Linecast(
+                                leadPlayerPos,
+                                playerData.Player.Position + Vector3.up * 1.6f,
+                                out var raycastHit, 
+                                LayerMaskClass.HighPolyWithTerrainMask
+                            );
+
+                            if (!blocked)
+                            {
+                                leadPlayer.BotsGroup.AddEnemy(playerData.Player.AIData.BotOwner, EBotEnemyCause.AddEnemyToAllGroups);
+                                leadPlayer.BotsGroup.ReportAboutEnemy(playerData.Player.AIData.BotOwner, EEnemyPartVisibleType.Sence, McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault());
+                            }
+                        }
+
+                        yield return internalTime;
+                    }
+                }
+                else
+                {
+                    yield return null;
+                    continue;
+                }
             }
         }
     }
