@@ -180,7 +180,7 @@ public sealed class ConfigService(
                 return kvp.Value.DisplayName;
             }
         }
-        return "";
+        return wildSpawnType;
     }
 
     private async Task LoadSpawnTypeConfig()
