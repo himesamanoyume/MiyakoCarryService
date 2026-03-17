@@ -27,6 +27,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
             __result.Friends.Add(miyakoChatBot.GetChatBot());
 
             var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
+            var configController = ServiceLocator.ServiceProvider.GetService<Controllers.ConfigController>();
             var mcsBotPlayerProfiles = profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
 
             if (mcsBotPlayerProfiles is not null)
@@ -45,7 +46,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
                         Aid = mcsPmcData.Aid,
                         Info = new UserDialogDetails
                         {
-                            Nickname = mcsPmcData.Info.Nickname,
+                            Nickname = mcsPmcData.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
                             Side = mcsPmcData.Info.Side,
                             Level = mcsPmcData.Info.Level,
                             MemberCategory = mcsPmcData.Info.MemberCategory,

@@ -23,5 +23,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return configService.GetOrderConfig();
         }
+
+        public string GetSpawnTypeDisplayName(string wildSpawnType)
+        {
+            return configService.GetSpawnTypeDisplayName(wildSpawnType);
+        }
     }
 }

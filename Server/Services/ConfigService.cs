@@ -171,6 +171,18 @@ public sealed class ConfigService(
         _orderConfig = await jsonUtil.DeserializeFromFileAsync<OrderConfig>(orderPath);
     }
 
+    public string GetSpawnTypeDisplayName(string wildSpawnType)
+    {
+        foreach (var kvp in _spawnTypes)
+        {
+            if (kvp.Value.WildSpawnType == wildSpawnType)
+            {
+                return kvp.Value.DisplayName;
+            }
+        }
+        return "";
+    }
+
     private async Task LoadSpawnTypeConfig()
     {
         var spawnTypeConfigPath = Path.Combine(_configsFolderPath, "spawntype.json");

@@ -1,7 +1,7 @@
 
+using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Models.Eft.Ws;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Server.Helper
 {
     [Injectable]
     public class NotificationHelper(
-
+        ConfigController configController
     )
     {
         public WsGroupMatchInviteDecline GenerateWsGroupMatchInviteDecline(SptProfile mcsBotPlayerProfile)
@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Server.Helper
                 EventType = NotificationEventType.groupMatchInviteDecline,
                 EventIdentifier = new(),
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
-                Nickname = mcsBotPlayerProfile.CharacterData.PmcData.Info.Nickname
+                Nickname = mcsBotPlayerProfile.CharacterData.PmcData.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]"
             };
         }
 
@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Server.Helper
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
                 Info = new CharacterInfo
                 {
-                    Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname,
+                    Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
                     Side = data.Info.Side,
                     Level = data.Info.Level,
                     MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
@@ -61,7 +61,7 @@ namespace MiyakoCarryService.Server.Helper
                     Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
                     Info = new UserDialogDetails
                     {
-                        Nickname = data.Info.Nickname,
+                        Nickname = data.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
                         Side = data.Info.Side,
                         Level = data.Info.Level,
                         MemberCategory = data.Info.MemberCategory,
@@ -84,7 +84,7 @@ namespace MiyakoCarryService.Server.Helper
                     Aid = data.Aid,
                     Info = new CharacterInfo
                     {
-                        Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname,
+                        Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
                         Side = data.Info.Side,
                         Level = data.Info.Level,
                         MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
@@ -129,7 +129,7 @@ namespace MiyakoCarryService.Server.Helper
             {
                 EventType = NotificationEventType.groupMatchUserLeave,
                 EventIdentifier = new(),
-                Nickname = mcsBotPlayerProfile.ProfileInfo.Username,
+                Nickname = mcsBotPlayerProfile.ProfileInfo.Username + $" [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid.Value,
             };
         }
