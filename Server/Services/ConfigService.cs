@@ -180,7 +180,13 @@ public sealed class ConfigService(
                 return kvp.Value.DisplayName;
             }
         }
-        return wildSpawnType;
+
+        return wildSpawnType switch
+        {
+            "pmcBEAR" => "Bear",
+            "pmcUSEC" => "Usec",
+            _ => wildSpawnType
+        };
     }
 
     private async Task LoadSpawnTypeConfig()
