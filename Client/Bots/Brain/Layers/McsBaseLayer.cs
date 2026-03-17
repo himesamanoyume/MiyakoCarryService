@@ -284,6 +284,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     CheckStuck();
                 }
 
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f)
+                {
+                    BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
+                    return true;
+                }
+
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
                     return true;
