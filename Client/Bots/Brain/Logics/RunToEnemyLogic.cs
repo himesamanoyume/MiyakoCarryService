@@ -27,12 +27,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             public override void UpdateNodeByBrain(BaseIntent data)
             {
-                bool flag = method_0(true) == DoorInteractionStatus.CanRun;
+                var canRun = method_0(true) == DoorInteractionStatus.CanRun;
                 BotOwner_0.SetTargetMoveSpeed(1f);
                 NotMovingCheck();
                 method_6();
                 BotOwner_0.SetPose(1f);
-                if (flag && BotOwner_0.Mover.HasPathAndNoComplete)
+                if (canRun && BotOwner_0.Mover.HasPathAndNoComplete)
                 {
                     BotOwner_0.Steering.LookToMovingDirection();
                     BotOwner_0.Sprint(true, true);

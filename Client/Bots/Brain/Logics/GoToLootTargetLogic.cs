@@ -11,7 +11,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     internal sealed class GoToLootTargetLogic : McsBotBaseLogic
     {
         private int _currentLootingRetries = 0;
-        private int _currentStuckRetries = 0;
         private float _lastTimeCheckDistance = 0f;
         private float _lastTimeDistance = -1f;
         public GoToLootTargetLogic(BotOwner botOwner) : base(botOwner)
@@ -36,7 +35,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
-                    _currentStuckRetries = 0;
                     _currentLootingRetries = 0;
 
                     return;
@@ -57,8 +55,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     // MiyakoCarryServicePlugin.Logger.LogInfo($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");
                     BotOwner.Steering.LookToPoint(targetPos);
                     mcsBotPlayerData.StartLooting();
-                    _currentStuckRetries = 0;
-                    _lastTimeDistance = -1f; // 重置卡脚检测
+                    _lastTimeDistance = Mathf.Infinity; // 重置卡脚检测
                     return;
                 }
 
@@ -78,25 +75,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     {
                         mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                         mcsBotPlayerData.IsLooting = false;
-                        _currentStuckRetries = 0;
                         return;
                     }
                 }
 
-                if (_lastTimeDistance >= 0f && Math.Abs(_lastTimeDistance - distance) <= 0.3f)
+                if (_lastTimeDistance > 0f)
                 {
-                    _currentStuckRetries++;
-                }
-                else
-                {
-                    _currentStuckRetries = 0; // 有移动就重置
+                    BotOwner.CheckStuck();
                 }
 
-                if (_currentStuckRetries > 2)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
                     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
-                    _currentStuckRetries = 0;
                     return;
                 }
 

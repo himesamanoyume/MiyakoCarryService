@@ -5,6 +5,7 @@ using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
@@ -67,6 +68,18 @@ namespace MiyakoCarryService.Client.Extensions
             public List<BotBehavior> GetBotBehaviors()
             {
                 return botOwner.GetMcsBotData().BotBehaviors;
+            }
+
+            public bool CheckStuck()
+            {
+                var pos = botOwner.Position;
+                if ((botOwner.Mover.LastPos - pos).sqrMagnitude > 0.1f)
+                {
+                    botOwner.Mover.LastPos = pos;
+                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    return false;
+                }
+                return true;
             }
         }
     }

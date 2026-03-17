@@ -23,7 +23,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _lastPatrolTime = Time.time;
         protected float _lastGoToPointTime = Time.time;
         protected float _lastShootTime = Time.time;
-        protected int _tryGoToPoint = 0;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -276,20 +275,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.GoToSomePointData.IsCome())
             {
-                _tryGoToPoint = 0;
                 return true;
             }
             else
             {
-                if (_lastGoToPointTime + 1f < Time.time)
+                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
-                    _tryGoToPoint += 1;
-                    _lastGoToPointTime = Time.time + 1f;
+                    CheckStuck();
                 }
 
-                if (_tryGoToPoint > 6)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
-                    _tryGoToPoint = 0;
                     return true;
                 }
                 return false;
@@ -311,6 +307,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
             return false;
+        }
+
+        protected bool CheckStuck()
+        {
+            var pos = BotOwner.Position;
+            if ((BotOwner.Mover.LastPos - pos).sqrMagnitude > 0.1f)
+            {
+                BotOwner.Mover.LastPos = pos;
+                BotOwner.Mover.LastTimePosChanged = Time.time;
+                return false;
+            }
+            return true;
         }
 
         protected virtual bool EndHoldPosition()
@@ -599,7 +607,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             
             if (BotOwner.Mover.IsComeTo(BotOwner.Settings.FileSettings.Move.REACH_DIST, false, null))
             {
-                return false;
+                return true;
             }
 
             var goalEnemy = BotOwner.Memory.GoalEnemy;
