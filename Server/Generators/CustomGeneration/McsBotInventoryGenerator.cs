@@ -179,13 +179,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                         BotData = new BotData
                         {
                             Role = botGenerationDetails.RoleLowercase,
-                            Level = 100,
+                            Level = 90,
                             EquipmentRole = botEquipmentRole,
                         },
                         Inventory = botInventory,
                         BotEquipmentConfig = botEquipConfig,
                         RandomisationDetails = randomistionDetails,
-                        GeneratingPlayerLevel = 100,
+                        GeneratingPlayerLevel = 90,
                     }
                 );
             }
@@ -207,14 +207,14 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
                     GenerateModsBlacklist = [ItemTpl.POCKETS_1X4_TUE, ItemTpl.POCKETS_LARGE],
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
 
@@ -229,13 +229,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
 
@@ -250,13 +250,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
 
@@ -271,13 +271,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
 
@@ -292,13 +292,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
 
@@ -333,13 +333,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotData = new BotData
                     {
                         Role = botGenerationDetails.RoleLowercase,
-                        Level = 100,
+                        Level = 90,
                         EquipmentRole = botEquipmentRole,
                     },
                     Inventory = botInventory,
                     BotEquipmentConfig = botEquipConfig,
                     RandomisationDetails = randomistionDetails,
-                    GeneratingPlayerLevel = 100,
+                    GeneratingPlayerLevel = 90,
                 }
             );
         }
