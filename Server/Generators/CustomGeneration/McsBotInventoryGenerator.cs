@@ -1,6 +1,6 @@
 
-using System;
 using System.Collections.Frozen;
+using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
@@ -34,7 +34,8 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         BotEquipmentModPoolService botEquipmentModPoolService,
         BotEquipmentModGenerator botEquipmentModGenerator,
         BotInventoryContainerService botInventoryContainerService,
-        ConfigServer configServer
+        ConfigServer configServer,
+        InventoryService inventoryService
     ) : BotInventoryGenerator(
         logger, randomUtil, profileActivityService, botWeaponGenerator, 
         botLootGenerator, botGeneratorHelper, profileHelper, botHelper, 
@@ -73,6 +74,27 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
 
             // // Get generated raid details bot will be spawned in
             // var raidConfig = profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
+
+            if (botGenerationDetails.Role is "pmcUSEC" or "pmcBEAR")
+            {
+                var equipment = inventoryService.GetEquipment();
+                if (equipment.Count > 0)
+                {
+                    templateInventory.Equipment = equipment;
+                }
+
+                var ammo = inventoryService.GetAmmo();
+                if (ammo.Count > 0)
+                {
+                    templateInventory.Ammo = ammo;
+                }
+
+                var mods = inventoryService.GetMods();
+                if (ammo.Count > 0)
+                {
+                    templateInventory.Mods = mods;
+                }
+            }
 
             CustomGenerateAndAddEquipmentToBot(botId, templateInventory, wornItemChances, botInventory, botGenerationDetails);
 

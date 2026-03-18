@@ -48,11 +48,13 @@ namespace MiyakoCarryService.Server.Services
         BotInventoryContainerService botInventoryContainerService,
         BotLootCacheService botLootCacheService,
         McsBotGenerator mcsBotGenerator,
+        BotGenerator botGenerator,
         PlayerScavGenerator playerScavGenerator,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         BotNameService botNameService,
         MailSendService mailSendService,
-        OrderInfoService orderInfoService
+        OrderInfoService orderInfoService,
+        CompatibilityService compatibilityService
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
@@ -402,7 +404,7 @@ namespace MiyakoCarryService.Server.Services
 
         private PmcData GeneratePmcData(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, BotGenerationDetails botGenerationDetails)
         {
-            var botBase = mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
             var playerName = randomUtil.GetArrayValue(_afdianNames);
             if (playerName is not null)
@@ -487,7 +489,7 @@ namespace MiyakoCarryService.Server.Services
             var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
             playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
 
-            var botBase = mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
             var scavData = new PmcData
             {

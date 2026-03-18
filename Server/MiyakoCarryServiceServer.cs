@@ -85,6 +85,7 @@ namespace MiyakoCarryService.Server
             OrderInfoService orderInfoService,
             CompatibilityService compatibilityService,
             ConfigService configService,
+            InventoryService inventoryService,
             JsonUtil jsonUtil
         ) : IOnLoad
         {
@@ -96,6 +97,7 @@ namespace MiyakoCarryService.Server
                 await profileService.OnPostLoadAsync();
                 await orderQuestService.OnPostLoadAsync();
                 await compatibilityService.OnPostLoadAsync();
+                await inventoryService.OnPostLoadAsync();
                 await Task.Run(() =>
                 {
                     var mcsBotPlayerIds = orderInfoService.GetExpiredMcsBotPlayerIds();
