@@ -15,7 +15,6 @@ using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Patches.OrderQuest
 {
@@ -32,7 +31,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             var eventOutputHolder = ServiceLocator.ServiceProvider.GetService<EventOutputHolder>();
             var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
             var httpResponseUtil = ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>();
-            var logger = ServiceLocator.ServiceProvider.GetService<SptLogger<RepeatableQuestChangeRequest>>();
+            var logger = ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>();
             
             var output = eventOutputHolder.GetOutput(sessionID);
 

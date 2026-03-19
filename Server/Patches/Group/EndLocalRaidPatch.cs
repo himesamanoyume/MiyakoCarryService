@@ -4,7 +4,7 @@ using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.Callbacks;
+using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Models.Common;
@@ -17,18 +17,20 @@ namespace MiyakoCarryService.Server.Patches.Group
     /// </summary>
     public sealed class EndLocalRaidPatch : AbstractPatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchCallbacks), nameof(MatchCallbacks.EndLocalRaid));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchController), nameof(MatchController.EndLocalRaid));
 
         [PatchPrefix]
-        public static void Prefix(string url, EndLocalRaidRequestData info, MongoId sessionID)
+        public static void Prefix(MongoId sessionId, EndLocalRaidRequestData request)
         {
-            var isTransfer = info.Results.IsMapToMapTransfer();
+            var isTransfer = request.Results.IsMapToMapTransfer();
+            System.Console.WriteLine($"[Mcs-Debug] 本次战局结束, 撤离状态: {request.Results.Result}");
             if (isTransfer)
             {
                 return;
             }
+            System.Console.WriteLine($"[Mcs-Debug] 进行护航小队清理");
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            raidController.ClearGroupMember(sessionID);
+            raidController.ClearGroupMember(sessionId);
         }
     }
 }

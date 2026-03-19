@@ -1,4 +1,5 @@
 
+using System;
 using System.Reflection;
 using EFT;
 using EFT.UI;
@@ -16,14 +17,24 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
 
         private static MainMenuControllerClass mainMenuControllerClass;
 
-        [PatchPrefix]
-        public static void Prefix(TraderScreensGroup.GClass3888 controller)
+        [PatchPostfix]
+        public static void Postfix(TraderScreensGroup.GClass3888 controller)
         {
             if (mainMenuControllerClass == null)
             {
                 TarkovApplication.Exist(out var tarkovApplication);
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
                 mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+            }
+
+            if (mainMenuControllerClass == null)
+            {
+                throw new Exception("刷新任务所需的实例未生成");
+            }
+
+            if (mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0 == null)
+            {
+                throw new Exception("刷新任务所需的实例为空");
             }
 
             _ = mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0?.Run();
