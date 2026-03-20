@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 {
                     foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
                     {
-                        if ((botOwner.Position - info.HitPoint).sqrMagnitude <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
+                        if ((botOwner.Position - info.HitPoint).sqrMagnitude <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                         {
                             botOwner.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Sence, botOwner);
                         }

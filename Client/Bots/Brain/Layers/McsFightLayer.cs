@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (canShoot)
                     {
                         var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
-                        safeFire = sqrDist >= 3f || closestFriend == null || closestFriend.Id > BotOwner.Id;
+                        safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                     }
 
                     if (safeFire)

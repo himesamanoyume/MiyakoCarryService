@@ -281,10 +281,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             else
             {
+                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
-                    var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
 
                     Vector3? validPosition = null;
                     var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
@@ -314,7 +314,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && (BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance * _closeLeadDistance)
                 {
                     BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
                     return true;

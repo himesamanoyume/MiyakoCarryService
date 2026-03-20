@@ -334,8 +334,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.REVENGE_FOR_SAVAGE_PLAYERS = true;
 
             // follower can turn enemy to anyone and cares only for the boss
-            settings.GetWarnBotTypes().Clear();
-            settings.GetFriendlyBotTypes().Clear();
+            botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
+            botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
+            botOwner.Settings.GetWarnBotTypes().Clear();
             settings.FileSettings.Mind.FRIENDLY_BOT_TYPES = [];
             settings.FileSettings.Mind.WARN_BOT_TYPES = [];
             settings.FileSettings.Mind.REVENGE_BOT_TYPES = [];
@@ -380,26 +381,26 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var botDifficultyInt = (int)botDifficulty;
 
             // - faster aiming sett
-            settings.FileSettings.Aiming.COEF_IF_MOVE /= botDifficultyInt;
-            settings.FileSettings.Aiming.BOTTOM_COEF /= botDifficultyInt;
-            settings.FileSettings.Aiming.COEF_FROM_COVER /= botDifficultyInt;
-            settings.FileSettings.Aiming.PANIC_COEF /= botDifficultyInt;
+            settings.FileSettings.Aiming.COEF_IF_MOVE /= botDifficultyInt * 2f;
+            settings.FileSettings.Aiming.BOTTOM_COEF /= botDifficultyInt * 2f;
+            settings.FileSettings.Aiming.COEF_FROM_COVER /= botDifficultyInt * 2f;
+            settings.FileSettings.Aiming.PANIC_COEF /= botDifficultyInt * 2f;
             settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME /= botDifficultyInt * 2f;
 
             // - improved shooting settings
             settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
             settings.FileSettings.Aiming.AIMING_TYPE = 6; // the head is a priority
 
-            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 5f;
+            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 10f;
             settings.FileSettings.Aiming.ANYTIME_LIGHT_WHEN_AIM_100 = 50f;
-            settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 2;
+            settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 1;
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
-            settings.FileSettings.Aiming.FIRST_CONTACT_ADD_CHANCE_100 = 20f;
+            settings.FileSettings.Aiming.FIRST_CONTACT_ADD_CHANCE_100 = 0f;
 
             // - hit disturbance settings
-            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_DELAY_SEC = 0.2f;
-            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 10f;
-            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_MIN_ANG = 2f;
+            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_DELAY_SEC = 0.1f;
+            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 0.01f;
+            settings.FileSettings.Aiming.BASE_HIT_AFFECTION_MIN_ANG = 0f;
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 30f;
 
@@ -425,8 +426,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
-            // 此选项会让护航将发现很远且没见到的敌人，可能需要下调数值或者一直注释掉
-            // settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 0.4f;
+            // // 此选项会让护航将发现很远且没见到的敌人，可能需要下调数值或者一直注释掉
+            // settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
             // settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
             // settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
             // settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
@@ -436,6 +437,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             // settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
             // settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.1f;
             // settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
+            // // end
 
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;
