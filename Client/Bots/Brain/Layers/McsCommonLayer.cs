@@ -226,7 +226,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     validPosition = navMeshHit2.position;
                 }
 
-                if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
+                if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance * _closeLeadDistance)
                 {
                     if (validPosition.HasValue)
                     {

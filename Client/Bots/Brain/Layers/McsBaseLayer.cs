@@ -6,6 +6,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -151,7 +152,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
                 if (_currentNavigationPoint != null)
                 {
-                    if ((mcsLeadPlayerPos - _currentNavigationPoint.Position).sqrMagnitude < _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
+                    if ((mcsLeadPlayerPos - _currentNavigationPoint.Position).sqrMagnitude < _closeLeadDistance * _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
                     {
                         BotOwner.Memory.IsInCover = true;
                         return;
@@ -183,7 +184,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (_currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
                 {
                     var sqrMagnitude = (leadPos - _currentNavigationPoint.Position).sqrMagnitude;
-                    if (sqrMagnitude >= 75f)
+                    if (sqrMagnitude >= 75f * 75f)
                     {
                         _haveCoverToShoot = false;
                         return;
@@ -283,6 +284,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
+                    var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+
+                    Vector3? validPosition = null;
+                    var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                    var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                    var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
+
+                    for (int attempt = 0; attempt < 30; attempt++)
+                    {
+                        if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                        {
+                            if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
+                            {
+                                validPosition = navMeshHit1.position;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                    {
+                        validPosition = navMeshHit2.position;
+                    }
+
+                    if (validPosition.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                    }
                 }
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f)
@@ -319,7 +348,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected bool CheckStuck()
         {
             var pos = BotOwner.Position;
-            if ((BotOwner.Mover.LastPos - pos).sqrMagnitude > 0.1f)
+            if ((BotOwner.Mover.LastPos - pos).sqrMagnitude > 2f * 2f)
             {
                 BotOwner.Mover.LastPos = pos;
                 BotOwner.Mover.LastTimePosChanged = Time.time;
@@ -332,7 +361,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             UpdateCoverToShoot();
             var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-            if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude > _closeLeadDistance)
+            if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude > _closeLeadDistance * _closeLeadDistance)
             {
                 return true;
             }

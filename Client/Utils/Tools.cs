@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Client.Utils
                     }
                 }
 
-                if ((itemData.RootTransform.position - mcsBotPlayerPos).sqrMagnitude <= distance)
+                if ((itemData.RootTransform.position - mcsBotPlayerPos).sqrMagnitude <= distance * distance)
                 {
                     result.Add(itemData);
                 }

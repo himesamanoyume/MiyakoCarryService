@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 UpdateCoverToShoot();
 
-                if (!goalEnemy.IsVisible && BotOwner.SmokeGrenade.ShallShoot() && (BotOwner.Position - goalEnemy.Person.Position).sqrMagnitude <= 30f)
+                if (!goalEnemy.IsVisible && BotOwner.SmokeGrenade.ShallShoot() && (BotOwner.Position - goalEnemy.Person.Position).sqrMagnitude <= 40f * 40f)
                 {
                     return new Action(typeof(ShootToSmokeLogic), "Mcs:SmokeGrenad");
                 }
@@ -100,18 +100,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         //     }
                         // }
 
-                        if (Time.time - goalEnemy.PersonalSeenTime <= 3f && (BotOwner.Position - goalEnemy.Person.Position).sqrMagnitude <= 40f)
+                        var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                        if (mcsLeadPlayerPos == null)
+                        {
+                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                        }
+
+                        if ((mcsLeadPlayerPos - goalEnemy.Person.Position).sqrMagnitude <= 50f * 50f)
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
                         else
                         {
-                            var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-                            if (mcsLeadPlayerPos == null)
-                            {
-                                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
-                            }
-
+                            
                             Vector3? validPosition = null;
                             var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
                             var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
