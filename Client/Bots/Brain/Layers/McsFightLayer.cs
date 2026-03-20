@@ -3,6 +3,7 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -48,27 +49,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return new Action(typeof(ShootToSmokeLogic), "Mcs:SmokeGrenad");
                 }
-                else if (_haveCoverToShoot && isProtectWantKill)
-                {
-                    var cannotSeeEnemy = CannotSeeEnemy(goalEnemy);
-                    var canShootNow = CanShootNow();
-                    if (cannotSeeEnemy && !canShootNow && Time.time - goalEnemy.PersonalSeenTime < 3f)
-                    {
-                        return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy1");
-                    }
-                    else if (!canShootNow && goalEnemy.Distance > 10f)
-                    {
-                        return new Action(typeof(AttackMovingLogic), "Mcs:goal.D");
-                    }
-                    else if (BotOwner.Memory.IsInCover && BotOwner.Memory.CurCustomCoverPoint.Id == _currentNavigationPoint.Id)
-                    {
-                        return new Action(typeof(ShootFromCoverLogic), "Mcs:.Memor1");
-                    }
-                    else
-                    {
-                        return new Action(typeof(AttackMovingLogic), "Mcs:.Memor2");
-                    }
-                }
+                // else if (_haveCoverToShoot && isProtectWantKill)
+                // {
+                //     var cannotSeeEnemy = CannotSeeEnemy(goalEnemy);
+                //     var canShootNow = CanShootNow();
+                //     if (cannotSeeEnemy && !canShootNow && Time.time - goalEnemy.PersonalSeenTime < 3f)
+                //     {
+                //         return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy1");
+                //     }
+                //     else if (!canShootNow && goalEnemy.Distance > 10f)
+                //     {
+                //         return new Action(typeof(AttackMovingLogic), "Mcs:goal.D");
+                //     }
+                //     else if (BotOwner.Memory.IsInCover && BotOwner.Memory.CurCustomCoverPoint.Id == _currentNavigationPoint.Id)
+                //     {
+                //         return new Action(typeof(ShootFromCoverLogic), "Mcs:.Memor1");
+                //     }
+                //     else
+                //     {
+                //         return new Action(typeof(AttackMovingLogic), "Mcs:.Memor2");
+                //     }
+                // }
                 else
                 {
                     var safeFire = false;
@@ -82,24 +83,86 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         if (goalEnemy.IsVisible)
                         {
-                            return new Action(typeof(ShootFromPlaceLogic), "Mcs:goalEnemy.V");
+                            return new Action(typeof(ShootFromPlaceLogic), "Mcs:ShootFromPlace");
                         }
                         else
                         {
-                            return new Action(typeof(RunToEnemyLogic), "Mcs:deltaLastHi");
+                            return new Action(typeof(RunToEnemyLogic), "Mcs:DeltaLastHi");
                         }
                     }
                     else
                     {
-                        if (isProtectCareKill)
+                        // if (isProtectCareKill)
+                        // {
+                        //     if (CanShootNow() && Time.time - goalEnemy.PersonalSeenTime < 3f)
+                        //     {
+                        //         return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy2");
+                        //     }
+                        // }
+
+                        if (Time.time - goalEnemy.PersonalSeenTime <= 3f && (BotOwner.Position - goalEnemy.Person.Position).sqrMagnitude <= 40f)
                         {
-                            if (!CanShootNow() && Time.time - goalEnemy.PersonalSeenTime < 3f)
+                            return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
+                        }
+                        else
+                        {
+                            var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                            if (mcsLeadPlayerPos == null)
                             {
-                                return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy2");
+                                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                            }
+
+                            Vector3? validPosition = null;
+                            var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                            var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                            var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
+
+                            for (int attempt = 0; attempt < 30; attempt++)
+                            {
+                                if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                                {
+                                    if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
+                                    {
+                                        validPosition = navMeshHit1.position;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                            {
+                                validPosition = navMeshHit2.position;
+                            }
+
+                            if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
+                            {
+                                if (validPosition.HasValue)
+                                {
+                                    BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                                    return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
+                                }
+
+                                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
+                            }
+                            else
+                            {
+                                if (_lastPatrolTime + 8f < Time.time)
+                                {
+                                    _lastPatrolTime = Time.time + 8f;
+                                    if (validPosition.HasValue)
+                                    {
+                                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                                        return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
+                                    }
+
+                                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
+                                }
+                                else
+                                {
+                                    return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
+                                }
                             }
                         }
-
-                        return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy3");
                     }
                 }
             }

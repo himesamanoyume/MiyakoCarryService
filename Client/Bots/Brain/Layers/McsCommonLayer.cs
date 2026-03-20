@@ -198,52 +198,62 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 //     McsBotPlayerData.UnlockLootingTarget();
                 // }
 
-                // 检查与老板之间的距离，若超过一定距离则需要跑到老板附近
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                 if (mcsLeadPlayerPos == null)
                 {
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
                 }
 
+                Vector3? validPosition = null;
+                var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
+
+                for (int attempt = 0; attempt < 30; attempt++)
+                {
+                    if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                    {
+                        if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
+                        {
+                            validPosition = navMeshHit1.position;
+                            break;
+                        }
+                    }
+                }
+
+                if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                {
+                    validPosition = navMeshHit2.position;
+                }
+
                 if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
                 {
-                    var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                    var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                    var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
-                    if (NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                    if (validPosition.HasValue)
                     {
-                        BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
+                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
                         return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                     }
-                    else
-                    {
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
-                    }
+
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
                 }
                 else
                 {
                     if (_lastPatrolTime + 8f < Time.time)
                     {
                         _lastPatrolTime = Time.time + 8f;
-                        var xOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                        var zOffset = GClass856.Random(1f, 5f) * GClass856.RandomSing();
-                        var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0, zOffset);
-                        if (NavMesh.SamplePosition(newPos, out var navMeshHit, 5f, -1))
+                        if (validPosition.HasValue)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(navMeshHit.position);
+                            BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
                             return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                         }
-                        else
-                        {
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
-                        }
+
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
                     }
                     else
                     {
                         return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                     }
                 }
-                // end
             }
             catch (Exception e)
             {

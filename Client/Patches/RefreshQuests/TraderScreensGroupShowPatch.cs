@@ -27,16 +27,6 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
                 mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
             }
 
-            if (mainMenuControllerClass == null)
-            {
-                throw new Exception("刷新任务所需的实例未生成");
-            }
-
-            if (mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0 == null)
-            {
-                throw new Exception("刷新任务所需的实例为空");
-            }
-
             _ = mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0?.Run();
         }
     }
