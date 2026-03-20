@@ -38,15 +38,15 @@ namespace MiyakoCarryService.Client.Misc
                         continue;
                     }
 
-                    if (!enemyInfo.HaveSeen)
-                    {
-                        continue;
-                    }
+                    // if (!enemyInfo.HaveSeen)
+                    // {
+                    //     continue;
+                    // }
 
-                    if (!enemyInfo.ShallKnowEnemy())
-                    {
-                        continue;
-                    }
+                    // if (!enemyInfo.ShallKnowEnemy())
+                    // {
+                    //     continue;
+                    // }
 
                     list.Add(enemyInfo);
                 }
@@ -65,7 +65,8 @@ namespace MiyakoCarryService.Client.Misc
 
             foreach (var botOwner in mcsBotPlayerBotOwners)
             {
-                MyPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.AddEnemyToAllGroups);
+                // MiyakoCarryServicePlugin.Logger.LogWarn($"{botOwner.Profile.Info.Nickname} CalcGoalEnemy中即将调用AddEnemy");
+                MyPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
                 MyPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Sence, botOwner);
                 botOwner.Memory.GoalEnemy = closestEnemy;
                 closestEnemy.PriorityIndex = 0;

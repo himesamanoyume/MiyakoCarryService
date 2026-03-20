@@ -175,9 +175,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         if (leadPlayer.BotsGroup != null)
                         {
-                            // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-                            // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
-
                             botOwner.Boss.IamBoss = false;
                             leadPlayer.BotsGroup.AddMember(botOwner, false);
                             return leadPlayer.BotsGroup;
@@ -201,6 +198,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             enemyTypes.Add(WildSpawnType.pmcUSEC);
                         }
 
+                        botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
+                        botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
+                        botOwner.Settings.GetWarnBotTypes().Clear();
+
                         var enemies = botSpawner.method_5(botOwner);
 
                         var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, true);
@@ -211,7 +212,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             {
                                 return;
                             }
-                            botsGroup.CheckAndAddEnemy(enemy);
+                            botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
                         };
 
                         foreach (var _leadPlayer in leadPlayers)
@@ -225,9 +226,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         leadPlayer.BotsGroup = botsGroup;
                         leadPlayer.BotsGroup.Lock();
-
-                        // botOwner.Settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-                        // botOwner.Settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = oldReasons;
 
                         return botsGroup;
                     });
@@ -272,10 +270,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = leadPlayer.Side != EPlayerSide.Savage;
 
-            // var oldReasons = settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY;
-
             settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
             // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
+            // settings.FileSettings.Mind.REACT_ADD_DRUNK_ENEMY = true;
             settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;

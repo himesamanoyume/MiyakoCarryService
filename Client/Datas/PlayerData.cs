@@ -57,7 +57,12 @@ namespace MiyakoCarryService.Client.Datas
         {
             try
             {
-                return Player.PlayerBones.Ribcage.Original;
+                var transform = Player?.PlayerBones?.Ribcage?.Original;
+                if (transform == null)
+                {
+                    return null;
+                }
+                return transform;
             }
             catch
             {
