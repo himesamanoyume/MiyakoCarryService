@@ -364,6 +364,15 @@ namespace MiyakoCarryService.Server.Services
 
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
+            if (isPmc)
+            {
+                foreach (var bodyPartHealth in pmcData.Health.BodyParts.Values)
+                {
+                    bodyPartHealth.Health.Maximum *= 2f;
+                    bodyPartHealth.Health.Current *= 2f;
+                }
+            }
+
             PmcData scavData;
             try
             {

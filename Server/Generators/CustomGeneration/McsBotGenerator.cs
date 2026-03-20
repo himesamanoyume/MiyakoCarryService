@@ -60,8 +60,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             // 所有装备部位100%生成
             foreach (var slot in botJsonTemplateClone.BotChances.EquipmentChances.Keys.ToList())  
             {  
-                if (slot is "Armband" or "Eyewear" or "FaceCover")
+                if (slot is "Armband")
                 {
+                    botJsonTemplateClone.BotChances.EquipmentChances[slot] = 0;
                     continue;
                 }
 
@@ -72,7 +73,12 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             foreach (var slot in botJsonTemplateClone.BotChances.EquipmentModsChances.Keys.ToList())  
             {  
                 botJsonTemplateClone.BotChances.EquipmentModsChances[slot] = 100;  
-            }  
+            }
+
+            foreach (var slot in botJsonTemplateClone.BotChances.WeaponModsChances.Keys.ToList())  
+            {  
+                botJsonTemplateClone.BotChances.WeaponModsChances[slot] = 100;  
+            }
 
             return CustomGenerateBot(sessionId, botBaseClone, botJsonTemplateClone, botGenerationDetails);
         }
@@ -80,11 +86,6 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         protected BotBase CustomGenerateBot(MongoId sessionId, BotBase bot, BotType botJsonTemplate, BotGenerationDetails botGenerationDetails)
         {
             botGenerationDetails.RoleLowercase = botGenerationDetails.Role.ToLowerInvariant();
-
-            // var botLevelDetails = botLevelGenerator.GenerateBotLevel(botJsonTemplate.BotExperience.Level, botGenerationDetails, bot);
-
-            // // Assign value for later use
-            // botGenerationDetails.BotLevel = botLevelDetails.Level.GetValueOrDefault();
 
             // Generate Id/AId for bot
             AddIdsToBot(bot);
