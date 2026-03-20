@@ -13,15 +13,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
-        protected override void InitActionMap()
-        {
-            _endActionMap = new()
-            {
-                { typeof(HoldPositionLogic), EndHoldPosition },
-                { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint }
-            };
-        }
-
         private float _lastPositionUpdateTime = 0f;
         private Vector3 _lastRecordedPosition = new(0,0,0);
 
@@ -29,9 +20,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
             {
-                return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:gotoExit");
+                return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");
             }
-            return new Action(typeof(HoldPositionLogic), "Mcs:holdExf");
+            return new Action(typeof(HoldPositionLogic), "Mcs:HoldExf");
         }
 
         public override bool IsActive()
@@ -46,16 +37,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Exfiltration.ResetLeaveTime();
                 return true;
             }
-            // try
-            // {
-                
-            // }
-            // catch (Exception e)
-            // {
-            //     MiyakoCarryServicePlugin.Logger.LogError(e);
-            //     return false;
-            // }
-
 
             var timeSinceLastPositionUpdate = Time.time - _lastPositionUpdateTime;
 
@@ -65,37 +46,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (Vector3.SqrMagnitude(BotOwner.Position - _lastRecordedPosition) > 1f)
+            if ((BotOwner.Position - _lastRecordedPosition).sqrMagnitude > 1f)
             {
                 _lastRecordedPosition = BotOwner.Position;
                 _lastPositionUpdateTime = Time.time;
             }
 
             return false;
-        }
-
-        private bool IsWannaLeave()
-        {
-            if (BotOwner.Boss.IamBoss || BotOwner.BotFollower == null || BotOwner.BotFollower.BossToFollow == null)
-            {
-                return BotOwner.Exfiltration.WannaLeave();
-            }
-            IPlayer player = BotOwner.BotFollower.BossToFollow.Player();
-            if (player != null && player.AIData != null && !(player.AIData.BotOwner == null) && player.AIData.BotOwner.Exfiltration != null)
-            {
-                return player.AIData.BotOwner.Exfiltration.WannaLeave();
-            }
-            return BotOwner.Exfiltration.WannaLeave();
-        }
-
-        private bool EndHoldPosition()
-        {
-            return true;
-        }
-
-        private bool EndGoToExfiltrationPoint()
-        {
-            return true;
         }
     }
 }

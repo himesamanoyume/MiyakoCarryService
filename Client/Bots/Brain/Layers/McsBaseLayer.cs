@@ -73,6 +73,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(ShootToSmokeLogic), EndShootToSmoke },
                 { typeof(ShootFromStationaryLogic), EndShootFromStationary },
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
+                { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
             };
         }
 
@@ -652,6 +653,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
             return false;
+        }
+
+        protected virtual bool EndGoToExfiltrationPoint()
+        {
+            return true;
+        }
+
+        protected virtual bool IsWannaLeave()
+        {
+            if (BotOwner.Boss.IamBoss || BotOwner.BotFollower == null || BotOwner.BotFollower.BossToFollow == null)
+            {
+                return BotOwner.Exfiltration.WannaLeave();
+            }
+            IPlayer player = BotOwner.BotFollower.BossToFollow.Player();
+            if (player != null && player.AIData != null && !(player.AIData.BotOwner == null) && player.AIData.BotOwner.Exfiltration != null)
+            {
+                return player.AIData.BotOwner.Exfiltration.WannaLeave();
+            }
+            return BotOwner.Exfiltration.WannaLeave();
         }
     }
 }
