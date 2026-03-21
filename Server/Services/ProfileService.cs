@@ -58,12 +58,12 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
-        private readonly string _afdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
+        private readonly string _ifdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
 
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
-        private List<string> _afdianNames = [];
-        private Afdian _afdian; 
+        private List<string> _ifdianNames = [];
+        private Ifdian _ifdian; 
         private SemaphoreSlim _saveLock = new(1, 1);
 
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
@@ -202,24 +202,24 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        private async Task LoadAfdianPmcName()
+        private async Task LoadIfdianPmcName()
         {
-            if (!fileUtil.DirectoryExists(_afdianFolderDir))
+            if (!fileUtil.DirectoryExists(_ifdianFolderDir))
             {
-                fileUtil.CreateDirectory(_afdianFolderDir);
+                fileUtil.CreateDirectory(_ifdianFolderDir);
             }
 
-            var afdianFilePath = System.IO.Path.Join(_afdianFolderDir, "afdian.json");
-            _afdian = await jsonUtil.DeserializeFromFileAsync<Afdian>(afdianFilePath);
-            _afdianNames = _afdian.Supporter;
+            var ifdianFilePath = System.IO.Path.Join(_ifdianFolderDir, "ifdian.json");
+            _ifdian = await jsonUtil.DeserializeFromFileAsync<Ifdian>(ifdianFilePath);
+            _ifdianNames = _ifdian.Supporter;
         }
 
-        public Afdian GetAfdian()
+        public Ifdian GetIfdian()
         {
-            return _afdian;
+            return _ifdian;
         }
 
-        public async Task SaveAfdian()
+        public async Task SaveIfdian()
         {
             if (_saveLock is null)
             {
@@ -231,9 +231,9 @@ namespace MiyakoCarryService.Server.Services
             {
                 try
                 {
-                    var afdianString = jsonUtil.Serialize(_afdian, true);
-                    var afdianFilePath = System.IO.Path.Join(_afdianFolderDir, "afdian.json");
-                    await fileUtil.WriteFileAsync(afdianFilePath, afdianString);
+                    var ifdianString = jsonUtil.Serialize(_ifdian, true);
+                    var ifdianFilePath = System.IO.Path.Join(_ifdianFolderDir, "ifdian.json");
+                    await fileUtil.WriteFileAsync(ifdianFilePath, ifdianString);
                 }
                 catch
                 {
@@ -415,7 +415,7 @@ namespace MiyakoCarryService.Server.Services
         {
             var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
-            var playerName = randomUtil.GetArrayValue(_afdianNames);
+            var playerName = randomUtil.GetArrayValue(_ifdianNames);
             if (playerName is not null)
             {
                 botBase.Info.Nickname = playerName;
@@ -574,7 +574,7 @@ namespace MiyakoCarryService.Server.Services
         public async Task OnPostLoadAsync()
         {
             await LoadAllMcsBotPlayerProfileAsync();
-            await LoadAfdianPmcName();
+            await LoadIfdianPmcName();
         }
     }
 }

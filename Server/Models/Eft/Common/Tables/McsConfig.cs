@@ -13,8 +13,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
     {
         [JsonPropertyName("CheckUpdate")]
         public bool CheckUpdate { get; set; } = true;
-        [JsonPropertyName("CheckAfdian")]
-        public bool CheckAfdian { get; set; } = true;
+        [JsonPropertyName("CheckIfdian")]
+        public bool CheckIfdian { get; set; } = true;
     }
 
     public record McsPluginConfig

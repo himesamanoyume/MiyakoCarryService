@@ -106,19 +106,19 @@ namespace MiyakoCarryService.Server
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });
-                _ = CheckForAfdianUpdate();
+                _ = CheckForIfdianUpdate();
             }
 
-            private async Task CheckForAfdianUpdate()
+            private async Task CheckForIfdianUpdate()
             {
-                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckAfdian)
+                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckIfdian)
                 {
                     return;
                 }
 
-                var afdian = profileService.GetAfdian();
+                var ifdian = profileService.GetIfdian();
 
-                if (System.DateTimeOffset.UtcNow - System.DateTimeOffset.FromUnixTimeSeconds(afdian.Timestamp) <= System.TimeSpan.FromDays(7))
+                if (System.DateTimeOffset.UtcNow - System.DateTimeOffset.FromUnixTimeSeconds(ifdian.Timestamp) <= System.TimeSpan.FromDays(7))
                 {
                     return;
                 }
@@ -128,9 +128,9 @@ namespace MiyakoCarryService.Server
                 {
                     var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/afdian/raw/master/README.md");
                     var supporter = jsonUtil.Deserialize<List<string>>(data);
-                    afdian.Timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    afdian.Supporter = supporter;
-                    await profileService.SaveAfdian();
+                    ifdian.Timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    ifdian.Supporter = supporter;
+                    await profileService.SaveIfdian();
                 }
                 catch
                 {

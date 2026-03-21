@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace MiyakoCarryService.Server.Models.Mcs
 {
-    public record Afdian
+    public record Ifdian
     {
         [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; }

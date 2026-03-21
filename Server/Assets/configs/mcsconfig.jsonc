@@ -4,6 +4,6 @@
     },
     "Server": {
         "CheckUpdate": true,
-        "CheckAfdian": true
+        "CheckIfdian": true
     }
 }
