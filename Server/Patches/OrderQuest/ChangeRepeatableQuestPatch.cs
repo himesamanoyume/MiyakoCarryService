@@ -49,9 +49,8 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             
             if (repeatables.RepeatableType.Name == "Order")
             {
-                logger.Warning(serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace"));
-
                 var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
+                var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
                 var orderInfos = orderInfoController.GetAllOrderInfo();
                 foreach (var orderInfo in orderInfos)
                 {
@@ -59,6 +58,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                     {
                         orderInfoController.RemoveOrderInfo(orderInfo);
                         _ = orderInfoController.SaveOrderInfo();
+                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
                         break;
                     }
                 }

@@ -32,6 +32,8 @@ namespace MiyakoCarryService.Server.Services
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
         TraderService traderService,
+        MailSendService mailSendService,
+        ItemHelper itemHelper,
         ProfileHelper profileHelper
     )
     {
@@ -79,7 +81,7 @@ namespace MiyakoCarryService.Server.Services
             foreach (var activeQuest in generatedRepeatables.ActiveQuests)
             {
                 var currentTime = timeUtil.GetTimeStamp();
-                if (currentTime < activeQuest.ChangeCost.FirstOrDefault(x => x.TemplateId == "5449016a4bdc2d6f028b456f").Count - 1)
+                if (currentTime < activeQuest.ChangeCost.FirstOrDefault(x => x.TemplateId == ItemTpl.MONEY_ROUBLES).Count - 1)
                 {
                     questsToKeep.Add(activeQuest);
                     continue;
@@ -97,10 +99,13 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
+                if (questStatusInProfile.Status != QuestStatusEnum.Success)
+                {
+                    Refund(bossPmcData.Id.Value, activeQuest, bossPmcData);
+                }
+
                 profileFixerService.RemoveDanglingConditionCounters(bossPmcData);
-
                 bossPmcData.Quests = bossPmcData.Quests.Where(quest => quest.QId != activeQuest.Id).ToList();
-
                 generatedRepeatables.InactiveQuests.Add(activeQuest);
             }
 
@@ -220,6 +225,69 @@ namespace MiyakoCarryService.Server.Services
                 pmcData.RepeatableQuests.Add(repeatableQuestDetails);
             }
             return repeatableQuestDetails;
+        }
+
+        public void Refund(MongoId sessionId, RepeatableQuest questToReplace, PmcData pmcData)
+        {
+            double total = 0;
+            List<MongoId> conditionIds = new();
+            List<QuestCondition> questConditions = new();
+
+            if (questToReplace.Conditions.Started != null)
+            {
+                questConditions.AddRange(questToReplace.Conditions.Started);
+            }
+            if (questToReplace.Conditions.AvailableForFinish != null)
+            {
+                questConditions.AddRange(questToReplace.Conditions.AvailableForFinish);
+            }
+            if (questToReplace.Conditions.AvailableForStart != null)
+            {
+                questConditions.AddRange(questToReplace.Conditions.AvailableForStart);
+            }
+            if (questToReplace.Conditions.Success != null)
+            {
+                questConditions.AddRange(questToReplace.Conditions.Success);
+            }
+            if (questToReplace.Conditions.Fail != null)
+            {
+                questConditions.AddRange(questToReplace.Conditions.Fail);
+            }
+            
+            foreach (var questCondition in questConditions)
+            {
+                if (questCondition.Target.List.Count == 1 && questCondition.Target.List.First() == ItemTpl.MONEY_ROUBLES)
+                {
+                    conditionIds.Add(questCondition.Id);
+                }
+            }
+
+            foreach (var conditionId in conditionIds)
+            {
+                if (pmcData.TaskConditionCounters.GetValueOrDefault(conditionId) != null)
+                {
+                    total += pmcData.TaskConditionCounters[conditionId].Value.HasValue ? pmcData.TaskConditionCounters[conditionId].Value.Value : 0;
+                }
+            }
+
+            if (total > 0)
+            {
+                var roubles = new Item  
+                {  
+                    Id = new MongoId(),  
+                    Template = ItemTpl.MONEY_ROUBLES,  
+                    Upd = new Upd { StackObjectsCount = total },  
+                };  
+
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.MessageWithItems,
+                    Locales.MIYAKOTRADERREFUND,
+                    itemHelper.SplitStackIntoSeparateItems(roubles).SelectMany(x => x).ToList(),
+                    timeUtil.GetHoursAsSeconds(168)
+                );
+            }
         }
     }
 }

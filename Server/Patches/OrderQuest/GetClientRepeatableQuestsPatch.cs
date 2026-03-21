@@ -44,9 +44,9 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 while (orderQuestsQueue.Count > 0)
                 {
                     var quest = orderQuestsQueue.Dequeue();
-                    Console.WriteLine("加入新任务");
+                    // Console.WriteLine("加入新任务");
                     quest.Side = Enum.GetName(orderConfig.Side);
-                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == "5449016a4bdc2d6f028b456f").Count = (int)(currentTime + orderConfig.ResetTime);
+                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == ItemTpl.MONEY_ROUBLES).Count = (int)(currentTime + orderConfig.ResetTime);
                     generatedOrder.ActiveQuests.Add(quest);
                     generatedOrder.ChangeRequirement.Add(
                         quest.Id,

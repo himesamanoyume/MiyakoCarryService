@@ -84,7 +84,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                     ParentId = string.Empty,
                     DynamicLocale = true,
                     VisibilityConditions = [],
-                    Target = new ListOrT<string>([new ("5449016a4bdc2d6f028b456f")], null),
+                    Target = new ListOrT<string>([new (ItemTpl.MONEY_ROUBLES)], null),
                     Value = currentRequestedItemCount * duration,
                     OnlyFoundInRaid = false,
                     IsEncoded = false,

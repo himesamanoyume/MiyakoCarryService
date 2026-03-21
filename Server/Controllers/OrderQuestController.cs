@@ -28,5 +28,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return orderQuestService.GetRepeatableQuestSubTypeFromProfile(repeatableConfig, pmcData);
         }
+
+        public void Refund(MongoId sessionId, RepeatableQuest questToReplace, PmcData pmcData)
+        {
+            orderQuestService.Refund(sessionId, questToReplace, pmcData);
+        }
     }
 }

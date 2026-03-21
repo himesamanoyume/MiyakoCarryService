@@ -46,5 +46,6 @@
     "Mcs/MiyakoTraderOrderNewQuest": "您已成功下单！您的订单信息可到商人任务界面查看\n接取订单并进行付款即可~",
     "Mcs/MiyakoTraderUnrecognizedCommand": "未知指令! 输入 \"help\" 来查看可用指令",
     "Mcs/MiyakoTraderAvailableCommandsList": "以下将列出可用的指令:",
-    "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！"
+    "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！",
+    "Mcs/MiyakoTraderRefund": "订单未结算，这是退款"
 }
