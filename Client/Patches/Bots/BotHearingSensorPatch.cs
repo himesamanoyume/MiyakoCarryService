@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var enemy = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(player.ProfileId);
                     if (enemy != null && shouldReact)
                     {
-                        thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Sence, __instance.BotOwner);
+                        thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Visible, __instance.BotOwner);
                     }
                 }
             }

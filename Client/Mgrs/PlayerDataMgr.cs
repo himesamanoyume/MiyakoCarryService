@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
-            StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(2f));
+            // StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(2f));
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
             {
@@ -260,7 +260,9 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             if (!blocked)
                             {
+                                // MiyakoCarryServicePlugin.Logger.LogWarning("观测到玩家目视的敌人");
                                 mcsAILeadPlayer.CalcGoalEnemy();
+                                break;
                             }
                         }
 

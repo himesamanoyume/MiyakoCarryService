@@ -66,6 +66,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(SimplePatrolLogic), EndSimplePatrol },
                 { typeof(HoldPositionLogic), EndHoldPosition },
                 { typeof(GoToPointLogic), EndGoToPoint },
+                { typeof(GoToProtectLogic), EndGoToProtect },
                 { typeof(GoToEnemyLogic), EndGoToEnemy },
                 { typeof(AttackMovingLogic), EndAttackMoving },
                 { typeof(GoToLootTargetLogic), EndLootingTarget },
@@ -287,8 +288,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     CheckStuck();
 
                     Vector3? validPosition = null;
-                    var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
-                    var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                    var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
                     var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
 
                     for (int attempt = 0; attempt < 30; attempt++)
@@ -312,6 +313,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
                     }
+                }
+
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
+                {
+                    BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
+                    return true;
+                }
+
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        protected virtual bool EndGoToProtect()
+        {
+            if (BotOwner.GoToSomePointData.IsCome())
+            {
+                return true;
+            }
+            else
+            {
+                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+                {
+                    CheckStuck();
                 }
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)

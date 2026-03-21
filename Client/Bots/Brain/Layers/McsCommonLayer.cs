@@ -206,8 +206,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 Vector3? validPosition = null;
-                var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
-                var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
                 var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
 
                 for (int attempt = 0; attempt < 30; attempt++)
@@ -239,7 +239,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else
                 {
-                    if (_lastPatrolTime + 8f < Time.time)
+                    if (_lastPatrolTime < Time.time)
                     {
                         _lastPatrolTime = Time.time + 8f;
                         if (validPosition.HasValue)

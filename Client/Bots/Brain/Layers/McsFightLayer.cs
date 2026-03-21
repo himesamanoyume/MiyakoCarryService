@@ -72,14 +72,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        // if (isProtectCareKill)
-                        // {
-                        //     if (CanShootNow() && Time.time - goalEnemy.PersonalSeenTime < 3f)
-                        //     {
-                        //         return new Action(typeof(RunToEnemyLogic), "Mcs:findEnemy2");
-                        //     }
-                        // }
-
                         var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                         if (mcsLeadPlayerPos == null)
                         {
@@ -94,8 +86,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             
                             Vector3? validPosition = null;
-                            var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
-                            var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
+                            var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                            var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
                             var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
 
                             for (int attempt = 0; attempt < 30; attempt++)
@@ -115,7 +107,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 validPosition = navMeshHit2.position;
                             }
 
-                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance)
+                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                             {
                                 if (validPosition.HasValue)
                                 {
@@ -140,6 +132,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
+                                    if (BotOwner.Memory.GoalEnemy != null && Time.time - BotOwner.Mover.LastTimePosChanged > 8f)
+                                    {
+                                        // 借鉴SAIN
+                                        var angle = UnityEngine.Random.Range(70, 110);
+                                        if (GClass856.RandomBool())
+                                        {
+                                            angle *= -1;
+                                        }
+
+                                        var directionToEnemy = BotOwner.Memory.GoalEnemy.Person.LookDirection.normalized;
+                                        var rotated = Quaternion.Euler(0, angle, 0) * directionToEnemy;
+                                        rotated.y = 0;
+                                        rotated *= 7f;
+                                        rotated += UnityEngine.Random.insideUnitSphere;
+                                        if (NavMesh.SamplePosition(mcsLeadPlayerPos + rotated, out var hit, 1f, -1))
+                                        {
+                                            BotOwner.GoToSomePointData.SetPoint(hit.position);
+                                            return new Action(typeof(GoToProtectLogic), "Mcs:Protect");
+                                        }
+                                    }
+
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
                             }

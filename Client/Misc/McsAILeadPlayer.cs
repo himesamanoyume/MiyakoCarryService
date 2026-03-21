@@ -39,17 +39,19 @@ namespace MiyakoCarryService.Client.Misc
                         continue;
                     }
 
-                    if (enemyInfo.IsVisible)
-                    {
-                        foreach (var _botOwner in mcsBotPlayerBotOwners)
-                        {
-                            MyPlayer.BotsGroup.AddEnemy(enemyInfo.Person.AIData.BotOwner, EBotEnemyCause.byKill);
-                            MyPlayer.BotsGroup.ReportAboutEnemy(enemyInfo.Person.AIData.BotOwner, EEnemyPartVisibleType.Sence, _botOwner);
-                            _botOwner.Memory.GoalEnemy = enemyInfo;
-                            enemyInfo.PriorityIndex = 0;
-                        }
-                        return;
-                    }
+                    // if (enemyInfo.IsVisible)
+                    // {
+                    //     MiyakoCarryServicePlugin.Logger.LogError("因有可见的敌人，将该敌人设置全体护航的目标敌人");
+                    //     foreach (var _botOwner in mcsBotPlayerBotOwners)
+                    //     {
+                    //         MyPlayer.BotsGroup.AddEnemy(enemyInfo.Person.AIData.BotOwner, EBotEnemyCause.byKill);
+                    //         MyPlayer.BotsGroup.ReportAboutEnemy(enemyInfo.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, _botOwner);
+                    //         enemyInfo.IsVisible = true;
+                    //         _botOwner.Memory.GoalEnemy = enemyInfo;
+                    //         enemyInfo.PriorityIndex = 0;
+                    //     }
+                    //     return;
+                    // }
 
                     list.Add(enemyInfo);
                 }
@@ -66,10 +68,12 @@ namespace MiyakoCarryService.Client.Misc
                 return;
             }
 
+            MiyakoCarryServicePlugin.Logger.LogError("将最近的敌人设置全体护航的目标敌人");
             foreach (var botOwner in mcsBotPlayerBotOwners)
             {
                 MyPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
-                MyPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Sence, botOwner);
+                MyPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, botOwner);
+                closestEnemy.IsVisible = true;
                 botOwner.Memory.GoalEnemy = closestEnemy;
                 closestEnemy.PriorityIndex = 0;
             }

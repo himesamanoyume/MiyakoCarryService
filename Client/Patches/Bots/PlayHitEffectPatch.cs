@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     {
                         if (botOwner.Position.McsSqrDistance(info.HitPoint) <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                         {
-                            botOwner.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Sence, botOwner);
+                            botOwner.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
                         }
                     }
                 }

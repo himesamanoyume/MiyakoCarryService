@@ -97,26 +97,26 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
         }
 
-        [PatchPostfix]
-        public static void Postfix(BotMemoryClass __instance, ref EnemyInfo value)
-        {
-            if (value == null)
-            {
-                return;
-            }
+        // [PatchPostfix]
+        // public static void Postfix(BotMemoryClass __instance, ref EnemyInfo value)
+        // {
+        //     if (value == null)
+        //     {
+        //         return;
+        //     }
 
-            if (McsMgr.IsMcsLeadPlayer(value.Person.ProfileId))
-            {
-                if (!McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
-                {
-                    var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(value.Person.ProfileId);
-                    var leadPlayer = mcsAILeadPlayer.Player() as Player;
-                    if (leadPlayer.BotsGroup != null)
-                    {
-                        mcsAILeadPlayer.CalcGoalEnemy();
-                    }
-                }
-            }
-        }
+        //     if (McsMgr.IsMcsLeadPlayer(value.Person.ProfileId))
+        //     {
+        //         if (!McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+        //         {
+        //             var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(value.Person.ProfileId);
+        //             var leadPlayer = mcsAILeadPlayer.Player() as Player;
+        //             if (leadPlayer.BotsGroup != null)
+        //             {
+        //                 mcsAILeadPlayer.CalcGoalEnemy();
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
