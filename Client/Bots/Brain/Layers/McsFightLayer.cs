@@ -52,6 +52,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else
                 {
+                    var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                    if (mcsLeadPlayerPos == null)
+                    {
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                    }
+
                     var safeFire = false;
                     if (canShoot)
                     {
@@ -63,7 +69,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         if (goalEnemy.IsVisible)
                         {
-                            return new Action(typeof(ShootFromPlaceLogic), "Mcs:ShootFromPlace");
+                            if (!BotOwner.GoToSomePointData.IsCome())
+                            {
+                                return new Action(typeof(AttackMovingLogic), "Mcs:AttackMoving");
+                            }
+                            else
+                            {
+                                return new Action(typeof(ShootFromPlaceLogic), "Mcs:ShootFromPlace");
+                            }
                         }
                         else
                         {
@@ -72,12 +85,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-                        if (mcsLeadPlayerPos == null)
-                        {
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
-                        }
-
+                        
                         if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f)
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");

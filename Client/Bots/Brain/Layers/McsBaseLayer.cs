@@ -371,6 +371,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
+            if (BotOwner.GoToSomePointData.IsCome())
+            {
+                return true;
+            }
             return false;
         }
 
