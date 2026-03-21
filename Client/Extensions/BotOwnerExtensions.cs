@@ -73,7 +73,7 @@ namespace MiyakoCarryService.Client.Extensions
             public bool CheckStuck()
             {
                 var pos = botOwner.Position;
-                if ((botOwner.Mover.LastPos - pos).sqrMagnitude > 2f * 2f)
+                if (botOwner.Mover.LastPos.McsSqrDistance(pos) > 2f * 2f)
                 {
                     botOwner.Mover.LastPos = pos;
                     botOwner.Mover.LastTimePosChanged = Time.time;

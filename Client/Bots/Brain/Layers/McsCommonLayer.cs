@@ -2,6 +2,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -226,7 +227,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     validPosition = navMeshHit2.position;
                 }
 
-                if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance)
+                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance)
                 {
                     if (validPosition.HasValue)
                     {

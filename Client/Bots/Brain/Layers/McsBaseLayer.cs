@@ -152,7 +152,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
                 if (_currentNavigationPoint != null)
                 {
-                    if ((mcsLeadPlayerPos - _currentNavigationPoint.Position).sqrMagnitude < _closeLeadDistance * _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
+                    if (mcsLeadPlayerPos.McsSqrDistance(_currentNavigationPoint.Position) < _closeLeadDistance * _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
                     {
                         BotOwner.Memory.IsInCover = true;
                         return;
@@ -183,7 +183,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentNavigationPoint = FollowerCheckData();
                 if (_currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
                 {
-                    var sqrMagnitude = (leadPos - _currentNavigationPoint.Position).sqrMagnitude;
+                    var sqrMagnitude = leadPos.McsSqrDistance(_currentNavigationPoint.Position);
                     if (sqrMagnitude >= 75f * 75f)
                     {
                         _haveCoverToShoot = false;
@@ -314,7 +314,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && (BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude >= _closeLeadDistance * _closeLeadDistance)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                 {
                     BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
                     return true;
@@ -348,7 +348,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected bool CheckStuck()
         {
             var pos = BotOwner.Position;
-            if ((BotOwner.Mover.LastPos - pos).sqrMagnitude > 2f * 2f)
+            if (BotOwner.Mover.LastPos.McsSqrDistance(pos) > 2f * 2f)
             {
                 BotOwner.Mover.LastPos = pos;
                 BotOwner.Mover.LastTimePosChanged = Time.time;
@@ -361,7 +361,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             UpdateCoverToShoot();
             var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-            if ((BotOwner.Position - mcsLeadPlayerPos).sqrMagnitude > _closeLeadDistance * _closeLeadDistance)
+            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) > _closeLeadDistance * _closeLeadDistance)
             {
                 return true;
             }

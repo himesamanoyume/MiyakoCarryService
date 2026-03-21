@@ -1,6 +1,7 @@
 
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -46,7 +47,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if ((BotOwner.Position - _lastRecordedPosition).sqrMagnitude > 1f)
+            if (BotOwner.Position.McsSqrDistance(_lastRecordedPosition) > 1f)
             {
                 _lastRecordedPosition = BotOwner.Position;
                 _lastPositionUpdateTime = Time.time;

@@ -376,7 +376,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Cover.RETURN_TO_ATTACK_AFTER_AMBUSH_MAX = 50f;
             settings.FileSettings.Cover.SPOTTED_GRENADE_RADIUS = 25f;
             settings.FileSettings.Cover.SPOTTED_GRENADE_TIME = 7f;
-            settings.FileSettings.Cover.SIT_DOWN_WHEN_HOLDING = true;
+            settings.FileSettings.Cover.SIT_DOWN_WHEN_HOLDING = false;
 
             var botDifficultyInt = (int)botDifficulty;
 

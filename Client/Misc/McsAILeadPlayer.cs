@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using EFT;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using UnityEngine;
@@ -86,7 +87,7 @@ namespace MiyakoCarryService.Client.Misc
             var minDistance = Mathf.Infinity;
             foreach (var enemyInfo in enemiesInfos)
             {
-                var distance = (Position - enemyInfo.CurrPosition).sqrMagnitude;
+                var distance = Position.McsSqrDistance(enemyInfo.CurrPosition);
                 if (distance < minDistance)
                 {
                     closestEnemy = enemyInfo;
