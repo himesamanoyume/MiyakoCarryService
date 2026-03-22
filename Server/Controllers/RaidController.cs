@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
@@ -54,6 +55,11 @@ namespace MiyakoCarryService.Server.Controllers
         public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)
         {
             return await raidService.GetMcsBotPlayerConfigs(mcsLeadPlayerId);
+        }
+
+        public List<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId)
+        {
+            return raidService.GetMcsBotPlayerIds(mcsLeadPlayerId).ToList();
         }
 
         public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)

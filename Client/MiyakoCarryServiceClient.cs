@@ -49,6 +49,12 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 
     #endregion
 
+    #region COMMAND
+
+    public static ConfigEntry<KeyboardShortcut> CommandHotKey;
+
+    #endregion
+
     #region DEBUG
 
 #if DEBUG
@@ -240,7 +246,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         return configType switch
         {
             EConfigType.BASIC => Locales.BASIC,
-            EConfigType.PLAYER => Locales.PLAYER,
+            EConfigType.COMMAND => Locales.COMMAND,
             EConfigType.DEBUG or _ => Locales.DEBUG
         };
     }
@@ -250,13 +256,15 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         return configType switch
         {
             EConfigType.BASIC => 100,
-            EConfigType.PLAYER => 200,
+            EConfigType.COMMAND => 200,
             EConfigType.DEBUG or _ => 2000
         };
     }
 
     private void SetupConfig()
     {
+        #region BASIC
+
         PriceThreshold = Register(
             EConfigType.BASIC,
             Locales.PRICETHRESHOLD_KEY,
@@ -289,5 +297,16 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
             Locales.BLOCKITEMTYPE_KEY,
             (EBlockItemType)0
         );
+
+        #endregion
+        #region COMMAND
+
+        CommandHotKey = Register(
+            EConfigType.COMMAND,
+            Locales.COMMANDHOTKEY_KEY,
+            new KeyboardShortcut(KeyCode.Mouse1)
+        );
+
+        #endregion
     }
 }

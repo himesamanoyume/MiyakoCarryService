@@ -14,6 +14,7 @@
     "695207e8bcc1dd1e3c80dfcb completePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "Order settled",
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "This order cannot be refreshed",
     "Mcs/A.Basic": "A. Basic | Not effective yet",
+    "Mcs/B.Command": "B. Command",
     "Mcs/PriceThreshold Key": "Price Threshold",
     "Mcs/PriceThreshold Description": "Loot below this price will be ignored",
     "Mcs/ArmorLevelThreshold Key": "Armor Level Threshold",
@@ -47,5 +48,7 @@
     "Mcs/MiyakoTraderUnrecognizedCommand": "Unknown command! Type \"help\" to see available commands.",
     "Mcs/MiyakoTraderAvailableCommandsList": "The available commands will be listed below:",
     "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!",
-    "Mcs/MiyakoTraderRefund": "Order not settled, this is a refund"
+    "Mcs/MiyakoTraderRefund": "Order not settled, this is a refund",
+    "Mcs/CommandHotKey Key": "Command Menu Hotkey",
+    "Mcs/CommandHotKey Description": "Requires long press"
 }

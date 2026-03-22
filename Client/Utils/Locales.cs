@@ -3,7 +3,7 @@ namespace MiyakoCarryService.Client.Utils
     internal static class Locales
     {
         public const string BASIC = "Mcs/A.Basic";
-        public const string PLAYER = "Mcs/B.Player";
+        public const string COMMAND = "Mcs/B.Command";
         public const string DEBUG = "Mcs/Z.Debug";
         public const string PRICETHRESHOLD_KEY = "Mcs/PriceThreshold Key";
         public const string PRICETHRESHOLD_DESCRIPTION = "Mcs/PriceThreshold Description";
@@ -37,5 +37,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string BLOCKITEMTYPEALL = "Mcs/BlockItemTypeAll";
         public const string LOADINGLOCALES = "Mcs/LoadingLocales";
         public const string ORIGINALWEBSITE = "Mcs/OriginalWebsite";
+        public const string COMMANDHOTKEY_KEY = "Mcs/CommandHotKey Key";
     }
 }

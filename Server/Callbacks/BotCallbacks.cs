@@ -39,5 +39,13 @@ namespace MiyakoCarryService.Server.Callbacks
             await raidController.CollectMcsBotPlayerConfig(info);
             return httpResponseUtil.NullResponse();
         }
+
+        /// <summary>
+        /// 处理 /mcs/singleplayer/info/bot/get
+        /// </summary>
+        public async ValueTask<string> GetMcsBotPlayerIds(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
+        {
+            return httpResponseUtil.NoBody(raidController.GetMcsBotPlayerIds(mcsLeadPlayerId));
+        }
     }
 }

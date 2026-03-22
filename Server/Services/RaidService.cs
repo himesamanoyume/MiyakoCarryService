@@ -63,6 +63,40 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        public IEnumerable<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId)
+        {
+            if (_saveLock is null)
+            {
+                _saveLock = new(1, 1);
+            }
+
+            _saveLock.Wait();
+
+            try
+            {
+                _leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids);
+                if (mcsAids == null)
+                {
+                    yield return new();
+                }
+
+                foreach (var mcsAid in mcsAids)
+                {
+                    var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
+                    if (profile == null)
+                    {
+                        continue;
+                    }
+
+                    yield return profile.ProfileInfo.ProfileId.Value;
+                }
+            }
+            finally
+            {
+                _saveLock.Release();
+            }
+        }
+
         public void AddGroupMember(MongoId mcsLeadPlayerId, int mcsAid)
         {
             if (_saveLock is null)
