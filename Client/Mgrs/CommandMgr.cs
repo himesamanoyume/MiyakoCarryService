@@ -26,48 +26,31 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        private bool _commandMenuOpening = false;
 
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            _commandMenuOpening = false;
-            _mcsBotPlayerIds = McsRequestHandler.GetMcsBotPlayerIds().GetAwaiter().GetResult();
+            _mcsBotPlayerIds = McsRequestHandler.GetMcsBotPlayerIds();
         }
 
         protected sealed override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            _commandMenuOpening = false;
             _mcsBotPlayerIds.Clear();
             _mcsBotPlayers.Clear();
         }
 
         void Update()
         {
-            // 监听快捷键（长按）
             if (!_gameloop.IsVaildGameWorld)
             {
                 return;
             }
 
-            if (KeyInput.BetterIsPressed(MiyakoCarryServicePlugin.CommandHotKey.Value))
+            if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.CommandHotKey.Value))
             {
-                if (!_commandMenuOpening)
-                {
-                    _commandMenuOpening = true;
-                    BuildMainCommandMenu();
-                }
+                BuildMainCommandMenu();
             }
-            else
-            {
-                if (_commandMenuOpening)
-                {
-                    _commandMenuOpening = false;
-                    CloseCommandMenu();
-                }
-            }
-            // end
         } 
 
         private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
@@ -122,7 +105,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 Actions = new()
             };
             
-            actionsReturnClass.Actions.Add(TeamHoldCommand(null));
+            actionsReturnClass.Actions.Add(TeamHoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(TeamRegroupCommand(CloseCommandMenu));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenu));
 
             if (actionsReturnClass != null)
@@ -138,7 +122,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = "全体听令",
-                TargetName = "对所有护航成员发号施令",
+                // TargetName = "对所有护航成员发号施令",
                 Disabled = false,
                 Action = action
             };
@@ -149,8 +133,8 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = $"{mcsBotPlayer.Profile.Info.Nickname} 听令",
-                TargetName = "单独给一个护航下达指令",
-                Disabled = mcsBotPlayer.ActiveHealthController.IsAlive,
+                // TargetName = "单独给一个护航下达指令",
+                Disabled = !mcsBotPlayer.ActiveHealthController.IsAlive,
                 Action = new Action(() =>
                 {
                     action(mcsBotPlayer);
@@ -163,7 +147,17 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = "全队停留在这",
-                TargetName = "指定一个位置让全部队友驻留",
+                // TargetName = "指定一个位置让全部队友驻留",
+                Disabled = false,
+                Action = action
+            };
+        }
+
+        public ActionsTypesClass TeamRegroupCommand(Action action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "全队集合",
                 Disabled = false,
                 Action = action
             };
@@ -181,9 +175,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 Actions = new()
             };
 
-
-            actionsReturnClass.Actions.Add(HoldCommand(null));
-
+            actionsReturnClass.Actions.Add(HoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(RegroupCommand(CloseCommandMenu));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenu));
 
             if (actionsReturnClass != null)
@@ -199,7 +192,17 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = "停留在这",
-                TargetName = "指定一个位置让队友驻留",
+                // TargetName = "指定一个位置让队友驻留",
+                Disabled = false,
+                Action = action
+            };
+        }
+
+        public ActionsTypesClass RegroupCommand(Action action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "集合",
                 Disabled = false,
                 Action = action
             };
@@ -210,7 +213,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = "取消",
-                TargetName = "取消下达指令",
+                // TargetName = "取消下达指令",
                 Disabled = false,
                 Action = action
             };
@@ -219,7 +222,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public void CloseCommandMenu()
         {
             _gamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
-            _commandMenuOpening = false;
         }
     }
 }

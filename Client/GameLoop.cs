@@ -70,6 +70,7 @@ namespace MiyakoCarryService.Client
             PlayerDataMgr.Enable();
             LootDataMgr.Enable();
             SubTitleMgr.Enable();
+            CommandMgr.Enable();
         }
 
         private void Reset()

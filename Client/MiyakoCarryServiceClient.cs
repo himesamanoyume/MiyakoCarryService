@@ -304,7 +304,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         CommandHotKey = Register(
             EConfigType.COMMAND,
             Locales.COMMANDHOTKEY_KEY,
-            new KeyboardShortcut(KeyCode.Mouse1)
+            new KeyboardShortcut()
         );
 
         #endregion

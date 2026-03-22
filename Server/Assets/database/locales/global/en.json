@@ -49,6 +49,5 @@
     "Mcs/MiyakoTraderAvailableCommandsList": "The available commands will be listed below:",
     "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!",
     "Mcs/MiyakoTraderRefund": "Order not settled, this is a refund",
-    "Mcs/CommandHotKey Key": "Command Menu Hotkey",
-    "Mcs/CommandHotKey Description": "Requires long press"
+    "Mcs/CommandHotKey Key": "Command Menu Hotkey"
 }

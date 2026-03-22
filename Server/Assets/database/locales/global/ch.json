@@ -49,6 +49,5 @@
     "Mcs/MiyakoTraderAvailableCommandsList": "以下将列出可用的指令:",
     "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！",
     "Mcs/MiyakoTraderRefund": "订单未结算，这是退款",
-    "Mcs/CommandHotKey Key": "打开指令菜单快捷键",
-    "Mcs/CommandHotKey Description": "需要长按"
+    "Mcs/CommandHotKey Key": "打开指令菜单快捷键"
 }

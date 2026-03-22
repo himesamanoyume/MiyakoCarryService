@@ -26,6 +26,10 @@ namespace MiyakoCarryService.Server.Routers.Static
             new RouteAction<McsBotPlayerConfigRequestData>(
                 "/mcs/singleplayer/settings/bot/upload",
                 async (url, info, sessionId, output) => await botCallbacks.CollectMcsBotPlayerConfig(url, info, sessionId)
+            ),
+            new RouteAction<EmptyRequestData>(
+                "/mcs/singleplayer/info/bot/get",
+                async (url, info, sessionId, output) => await botCallbacks.GetMcsBotPlayerIds(url, info, sessionId)
             )
         ]
     )
