@@ -58,7 +58,6 @@ namespace MiyakoCarryService.Server.Services
         {
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
-            logger.Info(serverLocalisationService.GetText(Locales.STARTINGQUESTCREATION));
             var punishmentMulti = traderService.GetGlobalPunishmentMulti();
             var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, spawnType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
                 RepeatableQuestType.Completion, TraderService.MiyakoTraderId,

@@ -122,11 +122,11 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new TryLoadBotsProfilesOnStartPatch().Enable();
         new AddEnemyPatch().Enable();
         new TraderClassConstructorPatch().Enable();
-        new TraderControllerClassConstructorPatch().Enable();
-        new TraderControllerClassAddItemEventInvokePatch().Enable();
-        new TraderControllerClassRemoveItemEventInvokePatch().Enable();
-        new TraderControllerClassOutProcessPatch().Enable();
-        new TraderControllerClassInProcessPatch().Enable();
+        // new TraderControllerClassConstructorPatch().Enable();
+        // new TraderControllerClassAddItemEventInvokePatch().Enable();
+        // new TraderControllerClassRemoveItemEventInvokePatch().Enable();
+        // new TraderControllerClassOutProcessPatch().Enable();
+        // new TraderControllerClassInProcessPatch().Enable();
         new ApplyDamagePatch().Enable();
         new OnGameStartedPatch().Enable();
         new RaidEndedPatch().Enable();
@@ -145,7 +145,8 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new MenuTaskBarAwakePatch().Enable();
         new NewNewsCountPatch().Enable();
         new SetGoalEnemyPatch().Enable();
-        new InitRepeatableQuestsDisposePatch().Enable();
+        // new InitRepeatableQuestsDisposePatch().Enable();
+        new ChatSendMessagePatch().Enable();
 
 #if DEBUG
         
@@ -301,11 +302,11 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         #endregion
         #region COMMAND
 
-        CommandHotKey = Register(
-            EConfigType.COMMAND,
-            Locales.COMMANDHOTKEY_KEY,
-            new KeyboardShortcut()
-        );
+        // CommandHotKey = Register(
+        //     EConfigType.COMMAND,
+        //     Locales.COMMANDHOTKEY_KEY,
+        //     new KeyboardShortcut()
+        // );
 
         #endregion
     }

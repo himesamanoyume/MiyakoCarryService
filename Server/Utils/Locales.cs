@@ -3,8 +3,6 @@ namespace MiyakoCarryService.Server.Utils
 {
     public static class Locales
     {
-        public const string STARTINGORDERGENERATION = "Mcs/StartingOrderGeneration";
-        public const string STARTINGQUESTCREATION = "Mcs/StartingQuestCreation";
         public const string SAVEORDERINFOEXCEPTION = "Mcs/SaveOrderInfoException";
         public const string SAVEMCSPLAYERPROFILEEXCEPTION = "Mcs/SaveMcsPlayerProfileException";
         public const string CLEANINGUPOUTDATEDMCSPLAYERPROFILE = "Mcs/CleaningUpOutdatedMcsPlayerProfile";

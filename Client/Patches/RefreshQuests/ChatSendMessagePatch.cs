@@ -1,27 +1,29 @@
 
-using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
-using EFT.UI;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
 {
     /// <summary>
-    /// 用于在打开任务界面时刷新
+    /// 当可能发送下单相关的消息时进行主动请求刷新任务
     /// </summary>
-    internal sealed class TraderScreensGroupShowPatch : ModulePatch
+    internal sealed class ChatSendMessagePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderScreensGroup), nameof(TraderScreensGroup.Show), [typeof(TraderScreensGroup.GClass3888)]);
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.ChatSendMessage));
 
         private static MainMenuControllerClass mainMenuControllerClass;
 
         [PatchPostfix]
-        public static void Postfix(TraderScreensGroup.GClass3888 controller)
+        public static void Postfix(string id, int type, string text, string replyTo, Callback<string> callback)
         {
-            _ = UpdateDailyQuests();
+            if (text.Contains("mcs order"))
+            {
+                _ = UpdateDailyQuests();
+            }
         }
 
         private static async Task UpdateDailyQuests()
@@ -32,6 +34,8 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
                 mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
             }
+
+            await Task.Delay(2000); 
 
             // _ = mainMenuControllerClass?.LocalQuestControllerClass?.QuestBookClass?.Gclass4059_0?.Run();
             var array = await GameLoop.Instance.Session.GetDailyQuests();

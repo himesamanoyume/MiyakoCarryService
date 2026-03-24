@@ -1,6 +1,4 @@
 {
-    "Mcs/StartingOrderGeneration": "Starting order generation",
-    "Mcs/StartingQuestCreation": "Starting quest creation",
     "Mcs/SaveOrderInfoException": "Exception while saving order information",
     "Mcs/SaveMcsPlayerProfileException": "Exception while saving Mcs player profile",
     "Mcs/CleaningUpOutdatedMcsPlayerProfile": "Cleaning up outdated Mcs player profile {0}",

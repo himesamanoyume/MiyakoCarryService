@@ -304,10 +304,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                     }
 
-                    if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
-                    {
-                        validPosition = navMeshHit2.position;
-                    }
+                    // if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                    // {
+                    //     validPosition = navMeshHit2.position;
+                    // }
 
                     if (validPosition.HasValue)
                     {

@@ -6,19 +6,14 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
-using MiyakoCarryService.Server.Utils;
-using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Utils.Logger;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
     public class OrderQuestGenerator(
-        SptLogger<OrderQuestGenerator> logger,
         RandomUtil randomUtil,
-        OrderQuestRewardGenerator orderQuestRewardGenerator,
-        ServerLocalisationService serverLocalisationService
+        OrderQuestRewardGenerator orderQuestRewardGenerator
     )
     {
         public RepeatableQuest GenerateOrderQuest(
@@ -44,7 +39,6 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 5 => 0.92f,
                 _ => 1f,
             };
-            logger.Info(serverLocalisationService.GetText(Locales.STARTINGORDERGENERATION));
             var order = Generate(players, spawnType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, punishmentMulti);
             return order;
         }

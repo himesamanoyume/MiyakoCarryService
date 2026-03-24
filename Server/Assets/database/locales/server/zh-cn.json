@@ -1,6 +1,4 @@
 {
-    "Mcs/StartingOrderGeneration": "开始生成订单",
-    "Mcs/StartingQuestCreation": "开始创建任务",
     "Mcs/SaveOrderInfoException": "保存订单信息异常",
     "Mcs/SaveMcsPlayerProfileException": "保存护航玩家存档异常",
     "Mcs/CleaningUpOutdatedMcsPlayerProfile": "正在清理过期的护航玩家存档 {0}",
