@@ -56,9 +56,9 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
+                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
                         orderInfoController.RemoveOrderInfo(orderInfo);
                         _ = orderInfoController.SaveOrderInfo();
-                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
                         break;
                     }
                 }

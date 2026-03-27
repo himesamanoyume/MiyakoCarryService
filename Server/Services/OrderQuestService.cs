@@ -271,6 +271,7 @@ namespace MiyakoCarryService.Server.Services
 
             if (total > 0)
             {
+                logger.Info($"[Mcs-Debug] 即将进行退款，退款金额为: {total} 卢布，如果你发现显示的退款金额与记忆中上交的金额数值有差异，请到Discord频道 #发布 的0.2.0.X子区中填写相应调查问卷，以帮助我修复Bug");
                 var roubles = new Item  
                 {  
                     Id = new MongoId(),  
