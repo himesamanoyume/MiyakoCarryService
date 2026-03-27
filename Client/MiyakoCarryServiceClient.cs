@@ -51,7 +51,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
 
     #region COMMAND
 
-    // public static ConfigEntry<KeyboardShortcut> CommandHotKey;
+    public static ConfigEntry<KeyboardShortcut> CommandHotKey;
 
     #endregion
 
@@ -302,11 +302,11 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         #endregion
         #region COMMAND
 
-        // CommandHotKey = Register(
-        //     EConfigType.COMMAND,
-        //     Locales.COMMANDHOTKEY_KEY,
-        //     new KeyboardShortcut()
-        // );
+        CommandHotKey = Register(
+            EConfigType.COMMAND,
+            Locales.COMMANDHOTKEY_KEY,
+            new KeyboardShortcut()
+        );
 
         #endregion
     }

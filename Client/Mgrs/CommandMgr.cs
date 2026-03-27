@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -18,6 +19,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private GamePlayerOwner _gamePlayerOwner
         {
+            set
+            {
+                field = value;
+            }
             get
             {
                 return field ??= Singleton<GameWorld>.Instance.MainPlayer.GetComponentInChildren<GamePlayerOwner>();
@@ -31,6 +36,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.OnRaidStarted();
             _mcsBotPlayerIds = McsRequestHandler.GetMcsBotPlayerIds();
+            _gamePlayerOwner = null;
         }
 
         protected sealed override void OnRaidEnded()
@@ -38,6 +44,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
             _mcsBotPlayerIds.Clear();
             _mcsBotPlayers.Clear();
+            _gamePlayerOwner = null;
         }
 
         void Update()
@@ -47,11 +54,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            // if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.CommandHotKey.Value))
-            // {
-            //     BuildMainCommandMenu();
-            // }
-        } 
+            if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.CommandHotKey.Value))
+            {
+                BuildMainCommandMenu();
+            }
+        }
 
         private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
         {
@@ -104,9 +111,9 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Actions = new()
             };
-            
-            actionsReturnClass.Actions.Add(TeamHoldCommand(CloseCommandMenu));
-            actionsReturnClass.Actions.Add(TeamRegroupCommand(CloseCommandMenu));
+
+            // actionsReturnClass.Actions.Add(TeamHoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenu));
 
             if (actionsReturnClass != null)
@@ -153,13 +160,25 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass TeamRegroupCommand(Action action)
+        public ActionsTypesClass TeamRegroupCommand(Action<Player> action)
         {
             return new ActionsTypesClass
             {
                 Name = "全队集合",
                 Disabled = false,
-                Action = action
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
             };
         }
 
@@ -175,8 +194,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 Actions = new()
             };
 
-            actionsReturnClass.Actions.Add(HoldCommand(CloseCommandMenu));
-            actionsReturnClass.Actions.Add(RegroupCommand(CloseCommandMenu));
+            // actionsReturnClass.Actions.Add(HoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(RegroupCommand(RegroupCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenu));
 
             if (actionsReturnClass != null)
@@ -198,13 +217,16 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass RegroupCommand(Action action)
+        public ActionsTypesClass RegroupCommand(Action<Player> action, Player mcsBotPlayer)
         {
             return new ActionsTypesClass
             {
                 Name = "集合",
                 Disabled = false,
-                Action = action
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
             };
         }
 
@@ -222,6 +244,14 @@ namespace MiyakoCarryService.Client.Mgrs
         public void CloseCommandMenu()
         {
             _gamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
+        }
+
+        public void RegroupCommandAction(Player mcsBotPlayer)
+        {
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            botOwner.Memory.GoalTarget.Clear();
+            botOwner.Memory.GoalEnemy = null;
+            botOwner.Mover.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position);
         }
     }
 }
