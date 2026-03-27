@@ -112,6 +112,14 @@ namespace MiyakoCarryService.Client.Utils
             }
             
             return response;
-        } 
+        }
+
+        public static async Task SendLog(string text)
+        {
+            await PostJsonAsync("/mcs/client/log", new DebugInfo
+            {
+                Info = text
+            });
+        }
     }
 }

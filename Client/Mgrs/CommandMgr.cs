@@ -47,10 +47,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.CommandHotKey.Value))
-            {
-                BuildMainCommandMenu();
-            }
+            // if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.CommandHotKey.Value))
+            // {
+            //     BuildMainCommandMenu();
+            // }
         } 
 
         private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
