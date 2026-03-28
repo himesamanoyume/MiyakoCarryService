@@ -32,8 +32,8 @@ namespace MiyakoCarryService.Server.Services
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
         TraderService traderService,
-        MailSendService mailSendService,
-        ItemHelper itemHelper,
+        // MailSendService mailSendService,
+        // ItemHelper itemHelper,
         ProfileHelper profileHelper
     )
     {
@@ -271,22 +271,22 @@ namespace MiyakoCarryService.Server.Services
 
             if (total > 0)
             {
-                logger.Info($"[Mcs-Debug] 即将进行退款，退款金额为: {total} 卢布，如果你发现显示的退款金额与记忆中上交的金额数值有差异，请到Discord频道 #发布 的0.2.0.X子区中填写相应调查问卷，以帮助我修复Bug");
-                var roubles = new Item  
-                {  
-                    Id = new MongoId(),  
-                    Template = ItemTpl.MONEY_ROUBLES,  
-                    Upd = new Upd { StackObjectsCount = total },  
-                };  
+                logger.Info($"[Mcs-Debug] 因退款功能存在恶性bug，暂时关闭退款。退款金额为: {total} 卢布。注意：如果你发现显示的退款金额与记忆中上交的金额数值有差异，请到Discord频道 #发布 的0.2.0.X子区中填写相应调查问卷，以帮助我修复Bug");
+                // var roubles = new Item  
+                // {  
+                //     Id = new MongoId(),  
+                //     Template = ItemTpl.MONEY_ROUBLES,  
+                //     Upd = new Upd { StackObjectsCount = total },  
+                // };  
 
-                mailSendService.SendLocalisedNpcMessageToPlayer(
-                    sessionId,
-                    TraderService.MiyakoTraderId,
-                    MessageType.MessageWithItems,
-                    Locales.MIYAKOTRADERREFUND,
-                    itemHelper.SplitStackIntoSeparateItems(roubles).SelectMany(x => x).ToList(),
-                    timeUtil.GetHoursAsSeconds(168)
-                );
+                // mailSendService.SendLocalisedNpcMessageToPlayer(
+                //     sessionId,
+                //     TraderService.MiyakoTraderId,
+                //     MessageType.MessageWithItems,
+                //     Locales.MIYAKOTRADERREFUND,
+                //     itemHelper.SplitStackIntoSeparateItems(roubles).SelectMany(x => x).ToList(),
+                //     timeUtil.GetHoursAsSeconds(168)
+                // );
             }
         }
     }

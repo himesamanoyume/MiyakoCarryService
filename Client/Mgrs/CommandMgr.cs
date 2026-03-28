@@ -113,7 +113,7 @@ namespace MiyakoCarryService.Client.Mgrs
             };
 
             // actionsReturnClass.Actions.Add(TeamHoldCommand(CloseCommandMenu));
-            actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
+            actionsReturnClass.Actions.Add(TeamForceRegroupCommand(ForceRegroupCommandAction));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenu));
 
             if (actionsReturnClass != null)
@@ -160,11 +160,11 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass TeamRegroupCommand(Action<Player> action)
+        public ActionsTypesClass TeamForceRegroupCommand(Action<Player> action)
         {
             return new ActionsTypesClass
             {
-                Name = "全队集合",
+                Name = "全队强制集合",
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -172,6 +172,11 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
                         {
                             continue;
                         }
@@ -251,7 +256,16 @@ namespace MiyakoCarryService.Client.Mgrs
             var botOwner = mcsBotPlayer.AIData.BotOwner;
             botOwner.Memory.GoalTarget.Clear();
             botOwner.Memory.GoalEnemy = null;
+            CloseCommandMenu();
+        }
+
+        public void ForceRegroupCommandAction(Player mcsBotPlayer)
+        {
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
             botOwner.Mover.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position);
+            botOwner.Memory.GoalTarget.Clear();
+            botOwner.Memory.GoalEnemy = null;
+            CloseCommandMenu();
         }
     }
 }
