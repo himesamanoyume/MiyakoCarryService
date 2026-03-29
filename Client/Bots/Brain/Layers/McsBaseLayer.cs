@@ -165,11 +165,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual void UpdateCoverToShoot()
         {
+            if (McsBotPlayerData?.LeadPlayer == null)
+            {
+                return;
+            }
+
             if (_lastHoldPositionTime < Time.time)
             {
                 _lastHoldPositionTime = Time.time + 1f;
                 Vector3 leadPos;
-                if (McsBotPlayerData.LeadPlayer != null && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
+
+                if (McsBotPlayerData.LeadPlayer.HealthController == null)
+                {
+                    return;
+                }
+
+                if (McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
                     leadPos = McsBotPlayerData.LeadPlayer.Position;
                 }
