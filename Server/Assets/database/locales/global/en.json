@@ -49,5 +49,14 @@
     "Mcs/MiyakoTraderAvailableCommandsList": "The available commands will be listed below:",
     "Mcs/MiyakoTraderSpecialHelp": "Friendly reminder: Please do not intentionally kill carry service players, this behavior will result in permanent price increase!",
     "Mcs/MiyakoTraderRefund": "Order not settled, this is a refund",
-    "Mcs/CommandHotKey Key": "Command Menu Hotkey"
+    "Mcs/CommandHotKey Key": "Command Menu Hotkey",
+    "Mcs/TeamCommand Name": "Team Command",
+    "Mcs/TeamCommand TargetName": "Issue commands to all carry service players",
+    "Mcs/MemberCommand TargetName": "Issue commands to specific carry service players",
+    "Mcs/TeamForceTeleportCommand Name": "Force Teleport All",
+    "Mcs/TeamForceTeleportCommand TargetName": "Clear goal enemy from all carry service players and attempt to teleport them to your current location",
+    "Mcs/ForceTeleportCommand Name": "Force Teleport",
+    "Mcs/ForceTeleportCommand TargetName": "Clear carry service player goal enemy and attempt to teleport them to your current location",
+    "Mcs/CancelCommand Name": "Cancel",
+    "Mcs/CancelCommand TargetName": "Cancel the command menu"
 }

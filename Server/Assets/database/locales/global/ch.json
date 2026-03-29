@@ -49,5 +49,14 @@
     "Mcs/MiyakoTraderAvailableCommandsList": "以下将列出可用的指令:",
     "Mcs/MiyakoTraderSpecialHelp": "温馨提示：请不要故意射杀护航玩家，此行为会导致价格永久上涨！",
     "Mcs/MiyakoTraderRefund": "订单未结算，这是退款",
-    "Mcs/CommandHotKey Key": "打开指令菜单快捷键"
+    "Mcs/CommandHotKey Key": "打开指令菜单快捷键",
+    "Mcs/TeamCommand Name": "全体都有",
+    "Mcs/TeamCommand TargetName": "对所有护航下达指令",
+    "Mcs/MemberCommand TargetName": "对指定护航下达指令",
+    "Mcs/TeamForceTeleportCommand Name": "全部强制传送",
+    "Mcs/TeamForceTeleportCommand TargetName": "清除全队护航仇恨、并尝试使其全部传送至当前位置",
+    "Mcs/ForceTeleportCommand Name": "强制传送",
+    "Mcs/ForceTeleportCommand TargetName": "清除护航仇恨、并尝试使其传送至当前位置",
+    "Mcs/CancelCommand Name": "取消",
+    "Mcs/CancelCommand TargetName": "取消下达指令"
 }

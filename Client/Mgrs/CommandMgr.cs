@@ -171,8 +171,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "全体听令",
-                TargetName = "对所有护航成员下达指令",
+                Name = Locales.TEAMCOMMAND_NAME,
+                TargetName = Locales.TEAMCOMMAND_TARGETNAME,
                 Disabled = mcsBotPlayers.All(p => !p.ActiveHealthController.IsAlive),
                 Action = action
             };
@@ -182,8 +182,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = $"{mcsBotPlayer.Profile.Info.Nickname} 听令",
-                TargetName = "单独给一个护航下达指令",
+                Name = mcsBotPlayer.Profile.Info.Nickname,
+                TargetName = Locales.MEMBERCOMMAND_TARGETNAME,
                 Disabled = !mcsBotPlayer.ActiveHealthController.IsAlive,
                 Action = new Action(() =>
                 {
@@ -207,8 +207,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "全队强制传送",
-                TargetName = "清除全队护航仇恨、并尝试使其全部传送至当前位置",
+                Name = Locales.TEAMFORCETELEPORTCOMMAND_NAME,
+                TargetName = Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -272,8 +272,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "强制传送",
-                TargetName = "清除护航仇恨、并尝试使其传送至当前位置",
+                Name = Locales.FORCETELEPORTCOMMAND_NAME,
+                TargetName = Locales.FORCETELEPORTCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -286,8 +286,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "取消",
-                TargetName = "取消下达指令",
+                Name = Locales.CANCELCOMMAND_NAME,
+                TargetName = Locales.CANCELCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = action
             };

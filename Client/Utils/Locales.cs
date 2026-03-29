@@ -38,5 +38,14 @@ namespace MiyakoCarryService.Client.Utils
         public const string LOADINGLOCALES = "Mcs/LoadingLocales";
         public const string ORIGINALWEBSITE = "Mcs/OriginalWebsite";
         public const string COMMANDHOTKEY_KEY = "Mcs/CommandHotKey Key";
+        public const string TEAMCOMMAND_NAME = "Mcs/TeamCommand Name";
+        public const string TEAMCOMMAND_TARGETNAME = "Mcs/TeamCommand TargetName";
+        public const string MEMBERCOMMAND_TARGETNAME = "Mcs/MemberCommand TargetName";
+        public const string TEAMFORCETELEPORTCOMMAND_NAME = "Mcs/TeamForceTeleportCommand Name";
+        public const string TEAMFORCETELEPORTCOMMAND_TARGETNAME = "Mcs/TeamForceTeleportCommand TargetName";
+        public const string FORCETELEPORTCOMMAND_NAME = "Mcs/ForceTeleportCommand Name";
+        public const string FORCETELEPORTCOMMAND_TARGETNAME = "Mcs/ForceTeleportCommand TargetName";
+        public const string CANCELCOMMAND_NAME = "Mcs/CancelCommand Name";
+        public const string CANCELCOMMAND_TARGETNAME = "Mcs/CancelCommand TargetName";
     }
 }
