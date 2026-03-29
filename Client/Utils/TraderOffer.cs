@@ -1,38 +1,39 @@
 using System;
 using EFT.InventoryLogic;
 
-namespace MiyakoCarryService.Client.Utils;
-
-internal sealed class TraderOffer
+namespace MiyakoCarryService.Client.Utils
 {
-    public string Name { get; private set; }
-    public long Price;
-    public string CurrencySignal { get; } = "₽";
-    public ECurrencyType CurrencyType;
-
-    public TraderOffer(long price, int totalSlot, ECurrencyType currencyType, string name = "Miyako")
+    internal sealed class TraderOffer
     {
-        Name = name;
-        CurrencyType = currencyType;
-        Price = ExchangePrice(currencyType, price) / totalSlot;
-    }
+        public string Name { get; private set; }
+        public long Price;
+        public string CurrencySignal { get; } = "₽";
+        public ECurrencyType CurrencyType;
 
-    public long ExchangePrice(ECurrencyType currencyType, long price)
-    {
-        return currencyType switch
+        public TraderOffer(long price, int totalSlot, ECurrencyType currencyType, string name = "Miyako")
         {
-            ECurrencyType.USD => Math.Abs(price * 151),
-            ECurrencyType.EUR => Math.Abs(price * 166),
-            ECurrencyType.GP => Math.Abs(price * 50000),
-            _ => Math.Abs(price)
-        };
-    }
+            Name = name;
+            CurrencyType = currencyType;
+            Price = ExchangePrice(currencyType, price) / totalSlot;
+        }
 
-    public TraderOffer()
-    {
-        Name = "";
-        Price = 0;
-        CurrencyType = ECurrencyType.RUB;
-        CurrencySignal = "₽";
+        public long ExchangePrice(ECurrencyType currencyType, long price)
+        {
+            return currencyType switch
+            {
+                ECurrencyType.USD => Math.Abs(price * 151),
+                ECurrencyType.EUR => Math.Abs(price * 166),
+                ECurrencyType.GP => Math.Abs(price * 50000),
+                _ => Math.Abs(price)
+            };
+        }
+
+        public TraderOffer()
+        {
+            Name = "";
+            Price = 0;
+            CurrencyType = ECurrencyType.RUB;
+            CurrencySignal = "₽";
+        }
     }
 }
