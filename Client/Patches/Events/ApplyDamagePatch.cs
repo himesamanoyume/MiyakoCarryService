@@ -30,7 +30,12 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
-            if (!McsMgr.IsHost || damage <= 0)
+            if (!McsMgr.IsHost)
+            {
+                return;
+            }
+
+            if (damage <= 0)
             {
                 return;
             }

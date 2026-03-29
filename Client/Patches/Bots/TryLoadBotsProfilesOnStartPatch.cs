@@ -89,25 +89,54 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 leadPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
                 {
-                    if (damageInfo.Player == null || !damageInfo.Player.IsAI || damageInfo.Player.AIData == null || damageInfo.Player.AIData.BotOwner == null)
+                    try
                     {
-                        return;
-                    }
-
-                    var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
-
-                    if (McsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
-                    {
-                        return;
-                    }
-
-                    if (leadPlayer.BotsGroup != null)
-                    {
-                        var mcsBotPlayer = McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId).FirstOrDefault();
-                        if (mcsBotPlayer.BotFollower.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
+                        if (damageInfo.Player == null)
                         {
-                            mcsAILeadPlayer.CalcGoalEnemy();
+                            return;
                         }
+
+                        if (!damageInfo.Player.IsAI)
+                        {
+                            return;
+                        }
+
+                        if (damageInfo.Player.AIData == null)
+                        {
+                            return;
+                        }
+
+                        if (damageInfo.Player.AIData.BotOwner == null)
+                        {
+                            return;
+                        }
+
+                        var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
+
+                        if (McsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
+                        {
+                            return;
+                        }
+
+                        if (leadPlayer.BotsGroup != null)
+                        {
+                            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
+
+                            if (mcsBotPlayers == null)
+                            {
+                                return;
+                            }
+
+                            var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
+                            if (mcsBotPlayer?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
+                            {
+                                mcsAILeadPlayer.CalcGoalEnemy();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        _ = McsRequestHandler.SendLog("此为调试警报类型6，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug");
                     }
                 };
 
