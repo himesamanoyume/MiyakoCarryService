@@ -57,6 +57,17 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.followerSanitar
         };
 
+        public static List<string> SAINNotAdjusted = new()
+        {
+            nameof(EBrainName.BossTest),
+            nameof(EBrainName.Marksman),
+            nameof(EBrainName.SectantWarrior),
+            // nameof(EBrainName.SctPredvst),
+            nameof(EBrainName.FlKlnAslt),
+            nameof(EBrainName.KolonSec),
+            nameof(EBrainName.Fl_Zraychiy),
+        };
+
         public static HashSet<string> LabyrinthSolvePuzzleItems = new()
         {
             CommonId.BBQS43_GasTorch,

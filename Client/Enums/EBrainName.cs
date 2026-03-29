@@ -49,5 +49,8 @@ namespace MiyakoCarryService.Client.Enums
         FlBoarSt,
         FlKlnAslt,
         KolonSec,
+        SctPredvst,
+        PrizrakSt,
+        Oni
     }
 }
