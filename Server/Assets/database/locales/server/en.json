@@ -9,7 +9,7 @@
     "Mcs/MiyakoTraderSubCommand": "Subcommand {0}:\n{1}",
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "Commands available for \"{0}\" prefix:",
     "Mcs/SpawnTypeCommon": "Common Player",
-    "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\n order command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\ncarry service level: 1~5\nduration: integer, in hours\nexample: mcs {2} 4 4 24",
+    "Mcs/MiyakoTraderCommandHelp1": "mcs {0}\norder command:\nmcs {1} {{player count}} {{bot type}} {{carry service level}} {{duration}}\nCarry service level: 1~5\nDuration: integer, in hours\nExample: mcs {2} 4 0 5 24\nThis represents ordering a 4-player carry service with common player type, carry service level 5, and 24-hour duration. You will be charged for 4 players' 24-hour service in Rubles",
     "Mcs/MiyakoTraderCommandHelp2": "Base Prices:\nCommon Player Type:\nCarry Service Level 1: {0} Rubles/hour\nCarry Service Level 2: {1} Rubles/hour\nCarry Service Level 3: {2} Rubles/hour\nCarry Service Level 4: {3} Rubles/hour\nCarry Service Level 5: {4} Rubles/hour\nBoss carry service type prices doubled",
     "Mcs/MiyakoTraderCommandHelp3": "Bot type list:\n",
     "Mcs/CurrentPriceIncrease": "Current permanent price increase: {0}%",

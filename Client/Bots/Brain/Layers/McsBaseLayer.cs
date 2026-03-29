@@ -287,32 +287,32 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     CheckStuck();
 
-                    Vector3? validPosition = null;
-                    var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                    var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                    var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
+                    // Vector3? validPosition = null;
+                    // var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    // var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    // var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
 
-                    for (int attempt = 0; attempt < 30; attempt++)
-                    {
-                        if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
-                        {
-                            if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
-                            {
-                                validPosition = navMeshHit1.position;
-                                break;
-                            }
-                        }
-                    }
+                    // for (int attempt = 0; attempt < 30; attempt++)
+                    // {
+                    //     if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                    //     {
+                    //         if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
+                    //         {
+                    //             validPosition = navMeshHit1.position;
+                    //             break;
+                    //         }
+                    //     }
+                    // }
 
                     // if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
                     // {
                     //     validPosition = navMeshHit2.position;
                     // }
 
-                    if (validPosition.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
-                    }
+                    // if (validPosition.HasValue)
+                    // {
+                    //     BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                    // }
                 }
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
