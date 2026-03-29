@@ -147,6 +147,7 @@ public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
         new SetGoalEnemyPatch().Enable();
         // new InitRepeatableQuestsDisposePatch().Enable();
         new ChatSendMessagePatch().Enable();
+        new LocalQuestControllerClassPatch().Enable();
 
 #if DEBUG
         
