@@ -7,6 +7,9 @@ using MiyakoCarryService.Client.Patches.Events;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;
+using UnityEngine;
+using System.IO;
+using System.Reflection;
 
 namespace MiyakoCarryService.Client
 {
@@ -14,6 +17,9 @@ namespace MiyakoCarryService.Client
     {
         public Dictionary<Type, IMgr> Mgrs { get; private set; } = new();
         public Dictionary<string, TraderOffer> ItemBestPriceDict { get; private set; } = new();
+        public Shader HighlightShader { get; private set; } = null;
+        public Camera MainCamera { get; private set; } = null;
+        public Camera OpticCamera { get; private set; } = null;
         public bool IsGameStarted = false;
 
         public ISession Session
@@ -61,21 +67,95 @@ namespace MiyakoCarryService.Client
         void Update()
         {
             CheckVaildGameWorld();
+
+            if (!IsVaildGameWorld)
+            {
+                return;
+            }
+
+            if (MainCamera == null)
+            {
+                MainCamera = Camera.main;
+            }
+
+            if (OpticCamera == null)
+            {
+                foreach (var camera in Camera.allCameras)
+                {
+                    if (camera.name == "BaseOpticCamera(Clone)")
+                    {
+                        OpticCamera = camera;
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void LoadAssetBundle()
+        {
+            if (HighlightShader != null)
+            {
+                return;
+            }
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "MiyakoCarryService.Client.Assets.miyakocarryservice";
+            var highlightShaderName = "assets/shader/teammatehighlight.shader";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    return;
+                }
+
+                byte[] assetBytes;
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    assetBytes = memoryStream.ToArray();
+                }
+
+                AssetBundle bundle = AssetBundle.LoadFromMemory(assetBytes);
+                if (bundle != null)
+                {
+                    HighlightShader = bundle.LoadAsset<Shader>(highlightShaderName);
+                    if (HighlightShader == null)
+                    {
+                        Debug.LogException(new Exception($"无法加载Shader: {highlightShaderName}"));
+                    }
+
+                    bundle.Unload(false);
+                    return;
+                }
+            }
         }
 
         public void Init()
         {
+            LoadAssetBundle();
+
             McsMgr.Enable();
             BrainMgr.Enable();
             PlayerDataMgr.Enable();
             LootDataMgr.Enable();
             SubTitleMgr.Enable();
             CommandMgr.Enable();
+
+            OnGameWorldStart += Reset;
+            OnGameWorldDestory += Reset;
         }
 
         private void Reset()
         {
-            
+            MainCamera = null;
+            OpticCamera = null;
+        }
+
+        private void OnDestroy()
+        {
+            OnGameWorldStart -= Reset;
+            OnGameWorldDestory -= Reset;
         }
 
         public T GetMgr<T>() where T : IMgr

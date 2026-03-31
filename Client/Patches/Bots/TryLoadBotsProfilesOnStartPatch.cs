@@ -91,22 +91,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 {
                     try
                     {
-                        if (damageInfo.Player == null)
-                        {
-                            return;
-                        }
-
-                        if (!damageInfo.Player.IsAI)
-                        {
-                            return;
-                        }
-
-                        if (damageInfo.Player.AIData == null)
-                        {
-                            return;
-                        }
-
-                        if (damageInfo.Player.AIData.BotOwner == null)
+                        if (damageInfo.Player?.AIData?.BotOwner == null)
                         {
                             return;
                         }

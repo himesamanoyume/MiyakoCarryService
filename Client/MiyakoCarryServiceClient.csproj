@@ -17,6 +17,9 @@
     <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets\miyakocarryservice" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +50,7 @@
     <Reference Include="spt-singleplayer" HintPath=".\Ref\spt-singleplayer.dll" Private="false" />
     <Reference Include="Unity.TextMeshPro" HintPath=".\Ref\Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="UnityEngine.AIModule" HintPath=".\Ref\UnityEngine.AIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.AssetBundleModule" HintPath=".\Ref\UnityEngine.AssetBundleModule.dll" Private="false" />
     <Reference Include="UnityEngine.CoreModule" HintPath=".\Ref\UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath=".\Ref\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.IMGUIModule" HintPath=".\Ref\UnityEngine.IMGUIModule.dll" Private="false" />

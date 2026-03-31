@@ -20,22 +20,9 @@
 
 ## 低优先级 | IDEA
 
-- AI恢复无限体力、耐力。如果不开启的话需要Patch生成Bot时往保险箱塞太多物品的代码，这会导致重量太大使AI总是会想丢东西
-- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
-- - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
-> 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
-
-> [Fika Wiki](https://wiki.project-fika.com/modding-fika)
-
-> 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
-- Fika联机下，护航会拿走玩家的物品去埋包
-- 移除Bot的臂章
-- 想办法实现武器的占用格数的计算
-- 需要实现老板距离Boss超一定距离且一段时间后传送护航至老板处
 - 修改指令系统数组`PredefinedLayoutGroup.PositionsToCenter`
 - - `(-321, 241)，(0, 315)，(321, 241)，(492, 55)，(433, -158)，(171, -296)，(-171, -296)，(-433, -158)，(-492, 55)，(-321, 241)，（0, 150）,（0, -100）`
 - - *关于指令系统和字幕系统，需要等待到有合适的联机同步方法后，才可继续推进*
-- `GClass117`为AI掠夺战利品的Layer，需要适时进行参考学习
 - 适配联机部分时
 - - 实现配置管理器显示默认配置项
 - - 包含物品收集筛选器：是否需要帮忙找老板的任务物品（特殊的任务物品不能拿，基本都是无价值物品吧。但是好像也未必一定不能丢出来），老板的愿望单物品，老板的高价值物品，老板的特定物品（尝试实现全物品搜索器）。这些开关都可以按需关闭
@@ -361,17 +348,30 @@
 - ~~尝试修一修`TryLoadBotsProfilesOnStartPatch`的异常~~
 - ~~尝试修一修`ApplyDamagePatch`的异常~~
 ```
-- **BUG: 还是会异常生成护航**
+- ~~BUG: 还是会异常生成护航~~很少被反馈提及了
 - **压子弹时会触发数据更新，导致频繁卡顿，需要优化**
 - ~~指令系统文本本地化~~
 - **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑**
 - - spawntype新增一个可空字段，可被BrainMgr从服务端获取
 - **队友高亮（联机时需要获取本局全部护航的ProfileId然后全部添加高亮）**
+- - 主机副机都向服务端获取
+- **联机状态下，当老板撤离时，护航也需要撤离**
 - 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
 - 先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划
 - 指令：
 - - 单人指令：报告情况（交战中等等）、前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）、归队（前往老板周围）、护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
 - - 全队指令：没有报告情况、全队前往指定位置（到达位置后停留）、全队归队（前往老板周围）、全队护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
+- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
+- - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
+> 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
+
+> [Fika Wiki](https://wiki.project-fika.com/modding-fika)
+
+> 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
+- Fika联机下，护航会拿走玩家的物品去埋包
+- 移除Bot的臂章
+- 想办法实现武器的占用格数的计算
+- `GClass117`为AI掠夺战利品的Layer，需要适时进行参考学习
 
 ## Logic思想指导
 
@@ -392,7 +392,7 @@
 
 #### 0.2.0.0
 
-- 新增指令系统功能**雏形**（当前应该是只有主机才可以完全正常地使用，下一步目标是适配联机，让副机也能使用完全正常地指令）
+- 新增指令系统功能**雏形**（联机状态时当前应该是只有主机才可以完全正常地使用，下一步目标是适配联机，让副机也能使用完全正常地指令）
 - 尝试修复异常退款金额的问题
 - 其他一些小调整
 

@@ -1,0 +1,197 @@
+using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
+using MiyakoCarryService.Client.Utils;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+namespace MiyakoCarryService.Client.Mgrs
+{
+    internal sealed class HighlightMgr : BaseMgr<HighlightMgr>
+    {
+        private Dictionary<Renderer, Material> _cache = new();
+        private CommandBuffer _commandBuffer;
+        private bool _mainCameraInitialized = false;
+        private bool _opticCameraInitialized = false;
+        private Dictionary<Material, List<Renderer>> _materialBatches = new();
+
+        private McsMgr McsMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
+            }
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            _commandBuffer = new CommandBuffer { name = "Mcs Player Highlight Pass" };
+
+            GameLoop.Instance.OnGameWorldStart += () =>
+            {
+                Clear();
+                _mainCameraInitialized = false;
+                _opticCameraInitialized = false;
+            };
+
+            GameLoop.Instance.OnGameWorldDestory += () =>
+            {
+                Clear();
+                _mainCameraInitialized = false;
+                _opticCameraInitialized = false;
+            };
+        }
+
+        void Update()
+        {
+            if (_gameloop.IsVaildGameWorld)
+            {
+                if (_gameloop.MainCamera != null && !_mainCameraInitialized)
+                {
+                    _mainCameraInitialized = true;
+                    _gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    _gameloop.MainCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                }
+
+                if (_gameloop.OpticCamera != null && !_opticCameraInitialized)
+                {
+                    _opticCameraInitialized = true;
+                    _gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    _gameloop.OpticCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                }
+            }
+
+        }
+
+        void SwitchShaders()
+        {
+            if (_gameloop.IsVaildGameWorld)
+            {
+                _commandBuffer.Clear();
+                foreach (var batches in _materialBatches.Values)
+                {
+                    batches.Clear();
+                }
+
+                foreach (var player in Singleton<GameWorld>.Instance.allAlivePlayersByID.Values)
+                {
+                    if (player.IsYourPlayer)
+                    {
+                        continue;
+                    }
+
+                    if (!player.ProfileId.Contains(""))
+                    {
+                        continue;
+                    }
+                    
+                    BatchRenderers(player, _gameloop.HighlightShader, Draw.Green.Rgb.linear);
+                }
+                ExecuteBatchRendering();
+            }
+        }
+
+        private void BatchRenderers(Player player, Shader shader, Color color)
+        {
+            var playerBody = player.PlayerBody;
+            if (playerBody == null)
+            {
+                return;
+            }
+
+            var skins = playerBody.BodySkins;
+            if (skins == null)
+            {
+                return;
+            }
+
+            foreach (var skin in skins.Values)
+            {
+                if (skin == null)
+                {
+                    continue;
+                }
+
+                foreach (var renderer in skin.GetRenderers())
+                {
+                    if (renderer == null)
+                    {
+                        continue;
+                    }
+
+                    if (!renderer.isVisible)
+                    {
+                        continue;
+                    }
+
+                    if (!_cache.TryGetValue(renderer, out var material))
+                    {
+                        material = new Material(shader);
+                        _cache[renderer] = material;
+                    }
+
+                    material.SetColor("_HighlightColor", color);
+                    material.SetFloat("_HighlightOutlinesWidth", 0.001f);
+
+                    if (!_materialBatches.ContainsKey(material))
+                    {
+                        _materialBatches[material] = new List<Renderer>();
+                    }
+                    _materialBatches[material].Add(renderer);
+                }
+            }
+        }
+
+        private void ExecuteBatchRendering()
+        {
+            foreach (var batch in _materialBatches)
+            {
+                var material = batch.Key;
+                var renderers = batch.Value;
+
+                foreach (var renderer in renderers)
+                {
+                    if (renderer != null && renderer.isVisible)
+                    {
+                        _commandBuffer.DrawRenderer(renderer, material, 0, -1);
+                    }
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            Clear();
+        }
+
+        private void Clear()
+        {
+            foreach (var material in _cache.Values)
+            {
+                if (material != null)
+                {
+                    if (material is UnityEngine.Object obj && obj != null)
+                    {
+                        Destroy(obj);
+                    }
+                }
+            }
+            foreach (var batch in _materialBatches)
+            {
+                batch.Value.Clear();
+            }
+            _cache.Clear();
+            _materialBatches.Clear();
+            if (_gameloop.MainCamera != null && _commandBuffer != null)
+            {
+                _gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+            }
+
+            if (_gameloop.OpticCamera != null && _commandBuffer != null)
+            {
+                _gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+            }
+        }
+    }
+}

@@ -3,7 +3,6 @@ Shader "MiyakoCarryService/TeammateHighlight"
     Properties
     {
         _HighlightColor("Highlight Color", Color) = (0, 0, 1, 0.2)
-        [Enum(UnityEngine.Rendering.CompareFunction)] _HighlightZTest("Highlight ZTest", Float) = 8
         _HighlightOutlinesWidth("Highlight Outlines Width", Range(0.0, 2.0)) = 0.15
     }
 

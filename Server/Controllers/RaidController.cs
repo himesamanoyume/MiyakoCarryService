@@ -51,6 +51,11 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return await raidService.SpawnMcsBotPlayer(mcsLeadPlayerId, side);
         }
+
+        public async Task<Dictionary<MongoId, IEnumerable<MongoId>>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId)
+        {
+            return await raidService.GetAllMcsBotPlayerIdInRaid(mcsLeadPlayerId);
+        }
     
         public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)
         {

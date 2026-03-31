@@ -121,5 +121,17 @@ namespace MiyakoCarryService.Client.Utils
                 Info = text
             });
         }
+
+        public static async Task<Dictionary<MongoID, List<MongoID>>> GetAllMcsBotPlayerIdInRaid()
+        {
+            var response = await GetJsonAsync<Dictionary<MongoID, List<MongoID>>>("/mcs/singleplayer/info/botids/get");
+
+            if (response == null)
+            {
+                return new();
+            }
+
+            return response;
+        }
     }
 }

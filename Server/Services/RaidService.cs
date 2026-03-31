@@ -251,10 +251,36 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsLeadPlayerId, SideType side)
+        public async Task<Dictionary<MongoId, IEnumerable<MongoId>>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId)
+        {
+            var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
+
+            var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
+            {
+                var profileIds = await Task.Run(() =>
+                {
+                    var profiles = GetAllGroupMemberProfiles(mcsLeadPlayerId);
+                    return profiles.Select(p => p.ProfileInfo.ProfileId.Value).ToList();
+                });
+
+                var mcsLeadPlayerProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
+
+                return new KeyValuePair<MongoId, IEnumerable<MongoId>>(mcsLeadPlayerProfile.ProfileInfo.ProfileId.Value, profileIds);
+            });
+
+            var results = await Task.WhenAll(tasks);
+
+            var mcsPmcDatas = results.ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value
+            );
+
+            return mcsPmcDatas;
+        }
+
+        public HashSet<MongoId> GetAllMcsLeadPlayerIds(MongoId mcsLeadPlayerId)
         {
             var mcsLeadPlayerIds = new HashSet<MongoId> { mcsLeadPlayerId };
-
             if (compatibilityService.HasFikaServer)
             {
                 var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
@@ -281,6 +307,13 @@ namespace MiyakoCarryService.Server.Services
                     }
                 }
             }
+
+            return mcsLeadPlayerIds;
+        }
+
+        public async Task<Dictionary<MongoId, IEnumerable<PmcData>>> SpawnMcsBotPlayer(MongoId mcsLeadPlayerId, SideType side)
+        {
+            var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
 
             var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
@@ -308,34 +341,7 @@ namespace MiyakoCarryService.Server.Services
 
         public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)
         {
-            var mcsLeadPlayerIds = new HashSet<MongoId> { mcsLeadPlayerId };
-
-            if (compatibilityService.HasFikaServer)
-            {
-                var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
-                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
-                var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
-
-                if (matchId is not null)
-                {
-                    var fikaMatch = AccessTools.Method(fikaMatchServiceType, "GetMatch").Invoke(fikaMatchService, [matchId]);
-
-                    if (fikaMatch is not null)
-                    {
-                        var fikaPlayers = AccessTools.Property(compatibilityService.FikaMatchType, "Players").GetValue(fikaMatch);
-                        var fikaPlayerIds = (System.Collections.IEnumerable)fikaPlayers.GetType().GetProperty("Keys").GetValue(fikaPlayers);
-
-                        foreach (MongoId playerId in fikaPlayerIds)
-                        {
-                            if (playerId != mcsLeadPlayerId)
-                            {
-                                AddMatchPlayer(mcsLeadPlayerId, playerId);
-                                mcsLeadPlayerIds.Add(playerId);
-                            }
-                        }
-                    }
-                }
-            }
+            var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
 
             var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
