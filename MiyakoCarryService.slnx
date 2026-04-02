@@ -2,6 +2,9 @@
   <Folder Name="/Client/">
     <Project Path="Client/MiyakoCarryServiceClient.csproj" />
   </Folder>
+  <Folder Name="/Fika/">
+    <Project Path="Fika/MiyakoCarryServiceFika.csproj" />
+  </Folder>
   <Folder Name="/Server/">
     <Project Path="Server/MiyakoCarryServiceServer.csproj" />
   </Folder>

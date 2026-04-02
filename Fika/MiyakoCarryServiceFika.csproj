@@ -4,21 +4,18 @@
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
     <DevGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X</DevGamePath>
-    <DevGamePluginsMiyakoCarryServicePath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMiyakoCarryServicePath>
-    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceClient</BuildMiyakoCarryServicePath>  
-    <AssemblyName>Himesamanoyume.MiyakoCarryServiceClient</AssemblyName>
+    <DevGamePluginsMiyakoCarryServicePath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceFika</DevGamePluginsMiyakoCarryServicePath>
+    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceFika</BuildMiyakoCarryServicePath>  
+    <AssemblyName>Himesamanoyume.MiyakoCarryServiceFika</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
-    <AssemblyProduct>MiyakoCarryServiceClient</AssemblyProduct>  
+    <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
     <Version>0.2.1.0</Version>
-    <AssemblyTitle>MiyakoCarryServiceClient</AssemblyTitle>
+    <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://sns.oddba.cn/184517.html</Trademark>
-    <RootNamespace>MiyakoCarryService.Client</RootNamespace>
+    <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
     <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\miyakocarryservice" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />

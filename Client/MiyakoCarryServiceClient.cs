@@ -15,6 +15,7 @@ using MiyakoCarryService.Client.Patches.Events;
 using System.Text.RegularExpressions;
 using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Extensions;
+using BepInEx.Bootstrap;
 
 namespace MiyakoCarryService.Client
 {
@@ -83,9 +84,9 @@ namespace MiyakoCarryService.Client
         void Start()
         {
             Application.logMessageReceived += OnLog;
-            FikaInstalled = !Tools.CheckPlugin([FikaGUID]);
-            IsFikaHeadless = !Tools.CheckPlugin(["com.fika.headless"]);
-            SAINInstalled = !Tools.CheckPlugin(["me.sol.sain"]);
+            FikaInstalled = !CheckPlugin([FikaGUID]);
+            IsFikaHeadless = !CheckPlugin(["com.fika.headless"]);
+            SAINInstalled = !CheckPlugin(["me.sol.sain"]);
             SetupConfig();
             DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
             foreach (var kvp in LocalLocales.LoadingLocales)
@@ -109,11 +110,25 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        public static string DefaultLang = "en";
-
-        public static bool CheckUnsupportedPlugin()
+        public bool CheckPlugin(List<string> pluginList)
         {
-            return Tools.CheckPlugin([]);
+            var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
+
+            foreach (PluginInfo Info in pluginInfos)
+            {
+                if (pluginList.Contains(Info.Metadata.GUID))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public string DefaultLang = "en";
+
+        public bool CheckUnsupportedPlugin()
+        {
+            return CheckPlugin([]);
         }
 
         private void EnableAllPatches()

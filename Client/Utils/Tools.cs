@@ -1,8 +1,6 @@
 
 
 using System.Collections.Generic;
-using BepInEx;
-using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Datas;
@@ -115,20 +113,6 @@ namespace MiyakoCarryService.Client.Utils
                 }
             }
             return result;
-        }
-
-        public static bool CheckPlugin(List<string> pluginList)
-        {
-            var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
-
-            foreach (PluginInfo Info in pluginInfos)
-            {
-                if (pluginList.Contains(Info.Metadata.GUID))
-                {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 }
