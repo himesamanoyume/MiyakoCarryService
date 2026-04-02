@@ -30,6 +30,10 @@ namespace MiyakoCarryService.Server.Routers.Static
             new RouteAction<EmptyRequestData>(
                 "/mcs/singleplayer/info/bot/get",
                 async (url, info, sessionId, output) => await botCallbacks.GetMcsBotPlayerIds(url, info, sessionId)
+            ),
+            new RouteAction<EmptyRequestData>(
+                "/mcs/singleplayer/info/botids/get",
+                async (url, info, sessionId, output) => await botCallbacks.GetAllMcsBotPlayerIdInRaid(url, info, sessionId)
             )
         ]
     )

@@ -15,6 +15,9 @@
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "本订单不支持刷新",
     "Mcs/A.Basic": "A. 基础 | 暂不生效",
     "Mcs/B.Command": "B. 指令",
+    "Mcs/C.Player": "C. 玩家",
+    "Mcs/FunctionEnabled": "已开启",
+    "Mcs/FunctionDisabled": "已关闭",
     "Mcs/PriceThreshold Key": "价值阈值",
     "Mcs/PriceThreshold Description": "低于该值的战利品会被忽略",
     "Mcs/ArmorLevelThreshold Key": "防护等级阈值",
@@ -58,5 +61,8 @@
     "Mcs/ForceTeleportCommand Name": "强制传送",
     "Mcs/ForceTeleportCommand TargetName": "清除护航仇恨、并尝试使其传送至当前位置",
     "Mcs/CancelCommand Name": "取消",
-    "Mcs/CancelCommand TargetName": "取消下达指令"
+    "Mcs/CancelCommand TargetName": "取消下达指令",
+    "Mcs/TeammateHighlight Key": "护航高亮",
+    "Mcs/TeammateHighlightHotKey Key": "护航高亮快捷键",
+    "Mcs/TeammateHighlightColor Key": "护航高亮颜色"
 }

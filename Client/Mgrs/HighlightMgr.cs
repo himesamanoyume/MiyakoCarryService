@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
-using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -28,6 +29,23 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
             _commandBuffer = new CommandBuffer { name = "Mcs Player Highlight Pass" };
 
+            MiyakoCarryServicePlugin.TeammateHighlight.SettingChanged += (object sender, EventArgs e) =>
+            {
+                if (!_gameloop.IsVaildGameWorld)
+                {
+                    return;
+                }
+
+                if (MiyakoCarryServicePlugin.TeammateHighlight.Value)
+                {
+                    SwitchShaders();
+                }
+                else
+                {
+                    _commandBuffer.Clear();
+                }
+            };
+
             GameLoop.Instance.OnGameWorldStart += () =>
             {
                 Clear();
@@ -45,8 +63,21 @@ namespace MiyakoCarryService.Client.Mgrs
 
         void Update()
         {
+            if (KeyInput.KeyDown(MiyakoCarryServicePlugin.TeammateHighlightHotKey.Value, MiyakoCarryServicePlugin.TeammateHighlight))
+            {
+                if (!MiyakoCarryServicePlugin.TeammateHighlight.Value)
+                {
+                    _commandBuffer.Clear();
+                }
+            }
+
             if (_gameloop.IsVaildGameWorld)
             {
+                if (MiyakoCarryServicePlugin.TeammateHighlight.Value)
+                {
+                    SwitchShaders();
+                }
+
                 if (_gameloop.MainCamera != null && !_mainCameraInitialized)
                 {
                     _mainCameraInitialized = true;
@@ -66,30 +97,35 @@ namespace MiyakoCarryService.Client.Mgrs
 
         void SwitchShaders()
         {
-            if (_gameloop.IsVaildGameWorld)
+            if (!_gameloop.IsVaildGameWorld)
             {
-                _commandBuffer.Clear();
-                foreach (var batches in _materialBatches.Values)
-                {
-                    batches.Clear();
-                }
-
-                foreach (var player in Singleton<GameWorld>.Instance.allAlivePlayersByID.Values)
-                {
-                    if (player.IsYourPlayer)
-                    {
-                        continue;
-                    }
-
-                    if (!player.ProfileId.Contains(""))
-                    {
-                        continue;
-                    }
-                    
-                    BatchRenderers(player, _gameloop.HighlightShader, Draw.Green.Rgb.linear);
-                }
-                ExecuteBatchRendering();
+                return;
             }
+
+            _commandBuffer.Clear();
+            foreach (var batches in _materialBatches.Values)
+            {
+                batches.Clear();
+            }
+
+            foreach (var playerData in _gameloop.GetDatas<PlayerData, PlayerDataMgr>())
+            {
+                if (playerData.Player.IsYourPlayer)
+                {
+                    continue;
+                }
+
+                var mcsBotPlayerIds = McsMgr.GetAllMcsBotPlayerIdInRaid();
+
+                if (!mcsBotPlayerIds.Contains(playerData.Player.ProfileId))
+                {
+                    continue;
+                }
+                
+                BatchRenderers(playerData.Player, _gameloop.HighlightShader, MiyakoCarryServicePlugin.TeammateHighlightColor.Value.linear);
+            }
+
+            ExecuteBatchRendering();
         }
 
         private void BatchRenderers(Player player, Shader shader, Color color)
@@ -132,7 +168,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
 
                     material.SetColor("_HighlightColor", color);
-                    material.SetFloat("_HighlightOutlinesWidth", 0.001f);
+                    material.SetFloat("_HighlightOutlinesWidth", 0.01f);
 
                     if (!_materialBatches.ContainsKey(material))
                     {

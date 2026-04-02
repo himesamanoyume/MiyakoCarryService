@@ -251,9 +251,14 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public async Task<Dictionary<MongoId, IEnumerable<MongoId>>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId)
+        public async Task<List<MongoId>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId)
         {
             var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
+
+            foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
+            {
+                System.Console.WriteLine(_mcsLeadPlayerId);
+            }
 
             var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
@@ -265,17 +270,14 @@ namespace MiyakoCarryService.Server.Services
 
                 var mcsLeadPlayerProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
 
-                return new KeyValuePair<MongoId, IEnumerable<MongoId>>(mcsLeadPlayerProfile.ProfileInfo.ProfileId.Value, profileIds);
+                return profileIds;
             });
 
             var results = await Task.WhenAll(tasks);
 
-            var mcsPmcDatas = results.ToDictionary(
-                pair => pair.Key,
-                pair => pair.Value
-            );
+            var mcsBotPlayerIdInRaids = results.SelectMany(list => list).ToList();
 
-            return mcsPmcDatas;
+            return mcsBotPlayerIdInRaids;
         }
 
         public HashSet<MongoId> GetAllMcsLeadPlayerIds(MongoId mcsLeadPlayerId)

@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Utils
     {
         public static SColor Green = new(new Color(0, .95f, 0, 1));
         public static SColor FernGreen = new(new Color(.31f, .467f, .176f, 1));
-        public static SColor TranslucentFernGreen = new(new Color(.31f, .467f, .176f, .2f));
+        public static SColor TranslucentTianyi = new(new Color(.4f, .8f, 1, .1f));
         public static SColor Tianyi = new(new Color(.4f, .8f, 1, 1));
         public static SColor Pink = new(new Color(1, .75f, 0.8f, 1));
         public static SColor Orange = new(new Color(.95f, .8f, 0, 1));

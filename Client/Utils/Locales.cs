@@ -4,6 +4,7 @@ namespace MiyakoCarryService.Client.Utils
     {
         public const string BASIC = "Mcs/A.Basic";
         public const string COMMAND = "Mcs/B.Command";
+        public const string PLAYER = "Mcs/C.Player";
         public const string DEBUG = "Mcs/Z.Debug";
         public const string PRICETHRESHOLD_KEY = "Mcs/PriceThreshold Key";
         public const string PRICETHRESHOLD_DESCRIPTION = "Mcs/PriceThreshold Description";
@@ -47,5 +48,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string FORCETELEPORTCOMMAND_TARGETNAME = "Mcs/ForceTeleportCommand TargetName";
         public const string CANCELCOMMAND_NAME = "Mcs/CancelCommand Name";
         public const string CANCELCOMMAND_TARGETNAME = "Mcs/CancelCommand TargetName";
+        public const string TEAMMATEHIGHLIGHT_KEY = "Mcs/TeammateHighlight Key";
+        public const string TEAMMATEHIGHLIGHTHOTKEY_KEY = "Mcs/TeammateHighlightHotKey Key";
+        public const string TEAMMATEHIGHLIGHTCOLOR_KEY = "Mcs/TeammateHighlightColor Key";
     }
 }

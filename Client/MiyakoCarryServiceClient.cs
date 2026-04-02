@@ -14,6 +14,7 @@ using MiyakoCarryService.Client.Patches.BepInEx;
 using MiyakoCarryService.Client.Patches.Events;
 using System.Text.RegularExpressions;
 using MiyakoCarryService.Client.Patches.BigSurvey;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client
 {
@@ -33,9 +34,9 @@ namespace MiyakoCarryService.Client
         public const string McsPluginName = "姫様の夢 MiyakoCarryService";
         public static MiyakoCarryServicePlugin Instance;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
-        public static bool FikaInstalled { get; private set; }  = false;
+        public static bool FikaInstalled { get; private set; } = false;
         public static bool IsFikaHeadless { get; private set; } = false;
-        public static bool SAINInstalled { get; private set; }  = false;
+        public static bool SAINInstalled { get; private set; } = false;
         private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
         public static LogBuffer LogBuffer = new LogBuffer();
 
@@ -55,11 +56,19 @@ namespace MiyakoCarryService.Client
 
         #endregion
 
+        #region PLAYER
+
+        public static ConfigEntry<bool> TeammateHighlight;
+        public static ConfigEntry<KeyboardShortcut> TeammateHighlightHotKey;
+        public static ConfigEntry<Color> TeammateHighlightColor;
+
+        #endregion
+
         #region DEBUG
 
-    #if DEBUG
+#if DEBUG
 
-    #endif
+#endif
 
         #endregion
 
@@ -113,9 +122,9 @@ namespace MiyakoCarryService.Client
             {
 
             }
-    #if CHEATERCARRY
+#if CHEATERCARRY
 
-    #endif
+#endif
             new TraderScreensGroupShowPatch().Enable();
             new RaidSettingsLocalPatch().Enable();
             new MatchMakerAcceptScreenReadyPatch().Enable();
@@ -149,9 +158,9 @@ namespace MiyakoCarryService.Client
             new ChatSendMessagePatch().Enable();
             new LocalQuestControllerClassPatch().Enable();
 
-    #if DEBUG
-            
-    #endif
+#if DEBUG
+
+#endif
         }
 
         private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
@@ -180,6 +189,7 @@ namespace MiyakoCarryService.Client
             string description = "",
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
+            bool needNotify = true,
             bool isCheaterEditionOnly = false,
             bool isHide = false
         )
@@ -216,6 +226,22 @@ namespace MiyakoCarryService.Client
                 configDescription
             );
 
+            if (typeof(T) == typeof(bool) && needNotify)
+            {
+                configEntry.SettingChanged += (object sender, EventArgs e) =>
+                {
+                    var entry = (ConfigEntryBase)sender;
+                    if ((bool)entry.BoxedValue)
+                    {
+                        NotificationManagerClass.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#00ff00>{Locales.FUNCTIONENABLED.McsLocalized()}</color>");
+                    }
+                    else
+                    {
+                        NotificationManagerClass.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#ff0000>{Locales.FUNCTIONDISABLED.McsLocalized()}</color>");
+                    }
+                };
+            }
+
             return configEntry;
         }
 
@@ -249,6 +275,7 @@ namespace MiyakoCarryService.Client
             {
                 EConfigType.BASIC => Locales.BASIC,
                 EConfigType.COMMAND => Locales.COMMAND,
+                EConfigType.PLAYER => Locales.PLAYER,
                 EConfigType.DEBUG or _ => Locales.DEBUG
             };
         }
@@ -259,6 +286,7 @@ namespace MiyakoCarryService.Client
             {
                 EConfigType.BASIC => 100,
                 EConfigType.COMMAND => 200,
+                EConfigType.PLAYER => 300,
                 EConfigType.DEBUG or _ => 2000
             };
         }
@@ -273,26 +301,26 @@ namespace MiyakoCarryService.Client
                 10000,
                 Locales.PRICETHRESHOLD_DESCRIPTION,
                 new AcceptableValueRange<int>(0, 1500000)
-            ); 
+            );
 
             ArmorLevelThreshold = Register(
                 EConfigType.BASIC,
                 Locales.ARMORLEVELTHRESHOLD_KEY,
                 5,
                 acceptableValues: new AcceptableValueRange<int>(1, 6)
-            ); 
+            );
 
             LootingWishlishItem = Register(
                 EConfigType.BASIC,
                 Locales.LOOTINGWISHLISHITEM_KEY,
                 true
-            ); 
+            );
 
             LootingQuestItem = Register(
                 EConfigType.BASIC,
                 Locales.LOOTINGQUESTITEM_KEY,
                 true
-            ); 
+            );
 
             BlockItemType = Register(
                 EConfigType.BASIC,
@@ -307,6 +335,27 @@ namespace MiyakoCarryService.Client
                 EConfigType.COMMAND,
                 Locales.COMMANDHOTKEY_KEY,
                 new KeyboardShortcut()
+            );
+
+            #endregion
+            #region PLAYER
+
+            TeammateHighlight = Register(
+                EConfigType.PLAYER,
+                Locales.TEAMMATEHIGHLIGHT_KEY,
+                false
+            );
+
+            TeammateHighlightHotKey = Register(
+                EConfigType.PLAYER,
+                Locales.TEAMMATEHIGHLIGHTHOTKEY_KEY,
+                new KeyboardShortcut()
+            );
+
+            TeammateHighlightColor = Register(
+                EConfigType.PLAYER,
+                Locales.TEAMMATEHIGHLIGHTCOLOR_KEY,
+                Draw.TranslucentTianyi.Rgb
             );
 
             #endregion

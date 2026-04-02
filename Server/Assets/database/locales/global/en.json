@@ -15,6 +15,9 @@
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "This order cannot be refreshed",
     "Mcs/A.Basic": "A. Basic | Not effective yet",
     "Mcs/B.Command": "B. Command",
+    "Mcs/C.Player": "C. Player",
+    "Mcs/FunctionEnabled": "Enabled",
+    "Mcs/FunctionDisabled": "Disabled",
     "Mcs/PriceThreshold Key": "Price Threshold",
     "Mcs/PriceThreshold Description": "Loot below this price will be ignored",
     "Mcs/ArmorLevelThreshold Key": "Armor Level Threshold",
@@ -58,5 +61,8 @@
     "Mcs/ForceTeleportCommand Name": "Force Teleport",
     "Mcs/ForceTeleportCommand TargetName": "Clear carry service player goal enemy and attempt to teleport them to your current location",
     "Mcs/CancelCommand Name": "Cancel",
-    "Mcs/CancelCommand TargetName": "Cancel the command menu"
+    "Mcs/CancelCommand TargetName": "Cancel the command menu",
+    "Mcs/TeammateHighlight Key": "Teammate Highlight",
+    "Mcs/TeammateHighlightHotKey Key": "Teammate Highlight Hotkey",
+    "Mcs/TeammateHighlightColor Key": "Teammate Highlight Color"
 }

@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> GetAllMcsBotPlayerIdInRaid(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.NoBody(raidController.GetAllMcsBotPlayerIdInRaid(mcsLeadPlayerId));
+            return httpResponseUtil.NoBody(await raidController.GetAllMcsBotPlayerIdInRaid(mcsLeadPlayerId));
         }
     }
 }

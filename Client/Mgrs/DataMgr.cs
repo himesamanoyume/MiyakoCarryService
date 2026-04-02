@@ -6,21 +6,8 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal abstract class DataMgr<T> : BaseMgr<T>  where T : MonoBehaviour
+    internal abstract class DataMgr<T> : BaseMgr<T> where T : MonoBehaviour
     {
-        protected HashSet<BaseData> _datas;
-        public HashSet<K> GetDatas<K>() where K : BaseData
-        {
-            var result = new HashSet<K>();
-            foreach (BaseData item in _datas)
-            {
-                if (item is K k)
-                {
-                    result.Add(k);
-                }
-            }
-            return result;
-        }
         protected McsMgr McsMgr {get; private set;}
 
         public override void Start()

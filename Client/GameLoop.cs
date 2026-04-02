@@ -10,6 +10,7 @@ using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
 using System.IO;
 using System.Reflection;
+using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client
 {
@@ -141,6 +142,7 @@ namespace MiyakoCarryService.Client
             LootDataMgr.Enable();
             SubTitleMgr.Enable();
             CommandMgr.Enable();
+            HighlightMgr.Enable();
 
             OnGameWorldStart += Reset;
             OnGameWorldDestory += Reset;
@@ -161,6 +163,12 @@ namespace MiyakoCarryService.Client
         public T GetMgr<T>() where T : IMgr
         {
             return (T)Mgrs[typeof(T)];
+        }
+        
+        public HashSet<T> GetDatas<T, K>() where T : BaseData where K : IMgr
+        {
+            var mgr = GetMgr<K>();
+            return mgr.GetDatas<T>();
         }
     }
 }

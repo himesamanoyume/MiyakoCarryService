@@ -4,6 +4,7 @@ namespace MiyakoCarryService.Client.Enums
     {
         BASIC,
         COMMAND,
+        PLAYER,
         DEBUG
     }
 }

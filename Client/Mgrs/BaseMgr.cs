@@ -1,4 +1,6 @@
 
+using System.Collections.Generic;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 
@@ -7,6 +9,7 @@ namespace MiyakoCarryService.Client.Mgrs
     internal abstract class BaseMgr<T> : MonoBehaviour, IMgr where T : MonoBehaviour
     {
         protected GameLoop _gameloop;
+        protected HashSet<BaseData> _datas;
 
         public virtual void Start()
         {
@@ -43,6 +46,19 @@ namespace MiyakoCarryService.Client.Mgrs
         protected virtual void OnRaidEnded()
         {
             StopAllCoroutines();
+        }
+
+        public HashSet<K> GetDatas<K>() where K : BaseData
+        {
+            var result = new HashSet<K>();
+            foreach (BaseData item in _datas)
+            {
+                if (item is K k)
+                {
+                    result.Add(k);
+                }
+            }
+            return result;
         }
     }
 }

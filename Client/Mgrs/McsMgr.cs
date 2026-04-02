@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
@@ -21,8 +22,8 @@ namespace MiyakoCarryService.Client.Mgrs
         // _mcsBotPlayerIds 只有Host才会使用
         private HashSet<MongoID> _mcsBotPlayerIds = new();
 
-        // _mcsAllBotPlayerIdInRaid 作为队友高亮的必须数据，每个玩家都会进行获取
-        private Dictionary<MongoID, List<MongoID>> _mcsAllBotPlayerIdInRaid = new();
+        // _allMcsBotPlayerIdInRaid 作为队友高亮的必须数据，每个玩家都会进行获取
+        private List<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
@@ -198,6 +199,11 @@ namespace MiyakoCarryService.Client.Mgrs
             friendlyFirePenalty.PunishEveryone = punishEveryone;
         }
 
+        public List<MongoID> GetAllMcsBotPlayerIdInRaid()
+        {
+            return _allMcsBotPlayerIdInRaid;
+        }
+
         private IEnumerator SendPunishRequest(float time)
         {
             var waitTime = new WaitForSeconds(time);
@@ -228,8 +234,13 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            _mcsAllBotPlayerIdInRaid = McsRequestHandler.GetAllMcsBotPlayerIdInRaid().GetAwaiter().GetResult();
+            RequestAllMcsBotPlayerIdInRaid();
             StartCoroutine(SendPunishRequest(10f));
+        }
+
+        private void RequestAllMcsBotPlayerIdInRaid()
+        {
+            _allMcsBotPlayerIdInRaid = McsRequestHandler.GetAllMcsBotPlayerIdInRaid();
         }
 
         protected override void OnRaidEnded()
@@ -240,7 +251,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _mcsLeadPlayerIds.Clear();
             _mcsBotPlayerIds.Clear();
             _mcsAILeadPlayers.Clear();
-            _mcsAllBotPlayerIdInRaid.Clear();
+            _allMcsBotPlayerIdInRaid.Clear();
             foreach (var transitMembers in McsTransitBotPlayers.Values)
             {
                 transitMembers.Clear();
