@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Utils
         public string Hex;
         public SColor(Color color)
         {
-            Rgb = color.linear;
+            Rgb = color;
             Hex = ColorToHex(Rgb);
         }
 
