@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 从服务端获取所有要生成的护航Bot数据
     /// </summary>
-    internal sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
+    public sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
     {
         private static McsMgr McsMgr
         {

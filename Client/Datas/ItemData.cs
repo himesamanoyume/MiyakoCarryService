@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal abstract class ItemData : BaseData
+    public abstract class ItemData : BaseData
     {
         private WeakReference<Item> _itemRef;
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;

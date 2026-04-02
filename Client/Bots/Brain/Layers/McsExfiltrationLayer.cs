@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    internal class McsExfiltrationLayer : McsBaseLayer<McsExfiltrationLayer>
+    public class McsExfiltrationLayer : McsBaseLayer<McsExfiltrationLayer>
     {
         // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)

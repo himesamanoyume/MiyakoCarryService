@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Extensions
 {
-    internal static class InventoryControllerExtensions
+    public static class InventoryControllerExtensions
     {
         extension(InventoryController inventoryController)
         {

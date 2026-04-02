@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class KeyInput
+    public static class KeyInput
     {
         public static bool BetterIsPressed(KeyboardShortcut key)
         {

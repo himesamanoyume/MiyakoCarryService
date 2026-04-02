@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// <summary>
     /// 原版中邀请玩家入队后不会选择对应的分类图标
     /// </summary>
-    internal sealed class GroupPlayerViewModelClassPatch : ModulePatch
+    public sealed class GroupPlayerViewModelClassPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GroupPlayerViewModelClass), nameof(GroupPlayerViewModelClass.UpdateFromAnotherItem), [typeof(GroupPlayerDataClass)]);
 

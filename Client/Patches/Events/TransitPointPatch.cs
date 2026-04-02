@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// 使转移时护航队友也一起转移
     /// 以后应该会改成需要护航队友实际触发转移
     /// </summary>
-    internal sealed class TransitPointPatch : ModulePatch
+    public sealed class TransitPointPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.method_7));
 

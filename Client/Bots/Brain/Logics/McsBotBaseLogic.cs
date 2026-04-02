@@ -4,7 +4,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    internal abstract class McsBotBaseLogic(BotOwner botOwner) : CustomLogic(botOwner)
+    public abstract class McsBotBaseLogic(BotOwner botOwner) : CustomLogic(botOwner)
     {
 
     }

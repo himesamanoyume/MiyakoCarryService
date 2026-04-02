@@ -13,7 +13,7 @@ using MiyakoCarryService.Client.Extensions;
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {
 
-    internal sealed class DrawFlagsFieldPatch : ModulePatch
+    public sealed class DrawFlagsFieldPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager).Assembly.GetType("ConfigurationManager.SettingFieldDrawer"), "DrawFlagsField");
 

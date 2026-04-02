@@ -10,7 +10,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Extensions
 {
-    internal static class ItemExtensions
+    public static class ItemExtensions
     {
         private static readonly ConditionalWeakTable<Item, ItemData> _datas = new();
 

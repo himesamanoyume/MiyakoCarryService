@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 尝试健壮原版的GoalEnemy属性，以避免发生锁尸体的问题，并且当敌人将老板设为敌人时，直接让护航也将其设为敌人
     /// </summary>
-    internal sealed class SetGoalEnemyPatch : ModulePatch
+    public sealed class SetGoalEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BotMemoryClass), nameof(BotMemoryClass.GoalEnemy));
 

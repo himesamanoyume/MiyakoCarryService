@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client.Interfaces
 {
-    internal interface IMgr
+    public interface IMgr
     {
         public HashSet<T> GetDatas<T>() where T : BaseData;
     }

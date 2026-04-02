@@ -58,9 +58,14 @@ namespace MiyakoCarryService.Fika
 
         private void EnableAllPatches()
         {
-            if (FikaInstalled)
+            if (!McsInstalled)
             {
+                return;
+            }
 
+            if (!FikaInstalled)
+            {
+                return;
             }
         }
     }

@@ -8,7 +8,7 @@ using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    internal sealed class GoToLootTargetLogic : McsBotBaseLogic
+    public sealed class GoToLootTargetLogic : McsBotBaseLogic
     {
         private int _currentLootingRetries = 0;
         private float _lastTimeCheckDistance = 0f;

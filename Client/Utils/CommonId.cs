@@ -1,7 +1,7 @@
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal struct CommonId
+    public struct CommonId
     {
         //public const string MultiTool = "590c2e1186f77425357b6124";
         public const string BuriedBarrelCache = "5d6d2bb386f774785b07a77a";

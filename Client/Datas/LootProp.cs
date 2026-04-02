@@ -7,7 +7,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal class LootProp
+    public class LootProp
     {
         public Item Item;
         public McsAILeadPlayer McsAILeadPlayer;

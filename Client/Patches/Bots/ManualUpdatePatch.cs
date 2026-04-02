@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 仅让护航Bot执行额外的行为，并适配Fika
     /// </summary>
-    internal sealed class ManualUpdatePatch : ModulePatch
+    public sealed class ManualUpdatePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotOwner), nameof(BotOwner.UpdateManual));
 

@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 监测玩家对护航的误伤情况
     /// </summary>
-    internal sealed class ApplyDamagePatch : ModulePatch
+    public sealed class ApplyDamagePatch : ModulePatch
     {
         private static McsMgr McsMgr
         {

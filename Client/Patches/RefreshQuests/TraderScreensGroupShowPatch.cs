@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
     /// <summary>
     /// 用于在打开任务界面时刷新
     /// </summary>
-    internal sealed class TraderScreensGroupShowPatch : ModulePatch
+    public sealed class TraderScreensGroupShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderScreensGroup), nameof(TraderScreensGroup.Show), [typeof(TraderScreensGroup.GClass3888)]);
 

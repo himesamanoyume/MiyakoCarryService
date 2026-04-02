@@ -3,7 +3,7 @@ using EFT.InventoryLogic;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal sealed class TraderOffer
+    public sealed class TraderOffer
     {
         public string Name { get; private set; }
         public long Price;

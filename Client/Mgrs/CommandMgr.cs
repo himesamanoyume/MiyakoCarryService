@@ -14,7 +14,7 @@ using TMPro;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class CommandMgr : BaseMgr<CommandMgr>
+    public sealed class CommandMgr : BaseMgr<CommandMgr>
     {
         public sealed override void Start()
         {

@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal sealed class LootData : ItemData
+    public sealed class LootData : ItemData
     {
         public Dictionary<McsAILeadPlayer, LootProp> LootProps = new();
         public TraderOffer Offer;

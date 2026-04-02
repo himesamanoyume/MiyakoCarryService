@@ -10,7 +10,7 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx;
 
-internal sealed class DrawSinglePluginPatch : ModulePatch
+public sealed class DrawSinglePluginPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager), "DrawSinglePlugin");
     private static Dictionary<string, List<SettingEntryBase>> _allSettings = new();

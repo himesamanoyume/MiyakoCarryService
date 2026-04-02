@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal abstract class DataMgr<T> : BaseMgr<T> where T : MonoBehaviour
+    public abstract class DataMgr<T> : BaseMgr<T> where T : MonoBehaviour
     {
         protected McsMgr McsMgr {get; private set;}
 

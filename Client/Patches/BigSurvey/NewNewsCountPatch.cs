@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Patches.BigSurvey;
 /// <summary>
 /// 修改调查按钮的提醒数值并修改颜色
 /// </summary>
-internal sealed class NewNewsCountPatch : ModulePatch
+public sealed class NewNewsCountPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(MenuTaskBar), nameof(MenuTaskBar.NewNewsCount));
 

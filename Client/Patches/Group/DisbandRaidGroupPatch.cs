@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// <summary>
     /// 自己实现解散队伍
     /// </summary>
-    internal sealed class DisbandRaidGroupPatch : ModulePatch
+    public sealed class DisbandRaidGroupPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.DisbandRaidGroup));
 

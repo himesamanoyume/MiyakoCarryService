@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class PlayerDataMgr : DataMgr<PlayerDataMgr>
+    public sealed class PlayerDataMgr : DataMgr<PlayerDataMgr>
     {
         public List<McsBotPlayerData> GetMcsBotPlayerDatas()
         {
@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private IEnumerator RefreshMcsBotPlayersInterestingLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
-            var internalTime = new WaitForSeconds(.2f);
+            var publicTime = new WaitForSeconds(.2f);
             while (true)
             {
                 yield return waitTime;
@@ -118,7 +118,7 @@ namespace MiyakoCarryService.Client.Mgrs
                                 rootItemData.RefreshInteresting(mcsAILeadPlayer);
                             }
                         }
-                        yield return internalTime;
+                        yield return publicTime;
                     }
 
                     // 让每位护航都获取到当前范围内未被锁定的最高优先级的战利品
@@ -134,7 +134,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
 
                         mcsBotPlayerData.SetLootingTarget(closeAllLootData);
-                        yield return internalTime;
+                        yield return publicTime;
                     }
                 }
             }
@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override IEnumerator LoadLootData(float time)
         {
             yield return new WaitForSeconds(time);
-            var internalTime = new WaitForSeconds(.2f);
+            var publicTime = new WaitForSeconds(.2f);
             if (_gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
@@ -209,7 +209,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         Debug.LogException(e);
                     }
-                    yield return internalTime;
+                    yield return publicTime;
                 }
             }
             else
@@ -221,7 +221,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private IEnumerator CheckMcsLeadPlayerSeenEnemiesLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
-            var internalTime = new WaitForSeconds(.2f);
+            var publicTime = new WaitForSeconds(.2f);
             while (true)
             {
                 yield return waitTime;
@@ -266,7 +266,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             }
                         }
 
-                        yield return internalTime;
+                        yield return publicTime;
                     }
                 }
                 else

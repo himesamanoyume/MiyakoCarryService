@@ -7,7 +7,7 @@ using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {
-    internal sealed class ContainsSearchStringPatch : ModulePatch
+    public sealed class ContainsSearchStringPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager), "ContainsSearchString");
 

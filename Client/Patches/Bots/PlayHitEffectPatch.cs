@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 借鉴friendlyPmc
     /// </summary>
-    internal sealed class PlayHitEffectPatch : ModulePatch
+    public sealed class PlayHitEffectPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EffectsCommutator), nameof(EffectsCommutator.PlayHitEffect));
 

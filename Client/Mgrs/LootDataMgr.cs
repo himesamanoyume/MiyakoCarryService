@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class LootDataMgr : DataMgr<LootDataMgr>
+    public sealed class LootDataMgr : DataMgr<LootDataMgr>
     {
         public HashSet<LootData> LockedLootingTarget = new();
         public HashSet<Transform> LockedLootingTargetRootTransform = new();
@@ -104,7 +104,7 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override IEnumerator LoadLootData(float time)
         {
             yield return new WaitForSeconds(time);
-            var internalTime = new WaitForSeconds(.1f);
+            var publicTime = new WaitForSeconds(.1f);
             if (_gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
@@ -134,7 +134,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         Debug.LogException(e);
                     }
-                    yield return internalTime;
+                    yield return publicTime;
                 }
             }
             else

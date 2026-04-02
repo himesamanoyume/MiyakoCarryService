@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 更新商人供货数据
     /// </summary>
-    internal sealed class TraderClassConstructorPatch : ModulePatch
+    public sealed class TraderClassConstructorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.FirstConstructor(typeof(TraderClass), x => true);
 

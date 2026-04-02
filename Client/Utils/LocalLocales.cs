@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class LocalLocales
+    public static class LocalLocales
     {
         public static Dictionary<string, Dictionary<string, string>> LoadingLocales = new()
         {

@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class Locales
+    public static class Locales
     {
         public const string BASIC = "Mcs/A.Basic";
         public const string COMMAND = "Mcs/B.Command";

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class SubTitleMgr : BaseMgr<SubTitleMgr>
+    public sealed class SubTitleMgr : BaseMgr<SubTitleMgr>
     {
         private GameObject _mcsDialogScreen;
         private Transform _subsContainer;
@@ -23,10 +23,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private IEnumerator Init()
         {
-            var internalTime = new WaitForSeconds(1f);
+            var publicTime = new WaitForSeconds(1f);
             while (true)
             {
-                yield return internalTime;
+                yield return publicTime;
                 if (MonoBehaviourSingleton<CommonUI>.Instantiated)
                 {
                     var traderDialogScreen = MonoBehaviourSingleton<CommonUI>.Instance.TraderDialogScreen;

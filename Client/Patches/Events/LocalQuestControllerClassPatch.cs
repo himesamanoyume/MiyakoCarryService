@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 用于修复上交物品时任务条件计数器会被赋值过大导致的巨额退款问题
     /// </summary>
-    internal sealed class LocalQuestControllerClassPatch : ModulePatch
+    public sealed class LocalQuestControllerClassPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalQuestControllerClass.Struct1295), nameof(LocalQuestControllerClass.Struct1295.MoveNext));
 

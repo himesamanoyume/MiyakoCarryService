@@ -14,7 +14,7 @@ using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client
 {
-    internal sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
+    public sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
     {
         public Dictionary<Type, IMgr> Mgrs { get; private set; } = new();
         public Dictionary<string, TraderOffer> ItemBestPriceDict { get; private set; } = new();

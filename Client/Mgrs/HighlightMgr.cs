@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class HighlightMgr : BaseMgr<HighlightMgr>
+    public sealed class HighlightMgr : BaseMgr<HighlightMgr>
     {
         private Dictionary<Renderer, Material> _cache = new();
         private CommandBuffer _commandBuffer;

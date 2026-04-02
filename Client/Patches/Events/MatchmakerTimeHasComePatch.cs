@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// <summary>
 	/// 使转移时仍能加载护航的小队信息
 	/// </summary>
-	internal sealed class MatchmakerTimeHasComePatch : ModulePatch
+	public sealed class MatchmakerTimeHasComePatch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass)]);
 

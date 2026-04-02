@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal sealed class McsMgr : BaseMgr<McsMgr>
+    public sealed class McsMgr : BaseMgr<McsMgr>
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();

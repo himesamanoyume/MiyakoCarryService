@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
-    internal static class BotOwnerExtensions
+    public static class BotOwnerExtensions
     {
         private static PlayerDataMgr PlayerDataMgr
         {

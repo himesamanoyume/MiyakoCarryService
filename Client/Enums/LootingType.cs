@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Client.Enums
 {
-    internal enum LootingType
+    public enum LootingType
     {
         Price,
         Weapon,

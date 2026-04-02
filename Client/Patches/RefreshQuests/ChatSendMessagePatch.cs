@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
     /// <summary>
     /// 当可能发送下单相关的消息时进行主动请求刷新任务
     /// </summary>
-    internal sealed class ChatSendMessagePatch : ModulePatch
+    public sealed class ChatSendMessagePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.ChatSendMessage));
 

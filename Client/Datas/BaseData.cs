@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal abstract class BaseData
+    public abstract class BaseData
     {
         protected GameLoop _gameloop;
 

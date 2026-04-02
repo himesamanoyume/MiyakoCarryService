@@ -10,7 +10,7 @@ using SPT.Common.Http;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class McsRequestHandler
+    public static class McsRequestHandler
     {
         private static T2 PostJson<T1, T2>(string path, T1 t1)
         {

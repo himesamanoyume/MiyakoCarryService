@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    internal sealed class McsBotPlayerData : PlayerData
+    public sealed class McsBotPlayerData : PlayerData
     {
         private WeakReference<BotOwner> _botOwnerRef;
         public BotOwner BotOwner => _botOwnerRef.TryGetTarget(out var botOwner) ? botOwner : null;
@@ -134,10 +134,10 @@ namespace MiyakoCarryService.Client.Datas
 
         public void StartLooting()
         {
-            _gameloop.StartCoroutine(InternalStartLooting());
+            _gameloop.StartCoroutine(publicStartLooting());
         }
 
-        private IEnumerator InternalStartLooting()
+        private IEnumerator publicStartLooting()
         {
             try
             {

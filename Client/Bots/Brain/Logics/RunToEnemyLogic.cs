@@ -4,7 +4,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    internal sealed class RunToEnemyLogic : McsBotBaseLogic
+    public sealed class RunToEnemyLogic : McsBotBaseLogic
     {
         private RunToEnemyNewLogic _baseLogic;
 
@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic.UpdateNodeByMain(data);
         }
 
-        internal sealed class RunToEnemyNewLogic : RunToEnemyBaseLogic
+        public sealed class RunToEnemyNewLogic : RunToEnemyBaseLogic
         {
             public RunToEnemyNewLogic(BotOwner bot) : base(bot)
             {

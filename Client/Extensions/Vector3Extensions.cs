@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
-    internal static class Vector3Extensions
+    public static class Vector3Extensions
     {
         extension(Vector3 a)
         {

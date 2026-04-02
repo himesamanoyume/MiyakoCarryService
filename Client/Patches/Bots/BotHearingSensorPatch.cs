@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 借鉴friendlyPmc
     /// </summary>
-    internal sealed class BotHearingSensorPatch : ModulePatch
+    public sealed class BotHearingSensorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.method_0));
 

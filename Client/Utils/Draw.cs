@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class Draw
+    public static class Draw
     {
         public static SColor Green = new(new Color(0, .95f, 0, 1));
         public static SColor FernGreen = new(new Color(.31f, .467f, .176f, 1));

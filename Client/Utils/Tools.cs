@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal static class Tools
+    public static class Tools
     {
         private static McsMgr McsMgr
         {

@@ -8,7 +8,7 @@ using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    internal class McsCommonLayer : McsBaseLayer<McsCommonLayer>
+    public class McsCommonLayer : McsBaseLayer<McsCommonLayer>
     {
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

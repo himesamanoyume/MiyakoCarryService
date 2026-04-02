@@ -3,7 +3,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.BotBehaviors
 {
-    internal abstract class BotBehavior
+    public abstract class BotBehavior
     {
         public BotOwner BotOwner { get; private set; }
         public Player McsLeadPlayer { get; private set; }

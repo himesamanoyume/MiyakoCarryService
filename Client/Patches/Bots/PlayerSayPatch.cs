@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 借鉴friendlyPmc
     /// </summary>
-    internal sealed class PlayerSayPatch : ModulePatch
+    public sealed class PlayerSayPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.Say));
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal class SColor
+    public class SColor
     {
         public Color Rgb;
         public string Hex;

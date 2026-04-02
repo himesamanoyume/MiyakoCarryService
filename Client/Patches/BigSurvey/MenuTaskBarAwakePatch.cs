@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.BigSurvey;
 /// <summary>
 /// 修改调查按钮的提醒数值并修改颜色
 /// </summary>
-internal sealed class MenuTaskBarAwakePatch : ModulePatch
+public sealed class MenuTaskBarAwakePatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MenuTaskBar), nameof(MenuTaskBar.Awake));
 

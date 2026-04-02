@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    internal abstract class BaseMgr<T> : MonoBehaviour, IMgr where T : MonoBehaviour
+    public abstract class BaseMgr<T> : MonoBehaviour, IMgr where T : MonoBehaviour
     {
         protected GameLoop _gameloop;
         protected HashSet<BaseData> _datas;

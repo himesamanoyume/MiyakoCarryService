@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 避免护航Bot将护航老板当做敌人，同时让护航Bot立即将把护航老板或护航Bot视为敌人的敌人也视为敌人，并且面对友好Bot类型时不主动开火
     /// </summary>
-    internal sealed class AddEnemyPatch : ModulePatch
+    public sealed class AddEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 

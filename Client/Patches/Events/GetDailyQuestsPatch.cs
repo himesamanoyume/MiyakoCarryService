@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 修改特定的订单任务为宫子商人的Id
     /// </summary>
-    internal sealed class GetDailyQuestsPatch : ModulePatch
+    public sealed class GetDailyQuestsPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.GetDailyQuests));
 

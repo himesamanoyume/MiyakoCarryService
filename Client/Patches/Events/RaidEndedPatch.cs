@@ -10,9 +10,9 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 处理GameWorld结束时事件，只在非转移的情况下才执行
     /// </summary>
-    internal sealed class RaidEndedPatch : ModulePatch
+    public sealed class RaidEndedPatch : ModulePatch
     {
-        internal static Action OnGameWorldDestory;
+        public static Action OnGameWorldDestory;
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.LocalRaidEnded));
 
         [PatchPrefix]

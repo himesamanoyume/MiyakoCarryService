@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Misc
 {
-    internal class McsAILeadPlayer : AIBossPlayer
+    public class McsAILeadPlayer : AIBossPlayer
     {
         public McsBotPlayerConfig McsBotPlayerConfig;
         public Player MyPlayer;

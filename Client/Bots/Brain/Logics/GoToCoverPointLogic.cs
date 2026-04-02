@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    internal sealed class GoToCoverPointLogic : McsBotBaseLogic
+    public sealed class GoToCoverPointLogic : McsBotBaseLogic
     {
         private GoToCoverPointBaseLogic _baseLogic;
 

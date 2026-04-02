@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 使实例化新的TraderControllerClass时第一时间更新其Data数据
     /// </summary>
-    internal sealed class TraderControllerClassConstructorPatch : ModulePatch
+    public sealed class TraderControllerClassConstructorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetConstructors()[0];
 
@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 新物品放入触发事件时额外更新其Data数据
     /// </summary>
-    internal sealed class TraderControllerClassAddItemEventInvokePatch : ModulePatch
+    public sealed class TraderControllerClassAddItemEventInvokePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_0").FieldType, "Invoke");
 
@@ -119,7 +119,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 物品离开触发事件时额外更新其Data数据
     /// </summary>
-    internal sealed class TraderControllerClassRemoveItemEventInvokePatch : ModulePatch
+    public sealed class TraderControllerClassRemoveItemEventInvokePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_1").FieldType, "Invoke");
 
@@ -174,7 +174,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 物品转移走时额外更新其Data数据
     /// </summary>
-    internal sealed class TraderControllerClassOutProcessPatch : ModulePatch
+    public sealed class TraderControllerClassOutProcessPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
@@ -255,7 +255,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 物品转移进来时额外更新其Data数据
     /// </summary>
-    internal sealed class TraderControllerClassInProcessPatch : ModulePatch
+    public sealed class TraderControllerClassInProcessPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 

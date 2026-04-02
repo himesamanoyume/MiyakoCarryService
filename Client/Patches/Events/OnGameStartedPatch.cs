@@ -9,9 +9,9 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 处理GameWorld开始时的事件
     /// </summary>
-    internal sealed class OnGameStartedPatch : ModulePatch
+    public sealed class OnGameStartedPatch : ModulePatch
     {
-        internal static Action OnGameWorldStart;
+        public static Action OnGameWorldStart;
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 
         [PatchPostfix]

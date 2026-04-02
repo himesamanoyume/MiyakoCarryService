@@ -1,7 +1,7 @@
 
 namespace MiyakoCarryService.Client.Extensions
 {
-    internal static class StringExtensions
+    public static class StringExtensions
     {
         extension(string id)
         {
