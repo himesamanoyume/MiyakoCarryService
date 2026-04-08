@@ -354,10 +354,12 @@
 - **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑**
 - - spawntype新增一个可空字段，可被BrainMgr从服务端获取
 - ~~队友高亮（联机时需要获取本局全部护航的ProfileId然后全部添加高亮）~~
-- - **需要测试联机下的情况**
-- **联机状态下，当老板撤离时，护航也需要撤离**
-- **反馈: 我交完任务也有刷护航但是打完一把还是给我退款了**
+- - ~~需要测试联机下的情况~~
+- 联机状态下，当老板撤离后，护航也需要撤离
+- **反馈很多次: 我交完任务也有刷护航但是打完一把还是给我退款了**
 - - 可能是进行过期清除订单任务处理时，获取到的pmcData还是老数据
+- **反馈: 护航有时候不和玩家刷在一起**
+- ~~BUG: Fika副机`TeamCommand`函数异常导致无法弹出指令菜单~~
 - 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
 - 先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划
 - 指令：
@@ -370,6 +372,7 @@
 > [Fika Wiki](https://wiki.project-fika.com/modding-fika)
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
+- - **就差个解决`HandleTeleport`为何没有正常传送**
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算

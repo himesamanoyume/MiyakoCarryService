@@ -130,12 +130,19 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public Player GetMcsLeadPlayerByMcsBotPlayerId(MongoID mcsBotPlayerId)
         {
-            foreach (var mcsSquad in _mcsSquadDict)
+            if (IsHost)
             {
-                if (mcsSquad.Value.ContainsKey(mcsBotPlayerId))
+                foreach (var mcsSquad in _mcsSquadDict)
                 {
-                    return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsSquad.Key);
+                    if (mcsSquad.Value.ContainsKey(mcsBotPlayerId))
+                    {
+                        return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsSquad.Key);
+                    }
                 }
+            }
+            else
+            {
+                return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
             }
             return null;
         }

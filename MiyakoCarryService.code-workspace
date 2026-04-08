@@ -136,7 +136,7 @@
 							"build: clean",
 							"server: build",
 							"client: build",
-							"fika: build"
+							// "fika: build"
 						],
 						"group": "build"
 					},
@@ -147,7 +147,7 @@
 							"build: clean",
 							"server: build CC",
 							"client: build CC",
-							"fika: build"
+							// "fika: build"
 						],
 						"group": "build"
 					},

@@ -255,11 +255,6 @@ namespace MiyakoCarryService.Server.Services
         {
             var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
 
-            foreach (var _mcsLeadPlayerId in mcsLeadPlayerIds)
-            {
-                System.Console.WriteLine(_mcsLeadPlayerId);
-            }
-
             var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
                 var profileIds = await Task.Run(() =>
