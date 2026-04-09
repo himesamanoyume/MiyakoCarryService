@@ -130,19 +130,16 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public Player GetMcsLeadPlayerByMcsBotPlayerId(MongoID mcsBotPlayerId)
         {
-            if (IsHost)
+            if (!IsHost)
             {
-                foreach (var mcsSquad in _mcsSquadDict)
-                {
-                    if (mcsSquad.Value.ContainsKey(mcsBotPlayerId))
-                    {
-                        return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsSquad.Key);
-                    }
-                }
+                throw new System.Exception("作为副机时不应使用此函数");
             }
-            else
+            foreach (var mcsSquad in _mcsSquadDict)
             {
-                return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+                if (mcsSquad.Value.ContainsKey(mcsBotPlayerId))
+                {
+                    return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsSquad.Key);
+                }
             }
             return null;
         }

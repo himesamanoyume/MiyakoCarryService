@@ -7,7 +7,6 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
@@ -31,11 +30,11 @@ namespace MiyakoCarryService.Client.Mgrs
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
                 FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
+                _handleActionsMap = new()
+                {
+                    {ECommandPacketType.Teleport, HandleTeleport},
+                };
             }
-            _handleActionsMap = new()
-            {
-                {ECommandPacketType.Teleport, HandleTeleport},
-            };
         }
 
         private GamePlayerOwner _gamePlayerOwner
@@ -81,6 +80,7 @@ namespace MiyakoCarryService.Client.Mgrs
             MiyakoCarryServicePlugin.Logger.LogWarning($"IsServer: {FikaBackendUtils.IsServer}, 接收到CommandPacket");
             if (!FikaBackendUtils.IsServer)
             {
+                MiyakoCarryServicePlugin.Logger.LogWarning($"并不是 FikaServer");
                 return;
             }
 
@@ -90,13 +90,23 @@ namespace MiyakoCarryService.Client.Mgrs
 
             if (mcsLeadPlayer == null)
             {
+                MiyakoCarryServicePlugin.Logger.LogWarning($"mcsLeadPlayer 为空");
                 return;
             }
+            else
+            {
+                MiyakoCarryServicePlugin.Logger.LogWarning($"mcsLeadPlayer：{mcsLeadPlayer.Profile.Nickname}");
+            }
 
-            if (server.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetIds, out FikaPlayer mcsBotPlayer))  
+            if (server.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
             {  
-                mcsBotPlayer.Teleport(mcsLeadPlayer.Position);  
-            }  
+                mcsBotPlayer.Teleport(mcsLeadPlayer.Position);
+                MiyakoCarryServicePlugin.Logger.LogWarning($"对 mcsBotPlayer: {mcsBotPlayer.Profile.Nickname} 执行传送至: {mcsLeadPlayer.Position}");
+            }
+            else
+            {
+                MiyakoCarryServicePlugin.Logger.LogWarning($"未能通过 McsBotPlayerNetId 找到 mcsBotPlayer");
+            }
         }
 
         protected sealed override void OnRaidStarted()
@@ -379,19 +389,22 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
                     mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position);
-                    // botOwner.Memory.GoalTarget.Clear();
-                    // botOwner.Memory.GoalEnemy = null;
+                    if (!MiyakoCarryServicePlugin.SAINInstalled)
+                    {
+                        botOwner.Memory.GoalTarget.Clear();
+                        botOwner.Memory.GoalEnemy = null;
+                    }
                 }
                 else
                 {
-                    var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayer.ProfileId);
+                    var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                     if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
                     {
-                        // mcsBotPlayer.Teleport(leadPlayer.Position);
+                        MiyakoCarryServicePlugin.Logger.LogWarning($"fikaMcsLeadPlayer: {fikaMcsLeadPlayer.Profile.Nickname}, fikaMcsBotPlayer: {fikaMcsBotPlayer.Profile.Nickname}");
                         var packet = new CommandPacket(ECommandPacketType.Teleport)
                         {
                             McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
-                            McsBotPlayerNetIds = fikaMcsBotPlayer.NetId
+                            McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                         };
                         Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                     }
@@ -401,8 +414,11 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position);
-                // botOwner.Memory.GoalTarget.Clear();
-                // botOwner.Memory.GoalEnemy = null;
+                if (!MiyakoCarryServicePlugin.SAINInstalled)
+                {
+                    botOwner.Memory.GoalTarget.Clear();
+                    botOwner.Memory.GoalEnemy = null;
+                }
             }
             CloseCommandMenuAction();
         }

@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Networking.Packets.Command
     {
         public ECommandPacketType CommandType;
         public int McsLeadPlayerNetId;
-        public int McsBotPlayerNetIds;
+        public int McsBotPlayerNetId;
 
         public CommandPacket()
         {
@@ -25,14 +25,14 @@ namespace MiyakoCarryService.Client.Networking.Packets.Command
         {  
             CommandType = reader.GetEnum<ECommandPacketType>();
             McsLeadPlayerNetId = reader.GetInt();
-            McsBotPlayerNetIds = reader.GetInt();
+            McsBotPlayerNetId = reader.GetInt();
         }  
     
         public void Serialize(NetDataWriter writer)  
         {  
             writer.PutEnum(CommandType);
             writer.Put(McsLeadPlayerNetId);  
-            writer.Put(McsBotPlayerNetIds);
+            writer.Put(McsBotPlayerNetId);
         } 
     }
 }
