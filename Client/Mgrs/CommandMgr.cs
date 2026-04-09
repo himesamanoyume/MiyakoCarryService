@@ -7,16 +7,9 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
-using Fika.Core.Modding;
-using Fika.Core.Modding.Events;
-using Fika.Core.Networking;
-using Fika.Core.Networking.LiteNetLib;
 using HarmonyLib;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Networking.Packets.Command;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 
@@ -27,14 +20,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
-                _handleActionsMap = new()
-                {
-                    {ECommandPacketType.Teleport, HandleTeleport},
-                };
-            }
         }
 
         private GamePlayerOwner _gamePlayerOwner
@@ -59,67 +44,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
-
-        public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
-        {
-            MiyakoCarryServicePlugin.Logger.LogWarning($"OnFikaNetworkCreated，开始注册数据包");
-            fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
-        }
-
-        public void OnCommandPacketReceived(CommandPacket packet)  
-        {  
-            if (_handleActionsMap.TryGetValue(packet.CommandType, out var action))
-            {
-                action(packet);
-            }
-        }
-
-        private void HandleTeleport(CommandPacket packet)
-        {
-            MiyakoCarryServicePlugin.Logger.LogWarning($"IsServer: {FikaBackendUtils.IsServer}, 接收到CommandPacket");
-            if (!FikaBackendUtils.IsServer)
-            {
-                MiyakoCarryServicePlugin.Logger.LogWarning($"并不是 FikaServer");
-                return;
-            }
-
-            var server = Singleton<IFikaNetworkManager>.Instance;
-
-            server.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
-
-            if (mcsLeadPlayer == null)
-            {
-                MiyakoCarryServicePlugin.Logger.LogWarning($"mcsLeadPlayer 为空");
-                return;
-            }
-            else
-            {
-                MiyakoCarryServicePlugin.Logger.LogWarning($"mcsLeadPlayer：{mcsLeadPlayer.Profile.Nickname}");
-            }
-
-            if (server.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
-                mcsBotPlayer.Teleport(mcsLeadPlayer.Position);
-                MiyakoCarryServicePlugin.Logger.LogWarning($"对 mcsBotPlayer: {mcsBotPlayer.Profile.Nickname} 执行传送至: {mcsLeadPlayer.Position}");
-            }
-            else
-            {
-                MiyakoCarryServicePlugin.Logger.LogWarning($"未能通过 McsBotPlayerNetId 找到 mcsBotPlayer");
-            }
-        }
+        public Dictionary<ECommandPacketType, Action<Player>> HandleFikaEventsMap = new();
 
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                if (FikaBackendUtils.IsServer)
-                {
-                    var fikaServer = Singleton<FikaServer>.Instance;
-                    fikaServer.RegisterPacket<CommandPacket>(OnCommandPacketReceived); 
-                }
-            }
             _mcsBotPlayerIds = McsRequestHandler.GetMcsBotPlayerIds();
             _gamePlayerOwner = null;
         }
@@ -385,7 +314,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
-                if (FikaBackendUtils.IsServer)
+                if (McsMgr.IsHost)
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
                     mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position);
@@ -397,16 +326,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 else
                 {
-                    var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                    if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
+                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.Teleport, out var action))
                     {
-                        MiyakoCarryServicePlugin.Logger.LogWarning($"fikaMcsLeadPlayer: {fikaMcsLeadPlayer.Profile.Nickname}, fikaMcsBotPlayer: {fikaMcsBotPlayer.Profile.Nickname}");
-                        var packet = new CommandPacket(ECommandPacketType.Teleport)
-                        {
-                            McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
-                            McsBotPlayerNetId = fikaMcsBotPlayer.NetId
-                        };
-                        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                        action(mcsBotPlayer);
                     }
                 }
             }

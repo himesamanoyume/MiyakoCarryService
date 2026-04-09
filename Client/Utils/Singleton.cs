@@ -4,32 +4,34 @@ namespace MiyakoCarryService.Client.Utils
 {
     public class MiyakoCarryServiceSingleton<T> : MonoBehaviour where T : Component
     {
-        private static T instance = null;
+        private static T _instance = null;
         public static T Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = FindObjectOfType(typeof(T)) as T;
-                    if (instance == null)
+                    _instance = FindObjectOfType(typeof(T)) as T;
+                    if (_instance == null)
                     {
-                        GameObject obj = new GameObject();
-                        instance = (T)obj.AddComponent(typeof(T));
+                        var obj = new GameObject();
+                        _instance = (T)obj.AddComponent(typeof(T));
                         obj.hideFlags = HideFlags.DontSave;
                         obj.name = "MiyakoCarryService" + typeof(T).Name;
                     }
                 }
-                return instance;
+                return _instance;
             }
         }
+
+        public static bool Instantiated => _instance != null;
 
         public virtual void Awake()
         {
             DontDestroyOnLoad(gameObject);
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = this as T;
+                _instance = this as T;
             }
             else
             {

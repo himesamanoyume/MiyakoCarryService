@@ -3,7 +3,7 @@
 using Fika.Core.Networking.LiteNetLib.Utils;
 using MiyakoCarryService.Client.Enums;
 
-namespace MiyakoCarryService.Client.Networking.Packets.Command
+namespace MiyakoCarryService.Fika.Packets
 {
     public class CommandPacket : INetSerializable
     {
