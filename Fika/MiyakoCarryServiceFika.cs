@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Fika
 {
     [BepInPlugin(McsFikaGUID, McsFikaPluginName, BepInExClientVersion)]
     [BepInProcess("EscapeFromTarkov.exe")]
-    [BepInDependency(BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(McsGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServiceFikaPlugin : BaseUnityPlugin
@@ -29,7 +28,6 @@ namespace MiyakoCarryService.Fika
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
         public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservicefika";
-        public const string BigBrainGUID = "xyz.drakia.bigbrain";
         public const string McsFikaPluginName = "姫様の夢 MiyakoCarryServiceFika";
         public static MiyakoCarryServiceFikaPlugin Instance;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryServiceFika");
@@ -104,7 +102,6 @@ namespace MiyakoCarryService.Fika
 
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
         {
-            Logger.LogWarning($"OnFikaNetworkCreated，开始注册数据包");
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
         }
@@ -119,10 +116,8 @@ namespace MiyakoCarryService.Fika
 
         private void HandleTeleport(CommandPacket packet)
         {
-            Logger.LogWarning($"IsServer: {FikaBackendUtils.IsServer}, 接收到CommandPacket");
             if (!FikaBackendUtils.IsServer)
             {
-                Logger.LogWarning($"并不是 FikaServer");
                 return;
             }
 
@@ -132,22 +127,12 @@ namespace MiyakoCarryService.Fika
 
             if (mcsLeadPlayer == null)
             {
-                Logger.LogWarning($"mcsLeadPlayer 为空");
                 return;
-            }
-            else
-            {
-                Logger.LogWarning($"mcsLeadPlayer：{mcsLeadPlayer.Profile.Nickname}");
             }
 
             if (server.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
             {  
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position);
-                Logger.LogWarning($"对 mcsBotPlayer: {mcsBotPlayer.Profile.Nickname} 执行传送至: {mcsLeadPlayer.Position}");
-            }
-            else
-            {
-                Logger.LogWarning($"未能通过 McsBotPlayerNetId 找到 mcsBotPlayer");
             }
         }
 
@@ -156,7 +141,6 @@ namespace MiyakoCarryService.Fika
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
-                Logger.LogWarning($"fikaMcsLeadPlayer: {fikaMcsLeadPlayer.Profile.Nickname}, fikaMcsBotPlayer: {fikaMcsBotPlayer.Profile.Nickname}");
                 var packet = new CommandPacket(ECommandPacketType.Teleport)
                 {
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,

@@ -373,7 +373,7 @@
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - - ~~就差个解决`HandleTeleport`为何没有正常传送~~
-- **还是要多一个Fika动态链接库**
+- ~~还是要多一个Fika动态链接库~~
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
@@ -392,7 +392,7 @@
 
 #### 0.2.2.0
 
-- 适配指令系统联机下副机使用
+- 首次对Fika进行强关联的适配工作，可能存在Bug：传送指令支持Fika联机下的副机使用（特别提醒：AI在做某些事的时候似乎会阻止传送，所以并不是指令本身的问题，以后再尝试解决）
 
 #### 0.2.1.0
 
