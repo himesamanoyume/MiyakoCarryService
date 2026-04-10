@@ -254,6 +254,7 @@
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"client: build CC",
+							"fika: build",
 							"client: move"
 						],
 						"group": "build"
@@ -263,6 +264,7 @@
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"client: debug build CC",
+							"fika: build",
 							"client: move"
 						],
 						"group": "build"

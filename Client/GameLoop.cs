@@ -99,7 +99,7 @@ namespace MiyakoCarryService.Client
                 return;
             }
 
-            Assembly assembly = Assembly.GetExecutingAssembly();
+            var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "MiyakoCarryService.Client.Assets.miyakocarryservice";
             var highlightShaderName = "assets/shader/teammatehighlight.shader";
 
@@ -132,6 +132,26 @@ namespace MiyakoCarryService.Client
             }
         }
 
+        public void LoadMcsFika()
+        {
+            var pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
+            if (!File.Exists(assemblyPath))
+            {
+                return;
+            }
+
+            var assembly = Assembly.LoadFrom(assemblyPath);
+            var mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
+
+            if (mcsFikaType != null)
+            {
+                var mcsFika = Activator.CreateInstance(mcsFikaType);
+                var initMethod = mcsFikaType.GetMethod("InitMcsFika");
+                initMethod?.Invoke(mcsFika, null);
+            }
+        }
+
         public void Init()
         {
             LoadAssetBundle();
@@ -143,6 +163,11 @@ namespace MiyakoCarryService.Client
             SubTitleMgr.Enable();
             CommandMgr.Enable();
             HighlightMgr.Enable();
+
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                LoadMcsFika();
+            }
 
             OnGameWorldStart += Reset;
             OnGameWorldDestory += Reset;

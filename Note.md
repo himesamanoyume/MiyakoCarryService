@@ -374,6 +374,7 @@
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - - ~~就差个解决`HandleTeleport`为何没有正常传送~~
 - ~~还是要多一个Fika动态链接库~~
+- ~~像WTTCommonLibClient一样，加载非插件的Fika模组~~
 - Fika联机下，护航会拿走玩家的物品去埋包
 - 移除Bot的臂章
 - 想办法实现武器的占用格数的计算
