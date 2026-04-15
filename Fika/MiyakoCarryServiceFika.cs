@@ -48,15 +48,10 @@ namespace MiyakoCarryService.Fika
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
         {
             fikaEvent.Manager.RegisterPacket<CommandPacket, NetPeer>(OnCommandPacketReceived);
-            fikaEvent.Manager.RegisterPacket<TalkPacket, NetPeer>(OnTalkPacketReceived);
-            if (FikaBackendUtils.IsServer)
-            {
-                SubTitleMgr.HandleFikaEvent = SendTalkPacket;
-            }
-            else
-            {
-                CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
-            }
+            fikaEvent.Manager.RegisterPacket<TalkMsgPacket, NetPeer>(OnTalkPacketReceived);
+            
+            SubTitleMgr.HandleFikaEvent = SendTalkPacket;
+            CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
         }
 
         public void OnCommandPacketReceived(CommandPacket packet, NetPeer netPeer)  
@@ -67,7 +62,7 @@ namespace MiyakoCarryService.Fika
             }
         }
         
-        public void OnTalkPacketReceived(TalkPacket packet, NetPeer netPeer)
+        public void OnTalkPacketReceived(TalkMsgPacket packet, NetPeer netPeer)
         {
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
 
@@ -80,7 +75,7 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
-                SubTitleMgr.ShowMcsBotPlayerMsg(mcsBotPlayer.ProfileId, packet.TalkContentType);
+                SubTitleMgr.ShowMcsBotPlayerMsg(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, packet.TalkContentType, packet.Position);
             }
         }
 
@@ -106,7 +101,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTeleportCommandPacket(Player mcsBotPlayer, Vector3 position)
+        public void SendTeleportCommandPacket(Player mcsBotPlayer, Vector3? position)
         {
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
@@ -121,9 +116,17 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkPacket(Player mcsBotPlayer, ETalkContentType talkContentType, Vector3 position)
+        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position)
         {
-            var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+            MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送TalkPacket");
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsLeadPlayerId);
+            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+            if (mcsLeadPlayer == null || mcsBotPlayer == null)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
+                return;
+            }
+
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
                 var netPeer = FindPeerByNetId(fikaMcsLeadPlayer.NetId);
@@ -133,7 +136,7 @@ namespace MiyakoCarryService.Fika
                     return;  
                 }
                 
-                var packet = new TalkPacket(talkContentType)
+                var packet = new TalkMsgPacket(talkContentType)
                 {
                     Position = position,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,

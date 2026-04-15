@@ -61,9 +61,9 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            public void ShowSubtitleMsg(ETalkContentType talkContentType)
+            public void ShowTalkMsg(ETalkContentType talkContentType)
             {
-                SubTitleMgr.ShowMcsBotPlayerMsg(botOwner.ProfileId, talkContentType);
+                SubTitleMgr.ShowTalkMsg(botOwner.GetMcsBotData().LeadPlayer.ProfileId, botOwner.ProfileId, talkContentType);
             }
 
             public List<BotBehavior> GetBotBehaviors()

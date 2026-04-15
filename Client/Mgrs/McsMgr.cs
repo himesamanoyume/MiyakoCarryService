@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
@@ -19,7 +18,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
 
-        // _mcsBotPlayerIds 只有Host才会使用
+        // _mcsBotPlayerIds 只有Host才会使用，注意：CommandMgr也有同名字段，需要优化
         private HashSet<MongoID> _mcsBotPlayerIds = new();
 
         // _allMcsBotPlayerIdInRaid 作为队友高亮的必须数据，每个玩家都会进行获取
@@ -119,6 +118,17 @@ namespace MiyakoCarryService.Client.Mgrs
         public bool IsMcsBotPlayer(MongoID mcsBotPlayerId)
         {
             return _mcsBotPlayerIds.Contains(mcsBotPlayerId);
+        }
+
+        public bool IsMyMcsBotPlayer(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
+        {
+            _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
+            _mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers);
+            if (squadMembers != null)
+            {
+                return squadMembers.Keys.Contains(mcsBotPlayerId);
+            }
+            return false;
         }
 
         public bool IsMcsBotPlayerDead(MongoID mcsBotPlayerId)

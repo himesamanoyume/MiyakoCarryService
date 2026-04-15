@@ -2,6 +2,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 using UnityEngine.AI;
@@ -184,6 +185,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.Memory.HaveEnemy)
             {
+                SubTitleMgr.ShowTalkMsg(McsBotPlayerData.LeadPlayer.ProfileId, BotOwner.ProfileId, ETalkContentType.EnemySpotted, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
                 return true;
             }
 

@@ -5,8 +5,8 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -44,6 +44,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override string GetName()
         {
             return Name;
+        }
+
+        protected SubTitleMgr SubTitleMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
+            }
         }
 
         public override bool IsCurrentActionEnding()

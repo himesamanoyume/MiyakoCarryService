@@ -6,17 +6,17 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public class TalkPacket : BasePacket
+    public class TalkMsgPacket : BasePacket
     {
         public ETalkContentType TalkContentType;
-        public Vector3 Position;
+        public Vector3? Position;
 
-        public TalkPacket()
+        public TalkMsgPacket()
         {
             
         }
 
-        public TalkPacket(ETalkContentType type)
+        public TalkMsgPacket(ETalkContentType type)
         {
             TalkContentType = type;
         }
@@ -25,14 +25,14 @@ namespace MiyakoCarryService.Fika.Packets
         {  
             base.Deserialize(reader);
             TalkContentType = reader.GetEnum<ETalkContentType>();
-            Position = reader.GetUnmanaged<Vector3>();
+            Position = reader.GetNullableUnmanaged<Vector3>();
         }  
     
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
             writer.PutEnum(TalkContentType);
-            writer.PutUnmanaged(Position);
+            writer.PutNullableUnmanaged(Position);
         } 
     }
 }

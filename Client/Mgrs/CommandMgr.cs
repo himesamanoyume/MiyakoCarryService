@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        public Dictionary<ECommandPacketType, Action<Player, Vector3>> HandleFikaEventsMap = new();
+        public Dictionary<ECommandPacketType, Action<Player, Vector3?>> HandleFikaEventsMap = new();
 
         protected sealed override void OnRaidStarted()
         {

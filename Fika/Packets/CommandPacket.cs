@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Fika.Packets
     public class CommandPacket : BasePacket
     {
         public ECommandPacketType CommandType;
-        public Vector3 Position;
+        public Vector3? Position;
 
         public CommandPacket()
         {
@@ -25,14 +25,14 @@ namespace MiyakoCarryService.Fika.Packets
         {  
             base.Deserialize(reader);
             CommandType = reader.GetEnum<ECommandPacketType>();
-            Position = reader.GetUnmanaged<Vector3>();
+            Position = reader.GetNullableUnmanaged<Vector3>();
         }  
     
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
             writer.PutEnum(CommandType);
-            writer.PutUnmanaged(Position);
+            writer.PutNullableUnmanaged(Position);
         } 
     }
 }

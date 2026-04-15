@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<ETalkContentType, string> _talkContents;
-        public Action<Player, ETalkContentType, Vector3> HandleFikaEvent;
+        public Action<MongoID, MongoID, ETalkContentType, Vector3?> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -33,6 +33,14 @@ namespace MiyakoCarryService.Client.Mgrs
                 {ETalkContentType.FoundHighValueLoot, Locales.FOUNDHIGHVALUELOOT},
                 {ETalkContentType.Regrouping, Locales.REGROUPING},
             };
+        }
+
+        private McsMgr McsMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
+            }
         }
 
         private IEnumerator Init()
@@ -67,10 +75,31 @@ namespace MiyakoCarryService.Client.Mgrs
                     break;
                 }
             }
-
         }
 
-        public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, ETalkContentType talkContentType)
+        public void ShowTalkMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                if (McsMgr.IsHost)
+                {
+                    if (McsMgr.IsMyMcsBotPlayer(mcsLeadPlayerId, mcsBotPlayerId))
+                    {
+                        ShowMcsBotPlayerMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
+                    }
+                    else
+                    {
+                        HandleFikaEvent(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
+                    }
+                }
+            }
+            else
+            {
+                ShowMcsBotPlayerMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType);
+            }
+        }
+
+        public void ShowMcsBotPlayerMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
         {
             _talkContents.TryGetValue(talkContentType, out var msg);
             msg = msg.McsLocalized();
