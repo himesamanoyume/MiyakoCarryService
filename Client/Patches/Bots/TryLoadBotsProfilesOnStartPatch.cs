@@ -281,13 +281,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
 
+            var notScav = leadPlayer.Side != EPlayerSide.Savage;
+
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
-            settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = leadPlayer.Side != EPlayerSide.Savage;
+            settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = notScav;
 
             settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
             // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
             // settings.FileSettings.Mind.REACT_ADD_DRUNK_ENEMY = true;
-            settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
+            settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = notScav ? EWarnBehaviour.AlwaysEnemies : EWarnBehaviour.Neutral;
             settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
 

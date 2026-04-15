@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
 
@@ -15,10 +18,19 @@ namespace MiyakoCarryService.Client.Mgrs
         private Transform _subsContainer;
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
+        private Dictionary<ETalkContentType, string> _talkContents;
+
         public sealed override void Start()
         {
             base.Start();
             StartCoroutine(Init());
+            _talkContents = new()
+            {
+                {ETalkContentType.EnemySpotted, Locales.ENEMYSPOTTED},
+                {ETalkContentType.CopyThat, Locales.COPYTHAT},
+                {ETalkContentType.FoundHighValueLoot, Locales.FOUNDHIGHVALUELOOT},
+                {ETalkContentType.Regrouping, Locales.REGROUPING},
+            };
         }
 
         private IEnumerator Init()
@@ -56,8 +68,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
         }
 
-        public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, string msg)
+        public void ShowMcsBotPlayerMsg(MongoID mcsBotPlayerId, ETalkContentType talkContentType)
         {
+            _talkContents.TryGetValue(talkContentType, out var msg);
+            msg = msg.McsLocalized();
             if (string.IsNullOrEmpty(msg))
             {
                 return;

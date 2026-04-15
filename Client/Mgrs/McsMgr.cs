@@ -36,6 +36,14 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
+        private static SubTitleMgr SubTitleMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
+            }
+        }
+
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAILeadPlayer mcsAILeadPlayer)
         {
             if (!_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
@@ -245,6 +253,10 @@ namespace MiyakoCarryService.Client.Mgrs
         private void RequestAllMcsBotPlayerIdInRaid()
         {
             _allMcsBotPlayerIdInRaid = McsRequestHandler.GetAllMcsBotPlayerIdInRaid();
+            foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
+            {
+                SubTitleMgr.CreateSubTitle(mcsBotPlayerId);
+            }
         }
 
         protected override void OnRaidEnded()

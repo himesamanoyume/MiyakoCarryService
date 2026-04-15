@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
 
@@ -60,9 +61,9 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            public void ShowSubtitleMsg(string msg)
+            public void ShowSubtitleMsg(ETalkContentType talkContentType)
             {
-                SubTitleMgr.ShowMcsBotPlayerMsg(botOwner.ProfileId, msg);
+                SubTitleMgr.ShowMcsBotPlayerMsg(botOwner.ProfileId, talkContentType);
             }
 
             public List<BotBehavior> GetBotBehaviors()
