@@ -4,8 +4,10 @@
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
     <DevGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X</DevGamePath>
-    <DevGamePluginsMiyakoCarryServicePath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMiyakoCarryServicePath>
-    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceClient</BuildMiyakoCarryServicePath>  
+    <DevHeadlessGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X-Headless</DevHeadlessGamePath>
+    <DevGamePluginsMcsPath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMcsPath>
+    <DevHeadlessGamePluginsMcsPath>$(DevHeadlessGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevHeadlessGamePluginsMcsPath>
+    <BuildMcsPath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>  
     <AssemblyName>Himesamanoyume.MiyakoCarryServiceFika</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
@@ -51,9 +53,11 @@
     <ProjectReference Include="..\Client\MiyakoCarryServiceClient.csproj" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
-    <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)') And '$(Configuration)' == 'Debug'" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Debug'" />  
-    <Exec Command="mkdir &quot;$(BuildMiyakoCarryServicePath)&quot;" Condition="!Exists('$(BuildMiyakoCarryServicePath)')" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMiyakoCarryServicePath)\$(TargetFileName)&quot;" />
+    <Exec Command="mkdir &quot;$(DevGamePluginsMcsPath)&quot;" Condition="!Exists('$(DevGamePluginsMcsPath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;"/>  
+    <Exec Command="mkdir &quot;$(DevHeadlessGamePluginsMcsPath)&quot;" Condition="!Exists('$(DevHeadlessGamePluginsMcsPath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevHeadlessGamePluginsMcsPath)\$(TargetFileName)&quot;"/>  
+    <Exec Command="mkdir &quot;$(BuildMcsPath)&quot;" Condition="!Exists('$(BuildMcsPath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMcsPath)\$(TargetFileName)&quot;" />
   </Target> 
 </Project>

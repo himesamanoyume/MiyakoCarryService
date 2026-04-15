@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Fika
         {
             fikaEvent.Manager.RegisterPacket<CommandPacket, NetPeer>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket, NetPeer>(OnTalkPacketReceived);
-            
+
             SubTitleMgr.HandleFikaEvent = SendTalkPacket;
             CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
         }
@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
-                SubTitleMgr.ShowMcsBotPlayerMsg(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, packet.TalkContentType, packet.Position);
+                SubTitleMgr.ShowMsg(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, packet.TalkContentType, packet.Position);
             }
         }
 

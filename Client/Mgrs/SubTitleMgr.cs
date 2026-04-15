@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void ShowTalkMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
+        public void TalkMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
@@ -85,7 +85,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     if (McsMgr.IsMyMcsBotPlayer(mcsLeadPlayerId, mcsBotPlayerId))
                     {
-                        ShowMcsBotPlayerMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
+                        ShowMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
                     }
                     else
                     {
@@ -95,11 +95,11 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                ShowMcsBotPlayerMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType);
+                ShowMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType);
             }
         }
 
-        public void ShowMcsBotPlayerMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
+        public void ShowMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
         {
             _talkContents.TryGetValue(talkContentType, out var msg);
             msg = msg.McsLocalized();

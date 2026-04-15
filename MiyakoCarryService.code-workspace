@@ -164,6 +164,18 @@
 						]
 					},
 					{
+						"label": "client headless: move",
+						"type": "shell",
+						"command": "xcopy",
+						"args": [
+							"/E",
+							"/I",
+							"/Y",
+							"'${workspaceFolder}\\Build\\BepInEx\\'",
+							"'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\'"
+						]
+					},
+					{
 						"label": "server: move",
 						"type": "shell",
 						"command": "xcopy",
@@ -180,25 +192,25 @@
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"server: move",
-							"client: move"
+							"client: move",
+							"client headless: move"
 						],
 						"group": "build"
 					},
 					{
-						"label": "all: (build & move)",
+						"label": "client fika: move",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"all: build",
-							"all: move"
+							"client: move",
+							"client headless: move"
 						],
 						"group": "build"
 					},
 					{
-						"label": "all: CC (build & move)",
+						"label": "all: build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"all: build CC",
-							"all: move"
+							"all: build"
 						],
 						"group": "build"
 					},
@@ -221,69 +233,54 @@
 						"group": "build"
 					},
 					{
-						"label": "all: (build & package & move)",
+						"label": "all: (build & package)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"all: build",
-							"package",
-							"all: move"
+							"package"
 						],
 						"group": "build"
 					},
 					{
-						"label": "all: CC (build & package & move)",
+						"label": "all: CC (build & package)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"all: build CC",
-							"package: CC",
-							"all: move"
+							"package: CC"
 						],
 						"group": "build"
 					},
 					{
-						"label": "client: (build & move)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"client: build",
-							"client: move"
-						],
-						"group": "build"
-					},
-					{
-						"label": "client: CC (build & move)",
+						"label": "client: CC build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"client: build CC",
-							"fika: build",
-							"client: move"
+							"fika: build"
 						],
 						"group": "build"
 					},
 					{
-						"label": "client: CC (debug build & move)",
+						"label": "client fika: CC debug build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"client: debug build CC",
-							"fika: build",
-							"client: move"
+							"fika: build"
 						],
 						"group": "build"
 					},
 					{
-						"label": "server: (build & move)",
+						"label": "server: build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"server: build",
-							"server: move"
+							"server: build"
 						],
 						"group": "build"
 					},
 					{
-						"label": "server: CC (build & move)",
+						"label": "server: CC build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
-							"server: build CC",
-							"server: move"
+							"server: build CC"
 						],
 						"group": "build"
 					},
