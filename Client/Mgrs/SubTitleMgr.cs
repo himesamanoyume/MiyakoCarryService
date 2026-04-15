@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using EFT;
@@ -19,6 +20,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<ETalkContentType, string> _talkContents;
+        public Action<Player, ETalkContentType, Vector3> HandleFikaEvent;
 
         public sealed override void Start()
         {

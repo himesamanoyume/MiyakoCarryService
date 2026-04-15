@@ -2,6 +2,7 @@ namespace MiyakoCarryService.Client.Enums
 {
     public enum ECommandPacketType
     {
-        Teleport
+        Teleport,
+        GoTo
     }
 }

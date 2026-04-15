@@ -6,32 +6,32 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public class CommandPacket : BasePacket
+    public class TalkPacket : BasePacket
     {
-        public ECommandPacketType CommandType;
+        public ETalkContentType TalkContentType;
         public Vector3 Position;
 
-        public CommandPacket()
+        public TalkPacket()
         {
             
         }
 
-        public CommandPacket(ECommandPacketType type)
+        public TalkPacket(ETalkContentType type)
         {
-            CommandType = type;
+            TalkContentType = type;
         }
         
         public override void Deserialize(NetDataReader reader)  
         {  
             base.Deserialize(reader);
-            CommandType = reader.GetEnum<ECommandPacketType>();
+            TalkContentType = reader.GetEnum<ETalkContentType>();
             Position = reader.GetUnmanaged<Vector3>();
         }  
     
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
-            writer.PutEnum(CommandType);
+            writer.PutEnum(TalkContentType);
             writer.PutUnmanaged(Position);
         } 
     }
