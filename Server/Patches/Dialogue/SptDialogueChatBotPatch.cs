@@ -21,8 +21,8 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
 
         private static CoreConfig _coreConfig;
 
-        [PatchPrefix]
-        public static bool Prefix(ref UserDialogInfo __result)
+        [PatchPostfix]
+        public static void Postfix(ref UserDialogInfo __result)
         {
             if (_coreConfig is null)
             {
@@ -36,15 +36,13 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                 Aid = 1234568,
                 Info = new UserDialogDetails
                 {
-                    Level = 1,
+                    Level = 1.0,
                     MemberCategory = MemberCategory.Developer,
                     SelectedMemberCategory = MemberCategory.Developer,
                     Nickname = _coreConfig.SptFriendNickname,
                     Side = "Usec",
                 },
             };
-
-            return false;
         }
     }
 }
