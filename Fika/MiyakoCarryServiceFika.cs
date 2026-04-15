@@ -47,14 +47,14 @@ namespace MiyakoCarryService.Fika
 
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
         {
-            fikaEvent.Manager.RegisterPacket<CommandPacket, NetPeer>(OnCommandPacketReceived);
-            fikaEvent.Manager.RegisterPacket<TalkMsgPacket, NetPeer>(OnTalkPacketReceived);
+            fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
+            fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
 
             SubTitleMgr.HandleFikaEvent = SendTalkPacket;
             CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
         }
 
-        public void OnCommandPacketReceived(CommandPacket packet, NetPeer netPeer)  
+        public void OnCommandPacketReceived(CommandPacket packet)  
         {  
             if (_handleActionsMap.TryGetValue(packet.CommandType, out var action))
             {
@@ -62,8 +62,10 @@ namespace MiyakoCarryService.Fika
             }
         }
         
-        public void OnTalkPacketReceived(TalkMsgPacket packet, NetPeer netPeer)
+        public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
+            MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 TalkPacket");
+
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
 
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
@@ -129,12 +131,12 @@ namespace MiyakoCarryService.Fika
 
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
-                var netPeer = FindPeerByNetId(fikaMcsLeadPlayer.NetId);
-                if (netPeer == null)  
-                {  
-                    MiyakoCarryServicePlugin.Logger.LogError($"未找到NetId {fikaMcsLeadPlayer.NetId} 的NetPeer");
-                    return;  
-                }
+                // var netPeer = FindPeerByNetId(fikaMcsLeadPlayer.NetId);
+                // if (netPeer == null)  
+                // {  
+                //     MiyakoCarryServicePlugin.Logger.LogError($"未找到NetId {fikaMcsLeadPlayer.NetId} 的NetPeer");
+                //     return;  
+                // }
                 
                 var packet = new TalkMsgPacket(talkContentType)
                 {
@@ -143,26 +145,26 @@ namespace MiyakoCarryService.Fika
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
 
-                Singleton<IFikaNetworkManager>.Instance.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, netPeer);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
-        private NetPeer FindPeerByNetId(int netId)  
-        {  
-            var server = Singleton<FikaServer>.Instance;  
-            if (server == null || server.NetServer == null)
-            {
-                return null;  
-            }
+        // private NetPeer FindPeerByNetId(int netId)  
+        // {  
+        //     var server = Singleton<FikaServer>.Instance;  
+        //     if (server == null || server.NetServer == null)
+        //     {
+        //         return null;  
+        //     }
             
-            foreach (NetPeer peer in server.NetServer.ConnectedPeerList)  
-            {  
-                if (peer.RemoteId == netId)  
-                {  
-                    return peer;  
-                }  
-            }  
-            return null;  
-        }
+        //     foreach (NetPeer peer in server.NetServer.ConnectedPeerList)  
+        //     {  
+        //         if (peer.RemoteId == netId)  
+        //         {  
+        //             return peer;  
+        //         }  
+        //     }  
+        //     return null;  
+        // }
     }
 }

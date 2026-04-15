@@ -122,7 +122,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public bool IsMyMcsBotPlayer(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
         {
-            _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
             _mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers);
             if (squadMembers != null)
             {

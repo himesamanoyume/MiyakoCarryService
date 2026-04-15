@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
@@ -83,7 +84,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (McsMgr.IsHost)
                 {
-                    if (McsMgr.IsMyMcsBotPlayer(mcsLeadPlayerId, mcsBotPlayerId))
+                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayerId))
                     {
                         ShowMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
                     }
@@ -115,7 +116,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     return;
                 }
 
-                subTitle.Show(msg);
+                subTitle.Show(msg, talkContentType);
             }
         }
 
@@ -147,17 +148,29 @@ namespace MiyakoCarryService.Client.Mgrs
             private TMP_Text _textField;
             private GameLoop _gameLoop;
             private Coroutine _coroutine;
+            private ETalkContentType _lastTalkContentType;
+            private float _colddown;
 
             public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView)
             {
+                _lastTalkContentType = ETalkContentType.EnemySpotted;
+                _colddown = 0;
                 SubtitlesView = subtitlesView;
                 _gameLoop = gameLoop;
                 var subtitlesViewTraverse = Traverse.Create(subtitlesView);
                 _textField = subtitlesViewTraverse.Field<TMP_Text>("_textField").Value;
             }
 
-            public void Show(string msg)
+            public void Show(string msg, ETalkContentType talkContentType)
             {
+                if (_lastTalkContentType == talkContentType)
+                {
+                    if (Time.time < _colddown)
+                    {
+                        return;
+                    }
+                }
+
                 Hide(0f);
                 if (_coroutine != null)
                 {
@@ -165,6 +178,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 _textField.text = msg;
                 SubtitlesView.ShowGameObject();
+                _colddown = Time.time + 2f;
+                _lastTalkContentType = talkContentType;
                 _coroutine = _gameLoop.StartCoroutine(Hide(4f));
             }
 
