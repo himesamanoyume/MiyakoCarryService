@@ -63,8 +63,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void TalkMsg(ETalkContentType talkContentType, Vector3? position = null)
             {
-                // MiyakoCarryServicePlugin.Logger.LogWarning($"{botOwner.GetMcsBotData().LeadPlayer.Profile.Nickname} 的护航正准备发出对话");
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer.ProfileId, botOwner.ProfileId, talkContentType, position);
+                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer.Profile, botOwner.Profile, talkContentType, position);
             }
 
             public List<BotBehavior> GetBotBehaviors()

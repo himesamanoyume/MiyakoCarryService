@@ -5,6 +5,7 @@ namespace MiyakoCarryService.Client.Enums
         EnemySpotted,
         CopyThat,
         FoundHighValueLoot,
-        Regrouping
+        Regrouping,
+        ManDown,
     }
 }

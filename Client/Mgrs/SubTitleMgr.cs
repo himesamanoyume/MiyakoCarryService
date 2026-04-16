@@ -78,29 +78,29 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void TalkMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
+        public void TalkMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, ETalkContentType talkContentType, Vector3? position = null)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
                 if (McsMgr.IsHost)
                 {
-                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayerId))
+                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayerProfile.Id))
                     {
-                        ShowMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
+                        ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, talkContentType, position);
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayerId, mcsBotPlayerId, talkContentType, position);
+                        HandleFikaEvent(mcsLeadPlayerProfile.Id, mcsBotPlayerProfile.Id, talkContentType, position);
                     }
                 }
             }
             else
             {
-                ShowMsg(mcsLeadPlayerId, mcsBotPlayerId, talkContentType);
+                ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, talkContentType);
             }
         }
 
-        public void ShowMsg(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, ETalkContentType talkContentType, Vector3? position = null)
+        public void ShowMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, ETalkContentType talkContentType, Vector3? position = null)
         {
             _talkContents.TryGetValue(talkContentType, out var msg);
             msg = msg.McsLocalized();
@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
             
-            if (_subTitles.TryGetValue(mcsBotPlayerId, out var subTitle))
+            if (_subTitles.TryGetValue(mcsBotPlayerProfile.Id, out var subTitle))
             {
                 if (subTitle.CurrentMsg() == msg)
                 {
@@ -120,16 +120,16 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void CreateSubTitle(MongoID mcsBotPlayerId)
+        public void CreateSubTitle(Profile mcsBotPlayerProfile)
         {
             var cloneSubtitleViewGameObject = Instantiate(_subtitlesViewTemplate);
             var cloneSubtitleView = cloneSubtitleViewGameObject.GetComponentInChildren<SubtitlesView>();
 
             cloneSubtitleViewGameObject.transform.SetParent(_subsContainer);
 
-            var cloneSubTitle = new SubTitle(_gameloop, cloneSubtitleView);
+            var cloneSubTitle = new SubTitle(_gameloop, cloneSubtitleView, mcsBotPlayerProfile);
             cloneSubTitle.Hide(0f);
-            _subTitles[mcsBotPlayerId] = cloneSubTitle;
+            _subTitles[mcsBotPlayerProfile.Id] = cloneSubTitle;
         }
 
         protected override void OnRaidEnded()
@@ -149,11 +149,13 @@ namespace MiyakoCarryService.Client.Mgrs
             private GameLoop _gameLoop;
             private Coroutine _coroutine;
             private ETalkContentType _lastTalkContentType;
+            private Profile _mcsBotPlayerProfile;
             private float _colddown;
 
-            public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView)
+            public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
             {
                 _lastTalkContentType = ETalkContentType.EnemySpotted;
+                _mcsBotPlayerProfile = mcsBotPlayerProfile;
                 _colddown = 0;
                 SubtitlesView = subtitlesView;
                 _gameLoop = gameLoop;
@@ -176,7 +178,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     _gameLoop.StopCoroutine(_coroutine);
                 }
-                _textField.text = msg;
+                _textField.text = $"<b>{_mcsBotPlayerProfile.Nickname}</b>: " + msg;
                 SubtitlesView.ShowGameObject();
                 _colddown = Time.time + 2f;
                 _lastTalkContentType = talkContentType;

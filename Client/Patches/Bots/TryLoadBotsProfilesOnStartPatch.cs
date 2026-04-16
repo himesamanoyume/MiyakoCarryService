@@ -185,7 +185,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         botOwner.Settings = settings;
 
                         McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
-                        SubTitleMgr.CreateSubTitle(botOwner.ProfileId);
+                        SubTitleMgr.CreateSubTitle(botOwner.Profile);
 
                         if (leadPlayer.BotsGroup != null)
                         {
@@ -433,7 +433,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Aiming.MISS_DIST = 500f;
             settings.FileSettings.Aiming.NEXT_SHOT_MISS_CHANCE_100 = 0f;
             settings.FileSettings.Aiming.NEXT_SHOT_MISS_Y_OFFSET = 1f;
-            settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = -1f;
+            settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
             settings.FileSettings.Aiming.WEAPON_ROOT_OFFSET = 0.35f;
             settings.FileSettings.Aiming.DANGER_UP_POINT = 3f;
             settings.FileSettings.Aiming.OFFSET_RECAL_ANYWAY_TIME = 1f;

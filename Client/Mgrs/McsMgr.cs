@@ -264,7 +264,8 @@ namespace MiyakoCarryService.Client.Mgrs
             _allMcsBotPlayerIdInRaid = McsRequestHandler.GetAllMcsBotPlayerIdInRaid();
             foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
             {
-                SubTitleMgr.CreateSubTitle(mcsBotPlayerId);
+                var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+                SubTitleMgr.CreateSubTitle(mcsBotPlayer.Profile);
             }
         }
 

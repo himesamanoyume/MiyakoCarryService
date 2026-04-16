@@ -2,7 +2,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 using UnityEngine.AI;
@@ -185,8 +184,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.Memory.HaveEnemy)
             {
-                MiyakoCarryServicePlugin.Logger.LogWarning("尝试说出发现敌人");
-                BotOwner.TalkMsg(ETalkContentType.EnemySpotted, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
+                // BotOwner.TalkMsg(ETalkContentType.EnemySpotted, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
                 return true;
             }
 

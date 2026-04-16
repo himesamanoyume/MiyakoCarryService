@@ -367,7 +367,7 @@
 - - 单人指令：报告情况（交战中等等）、前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）、归队（前往老板周围）、护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
 - - 全队指令：没有报告情况、全队前往指定位置（到达位置后停留）、全队归队（前往老板周围）、全队护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
 - `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
-- - **当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕**
+- - ~~当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕~~
 > 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
 
 > [Fika Wiki](https://wiki.project-fika.com/modding-fika)
@@ -377,9 +377,13 @@
 - ~~还是要多一个Fika动态链接库~~
 - ~~像WTTCommonLibClient一样，加载非插件的Fika模组~~
 - **使用前往指令时应该做出相应动作**
+- **可以用`EPhraseTrigger`完全替代掉`ETalkContentType`**
 - ~~BUG: 不是自己的护航却显示了字幕~~
 - ~~BUG: 主机中副机的护航的对话并没有能发送至副机使副机显示字幕~~
-- 让护航说话存在冷却（根据上一个枚举类型内置3秒冷却）
+- ~~让护航说话存在冷却（根据上一个枚举类型内置3秒冷却）~~
+- **想办法在AI说出某些语音时额外触发`TalkMsg`**
+- - PostPatch `BotTalk.TrySay`中的`method_5`
+- **新增被护航击杀的话赔偿个30w的机制**
 - 想办法实现武器的占用格数的计算
 - `GClass117`为AI掠夺战利品的Layer，需要适时进行参考学习
 
