@@ -973,8 +973,8 @@
     </div>
     &nbsp;&nbsp;
     <p><span style="font-size: 25px;"><strong>食用方式</strong></span></p>
-    <img src="https://ods5.oddba.cn/user_files/23687/bbs/81209917_1770549779.png"/>
-    <img src="https://ods5.oddba.cn/user_files/23687/bbs/91986568_1770549789.png"/>
+    <img src="https://ods5.oddba.cn/user_files/23687/bbs/35529095_1776484381.png"/>
+    <img src="https://ods5.oddba.cn/user_files/23687/bbs/24108994_1776483836.png"/>
     &nbsp;&nbsp;
     <p>
         <span style="font-size: 25px;"><strong>Q&A</strong></span>
@@ -996,19 +996,11 @@
             <p>A: FriendlyPMC 可以随意生成指定数量的AI队友（好像？），但反正 Mcs 在Pmc模式下最大仅支持4位，Scav模式下最大仅支持3位，符合原版组队设定；FriendlyPMC 功能更完善，比如能对AI队友下达指令，修改AI队友的装备，这些 Mcs 都还不支持，但这只是迟早的事，不要想着一开始 Mcs 就能做到尽善尽美，再怎么说 SAIN 和 FriendlyPMC 都是开发了数年的模组；<b>FriendlyPMC 不主动适配 Fika ，Mcs 会主动适配 Fika</b>；<b>FriendlyPMC 无法使用 SAIN 的战斗层级，而 Mcs 护航可以</b>。<b>FriendlyPMC 无法轻易适配其他AI Boss，而 Mcs 可以轻易适配</b>；<b>FriendlyPMC 无法生成其他Mod的AI类型，而 Mcs 支持生成第三方Mod的AI类型</b>，因此你将可以通过 Mcs 做到...</p>
         </li>
         &nbsp;&nbsp;
-        <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/30705353_1770772708.png"/></p>
+        <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/29648841_1776483848.png"/></p>
         <p style="text-align: center;">孩子们，别怕</p>
         &nbsp;&nbsp;
         <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/35371127_1771827285.png"/></p>
         <p style="text-align: center;">使用 《WTT - Black Division Home》 生成的黑色军团小队</p>
-    </ul>
-    <ul style="list-style-type: disc;">
-        <li>
-            <p>Q: 当前 Mcs 的现状、更新计划</p>
-        </li>
-        <li>
-            <p>A: 目前 Mcs 的护航在行为上仅实现了简单的跟随老板，只要进入战斗，就会回归原版的战斗行为，如果有 SAIN ，那就是进入 SAIN 的战斗行为，所以不要问我为什么护航不会主动冲，原版就这样。（目前我也没有任何战斗行为层级的开发计划，战斗方面我认为有 SAIN 就够了，何必多此一举）而为了适配 Fika 有些技术问题还需要攻克，然后 Mcs 计划是先解决技术问题，再实现指令系统，再实现护航更丰富的非战斗行为，再完善护航的配装</p>
-        </li>
     </ul>
     <ul style="list-style-type: disc;">
         <li>
@@ -1036,13 +1028,45 @@
         <br />
     </p>
     <details>
-        <summary id="summary"><span
-                style="font-size: 18px;"><strong>基础功能</strong></span></summary>
+        <summary id="summary"><span style="font-size: 18px;"><strong>基础功能</strong></span></summary>
         <table style="margin: 15px;
             width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
                     <td>目前预先写有一些配置项，但是当前版本的所有配置项均不会生效</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+    &nbsp;&nbsp;
+    <details>
+        <summary id="summary"><span style="font-size: 18px;"><strong>指令功能</strong></span></summary>
+        <table style="margin: 15px;
+            width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>打开指令菜单快捷键</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+    &nbsp;&nbsp;
+    <details>
+        <summary id="summary"><span style="font-size: 18px;"><strong>玩家功能</strong></span></summary>
+        <table style="margin: 15px; width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>护航高亮</td>
+                    <td>使战局内所有护航高亮，已适配Fika</td>
+                </tr>
+                <tr>
+                    <td>护航高亮快捷键</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>护航高亮颜色</td>
                     <td></td>
                 </tr>
             </tbody>
@@ -1065,30 +1089,111 @@
         </p>
         <p><span style="font-size: 20px;"><strong>更新日志</strong></span></p>
         <p>
-            <strong>[4.0.X] 0.1.7.X</strong>
+            <strong>[4.0.X] 0.2.3.0</strong>
         </p>
         <ul style="list-style-type: disc;">
             <li>
-                <p>开放其他护航类型（默认支持Kaban, Reshala, Glukhar,Killa, Knight, BigPipe, BirdEye, Kollontay, Shturman, Sanitar, Tagilla, Partisan, Zryachiy, Tagilla Agro, Killa Agro, Infected Tagilla, Rouge, Infected Pmc, Infected Assault, Raider）</p>
+                <p>实现基础的护航对指令的回应对话字幕功能</p>
             </li>
             <li>
-                <p>支持生成自定义护航类型（目标是允许生成第三方Mod提供的AI类型，比如BlackDivision，此功能需要重点测试）</p>
+                <p>再次尝试修复Aid重复问题</p>
             </li>
             <li>
-                <p>下单护航的价格不再几乎免费，而是恢复为需要正常的价格</p>
+                <p>护航装备中不会再自带任何手雷，以避免误伤</p>
             </li>
             <li>
-                <p>新增误伤惩罚机制：每误伤到一次护航，宫子商人下单价格永久涨价1.07%；每误杀一个护航，宫子商人下单价格永久涨价15.6%，此数值将会不断累加。每误杀一个护航，若击杀者为老板，则对该老板进行惩罚，其所有订单立即提前过期，所有已加为好友的护航会立刻主动删除好友（但处于战局中的护航不会立即消失）；若击杀者不是老板，但是是真人玩家，则对战局内所有拥有订单的玩家都进行立即过期、删除好友惩罚。</p>
-                <ul>
-                    <li>本机制在于维持真实组队情况下需要尽量避免TeamKill的游玩环境，请像线上组队时一样注意记忆队友的装备，做好各种防TeamKill措施</li>
-                </ul>
+                <p>提升了传送指令的成功率</p>
             </li>
             <li>
-                <p>为了平衡护航不像真实队友一样可以报点的缺陷，后续版本将会给予护航一定的交流机制以供老板分辨身份</p>
+                <p>现在当安装SAIN时，使用传送指令不会消除护航的仇恨，以防止SAIN的AI逻辑卡住</p>
             </li>
         </ul>
         <details>
             <summary>往期更新</summary>
+            <p>
+                <strong>[4.0.X] 0.2.0.0 ~ 0.2.2.0</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>首次对Fika进行强关联的适配工作：传送指令支持Fika联机下的副机使用</p>
+                </li>
+                <li>
+                    <p>新增护航高亮</p>
+                </li>
+                <li>
+                    <p>新增指令系统功能</p>
+                </li>
+                <li>
+                    <p>尝试修复异常退款金额的问题</p>
+                </li>
+            </ul>
+            <p>
+                <strong>[4.0.X] 0.1.9.X</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>新增了Mcs自己的Pmc装备池（如果有APBS则使用APBS）</p>
+                </li>
+                <li>
+                    <p>通过新增战斗层级、集火机制，调整AI参数、提高索敌能力，大幅提升了多数护航类型的攻击性、侵略性</p>
+                </li>
+                <li>
+                    <p>尝试修复护航锁尸体的问题</p>
+                </li>
+                <li>
+                    <p>好友位的护航名称新增护航类型后缀</p>
+                </li>
+                <li>
+                    <p>调整护航的战斗行为逻辑，下调了护航的进攻性，不再大老远跑去攻击敌人，注重保护老板和清理近距离威胁（注意：安装SAIN后Mcs自带的战斗行为无法使用）</p>
+                </li>
+                <li>
+                    <p>新增退款机制（下单之后如果任务未完成或过期，会返回你在该任务中提交的卢布）</p>
+                </li>
+                <li>
+                    <p>大幅提升护航的准度、反应力</p>
+                </li>
+            </ul>
+            <p>
+                <strong>[4.0.X] 0.1.7.X</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>开放其他护航类型（默认支持Kaban, Reshala, Glukhar,Killa, Knight, BigPipe, BirdEye, Kollontay, Shturman, Sanitar, Tagilla, Partisan, Zryachiy, Tagilla Agro, Killa Agro, Infected Tagilla, Rouge, Infected Pmc, Infected Assault, Raider）</p>
+                </li>
+                <li>
+                    <p>支持生成自定义护航类型（目标是允许生成第三方Mod提供的AI类型，比如BlackDivision，此功能需要重点测试）</p>
+                </li>
+                <li>
+                    <p>下单护航的价格不再几乎免费，而是恢复为需要正常的价格</p>
+                </li>
+                <li>
+                    <p>新增误伤惩罚机制：每误伤到一次护航，宫子商人下单价格永久涨价1.07%；每误杀一个护航，宫子商人下单价格永久涨价15.6%，此数值将会不断累加。每误杀一个护航，若击杀者为老板，则对该老板进行惩罚，其所有订单立即提前过期，所有已加为好友的护航会立刻主动删除好友（但处于战局中的护航不会立即消失）；若击杀者不是老板，但是是真人玩家，则对战局内所有拥有订单的玩家都进行立即过期、删除好友惩罚。</p>
+                    <ul>
+                        <li>本机制在于维持真实组队情况下需要尽量避免TeamKill的游玩环境，请像线上组队时一样注意记忆队友的装备，做好各种防TeamKill措施</li>
+                    </ul>
+                </li>
+                <li>
+                    <p>尝试修复宫子商人涨价可能导致的一些报错</p>
+                </li>
+                <li>
+                    <p>尝试修复`SPT`指令聊天机器人没有显示在好友列表的问题</p>
+                </li>
+                <li>
+                    <p>尝试修复护航攻击护航时会触发涨价惩罚的问题</p>
+                </li>
+                <li>
+                    <p>调整涨价惩罚数值，现在下限为0%，上限为500%</p>
+                </li>
+                <li>
+                    <p>尝试修复BTR、Zryachiy与护航之间会相互攻击的问题</p>
+                </li>
+                <li>
+                    <p>尝试修复当生成护航等级2级的护航时会报错无法生成的问题</p>
+                </li>
+                <li>
+                    <p>新增新版本检查更新机制、赞助者名单检查更新机制</p>
+                </li>
+            </ul>
             <p>
                 <strong>[4.0.X] 0.1.5.X</strong>
             </p>
@@ -1097,7 +1202,7 @@
                     <p>修复APBS兼容问题</p>
                 </li>
                 <li>
-                    <p>底部任务栏右下角新增了一个收集日志的按钮，游戏过程中当你看到有提示报错了，点击一下就会复制错误日志文本，然后发到Discord里来/p>
+                    <p>底部任务栏右下角新增了一个收集日志的按钮，游戏过程中当你看到有提示报错了，点击一下就会复制错误日志文本，然后发到Discord里来</p>
                 </li>
                 <li>
                     <p>修复Fika联机时，副机的真人玩家如果没有点护航就会被其他护航攻击的问题</p>

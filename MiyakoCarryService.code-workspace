@@ -207,14 +207,6 @@
 						"group": "build"
 					},
 					{
-						"label": "all: build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: build"
-						],
-						"group": "build"
-					},
-					{
 						"label": "all: (build & package)",
 						"dependsOrder": "sequence",
 						"dependsOn": [
@@ -229,15 +221,6 @@
 						"dependsOn": [
 							"all: build CC",
 							"package: CC"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: (build & package)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: build",
-							"package"
 						],
 						"group": "build"
 					},
@@ -265,14 +248,6 @@
 						"dependsOn": [
 							"client: debug build CC",
 							"fika: build"
-						],
-						"group": "build"
-					},
-					{
-						"label": "server: build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"server: build"
 						],
 						"group": "build"
 					},
