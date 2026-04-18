@@ -51,9 +51,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMMATEHIGHLIGHT_KEY = "Mcs/TeammateHighlight Key";
         public const string TEAMMATEHIGHLIGHTHOTKEY_KEY = "Mcs/TeammateHighlightHotKey Key";
         public const string TEAMMATEHIGHLIGHTCOLOR_KEY = "Mcs/TeammateHighlightColor Key";
-        public const string ENEMYSPOTTED = "Mcs/EnemySpotted";
-        public const string COPYTHAT = "Mcs/CopyThat";
+        public const string ONFIRSTCONTACT = "Mcs/OnFirstContact";
+        public const string ROGER = "Mcs/Roger";
         public const string FOUNDHIGHVALUELOOT = "Mcs/FoundHighValueLoot";
-        public const string REGROUPING = "Mcs/Regrouping";
+        public const string REGROUP = "Mcs/Regroup";
     }
 }

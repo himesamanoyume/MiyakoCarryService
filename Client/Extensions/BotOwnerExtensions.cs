@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
 
@@ -61,9 +60,9 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            public void TalkMsg(ETalkContentType talkContentType, Vector3? position = null)
+            public void TalkMsg(EPhraseTrigger phraseTrigger, Vector3? position = null)
             {
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer.Profile, botOwner.Profile, talkContentType, position);
+                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer.Profile, botOwner.Profile, phraseTrigger, position);
             }
 
             public List<BotBehavior> GetBotBehaviors()

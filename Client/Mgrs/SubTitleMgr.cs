@@ -20,8 +20,8 @@ namespace MiyakoCarryService.Client.Mgrs
         private Transform _subsContainer;
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
-        private Dictionary<ETalkContentType, string> _talkContents;
-        public Action<MongoID, MongoID, ETalkContentType, Vector3?> HandleFikaEvent;
+        private Dictionary<EPhraseTrigger, string> _talkContents;
+        public Action<MongoID, MongoID, EPhraseTrigger, Vector3?> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -29,10 +29,13 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(Init());
             _talkContents = new()
             {
-                {ETalkContentType.EnemySpotted, Locales.ENEMYSPOTTED},
-                {ETalkContentType.CopyThat, Locales.COPYTHAT},
-                {ETalkContentType.FoundHighValueLoot, Locales.FOUNDHIGHVALUELOOT},
-                {ETalkContentType.Regrouping, Locales.REGROUPING},
+                {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
+                {EPhraseTrigger.Roger, Locales.ROGER},
+                // {EPhraseTrigger.LootBody, Locales.FOUNDHIGHVALUELOOT},
+                // {EPhraseTrigger.LootContainer , Locales.FOUNDHIGHVALUELOOT},
+                // {EPhraseTrigger.LootGeneric , Locales.FOUNDHIGHVALUELOOT},
+                // {EPhraseTrigger.LootNothing , Locales.FOUNDHIGHVALUELOOT},
+                {EPhraseTrigger.Regroup, Locales.REGROUP},
             };
         }
 
@@ -78,7 +81,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void TalkMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, ETalkContentType talkContentType, Vector3? position = null)
+        public void TalkMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, EPhraseTrigger phraseTrigger, Vector3? position = null)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
@@ -86,23 +89,23 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayerProfile.Id))
                     {
-                        ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, talkContentType, position);
+                        ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, phraseTrigger, position);
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayerProfile.Id, mcsBotPlayerProfile.Id, talkContentType, position);
+                        HandleFikaEvent(mcsLeadPlayerProfile.Id, mcsBotPlayerProfile.Id, phraseTrigger, position);
                     }
                 }
             }
             else
             {
-                ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, talkContentType);
+                ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, phraseTrigger);
             }
         }
 
-        public void ShowMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, ETalkContentType talkContentType, Vector3? position = null)
+        public void ShowMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, EPhraseTrigger phraseTrigger, Vector3? position = null)
         {
-            _talkContents.TryGetValue(talkContentType, out var msg);
+            _talkContents.TryGetValue(phraseTrigger, out var msg);
             msg = msg.McsLocalized();
             if (string.IsNullOrEmpty(msg))
             {
@@ -116,7 +119,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     return;
                 }
 
-                subTitle.Show(msg, talkContentType);
+                subTitle.Show(msg, phraseTrigger);
             }
         }
 
@@ -148,13 +151,13 @@ namespace MiyakoCarryService.Client.Mgrs
             private TMP_Text _textField;
             private GameLoop _gameLoop;
             private Coroutine _coroutine;
-            private ETalkContentType _lastTalkContentType;
+            private EPhraseTrigger _lastPhraseTrigger;
             private Profile _mcsBotPlayerProfile;
             private float _colddown;
 
             public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
             {
-                _lastTalkContentType = ETalkContentType.EnemySpotted;
+                _lastPhraseTrigger = EPhraseTrigger.None;
                 _mcsBotPlayerProfile = mcsBotPlayerProfile;
                 _colddown = 0;
                 SubtitlesView = subtitlesView;
@@ -163,9 +166,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 _textField = subtitlesViewTraverse.Field<TMP_Text>("_textField").Value;
             }
 
-            public void Show(string msg, ETalkContentType talkContentType)
+            public void Show(string msg, EPhraseTrigger talkContentType)
             {
-                if (_lastTalkContentType == talkContentType)
+                if (_lastPhraseTrigger == talkContentType)
                 {
                     if (Time.time < _colddown)
                     {
@@ -181,7 +184,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 _textField.text = $"<b>{_mcsBotPlayerProfile.Nickname}</b>: " + msg;
                 SubtitlesView.ShowGameObject();
                 _colddown = Time.time + 2f;
-                _lastTalkContentType = talkContentType;
+                _lastPhraseTrigger = talkContentType;
                 _coroutine = _gameLoop.StartCoroutine(Hide(4f));
             }
 

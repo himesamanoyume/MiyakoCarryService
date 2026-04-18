@@ -1,14 +1,13 @@
 
 
 using Fika.Core.Networking.LiteNetLib.Utils;
-using MiyakoCarryService.Client.Enums;
 using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
     public class TalkMsgPacket : BasePacket
     {
-        public ETalkContentType TalkContentType;
+        public EPhraseTrigger PhraseTrigger;
         public Vector3? Position;
 
         public TalkMsgPacket()
@@ -16,22 +15,22 @@ namespace MiyakoCarryService.Fika.Packets
             
         }
 
-        public TalkMsgPacket(ETalkContentType type)
+        public TalkMsgPacket(EPhraseTrigger type)
         {
-            TalkContentType = type;
+            PhraseTrigger = type;
         }
         
         public override void Deserialize(NetDataReader reader)  
         {  
             base.Deserialize(reader);
-            TalkContentType = reader.GetEnum<ETalkContentType>();
+            PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
             Position = reader.GetNullableUnmanaged<Vector3>();
         }  
     
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
-            writer.PutEnum(TalkContentType);
+            writer.PutEnum(PhraseTrigger);
             writer.PutNullableUnmanaged(Position);
         } 
     }

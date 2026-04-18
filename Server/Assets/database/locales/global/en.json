@@ -65,8 +65,8 @@
     "Mcs/TeammateHighlight Key": "Teammate Highlight",
     "Mcs/TeammateHighlightHotKey Key": "Teammate Highlight Hotkey",
     "Mcs/TeammateHighlightColor Key": "Teammate Highlight Color",
-    "Mcs/EnemySpotted": "Enemy spotted!",
-    "Mcs/CopyThat": "Copy that.",
+    "Mcs/OnFirstContact": "Enemy Contact!",
+    "Mcs/Roger": "Roger.",
     "Mcs/FoundHighValueLoot": "Found high value loot.",
-    "Mcs/Regrouping": "Regrouping."
+    "Mcs/Regroup": "Regrouping."
 }
