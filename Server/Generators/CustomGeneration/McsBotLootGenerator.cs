@@ -68,7 +68,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             var foodItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Food.Weights);
             var drinkItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Drink.Weights);
             var stimItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Stims.Weights);
-            var grenadeCount = weightedRandomHelper.GetWeightedValue(itemCounts.Grenades.Weights);
+            // var grenadeCount = weightedRandomHelper.GetWeightedValue(itemCounts.Grenades.Weights);
 
             // Forced pmc healing loot into secure container
             if (botGenerationDetails.IsPmc && PMCConfig.ForceHealingItemsIntoSecure)
@@ -170,23 +170,23 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 botGenerationDetails.IsPmc
             );
 
-            // Grenades
-            AddLootFromPool(
-                botId,
-                botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
-                    botGenerationDetails.IsPmc,
-                    LootCacheType.GrenadeItems,
-                    botJsonTemplate
-                ),
-                [EquipmentSlots.Pockets, EquipmentSlots.TacticalVest], // Can't use containersBotHasEquipped as we don't want grenades added to backpack
-                grenadeCount,
-                botInventory,
-                botGenerationDetails.RoleLowercase,
-                null,
-                0,
-                botGenerationDetails.IsPmc
-            );
+            // // Grenades
+            // AddLootFromPool(
+            //     botId,
+            //     botLootCacheService.GetLootFromCache(
+            //         botGenerationDetails.RoleLowercase,
+            //         botGenerationDetails.IsPmc,
+            //         LootCacheType.GrenadeItems,
+            //         botJsonTemplate
+            //     ),
+            //     [EquipmentSlots.Pockets, EquipmentSlots.TacticalVest], // Can't use containersBotHasEquipped as we don't want grenades added to backpack
+            //     grenadeCount,
+            //     botInventory,
+            //     botGenerationDetails.RoleLowercase,
+            //     null,
+            //     0,
+            //     botGenerationDetails.IsPmc
+            // );
 
             // Secure
             // only add if not a pmc or is pmc and flag is true

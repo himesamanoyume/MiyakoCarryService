@@ -7,7 +7,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 在AI发出某些短语时显示字幕
+    /// 在AI发出某些短语时显示字幕（未开启Patch）
     /// </summary>
     public sealed class BotTalkPatch : ModulePatch
     {

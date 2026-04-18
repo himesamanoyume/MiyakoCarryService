@@ -13,6 +13,7 @@ using Fika.Core.Modding;
 using EFT;
 using Fika.Core.Networking.LiteNetLib;
 using UnityEngine;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Fika
 {
@@ -99,8 +100,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
             {  
-                mcsBotPlayer.AIData.BotOwner.StopMove();
-                mcsBotPlayer.Teleport(mcsLeadPlayer.Position);
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.StopMove();
+                botOwner.Mover.AllowTeleport();
+                mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
+                botOwner.TalkMsg(EPhraseTrigger.None);
             }
         }
 

@@ -6,7 +6,6 @@ using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
@@ -29,6 +28,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(Init());
             _talkContents = new()
             {
+                {EPhraseTrigger.None, "测试 - 指令回应对话"},
                 {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
                 {EPhraseTrigger.Roger, Locales.ROGER},
                 // {EPhraseTrigger.LootBody, Locales.FOUNDHIGHVALUELOOT},

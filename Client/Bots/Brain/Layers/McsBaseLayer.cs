@@ -336,7 +336,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                 {
-                    BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
+                    BotOwner.StopMove();
+                    BotOwner.Mover.AllowTeleport();
+                    BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    BotOwner.TalkMsg(EPhraseTrigger.None);
                     return true;
                 }
 
@@ -364,7 +367,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                 {
-                    BotOwner.Mover.Teleport(McsBotPlayerData.LeadPlayer.Position);
+                    BotOwner.StopMove();
+                    BotOwner.Mover.AllowTeleport();
+                    BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    BotOwner.TalkMsg(EPhraseTrigger.None);
                     return true;
                 }
 
