@@ -102,6 +102,11 @@ namespace MiyakoCarryService.Client.Utils
             await PostJsonAsync("/mcs/client/trading/api/friendlyFirePenalty", friendlyFirePenalty);
         }
 
+        public static async Task SendCompensationRequest(Compensation compensation)
+        {
+            await PostJsonAsync("/mcs/client/trading/api/compensation", compensation);
+        }
+
         public static List<MongoID> GetMcsBotPlayerIds()
         {
             var response = GetJson<List<MongoID>>("/mcs/singleplayer/info/bot/get");

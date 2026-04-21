@@ -40,31 +40,35 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
-            var player = damageInfo.Player?.iPlayer;
+            var attacker = damageInfo.Player?.iPlayer;
 
-            if (player == null)
+            if (attacker == null)
             {
                 return;
             }
 
-            if (McsMgr.IsMcsBotPlayer(player.ProfileId))
-            {
-                return;
-            }
+            var isMcsBotAttacker = McsMgr.IsMcsBotPlayer(attacker.ProfileId);
+            var isMcsLeadAttacker = McsMgr.IsMcsLeadPlayer(attacker.ProfileId);
+            var isMcsBotInjuredPlayer = McsMgr.IsMcsBotPlayer(___Player.ProfileId);
+            var isMcsLeadInjuredPlayer = McsMgr.IsMcsLeadPlayer(___Player.ProfileId);
 
-            if (McsMgr.IsMcsBotPlayer(___Player.ProfileId))
+            var commonHp = __instance.GetBodyPartHealth(EBodyPart.Common);
+            var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
+            var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
+            var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
+
+            if (isMcsBotAttacker && isMcsLeadInjuredPlayer)
             {
-                var isMcsLeadPlayer = McsMgr.IsMcsLeadPlayer(player.ProfileId);
-                var notMcsLeaderButIsFikaPlayer = player.Profile.Info.GroupId == "Fika" && !isMcsLeadPlayer;
-                if (!(isMcsLeadPlayer || notMcsLeaderButIsFikaPlayer))
+                if (!isDead)
                 {
                     return;
                 }
-                var commonHp = __instance.GetBodyPartHealth(EBodyPart.Common);
-                var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
-                var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
-                var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
-                McsMgr.AddPunish(player.ProfileId, isDead ? 0.1560d : 0.0107d, isDead, notMcsLeaderButIsFikaPlayer);
+                McsMgr.SendCompensation(___Player.ProfileId);
+            }
+            else if (isMcsBotInjuredPlayer && isMcsLeadAttacker)
+            {
+                var notMcsLeaderButIsFikaPlayer = attacker.Profile.Info.GroupId == "Fika";
+                McsMgr.AddPunish(attacker.ProfileId, isDead ? 0.1560d : 0.0107d, isDead, notMcsLeaderButIsFikaPlayer);
             }
         }
     }

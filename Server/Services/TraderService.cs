@@ -2,16 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Eft.Trader;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
@@ -35,6 +38,8 @@ namespace MiyakoCarryService.Server.Services
         CompatibilityService compatibilityService,
         FileUtil fileUtil,
         ISptLogger<TraderService> logger,
+        ItemHelper itemHelper,
+        MailSendService mailSendService,
         ConfigService configService
     )
     {
@@ -216,6 +221,25 @@ namespace MiyakoCarryService.Server.Services
 
             logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
             AddPunishmentMulti(info.Diff);
+        }
+
+        public void Compensation(CompensationRequestData info)
+        {
+            var roubles = new Item  
+            {  
+                Id = new MongoId(),  
+                Template = ItemTpl.MONEY_ROUBLES,  
+                Upd = new Upd { StackObjectsCount = 300000 },  
+            };  
+
+            mailSendService.SendLocalisedNpcMessageToPlayer(
+                info.McsLeadPlayerId,
+                MiyakoTraderId,
+                MessageType.MessageWithItems,
+                Locales.MIYAKOTRADERCOMPENSATION,
+                itemHelper.SplitStackIntoSeparateItems(roubles).SelectMany(x => x).ToList(),
+                timeUtil.GetHoursAsSeconds(168)
+            );
         }
     }
 }

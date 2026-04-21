@@ -22,5 +22,14 @@ namespace MiyakoCarryService.Server.Callbacks
             traderController.FriendlyFirePenalty(mcsLeadPlayerId, info);
             return httpResponseUtil.NullResponse();
         }
+
+        /// <summary>
+        /// 处理 /mcs/client/trading/api/compensation
+        /// </summary>
+        public async ValueTask<string> Compensation(string url, CompensationRequestData info, MongoId mcsLeadPlayerId)
+        {
+            traderController.Compensation(info);
+            return httpResponseUtil.NullResponse();
+        }
     }
 }

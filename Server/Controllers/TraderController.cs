@@ -15,5 +15,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             traderService.FriendlyFirePenalty(mcsLeadPlayerId, info);
         }
+
+        public void Compensation(CompensationRequestData info)
+        {
+            traderService.Compensation(info);
+        }
     }
 }

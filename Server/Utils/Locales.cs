@@ -25,5 +25,6 @@ namespace MiyakoCarryService.Server.Utils
         public const string CURRENTPRICEINCREASE = "Mcs/CurrentPriceIncrease";
         public const string GENERATEPROFILEERROR = "Mcs/GenerateProfileError";
         public const string MIYAKOTRADERREFUND = "Mcs/MiyakoTraderRefund";
+        public const string MIYAKOTRADERCOMPENSATION = "Mcs/MiyakoTraderCompensation";
     }
 }

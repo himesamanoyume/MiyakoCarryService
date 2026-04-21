@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
@@ -218,6 +219,14 @@ namespace MiyakoCarryService.Client.Mgrs
             friendlyFirePenalty.Diff += diff;
             friendlyFirePenalty.TeamKill = teamKill;
             friendlyFirePenalty.PunishEveryone = punishEveryone;
+        }
+
+        public void SendCompensation(MongoID mcsLeadPlayerId)
+        {
+            _ = McsRequestHandler.SendCompensationRequest(new Compensation
+            {
+                McsLeadPlayerId = mcsLeadPlayerId
+            });
         }
 
         public List<MongoID> GetAllMcsBotPlayerIdInRaid()

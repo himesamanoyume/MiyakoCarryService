@@ -18,6 +18,10 @@ namespace MiyakoCarryService.Server.Routers.Static
                 "/mcs/client/trading/api/friendlyFirePenalty",
                 async (url, info, sessionId, output) => await traderCallbacks.FriendlyFirePenalty(url, info, sessionId)
             ),
+            new RouteAction<CompensationRequestData>(
+                "/mcs/client/trading/api/compensation",
+                async (url, info, sessionId, output) => await traderCallbacks.Compensation(url, info, sessionId)
+            ),
         ]
     )
     { }
