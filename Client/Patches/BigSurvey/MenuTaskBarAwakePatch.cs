@@ -14,6 +14,7 @@ using TMPro;
 using UnityEngine;
 using System.Linq;
 using BepInEx;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -87,7 +88,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                     var stringBuilder = new StringBuilder();
                     stringBuilder.Append("Mcs 版本: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
-                    stringBuilder.Append("EFT版本: ").Append(Class1123.String_0).Append("\n")
+                    stringBuilder.Append("EFT版本: ").Append(EFTVersionInfoClass.String_0).Append("\n")
                         .Append("SPT版本: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
                         .Append("系统: ").Append(SystemInfo.operatingSystem).Append("\n")
                         .Append("CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("核心)\n")
@@ -98,6 +99,8 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                                 .Where(plugin => plugin != null)
                                 .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => p.Info.Metadata.Name)
                                 .ToArray())).Append("\n")
+                        .Append("全部Server模组:\n")
+                        .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => x.Name))).Append('\n')
                         .Append("总计异常: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())

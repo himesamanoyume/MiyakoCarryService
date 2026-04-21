@@ -138,5 +138,18 @@ namespace MiyakoCarryService.Client.Utils
 
             return response.ToList();
         }
+
+        public static Dictionary<string, SPTServerModInfo> GetLoadedServerMods()
+        {
+            try
+            {
+                var response = GetJson<Dictionary<string, SPTServerModInfo>>("/launcher/server/loadedServerMods");
+                return response;
+            }
+            catch
+            {
+                return new Dictionary<string, SPTServerModInfo>();
+            }
+        }
     }
 }
