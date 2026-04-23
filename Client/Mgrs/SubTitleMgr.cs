@@ -28,9 +28,16 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(Init());
             _talkContents = new()
             {
-                {EPhraseTrigger.None, "测试 - 指令回应对话"},
+                {EPhraseTrigger.None, "未知的回应。应向Discord频道提出反馈。"},
                 {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
                 {EPhraseTrigger.Roger, Locales.ROGER},
+                {EPhraseTrigger.OnPosition, "已到达指定位置。"},
+                {EPhraseTrigger.Clear, "区域安全。"},
+                {EPhraseTrigger.LeftFlank, "敌人在左翼。"},
+                {EPhraseTrigger.RightFlank, "敌人在右翼。"},
+                {EPhraseTrigger.InTheFront, "前方有敌人。"},
+                {EPhraseTrigger.OnSix, "背后有敌人。"},
+                {EPhraseTrigger.EnemyDown, "敌人倒下"},
                 // {EPhraseTrigger.LootBody, Locales.FOUNDHIGHVALUELOOT},
                 // {EPhraseTrigger.LootContainer , Locales.FOUNDHIGHVALUELOOT},
                 // {EPhraseTrigger.LootGeneric , Locales.FOUNDHIGHVALUELOOT},

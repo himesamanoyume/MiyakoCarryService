@@ -339,7 +339,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
-                    BotOwner.TalkMsg(EPhraseTrigger.None);
+                    BotOwner.TalkMsg(EPhraseTrigger.Regroup);
                     return true;
                 }
 
@@ -370,7 +370,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
-                    BotOwner.TalkMsg(EPhraseTrigger.None);
+                    BotOwner.TalkMsg(EPhraseTrigger.Regroup);
                     return true;
                 }
 

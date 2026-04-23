@@ -172,6 +172,7 @@ namespace MiyakoCarryService.Client
             // new InitRepeatableQuestsDisposePatch().Enable();
             new ChatSendMessagePatch().Enable();
             new LocalQuestControllerClassPatch().Enable();
+            new RaidReadyListFixAidPatch().Enable();
 
 #if DEBUG
 

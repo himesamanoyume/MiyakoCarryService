@@ -321,7 +321,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     botOwner.StopMove();
                     botOwner.Mover.AllowTeleport();
                     mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position, true);
-                    botOwner.TalkMsg(EPhraseTrigger.None);
+                    botOwner.TalkMsg(EPhraseTrigger.Regroup);
                     if (!MiyakoCarryServicePlugin.SAINInstalled)
                     {
                         botOwner.Memory.GoalTarget.Clear();
@@ -342,7 +342,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position, true);
-                botOwner.TalkMsg(EPhraseTrigger.None);
+                botOwner.TalkMsg(EPhraseTrigger.Regroup);
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
                     botOwner.Memory.GoalTarget.Clear();

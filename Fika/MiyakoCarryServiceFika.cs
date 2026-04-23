@@ -104,7 +104,7 @@ namespace MiyakoCarryService.Fika
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
-                botOwner.TalkMsg(EPhraseTrigger.None);
+                botOwner.TalkMsg(EPhraseTrigger.Regroup);
             }
         }
 
