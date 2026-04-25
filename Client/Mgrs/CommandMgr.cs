@@ -13,6 +13,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -45,7 +46,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        public Dictionary<ECommandPacketType, Action<Player, Vector3?>> HandleFikaEventsMap = new();
+        public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
+        // public Dictionary<ECommandPacketType, Action<Player, Vector3?>> HandleFikaEventsMap = new();
 
         protected sealed override void OnRaidStarted()
         {
@@ -292,81 +294,97 @@ namespace MiyakoCarryService.Client.Mgrs
         }
         public void RegroupCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (McsMgr.IsHost)
+                if (HandleFikaEvent != null)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    botOwner.GetMcsBotData().ShouldGoToPoint = false;
-                    botOwner.GetMcsBotData().ShouldHoldPosition = false;
-                    botOwner.TalkMsg(EPhraseTrigger.FollowMe);
+                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Regroup, new Vector3());
                 }
-                else
-                {
-                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.Regroup, out var action))
-                    {
-                        action(mcsBotPlayer, new Vector3());
-                    }
-                }
+                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.Regroup, out var action))
+                // {
+                //     action(mcsBotPlayer, new Vector3());
+                // }
             }
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.GetMcsBotData().ShouldGoToPoint = false;
                 botOwner.GetMcsBotData().ShouldHoldPosition = false;
-                botOwner.TalkMsg(EPhraseTrigger.FollowMe);
+                botOwner.TalkMsg(EPhraseTrigger.Regroup);
             }
             CloseCommandMenuAction();
         }
 
         public void GoToPointCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (McsMgr.IsHost)
+                if (HandleFikaEvent != null)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    botOwner.GetMcsBotData().ShouldGoToPoint = true;
-                    botOwner.TalkMsg(EPhraseTrigger.Going);
-                }
-                else
-                {
-                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.GoToPoint, out var action))
+                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
                     {
-                        if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
-                        {
-                            action(mcsBotPlayer, raycastHit.point);
-                        }
+                        HandleFikaEvent(mcsBotPlayer, ECommandPacketType.GoToPoint, raycastHit.point);
                     }
+                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Regroup, new Vector3());
                 }
+                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.GoToPoint, out var action))
+                // {
+                //     if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
+                //     {
+                //         action(mcsBotPlayer, raycastHit.point);
+                //     }
+                // }
             }
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.GetMcsBotData().ShouldGoToPoint = true;
-                botOwner.TalkMsg(EPhraseTrigger.Going);
+                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
+                {
+                    Vector3? validPosition = null;
+                    var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    var newPos = raycastHit.point + new Vector3(xOffset, 0f, zOffset);
+
+                    for (int attempt = 0; attempt < 30; attempt++)
+                    {
+                        if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                        {
+                            if (Mathf.Abs(navMeshHit1.position.y - raycastHit.point.y) <= 2f)
+                            {
+                                validPosition = navMeshHit1.position;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                    {
+                        validPosition = navMeshHit2.position;
+                    }
+
+                    if (validPosition.HasValue)
+                    {
+                        botOwner.TalkMsg(EPhraseTrigger.Going);
+                        botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                        botOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                    }
+                }
             }
             CloseCommandMenuAction();
         }
 
         public void HoldPositionCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (McsMgr.IsHost)
+                if (HandleFikaEvent != null)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    botOwner.StopMove();
-                    botOwner.GetMcsBotData().ShouldHoldPosition = true;
-                    botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
+                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.HoldPosition, new Vector3());
                 }
-                else
-                {
-                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.HoldPosition, out var action))
-                    {
-                        action(mcsBotPlayer, new Vector3());
-                    }
-                }
+                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.HoldPosition, out var action))
+                // {
+                //     action(mcsBotPlayer, new Vector3());
+                // }
             }
             else
             {
@@ -508,28 +526,16 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void ForceTeleportCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (McsMgr.IsHost)
+                if (HandleFikaEvent != null)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    botOwner.StopMove();
-                    botOwner.Mover.AllowTeleport();
-                    mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position, true);
-                    botOwner.TalkMsg(EPhraseTrigger.Regroup);
-                    if (!MiyakoCarryServicePlugin.SAINInstalled)
-                    {
-                        botOwner.Memory.GoalTarget.Clear();
-                        botOwner.Memory.GoalEnemy = null;
-                    }
+                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Teleport, new Vector3());
                 }
-                else
-                {
-                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.Teleport, out var action))
-                    {
-                        action(mcsBotPlayer, new Vector3());
-                    }
-                }
+                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.Teleport, out var action))
+                // {
+                //     action(mcsBotPlayer, new Vector3());
+                // }
             }
             else
             {
@@ -537,7 +543,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position, true);
-                botOwner.TalkMsg(EPhraseTrigger.Regroup);
+                botOwner.TalkMsg(EPhraseTrigger.Roger);
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
                     botOwner.Memory.GoalTarget.Clear();

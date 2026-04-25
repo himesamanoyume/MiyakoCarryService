@@ -297,6 +297,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.GoToSomePointData.IsCome())
             {
+                if (McsBotPlayerData.ShouldGoToPoint)
+                {
+                    McsBotPlayerData.ShouldGoToPoint = false;
+                    McsBotPlayerData.ShouldHoldPosition = true;
+                }
                 return true;
             }
             else
@@ -339,12 +344,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
-                    BotOwner.TalkMsg(EPhraseTrigger.Regroup);
                     return true;
                 }
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
+                    if (McsBotPlayerData.ShouldGoToPoint)
+                    {
+                        McsBotPlayerData.ShouldGoToPoint = false;
+                        McsBotPlayerData.ShouldHoldPosition = true;
+                    }
                     return true;
                 }
                 return false;

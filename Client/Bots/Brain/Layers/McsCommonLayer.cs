@@ -23,11 +23,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (mcsBotPlayerData.ShouldGoToPoint)
                 {
-                    if (BotOwner.GoToSomePointData.IsCome())
-                    {
-                        mcsBotPlayerData.ShouldGoToPoint = false;
-                        mcsBotPlayerData.ShouldHoldPosition = true;
-                    }
+                    return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                 }
 
                 if (mcsBotPlayerData.ShouldHoldPosition)

@@ -38,6 +38,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.InTheFront, "前方有敌人。"},
                 {EPhraseTrigger.OnSix, "背后有敌人。"},
                 {EPhraseTrigger.EnemyDown, "敌人倒下"},
+                {EPhraseTrigger.Going, "正在前往"},
+                {EPhraseTrigger.HoldPosition, "正在原地驻守待命"},
                 // {EPhraseTrigger.LootBody, Locales.FOUNDHIGHVALUELOOT},
                 // {EPhraseTrigger.LootContainer , Locales.FOUNDHIGHVALUELOOT},
                 // {EPhraseTrigger.LootGeneric , Locales.FOUNDHIGHVALUELOOT},

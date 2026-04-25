@@ -14,6 +14,7 @@ using EFT;
 using Fika.Core.Networking.LiteNetLib;
 using UnityEngine;
 using MiyakoCarryService.Client.Extensions;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Fika
 {
@@ -43,6 +44,9 @@ namespace MiyakoCarryService.Fika
             _handleActionsMap = new()
             {
                 {ECommandPacketType.Teleport, HandleTeleport},
+                {ECommandPacketType.GoToPoint, HandleGoToPoint},
+                {ECommandPacketType.HoldPosition, HandleHoldPosition},
+                {ECommandPacketType.Regroup, HandleRegroup},
             };
         }
 
@@ -52,7 +56,11 @@ namespace MiyakoCarryService.Fika
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
 
             SubTitleMgr.HandleFikaEvent = SendTalkPacket;
-            CommandMgr.HandleFikaEventsMap.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
+            CommandMgr.HandleFikaEvent = SendCommandPacket;
+            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
+            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.GoToPoint, );
+            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.HoldPosition, );
+            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.Regroup, );
         }
 
         public void OnCommandPacketReceived(CommandPacket packet)  
@@ -84,6 +92,11 @@ namespace MiyakoCarryService.Fika
 
         private void HandleTeleport(CommandPacket packet)
         {
+            if (packet.CommandType != ECommandPacketType.Teleport)
+            {
+                return;
+            }
+
             if (!FikaBackendUtils.IsServer)
             {
                 return;
@@ -104,16 +117,131 @@ namespace MiyakoCarryService.Fika
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
+                botOwner.TalkMsg(EPhraseTrigger.Roger);
+            }
+        }
+
+        private void HandleGoToPoint(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.GoToPoint)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
+            {  
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                Vector3? validPosition = null;
+                var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                var newPos = packet.Position.Value + new Vector3(xOffset, 0f, zOffset);
+
+                for (int attempt = 0; attempt < 30; attempt++)
+                {
+                    if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                    {
+                        if (Mathf.Abs(navMeshHit1.position.y - packet.Position.Value.y) <= 2f)
+                        {
+                            validPosition = navMeshHit1.position;
+                            break;
+                        }
+                    }
+                }
+
+                if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                {
+                    validPosition = navMeshHit2.position;
+                }
+
+                if (validPosition.HasValue)
+                {
+                    botOwner.TalkMsg(EPhraseTrigger.Going);
+                    botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                    botOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                }
+            }
+        }
+
+        private void HandleHoldPosition(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.HoldPosition)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
+            {  
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.StopMove();
+                botOwner.GetMcsBotData().ShouldHoldPosition = true;
+                botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
+            }
+        }
+
+        private void HandleRegroup(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.Regroup)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
+            {  
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.GetMcsBotData().ShouldGoToPoint = false;
+                botOwner.GetMcsBotData().ShouldHoldPosition = false;
                 botOwner.TalkMsg(EPhraseTrigger.Regroup);
             }
         }
 
-        public void SendTeleportCommandPacket(Player mcsBotPlayer, Vector3? position)
+        public void SendCommandPacket(Player mcsBotPlayer, ECommandPacketType commandPacketType, Vector3? position)
         {
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
-                var packet = new CommandPacket(ECommandPacketType.Teleport)
+                var packet = new CommandPacket(commandPacketType)
                 {
                     Position = position,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
