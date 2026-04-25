@@ -4,6 +4,7 @@ namespace MiyakoCarryService.Client.Enums
     {
         Teleport,
         GoToPoint,
-        HoldPosition
+        HoldPosition,
+        Regroup
     }
 }

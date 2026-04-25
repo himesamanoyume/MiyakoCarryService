@@ -137,6 +137,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
+            actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
+            actionsReturnClass.Actions.Add(TeamGoToPointCommand(GoToPointCommandAction));
             actionsReturnClass.Actions.Add(TeamHoldPositionCommand(HoldPositionCommandAction));
             actionsReturnClass.Actions.Add(TeamForceTeleportCommand(ForceTeleportCommandAction));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
@@ -205,6 +207,62 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
+        public ActionsTypesClass TeamRegroupCommand(Action<Player> action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "全队集结",
+                TargetName = "让所有护航跟随老板",
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
+            };
+        }
+
+        public ActionsTypesClass TeamGoToPointCommand(Action<Player> action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "全队前往",
+                TargetName = "让所有护航前往指定地点",
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
+            };
+        }
+
         public ActionsTypesClass TeamHoldPositionCommand(Action<Player> action)
         {
             return new ActionsTypesClass
@@ -231,6 +289,64 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                 })
             };
+        }
+        public void RegroupCommandAction(Player mcsBotPlayer)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                if (McsMgr.IsHost)
+                {
+                    var botOwner = mcsBotPlayer.AIData.BotOwner;
+                    botOwner.GetMcsBotData().ShouldGoToPoint = false;
+                    botOwner.GetMcsBotData().ShouldHoldPosition = false;
+                    botOwner.TalkMsg(EPhraseTrigger.FollowMe);
+                }
+                else
+                {
+                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.Regroup, out var action))
+                    {
+                        action(mcsBotPlayer, new Vector3());
+                    }
+                }
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.GetMcsBotData().ShouldGoToPoint = false;
+                botOwner.GetMcsBotData().ShouldHoldPosition = false;
+                botOwner.TalkMsg(EPhraseTrigger.FollowMe);
+            }
+            CloseCommandMenuAction();
+        }
+
+        public void GoToPointCommandAction(Player mcsBotPlayer)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                if (McsMgr.IsHost)
+                {
+                    var botOwner = mcsBotPlayer.AIData.BotOwner;
+                    botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                    botOwner.TalkMsg(EPhraseTrigger.Going);
+                }
+                else
+                {
+                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.GoToPoint, out var action))
+                    {
+                        if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
+                        {
+                            action(mcsBotPlayer, raycastHit.point);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                botOwner.TalkMsg(EPhraseTrigger.Going);
+            }
+            CloseCommandMenuAction();
         }
 
         public void HoldPositionCommandAction(Player mcsBotPlayer)
@@ -304,6 +420,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
+            actionsReturnClass.Actions.Add(RegroupCommand(RegroupCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(ForceTeleportCommand(ForceTeleportCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
@@ -314,6 +432,34 @@ namespace MiyakoCarryService.Client.Mgrs
             }
 
             _gamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
+        }
+
+        public ActionsTypesClass RegroupCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "集结",
+                TargetName = "命令护航跟随老板",
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
+            };
+        }
+
+        public ActionsTypesClass GoToPointCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "前往",
+                TargetName = "命令护航前往指定地点",
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
+            };
         }
 
         public ActionsTypesClass HoldPositionCommand(Action<Player> action, Player mcsBotPlayer)
