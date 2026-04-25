@@ -19,6 +19,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var mcsBotPlayerData = BotOwner.GetMcsBotData();
+                mcsBotPlayerData.ShouldHoldPosition = false;
+                mcsBotPlayerData.ShouldGoToPoint = false;
+                
                 if (ShouldShootImmediately())
                 {
                     return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");

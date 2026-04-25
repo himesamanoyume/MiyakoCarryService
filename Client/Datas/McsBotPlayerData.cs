@@ -58,6 +58,12 @@ namespace MiyakoCarryService.Client.Datas
         }
         private LootDataMgr _lootDataMgr = null;
         public bool IsRunningCoroutine = false;
+
+
+        public bool ShouldHoldPosition = false;
+        public bool ShouldGoToPoint = false;
+
+
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
             _botOwnerRef = new(player.AIData.BotOwner);

@@ -137,7 +137,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
-            // actionsReturnClass.Actions.Add(TeamHoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(TeamHoldPositionCommand(HoldPositionCommandAction));
             actionsReturnClass.Actions.Add(TeamForceTeleportCommand(ForceTeleportCommandAction));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
 
@@ -205,15 +205,61 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass TeamHoldCommand(Action action)
+        public ActionsTypesClass TeamHoldPositionCommand(Action<Player> action)
         {
             return new ActionsTypesClass
             {
-                Name = "全队停留在这",
-                TargetName = "指定一个位置让全部队友驻留",
+                Name = "全队驻守",
+                TargetName = "让全部队友停留在原地",
                 Disabled = false,
-                Action = action
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
             };
+        }
+
+        public void HoldPositionCommandAction(Player mcsBotPlayer)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                if (McsMgr.IsHost)
+                {
+                    var botOwner = mcsBotPlayer.AIData.BotOwner;
+                    botOwner.StopMove();
+                    botOwner.GetMcsBotData().ShouldHoldPosition = true;
+                    botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
+                }
+                else
+                {
+                    if (HandleFikaEventsMap.TryGetValue(ECommandPacketType.HoldPosition, out var action))
+                    {
+                        action(mcsBotPlayer, new Vector3());
+                    }
+                }
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.StopMove();
+                botOwner.GetMcsBotData().ShouldHoldPosition = true;
+                botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
+            }
+            CloseCommandMenuAction();
         }
 
         public ActionsTypesClass TeamForceTeleportCommand(Action<Player> action)
@@ -258,7 +304,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
-            // actionsReturnClass.Actions.Add(HoldCommand(CloseCommandMenu));
+            actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(ForceTeleportCommand(ForceTeleportCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
 
@@ -270,14 +316,17 @@ namespace MiyakoCarryService.Client.Mgrs
             _gamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
         }
 
-        public ActionsTypesClass HoldCommand(Action action)
+        public ActionsTypesClass HoldPositionCommand(Action<Player> action, Player mcsBotPlayer)
         {
             return new ActionsTypesClass
             {
-                Name = "停留在这",
-                TargetName = "指定一个位置让队友驻留",
+                Name = "驻守",
+                TargetName = "指定其停留在原地",
                 Disabled = false,
-                Action = action
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
             };
         }
 

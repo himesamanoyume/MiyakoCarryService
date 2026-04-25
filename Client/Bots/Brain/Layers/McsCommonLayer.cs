@@ -19,6 +19,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var mcsBotPlayerData = BotOwner.GetMcsBotData();
+
+                if (mcsBotPlayerData.ShouldGoToPoint)
+                {
+                    if (BotOwner.GoToSomePointData.IsCome())
+                    {
+                        mcsBotPlayerData.ShouldGoToPoint = false;
+                        mcsBotPlayerData.ShouldHoldPosition = true;
+                    }
+                }
+
+                if (mcsBotPlayerData.ShouldHoldPosition)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
+                }
+
                 // 检查老板生命值状态并且检测老板没有医疗物品，如果老板健康不行但是有医疗物品则无视
                 if (false && false)
                 {

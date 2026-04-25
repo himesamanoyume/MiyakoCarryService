@@ -19,6 +19,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
+            var mcsBotPlayerData = BotOwner.GetMcsBotData();
+            mcsBotPlayerData.ShouldHoldPosition = false;
+            mcsBotPlayerData.ShouldGoToPoint = false;
+            
             if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
             {
                 return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");
