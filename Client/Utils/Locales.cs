@@ -55,5 +55,14 @@ namespace MiyakoCarryService.Client.Utils
         public const string ROGER = "Mcs/Roger";
         public const string FOUNDHIGHVALUELOOT = "Mcs/FoundHighValueLoot";
         public const string REGROUP = "Mcs/Regroup";
+        public const string ONPOSITION = "Mcs/OnPosition";
+        public const string CLEAR = "Mcs/Clear";
+        public const string LEFTFLANK = "Mcs/LeftFlank";
+        public const string RIGHTFLANK = "Mcs/RightFlank";
+        public const string INTHEFRONT = "Mcs/InTheFront";
+        public const string ONSIX = "Mcs/OnSix";
+        public const string ENEMYDOWN = "Mcs/EnemyDown";
+        public const string GOING = "Mcs/Going";
+        public const string HOLDPOSITION = "Mcs/HoldPosition";
     }
 }

@@ -69,5 +69,14 @@
     "Mcs/OnFirstContact": "发现敌人！",
     "Mcs/Roger": "收到。",
     "Mcs/FoundHighValueLoot": "发现高价值战利品。",
-    "Mcs/Regroup": "正在重新集结。"
+    "Mcs/Regroup": "正在重新集结。",
+    "Mcs/OnPosition": "已到达指定位置。",
+    "Mcs/Clear": "区域安全。",
+    "Mcs/LeftFlank": "敌人在左翼。",
+    "Mcs/RightFlank": "敌人在右翼。",
+    "Mcs/InTheFront": "前方有敌人。",
+    "Mcs/OnSix": "背后有敌人。",
+    "Mcs/EnemyDown": "敌人倒下。",
+    "Mcs/Going": "正在前往。",
+    "Mcs/HoldPosition": "正在原地驻守待命。"
 }

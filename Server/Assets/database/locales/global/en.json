@@ -69,5 +69,14 @@
     "Mcs/OnFirstContact": "Enemy Contact!",
     "Mcs/Roger": "Roger.",
     "Mcs/FoundHighValueLoot": "Found high value loot.",
-    "Mcs/Regroup": "Regrouping."
+    "Mcs/Regroup": "Regrouping.",
+    "Mcs/OnPosition": "Reached designated position.",
+    "Mcs/Clear": "Area clear.",
+    "Mcs/LeftFlank": "Enemy on left flank.",
+    "Mcs/RightFlank": "Enemy on right flank.",
+    "Mcs/InTheFront": "Enemy in front.",
+    "Mcs/OnSix": "Enemy at six o'clock.",
+    "Mcs/EnemyDown": "Enemy down.",
+    "Mcs/Going": "On the way.",
+    "Mcs/HoldPosition": "Holding position."
 }
