@@ -78,5 +78,6 @@
     "Mcs/OnSix": "Enemy at six o'clock.",
     "Mcs/EnemyDown": "Enemy down.",
     "Mcs/Going": "On the way.",
-    "Mcs/HoldPosition": "Holding position."
+    "Mcs/HoldPosition": "Holding position.",
+    "Mcs/StartHeal": "I'm healing."
 }

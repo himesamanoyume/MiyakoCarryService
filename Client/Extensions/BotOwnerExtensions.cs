@@ -62,7 +62,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void TalkMsg(EPhraseTrigger phraseTrigger, Vector3? position = null)
             {
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer.Profile, botOwner.Profile, phraseTrigger, position);
+                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer, botOwner.GetPlayer, phraseTrigger, position);
             }
 
             public List<BotBehavior> GetBotBehaviors()

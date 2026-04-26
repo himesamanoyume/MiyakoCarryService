@@ -64,5 +64,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string ENEMYDOWN = "Mcs/EnemyDown";
         public const string GOING = "Mcs/Going";
         public const string HOLDPOSITION = "Mcs/HoldPosition";
+        public const string STARTHEAL = "Mcs/StartHeal";
     }
 }

@@ -15,16 +15,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
+        public override void Start()
+        {
+            base.Start();
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.ShouldHoldPosition = false;
+                McsBotPlayerData.ShouldGoToPoint = false;
+            }
+
+            BotOwner.TalkMsg(EPhraseTrigger.OnFirstContact, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            BotOwner.TalkMsg(EPhraseTrigger.Regroup);
+        }
+
         public override Action GetNextAction()
         {
             try
             {
-                if (McsBotPlayerData != null)
-                {
-                    McsBotPlayerData.ShouldHoldPosition = false;
-                    McsBotPlayerData.ShouldGoToPoint = false;
-                }
-                
                 if (ShouldShootImmediately())
                 {
                     return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");

@@ -20,6 +20,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
+        private Dictionary<EPhraseTrigger, Func<string, Vector3, Player, string>> _phrasePosHandleMaps;
         public Action<MongoID, MongoID, EPhraseTrigger, Vector3?> HandleFikaEvent;
 
         public sealed override void Start()
@@ -45,6 +46,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 // {EPhraseTrigger.LootGeneric , Locales.FOUNDHIGHVALUELOOT},
                 // {EPhraseTrigger.LootNothing , Locales.FOUNDHIGHVALUELOOT},
                 {EPhraseTrigger.Regroup, Locales.REGROUP},
+                {EPhraseTrigger.StartHeal, Locales.STARTHEAL}
+            };
+
+            _phrasePosHandleMaps = new()
+            {
+                {EPhraseTrigger.OnFirstContact, HandleOnFirstContact}
             };
         }
 
@@ -90,45 +97,84 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void TalkMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, EPhraseTrigger phraseTrigger, Vector3? position = null)
+        public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
                 if (McsMgr.IsHost)
                 {
-                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayerProfile.Id))
+                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayer.ProfileId))
                     {
-                        ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, phraseTrigger, position);
+                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position);
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayerProfile.Id, mcsBotPlayerProfile.Id, phraseTrigger, position);
+                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, phraseTrigger, position);
                     }
                 }
             }
             else
             {
-                ShowMsg(mcsLeadPlayerProfile, mcsBotPlayerProfile, phraseTrigger);
+                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger);
             }
         }
 
-        public void ShowMsg(Profile mcsLeadPlayerProfile, Profile mcsBotPlayerProfile, EPhraseTrigger phraseTrigger, Vector3? position = null)
+        public string HandleOnFirstContact(string content, Vector3 enemyPos, Player mcsLeadPlayer)
         {
-            _talkContents.TryGetValue(phraseTrigger, out var msg);
-            msg = msg.McsLocalized();
-            if (string.IsNullOrEmpty(msg))
+            var toEnemy = enemyPos - mcsLeadPlayer.Position;
+            var flatToEnemy = new Vector3(toEnemy.x, 0, toEnemy.z);
+            var flatDirection = new Vector3(mcsLeadPlayer.InteractionRay.direction.x, 0, mcsLeadPlayer.InteractionRay.direction.z);
+
+            flatToEnemy.Normalize();
+            flatDirection.Normalize();
+
+            var dot = Vector3.Dot(flatDirection, flatToEnemy);
+            var cross = Vector3.Cross(flatDirection, flatToEnemy);
+            var angleThreshold = 0.707f;
+            if (dot >= angleThreshold)
+            {
+                content += Locales.INTHEFRONT.McsLocalized();
+            }
+            else if (dot <= -angleThreshold)
+            {
+                content += Locales.ONSIX.McsLocalized();
+            }
+            else
+            {
+                if (cross.y > 0)
+                {
+                    content += Locales.RIGHTFLANK.McsLocalized();
+                }
+                else
+                {
+                    content += Locales.LEFTFLANK.McsLocalized();
+                }
+            }
+            return content;
+        }
+
+        public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null)
+        {
+            _talkContents.TryGetValue(phraseTrigger, out var talkContent);
+            talkContent = talkContent.McsLocalized();
+            if (string.IsNullOrEmpty(talkContent))
             {
                 return;
             }
-            
-            if (_subTitles.TryGetValue(mcsBotPlayerProfile.Id, out var subTitle))
+
+            if (_phrasePosHandleMaps.TryGetValue(phraseTrigger, out var action))
             {
-                if (subTitle.CurrentMsg() == msg)
+                talkContent = action(talkContent, position.Value, mcsLeadPlayer);
+            }
+            
+            if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))
+            {
+                if (subTitle.CurrentMsg() == talkContent)
                 {
                     return;
                 }
 
-                subTitle.Show(msg, phraseTrigger);
+                subTitle.Show(talkContent, phraseTrigger);
             }
         }
 

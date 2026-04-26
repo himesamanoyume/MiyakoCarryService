@@ -86,7 +86,7 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
-                SubTitleMgr.ShowMsg(mcsLeadPlayer.Profile, mcsBotPlayer.Profile, packet.PhraseTrigger, packet.Position);
+                SubTitleMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, packet.PhraseTrigger, packet.Position);
             }
         }
 

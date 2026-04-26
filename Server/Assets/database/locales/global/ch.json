@@ -78,5 +78,6 @@
     "Mcs/OnSix": "背后有敌人。",
     "Mcs/EnemyDown": "敌人倒下。",
     "Mcs/Going": "正在前往。",
-    "Mcs/HoldPosition": "正在原地驻守待命。"
+    "Mcs/HoldPosition": "正在原地驻守待命。",
+    "Mcs/StartHeal": "我正在治疗。"
 }
