@@ -19,11 +19,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            var mcsBotPlayerData = BotOwner.GetMcsBotData();
-            if (mcsBotPlayerData != null)
+            if (McsBotPlayerData != null)
             {
-                mcsBotPlayerData.ShouldHoldPosition = false;
-                mcsBotPlayerData.ShouldGoToPoint = false;
+                McsBotPlayerData.ShouldHoldPosition = false;
+                McsBotPlayerData.ShouldGoToPoint = false;
             }
             
             if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())

@@ -19,15 +19,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
-                var mcsBotPlayerData = BotOwner.GetMcsBotData();
-                if (mcsBotPlayerData != null)
+                if (McsBotPlayerData != null)
                 {
-                    if (mcsBotPlayerData.ShouldGoToPoint)
+                    if (McsBotPlayerData.ShouldGoToPoint)
                     {
                         return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                     }
 
-                    if (mcsBotPlayerData.ShouldHoldPosition)
+                    if (McsBotPlayerData.ShouldHoldPosition)
                     {
                         return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                     }

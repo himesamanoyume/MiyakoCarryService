@@ -13,6 +13,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic = new(botOwner);
         }
 
+        public override void Start()
+        {
+            base.Start();
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+        }
+
         public override void Update(CustomLayer.ActionData data)
         {
             // if (Random.Range(0, 100) > 90)

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
@@ -59,10 +58,8 @@ namespace MiyakoCarryService.Client.Datas
         private LootDataMgr _lootDataMgr = null;
         public bool IsRunningCoroutine = false;
 
-
         public bool ShouldHoldPosition = false;
         public bool ShouldGoToPoint = false;
-
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {

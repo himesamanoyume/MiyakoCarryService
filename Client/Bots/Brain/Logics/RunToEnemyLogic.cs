@@ -6,11 +6,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public sealed class RunToEnemyLogic : McsBotBaseLogic
     {
-        private RunToEnemyNewLogic _baseLogic;
+        private RunToEnemyOverrideLogic _baseLogic;
 
         public RunToEnemyLogic(BotOwner botOwner) : base(botOwner)
         {
             _baseLogic = new(botOwner);
+        }
+
+        public override void Start()
+        {
+            base.Start();
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
         }
 
         public override void Update(CustomLayer.ActionData data)
@@ -18,9 +28,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic.UpdateNodeByMain(data);
         }
 
-        public sealed class RunToEnemyNewLogic : RunToEnemyBaseLogic
+        public sealed class RunToEnemyOverrideLogic : RunToEnemyBaseLogic
         {
-            public RunToEnemyNewLogic(BotOwner bot) : base(bot)
+            public RunToEnemyOverrideLogic(BotOwner bot) : base(bot)
             {
 
             }
