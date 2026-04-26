@@ -171,6 +171,8 @@ namespace MiyakoCarryService.Fika
                 {
                     botOwner.TalkMsg(EPhraseTrigger.Going);
                     botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.StopMove();
                     botOwner.GoToSomePointData.SetPoint(validPosition.Value);
                 }
             }

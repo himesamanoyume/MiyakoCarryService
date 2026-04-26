@@ -20,8 +20,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             try
             {
                 var mcsBotPlayerData = BotOwner.GetMcsBotData();
-                mcsBotPlayerData.ShouldHoldPosition = false;
-                mcsBotPlayerData.ShouldGoToPoint = false;
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                }
                 
                 if (ShouldShootImmediately())
                 {

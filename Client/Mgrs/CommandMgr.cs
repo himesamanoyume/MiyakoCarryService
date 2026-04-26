@@ -321,11 +321,10 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (HandleFikaEvent != null)
                 {
-                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
+                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
                     {
                         HandleFikaEvent(mcsBotPlayer, ECommandPacketType.GoToPoint, raycastHit.point);
                     }
-                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Regroup, new Vector3());
                 }
                 // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.GoToPoint, out var action))
                 // {
@@ -338,7 +337,7 @@ namespace MiyakoCarryService.Client.Mgrs
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
+                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
                 {
                     Vector3? validPosition = null;
                     var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
@@ -366,6 +365,8 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         botOwner.TalkMsg(EPhraseTrigger.Going);
                         botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                        botOwner.Mover.LastTimePosChanged = Time.time;
+                        botOwner.StopMove();
                         botOwner.GoToSomePointData.SetPoint(validPosition.Value);
                     }
                 }
