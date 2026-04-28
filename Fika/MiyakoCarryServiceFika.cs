@@ -15,6 +15,7 @@ using Fika.Core.Networking.LiteNetLib;
 using UnityEngine;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine.AI;
+using HarmonyLib;
 
 namespace MiyakoCarryService.Fika
 {
@@ -57,10 +58,6 @@ namespace MiyakoCarryService.Fika
 
             SubTitleMgr.HandleFikaEvent = SendTalkPacket;
             CommandMgr.HandleFikaEvent = SendCommandPacket;
-            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.Teleport, SendTeleportCommandPacket);
-            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.GoToPoint, );
-            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.HoldPosition, );
-            // CommandMgr.HandleFikaEventAction.TryAdd(ECommandPacketType.Regroup, );
         }
 
         public void OnCommandPacketReceived(CommandPacket packet)  
