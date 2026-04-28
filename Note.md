@@ -20,6 +20,7 @@
 
 ## 低优先级 | IDEA
 
+- 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
 - 战局中增配护航功能吧。。。如果有护航减员可以在转移点重新增添进来
 - 可以实现多短语工厂，通过短语枚举拼接成一句话。比如`GetInCover`+`StartHeal`, 可以提前预备好各种短语的组合，使其变为一个有逻辑顺序的全新语句: `我要退到掩体后进行治疗`
 - 适配联机部分时
@@ -54,6 +55,10 @@
 
 ## 疑难杂症
 
+- **压子弹时会触发数据更新，导致频繁卡顿，需要优化**
+- **反馈很多次: 我交完任务也有刷护航但是打完一把还是给我退款了**
+- **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑。如果第三方的AI没有使用到自带的Brain的话，就会无法作为护航行动**
+- **反馈: 护航有时候不和玩家刷在一起**
 - - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
 - - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
 - - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
@@ -346,42 +351,22 @@
 - - 客户端战局结束上传完整Profile时，这些Order的任务条件数值就已经异常，致使服务端存档的数值异常
 - ~~尝试修一修`TryLoadBotsProfilesOnStartPatch`的异常~~
 - ~~尝试修一修`ApplyDamagePatch`的异常~~
-```
 - ~~BUG: 还是会异常生成护航~~很少被反馈提及了
-- **压子弹时会触发数据更新，导致频繁卡顿，需要优化**
 - ~~指令系统文本本地化~~
-- **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑**
 - - spawntype新增一个可空字段，可被BrainMgr从服务端获取
 - ~~队友高亮（联机时需要获取本局全部护航的ProfileId然后全部添加高亮）~~
 - - ~~需要测试联机下的情况~~
-- 联机状态下，当老板撤离后，护航也需要撤离
-- **反馈很多次: 我交完任务也有刷护航但是打完一把还是给我退款了**
 - - 可能是进行过期清除订单任务处理时，获取到的pmcData还是老数据
-- **反馈: 护航有时候不和玩家刷在一起**
 - ~~BUG: Fika副机`TeamCommand`函数异常导致无法弹出指令菜单~~
 - ~~反馈：大佬可以让护航检测对方是中立或者友好吗，scav进去护航经常杀自己人导致被迫与所有人为敌了~~
-- 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
-- 先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划
-- 指令：
-- - 单人指令：报告情况（交战中等等）、前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）、归队（前往老板周围）、护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
-- - 全队指令：没有报告情况、全队前往指定位置（到达位置后停留）、全队归队（前往老板周围）、全队护航策略（优先保护、优先歼灭、两者兼顾）、歼灭敌人、保护我、清理XX地点
-- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
-- - ~~当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕~~
-> 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
-
-> [Fika Wiki](https://wiki.project-fika.com/modding-fika)
-
-> 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - - ~~就差个解决`HandleTeleport`为何没有正常传送~~
 - ~~还是要多一个Fika动态链接库~~
 - ~~像WTTCommonLibClient一样，加载非插件的Fika模组~~
-- **使用前往指令时应该做出相应动作**
 - ~~尝试修复很多时候不能瞬移的问题~~无法完全解决，大幅提升成功率
 - ~~可以用`EPhraseTrigger`完全替代掉`ETalkContentType`~~
 - ~~BUG: 不是自己的护航却显示了字幕~~
 - ~~BUG: 主机中副机的护航的对话并没有能发送至副机使副机显示字幕~~
 - ~~让护航说话存在冷却（根据上一个枚举类型内置3秒冷却）~~
-- **想办法在AI说出某些语音时额外触发`TalkMsg`**
 - - PostPatch `BotTalk.TrySay`中的`method_5`
 - ~~新增被护航击杀的话赔偿个30w的机制~~
 - 想办法实现武器的占用格数的计算
@@ -390,6 +375,20 @@
 - ~~借助玩家自带的射线实现指定护航前往地点~~
 - - `GameWorld.FindInteractable`
 - - ~~不知道为什么有些护航不会进行前往，而是判断成直接到达目的地,对`McsBotPlayerData.ShouldGoToPoint = false;`进行打印输出，找出是哪个地方容易导致对应名字的护航过早地结束了指令~~
+```
+- ~~先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划~~
+- 指令：
+- - 单人指令：**报告情况（交战中等等）**、~~前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）~~、~~归队（前往老板周围）~~、**护航策略（优先保护、优先歼灭、两者兼顾）**、清理XX地点
+- - 全队指令：没有报告情况、全队前往指定位置（到达位置后停留）、全队归队（前往老板周围）、全队护航策略（优先保护、优先歼灭、两者兼顾）、清理XX地点
+- `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
+- - ~~当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕~~
+> 参考[HeliCrash](https://github.com/ArysWasTaken/SamSWAT.HeliCrash.ArysReloaded)的Core和Fika部分
+
+> [Fika Wiki](https://wiki.project-fika.com/modding-fika)
+
+> 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
+- **联机状态下，当老板撤离后，护航也需要撤离**
+- **安装SAIN时，会导致`"Mcs:GoToPointLogic"`奇怪地停在原地或者朝某个方向缓慢走动**
 
 ## Logic思想指导
 
@@ -585,9 +584,10 @@
 
 ## 更新日志
 
-#### 0.2.6.0 预定
+#### 0.2.6.0
 
-- 新增报告敌人位置指令
+- 当安装SAIN时，无法使用全队强制传送指令
+- **新增报告敌人位置、报告自身状态指令**
 
 #### 0.2.5.0
 

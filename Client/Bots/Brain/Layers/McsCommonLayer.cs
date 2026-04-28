@@ -294,6 +294,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return false;
                 }
+                if (BotOwner.Memory.HaveEnemy && MiyakoCarryServicePlugin.SAINInstalled)
+                {
+                    return false;
+                }
                 return true;
             }
             return false;

@@ -403,7 +403,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Name = Locales.TEAMFORCETELEPORTCOMMAND_NAME,
                 TargetName = Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = false,
+                Disabled = MiyakoCarryServicePlugin.SAINInstalled,
                 Action = new Action(() =>
                 {
                     foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
@@ -501,7 +501,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Name = Locales.FORCETELEPORTCOMMAND_NAME,
                 TargetName = Locales.FORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = false,
+                Disabled = MiyakoCarryServicePlugin.SAINInstalled,
                 Action = new Action(() =>
                 {
                     action(mcsBotPlayer);
@@ -533,10 +533,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Teleport, new Vector3());
                 }
-                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.Teleport, out var action))
-                // {
-                //     action(mcsBotPlayer, new Vector3());
-                // }
             }
             else
             {

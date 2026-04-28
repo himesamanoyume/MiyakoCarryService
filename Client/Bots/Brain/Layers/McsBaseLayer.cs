@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
@@ -314,9 +315,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                 {
-                    BotOwner.StopMove();
-                    BotOwner.Mover.AllowTeleport();
-                    BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    if (MiyakoCarryServicePlugin.SAINInstalled)
+                    {
+                        BotOwner.StopMove();
+                        BotOwner.Mover.AllowTeleport();
+                        BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    }
                     return true;
                 }
 
@@ -349,9 +353,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
                 {
-                    BotOwner.StopMove();
-                    BotOwner.Mover.AllowTeleport();
-                    BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    if (MiyakoCarryServicePlugin.SAINInstalled)
+                    {
+                        BotOwner.StopMove();
+                        BotOwner.Mover.AllowTeleport();
+                        BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                    }
                     BotOwner.TalkMsg(EPhraseTrigger.Regroup);
                     return true;
                 }
