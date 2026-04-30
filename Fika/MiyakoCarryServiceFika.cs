@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Fika
                 {ECommandPacketType.GoToPoint, HandleGoToPoint},
                 {ECommandPacketType.HoldPosition, HandleHoldPosition},
                 {ECommandPacketType.Regroup, HandleRegroup},
+                {ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy},
             };
         }
 
@@ -70,10 +71,7 @@ namespace MiyakoCarryService.Fika
         
         public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 TalkPacket");
-
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
-
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
             if (mcsLeadPlayer == null || !mcsLeadPlayer.IsYourPlayer)
@@ -232,6 +230,34 @@ namespace MiyakoCarryService.Fika
                 botOwner.GetMcsBotData().ShouldGoToPoint = false;
                 botOwner.GetMcsBotData().ShouldHoldPosition = false;
                 botOwner.TalkMsg(EPhraseTrigger.Regroup);
+            }
+        }
+
+        private void HandleReportAboutEnemy(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.ReportAboutEnemy)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
+            {  
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.TalkMsg(EPhraseTrigger.OnFirstContact, packet.Position);
             }
         }
 

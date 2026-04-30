@@ -47,7 +47,6 @@ namespace MiyakoCarryService.Client.Mgrs
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
         public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
-        // public Dictionary<ECommandPacketType, Action<Player, Vector3?>> HandleFikaEventsMap = new();
 
         protected sealed override void OnRaidStarted()
         {
@@ -139,6 +138,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
+            actionsReturnClass.Actions.Add(TeamReportAboutEnemyCommand(ReportAboutEnemyCommandAction));
             actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
             actionsReturnClass.Actions.Add(TeamGoToPointCommand(GoToPointCommandAction));
             actionsReturnClass.Actions.Add(TeamHoldPositionCommand(HoldPositionCommandAction));
@@ -209,12 +209,40 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
+        public ActionsTypesClass TeamReportAboutEnemyCommand(Action<Player> action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = Locales.TEAMREPORTABOUTENEMY_NAME,
+                TargetName = Locales.TEAMREPORTABOUTENEMY_TARGETNAME,
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
+            };
+        }
+
         public ActionsTypesClass TeamRegroupCommand(Action<Player> action)
         {
             return new ActionsTypesClass
             {
-                Name = "全队集结",
-                TargetName = "让所有护航跟随老板",
+                Name = Locales.TEAMREGROUP_NAME,
+                TargetName = Locales.TEAMREGROUP_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -241,8 +269,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "全队前往",
-                TargetName = "让所有护航前往指定地点",
+                Name = Locales.TEAMGOTOPOINT_NAME,
+                TargetName = Locales.TEAMGOTOPOINT_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -269,8 +297,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "全队驻守",
-                TargetName = "让全部队友停留在原地",
+                Name = Locales.TEAMHOLDPOSITION_NAME,
+                TargetName = Locales.TEAMHOLDPOSITION_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -292,6 +320,25 @@ namespace MiyakoCarryService.Client.Mgrs
                 })
             };
         }
+
+        public void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                if (HandleFikaEvent != null)
+                {
+                    var botOwner = mcsBotPlayer.AIData.BotOwner;
+                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.ReportAboutEnemy, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+                }
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.TalkMsg(EPhraseTrigger.OnFirstContact, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+            }
+            CloseCommandMenuAction();
+        }
+
         public void RegroupCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
@@ -300,10 +347,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Regroup, new Vector3());
                 }
-                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.Regroup, out var action))
-                // {
-                //     action(mcsBotPlayer, new Vector3());
-                // }
             }
             else
             {
@@ -326,13 +369,6 @@ namespace MiyakoCarryService.Client.Mgrs
                         HandleFikaEvent(mcsBotPlayer, ECommandPacketType.GoToPoint, raycastHit.point);
                     }
                 }
-                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.GoToPoint, out var action))
-                // {
-                //     if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue))
-                //     {
-                //         action(mcsBotPlayer, raycastHit.point);
-                //     }
-                // }
             }
             else
             {
@@ -382,10 +418,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     HandleFikaEvent(mcsBotPlayer, ECommandPacketType.HoldPosition, new Vector3());
                 }
-                // if (HandleFikaEventAction.TryGetValue(ECommandPacketType.HoldPosition, out var action))
-                // {
-                //     action(mcsBotPlayer, new Vector3());
-                // }
             }
             else
             {
@@ -439,6 +471,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
+            actionsReturnClass.Actions.Add(ReportAboutEnemyCommand(ReportAboutEnemyCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(RegroupCommand(RegroupCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
@@ -453,12 +486,26 @@ namespace MiyakoCarryService.Client.Mgrs
             _gamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
         }
 
+        public ActionsTypesClass ReportAboutEnemyCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = Locales.REPORTABOUTENEMY_NAME,
+                TargetName = Locales.REPORTABOUTENEMY_TARGETNAME,
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
+            };
+        }
+
         public ActionsTypesClass RegroupCommand(Action<Player> action, Player mcsBotPlayer)
         {
             return new ActionsTypesClass
             {
-                Name = "集结",
-                TargetName = "命令护航跟随老板",
+                Name = Locales.REGROUP_NAME,
+                TargetName = Locales.REGROUP_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -471,8 +518,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "前往",
-                TargetName = "命令护航前往指定地点",
+                Name = Locales.GOTOPOINT_NAME,
+                TargetName = Locales.GOTOPOINT_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -485,8 +532,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "驻守",
-                TargetName = "指定其停留在原地",
+                Name = Locales.HOLDPOSITION_NAME,
+                TargetName = Locales.HOLDPOSITION_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
