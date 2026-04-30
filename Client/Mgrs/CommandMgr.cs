@@ -213,8 +213,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.TEAMREPORTABOUTENEMY_NAME,
-                TargetName = Locales.TEAMREPORTABOUTENEMY_TARGETNAME,
+                Name = Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME,
+                TargetName = Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -241,8 +241,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.TEAMREGROUP_NAME,
-                TargetName = Locales.TEAMREGROUP_TARGETNAME,
+                Name = Locales.TEAMREGROUPCOMMAND_NAME,
+                TargetName = Locales.TEAMREGROUPCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -269,8 +269,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.TEAMGOTOPOINT_NAME,
-                TargetName = Locales.TEAMGOTOPOINT_TARGETNAME,
+                Name = Locales.TEAMGOTOPOINTCOMMAND_NAME,
+                TargetName = Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -297,8 +297,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.TEAMHOLDPOSITION_NAME,
-                TargetName = Locales.TEAMHOLDPOSITION_TARGETNAME,
+                Name = Locales.TEAMHOLDPOSITIONCOMMAND_NAME,
+                TargetName = Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -328,13 +328,19 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (HandleFikaEvent != null)
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.ReportAboutEnemy, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+                    if (botOwner.Memory.HaveEnemy)
+                    {
+                        HandleFikaEvent(mcsBotPlayer, ECommandPacketType.ReportAboutEnemy, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+                    }
                 }
             }
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.TalkMsg(EPhraseTrigger.OnFirstContact, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+                if (botOwner.Memory.HaveEnemy)
+                {
+                    botOwner.TalkMsg(EPhraseTrigger.OnFirstContact, botOwner.Memory.GoalEnemy.EnemyLastPosition);
+                }
             }
             CloseCommandMenuAction();
         }
@@ -490,8 +496,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.REPORTABOUTENEMY_NAME,
-                TargetName = Locales.REPORTABOUTENEMY_TARGETNAME,
+                Name = Locales.REPORTABOUTENEMYCOMMAND_NAME,
+                TargetName = Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -504,8 +510,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.REGROUP_NAME,
-                TargetName = Locales.REGROUP_TARGETNAME,
+                Name = Locales.REGROUPCOMMAND_NAME,
+                TargetName = Locales.REGROUPCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -518,8 +524,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.GOTOPOINT_NAME,
-                TargetName = Locales.GOTOPOINT_TARGETNAME,
+                Name = Locales.GOTOPOINTCOMMAND_NAME,
+                TargetName = Locales.GOTOPOINTCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -532,8 +538,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.HOLDPOSITION_NAME,
-                TargetName = Locales.HOLDPOSITION_TARGETNAME,
+                Name = Locales.HOLDPOSITIONCOMMAND_NAME,
+                TargetName = Locales.HOLDPOSITIONCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {

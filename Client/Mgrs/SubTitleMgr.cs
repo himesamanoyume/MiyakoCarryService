@@ -115,7 +115,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger);
+                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position);
             }
         }
 

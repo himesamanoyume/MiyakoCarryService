@@ -388,6 +388,7 @@
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - **联机状态下，当老板撤离后，护航也需要撤离**
+- **Bug:为啥进入战斗层级时没有触发敌人方位**
 - **安装SAIN时，会导致`"Mcs:GoToPointLogic"`奇怪地停在原地或者朝某个方向缓慢走动**
 
 ## Logic思想指导
