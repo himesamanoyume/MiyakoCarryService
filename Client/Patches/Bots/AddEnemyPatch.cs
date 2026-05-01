@@ -104,7 +104,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     foreach (var attacker in __instance.Members)
                     {
-                        // MiyakoCarryServicePlugin.Logger.LogError($"{attacker.Profile.Info.Nickname} 因老板被视为敌人即将调用AddEnemy");
                         botGroup.AddEnemy(attacker, EBotEnemyCause.byKill);
                     }
                 }

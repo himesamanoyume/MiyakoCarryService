@@ -68,7 +68,6 @@ namespace MiyakoCarryService.Client.Misc
                 return;
             }
 
-            // MiyakoCarryServicePlugin.Logger.LogError("将最近的敌人设置全体护航的目标敌人");
             foreach (var botOwner in mcsBotPlayerBotOwners)
             {
                 MyPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);

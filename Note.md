@@ -388,10 +388,11 @@
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - **联机状态下，当老板撤离后，护航也需要撤离**
+- - 老板死亡或者撤离时，除非CommonLayer会一直跳过，ExfilLayer应该改为新增到所有Bot类型中，并在以上条件时发生去进行
 - ~~Bug:为啥进入战斗层级时没有触发敌人方位~~
 - ~~Bug:Scav模式下`RequestAllMcsBotPlayerIdInRaid`中`GetEverExistedPlayerByID`所使用的护航Id无法找到Player~~
 - ~~Bug:Scav模式下无法使用指令~~
-- **Scav模式下护航不应该主动攻击Scav**
+- ~~Scav模式下护航不应该主动攻击Scav~~
 
 ## Logic思想指导
 
@@ -591,6 +592,8 @@
 
 - 当安装SAIN时，无法使用全队强制传送指令
 - 调整了与SAIN的兼容性
+- 修复了Scav模式下使用护航的很多Bug
+- 调整了Scav模式下护航的仇恨机制：不会像Pmc模式下主动进攻所有目标，以避免某些特定类型的护航主动攻击Scav导致老板变成坏兄弟，但也意味着可能会被某些特定类型的敌人主动攻击后护航才会开始反击
 - 新增报告敌人方位指令
 
 #### 0.2.5.0

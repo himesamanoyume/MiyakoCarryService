@@ -66,7 +66,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 foreach (var mcsProfile in mcsProfileItem.Value)
                 {
-                    // MiyakoCarryServicePlugin.Logger.LogError(mcsProfile.ProfileId);
                     await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.General, new Progress<LoadingProgressStruct>(), default);
                 }
             }
@@ -82,8 +81,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var botsController = botGame.BotsController;
             var botSpawner = botsController.BotSpawner;
             var botCreator = botSpawner.BotCreator;
-
-            MiyakoCarryServicePlugin.Logger.LogInfo("leadPlayer Count: " + leadPlayers.Count());
 
             foreach (var leadPlayer in leadPlayers)
             {
@@ -211,7 +208,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         {
                             enemyTypes.Add(WildSpawnType.pmcUSEC);
                         }
-
+                        
                         botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
                         botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
                         botOwner.Settings.GetWarnBotTypes().Clear();
@@ -220,14 +217,18 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                         var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, true);
 
-                        botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
+                        var notScav = leadPlayer.Side != EPlayerSide.Savage;
+                        if (notScav)
                         {
-                            if (McsMgr.IsMcsLeadPlayer(enemy.ProfileId) || McsMgr.IsMcsBotPlayer(enemy.ProfileId))
+                            botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
                             {
-                                return;
-                            }
-                            botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
-                        };
+                                if (McsMgr.IsMcsLeadPlayer(enemy.ProfileId) || McsMgr.IsMcsBotPlayer(enemy.ProfileId))
+                                {
+                                    return;
+                                }
+                                botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
+                            };
+                        }
 
                         foreach (var _leadPlayer in leadPlayers)
                         {
@@ -328,7 +329,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.CAN_TAKE_ANY_ITEM = true;
             settings.FileSettings.Mind.CAN_TAKE_ITEMS = true;
             settings.FileSettings.Mind.CAN_THROW_REQUESTS = true;
-            settings.FileSettings.Mind.CAN_DROP_ITEMS = true; // prevent bot from dropping items randomly
+            settings.FileSettings.Mind.CAN_DROP_ITEMS = true;
             settings.FileSettings.Mind.CAN_USE_MEDS = true;
             settings.FileSettings.Mind.MEDS_ONLY_SAFE_CONTAINER = false;
             settings.FileSettings.Mind.SURGE_KIT_ONLY_SAFE_CONTAINER = false;
@@ -339,17 +340,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
 
-            // force follower loyality
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_SAVAGE = leadPlayer.Side == EPlayerSide.Savage;
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_BEAR = leadPlayer.Side == EPlayerSide.Bear;
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_USEC = leadPlayer.Side == EPlayerSide.Usec;
             settings.FileSettings.Mind.CAN_EXECUTE_REQUESTS = true;
 
-            settings.FileSettings.Mind.FRIEND_AGR_KILL = 0.3f;
-            settings.FileSettings.Mind.FRIEND_DEAD_AGR_LOW = -0.3f;
+            settings.FileSettings.Mind.FRIEND_AGR_KILL = 0.00003f;
+            settings.FileSettings.Mind.FRIEND_DEAD_AGR_LOW = -0.00003f;
             settings.FileSettings.Mind.REVENGE_FOR_SAVAGE_PLAYERS = true;
 
-            // follower can turn enemy to anyone and cares only for the boss
             botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
             botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
             botOwner.Settings.GetWarnBotTypes().Clear();
