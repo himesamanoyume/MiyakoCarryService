@@ -60,9 +60,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(SpawnMcsBotPlayerType spawnMcsBotPlayerType)
+        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<SpawnMcsBotPlayerType, Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate", spawnMcsBotPlayerType);
+            var response = await PostJsonAsync<McsBotPlayerType, Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate", mcsBotPlayerType);
 
             if (response == null)
             {
@@ -107,9 +107,9 @@ namespace MiyakoCarryService.Client.Utils
             await PostJsonAsync("/mcs/client/trading/api/compensation", compensation);
         }
 
-        public static List<MongoID> GetMcsBotPlayerIds()
+        public static async Task<List<MongoID>> GetMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = GetJson<List<MongoID>>("/mcs/singleplayer/info/bot/get");
+            var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);
             
             if (response == null)
             {
@@ -127,16 +127,16 @@ namespace MiyakoCarryService.Client.Utils
             });
         }
 
-        public static List<MongoID> GetAllMcsBotPlayerIdInRaid()
+        public static async Task<List<MongoID>> GetAllMcsBotPlayerIdInRaid(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = GetJson<List<MongoID>>("/mcs/singleplayer/info/botids/get");
+            var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/botids/get", mcsBotPlayerType);
 
             if (response == null)
             {
                 return new();
             }
 
-            return response.ToList();
+            return response;
         }
 
         public static Dictionary<string, SPTServerModInfo> GetLoadedServerMods()

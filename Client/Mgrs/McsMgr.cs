@@ -9,6 +9,7 @@ using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -264,13 +265,17 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            RequestAllMcsBotPlayerIdInRaid();
+            _ = RequestAllMcsBotPlayerIdInRaid();
             StartCoroutine(SendPunishRequest(10f));
         }
 
-        private void RequestAllMcsBotPlayerIdInRaid()
+        private async Task RequestAllMcsBotPlayerIdInRaid()
         {
-            _allMcsBotPlayerIdInRaid = McsRequestHandler.GetAllMcsBotPlayerIdInRaid();
+            _allMcsBotPlayerIdInRaid = await McsRequestHandler.GetAllMcsBotPlayerIdInRaid(new()
+            {
+                Side = MatchmakerAcceptScreenShowPatch.CurrentType
+            });
+
             foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
             {
                 var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);

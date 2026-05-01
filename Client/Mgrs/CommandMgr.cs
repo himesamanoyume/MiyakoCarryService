@@ -4,12 +4,14 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
@@ -51,8 +53,16 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            _mcsBotPlayerIds = McsRequestHandler.GetMcsBotPlayerIds();
+            _ = GetMcsBotPlayerIds();
             _gamePlayerOwner = null;
+        }
+
+        private async Task GetMcsBotPlayerIds()
+        {
+            _mcsBotPlayerIds = await McsRequestHandler.GetMcsBotPlayerIds(new()
+            {
+                Side = MatchmakerAcceptScreenShowPatch.CurrentType
+            });
         }
 
         protected sealed override void OnRaidEnded()

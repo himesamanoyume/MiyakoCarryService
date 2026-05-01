@@ -63,7 +63,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public IEnumerable<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId)
+        public IEnumerable<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId, SideType side)
         {
             if (_saveLock is null)
             {
@@ -88,7 +88,7 @@ namespace MiyakoCarryService.Server.Services
                         continue;
                     }
 
-                    yield return profile.ProfileInfo.ProfileId.Value;
+                    yield return side == SideType.Pmc ? profile.ProfileInfo.ProfileId.Value : profile.ProfileInfo.ScavengerId.Value;
                 }
             }
             finally

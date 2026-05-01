@@ -62,9 +62,9 @@ namespace MiyakoCarryService.Server.Controllers
             return await raidService.GetMcsBotPlayerConfigs(mcsLeadPlayerId);
         }
 
-        public List<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId)
+        public List<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId, SideType side)
         {
-            return raidService.GetMcsBotPlayerIds(mcsLeadPlayerId).ToList();
+            return raidService.GetMcsBotPlayerIds(mcsLeadPlayerId, side).ToList();
         }
 
         public async Task CollectMcsBotPlayerConfig(McsBotPlayerConfigRequestData mcsBotPlayerConfig)
