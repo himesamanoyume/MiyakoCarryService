@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/bot/generate
         /// </summary>
-        public async ValueTask<string> SpawnMcsBotPlayer(string url, SpawnMcsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
+        public async ValueTask<string> SpawnMcsBotPlayer(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(await raidController.SpawnMcsBotPlayer(mcsLeadPlayerId, info.Side));
         }
@@ -51,9 +51,9 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/singleplayer/info/botids/get
         /// </summary>
-        public async ValueTask<string> GetAllMcsBotPlayerIdInRaid(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
+        public async ValueTask<string> GetAllMcsBotPlayerIdInRaid(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.NoBody(await raidController.GetAllMcsBotPlayerIdInRaid(mcsLeadPlayerId));
+            return httpResponseUtil.NoBody(await raidController.GetAllMcsBotPlayerIdInRaid(mcsLeadPlayerId, info.Side));
         }
     }
 }

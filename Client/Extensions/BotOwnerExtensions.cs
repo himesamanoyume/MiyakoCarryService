@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public bool IsMcsBotPlayer => McsMgr.IsMcsBotPlayer(botOwner.ProfileId);
 
-            public McsBotPlayerData GetMcsBotData()
+            public McsBotPlayerData GetMcsBotPlayerData()
             {
                 if (_datas.TryGetValue(botOwner, out var mcsBotPlayerData))
                 {
@@ -62,12 +62,22 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void TalkMsg(EPhraseTrigger phraseTrigger, Vector3? position = null)
             {
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotData().LeadPlayer, botOwner.GetPlayer, phraseTrigger, position);
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    return;
+                }
+                SubTitleMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, phraseTrigger, position);
             }
 
             public List<BotBehavior> GetBotBehaviors()
             {
-                return botOwner.GetMcsBotData().BotBehaviors;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    return new();
+                }
+                return mcsBotPlayerData.BotBehaviors;
             }
 
             public bool CheckStuck()

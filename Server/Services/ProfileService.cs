@@ -386,7 +386,6 @@ namespace MiyakoCarryService.Server.Services
                 scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
             
-            scavData.Info.Settings = new();
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcData.Info.RegistrationDate;
             scavData.Info.GameVersion = pmcData.Info.GameVersion;

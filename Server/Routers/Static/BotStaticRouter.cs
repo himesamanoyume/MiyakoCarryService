@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Server.Routers.Static
     ) : StaticRouter(
         jsonUtil,
         [
-            new RouteAction<SpawnMcsBotPlayerTypeRequestData>(
+            new RouteAction<McsBotPlayerTypeRequestData>(
                 "/mcs/client/game/bot/generate",
                 async (url, info, sessionId, output) => await botCallbacks.SpawnMcsBotPlayer(url, info, sessionId)
             ),
@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Server.Routers.Static
                 "/mcs/singleplayer/info/bot/get",
                 async (url, info, sessionId, output) => await botCallbacks.GetMcsBotPlayerIds(url, info, sessionId)
             ),
-            new RouteAction<EmptyRequestData>(
+            new RouteAction<McsBotPlayerTypeRequestData>(
                 "/mcs/singleplayer/info/botids/get",
                 async (url, info, sessionId, output) => await botCallbacks.GetAllMcsBotPlayerIdInRaid(url, info, sessionId)
             )

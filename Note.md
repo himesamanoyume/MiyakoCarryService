@@ -388,7 +388,10 @@
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
 - **联机状态下，当老板撤离后，护航也需要撤离**
-- **Bug:为啥进入战斗层级时没有触发敌人方位**
+- ~~Bug:为啥进入战斗层级时没有触发敌人方位~~
+- ~~Bug:Scav模式下`RequestAllMcsBotPlayerIdInRaid`中`GetEverExistedPlayerByID`所使用的护航Id无法找到Player~~
+- **Bug:Scav模式下无法使用指令**
+- **Scav模式下护航不应该主动攻击Scav**
 - **安装SAIN时，会导致`"Mcs:GoToPointLogic"`奇怪地停在原地或者朝某个方向缓慢走动**
 
 ## Logic思想指导
@@ -588,6 +591,7 @@
 #### 0.2.5.1
 
 - 当安装SAIN时，无法使用全队强制传送指令
+- 调整了与SAIN的兼容性
 - 新增报告敌人方位指令
 
 #### 0.2.5.0

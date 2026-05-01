@@ -357,8 +357,8 @@ namespace MiyakoCarryService.Client.Mgrs
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.GetMcsBotData().ShouldGoToPoint = false;
-                botOwner.GetMcsBotData().ShouldHoldPosition = false;
+                botOwner.GetMcsBotPlayerData().ShouldGoToPoint = false;
+                botOwner.GetMcsBotPlayerData().ShouldHoldPosition = false;
                 botOwner.TalkMsg(EPhraseTrigger.Regroup);
             }
             CloseCommandMenuAction();
@@ -406,7 +406,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     if (validPosition.HasValue)
                     {
                         botOwner.TalkMsg(EPhraseTrigger.Going);
-                        botOwner.GetMcsBotData().ShouldGoToPoint = true;
+                        botOwner.GetMcsBotPlayerData().ShouldGoToPoint = true;
                         botOwner.Mover.LastTimePosChanged = Time.time;
                         botOwner.StopMove();
                         botOwner.GoToSomePointData.SetPoint(validPosition.Value);
@@ -429,7 +429,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
-                botOwner.GetMcsBotData().ShouldHoldPosition = true;
+                botOwner.GetMcsBotPlayerData().ShouldHoldPosition = true;
                 botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
             }
             CloseCommandMenuAction();
@@ -592,7 +592,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
-                mcsBotPlayer.Teleport(botOwner.GetMcsBotData().LeadPlayer.Position, true);
+                mcsBotPlayer.Teleport(botOwner.GetMcsBotPlayerData().LeadPlayer.Position, true);
                 botOwner.TalkMsg(EPhraseTrigger.Roger);
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {

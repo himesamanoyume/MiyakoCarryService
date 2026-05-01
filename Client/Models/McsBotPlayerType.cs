@@ -5,7 +5,7 @@ using EFT;
 namespace MiyakoCarryService.Client.Models
 {
     [DataContract]
-    public class SpawnMcsBotPlayerType
+    public class McsBotPlayerType
     {
         [DataMember(Name = "Side")]
         public ESideType Side;

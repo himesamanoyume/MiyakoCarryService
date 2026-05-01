@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             get
             {
-                return field ??= BotOwner.GetMcsBotData();
+                return field ??= BotOwner.GetMcsBotPlayerData();
             }
         }
 

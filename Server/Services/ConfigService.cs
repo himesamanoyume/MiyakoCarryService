@@ -185,6 +185,7 @@ public sealed class ConfigService(
         {
             "pmcBEAR" => "Bear",
             "pmcUSEC" => "Usec",
+            "assault" => "Scav",
             _ => wildSpawnType
         };
     }

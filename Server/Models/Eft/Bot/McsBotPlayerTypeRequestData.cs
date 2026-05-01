@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
-    public record SpawnMcsBotPlayerTypeRequestData : IRequestData
+    public record McsBotPlayerTypeRequestData : IRequestData
     {
         [JsonPropertyName("Side")]
         public required SideType Side { get; set; }

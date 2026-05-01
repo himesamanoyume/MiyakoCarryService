@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            var mcsBotPlayerData = BotOwner.GetMcsBotData();
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData.IsRunningCoroutine)
             {
                 return;

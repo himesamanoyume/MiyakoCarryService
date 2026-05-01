@@ -251,20 +251,20 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public async Task<List<MongoId>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId)
+        public async Task<List<MongoId>> GetAllMcsBotPlayerIdInRaid(MongoId mcsLeadPlayerId, SideType side)
         {
             var mcsLeadPlayerIds = GetAllMcsLeadPlayerIds(mcsLeadPlayerId);
 
             var tasks = mcsLeadPlayerIds.Select(async mcsLeadPlayerId =>
             {
+                var isPmc = side is SideType.Pmc;
                 var profileIds = await Task.Run(() =>
                 {
                     var profiles = GetAllGroupMemberProfiles(mcsLeadPlayerId);
-                    return profiles.Select(p => p.ProfileInfo.ProfileId.Value).ToList();
+                    return profiles.Select(p => isPmc ? p.ProfileInfo.ProfileId.Value : p.ProfileInfo.ScavengerId.Value).ToList();
                 });
 
                 var mcsLeadPlayerProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
-
                 return profileIds;
             });
 
