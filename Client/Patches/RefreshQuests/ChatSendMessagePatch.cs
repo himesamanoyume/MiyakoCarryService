@@ -1,7 +1,6 @@
 
 using System.Reflection;
 using Comfort.Common;
-using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -13,8 +12,6 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
     public sealed class ChatSendMessagePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.ChatSendMessage));
-
-        private static Traverse _tarkovApplicationTraverse;
 
         [PatchPostfix]
         public static void Postfix(string id, int type, string text, string replyTo, Callback<string> callback)
