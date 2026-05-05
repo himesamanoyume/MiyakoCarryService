@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Server.Controllers
 
         public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
         {
-            raidService.AcceptGroupInvite(mcsLeadPlayerId, mcsAid);
+            _ = raidService.AcceptGroupInvite(mcsLeadPlayerId, mcsAid);
         }
 
         public List<SptProfile> GetAllGroupMemberProfiles(MongoId mcsLeadPlayerId)

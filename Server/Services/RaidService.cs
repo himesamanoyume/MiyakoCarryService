@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -179,8 +180,10 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public void AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
+        public async Task AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
         {
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            
             var mcsBotPlayerFullProfile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
 
             if (mcsBotPlayerFullProfile is null)
