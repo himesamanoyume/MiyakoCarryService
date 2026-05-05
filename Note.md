@@ -16,7 +16,7 @@
 
 ## 已知问题
 
-- 邀请入队时即便返回了接受邀请的消息，也还是显示着正在邀请（小问题）
+- null
 
 ## 低优先级 | IDEA
 
@@ -56,25 +56,8 @@
 ## 疑难杂症
 
 - **压子弹时会触发数据更新，导致频繁卡顿，需要优化**
-- **反馈很多次: 我交完任务也有刷护航但是打完一把还是给我退款了**
 - **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑。如果第三方的AI没有使用到自带的Brain的话，就会无法作为护航行动**
 - **反馈: 护航有时候不和玩家刷在一起**
-- - ~~当前只要导致切到过一次scav，再切回Pmc时，仍会以scav状态进入~~
-- - - 竟然是`MatchmakerAcceptScreenShowPatch.Postfix`,`___raidSettings_0.RaidMode = ERaidMode.Local;`导致的
-- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`时, 战局设置不生效
-- - 无`___raidSettings_0.RaidMode = ERaidMode.Local`, 有`MatchMakerAcceptScreenReadyStatusPatch`时，战局设置不生效
-- 有`___raidSettings_0.RaidMode = ERaidMode.Local`和`___eraidMode_0 = ERaidMode.Local`时，先选scav再选pmc会以scav进
-- - 单人状态不论pmc/scav下不改设置RaidMode为Online，改了战局设置就会变成Local
-- - 组队状态scav不改设置为Online，改设置为Local，pmc则改不改都是online
-- - 那么理论上scav组队改设置进战局，应该是不会刷新bot的（确实）
-- - ~~而pmc因为组队时无论如何改设置都是online，所以战局设置无法生效，而强行设置为Local就会触发scav的Local设置而以scav进入~~即便让组队时不强制为Online也无效
-- `GClass3926<T>.Gparam_1`(实质为GClass3926<RaidSettings>)这个RaidSettings仍然`isPmc`为`false`,`isScav`为`true`的原因
-- 其直接原因是`RaidSettings.Apply`被调用，即Side为`Savage`的设置覆盖了原本isPmc为true的设置
-- - `MainMenuControllerClass.method_27`中因为`if (this.RaidSettings_0.RaidMode != ERaidMode.Online && !this.RaidSettings_0.IsPveOffline)`因此最终调用了一次`this.RaidSettings_0.Apply(this.RaidSettings_1);`导致覆盖了Scav的设置
-- 目前打算是弄清楚在不将RaidMode设为Local，组队不强制为Online的情况下，是什么原因导致战局设置无效
-- - 观察`MatchMakerAcceptScreen.Show`在不设Local，不强制Online的情况下，会传进来什么raidSettings的RaidMode,正常来说组队调整设置的情况下应该为Local，如果还是传入Online那可能局势会明朗很多（确实还是Online）
-- 打断点`UpdateMatchmakerSettings`可最清晰观察到点击开始战局后的一次该函数调用
-- ~~尝试记录`MatchMakerPlayerPreview`中的玩家Side，只根据此阵营来在`GClass3926<RaidSettings>.UpdateMatchmakerSettings`选择RaidSettings~~
 
 ## TODO
 
@@ -378,7 +361,7 @@
 ```
 - ~~先恢复说话，然后立即开始Fika兼容的新dll的开发，确定一系列的同步流程后，再进行后续计划~~
 - 指令：
-- - 单人指令：**报告情况（交战中等等）**、~~前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）~~、~~归队（前往老板周围）~~、**护航策略（优先保护、优先歼灭、两者兼顾）**、清理XX地点
+- - 单人指令：~~报告情况（交战中等等）、前往指定位置（先尝试直接走到标示的位置，如果不行再扩大范围搜索路径，到达位置后停留）~~、~~归队（前往老板周围）~~、**护航策略（优先保护、优先歼灭、两者兼顾）**
 - - 全队指令：没有报告情况、全队前往指定位置（到达位置后停留）、全队归队（前往老板周围）、全队护航策略（优先保护、优先歼灭、两者兼顾）、清理XX地点
 - `[Info   : Fika.Core] Sending bot operation GClass3513 from KokaZ93`是否可以利用
 - - ~~当前适配Fika的手段是：额外一个新的Mod，专门用于适配Fika发送指令、字幕~~
@@ -387,12 +370,15 @@
 > [Fika Wiki](https://wiki.project-fika.com/modding-fika)
 
 > 和[WTTClientCommonLib](https://github.com/WelcomeToTarkov/WTT-CommonLib/blob/main/WTT-ClientCommonLib/WTTClientCommonLib.cs)
-- **联机状态下，当老板撤离后，护航也需要撤离**
-- - 老板死亡或者撤离时，除非CommonLayer会一直跳过，ExfilLayer应该改为新增到所有Bot类型中，并在以上条件时发生去进行
+- ~~联机状态下，当老板撤离后，护航也需要撤离~~
+- - ~~老板死亡或者撤离时，除非CommonLayer会一直跳过，ExfilLayer应该改为新增到所有Bot类型中，并在以上条件时发生去进行~~
+- - ~~直接判断老板的HealthController.IsAlive状态，为false就撤离~~
 - ~~Bug:为啥进入战斗层级时没有触发敌人方位~~
 - ~~Bug:Scav模式下`RequestAllMcsBotPlayerIdInRaid`中`GetEverExistedPlayerByID`所使用的护航Id无法找到Player~~
 - ~~Bug:Scav模式下无法使用指令~~
 - ~~Scav模式下护航不应该主动攻击Scav~~
+- ~~反馈很多次: 我交完任务也有刷护航但是打完一把还是给我退款了~~
+- - ~~鉴于退款问题时常发生，决定不再完全依靠存档自带的任务数据，而是实现`orderinfo`的全面订单状态记录，以该数据为准执行后续业务~~
 
 ## Logic思想指导
 
@@ -587,6 +573,18 @@
 - **Frozen = 113**：冻僵了（寒冷环境下的负面状态）。
 
 ## 更新日志
+
+#### 0.2.6.0
+
+- **实现护航策略（优先保护、优先歼灭、两者兼顾(默认)）**
+- **实现联机下老板撤离时自己也尝试撤离**
+
+#### 0.2.5.2
+
+- 尝试修复已完成的任务被退款的问题
+- 修复邀请护航进队再踢出队伍时护航状态会显示为邀请中的问题
+- 修复战局设置不生效的问题
+- 让护航不再会随机丢东西
 
 #### 0.2.5.1
 

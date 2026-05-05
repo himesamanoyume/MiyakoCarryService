@@ -279,6 +279,10 @@ namespace MiyakoCarryService.Client.Mgrs
             foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
             {
                 var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+                if (mcsBotPlayer == null)
+                {
+                    continue;
+                }
                 SubTitleMgr.CreateSubTitle(mcsBotPlayer.Profile);
             }
         }

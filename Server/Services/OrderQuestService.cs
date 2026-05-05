@@ -101,6 +101,10 @@ namespace MiyakoCarryService.Server.Services
                 }
 
                 var orderInfo = orderInfos.FirstOrDefault(orderInfo => orderInfo.QuestId == questStatusInProfile.QId);
+                if (orderInfo is null)
+                {
+                    continue;
+                }
 
                 if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
                 {
