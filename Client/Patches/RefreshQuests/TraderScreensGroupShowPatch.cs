@@ -1,5 +1,4 @@
 
-using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using EFT;
@@ -25,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
             _ = UpdateDailyQuests();
         }
 
-        private static async Task UpdateDailyQuests()
+        public static async Task UpdateDailyQuests()
         {
             if (_tarkovApplicationTraverse == null)
             {
