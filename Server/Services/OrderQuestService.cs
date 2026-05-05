@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Generators.OrderQuestGeneration;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Patches.OrderQuest;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
@@ -77,6 +78,7 @@ namespace MiyakoCarryService.Server.Services
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
         {
             var questsToKeep = new List<RepeatableQuest>();
+            var orderInfos = orderInfoService.GetOrderInfos(bossPmcData.Id.Value);
             foreach (var activeQuest in generatedRepeatables.ActiveQuests)
             {
                 var currentTime = timeUtil.GetTimeStamp();
@@ -98,7 +100,9 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
-                if (questStatusInProfile.Status != QuestStatusEnum.Success)
+                var orderInfo = orderInfos.FirstOrDefault(orderInfo => orderInfo.QuestId == questStatusInProfile.QId);
+
+                if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
                 {
                     Refund(bossPmcData.Id.Value, activeQuest, bossPmcData);
                 }
