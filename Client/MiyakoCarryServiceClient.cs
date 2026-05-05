@@ -133,10 +133,6 @@ namespace MiyakoCarryService.Client
 
         private void EnableAllPatches()
         {
-            if (FikaInstalled)
-            {
-
-            }
 #if CHEATERCARRY
 
 #endif
@@ -175,6 +171,11 @@ namespace MiyakoCarryService.Client
             new ChatSendMessagePatch().Enable();
             new LocalQuestControllerClassPatch().Enable();
             new RaidReadyListFixAidPatch().Enable();
+
+            if (FikaInstalled)
+            {
+                
+            }
 
 #if DEBUG
 

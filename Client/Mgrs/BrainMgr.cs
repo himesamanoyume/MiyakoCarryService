@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             BrainManager.RemoveLayer("Exfiltration", [nameof(EBrainName.PmcUsec), nameof(EBrainName.PmcBear)]);
-            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), [nameof(EBrainName.PmcUsec), nameof(EBrainName.PmcBear)], 89);
+            BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), Classification.AllBrainNames, 89);
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 65);
             if (!MiyakoCarryServicePlugin.SAINInstalled)
             {

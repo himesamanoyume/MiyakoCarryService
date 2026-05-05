@@ -36,6 +36,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (IsMcsBotPlayer)
             {
+                if (McsBotPlayerData == null)
+                {
+                    return false;
+                }
+
+                if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
+                {
+                    return true;
+                }
+
                 return false;
             }
 
