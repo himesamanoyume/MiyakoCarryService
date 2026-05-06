@@ -155,7 +155,8 @@ namespace MiyakoCarryService.Client
             new BotHearingSensorPatch().Enable();
             new PlayerSayPatch().Enable();
             new PlayHitEffectPatch().Enable();
-            new TransitPointPatch().Enable();
+            new TransitPointPatch1().Enable();
+            new TransitPointPatch2().Enable();
             new MatchmakerTimeHasComePatch().Enable();
             new MatchMakerAcceptScreenCallbackPatch().Enable();
             new GroupPlayerViewModelClassPatch().Enable();
