@@ -88,7 +88,17 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
         {
-            return _mcsBotPlayers.GetOrAdd(mcsBotPlayerId, _ => Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId));
+            return _mcsBotPlayers.AddOrUpdate(
+                mcsBotPlayerId, 
+                id => Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id),
+                (id, oldPlayer) =>
+                {
+                    if (oldPlayer != null)
+                    {
+                        return oldPlayer;
+                    }
+                    return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
+                });
         }
 
         public void BuildMainCommandMenu()
