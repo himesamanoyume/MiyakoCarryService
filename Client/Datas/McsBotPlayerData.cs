@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
@@ -60,6 +61,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public bool ShouldHoldPosition = false;
         public bool ShouldGoToPoint = false;
+        public EStrategy Strategy = EStrategy.Default;
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
