@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -61,6 +62,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly string _ifdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
 
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
+        private readonly ConcurrentDictionary<MongoId, int> _mcsInventoryIds = new();
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
         private List<string> _ifdianNames = [];
         private Ifdian _ifdian; 
@@ -157,6 +159,18 @@ namespace MiyakoCarryService.Server.Services
             {
                 saveLock.Release();
             }
+        }
+
+        public async Task<long> SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
+        {
+            var mcsBotPlayerProfiles = _profiles[mcsLeadPlayerId].Values;
+            var start = Stopwatch.StartNew();
+            foreach (var mcsBotPlayerProfile in mcsBotPlayerProfiles)
+            {
+                await SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
+            }
+            start.Stop();
+            return start.ElapsedMilliseconds;
         }
 
         private async Task LoadMcsBotPlayerProfileAsync(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
@@ -275,6 +289,16 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
+        public SptProfile? GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            if (_mcsInventoryIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
+            {
+                return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
+            }
+
+            return null;
+        }
+
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
         {
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
@@ -313,6 +337,42 @@ namespace MiyakoCarryService.Server.Services
                 return mcsBotPlayerFullProfles;
             }
             return new();
+        }
+
+        public async Task<bool> VerifyMcsBotPlayerAid(MongoId mcsLeadPlayerId, string mcsAid)
+        {
+            var isInt = int.TryParse(mcsAid, out var intMcsAid);
+            if (!isInt)
+            {
+                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
+                return false;
+            }
+
+            if (_profiles.ContainsKey(mcsLeadPlayerId))
+            {
+                _profiles.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerProfiles);
+                if (mcsBotPlayerProfiles is null)
+                {
+                    return false;
+                }
+
+                var verify = mcsBotPlayerProfiles.Any(p => p.Value.ProfileInfo.Aid == intMcsAid);
+                if (verify)
+                {
+                    if (!_mcsInventoryIds.TryAdd(mcsLeadPlayerId, intMcsAid))
+                    {
+                        _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
+                        _mcsInventoryIds.TryAdd(mcsLeadPlayerId, intMcsAid);
+                    }
+                }
+                return verify;
+            }
+            return false;
+        }
+
+        public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            return _mcsInventoryIds.ContainsKey(mcsLeadPlayerId);
         }
 
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)

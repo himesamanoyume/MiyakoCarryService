@@ -1,5 +1,6 @@
 
 using System.Reflection;
+using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -14,6 +15,10 @@ namespace MiyakoCarryService.Client.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerPlayerControllerClass), nameof(MatchmakerPlayerControllerClass.GetContextInteractions));
 
+        private static Traverse _tarkovApplicationTraverse;
+        public static bool IsMcsBotPlayerInventoryMode = false;
+        public static string McsBotPlayerAid = "";
+
         [PatchPostfix]
         public static void Postfix(GroupPlayerDataClass player, ContextInteractionsClass __result)
         {
@@ -24,9 +29,25 @@ namespace MiyakoCarryService.Client.Patches.Group
             );
         }
 
-        private static void OnOpenMcsBotPlayerInventory(string Aid)
+        private static void OnOpenMcsBotPlayerInventory(string aid)
         {
-            NotificationManagerClass.DisplayMessageNotification($"正在尝试打开 {Aid} 的库存");
+            if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
+            {
+                NotificationManagerClass.DisplayMessageNotification($"此玩家不是护航玩家，无法打开库存");
+                return;
+            }
+
+            if (_tarkovApplicationTraverse == null)
+            {
+                TarkovApplication.Exist(out var tarkovApplication);
+                _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
+            }
+
+            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+
+            McsBotPlayerAid = aid;
+            IsMcsBotPlayerInventoryMode = true;
+            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
         }
     }
 }

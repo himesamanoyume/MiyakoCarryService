@@ -75,6 +75,25 @@ namespace MiyakoCarryService.Client.Utils
             );
         }
 
+        public static async Task<CompleteProfileDescriptorClass[]> GetMcsBotPlayerProfiles()
+        {
+            var response = await GetJsonAsync<CompleteProfileDescriptorClass[]>("/mcs/client/game/profile/list");
+
+            if (response == null)
+            {
+                return [];
+            }
+
+            return response;
+        }
+
+        public static bool VerifyMcsBotPlayerAid(McsBotPlayerAid mcsBotPlayerAid)
+        {
+            var response = PostJson<McsBotPlayerAid, bool>("/mcs/client/game/aid/verify", mcsBotPlayerAid);
+
+            return response;
+        }
+
         public static async Task<Dictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
         {
             var response = await GetJsonAsync<Dictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");

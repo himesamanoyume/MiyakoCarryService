@@ -1,0 +1,37 @@
+
+using System.Reflection;
+using System.Threading.Tasks;
+using HarmonyLib;
+using Microsoft.Extensions.DependencyInjection;
+using MiyakoCarryService.Server.Controllers;
+using SPTarkov.Reflection.Patching;
+using SPTarkov.Server.Core.Controllers;
+using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Extensions;
+using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Match;
+using SPTarkov.Server.Core.Servers;
+
+namespace MiyakoCarryService.Server.Patches.Group
+{
+    /// <summary>
+    /// 检测到玩家处于护航库存模式时，改为保存护航的存档
+    /// </summary>
+    public sealed class SaveProfileAsyncPatch : AbstractPatch
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SaveServer), nameof(SaveServer.SaveProfileAsync));
+
+        [PatchPrefix]  
+        public static bool Prefix(MongoId sessionID, ref Task<long> __result)  
+        {  
+            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
+
+            if (profileController.IsMcsBotPlayerInventoryMode(sessionID))  
+            {  
+                __result = profileController.SaveMcsBotPlayerProfile(sessionID);  
+                return false;
+            }  
+            return true;  
+        }
+    }
+}

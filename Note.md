@@ -24,7 +24,7 @@
 
 > [对话记录](https://app.devin.ai/search/mcsai_7a496a67-6fb3-43ea-9edf-2f22cddad725)
 
-1. 添加右键菜单选项 "自定义库存" 
+1. ~~添加右键菜单选项 "自定义库存" ~~
 
 通过 Harmony Patch GetContextInteractions 和 ContextInteractionsClass 的 IsActive/ExecuteInteractionInternal，可以注入一个新的自定义按钮
 
@@ -38,7 +38,7 @@
 
 只要护航的 SptProfile 不被添加到 SaveServer.profiles 字典中，SPT 的自动保存就不会将其写入 `user/profiles/`
 
-因此需要Patch `SaveProfileAsync`，同样判断是否处于护航库存模式，并调用McsProfileService.SaveMcsBotPlayerProfile
+因此需要Patch `SaveServer.SaveProfileAsync(sessionId)`, `SaveServer.GetProfile(sessionId)`，同样判断是否处于护航库存模式，并调用Mcs的SaveMcsBotPlayerProfile
 
 4. 主菜单新增一个切换回主角色、以及禁用开始游戏按钮
 

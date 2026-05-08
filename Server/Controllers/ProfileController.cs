@@ -30,6 +30,11 @@ namespace MiyakoCarryService.Server.Controllers
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
         }
 
+        public async Task<long> SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
+        {
+            return await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId);
+        }
+
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)
         {
             return profileService.Generate(mcsLeadPlayerId, mcsBotPlayerId, completeQuestPmcData, orderInfo);
@@ -40,6 +45,11 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GetMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
         }
 
+        public SptProfile? GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            return profileService.GetMcsBotPlayerProfileForInventoryMode(mcsLeadPlayerId);
+        }
+
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
         {
             return profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
@@ -47,12 +57,22 @@ namespace MiyakoCarryService.Server.Controllers
 
         public SptProfile? GetMcsBotPlayerProfileByBotId(MongoId mcsBotPlayerId)
         {
-            return profileService.GetMcsBotPlayerProfileByBotId( mcsBotPlayerId);
+            return profileService.GetMcsBotPlayerProfileByBotId(mcsBotPlayerId);
         }
 
         public List<SptProfile> GetAllMcsBotPlayerProfileByBossId(MongoId mcsLeadPlayerId)
         {
             return profileService.GetAllMcsBotPlayerProfileByBossId(mcsLeadPlayerId);
+        }
+
+        public async Task<bool> VerifyMcsBotPlayerAid(MongoId mcsLeadPlayerId, string mcsAid)
+        {
+            return await profileService.VerifyMcsBotPlayerAid(mcsLeadPlayerId, mcsAid);
+        }
+
+        public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            return profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId);
         }
     }
 }

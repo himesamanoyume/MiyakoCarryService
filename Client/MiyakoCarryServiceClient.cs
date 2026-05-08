@@ -173,6 +173,7 @@ namespace MiyakoCarryService.Client
             new LocalQuestControllerClassPatch().Enable();
             new RaidReadyListFixAidPatch().Enable();
             new GetContextInteractionsPatch().Enable();
+            new GetProfilesPatch().Enable();
 
             if (FikaInstalled)
             {
