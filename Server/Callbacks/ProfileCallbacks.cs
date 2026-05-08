@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> VerifyMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.GetBody(await profileController.VerifyMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
+            return httpResponseUtil.NoBody(await profileController.VerifyMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
         }
     }
 }

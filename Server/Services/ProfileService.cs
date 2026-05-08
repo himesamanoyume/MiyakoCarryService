@@ -17,9 +17,11 @@ using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Enums.Hideout;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -55,6 +57,7 @@ namespace MiyakoCarryService.Server.Services
         BotNameService botNameService,
         MailSendService mailSendService,
         OrderInfoService orderInfoService,
+        DatabaseService databaseService,
         CompatibilityService compatibilityService
     )
     {
@@ -65,7 +68,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly ConcurrentDictionary<MongoId, int> _mcsInventoryIds = new();
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
         private List<string> _ifdianNames = [];
-        private Ifdian _ifdian; 
+        private Ifdian _ifdian;
         private SemaphoreSlim _saveLock = new(1, 1);
 
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
@@ -239,7 +242,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 _saveLock = new(1, 1);
             }
-            
+
             await _saveLock.WaitAsync();
             try
             {
@@ -251,7 +254,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 catch
                 {
-                    
+
                 }
             }
             finally
@@ -289,14 +292,31 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
-        public SptProfile? GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        public List<PmcData> GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
         {
             if (_mcsInventoryIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
             {
-                return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
+                var mcsBotPlayerFullProfle = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
+                var mcsBotPlayerFullProfleClone = cloner.Clone(mcsBotPlayerFullProfle)!;
+
+                if (mcsBotPlayerFullProfleClone.CharacterData?.PmcData?.TradersInfo?.Values is not null)
+                {
+                    foreach (var trader in mcsBotPlayerFullProfleClone.CharacterData.PmcData.TradersInfo.Values)
+                    {
+                        trader.LoyaltyLevel = null;
+                    }
+                }
+
+                var output = new List<PmcData>
+                {
+                    mcsBotPlayerFullProfleClone.CharacterData!.PmcData!,
+                    mcsBotPlayerFullProfleClone.CharacterData!.ScavData!
+                };
+
+                return output;
             }
 
-            return null;
+            return new();
         }
 
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
@@ -403,7 +423,7 @@ namespace MiyakoCarryService.Server.Services
             try
             {
                 pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
-            
+
             }
             catch (Exception e)
             {
@@ -445,7 +465,7 @@ namespace MiyakoCarryService.Server.Services
                 clonedBotGenerationDetails.Role = "assault";
                 scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
-            
+
             scavData.Info.Bans = [];
             scavData.Info.RegistrationDate = pmcData.Info.RegistrationDate;
             scavData.Info.GameVersion = pmcData.Info.GameVersion;
@@ -477,6 +497,66 @@ namespace MiyakoCarryService.Server.Services
             botBase.SessionId = mcsBotPlayerId;
             botBase.Aid = hashUtil.GenerateAccountId();
 
+            var tradersInfo = new Dictionary<MongoId, TraderInfo>();
+            var traders = databaseService.GetTraders();
+
+            foreach (var (traderId, trader) in traders)
+            {
+                tradersInfo[traderId] = new TraderInfo
+                {
+                    LoyaltyLevel = 4,
+                    SalesSum = 0,
+                    Standing = 10.0,
+                    NextResupply = trader.Base?.NextResupply ?? 0,
+                    Unlocked = trader.Base?.UnlockedByDefault ?? false,
+                    Disabled = false,
+                };
+            }
+
+            var areas = new List<BotHideoutArea>();
+
+            foreach (HideoutAreas areaType in Enum.GetValues(typeof(HideoutAreas)))
+            {
+                if (areaType == HideoutAreas.NotSet)
+                {
+                    continue; 
+                }
+
+                areas.Add(new BotHideoutArea
+                {
+                    Type = areaType,
+                    Level = areaType == HideoutAreas.Stash ? 1 : 0,
+                    Active = true,
+                    PassiveBonusesEnabled = areaType != HideoutAreas.ChristmasIllumination,
+                    CompleteTime = 0,
+                    Constructing = false,
+                    Slots = new(),
+                    LastRecipe = "",
+                });
+            }
+
+            var random = new Random();  
+            var bytes = new byte[16];  
+            random.NextBytes(bytes);  
+            var hideoutSeed = BitConverter.ToString(bytes).Replace("-", "").ToLower();
+
+            var hideout = new Hideout
+            {
+                Areas = areas,  
+                Production = new(),  
+                Improvements = new(),  
+                Seed = hideoutSeed,
+                Customization = new()
+                {  
+                    { "Wall", "675844bdf94a97cbbe096f1a" },  
+                    { "Floor", "6758443ff94a97cbbe096f18" },  
+                    { "Light", "675fe8abbc3deae49a0b947f" },  
+                    { "Ceiling", "673b3f977038192ee006aa09" },  
+                    { "ShootingRangeMark", "67585d416c72998cf60ed85a" },  
+                },  
+                MannequinPoses = new(), 
+            };
+
             var pmcData = new PmcData
             {
                 Id = botBase.Id,
@@ -489,18 +569,18 @@ namespace MiyakoCarryService.Server.Services
                 Inventory = botBase.Inventory,
                 Skills = botBase.Skills,
                 Stats = botBase.Stats,
-                Encyclopedia = botBase.Encyclopedia,
+                Encyclopedia = new(),
                 TaskConditionCounters = botBase.TaskConditionCounters,
                 InsuredItems = botBase.InsuredItems,
-                Hideout = botBase.Hideout,
-                Quests = botBase.Quests,
-                TradersInfo = botBase.TradersInfo,
+                Hideout = hideout,
+                Quests = new(),
+                TradersInfo = tradersInfo,
                 UnlockedInfo = botBase.UnlockedInfo,
                 RagfairInfo = botBase.RagfairInfo,
-                Achievements = botBase.Achievements,
-                RepeatableQuests = botBase.RepeatableQuests,
+                Achievements = new(),
+                RepeatableQuests = new(),
                 Bonuses = botBase.Bonuses,
-                Notes = botBase.Notes,
+                Notes = new(),
                 CarExtractCounts = botBase.CarExtractCounts,
                 CoopExtractCounts = botBase.CoopExtractCounts,
                 SurvivorClass = botBase.SurvivorClass,
@@ -606,7 +686,7 @@ namespace MiyakoCarryService.Server.Services
             scavData.SessionId = pmcData.SessionId;
             return new SptProfile
             {
-                ProfileInfo = new Info
+                ProfileInfo = new SPTarkov.Server.Core.Models.Eft.Profile.Info
                 {
                     ProfileId = pmcData.SessionId,
                     Username = pmcData.Info.Nickname,

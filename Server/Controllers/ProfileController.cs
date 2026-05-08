@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GetMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
         }
 
-        public SptProfile? GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        public List<PmcData> GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
         {
             return profileService.GetMcsBotPlayerProfileForInventoryMode(mcsLeadPlayerId);
         }

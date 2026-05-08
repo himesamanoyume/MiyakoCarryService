@@ -174,6 +174,7 @@ namespace MiyakoCarryService.Client
             new RaidReadyListFixAidPatch().Enable();
             new GetContextInteractionsPatch().Enable();
             new GetProfilesPatch().Enable();
+            new MenuScreenPatch().Enable();
 
             if (FikaInstalled)
             {

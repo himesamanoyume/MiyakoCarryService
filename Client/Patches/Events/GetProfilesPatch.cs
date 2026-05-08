@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -33,25 +34,30 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             var response = await McsRequestHandler.GetMcsBotPlayerProfiles();
 
+            if (response == null || response.Length == 0)
+            {
+                GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode = false;
+                NotificationManagerClass.DisplayMessageNotification("未获取到护航存档，无法加载");
+                return;
+            }
+
             session.ProfilesUpdateTime = Time.time;
 
             session.AllProfiles = response
                 .Select(descriptor => new Profile(descriptor))
                 .ToArray();
 
+            session.Profile = session.AllProfiles[0];
+            var profileStatuses = new List<ProfileStatusClass>();
             foreach (var profile in session.AllProfiles)
             {
-                ItemFactoryClass.LogErrors(
-                    profile.Inventory.DeserializationErrors,
-                    "profile " + profile.Id
-                );
-                profile.EftStats.TotalInGameTime = session.TotalInGameTime;
+                profileStatuses.Add(new ProfileStatusClass
+                {
+                    profileid = profile.Id,
+                    status = EProfileStatus.Free,
+                });
             }
-
-            session.Profile = session.AllProfiles.FirstOrDefault(p => p.Info.Side.CheckSide(EPlayerSideMask.Pmc));
-            var scavProfile = session.AllProfiles.FirstOrDefault(p => p.Info.Side.CheckSide(EPlayerSideMask.Savage));
-            var pmcProfile = session.Profile;
-            session.OverallAccountStats = pmcProfile?.EftStats.OverallCounters.SumCounters(scavProfile?.EftStats.OverallCounters);
+            session.AllProfileStatus = profileStatuses.ToArray();
         }
     }
 }
