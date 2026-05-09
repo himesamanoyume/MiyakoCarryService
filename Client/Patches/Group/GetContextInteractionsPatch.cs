@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Patches.Group
         {
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification($"当前发生异常，请反馈并重启游戏");
+                NotificationManagerClass.DisplayMessageNotification($"请选择当前护航库存模式的角色来返回主角色");
                 return;
             }
 

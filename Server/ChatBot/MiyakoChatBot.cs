@@ -21,6 +21,7 @@ namespace MiyakoCarryService.Server.ChatBot
         ISptLogger<MiyakoChatBot> logger,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
+        ProfileService profileService,
         IEnumerable<MiyakoChatBotCommands> chatCommands
     ) : IDialogueChatBot
     {
@@ -52,6 +53,19 @@ namespace MiyakoCarryService.Server.ChatBot
                 logger.Error(serverLocalisationService.GetText("chatbot-command_was_empty"));
 
                 return request.DialogId;
+            }
+
+            if (profileService.IsMcsBotPlayerInventoryMode(sessionId))
+            {
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    Locales.MIYAKOTRADERINVENTORYMODEREFUSE,
+                    null
+                );
+
+                return string.Empty;
             }
 
             var splitCommand = request.Text.Split(" ");
