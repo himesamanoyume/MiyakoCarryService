@@ -63,6 +63,17 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
             var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
             if (GameLoop.Instance.Session is SessionBackendClass sessionBackendClass)
             {
+                var profile = sessionBackendClass.Profile;
+                var correctInfo = profile.Info;
+
+                foreach (var (traderId, traderInfo) in profile.TradersInfo)
+                {
+                    if (traderInfo.ProfileInfo != correctInfo)  
+                    {  
+                        traderInfo.ProfileInfo = correctInfo;  
+                    }  
+                }
+
                 if (sessionBackendClass.Dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
                 {
                     profileUpdater.UpdateProfile(profileChangesPocoClass);
