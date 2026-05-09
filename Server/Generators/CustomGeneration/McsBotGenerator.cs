@@ -1,4 +1,5 @@
 
+using System;
 using System.Linq;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
@@ -33,9 +34,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         ConfigServer configServer,
         ICloner cloner
     ) : BotGenerator(
-        logger, hashUtil, randomUtil, databaseService, botInventoryGenerator, 
-        botLevelGenerator, botEquipmentFilterService, weightedRandomHelper, 
-        botHelper, seasonalEventService, itemFilterService, botNameService, 
+        logger, hashUtil, randomUtil, databaseService, botInventoryGenerator,
+        botLevelGenerator, botEquipmentFilterService, weightedRandomHelper,
+        botHelper, seasonalEventService, itemFilterService, botNameService,
         configServer, cloner
     )
     {
@@ -58,26 +59,26 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             }
 
             // 所有装备部位100%生成
-            foreach (var slot in botJsonTemplateClone.BotChances.EquipmentChances.Keys.ToList())  
-            {  
+            foreach (var slot in botJsonTemplateClone.BotChances.EquipmentChances.Keys.ToList())
+            {
                 if (slot is "Armband")
                 {
                     botJsonTemplateClone.BotChances.EquipmentChances[slot] = 0;
                     continue;
                 }
 
-                botJsonTemplateClone.BotChances.EquipmentChances[slot] = 100;  
-            }  
-            
-            // 强制所有模组100%生成
-            foreach (var slot in botJsonTemplateClone.BotChances.EquipmentModsChances.Keys.ToList())  
-            {  
-                botJsonTemplateClone.BotChances.EquipmentModsChances[slot] = 100;  
+                botJsonTemplateClone.BotChances.EquipmentChances[slot] = 100;
             }
 
-            foreach (var slot in botJsonTemplateClone.BotChances.WeaponModsChances.Keys.ToList())  
-            {  
-                botJsonTemplateClone.BotChances.WeaponModsChances[slot] = 100;  
+            // 强制所有模组100%生成
+            foreach (var slot in botJsonTemplateClone.BotChances.EquipmentModsChances.Keys.ToList())
+            {
+                botJsonTemplateClone.BotChances.EquipmentModsChances[slot] = 100;
+            }
+
+            foreach (var slot in botJsonTemplateClone.BotChances.WeaponModsChances.Keys.ToList())
+            {
+                botJsonTemplateClone.BotChances.WeaponModsChances[slot] = 100;
             }
 
             return CustomGenerateBot(sessionId, botBaseClone, botJsonTemplateClone, botGenerationDetails);
@@ -129,7 +130,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 bot.Hideout = null;
             }
 
-            bot.Info.Experience = 0;
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length);  
+            bot.Info.Experience = expTable.Take(level).Sum(entry => entry.Experience);
             bot.Info.Level = botGenerationDetails.PlayerLevel;
             bot.Info.Settings.Experience = GetExperienceRewardForKillByDifficulty(
                 botJsonTemplate.BotExperience.Reward,
@@ -150,9 +153,20 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             bot.Customization.Voice = weightedRandomHelper.GetWeightedValue(botJsonTemplate.BotAppearance.Voice);
             bot.Health = GenerateHealth(botJsonTemplate.BotHealth, botGenerationDetails.IsPlayerScav);
 
-            // 需要定制（需要先知道技能是否会对AI的行为产生影响）
-            bot.Skills = GenerateSkills(botJsonTemplate.BotSkills);
-            // end
+            bot.Skills = new Skills
+            {
+                Common = Enum.GetValues<SkillTypes>()
+                    .Select(skill => new CommonSkill
+                    {
+                        Id = skill,
+                        Progress = 0,
+                        PointsEarnedDuringSession = 0,
+                        LastAccess = 0,
+                    }).ToList(),
+                Mastering = GetMasteringSkillsWithRandomisedProgressValue(botJsonTemplate.BotSkills.Mastering),
+                Points = 0,
+            };
+
             bot.Info.PrestigeLevel = 0;
 
             if (botGenerationDetails.IsPmc)

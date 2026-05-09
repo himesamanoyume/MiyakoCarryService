@@ -46,6 +46,7 @@ namespace MiyakoCarryService.Server.Services
         ICloner cloner,
         ConfigServer configServer,
         BotHelper botHelper,
+        ProfileHelper profileHelper,
         ServerLocalisationService serverLocalisationService,
         NotificationHelper notificationHelper,
         BotInventoryContainerService botInventoryContainerService,
@@ -319,6 +320,16 @@ namespace MiyakoCarryService.Server.Services
             return new();
         }
 
+        public SptProfile? GetMcsBotPlayerFullProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            if (_mcsInventoryIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
+            {
+                return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
+            }
+
+            return null;
+        }
+
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
         {
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
@@ -584,6 +595,18 @@ namespace MiyakoCarryService.Server.Services
                 MannequinPoses = new(), 
             };
 
+            var moneyTransferLimitData = new MoneyTransferLimits  
+            {  
+                NextResetTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 86400,  
+                RemainingLimit = 1000000,  
+                TotalLimit = 1000000,  
+                ResetInterval = 86400,  
+            };
+
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length); 
+            botBase.Info.Experience += expTable.Take(level).Sum(entry => entry.Experience);
+
             var pmcData = new PmcData
             {
                 Id = botBase.Id,
@@ -607,12 +630,21 @@ namespace MiyakoCarryService.Server.Services
                 Achievements = new(),
                 RepeatableQuests = new(),
                 Bonuses = botBase.Bonuses,
+                // Bonuses = new()
+                // {
+                //     new Bonus  
+                //     {  
+                //         Id = new(),  
+                //         TemplateId = ItemTpl.STASH_THE_UNHEARD_EDITION_STASH_10X72,
+                //         Type = BonusType.StashRows,  
+                //     }  
+                // },
                 Notes = new(),
                 CarExtractCounts = botBase.CarExtractCounts,
                 CoopExtractCounts = botBase.CoopExtractCounts,
                 SurvivorClass = botBase.SurvivorClass,
                 WishList = botBase.WishList,
-                MoneyTransferLimitData = botBase.MoneyTransferLimitData,
+                MoneyTransferLimitData = moneyTransferLimitData,
                 IsPmc = botBase.IsPmc,
                 Prestige = new(),
             };
@@ -657,6 +689,10 @@ namespace MiyakoCarryService.Server.Services
 
             var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length); 
+            botBase.Info.Experience += expTable.Take(level).Sum(entry => entry.Experience);
+
             var scavData = new PmcData
             {
                 Id = new(),
@@ -670,7 +706,7 @@ namespace MiyakoCarryService.Server.Services
                 Inventory = botBase.Inventory,
                 Skills = botBase.Skills,
                 Stats = botBase.Stats,
-                Encyclopedia = botBase.Encyclopedia,
+                Encyclopedia = pmcData.Encyclopedia,
                 TaskConditionCounters = botBase.TaskConditionCounters,
                 InsuredItems = botBase.InsuredItems,
                 Hideout = botBase.Hideout,
@@ -724,7 +760,21 @@ namespace MiyakoCarryService.Server.Services
                 {
                     PmcData = pmcData,
                     ScavData = scavData
-                }
+                },
+                UserBuildData = new UserBuilds
+                {
+                    EquipmentBuilds = [],
+                    WeaponBuilds = [],
+                    MagazineBuilds = [],
+                },
+                DialogueRecords = new(),
+                SptData = profileHelper.GetDefaultSptDataObject(),  
+                InraidData = new(),
+                InsuranceList = [],
+                BtrDeliveryList = [],
+                TraderPurchases = [],
+                FriendProfileIds = [],
+                CustomisationUnlocks = [],
             };
         }
 

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using System.Collections.Generic;
+using MiyakoCarryService.Server.Patches.Profile;
 
 namespace MiyakoCarryService.Server
 {
@@ -39,6 +40,8 @@ namespace MiyakoCarryService.Server
                 new GenerateDialogueViewPatch().Enable();
                 new GetDialogByIdFromProfilePatch().Enable();
                 new SptDialogueChatBotPatch().Enable();
+                new SaveProfileAsyncPatch().Enable();
+                new GetProfilePatch().Enable();
                 await configService.OnPreLoadAsync();
                 _ = CheckForUpdate();
             }

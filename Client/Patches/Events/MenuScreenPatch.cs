@@ -31,13 +31,6 @@ namespace MiyakoCarryService.Client.Patches.Events
                 var _playButton = _menuScreenTraverse.Field<DefaultUIButton>("_playButton").Value;
                 _playButton.SetDisabledTooltip("正处于护航库存模式，无法进入战局", false);
                 _playButton.Interactable = false;
-                Singleton<PreloaderUI>.Instance.MenuTaskBar.SetCustomButtonsAvailability(new()
-                {
-                    {
-                        EMenuType.Chat,
-                        EStateSwitcher.Disabled
-                    }
-                });
             }
         }
     }

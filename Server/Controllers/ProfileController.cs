@@ -50,6 +50,11 @@ namespace MiyakoCarryService.Server.Controllers
             return profileService.GetMcsBotPlayerProfileForInventoryMode(mcsLeadPlayerId);
         }
 
+        public SptProfile? GetMcsBotPlayerFullProfileForInventoryMode(MongoId mcsLeadPlayerId)
+        {
+            return profileService.GetMcsBotPlayerFullProfileForInventoryMode(mcsLeadPlayerId);
+        }
+
         public SptProfile? GetMcsBotPlayerProfileByAccountId(MongoId mcsLeadPlayerId, string mcsAid)
         {
             return profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
