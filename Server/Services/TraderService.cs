@@ -13,7 +13,9 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -33,6 +35,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         TimeUtil timeUtil,
         DatabaseService databaseService,
+        SaveServer saveServer,
         ProfileService profileService,
         JsonUtil jsonUtil,
         CompatibilityService compatibilityService,
@@ -240,6 +243,37 @@ namespace MiyakoCarryService.Server.Services
                 itemHelper.SplitStackIntoSeparateItems(roubles).SelectMany(x => x).ToList(),
                 timeUtil.GetHoursAsSeconds(168)
             );
+        }
+
+        public async Task<ProfileChange> UpdateProfile(MongoId mcsLeadPlayerId)
+        {
+            PmcData targetPmcData;
+
+            if (profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId))
+            {
+                targetPmcData = profileService.GetMcsBotPlayerProfileForInventoryMode(mcsLeadPlayerId)[0];
+            }
+            else
+            {
+                targetPmcData = saveServer.GetProfile(mcsLeadPlayerId).CharacterData.PmcData;
+            }
+
+            return new()
+            {
+                Id = mcsLeadPlayerId,
+                Experience = targetPmcData.Info.Experience,
+                TraderRelations = targetPmcData.TradersInfo.ToDictionary(
+                    trader => trader.Key,
+                    trader => new TraderData
+                    {
+                        SalesSum = trader.Value.SalesSum,  
+                        Standing = trader.Value.Standing,  
+                        Loyalty = trader.Value.LoyaltyLevel,  
+                        Unlocked = trader.Value.Unlocked,  
+                        Disabled = trader.Value.Disabled, 
+                    }
+                )
+            };
         }
     }
 }

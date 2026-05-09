@@ -133,6 +133,18 @@ namespace MiyakoCarryService.Client.Utils
             await PostJsonAsync("/mcs/client/trading/api/compensation", compensation);
         }
 
+        public static async Task<ProfileChangesPocoClass> UpdateProfile()
+        {
+            var response = await GetJsonAsync<ProfileChangesPocoClass>("/mcs/client/trading/api/updateProfile");
+
+            if (response == null)
+            {
+                return new();
+            }
+
+            return response;
+        }
+
         public static async Task<List<MongoID>> GetMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
         {
             var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);

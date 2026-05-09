@@ -42,23 +42,19 @@ namespace MiyakoCarryService.Client.Patches.Events
             }
 
             session.ProfilesUpdateTime = Time.time;
-
-            session.AllProfiles = response
-                .Select(descriptor => new Profile(descriptor))
-                .ToArray();
-
+            session.AllProfiles = response.Select(descriptor => new Profile(descriptor)).ToArray();
             session.Profile = session.AllProfiles[0];
+            
             var profileStatuses = new List<ProfileStatusClass>();
             foreach (var profile in session.AllProfiles)
             {
-                profileStatuses.Add(new ProfileStatusClass
+                profileStatuses.Add(new()
                 {
                     profileid = profile.Id,
                     status = EProfileStatus.Free,
                 });
             }
             session.AllProfileStatus = profileStatuses.ToArray();
-            session.method_36();
         }
     }
 }

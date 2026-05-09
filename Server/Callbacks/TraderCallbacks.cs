@@ -4,6 +4,7 @@ using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Models.Eft.Trader;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Callbacks
@@ -30,6 +31,14 @@ namespace MiyakoCarryService.Server.Callbacks
         {
             traderController.Compensation(info);
             return httpResponseUtil.NullResponse();
+        }
+
+        /// <summary>
+        /// 处理 /mcs/client/trading/api/updateProfile
+        /// </summary>
+        public async ValueTask<string> UpdateProfile(string url, EmptyRequestData info, MongoId mcsLeadPlayerId)
+        {
+            return httpResponseUtil.NoBody(await traderController.UpdateProfile(mcsLeadPlayerId));
         }
     }
 }

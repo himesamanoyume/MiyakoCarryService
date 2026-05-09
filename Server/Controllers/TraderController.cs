@@ -1,8 +1,10 @@
 
+using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Eft.Trader;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 
 namespace MiyakoCarryService.Server.Controllers
 {
@@ -19,6 +21,11 @@ namespace MiyakoCarryService.Server.Controllers
         public void Compensation(CompensationRequestData info)
         {
             traderService.Compensation(info);
+        }
+
+        public async Task<ProfileChange> UpdateProfile(MongoId mcsLeadPlayerId)
+        {
+            return await traderService.UpdateProfile(mcsLeadPlayerId);
         }
     }
 }

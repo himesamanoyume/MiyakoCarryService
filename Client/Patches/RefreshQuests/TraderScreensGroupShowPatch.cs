@@ -21,7 +21,8 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
         [PatchPostfix]
         public static void Postfix(TraderScreensGroup.GClass3888 controller)
         {
-            _ = UpdateDailyQuests();
+            TasksExtensions.HandleExceptions(UpdateProfile());
+            TasksExtensions.HandleExceptions(UpdateDailyQuests());
         }
 
         public static async Task UpdateDailyQuests()
@@ -54,6 +55,18 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
                     return;
                 }
                 mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
+            }
+        }
+
+        private static async Task UpdateProfile()
+        {
+            var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
+            if (GameLoop.Instance.Session is SessionBackendClass sessionBackendClass)
+            {
+                if (sessionBackendClass.Dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
+                {
+                    profileUpdater.UpdateProfile(profileChangesPocoClass);
+                }
             }
         }
     }
