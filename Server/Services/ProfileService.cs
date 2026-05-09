@@ -604,8 +604,7 @@ namespace MiyakoCarryService.Server.Services
             };
 
             var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
-            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length); 
-            botBase.Info.Experience += expTable.Take(level).Sum(entry => entry.Experience);
+            botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var pmcData = new PmcData
             {
@@ -690,8 +689,7 @@ namespace MiyakoCarryService.Server.Services
             var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
             var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
-            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length); 
-            botBase.Info.Experience += expTable.Take(level).Sum(entry => entry.Experience);
+            botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var scavData = new PmcData
             {

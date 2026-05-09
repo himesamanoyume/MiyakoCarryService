@@ -26,6 +26,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
     protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MenuTaskBar), nameof(MenuTaskBar.Awake));
 
     private static GameObject _bigSurveyGameObject;
+    private static GameObject _mcsBotPlayerInventoryModeGameObject;
     private static GameObject _bigSurveyButton;
     private static AnimatedToggle _animatedToggle;
     private static HoverTooltipArea _hoverTooltipArea;
@@ -33,6 +34,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
     private static GameObject _bigSurveyNewNodes;
     private static TextMeshProUGUI _newBigSurveyLabel;
     private static GameObject _tempNewsGameObject;
+    private static GameObject _tempBackGameObject;
 
     public static int NewBigSurveyCount
     {
@@ -64,7 +66,16 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
     [HarmonyPriority(Priority.First)]
     public static void Prefix(MenuTaskBar __instance)
     {
-        _tempNewsGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/News");
+        if (_tempNewsGameObject == null)
+        {
+            _tempNewsGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/News");
+        }
+
+        if (_tempBackGameObject == null)
+        {
+            _tempBackGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Spacer/BackToMatchingContainer");
+        }
+        
         if (_tempNewsGameObject != null)
         {
             _bigSurveyGameObject = Object.Instantiate(_tempNewsGameObject);
@@ -118,6 +129,20 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             _hoverTooltipArea = _bigSurveyGameObject.GetComponentInChildren<HoverTooltipArea>();
             SetBigSurveyButtonInteractable(true);
         }
+
+        if (_tempBackGameObject != null)
+        {
+            _mcsBotPlayerInventoryModeGameObject = Object.Instantiate(_tempBackGameObject);
+            _mcsBotPlayerInventoryModeGameObject.name = "McsBotPlayerInventoryModeInfo";
+            _mcsBotPlayerInventoryModeGameObject.transform.SetParent(_tempBackGameObject.transform.parent, false);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).gameObject.SetActive(true);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
+
+            var matchingStatus = _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(1);
+            matchingStatus.GetComponentInChildren<TextMeshProUGUI>().text = "护航库存模式";
+            ShowMcsBotPlayerInventoryModeInfo(false);
+        }
     }
 
     [PatchPostfix]
@@ -150,5 +175,10 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             _hoverTooltipArea.SetUnlockStatus(interactable);
             _hoverTooltipArea.SetMessageText(interactable ? string.Empty : text);
         }
+    }
+
+    public static void ShowMcsBotPlayerInventoryModeInfo(bool active)
+    {
+        _mcsBotPlayerInventoryModeGameObject.SetActive(active);
     }
 }

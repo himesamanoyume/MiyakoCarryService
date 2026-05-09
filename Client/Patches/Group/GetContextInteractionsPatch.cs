@@ -5,6 +5,7 @@ using EFT;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -61,6 +62,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
         private static void OnOpenMcsBotPlayerInventoryMode(string aid)
@@ -82,6 +84,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }
     }
 

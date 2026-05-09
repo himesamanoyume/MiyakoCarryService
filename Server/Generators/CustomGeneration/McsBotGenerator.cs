@@ -131,8 +131,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             }
 
             var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
-            var level = Math.Min(botGenerationDetails.PlayerLevel.Value, expTable.Length);  
-            bot.Info.Experience = expTable.Take(level).Sum(entry => entry.Experience);
+            bot.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
             bot.Info.Level = botGenerationDetails.PlayerLevel;
             bot.Info.Settings.Experience = GetExperienceRewardForKillByDifficulty(
                 botJsonTemplate.BotExperience.Reward,
