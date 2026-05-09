@@ -300,14 +300,6 @@ namespace MiyakoCarryService.Server.Services
                 var mcsBotPlayerFullProfle = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
                 var mcsBotPlayerFullProfleClone = cloner.Clone(mcsBotPlayerFullProfle)!;
 
-                if (mcsBotPlayerFullProfleClone.CharacterData?.PmcData?.TradersInfo?.Values is not null)
-                {
-                    foreach (var trader in mcsBotPlayerFullProfleClone.CharacterData.PmcData.TradersInfo.Values)
-                    {
-                        trader.LoyaltyLevel = null;
-                    }
-                }
-
                 var output = new List<PmcData>
                 {
                     mcsBotPlayerFullProfleClone.CharacterData!.PmcData!,
@@ -548,10 +540,10 @@ namespace MiyakoCarryService.Server.Services
                 tradersInfo[traderId] = new TraderInfo
                 {
                     LoyaltyLevel = 4,
-                    SalesSum = 0,
+                    SalesSum = 999999999.0,
                     Standing = 10.0,
                     NextResupply = trader.Base?.NextResupply ?? 0,
-                    Unlocked = trader.Base?.UnlockedByDefault ?? false,
+                    Unlocked = true,
                     Disabled = false,
                 };
             }

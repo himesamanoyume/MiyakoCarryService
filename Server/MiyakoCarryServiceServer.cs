@@ -42,6 +42,7 @@ namespace MiyakoCarryService.Server
                 new SptDialogueChatBotPatch().Enable();
                 new SaveProfileAsyncPatch().Enable();
                 new GetProfilePatch().Enable();
+                new ItemEventRouterHandleEventsPatch().Enable();
                 await configService.OnPreLoadAsync();
                 _ = CheckForUpdate();
             }

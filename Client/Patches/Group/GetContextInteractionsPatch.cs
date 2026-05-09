@@ -61,6 +61,7 @@ namespace MiyakoCarryService.Client.Patches.Group
 
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
+            Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
@@ -83,6 +84,7 @@ namespace MiyakoCarryService.Client.Patches.Group
 
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
+            Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }

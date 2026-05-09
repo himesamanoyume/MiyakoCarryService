@@ -16,10 +16,10 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class GetProfilesPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Class308), nameof(Class308.GetProfiles));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.GetProfiles));
 
         [PatchPrefix]
-        public static bool Prefix(Class308 __instance, ref Task __result)
+        public static bool Prefix(SessionBackendClass __instance, ref Task __result)
         {
             if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             return false;
         }
 
-        private static async Task GetMcsBotPlayerProfile(Class308 session)
+        private static async Task GetMcsBotPlayerProfile(SessionBackendClass session)
         {
             var response = await McsRequestHandler.GetMcsBotPlayerProfiles();
 
@@ -58,6 +58,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 });
             }
             session.AllProfileStatus = profileStatuses.ToArray();
+            session.method_36();
         }
     }
 }
