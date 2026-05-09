@@ -22,6 +22,10 @@ namespace MiyakoCarryService.Server.Routers.Static
             new RouteAction<McsBotPlayerAidRequestData>(
                 "/mcs/client/game/aid/verify",
                 async (url, info, sessionId, output) => await profileCallbacks.VerifyMcsBotPlayerAid(url, info, sessionId)
+            ),
+            new RouteAction<McsBotPlayerAidRequestData>(
+                "/mcs/client/game/aid/remove",
+                async (url, info, sessionId, output) => await profileCallbacks.RemoveMcsBotPlayerAid(url, info, sessionId)
             )
         ]
     )

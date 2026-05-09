@@ -390,6 +390,33 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
+        public async Task<bool> RemoveMcsBotPlayerAid(MongoId mcsLeadPlayerId, string mcsAid)
+        {
+            var isInt = int.TryParse(mcsAid, out var intMcsAid);
+            if (!isInt)
+            {
+                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
+                return false;
+            }
+
+            if (_profiles.ContainsKey(mcsLeadPlayerId))
+            {
+                _profiles.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerProfiles);
+                if (mcsBotPlayerProfiles is null)
+                {
+                    return false;
+                }
+
+                var verify = mcsBotPlayerProfiles.Any(p => p.Value.ProfileInfo.Aid == intMcsAid);
+                if (verify)
+                {
+                    verify = _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
+                }
+                return verify;
+            }
+            return false;
+        }
+
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
             return _mcsInventoryIds.ContainsKey(mcsLeadPlayerId);

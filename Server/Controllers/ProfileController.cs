@@ -70,6 +70,11 @@ namespace MiyakoCarryService.Server.Controllers
             return await profileService.VerifyMcsBotPlayerAid(mcsLeadPlayerId, mcsAid);
         }
 
+        public async Task<bool> RemoveMcsBotPlayerAid(MongoId mcsLeadPlayerId, string mcsAid)
+        {
+            return await profileService.RemoveMcsBotPlayerAid(mcsLeadPlayerId, mcsAid);
+        }
+
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
             return profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId);

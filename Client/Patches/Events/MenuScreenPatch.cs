@@ -1,5 +1,7 @@
+using Comfort.Common;
 using EFT;
 using EFT.UI;
+using EFT.UI.Screens;
 using HarmonyLib;
 using MiyakoCarryService.Client.Patches.Group;
 using SPT.Reflection.Patching;
@@ -16,8 +18,8 @@ namespace MiyakoCarryService.Client.Patches.Events
 
         private static Traverse _menuScreenTraverse = null;
 
-        [PatchPrefix]
-        public static bool Prefix(MenuScreen __instance, EMatchingType matchingType)
+        [PatchPostfix]
+        public static void Postfix(MenuScreen __instance, EMatchingType matchingType)
         {
             if (GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
@@ -29,9 +31,14 @@ namespace MiyakoCarryService.Client.Patches.Events
                 var _playButton = _menuScreenTraverse.Field<DefaultUIButton>("_playButton").Value;
                 _playButton.SetDisabledTooltip("正处于护航库存模式，无法进入战局", false);
                 _playButton.Interactable = false;
-                return false;
+                Singleton<PreloaderUI>.Instance.MenuTaskBar.SetCustomButtonsAvailability(new()
+                {
+                    {
+                        EMenuType.Chat,
+                        EStateSwitcher.Disabled
+                    }
+                });
             }
-            return true;
         }
     }
 }

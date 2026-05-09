@@ -30,5 +30,13 @@ namespace MiyakoCarryService.Server.Callbacks
         {
             return httpResponseUtil.NoBody(await profileController.VerifyMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
         }
+
+        /// <summary>
+        /// 处理 /mcs/client/game/aid/remove
+        /// </summary>
+        public async ValueTask<string> RemoveMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
+        {
+            return httpResponseUtil.NoBody(await profileController.RemoveMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
+        }
     }
 }

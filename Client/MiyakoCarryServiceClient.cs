@@ -173,6 +173,7 @@ namespace MiyakoCarryService.Client
             new LocalQuestControllerClassPatch().Enable();
             new RaidReadyListFixAidPatch().Enable();
             new GetContextInteractionsPatch().Enable();
+            new ContextInteractionsClassPatch().Enable();
             new GetProfilesPatch().Enable();
             new MenuScreenPatch().Enable();
 

@@ -1,6 +1,8 @@
 
 using System.Reflection;
+using Comfort.Common;
 using EFT;
+using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -9,7 +11,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Group
 {
     /// <summary>
-    /// 邀请至队伍界面对玩家添加右键按钮选项
+    /// 邀请至队伍界面对玩家添加右键自定义选项
     /// </summary>
     public sealed class GetContextInteractionsPatch : ModulePatch
     {
@@ -22,14 +24,46 @@ namespace MiyakoCarryService.Client.Patches.Group
         [PatchPostfix]
         public static void Postfix(GroupPlayerDataClass player, ContextInteractionsClass __result)
         {
+            if (IsMcsBotPlayerInventoryMode)
+            {
+                __result.method_2(
+                    id: "BackMainChar",
+                    key: "返回主角色",
+                    callback: () => OnExitMcsBotPlayerInventoryMode(player.AccountId)
+                );
+
+                return;
+            }
+
             __result.method_2(
-                id: "OpenMcsBotPlayerInventory",
+                id: "OpenMcsBotPlayerInventoryMode",
                 key: Locales.OPENMCSBOTPLAYERINVENTORY.McsLocalized(),
-                callback: () => OnOpenMcsBotPlayerInventory(player.AccountId)
+                callback: () => OnOpenMcsBotPlayerInventoryMode(player.AccountId)
             );
         }
 
-        private static void OnOpenMcsBotPlayerInventory(string aid)
+        private static void OnExitMcsBotPlayerInventoryMode(string aid)
+        {
+            if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
+            {
+                NotificationManagerClass.DisplayMessageNotification($"当前发生异常，请反馈并重启游戏");
+                return;
+            }
+
+            if (_tarkovApplicationTraverse == null)
+            {
+                TarkovApplication.Exist(out var tarkovApplication);
+                _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
+            }
+
+            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+
+            McsBotPlayerAid = "";
+            IsMcsBotPlayerInventoryMode = false;
+            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+        }
+
+        private static void OnOpenMcsBotPlayerInventoryMode(string aid)
         {
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
@@ -49,5 +83,22 @@ namespace MiyakoCarryService.Client.Patches.Group
             IsMcsBotPlayerInventoryMode = true;
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
         }
+    }
+
+    public sealed class ContextInteractionsClassPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ContextInteractionsClass), nameof(ContextInteractionsClass.IsActive));
+
+        [PatchPrefix]  
+        public static bool Prefix(ref bool __result)  
+        {  
+            if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)  
+            {  
+                return true;
+            }  
+    
+            __result = false;  
+            return false;  
+        }  
     }
 }

@@ -94,6 +94,13 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
+        public static bool RemoveMcsBotPlayerAid(McsBotPlayerAid mcsBotPlayerAid)
+        {
+            var response = PostJson<McsBotPlayerAid, bool>("/mcs/client/game/aid/remove", mcsBotPlayerAid);
+
+            return response;
+        }
+
         public static async Task<Dictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
         {
             var response = await GetJsonAsync<Dictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
