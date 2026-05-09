@@ -107,6 +107,10 @@ namespace MiyakoCarryService.Server
                     var mcsBotPlayerIds = orderInfoService.GetExpiredMcsBotPlayerIds();
                     foreach (var kvp in mcsBotPlayerIds)
                     {
+                        if (profileService.IsMcsBotPlayerInventoryMode(kvp.Key))
+                        {
+                            continue;
+                        }
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });
