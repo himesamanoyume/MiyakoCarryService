@@ -80,6 +80,11 @@ namespace MiyakoCarryService.Server.Controllers
             return await profileService.RemoveMcsBotPlayerAid(mcsLeadPlayerId, mcsAid);
         }
 
+        public void RemoveMcsBotPlayerAid(MongoId mcsLeadPlayerId)
+        {
+            profileService.RemoveMcsBotPlayerAid(mcsLeadPlayerId);
+        }
+
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
             return profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId);

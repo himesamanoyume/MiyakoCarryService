@@ -428,6 +428,11 @@ namespace MiyakoCarryService.Server.Services
             return false;
         }
 
+        public void RemoveMcsBotPlayerAid(MongoId mcsLeadPlayerId)
+        {
+            _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
+        }
+
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
             return _mcsInventoryIds.ContainsKey(mcsLeadPlayerId);

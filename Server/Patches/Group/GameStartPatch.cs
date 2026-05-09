@@ -23,6 +23,9 @@ namespace MiyakoCarryService.Server.Patches.Group
         {
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
             raidController.ClearGroupMember(sessionID);
+
+            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
+            profileController.RemoveMcsBotPlayerAid(sessionID);
         }
     }
 }
