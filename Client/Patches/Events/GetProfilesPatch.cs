@@ -54,7 +54,6 @@ namespace MiyakoCarryService.Client.Patches.Events
                     status = EProfileStatus.Free,
                 });
             }
-            session.AllProfileStatus = profileStatuses.ToArray();
         }
     }
 }

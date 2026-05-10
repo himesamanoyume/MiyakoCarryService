@@ -418,14 +418,9 @@
 > 关于售卖全物品参考`https://deepwiki.com/bluehead24/AIOTrader-For-SPT`, `https://github.com/bluehead24/AIOTrader-For-SPT/blob/main/AddAIOTrader.cs`
 
 - ~~生成护航存档时，往其仓库中添加大量卢布、美元、欧元、GP币~~
-- **宫子商人提供的商品购买时提示`[InventoryHelper]: Object reference not set to an instance of an object.`**
-- **从护航库存模式返回主角色时报错**
-```log
-NullReferenceException: Object reference not set to an instance of an object
-  at EFT.TarkovApplication.method_43 (ServerScenesDataStruct scenePreset, System.Threading.CancellationToken cancellationToken, System.Boolean isLocalGame, System.Boolean canEscape) [0x000bd] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at EFT.TarkovApplication.method_41 (EFT.TimeAndWeatherSettings timeAndWeather, System.Boolean inTransition) [0x0022a] in <ad47400a25db462cbf0a531df654c3c3>:0 
-```
-- **当处于护航库存模式时，禁用上架跳蚤市场（只需要在上架的最后一步阻止即可）**
+- ~~宫子商人提供的商品购买时提示`[InventoryHelper]: Object reference not set to an instance of an object.`~~
+- ~~从护航库存模式返回主角色时报错~~
+- ~~当处于护航库存模式时，禁用上架跳蚤市场~~
 
 ## Logic思想指导
 
