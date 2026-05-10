@@ -75,7 +75,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
         {
             _tempBackGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Spacer/BackToMatchingContainer");
         }
-        
+
         if (_tempNewsGameObject != null)
         {
             _bigSurveyGameObject = Object.Instantiate(_tempNewsGameObject);
@@ -155,10 +155,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
             Object.Destroy(_tempNewsGameObject.gameObject);
             List<GameObject> newList = [.. ____newInformation];
-            if (newList.Count > 0)
-            {
-                newList.RemoveAt(newList.Count - 1);
-            }
+            newList.Remove(newList[^1]);
             ____newInformation = [.. newList];
         }
     }
