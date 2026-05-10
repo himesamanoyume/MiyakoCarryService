@@ -90,9 +90,9 @@ namespace MiyakoCarryService.Server.Services
                 _punishmentMulti.PunishmentMulti = 0d;
                 _ = SavePunishmentMulti();
             }
-            else if (_punishmentMulti.PunishmentMulti > 5d)
+            else if (_punishmentMulti.PunishmentMulti > 1d)
             {
-                _punishmentMulti.PunishmentMulti = 5d;
+                _punishmentMulti.PunishmentMulti = 1d;
                 _ = SavePunishmentMulti();
             }
         }
@@ -279,9 +279,9 @@ namespace MiyakoCarryService.Server.Services
             {
                 _punishmentMulti.PunishmentMulti = 0d;
             }
-            else if (_punishmentMulti.PunishmentMulti > 5d)
+            else if (_punishmentMulti.PunishmentMulti > 1d)
             {
-                _punishmentMulti.PunishmentMulti = 5d;
+                _punishmentMulti.PunishmentMulti = 1d;
             }
             _ = SavePunishmentMulti();
         }

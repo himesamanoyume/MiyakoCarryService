@@ -125,7 +125,7 @@ public sealed class ConfigService(
                         {
                             LevelRange = new MinMax<int> {Min = 0, Max = 9999},
                             PossibleSkillRewards = [],
-                            RequestedItemCount = new MinMax<int> {Min = 100000, Max = 100000},
+                            RequestedItemCount = new MinMax<int> {Min = 30000, Max = 30000},
                             UniqueItemCount = new MinMax<int> {Min = 0, Max = 0},
                             RequestedBulletCount = new MinMax<int> {Min = 0, Max = 0},
                             UseWhitelist = false,

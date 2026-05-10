@@ -69,8 +69,8 @@
                         },
                         "possibleSkillRewards": [],
                         "requestedItemCount": {
-                            "min": 100000,
-                            "max": 100000
+                            "min": 30000,
+                            "max": 30000
                         },
                         "uniqueItemCount": {
                             "min": 0,

@@ -562,7 +562,7 @@ namespace MiyakoCarryService.Server.Services
                 areas.Add(new BotHideoutArea
                 {
                     Type = areaType,
-                    Level = areaType == HideoutAreas.Stash ? 1 : 0,
+                    Level = areaType == HideoutAreas.Stash ? 4 : (areaType == HideoutAreas.Workbench ? 3 : 0),
                     Active = true,
                     PassiveBonusesEnabled = areaType != HideoutAreas.ChristmasIllumination,
                     CompleteTime = 0,
