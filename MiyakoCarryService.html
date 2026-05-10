@@ -990,10 +990,10 @@
     
     <ul style="list-style-type: disc;">
         <li>
-            <p>Q: 与 FriendlyPMC 相比有何区别、有什么特色</p>
+            <p>Q: 与 FriendlyPMC (PitFireTeam) 相比有何区别、有什么特色</p>
         </li>
         <li>
-            <p>A: FriendlyPMC 可以随意生成指定数量的AI队友（好像？），但反正 Mcs 在Pmc模式下最大仅支持4位，Scav模式下最大仅支持3位，符合原版组队设定；FriendlyPMC 功能更完善，比如能对AI队友下达指令，修改AI队友的装备，这些 Mcs 都还不支持，但这只是迟早的事，不要想着一开始 Mcs 就能做到尽善尽美，再怎么说 SAIN 和 FriendlyPMC 都是开发了数年的模组；<b>FriendlyPMC 不主动适配 Fika ，Mcs 会主动适配 Fika</b>；<b>FriendlyPMC 无法使用 SAIN 的战斗层级，而 Mcs 护航可以</b>。<b>FriendlyPMC 无法轻易适配其他AI Boss，而 Mcs 可以轻易适配</b>；<b>FriendlyPMC 无法生成其他Mod的AI类型，而 Mcs 支持生成第三方Mod的AI类型</b>，因此你将可以通过 Mcs 做到...</p>
+            <p>A: FriendlyPMC 可以随意带入指定数量的AI队友进入战局（好像？），但反正 Mcs 在Pmc模式下最大仅支持4位，Scav模式下最大仅支持3位，符合原版组队设定；FriendlyPMC 功能更完善，比如能对AI队友下达指令，修改AI队友的装备，<del>这些 Mcs 都还不支持，但这只是迟早的事，不要想着一开始 Mcs 就能做到尽善尽美，再怎么说 SAIN 和 FriendlyPMC 都是开发了数年的模组；</del>Mcs 已经基本追赶上了。<b>FriendlyPMC 不主动适配 Fika ，Mcs 会主动适配 Fika</b>；<b>FriendlyPMC 无法使用 SAIN 的战斗层级，而 Mcs 护航可以</b>。<b>FriendlyPMC 无法轻易适配其他AI Boss，而 Mcs 可以轻易适配</b>；<b>FriendlyPMC 无法生成其他Mod的AI类型，而 Mcs 支持生成第三方Mod的AI类型</b>，因此你将可以通过 Mcs 做到...</p>
         </li>
         &nbsp;&nbsp;
         <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/29648841_1776483848.png"/></p>
@@ -1007,7 +1007,7 @@
             <p>Q: 其他兼容性</p>
         </li>
         <li>
-            <p>A: 目前是只测试了 SAIN、Fika 兼容（大概），LootingBots 、Questing Bot 这些其他AI模组没测试过</p>
+            <p>A: 目前是只测试了 SAIN、Fika 兼容，LootingBots 、Questing Bot 这些其他AI模组没测试过</p>
         </li>
     </ul>
     <p>
@@ -1088,28 +1088,96 @@
             <a href="https://ifdian.net/a/himesamanoyume" target="_blank" id="afadian">[爱发电]简简单单恰个米 [s-44] </a>
         </p>
         <p><span style="font-size: 20px;"><strong>更新日志</strong></span></p>
+        <p>未公开发布期间更新日志不会时刻更新到最新进度，以Discord频道为准</p>
         <p>
-            <strong>[4.0.X] 0.2.3.0</strong>
+            <strong>[4.0.X] 0.3.0.0</strong>
         </p>
         <ul style="list-style-type: disc;">
             <li>
-                <p>实现基础的护航对指令的回应对话字幕功能</p>
+                <p>修复带有护航的战局无法使用转移的问题</p>
             </li>
             <li>
-                <p>再次尝试修复Aid重复问题</p>
-            </li>
-            <li>
-                <p>护航装备中不会再自带任何手雷，以避免误伤</p>
-            </li>
-            <li>
-                <p>提升了传送指令的成功率</p>
-            </li>
-            <li>
-                <p>现在当安装SAIN时，使用传送指令不会消除护航的仇恨，以防止SAIN的AI逻辑卡住</p>
+                <p>新增<b>护航库存模式</b>。你将能够完全自定义护航的一切。</p>
             </li>
         </ul>
+        <ol>
+            <li>
+                <p>你需要在"邀请至队伍"界面右键护航玩家，点击"打开库存"来切换至<b>护航库存模式</b></p>
+            </li>
+            <li>
+                <p>处于<b>护航库存模式</b>下时，你可以为你的护航做绝大多数平时你能做的事</p>
+            </li>
+            <li>
+                <p>处于<b>护航库存模式</b>下时，宫子商人将提供全物品购买，供你自由地搭配护航的武器装备</p>
+            </li>
+            <li>
+                <p>若要返回主角色，也是一样通过"邀请至队伍"界面右键护航玩家，点击"返回主角色"来切换回主角色</p>
+            </li>
+            <li>
+                <p><b>护航库存模式</b>主要用于玩家自定义护航的武器装备，且护航库存模式是为了后续更新新类型的护航打下基础，因此目前只适合搭配下单长期的护航来使用</p>
+            </li>
+        </ol>
         <details>
             <summary>往期更新</summary>
+            <p>
+                <strong>[4.0.X] 0.2.3.0 ~ 0.2.5.2</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>尝试修复已完成的任务被退款的问题</p>
+                </li>
+                <li>
+                    <p>修复邀请护航进队再踢出队伍时护航状态会显示为邀请中的问题</p>
+                </li>
+                <li>
+                    <p>修复战局设置不生效的问题</p>
+                </li>
+                <li>
+                    <p>让护航不再会随机丢东西</p>
+                </li>
+                <li>
+                    <p>当安装SAIN时，无法使用全队强制传送指令</p>
+                </li>
+                <li>
+                    <p>调整了与SAIN的兼容性</p>
+                </li>
+                <li>
+                    <p>修复了Scav模式下使用护航的很多Bug</p>
+                </li>
+                <li>
+                    <p>调整了Scav模式下护航的仇恨机制：不会像Pmc模式下主动进攻所有目标，以避免某些特定类型的护航主动攻击Scav导致老板变成坏兄弟，但也意味着可能会被某些特定类型的敌人主动攻击后护航才会开始反击</p>
+                </li>
+                <li>
+                    <p>新增报告敌人方位指令</p>
+                </li>
+                <li>
+                    <p>实现集结、前往指定地点、驻守指令</p>
+                </li>
+                <li>
+                    <p>新增一些护航的对话</p>
+                </li>
+                <li>
+                    <p>新增误杀老板时触发赔偿30w的机制</p>
+                </li>
+                <li>
+                    <p>修复邀请至队伍界面中无法加载护航的问题</p>
+                </li>
+                <li>
+                    <p>实现基础的护航对指令的回应对话字幕功能</p>
+                </li>
+                <li>
+                    <p>再次尝试修复Aid重复问题</p>
+                </li>
+                <li>
+                    <p>护航装备中不会再自带任何手雷，以避免误伤</p>
+                </li>
+                <li>
+                    <p>提升了传送指令的成功率</p>
+                </li>
+                <li>
+                    <p>现在当安装SAIN时，使用传送指令不会消除护航的仇恨，以防止SAIN的AI逻辑卡住</p>
+                </li>
+            </ul>
             <p>
                 <strong>[4.0.X] 0.2.0.0 ~ 0.2.2.0</strong>
             </p>
