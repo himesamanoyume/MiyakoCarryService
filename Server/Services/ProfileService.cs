@@ -18,6 +18,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Eft.Inventory;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
@@ -47,6 +48,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         BotHelper botHelper,
         ProfileHelper profileHelper,
+        ItemHelper itemHelper,
         ServerLocalisationService serverLocalisationService,
         NotificationHelper notificationHelper,
         BotInventoryContainerService botInventoryContainerService,
@@ -626,15 +628,6 @@ namespace MiyakoCarryService.Server.Services
                 Achievements = new(),
                 RepeatableQuests = new(),
                 Bonuses = botBase.Bonuses,
-                // Bonuses = new()
-                // {
-                //     new Bonus  
-                //     {  
-                //         Id = new(),  
-                //         TemplateId = ItemTpl.STASH_THE_UNHEARD_EDITION_STASH_10X72,
-                //         Type = BonusType.StashRows,  
-                //     }  
-                // },
                 Notes = new(),
                 CarExtractCounts = botBase.CarExtractCounts,
                 CoopExtractCounts = botBase.CoopExtractCounts,
@@ -644,6 +637,41 @@ namespace MiyakoCarryService.Server.Services
                 IsPmc = botBase.IsPmc,
                 Prestige = new(),
             };
+
+            var currencies = new Dictionary<MongoId, int>
+            {
+                { Money.ROUBLES, 1000000 },
+                { Money.DOLLARS, 50000 },
+                { Money.EUROS, 50000 },
+                { Money.GP, 1000 }
+            };
+
+            var stashId = pmcData.Inventory.Stash.Value;  
+
+            foreach (var (moneyId, amount) in currencies)
+            {
+                var item = new Item
+                {
+                    Id = new(),
+                    Template = moneyId,
+                    Upd = new Upd
+                    {
+                        StackObjectsCount = amount
+                    }
+                };
+
+                var currencyStacks = itemHelper.SplitStackIntoSeparateItems(item);
+                foreach (var stacks in currencyStacks)  
+                {  
+                    foreach (var stack in stacks)  
+                    {  
+                        stack.ParentId = stashId;  
+                        stack.SlotId = "hideout";  
+                        pmcData.Inventory.Items.Add(stack);  
+                    }  
+                }
+            }
+
             return pmcData;
         }
 

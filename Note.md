@@ -417,9 +417,15 @@
 - ~~需要对护航存档库存中添加更多东西，除非让宫子商人提供所有商品。假设我现在往宫子商人的供货物品文件中添加了大量商品，是否有什么办法是可以让当切换到护航库存模式时，宫子商人才会提供这些商品，正常主角色则不会看到这些商品？~~
 > 关于售卖全物品参考`https://deepwiki.com/bluehead24/AIOTrader-For-SPT`, `https://github.com/bluehead24/AIOTrader-For-SPT/blob/main/AddAIOTrader.cs`
 
+- ~~生成护航存档时，往其仓库中添加大量卢布、美元、欧元、GP币~~
+- **宫子商人提供的商品购买时提示`[InventoryHelper]: Object reference not set to an instance of an object.`**
+- **从护航库存模式返回主角色时报错**
+```log
+NullReferenceException: Object reference not set to an instance of an object
+  at EFT.TarkovApplication.method_43 (ServerScenesDataStruct scenePreset, System.Threading.CancellationToken cancellationToken, System.Boolean isLocalGame, System.Boolean canEscape) [0x000bd] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at EFT.TarkovApplication.method_41 (EFT.TimeAndWeatherSettings timeAndWeather, System.Boolean inTransition) [0x0022a] in <ad47400a25db462cbf0a531df654c3c3>:0 
+```
 - **当处于护航库存模式时，禁用上架跳蚤市场（只需要在上架的最后一步阻止即可）**
-- **生成护航装备时，耐久度需要全满**
-- **生成护航存档时，往其仓库中添加大量卢布、美元、欧元、GP币**
 
 ## Logic思想指导
 

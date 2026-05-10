@@ -133,7 +133,6 @@ namespace MiyakoCarryService.Server.Services
         private Task GenerateMcsBotPlayerInventoryModeAssort()
         {
             var items = databaseService.GetItems();
-            var prices = databaseService.GetPrices();
             
             foreach (var kvp in items) 
             {
@@ -167,7 +166,7 @@ namespace MiyakoCarryService.Server.Services
 
                 var barterScheme = new BarterScheme
                 {
-                    Count = prices.TryGetValue(templateItem.Id, out var price) ? price : 10000,
+                    Count = 1,
                     Template = ItemTpl.MONEY_ROUBLES
                 };
 

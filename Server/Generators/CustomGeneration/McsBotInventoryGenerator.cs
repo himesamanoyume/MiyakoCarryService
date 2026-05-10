@@ -69,8 +69,34 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             var wornItemChances = botJsonTemplate.BotChances;
             var itemGenerationLimitsMinMax = botJsonTemplate.BotGeneration;
 
-            // Generate base inventory with no items
-            var botInventory = GenerateInventoryBase();
+            var equipmentId = new MongoId();
+            var stashId = new MongoId();
+            var questRaidItemsId = new MongoId();
+            var questStashItemsId = new MongoId();
+            var sortingTableId = new MongoId();
+            var hideoutCustomizationStashId = new MongoId();
+
+            var botInventory = new BotBaseInventory
+            {
+                Items =
+                [
+                    new Item { Id = equipmentId, Template = ItemTpl.INVENTORY_DEFAULT },
+                    new Item { Id = stashId, Template = ItemTpl.STASH_THE_UNHEARD_EDITION_STASH_10X72 },
+                    new Item { Id = questRaidItemsId, Template = ItemTpl.STASH_QUESTRAID },
+                    new Item { Id = questStashItemsId, Template = ItemTpl.STASH_QUESTOFFLINE },
+                    new Item { Id = sortingTableId, Template = ItemTpl.SORTINGTABLE_SORTING_TABLE },
+                    new Item { Id = hideoutCustomizationStashId, Template = ItemTpl.HIDEOUTAREACONTAINER_CUSTOMIZATION },
+                ],
+                Equipment = equipmentId,
+                Stash = stashId,
+                QuestRaidItems = questRaidItemsId,
+                QuestStashItems = questStashItemsId,
+                SortingTable = sortingTableId,
+                HideoutAreaStashes = new(),
+                FastPanel = new(),
+                FavoriteItems = [],
+                HideoutCustomizationStashId = hideoutCustomizationStashId,
+            };
 
             // // Get generated raid details bot will be spawned in
             // var raidConfig = profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
