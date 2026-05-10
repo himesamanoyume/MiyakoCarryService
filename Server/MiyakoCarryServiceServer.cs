@@ -12,6 +12,7 @@ using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using System.Collections.Generic;
 using MiyakoCarryService.Server.Patches.Profile;
+using MiyakoCarryService.Server.Patches.Trader;
 
 namespace MiyakoCarryService.Server
 {
@@ -43,6 +44,7 @@ namespace MiyakoCarryService.Server
                 new SaveProfileAsyncPatch().Enable();
                 new GetProfilePatch().Enable();
                 new ItemEventRouterHandleEventsPatch().Enable();
+                new GetAssortPatch().Enable();
                 await configService.OnPreLoadAsync();
                 _ = CheckForUpdate();
             }

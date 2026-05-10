@@ -54,10 +54,15 @@ namespace MiyakoCarryService.Server.Services
         private Punish _punishmentMulti;
         private SemaphoreSlim _saveLock = new(1, 1);
 
+        private readonly List<Item> _mcsBotPlayerInventoryModeItems = new();
+        private readonly Dictionary<MongoId, List<List<BarterScheme>>> _mcsBotPlayerInventoryModeBarterScheme = new();
+        private readonly Dictionary<MongoId, int>_mcsBotPlayerInventoryModeLoyalLevelItems = new();
+
         public async Task OnPostLoadAsync()
         {
             await LoadTrader();
             await LoadPunish();
+            await GenerateMcsBotPlayerInventoryModeAssort();
         }
 
         private Task LoadTrader()
@@ -123,6 +128,129 @@ namespace MiyakoCarryService.Server.Services
             {
                 
             }
+        }
+
+        private Task GenerateMcsBotPlayerInventoryModeAssort()
+        {
+            var items = databaseService.GetItems();
+            var prices = databaseService.GetPrices();
+            
+            foreach (var kvp in items) 
+            {
+                var templateItem = kvp.Value;
+                if (templateItem.Type != "Item")
+                {
+                    continue;
+                }
+
+                if (templateItem.Id == ItemTpl.FACECOVER_BALACLAVA_TEST || templateItem.Id == ItemTpl.FACECOVER_BALACLAVA_DEV)
+                {
+                    continue;
+                }
+
+                var upd = new Upd
+                {
+                    UnlimitedCount = true,
+                    StackObjectsCount = 9999,
+                    BuyRestrictionCurrent = 0
+                };
+                var item = new Item
+                {
+                    Id = new(),
+                    Template = templateItem.Id,
+                    ParentId = "hideout",
+                    SlotId = "hideout",
+                    Upd = upd
+                };
+
+                _mcsBotPlayerInventoryModeItems.Add(item);
+
+                var barterScheme = new BarterScheme
+                {
+                    Count = prices.TryGetValue(templateItem.Id, out var price) ? price : 10000,
+                    Template = ItemTpl.MONEY_ROUBLES
+                };
+
+                _mcsBotPlayerInventoryModeBarterScheme.Add(item.Id, [[barterScheme]]);
+                _mcsBotPlayerInventoryModeLoyalLevelItems.Add(item.Id, 1);
+
+                if (templateItem.Parent == BaseClasses.ARMOR || templateItem.Parent == BaseClasses.HEADWEAR || templateItem.Parent == BaseClasses.VEST)
+                {
+                    foreach (var slot in templateItem.Properties?.Slots)
+                    {
+                        if (slot is null)
+                        {
+                            continue;
+                        }
+
+                        var locked = slot.Properties?.Filters?.ElementAt(0)?.Locked;
+                        if (locked is null)
+                        {
+                            continue;
+                        }
+
+                        if (locked == false)
+                        {
+                            continue;
+                        }
+
+                        var slotUpd = new Upd
+                        {
+                            StackObjectsCount = 1
+                        };
+                        var slotItem = new Item
+                        {
+                            Id = new(),
+                            Template = slot.Properties.Filters.ElementAt(0).Plate.Value,
+                            ParentId = item.Id,
+                            SlotId = slot.Name,
+                            Upd = slotUpd
+                        };
+                        _mcsBotPlayerInventoryModeItems.Add(slotItem);
+                    }
+                }
+                else if (templateItem.Parent == BaseClasses.AMMO_BOX)
+                {
+                    var stackSlot = templateItem.Properties?.StackSlots?.ElementAt(0);
+                    if (stackSlot is null)
+                    {
+                        continue;
+                    }
+
+                    var slotTemplateId = stackSlot.Properties?.Filters?.ElementAt(0)?.Filter?.ElementAt(0);
+                    if (slotTemplateId is null)
+                    {
+                        continue;
+                    }
+
+                    var slotUpd = new Upd
+                    {
+                        StackObjectsCount = stackSlot.MaxCount
+                    };
+                    var slotItem = new Item
+                    {
+                        Id = new(),
+                        Template = slotTemplateId.Value,
+                        ParentId = item.Id,
+                        SlotId = "cartridges",
+                        Upd = slotUpd
+                    };
+
+                    _mcsBotPlayerInventoryModeItems.Add(slotItem);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public TraderAssort GetMcsBotPlayerInventoryModeAssort()
+        {
+            return new TraderAssort
+            {
+                Items = _mcsBotPlayerInventoryModeItems,
+                BarterScheme = _mcsBotPlayerInventoryModeBarterScheme,
+                LoyalLevelItems = _mcsBotPlayerInventoryModeLoyalLevelItems
+            };
         }
 
         private void OverwriteTraderAssort(string traderId, TraderAssort newAssorts)
