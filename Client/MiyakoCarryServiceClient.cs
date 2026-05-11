@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client
     [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
-        public const string BepInExClientVersion = "0.3.1.0";
+        public const string BepInExClientVersion = "0.3.0.1";
         public static Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
