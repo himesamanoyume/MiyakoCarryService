@@ -165,7 +165,6 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    RemoveOrderInfo(orderInfo);
                     if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
                     {
                         continue;
@@ -178,8 +177,21 @@ namespace MiyakoCarryService.Server.Services
                     }
                 }
             }
-            _ = SaveOrderInfo();
             return mcsBotPlayerIds;
+        }
+
+        public void ProcessExpiredOrderInfo(MongoId mcsLeadPlayerId)
+        {
+            var orderInfos = GetAllOrderInfo();
+            foreach (var orderInfo in orderInfos)
+            {
+                var currentTime = timeUtil.GetTimeStamp();
+                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId && currentTime >= orderInfo.ExpirationTime - 1)
+                {
+                    RemoveOrderInfo(orderInfo);
+                }
+            }
+            _ = SaveOrderInfo();
         }
 
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)

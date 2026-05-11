@@ -115,6 +115,7 @@ namespace MiyakoCarryService.Server
                         {
                             continue;
                         }
+                        orderInfoService.ProcessExpiredOrderInfo(kvp.Key);
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });

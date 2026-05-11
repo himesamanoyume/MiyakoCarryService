@@ -20,6 +20,11 @@ namespace MiyakoCarryService.Server.Controllers
             return orderInfoService.GetExpiredMcsBotPlayerIds();
         }
 
+        public void ProcessExpiredOrderInfo(MongoId mcsLeadPlayerId)
+        {
+            orderInfoService.ProcessExpiredOrderInfo(mcsLeadPlayerId);
+        }
+
         public void RemoveOrderInfo(OrderInfo orderInfo)
         {
             orderInfoService.RemoveOrderInfo(orderInfo);

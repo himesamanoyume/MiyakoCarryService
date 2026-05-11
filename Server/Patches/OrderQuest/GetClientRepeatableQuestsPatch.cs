@@ -68,6 +68,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 {
                     continue;
                 }
+                orderInfoController.ProcessExpiredOrderInfo(kvp.Key);
                 profileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
             }
 

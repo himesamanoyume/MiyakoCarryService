@@ -18,7 +18,6 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Eft.Inventory;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
@@ -69,7 +68,7 @@ namespace MiyakoCarryService.Server.Services
         private readonly string _ifdianFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "bots", "types");
 
         private readonly ConcurrentDictionary<MongoId, ConcurrentDictionary<MongoId, SptProfile>> _profiles = new();
-        private readonly ConcurrentDictionary<MongoId, int> _mcsInventoryIds = new();
+        private readonly ConcurrentDictionary<MongoId, int> _mcsInventoryModeIds = new();
         private readonly ConcurrentDictionary<MongoId, SemaphoreSlim> _saveLocks = new();
         private List<string> _ifdianNames = [];
         private Ifdian _ifdian;
@@ -298,7 +297,7 @@ namespace MiyakoCarryService.Server.Services
 
         public List<PmcData> GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
         {
-            if (_mcsInventoryIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
+            if (_mcsInventoryModeIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
             {
                 var mcsBotPlayerFullProfle = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
                 var mcsBotPlayerFullProfleClone = cloner.Clone(mcsBotPlayerFullProfle)!;
@@ -317,7 +316,7 @@ namespace MiyakoCarryService.Server.Services
 
         public SptProfile? GetMcsBotPlayerFullProfileForInventoryMode(MongoId mcsLeadPlayerId)
         {
-            if (_mcsInventoryIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
+            if (_mcsInventoryModeIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
             {
                 return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
             }
@@ -385,10 +384,10 @@ namespace MiyakoCarryService.Server.Services
                 var verify = mcsBotPlayerProfiles.Any(p => p.Value.ProfileInfo.Aid == intMcsAid);
                 if (verify)
                 {
-                    if (!_mcsInventoryIds.TryAdd(mcsLeadPlayerId, intMcsAid))
+                    if (!_mcsInventoryModeIds.TryAdd(mcsLeadPlayerId, intMcsAid))
                     {
-                        _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
-                        _mcsInventoryIds.TryAdd(mcsLeadPlayerId, intMcsAid);
+                        _mcsInventoryModeIds.TryRemove(mcsLeadPlayerId, out _);
+                        _mcsInventoryModeIds.TryAdd(mcsLeadPlayerId, intMcsAid);
                     }
                 }
                 return verify;
@@ -416,7 +415,7 @@ namespace MiyakoCarryService.Server.Services
                 var verify = mcsBotPlayerProfiles.Any(p => p.Value.ProfileInfo.Aid == intMcsAid);
                 if (verify)
                 {
-                    verify = _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
+                    verify = _mcsInventoryModeIds.TryRemove(mcsLeadPlayerId, out _);
                 }
                 return verify;
             }
@@ -425,12 +424,12 @@ namespace MiyakoCarryService.Server.Services
 
         public void RemoveMcsBotPlayerAid(MongoId mcsLeadPlayerId)
         {
-            _mcsInventoryIds.TryRemove(mcsLeadPlayerId, out _);
+            _mcsInventoryModeIds.TryRemove(mcsLeadPlayerId, out _);
         }
 
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
-            return _mcsInventoryIds.ContainsKey(mcsLeadPlayerId);
+            return _mcsInventoryModeIds.ContainsKey(mcsLeadPlayerId);
         }
 
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)
