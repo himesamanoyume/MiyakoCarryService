@@ -97,5 +97,9 @@
     "Mcs/Going": "On the way.",
     "Mcs/HoldPosition": "Holding position.",
     "Mcs/StartHeal": "I'm healing.",
-    "Mcs/OpenMcsBotPlayerInventory": "Open Inventory"
+    "Mcs/OpenMcsBotPlayerInventory": "Open Inventory",
+    "Mcs/ReturnToMainChar": "Return To Main Character",
+    "Mcs/McsInventoryMode": "Mcs Inventory Mode",
+    "Mcs/ReturnToMainCharRefuse": "This player is not a carry service player, unable to open inventory",
+    "Mcs/ReturnToMainCharTip": "Please select the player currently in Mcs Inventory Mode to return to the main character"
 }

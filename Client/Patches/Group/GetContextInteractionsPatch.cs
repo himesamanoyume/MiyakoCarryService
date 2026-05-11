@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             {
                 __result.method_2(
                     id: "BackMainChar",
-                    key: "返回主角色",
+                    key: Locales.RETURNTOMAINCHAR.McsLocalized(),
                     callback: () => OnExitMcsBotPlayerInventoryMode(player.AccountId)
                 );
 
@@ -43,12 +43,12 @@ namespace MiyakoCarryService.Client.Patches.Group
             );
         }
 
-        private static async void OnExitMcsBotPlayerInventoryMode(string aid)
+        public static async void OnExitMcsBotPlayerInventoryMode(string aid)
         {
             await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification($"请选择当前护航库存模式的角色来返回主角色");
+                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized());
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification($"此玩家不是护航玩家，无法打开库存");
+                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized());
                 return;
             }
 

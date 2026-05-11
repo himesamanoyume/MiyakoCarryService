@@ -97,5 +97,9 @@
     "Mcs/Going": "正在前往。",
     "Mcs/HoldPosition": "正在原地驻守待命。",
     "Mcs/StartHeal": "我正在治疗。",
-    "Mcs/OpenMcsBotPlayerInventory": "打开库存"
+    "Mcs/OpenMcsBotPlayerInventory": "打开库存",
+    "Mcs/ReturnToMainChar": "返回主角色",
+    "Mcs/McsInventoryMode": "护航库存模式",
+    "Mcs/ReturnToMainCharRefuse": "此玩家不是护航玩家，无法打开库存",
+    "Mcs/ReturnToMainCharTip": "请选择当前护航库存模式的角色来返回主角色"
 }

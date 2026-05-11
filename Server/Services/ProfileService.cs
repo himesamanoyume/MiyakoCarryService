@@ -412,7 +412,7 @@ namespace MiyakoCarryService.Server.Services
                     return false;
                 }
 
-                var verify = mcsBotPlayerProfiles.Any(p => p.Value.ProfileInfo.Aid == intMcsAid);
+                var verify = _mcsInventoryModeIds.Any(p => p.Value == intMcsAid);
                 if (verify)
                 {
                     verify = _mcsInventoryModeIds.TryRemove(mcsLeadPlayerId, out _);

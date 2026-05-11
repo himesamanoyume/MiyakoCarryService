@@ -15,6 +15,9 @@ using UnityEngine;
 using System.Linq;
 using BepInEx;
 using MiyakoCarryService.Client.Utils;
+using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Patches.Group;
+using UnityEngine.UI;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -140,7 +143,22 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
 
             var matchingStatus = _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(1);
-            matchingStatus.GetComponentInChildren<TextMeshProUGUI>().text = "护航库存模式";
+            var textMeshProUGUI = matchingStatus.GetComponentInChildren<TextMeshProUGUI>();
+            if (textMeshProUGUI != null)
+            {
+                var localizedText = textMeshProUGUI.gameObject.AddComponent<LocalizedText>();
+                localizedText.LocalizationKey = Locales.MCSINVENTORYMODE;
+            }
+
+            var button = _mcsBotPlayerInventoryModeGameObject.GetComponentInChildren<Button>();
+            if (button != null)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() =>
+                {
+                    GetContextInteractionsPatch.OnExitMcsBotPlayerInventoryMode(GetContextInteractionsPatch.McsBotPlayerAid);
+                });
+            }
             ShowMcsBotPlayerInventoryModeInfo(false);
         }
     }
