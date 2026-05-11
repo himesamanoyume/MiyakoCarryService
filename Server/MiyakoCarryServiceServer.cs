@@ -44,6 +44,7 @@ namespace MiyakoCarryService.Server
                 new SaveProfileAsyncPatch().Enable();
                 new GetProfilePatch().Enable();
                 new ItemEventRouterHandleEventsPatch().Enable();
+                new GenerateFleaOffersForTraderPatch().Enable();
                 new GetAssortPatch().Enable();
                 new GetTraderAssortsByTraderIdPatch().Enable();
                 new AddOfferPatch().Enable();

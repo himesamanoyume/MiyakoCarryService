@@ -60,21 +60,23 @@ namespace MiyakoCarryService.Server.Services
 
         public async Task OnPostLoadAsync()
         {
+            await GenerateMcsBotPlayerInventoryModeAssort();
             await LoadTrader();
             await LoadPunish();
-            await GenerateMcsBotPlayerInventoryModeAssort();
         }
 
-        private Task LoadTrader()
+        private async Task LoadTrader()
         {
             var iconPath = System.IO.Path.Join(_traderFolderDir, "miyako_halo.jpg");
             var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderFolderDir, "base.json");
             imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
             AddTraderWithEmptyAssortToDb(traderBase);
-            var assort = modHelper.GetJsonDataFromFile<TraderAssort>(_traderFolderDir, "assort.json");
-            OverwriteTraderAssort(traderBase.Id, assort);
             SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
-            return Task.CompletedTask;
+            var ragfairConfig = configServer.GetConfig<RagfairConfig>();
+            if (!ragfairConfig.Traders.ContainsKey(MiyakoTraderId))
+            {
+                ragfairConfig.Traders[MiyakoTraderId] = true;
+            }
         }
 
         private async Task LoadPunish()
@@ -104,16 +106,16 @@ namespace MiyakoCarryService.Server.Services
 
         private void AddTraderWithEmptyAssortToDb(TraderBase traderDetailsToAdd)
         {
-            var emptyTraderItemAssortObject = new TraderAssort
+            var traderAssort = new TraderAssort
             {
-                Items = [],
-                BarterScheme = new Dictionary<MongoId, List<List<BarterScheme>>>(),
-                LoyalLevelItems = new Dictionary<MongoId, int>()
+                Items = new(),
+                BarterScheme = new(),
+                LoyalLevelItems = new()
             };
 
             var traderDataToAdd = new Trader
             {
-                Assort = emptyTraderItemAssortObject,
+                Assort = traderAssort,
                 Base = cloner.Clone(traderDetailsToAdd),
                 QuestAssort = new()
                 {
@@ -150,7 +152,7 @@ namespace MiyakoCarryService.Server.Services
                 var upd = new Upd
                 {
                     UnlimitedCount = true,
-                    StackObjectsCount = 9999,
+                    StackObjectsCount = 9999999,
                     BuyRestrictionCurrent = 0
                 };
                 var item = new Item

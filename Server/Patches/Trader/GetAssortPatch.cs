@@ -17,9 +17,9 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderAssortHelper), nameof(TraderAssortHelper.GetAssort));
 
-        [PatchPostfix]  
-        public static void Postfix(MongoId sessionId, MongoId traderId, ref TraderAssort __result)  
-        {  
+        [PatchPostfix]
+        public static void Postfix(MongoId sessionId, MongoId traderId, ref TraderAssort __result)
+        {
             if (traderId != Services.TraderService.MiyakoTraderId)
             {
                 return;
@@ -32,7 +32,22 @@ namespace MiyakoCarryService.Server.Patches.Trader
             }  
 
             var traderController = ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>();
-            __result = traderController.GetMcsBotPlayerInventoryModeAssort();
+            var traderAssort = traderController.GetMcsBotPlayerInventoryModeAssort();
+            // __result = traderController.GetMcsBotPlayerInventoryModeAssort();
+
+            if (profileController.IsMcsBotPlayerInventoryMode(sessionId))
+            {
+                __result = traderAssort;
+            }
+            else
+            {
+                __result = new TraderAssort
+                {
+                    Items = traderAssort.Items,
+                    BarterScheme = new(),
+                    LoyalLevelItems = new()
+                };
+            }
         }
     }
 }
