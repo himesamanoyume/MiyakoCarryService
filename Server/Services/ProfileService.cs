@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         BotHelper botHelper,
         ProfileHelper profileHelper,
+        InventoryHelper inventoryHelper,
         ItemHelper itemHelper,
         ServerLocalisationService serverLocalisationService,
         NotificationHelper notificationHelper,
@@ -667,6 +668,7 @@ namespace MiyakoCarryService.Server.Services
             };
 
             var stashId = pmcData.Inventory.Stash.Value;
+            var inventoryHelperTraverse = Traverse.Create(inventoryHelper);
 
             foreach (var (moneyId, amount) in currencies)
             {
@@ -681,12 +683,23 @@ namespace MiyakoCarryService.Server.Services
                 };
 
                 var currencyStacks = itemHelper.SplitStackIntoSeparateItems(item);
+                var stashFS2D = inventoryHelperTraverse.Method("GetStashSlotMap", [pmcData]).GetValue<int[,]>();
                 foreach (var stacks in currencyStacks)
                 {
                     foreach (var stack in stacks)
                     {
-                        stack.ParentId = stashId;
-                        stack.SlotId = "hideout";
+                        var placeResult = inventoryHelper.PlaceItemInContainer(
+                            stashFS2D,
+                            [stack],
+                            stashId,
+                            "hideout"
+                        );
+
+                        if (!placeResult.Success.GetValueOrDefault(false))
+                        {
+                            continue;
+                        }
+
                         pmcData.Inventory.Items.Add(stack);
                     }
                 }
