@@ -43,8 +43,9 @@ namespace MiyakoCarryService.Client.Patches.Group
             );
         }
 
-        private static void OnExitMcsBotPlayerInventoryMode(string aid)
+        private static async void OnExitMcsBotPlayerInventoryMode(string aid)
         {
+            await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
                 NotificationManagerClass.DisplayMessageNotification($"请选择当前护航库存模式的角色来返回主角色");
@@ -66,8 +67,9 @@ namespace MiyakoCarryService.Client.Patches.Group
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
-        private static void OnOpenMcsBotPlayerInventoryMode(string aid)
+        private static async void OnOpenMcsBotPlayerInventoryMode(string aid)
         {
+            await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
                 NotificationManagerClass.DisplayMessageNotification($"此玩家不是护航玩家，无法打开库存");
@@ -90,20 +92,23 @@ namespace MiyakoCarryService.Client.Patches.Group
         }
     }
 
+    /// <summary>
+    /// 处于护航库存模式时，隐藏邀请至队伍界面中的其他好友右键选项
+    /// </summary>
     public sealed class ContextInteractionsClassPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ContextInteractionsClass), nameof(ContextInteractionsClass.IsActive));
 
-        [PatchPrefix]  
-        public static bool Prefix(ref bool __result)  
-        {  
-            if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)  
-            {  
+        [PatchPrefix]
+        public static bool Prefix(ref bool __result)
+        {
+            if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
+            {
                 return true;
-            }  
-    
-            __result = false;  
-            return false;  
-        }  
+            }
+
+            __result = false;
+            return false;
+        }
     }
 }

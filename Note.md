@@ -414,35 +414,6 @@
 - ~~从护航库存模式返回主角色时报错~~
 - ~~当处于护航库存模式时，禁用上架跳蚤市场~~
 - ~~生成护航存档时藏身处仓库、工作台直接满级~~
-```log
-[客户端请求] /client/game/profile/items/moving
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263d, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263e, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263f, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2641, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2642, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2643, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2644, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2645, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2646, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2647, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2648, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2649, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f264a, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263d, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263e, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263f, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2641, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2642, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2643, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2644, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2645, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2646, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2647, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2648, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2649, skipping
-Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f264a, skipping
-```
 
 ## Logic思想指导
 
@@ -465,13 +436,14 @@ Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f264a, sk
 - **实现护航策略（优先保护、优先歼灭、两者兼顾(默认)）**
 - **实现联机下老板撤离时自己也尝试撤离**
 
-#### 0.3.0.1
+#### 0.3.1.0
 
 - 为鼓励下单长期护航，护航每小时基础价格`-70%`(手动绿色),当前最贵基础价格为每小时~~100000~~**30000**卢布，惩罚涨价最大值`-75%`(手动绿色), 当前惩罚涨价最大值为~~500%~~**100%**
 - **增加新的本地化适配**
+- 修复护航库存模式下的藏身处异常、购买商品后出现某些异常的问题
+- 修复生成护航存档时的仓库内物品存放问题
+- 护航库存模式下宫子商人全物品供货适配跳蚤市场
 - 调整了护航的藏身处，直接全部设施满级
-- **看看有什么bug需要修修**
-- - 反馈：跳蚤买某些东西会不刷新出来，必须重进
 
 #### 0.3.0.0
 
