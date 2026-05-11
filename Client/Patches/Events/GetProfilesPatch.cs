@@ -30,6 +30,22 @@ namespace MiyakoCarryService.Client.Patches.Events
             return false;
         }
 
+        [PatchPostfix]
+        public static async void Postfix(SessionBackendClass __instance, Task __result)
+        {
+            await __result;
+            var profileStatuses = new List<ProfileStatusClass>();
+            foreach (var profile in __instance.AllProfiles)
+            {
+                profileStatuses.Add(new()
+                {
+                    profileid = profile.Id,
+                    status = EProfileStatus.Free,
+                });
+            }
+            __instance.AllProfileStatus = profileStatuses.ToArray();
+        }
+
         private static async Task GetMcsBotPlayerProfile(SessionBackendClass session)
         {
             var response = await McsRequestHandler.GetMcsBotPlayerProfiles();
@@ -44,16 +60,6 @@ namespace MiyakoCarryService.Client.Patches.Events
             session.ProfilesUpdateTime = Time.time;
             session.AllProfiles = response.Select(descriptor => new Profile(descriptor)).ToArray();
             session.Profile = session.AllProfiles[0];
-            
-            var profileStatuses = new List<ProfileStatusClass>();
-            foreach (var profile in session.AllProfiles)
-            {
-                profileStatuses.Add(new()
-                {
-                    profileid = profile.Id,
-                    status = EProfileStatus.Free,
-                });
-            }
         }
     }
 }

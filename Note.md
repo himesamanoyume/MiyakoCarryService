@@ -9,7 +9,7 @@
 - ~~最好支持BOSS护航~~
 - ~~兼容SAIN、Fika~~
 - 最好是自带一部分QuestingBots和LootingBots的功能，可根据交互来选择帮助你。比如我想要什么物品，他就会去帮你找
-- **赞助版**：解锁红护/挂护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资
+- **赞助版**：解锁红护/挂护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资（护航级别6）
 - - 如果是红护根据价位有不同的概率（通过封号系数决定，可关闭）可能被封号，然后根据你本局的战利品收益进行追缴（可关闭）
 - ~~图标：宫子头饰, 后面一个光环~~
 - ~~根据好感度等级能够打折扣~~
@@ -20,9 +20,24 @@
 
 ## 低优先级 | IDEA
 
+- 成为打手。大型更新
+- - 需要接取考核任务：比如需要下图击杀指定数量Pmc
+- - 考核完成服务端记录下通过考核的id，才能进行接单。发送指令开始接单。`mcs exam 5` 代表考取护航级别5的护航
+- - - 护航级别有等级要求，20~30,30~40,40~50,50~60,60~79(根据当时实际生成的AI护航等级来限定)
+- - - 考核任务一样有费用，是给考官的
+- - - 接取考核任务后，会有考官`姫様の夢`加入好友列表，无装备，需要带着考官一起进图，考官进图就会自杀
+- - Fika联机下，新增真人护航订单：在宫子消息发送`mcs order 2 -1 5 1` -1类型则为人数2人，真人玩家类型，1小时
+- - Fika联机下，真人玩家在宫子商人发送开始接单的指令后，若有另一个真人玩家下单真人护航，则会广播给所有在线的真人护航并附带一串代码，真人护航输入代码视为接单
+- - 接单之后，真人护航获取到一个任务，X小时内不得死亡（任务条件可以尝试使用到达指定地点，或者自己新增条件，若触发服务端战斗结算时撤离状态为迷失或死亡一定次数，或是老板死亡一定次数，则触发炸单，记录炸单时间），至少撤离成功X次(1小时1次)，每次进入战局时，若判断到老板也处于战局中，则任务条件+1。
+- - AI老板会去随机做任务，吃周围的战利品，遭遇战斗会躲进掩体，不会主动进攻，需要保证其不死亡
+- - 炸单在一定时间内达到一定次数会被暂时取消接单，需要再通过一次同级别考核
+---
+- 交罚款消惩罚涨价，mcs xxx 15 => 消除15%的涨价，罚150w，1%/10w
+- - 要根据当前涨价来生成罚款任务，比如当前只有11%涨价，若指令下发50%的罚款任务，实际也只会生成11%的罚款任务
 - 套包算法 [参考](https://app.devin.ai/search/_df2c1762-0478-4547-8ed1-893654780039)
 - 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
 - 战局中增配护航功能吧。。。如果有护航减员可以在转移点重新增添进来
+- 落实护航级别在AI能力数值上的差距
 - 可以实现多短语工厂，通过短语枚举拼接成一句话。比如`GetInCover`+`StartHeal`, 可以提前预备好各种短语的组合，使其变为一个有逻辑顺序的全新语句: `我要退到掩体后进行治疗`
 - 适配联机部分时
 - - 实现配置管理器显示默认配置项
@@ -58,6 +73,7 @@
 
 - **压子弹时会触发数据更新，导致频繁卡顿，需要优化**
 - **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑。如果第三方的AI没有使用到自带的Brain的话，就会无法作为护航行动**
+- **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
 
 ## TODO
 
@@ -398,10 +414,39 @@
 - ~~从护航库存模式返回主角色时报错~~
 - ~~当处于护航库存模式时，禁用上架跳蚤市场~~
 - ~~生成护航存档时藏身处仓库、工作台直接满级~~
+```log
+[客户端请求] /client/game/profile/items/moving
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263d, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263e, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263f, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2641, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2642, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2643, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2644, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2645, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2646, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2647, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2648, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2649, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f264a, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263d, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263e, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f263f, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2641, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2642, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2643, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2644, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2645, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2646, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2647, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2648, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f2649, skipping
+Unable to find 'location' property on item with id: 6a007c1c06cdd8cf186f264a, skipping
+```
 
 ## Logic思想指导
 
-- 思想钢印：跟随、巡逻、**掠夺、丢出指定物品(如高价值物品、医疗物品、吃喝)给老板、帮老板理包**5大主要行为
+- 思想钢印：跟随、巡逻、**不进行掠夺，不打开容器，只会指路高价值物品给老板、帮老板理包**5大主要行为
 - - `HealAnotherTargetBaseLogic`治疗他人，可能需要
 - 护航能够开所有的门，为护航添加订阅老板的射线检测的事件，检测老板Ray的可交互物体是否是上锁的门，如果是就要跑去帮老板开门
 - 当需要吃喝、医疗品时要能够在安全的情况下寻找周围的吃喝、医疗品并使用。因此这也将能够做到你丢出医疗品给他，他会自己去取来用
@@ -410,23 +455,23 @@
 
 ## 更新日志
 
-#### 0.3.X.0 计划
+#### 0.X.X.0 计划
 
-- 新增护航类型：固排（暂定名称）
-- - 
+- 新增玩法：成为护航打手
 
 #### 0.3.2.0 计划
 
-- **重新实现护航根据配置拾取战利品**
+- **重新实现护航根据配置带路到战利品位置**
 - **实现护航策略（优先保护、优先歼灭、两者兼顾(默认)）**
 - **实现联机下老板撤离时自己也尝试撤离**
 
-#### 0.3.1.0
+#### 0.3.0.1
 
 - 为鼓励下单长期护航，护航每小时基础价格`-70%`(手动绿色),当前最贵基础价格为每小时~~100000~~**30000**卢布，惩罚涨价最大值`-75%`(手动绿色), 当前惩罚涨价最大值为~~500%~~**100%**
 - **增加新的本地化适配**
-- 优化了生成护航存档时的一些设置
+- 调整了护航的藏身处，直接全部设施满级
 - **看看有什么bug需要修修**
+- - 反馈：跳蚤买某些东西会不刷新出来，必须重进
 
 #### 0.3.0.0
 

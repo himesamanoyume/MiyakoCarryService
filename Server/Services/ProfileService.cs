@@ -552,17 +552,37 @@ namespace MiyakoCarryService.Server.Services
 
             var areas = new List<BotHideoutArea>();
 
+            var dbHideout = databaseService.GetHideout();
+            var hideoutAreas = dbHideout.Areas;
+
             foreach (HideoutAreas areaType in Enum.GetValues(typeof(HideoutAreas)))
             {
                 if (areaType == HideoutAreas.NotSet)
                 {
-                    continue; 
+                    continue;
+                }
+
+                var dbArea = hideoutAreas.FirstOrDefault(area => area.Type == areaType);
+                int maxLevel = 0;
+                MongoId? containerId = null;
+
+                if (dbArea != null && dbArea.Stages != null)
+                {
+                    maxLevel = dbArea.Stages.Count - 1; // 等级从0开始，所以减1  
+
+                    if (maxLevel >= 0 && dbArea.Stages.TryGetValue(maxLevel.ToString(), out var maxStage))
+                    {
+                        if (maxStage.Container.HasValue && !maxStage.Container.Value.IsEmpty)
+                        {
+                            containerId = maxStage.Container.Value;
+                        }
+                    }
                 }
 
                 areas.Add(new BotHideoutArea
                 {
                     Type = areaType,
-                    Level = areaType == HideoutAreas.Stash ? 4 : (areaType == HideoutAreas.Workbench ? 3 : 0),
+                    Level = maxLevel,
                     Active = true,
                     PassiveBonusesEnabled = areaType != HideoutAreas.ChristmasIllumination,
                     CompleteTime = 0,
@@ -572,37 +592,37 @@ namespace MiyakoCarryService.Server.Services
                 });
             }
 
-            var random = new Random();  
-            var bytes = new byte[16];  
-            random.NextBytes(bytes);  
+            var random = new Random();
+            var bytes = new byte[16];
+            random.NextBytes(bytes);
             var hideoutSeed = BitConverter.ToString(bytes).Replace("-", "").ToLower();
 
             var hideout = new Hideout
             {
-                Areas = areas,  
-                Production = new(),  
-                Improvements = new(),  
+                Areas = areas,
+                Production = new(),
+                Improvements = new(),
                 Seed = hideoutSeed,
                 Customization = new()
-                {  
-                    { "Wall", "675844bdf94a97cbbe096f1a" },  
-                    { "Floor", "6758443ff94a97cbbe096f18" },  
-                    { "Light", "675fe8abbc3deae49a0b947f" },  
-                    { "Ceiling", "673b3f977038192ee006aa09" },  
-                    { "ShootingRangeMark", "67585d416c72998cf60ed85a" },  
-                },  
-                MannequinPoses = new(), 
+                {
+                    { "Wall", "675844bdf94a97cbbe096f1a" },
+                    { "Floor", "6758443ff94a97cbbe096f18" },
+                    { "Light", "675fe8abbc3deae49a0b947f" },
+                    { "Ceiling", "673b3f977038192ee006aa09" },
+                    { "ShootingRangeMark", "67585d416c72998cf60ed85a" },
+                },
+                MannequinPoses = new(),
             };
 
-            var moneyTransferLimitData = new MoneyTransferLimits  
-            {  
-                NextResetTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 86400,  
-                RemainingLimit = 1000000,  
-                TotalLimit = 1000000,  
-                ResetInterval = 86400,  
+            var moneyTransferLimitData = new MoneyTransferLimits
+            {
+                NextResetTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 86400,
+                RemainingLimit = 1000000,
+                TotalLimit = 1000000,
+                ResetInterval = 86400,
             };
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
             botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var pmcData = new PmcData
@@ -646,7 +666,7 @@ namespace MiyakoCarryService.Server.Services
                 { Money.GP, 1000 }
             };
 
-            var stashId = pmcData.Inventory.Stash.Value;  
+            var stashId = pmcData.Inventory.Stash.Value;
 
             foreach (var (moneyId, amount) in currencies)
             {
@@ -661,14 +681,65 @@ namespace MiyakoCarryService.Server.Services
                 };
 
                 var currencyStacks = itemHelper.SplitStackIntoSeparateItems(item);
-                foreach (var stacks in currencyStacks)  
-                {  
-                    foreach (var stack in stacks)  
-                    {  
-                        stack.ParentId = stashId;  
-                        stack.SlotId = "hideout";  
-                        pmcData.Inventory.Items.Add(stack);  
-                    }  
+                foreach (var stacks in currencyStacks)
+                {
+                    foreach (var stack in stacks)
+                    {
+                        stack.ParentId = stashId;
+                        stack.SlotId = "hideout";
+                        pmcData.Inventory.Items.Add(stack);
+                    }
+                }
+            }
+
+            if (pmcData.Inventory.HideoutAreaStashes == null)
+            {
+                pmcData.Inventory.HideoutAreaStashes = new Dictionary<string, MongoId>();
+            }
+
+            foreach (var dbArea in hideoutAreas)
+            {
+                if (dbArea.Type == null || dbArea.Stages == null)
+                {
+                    continue;
+                }
+
+                var profileArea = areas.FirstOrDefault(area => area.Type == dbArea.Type);
+                if (profileArea == null || profileArea.Level < 0)
+                {
+                    continue;
+                }
+
+                if (!dbArea.Stages.TryGetValue(profileArea.Level.ToString(), out var stage))
+                {
+                    continue;
+                }
+
+                if (!stage.Container.HasValue || stage.Container.Value.IsEmpty)
+                {
+                    continue;
+                }
+
+                var keyForHideoutAreaStash = ((int)dbArea.Type).ToString();
+                if (!pmcData.Inventory.HideoutAreaStashes.ContainsKey(keyForHideoutAreaStash))
+                {
+                    pmcData.Inventory.HideoutAreaStashes[keyForHideoutAreaStash] = dbArea.Id;
+                }
+
+                var existingInventoryItem = pmcData.Inventory.Items.FirstOrDefault(item => item.Id == dbArea.Id);
+                if (existingInventoryItem == null)
+                {
+                    var newContainerItem = new Item
+                    {
+                        Id = dbArea.Id,
+                        Template = stage.Container.Value
+                    };
+                    pmcData.Inventory.Items.Add(newContainerItem);
+                }
+                else
+                {
+                    // 更新现有物品的模板  
+                    existingInventoryItem.Template = stage.Container.Value;
                 }
             }
 
@@ -713,7 +784,7 @@ namespace MiyakoCarryService.Server.Services
 
             var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
             botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var scavData = new PmcData
@@ -791,7 +862,7 @@ namespace MiyakoCarryService.Server.Services
                     MagazineBuilds = [],
                 },
                 DialogueRecords = new(),
-                SptData = profileHelper.GetDefaultSptDataObject(),  
+                SptData = profileHelper.GetDefaultSptDataObject(),
                 InraidData = new(),
                 InsuranceList = [],
                 BtrDeliveryList = [],
