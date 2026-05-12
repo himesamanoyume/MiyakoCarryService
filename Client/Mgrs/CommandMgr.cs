@@ -63,6 +63,21 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
+
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                {
+                    var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                    if (mcsBotPlayer == null)
+                    {
+                        continue;
+                    }
+                    mcsBotPlayer.Profile.Info.GroupId = "Fika";
+                    mcsBotPlayer.Profile.Info.TeamId = "Fika";
+                }
+            }
+
         }
 
         protected sealed override void OnRaidEnded()
