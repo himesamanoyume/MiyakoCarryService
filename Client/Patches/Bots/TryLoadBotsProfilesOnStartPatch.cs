@@ -168,12 +168,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     botCreationDataClass.AddProfile(mcsBotPlayerProfile);
 
                     var closestGroupPoint = botsController.CoversData.GetClosest(leadPlayerPos);
-                    var xOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
-                    var zOffset = GClass856.Random(1f, 3f) * GClass856.RandomSing();
-                    var newPos = leadPlayerPos + new Vector3(xOffset, 0f, zOffset);
-                    botCreationDataClass.AddPosition(newPos, closestGroupPoint.CorePointInGame.Id);
+                    botCreationDataClass.AddPosition(leadPlayerPos, closestGroupPoint.CorePointInGame.Id);
 
-                    var closestZone = botSpawner.GetClosestZone(newPos, out _);
+                    var closestZone = botSpawner.GetClosestZone(leadPlayerPos, out _);
 
                     var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
                     {
@@ -211,7 +208,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         {
                             enemyTypes.Add(WildSpawnType.pmcUSEC);
                         }
-                        
+
                         botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
                         botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
                         botOwner.Settings.GetWarnBotTypes().Clear();
@@ -274,7 +271,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         botSpawner.InSpawnProcess += 1;
 
                         var cancellationToken = new CancellationToken();
-                        await botCreator.ActivateBot(profile, new GClass682(newPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
+                        await botCreator.ActivateBot(profile, new GClass682(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
                     });
                 }
             }

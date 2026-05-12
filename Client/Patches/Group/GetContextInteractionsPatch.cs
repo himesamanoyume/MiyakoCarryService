@@ -46,6 +46,12 @@ namespace MiyakoCarryService.Client.Patches.Group
         public static async void OnExitMcsBotPlayerInventoryMode(string aid)
         {
             await GameLoop.Instance.Session.FlushOperationQueue();
+            if (aid != McsBotPlayerAid)
+            {
+                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized());
+                return;
+            }
+
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
                 NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized());
