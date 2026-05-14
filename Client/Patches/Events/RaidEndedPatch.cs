@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
@@ -12,7 +14,6 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class RaidEndedPatch : ModulePatch
     {
-        public static Action OnGameWorldDestory;
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.LocalRaidEnded));
 
         [PatchPrefix]
@@ -22,8 +23,13 @@ namespace MiyakoCarryService.Client.Patches.Events
             {
                 GameLoop.Instance.IsVaildGameWorld = false;
                 GameLoop.Instance.IsGameStarted = false;
-                OnGameWorldDestory?.Invoke();
             }
+
+            EventMgr.Notify(new GameWorldEndedEvent
+            {
+                ExitStatus = results.result,
+                EndTime = DateTime.Now
+            });
         }
     }
 }

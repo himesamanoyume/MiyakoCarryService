@@ -1,7 +1,10 @@
 using System;
 using System.Reflection;
+using Comfort.Common;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
@@ -11,7 +14,6 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class OnGameStartedPatch : ModulePatch
     {
-        public static Action OnGameWorldStart;
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 
         [PatchPostfix]
@@ -19,7 +21,11 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             GameLoop.Instance.IsGameStarted = true;
             GameLoop.Instance.CheckVaildGameWorld();
-            OnGameWorldStart?.Invoke();
+            EventMgr.Notify(new GameWorldStartedEvent  
+            {  
+                GameWorld = Singleton<GameWorld>.Instance,  
+                StartTime = DateTime.Now  
+            }); 
         }
     }
 }

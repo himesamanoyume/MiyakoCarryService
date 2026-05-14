@@ -11,6 +11,7 @@ using UnityEngine;
 using System.IO;
 using System.Reflection;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Events;
 
 namespace MiyakoCarryService.Client
 {
@@ -39,31 +40,31 @@ namespace MiyakoCarryService.Client
             return IsVaildGameWorld;
         }
 
-        public Action OnGameWorldStart
-        {
-            get
-            {
-                return OnGameStartedPatch.OnGameWorldStart;
-            }
+        // public Action OnGameWorldStart
+        // {
+        //     get
+        //     {
+        //         return OnGameStartedPatch.OnGameWorldStart;
+        //     }
 
-            set
-            {
-                OnGameStartedPatch.OnGameWorldStart = value;
-            }
-        }
+        //     set
+        //     {
+        //         OnGameStartedPatch.OnGameWorldStart = value;
+        //     }
+        // }
 
-        public Action OnGameWorldDestory
-        {
-            get
-            {
-                return RaidEndedPatch.OnGameWorldDestory;
-            }
+        // public Action OnGameWorldDestory
+        // {
+        //     get
+        //     {
+        //         return RaidEndedPatch.OnGameWorldDestory;
+        //     }
 
-            set
-            {
-                RaidEndedPatch.OnGameWorldDestory = value;
-            }
-        }
+        //     set
+        //     {
+        //         RaidEndedPatch.OnGameWorldDestory = value;
+        //     }
+        // }
 
         void Update()
         {
@@ -169,9 +170,19 @@ namespace MiyakoCarryService.Client
                 LoadMcsFika();
             }
 
-            OnGameWorldStart += Reset;
-            OnGameWorldDestory += Reset;
+            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);  
+            EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
+
+        private void OnGameWorldStarted(GameWorldStartedEvent @event)  
+        {  
+            Reset();  
+        }  
+    
+        private void OnGameWorldEnded(GameWorldEndedEvent @event)  
+        {  
+            Reset();  
+        } 
 
         private void Reset()
         {
@@ -181,8 +192,7 @@ namespace MiyakoCarryService.Client
 
         private void OnDestroy()
         {
-            OnGameWorldStart -= Reset;
-            OnGameWorldDestory -= Reset;
+            EventMgr.UnsubscribeAll(this); 
         }
 
         public T GetMgr<T>() where T : IMgr

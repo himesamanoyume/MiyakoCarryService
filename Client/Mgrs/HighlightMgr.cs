@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -46,19 +47,22 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             };
 
-            GameLoop.Instance.OnGameWorldStart += () =>
-            {
-                Clear();
-                _mainCameraInitialized = false;
-                _opticCameraInitialized = false;
-            };
+            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
+            EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
+        }
 
-            GameLoop.Instance.OnGameWorldDestory += () =>
-            {
-                Clear();
-                _mainCameraInitialized = false;
-                _opticCameraInitialized = false;
-            };
+        private void OnGameWorldStarted(GameWorldStartedEvent @event)
+        {
+            Clear();
+            _mainCameraInitialized = false;
+            _opticCameraInitialized = false;
+        }
+
+        private void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            Clear();
+            _mainCameraInitialized = false;
+            _opticCameraInitialized = false;
         }
 
         void Update()
@@ -121,7 +125,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     continue;
                 }
-                
+
                 BatchRenderers(playerData.Player, _gameloop.HighlightShader, MiyakoCarryServicePlugin.TeammateHighlightColor.Value.linear);
             }
 

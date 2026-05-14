@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 
@@ -15,8 +16,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _gameloop = GameLoop.Instance;
             _gameloop.Mgrs.Add(typeof(T), this);
-            _gameloop.OnGameWorldStart += OnRaidStarted;
-            _gameloop.OnGameWorldDestory += OnRaidEnded;
+            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);  
+            EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
         public static void Enable()
@@ -34,9 +35,18 @@ namespace MiyakoCarryService.Client.Mgrs
 
         protected virtual void OnMgrDestroy()
         {
-            _gameloop.OnGameWorldStart -= OnRaidStarted;
-            _gameloop.OnGameWorldDestory -= OnRaidEnded;
+            EventMgr.UnsubscribeAll(this); 
         }
+
+        private void OnGameWorldStarted(GameWorldStartedEvent @event)  
+        {  
+            OnRaidStarted();  
+        }  
+    
+        private void OnGameWorldEnded(GameWorldEndedEvent @event)  
+        {  
+            OnRaidEnded();  
+        } 
 
         protected virtual void OnRaidStarted()
         {
