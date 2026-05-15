@@ -138,8 +138,7 @@ namespace MiyakoCarryService.Client
 #endif
             new TraderScreensGroupShowPatch().Enable();
             new RaidSettingsLocalPatch().Enable();
-            new MainMenuControllerClass1Patch().Enable();
-            new MainMenuControllerClass2Patch().Enable();
+            new MainMenuControllerClassPatch().Enable();
             new MatchMakerAcceptScreenReadyPatch().Enable();
             new TryLoadBotsProfilesOnStartPatch().Enable();
             new AddEnemyPatch().Enable();

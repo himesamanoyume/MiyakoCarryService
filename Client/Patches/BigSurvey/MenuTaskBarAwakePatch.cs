@@ -173,7 +173,10 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
             Object.Destroy(_tempNewsGameObject.gameObject);
             List<GameObject> newList = [.. ____newInformation];
-            newList.Remove(newList[^1]);
+            if (newList.Count > 0)
+            {
+                newList.RemoveAt(newList.Count - 1);
+            }
             ____newInformation = [.. newList];
         }
     }
