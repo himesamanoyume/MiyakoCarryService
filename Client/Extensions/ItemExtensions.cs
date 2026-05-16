@@ -14,13 +14,7 @@ namespace MiyakoCarryService.Client.Extensions
     {
         private static readonly ConditionalWeakTable<Item, ItemData> _datas = new();
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         extension(Item item)
         {

@@ -2,6 +2,7 @@ using EFT;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -14,13 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass)]);
 
-		private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+		private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
 		[PatchPrefix]
 		public static void Prefix(ISession session, RaidSettings raidSettings, MatchmakerPlayerControllerClass matchmaker)

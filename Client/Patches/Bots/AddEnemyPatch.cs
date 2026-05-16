@@ -3,6 +3,7 @@ using System.Reflection;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -14,13 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [ThreadStatic]
         private static bool _isPropagating;

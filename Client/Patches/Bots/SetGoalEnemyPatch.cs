@@ -6,6 +6,7 @@ using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -18,13 +19,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BotMemoryClass), nameof(BotMemoryClass.GoalEnemy));
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static bool Prefix(BotMemoryClass __instance, Action<BotOwner> ___action_1, ref EnemyInfo value)

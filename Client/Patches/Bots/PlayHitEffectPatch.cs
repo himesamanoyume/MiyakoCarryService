@@ -3,6 +3,7 @@ using System.Reflection;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using Systems.Effects;
 
@@ -15,13 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EffectsCommutator), nameof(EffectsCommutator.PlayHitEffect));
 
-        private static McsMgr McsMgr
-        { 
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(EffectsCommutator __instance, EftBulletClass info, ShotInfoClass playerHitInfo)

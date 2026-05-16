@@ -8,6 +8,7 @@ using MiyakoCarryService.Client.Extensions;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using System;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -19,13 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetConstructors()[0];
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TraderControllerClass __instance)
@@ -68,13 +63,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_0").FieldType, "Invoke");
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(object __instance, GEventArgs2 obj)
@@ -123,13 +112,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_1").FieldType, "Invoke");
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(object __instance, GEventArgs3 obj)
@@ -178,13 +161,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress from, ItemAddress to, IOperationClass operation, Callback callback)
@@ -259,13 +236,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress to, bool succeed, IOperationClass operation, Callback callback)

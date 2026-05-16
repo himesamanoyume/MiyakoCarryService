@@ -4,6 +4,7 @@ using EFT;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Misc
@@ -18,13 +19,7 @@ namespace MiyakoCarryService.Client.Misc
             McsBotPlayerConfig = mcsBotPlayerConfig;
         }
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public void CalcGoalEnemy()
         {

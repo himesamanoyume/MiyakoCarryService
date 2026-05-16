@@ -37,13 +37,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
-        private static SubTitleMgr SubTitleMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
-            }
-        }
+        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAILeadPlayer mcsAILeadPlayer)
         {

@@ -5,35 +5,18 @@ using EFT;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
     public static class BotOwnerExtensions
     {
-        private static PlayerDataMgr PlayerDataMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<PlayerDataMgr>();
-            }
-        }
+        private static PlayerDataMgr PlayerDataMgr => MgrAccessor.Get<PlayerDataMgr>();
 
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        private static SubTitleMgr SubTitleMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
-            }
-        }
+        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
         

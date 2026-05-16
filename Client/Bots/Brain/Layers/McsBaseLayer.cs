@@ -7,6 +7,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -47,13 +48,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return Name;
         }
 
-        protected SubTitleMgr SubTitleMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
-            }
-        }
+        protected SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         public override bool IsCurrentActionEnding()
         {

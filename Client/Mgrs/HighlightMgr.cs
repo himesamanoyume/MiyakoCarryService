@@ -17,13 +17,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private bool _opticCameraInitialized = false;
         private Dictionary<Material, List<Renderer>> _materialBatches = new();
 
-        private McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public override void Start()
         {

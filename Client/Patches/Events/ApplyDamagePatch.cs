@@ -3,6 +3,7 @@ using EFT;
 using EFT.HealthSystem;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
@@ -12,13 +13,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class ApplyDamagePatch : ModulePatch
     {
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ActiveHealthController), nameof(ActiveHealthController.ApplyDamage));
 

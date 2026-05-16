@@ -13,13 +13,7 @@ namespace MiyakoCarryService.Client.Utils
 {
     public static class Tools
     {
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         public static bool IsPlayerInventory(string stringTemplateId)
         {
             return stringTemplateId == CommonId.DefaultInventory;

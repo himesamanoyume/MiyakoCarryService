@@ -38,13 +38,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        private McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();

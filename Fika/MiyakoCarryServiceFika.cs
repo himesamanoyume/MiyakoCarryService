@@ -16,6 +16,7 @@ using UnityEngine;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine.AI;
 using HarmonyLib;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Fika
 {
@@ -23,21 +24,9 @@ namespace MiyakoCarryService.Fika
     {
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
 
-        private CommandMgr CommandMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<CommandMgr>();
-            }
-        }
+        private CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
-        private SubTitleMgr SubTitleMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
-            }
-        }
+        private SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         public void InitMcsFika()
         {

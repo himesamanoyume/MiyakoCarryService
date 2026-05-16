@@ -24,21 +24,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
     {
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        private static SubTitleMgr SubTitleMgr
-        {
-            get
-            {
-                return field ??= GameLoop.Instance.GetMgr<SubTitleMgr>();
-            }
-        }
+        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.TryLoadBotsProfilesOnStart));
 

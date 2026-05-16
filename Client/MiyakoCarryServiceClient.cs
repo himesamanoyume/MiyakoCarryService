@@ -143,11 +143,11 @@ namespace MiyakoCarryService.Client
             new TryLoadBotsProfilesOnStartPatch().Enable();
             new AddEnemyPatch().Enable();
             new TraderClassConstructorPatch().Enable();
-            // new TraderControllerClassConstructorPatch().Enable();
-            // new TraderControllerClassAddItemEventInvokePatch().Enable();
-            // new TraderControllerClassRemoveItemEventInvokePatch().Enable();
-            // new TraderControllerClassOutProcessPatch().Enable();
-            // new TraderControllerClassInProcessPatch().Enable();
+            new TraderControllerClassConstructorPatch().Enable();
+            new TraderControllerClassAddItemEventInvokePatch().Enable();
+            new TraderControllerClassRemoveItemEventInvokePatch().Enable();
+            new TraderControllerClassOutProcessPatch().Enable();
+            new TraderControllerClassInProcessPatch().Enable();
             new ApplyDamagePatch().Enable();
             new OnGameStartedPatch().Enable();
             new RaidEndedPatch().Enable();
