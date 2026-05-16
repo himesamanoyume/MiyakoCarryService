@@ -3,7 +3,6 @@ using EFT;
 using System;
 using SPT.Reflection.Utils;
 using MiyakoCarryService.Client.Utils;
-using MiyakoCarryService.Client.Patches.Events;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;
@@ -39,32 +38,6 @@ namespace MiyakoCarryService.Client
             IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld && IsGameStarted;
             return IsVaildGameWorld;
         }
-
-        // public Action OnGameWorldStart
-        // {
-        //     get
-        //     {
-        //         return OnGameStartedPatch.OnGameWorldStart;
-        //     }
-
-        //     set
-        //     {
-        //         OnGameStartedPatch.OnGameWorldStart = value;
-        //     }
-        // }
-
-        // public Action OnGameWorldDestory
-        // {
-        //     get
-        //     {
-        //         return RaidEndedPatch.OnGameWorldDestory;
-        //     }
-
-        //     set
-        //     {
-        //         RaidEndedPatch.OnGameWorldDestory = value;
-        //     }
-        // }
 
         void Update()
         {
@@ -177,11 +150,13 @@ namespace MiyakoCarryService.Client
         private void OnGameWorldStarted(GameWorldStartedEvent @event)  
         {  
             Reset();  
+            ItemDataUpdateDebouncer.ClearAllRecords();
         }  
     
         private void OnGameWorldEnded(GameWorldEndedEvent @event)  
         {  
-            Reset();  
+            Reset();
+            ItemDataUpdateDebouncer.ClearAllRecords();
         } 
 
         private void Reset()
