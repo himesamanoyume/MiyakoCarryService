@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 		{
 			if (MiyakoCarryServicePlugin.FikaInstalled)
 			{
-				_ = McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
+                TasksExtensions.HandleExceptions(McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
 				{
 					McsLeadPlayerId = session.Profile.Id,
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 					LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
 					LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
 					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
-				});
+				}));
 			}
 			CurrentType = raidSettings.Side;
 		}

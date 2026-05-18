@@ -106,7 +106,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     }
                     catch
                     {
-                        _ = McsRequestHandler.SendLog("此为调试警报类型6，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug");
+                        TasksExtensions.HandleExceptions(McsRequestHandler.SendLog("此为调试警报类型6，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug"));
                     }
                 };
 

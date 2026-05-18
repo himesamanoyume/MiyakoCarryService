@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
         {
             if (text.Contains("mcs order"))
             {
-                _ = TraderScreensGroupShowPatch.UpdateDailyQuests();
+                TasksExtensions.HandleExceptions(TraderScreensGroupShowPatch.UpdateDailyQuests());
             }
         }
     }

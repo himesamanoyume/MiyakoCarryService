@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            _ = GetMcsBotPlayerIds();
+            TasksExtensions.HandleExceptions(GetMcsBotPlayerIds());
             _gamePlayerOwner = null;
         }
 

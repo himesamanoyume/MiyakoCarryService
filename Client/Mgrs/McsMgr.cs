@@ -219,10 +219,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void SendCompensation(MongoID mcsLeadPlayerId)
         {
-            _ = McsRequestHandler.SendCompensationRequest(new Compensation
+            TasksExtensions.HandleExceptions(McsRequestHandler.SendCompensationRequest(new Compensation
             {
                 McsLeadPlayerId = mcsLeadPlayerId
-            });
+            }));
         }
 
         public List<MongoID> GetAllMcsBotPlayerIdInRaid()
@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return _allMcsBotPlayerIdInRaid;
         }
 
-        private IEnumerator SendPunishRequest(float time)
+        private IEnumerator SendPunishRequestLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
             while (true)
@@ -248,7 +248,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         if (kvp.Value != null)
                         {
-                            _ = McsRequestHandler.SendPunishRequest(kvp.Value);
+                            TasksExtensions.HandleExceptions(McsRequestHandler.SendPunishRequest(kvp.Value));
                         }
                     }
                     _mcsFriendlyFirePenalties.Clear();
@@ -260,8 +260,8 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            _ = RequestAllMcsBotPlayerIdInRaid();
-            StartCoroutine(SendPunishRequest(10f));
+            TasksExtensions.HandleExceptions(RequestAllMcsBotPlayerIdInRaid());
+            StartCoroutine(SendPunishRequestLoop(10f));
         }
 
         private async Task RequestAllMcsBotPlayerIdInRaid()

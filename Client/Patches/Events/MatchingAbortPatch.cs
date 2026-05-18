@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPrefix]
         public static void Prefix()
         {
-            _ = McsRequestHandler.ClearGroupMember();
+            TasksExtensions.HandleExceptions(McsRequestHandler.ClearGroupMember());
         }
     }
 }
