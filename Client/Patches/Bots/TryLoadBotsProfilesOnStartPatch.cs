@@ -40,14 +40,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 Side = currentType
             });
-            Dictionary<MongoID, McsBotPlayerConfig> mcsLeadPlayerConfigs;
+
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
-                mcsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+                McsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
             }
             else
             {
-                mcsLeadPlayerConfigs = new();
+                McsMgr.McsLeadPlayerConfigs = new();
             }
 
             foreach (var mcsProfileItem in mcsProfilesDict)
@@ -111,7 +111,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 };
 
                 var leadPlayerPos = leadPlayer.Position;
-                if (!mcsLeadPlayerConfigs.TryGetValue(leadPlayer.ProfileId, out var mcsBotPlayerConfig))
+                if (!McsMgr.McsLeadPlayerConfigs.TryGetValue(leadPlayer.ProfileId, out var mcsBotPlayerConfig))
                 {
                     mcsBotPlayerConfig = new McsBotPlayerConfig
                     {

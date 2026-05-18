@@ -265,6 +265,15 @@ namespace MiyakoCarryService.Client
                 };
             }
 
+            if (type == EConfigType.BASIC && FikaInstalled)
+            {
+                configEntry.SettingChanged += (object sender, EventArgs e) =>
+                {
+                    // 当修改时发送Fika同步包
+                    
+                };
+            }
+
             return configEntry;
         }
 

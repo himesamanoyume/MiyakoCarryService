@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Enums;
 using System;
 using MiyakoCarryService.Fika.Packets;
@@ -17,20 +16,20 @@ using MiyakoCarryService.Client.Extensions;
 using UnityEngine.AI;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Events;
 
 namespace MiyakoCarryService.Fika
 {
     public class MiyakoCarryServiceFika
     {
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
-
-        private CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
-
         private SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         public void InitMcsFika()
         {
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
+            EventMgr.Subscribe<SubTitleMgrHandleFikaEvent>(SendTalkPacket, this);
+            EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             _handleActionsMap = new()
             {
                 {ECommandPacketType.Teleport, HandleTeleport},
@@ -45,9 +44,6 @@ namespace MiyakoCarryService.Fika
         {
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
-
-            SubTitleMgr.HandleFikaEvent = SendTalkPacket;
-            CommandMgr.HandleFikaEvent = SendCommandPacket;
         }
 
         public void OnCommandPacketReceived(CommandPacket packet)
@@ -270,14 +266,15 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendCommandPacket(Player mcsBotPlayer, ECommandPacketType commandPacketType, Vector3? position)
+        public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-            if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
+            if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && @event.McsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
-                var packet = new CommandPacket(commandPacketType)
+                var packet = new CommandPacket
                 {
-                    Position = position,
+                    CommandType = @event.CommandPacketType,
+                    Position = @event.Position,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
@@ -285,11 +282,11 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, McsMsg msg)
+        public void SendTalkPacket(SubTitleMgrHandleFikaEvent @event)
         {
             // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送TalkPacket");
-            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsLeadPlayerId);
-            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
+            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
             {
                 // MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
@@ -300,9 +297,9 @@ namespace MiyakoCarryService.Fika
             {
                 var packet = new TalkMsgPacket
                 {
-                    PhraseTrigger = msg.PhraseTrigger,
-                    Position = msg.Position,
-                    Key = msg.Key,
+                    PhraseTrigger = @event.Msg.PhraseTrigger,
+                    Position = @event.Msg.Position,
+                    Key = @event.Msg.Key,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

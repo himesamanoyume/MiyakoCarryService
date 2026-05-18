@@ -1,0 +1,22 @@
+using EFT;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Models;
+using UnityEngine;
+
+namespace MiyakoCarryService.Client.Events
+{
+    public sealed class SubTitleMgrHandleFikaEvent : IMcsEvent
+    {
+        public MongoID McsLeadPlayerId { get; set; }
+        public MongoID McsBotPlayerId { get; set; }
+        public McsMsg Msg { get; set; }
+    }
+
+    public sealed class CommandMgrHandleFikaEvent : IMcsEvent
+    {
+        public Player McsBotPlayer { get; set; }
+        public ECommandPacketType CommandPacketType { get; set; }
+        public Vector3? Position { get; set; }
+    }
+}

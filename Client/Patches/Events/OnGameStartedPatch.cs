@@ -21,11 +21,10 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             GameLoop.Instance.IsGameStarted = true;
             GameLoop.Instance.CheckVaildGameWorld();
-            EventMgr.Notify(new GameWorldStartedEvent  
-            {  
-                GameWorld = Singleton<GameWorld>.Instance,  
-                StartTime = DateTime.Now  
-            }); 
+            EventMgr.Notify(new GameWorldStartedEvent
+            {
+                GameWorld = Singleton<GameWorld>.Instance,
+            });
         }
     }
 }

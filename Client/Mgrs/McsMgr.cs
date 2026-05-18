@@ -29,6 +29,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
         private ConcurrentDictionary<MongoID, FriendlyFirePenalty> _mcsFriendlyFirePenalties  = new();
+        public Dictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
 
         public bool IsHost = false;
 
@@ -290,6 +291,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _mcsBotPlayerIds.Clear();
             _mcsAILeadPlayers.Clear();
             _allMcsBotPlayerIdInRaid.Clear();
+            McsLeadPlayerConfigs.Clear();
             foreach (var transitMembers in McsTransitBotPlayers.Values)
             {
                 transitMembers.Clear();

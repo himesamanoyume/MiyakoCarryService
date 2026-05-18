@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public class TalkMsgPacket : BasePacket
+    public sealed class TalkMsgPacket : BasePacket
     {
         public EPhraseTrigger PhraseTrigger;
         public Vector3? Position;
@@ -14,11 +14,6 @@ namespace MiyakoCarryService.Fika.Packets
         public TalkMsgPacket()
         {
             
-        }
-
-        public TalkMsgPacket(EPhraseTrigger type)
-        {
-            PhraseTrigger = type;
         }
         
         public override void Deserialize(NetDataReader reader)  

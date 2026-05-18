@@ -28,8 +28,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 
             EventMgr.Notify(new GameWorldEndedEvent
             {
-                ExitStatus = results.result,
-                EndTime = DateTime.Now
+                ExitStatus = results.result
             });
         }
     }

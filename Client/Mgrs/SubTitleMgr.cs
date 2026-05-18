@@ -6,6 +6,7 @@ using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -22,7 +23,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
-        public Action<MongoID, MongoID, McsMsg> HandleFikaEvent;
+        // public Action<MongoID, MongoID, McsMsg> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -106,7 +107,13 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, msg);
+                        EventMgr.Notify(new SubTitleMgrHandleFikaEvent
+                        {
+                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                            McsBotPlayerId = mcsBotPlayer.ProfileId,
+                            Msg = msg
+                        });
+                        // HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, msg);
                     }
                 }
             }
