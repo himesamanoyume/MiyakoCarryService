@@ -264,14 +264,14 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, EPhraseTrigger phraseTrigger, Vector3? position)
+        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, EPhraseTrigger phraseTrigger, Vector3? position, string key)
         {
             // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送TalkPacket");
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsLeadPlayerId);
             var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
             {
-                MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
+                // MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
                 return;
             }
 
@@ -280,6 +280,7 @@ namespace MiyakoCarryService.Fika
                 var packet = new TalkMsgPacket(phraseTrigger)
                 {
                     Position = position,
+                    Key = key,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

@@ -43,14 +43,14 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            public void TalkMsg(EPhraseTrigger phraseTrigger, Vector3? position = null)
+            public void TalkMsg(EPhraseTrigger phraseTrigger, Vector3? position = null, string key = null)
             {
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData == null)
                 {
                     return;
                 }
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, phraseTrigger, position);
+                SubTitleMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, phraseTrigger, position, key);
             }
 
             public List<BotBehavior> GetBotBehaviors()

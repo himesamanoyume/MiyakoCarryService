@@ -209,18 +209,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                // if (McsBotPlayerData != null)
-                // {
-                //     // 检测周围是否有符合条件的战利品
-                //     if (McsBotPlayerData.LootingTarget != null)
-                //     {
-                //         // 尝试去拿战利品
-                //         return new Action(typeof(GoToLootTargetLogic), "Mcs:going to loot target");
-                //     }
+                if (McsBotPlayerData != null)
+                {
+                    // 检测周围是否有符合条件的战利品
+                    if (McsBotPlayerData.LootingTarget != null)
+                    {
+                        // 尝试去拿战利品
+                        return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                    }
 
-                //     // 取消当前锁定的目标战利品
-                //     McsBotPlayerData.UnlockLootingTarget();
-                // }
+                    // 取消当前锁定的目标战利品
+                    McsBotPlayerData.UnlockLootingTarget();
+                }
 
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                 if (mcsLeadPlayerPos == null)

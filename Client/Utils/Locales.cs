@@ -72,6 +72,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string FOUNDHIGHVALUELOOT = "Mcs/FoundHighValueLoot";
         public const string REGROUP = "Mcs/Regroup";
         public const string ONPOSITION = "Mcs/OnPosition";
+        public const string ONLOOT = "Mcs/OnLoot";
         public const string CLEAR = "Mcs/Clear";
         public const string LEFTFLANK = "Mcs/LeftFlank";
         public const string RIGHTFLANK = "Mcs/RightFlank";

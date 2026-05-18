@@ -20,8 +20,8 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
-        private Dictionary<EPhraseTrigger, Func<string, Vector3, Player, string>> _phrasePosHandleMaps;
-        public Action<MongoID, MongoID, EPhraseTrigger, Vector3?> HandleFikaEvent;
+        private Dictionary<EPhraseTrigger, Func<string, Vector3, string, Player, string>> _phraseHandleMaps;
+        public Action<MongoID, MongoID, EPhraseTrigger, Vector3?, string> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -33,6 +33,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
                 {EPhraseTrigger.Roger, Locales.ROGER},
                 {EPhraseTrigger.OnPosition, Locales.ONPOSITION},
+                {EPhraseTrigger.OnLoot, Locales.ONLOOT},
                 {EPhraseTrigger.Clear, Locales.CLEAR},
                 {EPhraseTrigger.LeftFlank, Locales.LEFTFLANK},
                 {EPhraseTrigger.RightFlank, Locales.RIGHTFLANK},
@@ -49,9 +50,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.StartHeal, Locales.STARTHEAL}
             };
 
-            _phrasePosHandleMaps = new()
+            _phraseHandleMaps = new()
             {
-                {EPhraseTrigger.OnFirstContact, HandleOnFirstContact}
+                {EPhraseTrigger.OnFirstContact, HandleOnFirstContact},
+                {EPhraseTrigger.OnLoot, HandleOnLoot}
             };
         }
 
@@ -91,7 +93,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null)
+        public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null, string key = null)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
@@ -99,21 +101,21 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayer.ProfileId))
                     {
-                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position);
+                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position, key);
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, phraseTrigger, position);
+                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, phraseTrigger, position, key);
                     }
                 }
             }
             else
             {
-                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position);
+                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position, key);
             }
         }
 
-        public string HandleOnFirstContact(string content, Vector3 enemyPos, Player mcsLeadPlayer)
+        public string HandleOnFirstContact(string content, Vector3 enemyPos, string key, Player mcsLeadPlayer)
         {
             var toEnemy = enemyPos - mcsLeadPlayer.Position;
             var flatToEnemy = new Vector3(toEnemy.x, 0, toEnemy.z);
@@ -147,7 +149,13 @@ namespace MiyakoCarryService.Client.Mgrs
             return content;
         }
 
-        public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null)
+        public string HandleOnLoot(string content, Vector3 enemyPos, string key, Player mcsLeadPlayer)
+        {
+            content += string.Format(Locales.ONLOOT.McsLocalized(), key.McsLocalized());
+            return content;
+        }
+
+        public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null, string key = null)
         {
             _talkContents.TryGetValue(phraseTrigger, out var talkContent);
             talkContent = talkContent.McsLocalized();
@@ -156,9 +164,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            if (_phrasePosHandleMaps.TryGetValue(phraseTrigger, out var action))
+            if (_phraseHandleMaps.TryGetValue(phraseTrigger, out var action))
             {
-                talkContent = action(talkContent, position.Value, mcsLeadPlayer);
+                talkContent = action(talkContent, position.Value, key, mcsLeadPlayer);
             }
             
             if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))

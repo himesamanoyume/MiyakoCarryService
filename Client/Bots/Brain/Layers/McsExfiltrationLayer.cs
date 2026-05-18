@@ -41,6 +41,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return false;
                 }
 
+                if (BotOwner.Memory.IsUnderFire)
+                {
+                    return false;
+                }
+
                 if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
                     return true;

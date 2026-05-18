@@ -88,6 +88,7 @@
     "Mcs/FoundHighValueLoot": "发现高价值战利品。",
     "Mcs/Regroup": "正在重新集结。",
     "Mcs/OnPosition": "已到达指定位置。",
+    "Mcs/OnLoot": "已到达目标战利品位置，这里有 {0}。",
     "Mcs/Clear": "区域安全。",
     "Mcs/LeftFlank": "敌人在左翼。",
     "Mcs/RightFlank": "敌人在右翼。",

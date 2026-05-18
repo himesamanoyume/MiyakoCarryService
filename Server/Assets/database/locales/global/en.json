@@ -88,6 +88,7 @@
     "Mcs/FoundHighValueLoot": "Found high value loot.",
     "Mcs/Regroup": "Regrouping.",
     "Mcs/OnPosition": "Reached designated position.",
+    "Mcs/OnLoot": "Reached the loot location, here is {0}.",
     "Mcs/Clear": "Area clear.",
     "Mcs/LeftFlank": "Enemy on left flank.",
     "Mcs/RightFlank": "Enemy on right flank.",

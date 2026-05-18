@@ -59,10 +59,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 // 到达判定
                 if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
                 {
-                    // BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()));
+                    BotOwner.TalkMsg(EPhraseTrigger.OnLoot, key: mcsBotPlayerData.LootingTarget.Item.ShortName);
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
-                    // MiyakoCarryServicePlugin.Logger.LogInfo($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");
+                    MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");
                     BotOwner.Steering.LookToPoint(targetPos);
                     mcsBotPlayerData.StartLooting();
                     _lastTimeDistance = Mathf.Infinity; // 重置卡脚检测
