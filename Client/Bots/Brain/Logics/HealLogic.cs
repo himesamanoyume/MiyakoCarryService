@@ -2,6 +2,7 @@
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -17,7 +18,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Start()
         {
             base.Start();
-            BotOwner.TalkMsg(EPhraseTrigger.StartHeal);
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.StartHeal,
+            });
         }
 
         public override void Stop()

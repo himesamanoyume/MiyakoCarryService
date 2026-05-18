@@ -16,6 +16,7 @@ using UnityEngine;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine.AI;
 using MiyakoCarryService.Client.Utils;
+using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Fika
 {
@@ -49,14 +50,14 @@ namespace MiyakoCarryService.Fika
             CommandMgr.HandleFikaEvent = SendCommandPacket;
         }
 
-        public void OnCommandPacketReceived(CommandPacket packet)  
-        {  
+        public void OnCommandPacketReceived(CommandPacket packet)
+        {
             if (_handleActionsMap.TryGetValue(packet.CommandType, out var action))
             {
                 action(packet);
             }
         }
-        
+
         public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
@@ -69,7 +70,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
-                SubTitleMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, packet.PhraseTrigger, packet.Position);
+                SubTitleMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
+                {
+                    PhraseTrigger = packet.PhraseTrigger, 
+                    Position = packet.Position
+                });
             }
         }
 
@@ -94,13 +99,16 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
-                botOwner.TalkMsg(EPhraseTrigger.Roger);
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
             }
         }
 
@@ -125,8 +133,8 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 Vector3? validPosition = null;
                 var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
@@ -152,7 +160,10 @@ namespace MiyakoCarryService.Fika
 
                 if (validPosition.HasValue)
                 {
-                    botOwner.TalkMsg(EPhraseTrigger.Going);
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Going,
+                    });
                     botOwner.GetMcsBotPlayerData().ShouldGoToPoint = true;
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
@@ -182,12 +193,15 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 botOwner.GetMcsBotPlayerData().ShouldHoldPosition = true;
-                botOwner.TalkMsg(EPhraseTrigger.HoldPosition);
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.HoldPosition,
+                });
             }
         }
 
@@ -212,12 +226,15 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.GetMcsBotPlayerData().ShouldGoToPoint = false;
                 botOwner.GetMcsBotPlayerData().ShouldHoldPosition = false;
-                botOwner.TalkMsg(EPhraseTrigger.Regroup);
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Regroup,
+                });
             }
         }
 
@@ -242,10 +259,14 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))  
-            {  
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.TalkMsg(EPhraseTrigger.OnFirstContact, packet.Position);
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.OnFirstContact,
+                    Position = packet.Position
+                });
             }
         }
 
@@ -264,7 +285,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, EPhraseTrigger phraseTrigger, Vector3? position, string key)
+        public void SendTalkPacket(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, McsMsg msg)
         {
             // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送TalkPacket");
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsLeadPlayerId);
@@ -277,10 +298,11 @@ namespace MiyakoCarryService.Fika
 
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
-                var packet = new TalkMsgPacket(phraseTrigger)
+                var packet = new TalkMsgPacket
                 {
-                    Position = position,
-                    Key = key,
+                    PhraseTrigger = msg.PhraseTrigger,
+                    Position = msg.Position,
+                    Key = msg.Key,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

@@ -3,6 +3,7 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -24,13 +25,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 McsBotPlayerData.ShouldGoToPoint = false;
             }
 
-            BotOwner.TalkMsg(EPhraseTrigger.OnFirstContact, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.OnFirstContact,
+                Position = BotOwner.Memory.GoalEnemy.EnemyLastPosition
+            });
         }
 
         public override void Stop()
         {
             base.Stop();
-            BotOwner.TalkMsg(EPhraseTrigger.Regroup);
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.Regroup,
+            });
         }
 
         public override Action GetNextAction()

@@ -3,6 +3,7 @@ using System;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -59,7 +60,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 // 到达判定
                 if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
                 {
-                    BotOwner.TalkMsg(EPhraseTrigger.OnLoot, key: mcsBotPlayerData.LootingTarget.Item.ShortName);
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.OnLoot,
+                        Key = mcsBotPlayerData.LootingTarget.Item.ShortName
+                    });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");

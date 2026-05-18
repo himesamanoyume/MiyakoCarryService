@@ -7,6 +7,7 @@ using EFT;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
@@ -20,8 +21,8 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, SubTitle> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
-        private Dictionary<EPhraseTrigger, Func<string, Vector3, string, Player, string>> _phraseHandleMaps;
-        public Action<MongoID, MongoID, EPhraseTrigger, Vector3?, string> HandleFikaEvent;
+        private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
+        public Action<MongoID, MongoID, McsMsg> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -93,7 +94,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null, string key = null)
+        public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
@@ -101,23 +102,23 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayer.ProfileId))
                     {
-                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position, key);
+                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
                     }
                     else
                     {
-                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, phraseTrigger, position, key);
+                        HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, msg);
                     }
                 }
             }
             else
             {
-                ShowMsg(mcsLeadPlayer, mcsBotPlayer, phraseTrigger, position, key);
+                ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
             }
         }
 
-        public string HandleOnFirstContact(string content, Vector3 enemyPos, string key, Player mcsLeadPlayer)
+        public string HandleOnFirstContact(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            var toEnemy = enemyPos - mcsLeadPlayer.Position;
+            var toEnemy = msg.Position.Value - mcsLeadPlayer.Position;
             var flatToEnemy = new Vector3(toEnemy.x, 0, toEnemy.z);
             var flatDirection = new Vector3(mcsLeadPlayer.InteractionRay.direction.x, 0, mcsLeadPlayer.InteractionRay.direction.z);
 
@@ -149,24 +150,24 @@ namespace MiyakoCarryService.Client.Mgrs
             return content;
         }
 
-        public string HandleOnLoot(string content, Vector3 enemyPos, string key, Player mcsLeadPlayer)
+        public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content += string.Format(Locales.ONLOOT.McsLocalized(), key.McsLocalized());
+            content += string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized());
             return content;
         }
 
-        public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, EPhraseTrigger phraseTrigger, Vector3? position = null, string key = null)
+        public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
         {
-            _talkContents.TryGetValue(phraseTrigger, out var talkContent);
+            _talkContents.TryGetValue(msg.PhraseTrigger, out var talkContent);
             talkContent = talkContent.McsLocalized();
             if (string.IsNullOrEmpty(talkContent))
             {
                 return;
             }
 
-            if (_phraseHandleMaps.TryGetValue(phraseTrigger, out var action))
+            if (_phraseHandleMaps.TryGetValue(msg.PhraseTrigger, out var action))
             {
-                talkContent = action(talkContent, position.Value, key, mcsLeadPlayer);
+                talkContent = action(talkContent, msg, mcsLeadPlayer);
             }
             
             if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))
@@ -176,7 +177,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     return;
                 }
 
-                subTitle.Show(talkContent, phraseTrigger);
+                subTitle.Show(talkContent, msg.PhraseTrigger);
             }
         }
 

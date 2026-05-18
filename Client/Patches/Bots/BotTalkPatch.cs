@@ -2,6 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -36,7 +37,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            botOwner.TalkMsg(type);
+            botOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = type,
+            });
         }
     }
 }
