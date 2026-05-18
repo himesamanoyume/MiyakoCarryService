@@ -38,12 +38,12 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.UnsubscribeAll(this); 
         }
 
-        private void OnGameWorldStarted(GameWorldStartedEvent @event)  
+        protected virtual void OnGameWorldStarted(GameWorldStartedEvent @event)  
         {  
             OnRaidStarted();  
         }  
     
-        private void OnGameWorldEnded(GameWorldEndedEvent @event)  
+        protected virtual void OnGameWorldEnded(GameWorldEndedEvent @event)  
         {  
             OnRaidEnded();  
         } 

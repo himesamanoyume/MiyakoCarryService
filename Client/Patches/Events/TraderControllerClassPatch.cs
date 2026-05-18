@@ -43,8 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                             }
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(rootItem, mcsAILeadPlayer, () => GameLoop.Instance.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // itemData.RefreshRootItemInteresting(mcsAILeadPlayer);
+                                itemData.RefreshRootItemInteresting(mcsAILeadPlayer);
                             }
                         }
                         catch (Exception e)
@@ -81,8 +80,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            ItemDataUpdateDebouncer.TryDebouncedUpdate(rootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                            // gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                         }
                     }
                 }
@@ -98,8 +96,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(toParentRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }
@@ -132,8 +129,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            ItemDataUpdateDebouncer.TryDebouncedUpdate(rootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                            // gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                         }
                     }
                 }
@@ -149,8 +145,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(fromParentRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                fromParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }
@@ -182,8 +177,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            ItemDataUpdateDebouncer.TryDebouncedUpdate(instanceRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                            // gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                            instanceRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                         }
                     }
                 }
@@ -195,8 +189,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            ItemDataUpdateDebouncer.TryDebouncedUpdate(rootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                            // gameloop.StartCoroutine(rootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                         }
                     }
                 }
@@ -211,8 +204,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(fromParentRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(fromParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                fromParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }
@@ -228,8 +220,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(toParentRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }
@@ -261,8 +252,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            ItemDataUpdateDebouncer.TryDebouncedUpdate(instanceRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                            // gameloop.StartCoroutine(instanceRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                            instanceRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                         }
                     }
                 }
@@ -277,8 +267,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(rootParentItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(rootParentItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(rootParentItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                rootParentItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }
@@ -294,8 +283,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                ItemDataUpdateDebouncer.TryDebouncedUpdate(toParentRootItem, mcsAILeadPlayer, () => gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer)));
-                                // gameloop.StartCoroutine(toParentRootItem.GetData().RefreshRootItemInteresting(mcsAILeadPlayer));
+                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
                             }
                         }
                     }

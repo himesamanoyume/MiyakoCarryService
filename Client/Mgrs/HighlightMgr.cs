@@ -45,15 +45,17 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
-        private void OnGameWorldStarted(GameWorldStartedEvent @event)
+        protected override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
+            base.OnGameWorldStarted(@event);
             Clear();
             _mainCameraInitialized = false;
             _opticCameraInitialized = false;
         }
 
-        private void OnGameWorldEnded(GameWorldEndedEvent @event)
+        protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
+            base.OnGameWorldEnded(@event);
             Clear();
             _mainCameraInitialized = false;
             _opticCameraInitialized = false;

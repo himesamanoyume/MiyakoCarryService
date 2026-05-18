@@ -150,13 +150,11 @@ namespace MiyakoCarryService.Client
         private void OnGameWorldStarted(GameWorldStartedEvent @event)  
         {  
             Reset();  
-            ItemDataUpdateDebouncer.ClearAllRecords();
         }  
     
         private void OnGameWorldEnded(GameWorldEndedEvent @event)  
         {  
             Reset();
-            ItemDataUpdateDebouncer.ClearAllRecords();
         } 
 
         private void Reset()
