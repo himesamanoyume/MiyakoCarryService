@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Fika
     public class MiyakoCarryServiceFika
     {
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
+        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
 
         public void InitMcsFika()
@@ -87,7 +88,15 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-
+            McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
+            {
+                McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                PriceThreshold = packet.PriceThreshold,
+                ArmorLevelThreshold = packet.ArmorLevelThreshold,
+                LootingWishlishItem = packet.LootingWishlishItem,
+                LootingQuestItem = packet.LootingQuestItem,
+                BlockItemType = packet.BlockItemType,
+            });
         }
 
         private void HandleTeleport(CommandPacket packet)
