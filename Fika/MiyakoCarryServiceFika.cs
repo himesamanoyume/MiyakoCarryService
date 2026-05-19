@@ -91,11 +91,11 @@ namespace MiyakoCarryService.Fika
             McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
             {
                 McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                PriceThreshold = packet.PriceThreshold,
-                ArmorLevelThreshold = packet.ArmorLevelThreshold,
-                LootingWishlishItem = packet.LootingWishlishItem,
-                LootingQuestItem = packet.LootingQuestItem,
-                BlockItemType = packet.BlockItemType,
+                PriceThreshold = packet.McsBotPlayerConfig.PriceThreshold,
+                ArmorLevelThreshold = packet.McsBotPlayerConfig.ArmorLevelThreshold,
+                LootingWishlishItem = packet.McsBotPlayerConfig.LootingWishlishItem,
+                LootingQuestItem = packet.McsBotPlayerConfig.LootingQuestItem,
+                BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
             });
         }
 
@@ -346,11 +346,14 @@ namespace MiyakoCarryService.Fika
                 var packet = new McsBotPlayerConfigPacket
                 {
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
-                    PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-                    ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
-                    LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
-                    LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
-                    BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                    McsBotPlayerConfig = new SMcsBotPlayerConfig
+                    {
+                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                        ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
+                        LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
+                        LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+                    }
                 };
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
