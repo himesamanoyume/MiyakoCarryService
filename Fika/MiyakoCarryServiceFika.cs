@@ -17,6 +17,7 @@ using UnityEngine.AI;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client;
 
 namespace MiyakoCarryService.Fika
 {
@@ -30,6 +31,7 @@ namespace MiyakoCarryService.Fika
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubTitleMgrHandleFikaEvent>(SendTalkPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
+            EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
             _handleActionsMap = new()
             {
                 {ECommandPacketType.Teleport, HandleTeleport},
@@ -44,6 +46,7 @@ namespace MiyakoCarryService.Fika
         {
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
+            fikaEvent.Manager.RegisterPacket<McsBotPlayerConfigPacket>(OnMcsBotPlayerConfigPacketReceived);
         }
 
         public void OnCommandPacketReceived(CommandPacket packet)
@@ -72,6 +75,19 @@ namespace MiyakoCarryService.Fika
                     Position = packet.Position
                 });
             }
+        }
+
+        public void OnMcsBotPlayerConfigPacketReceived(McsBotPlayerConfigPacket packet)
+        {
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null || !mcsLeadPlayer.IsYourPlayer)
+            {
+                return;
+            }
+
+
         }
 
         private void HandleTeleport(CommandPacket packet)
@@ -305,6 +321,29 @@ namespace MiyakoCarryService.Fika
                 };
 
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            }
+        }
+
+        public void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
+        {
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerConfig.McsLeadPlayerId);
+            if (mcsLeadPlayer == null)
+            {
+                // MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
+                return;
+            }
+            if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer)
+            {
+                var packet = new McsBotPlayerConfigPacket
+                {
+                    McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
+                    PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                    ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
+                    LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
+                    LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
+                    BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                };
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
     }

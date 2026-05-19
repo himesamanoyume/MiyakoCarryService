@@ -1,6 +1,6 @@
 
 
-using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -102,9 +102,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<Dictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
+        public static async Task<ConcurrentDictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
         {
-            var response = await GetJsonAsync<Dictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
+            var response = await GetJsonAsync<ConcurrentDictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
 
             if (response == null)
             {

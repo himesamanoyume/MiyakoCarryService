@@ -16,6 +16,9 @@ using System.Text.RegularExpressions;
 using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Extensions;
 using BepInEx.Bootstrap;
+using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Events;
 
 namespace MiyakoCarryService.Client
 {
@@ -40,6 +43,7 @@ namespace MiyakoCarryService.Client
         public static bool SAINInstalled { get; private set; } = false;
         private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
         public static LogBuffer LogBuffer = new LogBuffer();
+        private Debouncer<string, McsBotPlayerConfig> _configDebouncer;
 
         #region BASIC
 
@@ -178,7 +182,7 @@ namespace MiyakoCarryService.Client
 
             if (FikaInstalled)
             {
-                
+
             }
 
 #if DEBUG
@@ -269,8 +273,20 @@ namespace MiyakoCarryService.Client
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {
-                    // 当修改时发送Fika同步包
-                    
+                    if (!GameLoop.Instance.IsGameStarted)
+                    {
+                        return;
+                    }
+
+                    DebouncedConfigSync(new McsBotPlayerConfig
+                    {
+                        McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        PriceThreshold = (int)PriceThreshold.DefaultValue,
+                        ArmorLevelThreshold = (int)ArmorLevelThreshold.DefaultValue,
+                        LootingWishlishItem = (bool)LootingWishlishItem.DefaultValue,
+                        LootingQuestItem = (bool)LootingQuestItem.DefaultValue,
+                        BlockItemType = (int)BlockItemType.DefaultValue
+                    });
                 };
             }
 
@@ -391,6 +407,41 @@ namespace MiyakoCarryService.Client
             );
 
             #endregion
+        }
+
+        public void DebouncedConfigSync(McsBotPlayerConfig mcsBotPlayerConfig)
+        {
+            if (_configDebouncer == null)
+            {
+                _configDebouncer = new Debouncer<string, McsBotPlayerConfig>(
+                    this,
+                    1f,
+                    ExecuteConfigChanges
+                );
+            }
+
+            if (_configDebouncer != null)
+            {
+                _configDebouncer.Trigger(McsGUID, mcsBotPlayerConfig);
+            }
+        }
+
+        private void ExecuteConfigChanges(Dictionary<string, McsBotPlayerConfig> configs)
+        {
+            foreach (var kvp in configs)
+            {
+                try
+                {
+                    EventMgr.Notify(new ConfigEntrySettingChangedEvent
+                    {
+                        McsBotPlayerConfig = kvp.Value
+                    });
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError($"Batch refresh mcsBotPlayerConfig error: {e}");
+                }
+            }
         }
     }
 }

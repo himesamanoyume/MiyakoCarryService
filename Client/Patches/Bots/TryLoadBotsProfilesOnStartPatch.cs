@@ -115,13 +115,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 {
                     mcsBotPlayerConfig = new McsBotPlayerConfig
                     {
-                        McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        McsLeadPlayerId = leadPlayer.ProfileId,
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
                         LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
                         LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     };
+                    McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer, mcsBotPlayerConfig);
                 leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "Fika" ? "Fika" : "Mcs";

@@ -105,7 +105,6 @@ namespace MiyakoCarryService.Client.Datas
             _updateDebouncer.Clear();
             _updateDebouncer = null;
             ItemsInContainer = null;
-            
         }
     }
 }

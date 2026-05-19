@@ -1,5 +1,5 @@
 
-
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,9 +25,8 @@ namespace MiyakoCarryService.Client.Mgrs
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
-        // private ConcurrentDictionary<MongoID, FriendlyFirePenalty> _mcsFriendlyFirePenalties = new();
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
-        public Dictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
+        public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
 
         public bool IsHost = false;
 
@@ -199,6 +198,19 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
             return mcsBotPlayers;
+        }
+
+        public void UpdateMcsBotPlayerConfig(MongoID mcsLeadPlayerId, McsBotPlayerConfig mcsBotPlayerConfig)
+        {
+            McsLeadPlayerConfigs.AddOrUpdate(
+                mcsLeadPlayerId,
+                id => mcsBotPlayerConfig,
+                (id, oldConfig) =>
+                {
+                    oldConfig = mcsBotPlayerConfig;
+                    return oldConfig;
+                }
+            );
         }
 
         public void AddPunish(MongoID friendlyFirePlayerId, double diff, bool teamKill, bool punishEveryone)
