@@ -93,18 +93,23 @@ namespace MiyakoCarryService.Client.Utils
                     continue;
                 }
 
+                if (itemData.RootTransform.position.McsSqrDistance(mcsBotPlayerPos) >= distance * distance)
+                {
+                    continue;
+                }
+
                 if (itemData is PlayerData playerData)
                 {
                     if (McsMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
                     {
                         continue;
                     }
+                    else if (playerData.Player.HealthController.IsAlive)
+                    {
+                        continue;
+                    }
                 }
-
-                if (itemData.RootTransform.position.McsSqrDistance(mcsBotPlayerPos) <= distance * distance)
-                {
-                    result.Add(itemData);
-                }
+                result.Add(itemData);
             }
             return result;
         }

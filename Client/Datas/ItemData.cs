@@ -5,7 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -16,36 +18,12 @@ namespace MiyakoCarryService.Client.Datas
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
-        private WeakReference<Transform> _transformRef;
-        public Transform RootTransform
-        {
-            get
-            {
-                if (_transformRef == null)
-                {
-                    _transformRef = new(null);
-                }
-
-                if (_transformRef.TryGetTarget(out var transform))
-                {
-                    return transform;
-                }
-                else
-                {
-                    transform = GetRootTransfrom();
-                    if (transform != null)
-                    {
-                        _transformRef = new(transform);
-                    }
-                    return transform;
-                }
-            }
-        }
+        public Transform RootTransform => GetRootTransfrom();
+        protected LootDataMgr _lootDataMgr = MgrAccessor.Get<LootDataMgr>();
 
         public ItemData(Item item)
         {
             _itemRef = new(item);
-            _transformRef = new(GetRootTransfrom());
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 

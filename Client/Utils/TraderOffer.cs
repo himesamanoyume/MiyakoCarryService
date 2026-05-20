@@ -14,7 +14,8 @@ namespace MiyakoCarryService.Client.Utils
         {
             Name = name;
             CurrencyType = currencyType;
-            Price = ExchangePrice(currencyType, price) / totalSlot;
+            Price = ExchangePrice(currencyType, price);
+            // Price = ExchangePrice(currencyType, price) / totalSlot;
         }
 
         public long ExchangePrice(ECurrencyType currencyType, long price)

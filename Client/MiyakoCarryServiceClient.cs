@@ -269,11 +269,11 @@ namespace MiyakoCarryService.Client
                 };
             }
 
-            if (type == EConfigType.BASIC && FikaInstalled)
+            if (type == EConfigType.BASIC)
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {
-                    if (!GameLoop.Instance.IsGameStarted)
+                    if (!GameLoop.Instance.IsVaildGameWorld)
                     {
                         return;
                     }
@@ -281,11 +281,11 @@ namespace MiyakoCarryService.Client
                     DebouncedConfigSync(new McsBotPlayerConfig
                     {
                         McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
-                        PriceThreshold = (int)PriceThreshold.DefaultValue,
-                        ArmorLevelThreshold = (int)ArmorLevelThreshold.DefaultValue,
-                        LootingWishlishItem = (bool)LootingWishlishItem.DefaultValue,
-                        LootingQuestItem = (bool)LootingQuestItem.DefaultValue,
-                        BlockItemType = (int)BlockItemType.DefaultValue
+                        PriceThreshold = PriceThreshold.Value,
+                        ArmorLevelThreshold = ArmorLevelThreshold.Value,
+                        LootingWishlishItem = LootingWishlishItem.Value,
+                        LootingQuestItem = LootingQuestItem.Value,
+                        BlockItemType = (int)BlockItemType.Value
                     });
                 };
             }

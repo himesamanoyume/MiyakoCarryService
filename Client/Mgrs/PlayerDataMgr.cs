@@ -61,6 +61,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (_gameloop.IsVaildGameWorld)
                 {
                     // 收集护航周围的根战利品信息
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("正在收集战利品信息");
                     var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
                     var closeRootItemDataDict = new Dictionary<McsBotPlayerData, List<ItemData>>();
                     foreach (var mcsBotPlayerData in mcsBotPlayerDatas)

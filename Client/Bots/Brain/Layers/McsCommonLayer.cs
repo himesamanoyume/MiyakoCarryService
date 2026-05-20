@@ -219,7 +219,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
 
                     // 取消当前锁定的目标战利品
-                    McsBotPlayerData.UnlockLootingTarget();
+                    // McsBotPlayerData.UnlockLootingTarget();
                 }
 
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();

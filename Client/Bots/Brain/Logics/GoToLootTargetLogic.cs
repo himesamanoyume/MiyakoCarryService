@@ -57,17 +57,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - targetPos;
                 var distance = offset.sqrMagnitude;
 
+                MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
+
                 // 到达判定
-                if (distance <= 1f && Math.Abs(offset.y) < 0.5f)
+                if (distance <= 4f && Math.Abs(offset.y) < 0.5f)
                 {
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnLoot,
-                        Key = mcsBotPlayerData.LootingTarget.Item.ShortName
+                        Key = mcsBotPlayerData.LootingTarget.Item.Name
                     });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
-                    MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.LootingTarget.Item.ShortName.McsLocalized()} 坐标: {targetPos}");
                     BotOwner.Steering.LookToPoint(targetPos);
                     mcsBotPlayerData.StartLooting();
                     _lastTimeDistance = Mathf.Infinity; // 重置卡脚检测
@@ -83,15 +84,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.Mover.Sprint(false);
                 }
 
-                if (_currentLootingRetries == 1)
+                var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
+                if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
-                    var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
-                    if (pathStatus != NavMeshPathStatus.PathComplete)
-                    {
-                        mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                        mcsBotPlayerData.IsLooting = false;
-                        return;
-                    }
+                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
+                    mcsBotPlayerData.IsLooting = false;
+                    return;
                 }
 
                 if (_lastTimeDistance > 0f)

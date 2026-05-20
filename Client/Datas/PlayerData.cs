@@ -40,6 +40,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
+            _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             if (ItemsInContainer == null)
             {
                 ItemsInContainer = Item.GetAllDatas().ToList();
@@ -67,6 +68,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                _lootDataMgr.UnlockLootingTarget(lootData);
                 lootData.Refresh(mcsAILeadPlayer);
             }
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -33,6 +34,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
+            EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
         }
 
         private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
@@ -357,6 +359,16 @@ namespace MiyakoCarryService.Client.Mgrs
                 transitMembers.Clear();
             }
             IsHost = false;
+        }
+
+        private void UpdateMcsBotPlayerConfig(ConfigEntrySettingChangedEvent @event)
+        {
+            if (!IsHost)
+            {
+                return;
+            }
+
+            UpdateMcsBotPlayerConfig(@event.McsBotPlayerConfig.McsLeadPlayerId, @event.McsBotPlayerConfig);
         }
     }
 }

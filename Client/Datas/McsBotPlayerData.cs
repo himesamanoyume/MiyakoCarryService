@@ -7,7 +7,6 @@ using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Enums;
-using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
 
@@ -56,7 +55,6 @@ namespace MiyakoCarryService.Client.Datas
                 }
             }
         }
-        private LootDataMgr _lootDataMgr = null;
         public bool IsRunningCoroutine = false;
 
         public bool ShouldHoldPosition = false;
@@ -69,11 +67,11 @@ namespace MiyakoCarryService.Client.Datas
             _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
             _leadPlayeRef = new(bossPlayer);
             BotBehaviors = [new BotCarryServiceChecker(BotOwner, LeadPlayer)];
-            _lootDataMgr = _gameloop.GetMgr<LootDataMgr>();
         }
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
+            // MiyakoCarryServicePlugin.Logger.LogWarning("正在设置目标战利品");
             var filtedLootDatas = new List<LootData>(itemDatas.Count);
             // 只要是符合条件的，都先筛选出来
             foreach (var itemData in itemDatas)
@@ -139,19 +137,19 @@ namespace MiyakoCarryService.Client.Datas
 
         public void StartLooting()
         {
-            _gameloop.StartCoroutine(publicStartLooting());
+            _gameloop.StartCoroutine(InternalStartLooting());
         }
 
-        private IEnumerator publicStartLooting()
+        private IEnumerator InternalStartLooting()
         {
+            MiyakoCarryServicePlugin.Logger.LogWarning("开始掠夺目标战利品");
             try
             {
                 if (LootingTarget != null)
                 {
                     IsRunningCoroutine = true;
                     // 模拟打开容器的时间
-                    yield return new WaitForSeconds(2f);
-                    // BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:到达战利品位置, 这里有{1}".McsLocalized(), BotOwner.Profile.Nickname, LootingTarget.Item.ShortName.McsLocalized()));
+                    yield return new WaitForSeconds(5f);
                 }
             }
             finally

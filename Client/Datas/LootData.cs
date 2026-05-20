@@ -99,6 +99,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
+            _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             IsItemInContainer = false;
             Refresh(mcsAILeadPlayer);
 
@@ -129,6 +130,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                _lootDataMgr.UnlockLootingTarget(lootData);
                 lootData.Refresh(mcsAILeadPlayer);
                 IsItemInContainer = true;
             }

@@ -159,7 +159,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content += string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized());
+            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized());
             return content;
         }
 
