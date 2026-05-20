@@ -100,11 +100,7 @@ namespace MiyakoCarryService.Client.Utils
 
                 if (itemData is PlayerData playerData)
                 {
-                    if (McsMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
-                    {
-                        continue;
-                    }
-                    else if (playerData.Player.HealthController.IsAlive)
+                    if (McsMgr.IsMcsLeadPlayer(playerData.Player.ProfileId) || McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId) || playerData.Player.HealthController.IsAlive)
                     {
                         continue;
                     }

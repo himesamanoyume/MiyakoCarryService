@@ -43,6 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                             }
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
+                                itemData.UpdateContainerInfoData();
                                 itemData.RefreshRootItemInteresting(mcsAILeadPlayer);
                             }
                         }
@@ -69,7 +70,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         public static void Postfix(object __instance, GEventArgs2 obj)
         {
             var gameloop = GameLoop.Instance;
-            if (GameLoop.Instance.IsVaildGameWorld)
+            if (gameloop.IsVaildGameWorld)
             {
                 var item = obj.Item;
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
@@ -118,7 +119,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         public static void Postfix(object __instance, GEventArgs3 obj)
         {
             var gameloop = GameLoop.Instance;
-            if (GameLoop.Instance.IsVaildGameWorld)
+            if (gameloop.IsVaildGameWorld)
             {
                 var item = obj.Item;
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
@@ -242,7 +243,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress to, bool succeed, IOperationClass operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
-            if (GameLoop.Instance.IsVaildGameWorld)
+            if (gameloop.IsVaildGameWorld)
             {
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (__instance != null)

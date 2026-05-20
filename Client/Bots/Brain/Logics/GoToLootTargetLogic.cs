@@ -55,7 +55,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 var targetPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
                 var offset = BotOwner.Position - targetPos;
-                var distance = offset.sqrMagnitude;
+                var distance = BotOwner.Position.McsSqrDistance(targetPos);
 
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
 

@@ -3,8 +3,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
@@ -34,12 +36,18 @@ namespace MiyakoCarryService.Client.Datas
             yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
             try
             {
+                MiyakoCarryServicePlugin.Logger.LogWarning($"触发兴趣更新, 配置价值阈值为: {mcsAILeadPlayer.McsBotPlayerConfig.PriceThreshold}");
                 RefreshInteresting(mcsAILeadPlayer);
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogInfo(e);
             }
+        }
+
+        public void UpdateContainerInfoData()
+        {
+            ItemsInContainer = Item.GetAllDatas().ToList();
         }
 
         protected abstract Transform GetRootTransfrom();
