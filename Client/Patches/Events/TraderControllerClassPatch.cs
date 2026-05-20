@@ -80,7 +80,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                            gameloop.DebouncedRefresh(rootItem.GetData(), mcsAILeadPlayer);
                         }
                     }
                 }
@@ -96,7 +96,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(toParentRootItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }
@@ -129,7 +129,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                            gameloop.DebouncedRefresh(rootItem.GetData(), mcsAILeadPlayer);
                         }
                     }
                 }
@@ -145,7 +145,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                fromParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(fromParentRootItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }
@@ -167,7 +167,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress from, ItemAddress to, IOperationClass operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
-            if (GameLoop.Instance.IsVaildGameWorld)
+            if (gameloop.IsVaildGameWorld)
             {
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (__instance != null)
@@ -177,7 +177,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            instanceRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                            gameloop.DebouncedRefresh(instanceRootItem.GetData(), mcsAILeadPlayer);
                         }
                     }
                 }
@@ -189,7 +189,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            rootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                            gameloop.DebouncedRefresh(rootItem.GetData(), mcsAILeadPlayer);
                         }
                     }
                 }
@@ -204,7 +204,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                fromParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(fromParentRootItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }
@@ -220,7 +220,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(toParentRootItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }
@@ -252,7 +252,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     {
                         foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                         {
-                            instanceRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                            gameloop.DebouncedRefresh(instanceRootItem.GetData(), mcsAILeadPlayer);
                         }
                     }
                 }
@@ -267,7 +267,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                rootParentItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(rootParentItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }
@@ -283,7 +283,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                toParentRootItem.GetData().DebouncedRefresh(mcsAILeadPlayer);
+                                gameloop.DebouncedRefresh(toParentRootItem.GetData(), mcsAILeadPlayer);
                             }
                         }
                     }

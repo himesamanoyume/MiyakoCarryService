@@ -6,19 +6,17 @@ using System.Collections.Generic;
 using EFT.InventoryLogic;
 using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Misc;
-using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public abstract class ItemData : BaseData, IDisposable
+    public abstract class ItemData : BaseData
     {
         private WeakReference<Item> _itemRef;
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         private WeakReference<Transform> _transformRef;
-        private Debouncer<Item, McsAILeadPlayer> _updateDebouncer;
         public Transform RootTransform
         {
             get
@@ -66,45 +64,6 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        public void DebouncedRefresh(McsAILeadPlayer mcsAILeadPlayer)
-        {
-            if (_updateDebouncer == null)
-            {
-                _updateDebouncer = new Debouncer<ItemData, McsAILeadPlayer>(
-                    _gameloop,
-                    1f,
-                    BatchRefreshItems
-                );
-            }
-
-            if (_updateDebouncer != null && Item != null)
-            {
-                _updateDebouncer.Trigger(Item, mcsAILeadPlayer);
-            }
-        }
-
-        private void BatchRefreshItems(Dictionary<ItemData, McsAILeadPlayer> updates)
-        {
-            foreach (var kvp in updates)
-            {
-                try
-                {
-                    kvp.Key.RefreshRootItemInteresting(kvp.Value);
-                }
-                catch (Exception e)
-                {
-                    MiyakoCarryServicePlugin.Logger.LogError($"Batch refresh item error: {e}");
-                }
-            }
-        }
-
         protected abstract Transform GetRootTransfrom();
-
-        public void Dispose()
-        {
-            _updateDebouncer.Clear();
-            _updateDebouncer = null;
-            ItemsInContainer = null;
-        }
     }
 }

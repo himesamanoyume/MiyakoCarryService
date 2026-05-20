@@ -11,6 +11,7 @@ using System.IO;
 using System.Reflection;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client
 {
@@ -22,6 +23,7 @@ namespace MiyakoCarryService.Client
         public Camera MainCamera { get; private set; } = null;
         public Camera OpticCamera { get; private set; } = null;
         public bool IsGameStarted = false;
+        private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
 
         public ISession Session
         {
@@ -155,6 +157,8 @@ namespace MiyakoCarryService.Client
         private void OnGameWorldEnded(GameWorldEndedEvent @event)  
         {  
             Reset();
+            _updateDebouncer.Clear();
+            _updateDebouncer = null;
         } 
 
         private void Reset()
@@ -177,6 +181,38 @@ namespace MiyakoCarryService.Client
         {
             var mgr = GetMgr<K>();
             return mgr.GetDatas<T>();
+        }
+
+        public void DebouncedRefresh(ItemData itemData, McsAILeadPlayer mcsAILeadPlayer)
+        {
+            if (_updateDebouncer == null)
+            {
+                _updateDebouncer = new Debouncer<ItemData, McsAILeadPlayer>(
+                    this,
+                    1f,
+                    BatchRefreshItems
+                );
+            }
+
+            if (_updateDebouncer != null && itemData != null)
+            {
+                _updateDebouncer.Trigger(itemData, mcsAILeadPlayer);
+            }
+        }
+
+        private void BatchRefreshItems(Dictionary<ItemData, McsAILeadPlayer> updates)
+        {
+            foreach (var kvp in updates)
+            {
+                try
+                {
+                    kvp.Key.RefreshRootItemInteresting(kvp.Value);
+                }
+                catch (Exception e)
+                {
+                    MiyakoCarryServicePlugin.Logger.LogError($"Batch refresh item error: {e}");
+                }
+            }
         }
     }
 }

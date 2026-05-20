@@ -26,6 +26,11 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             base.OnGameWorldStarted(@event);
+        }
+
+        protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            base.OnGameWorldEnded(@event);
             foreach (var data in _datas)
             {
                 if (data is IDisposable disposable)
@@ -33,11 +38,6 @@ namespace MiyakoCarryService.Client.Mgrs
                     disposable.Dispose();
                 }
             }
-        }
-
-        protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
-        {
-            base.OnGameWorldEnded(@event);
         }
     }
 }
