@@ -207,7 +207,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 id => mcsBotPlayerConfig,
                 (id, oldConfig) =>
                 {
-                    oldConfig = mcsBotPlayerConfig;
+                    oldConfig.PriceThreshold = mcsBotPlayerConfig.PriceThreshold;
+                    oldConfig.ArmorLevelThreshold = mcsBotPlayerConfig.ArmorLevelThreshold;
+                    oldConfig.LootingWishlishItem = mcsBotPlayerConfig.LootingWishlishItem;
+                    oldConfig.LootingQuestItem = mcsBotPlayerConfig.LootingQuestItem;
+                    oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
                     return oldConfig;
                 }
             );

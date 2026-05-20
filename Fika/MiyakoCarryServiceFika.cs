@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Fika
         public void InitMcsFika()
         {
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
-            EventMgr.Subscribe<SubTitleMgrHandleFikaEvent>(SendTalkPacket, this);
+            EventMgr.Subscribe<SubTitleMgrHandleFikaEvent>(SendTalkMsgPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
             _handleActionsMap = new()
@@ -60,6 +60,7 @@ namespace MiyakoCarryService.Fika
 
         public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 TalkMsgPacket");
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
@@ -73,20 +74,24 @@ namespace MiyakoCarryService.Fika
                 SubTitleMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
                 {
                     PhraseTrigger = packet.PhraseTrigger, 
-                    Position = packet.Position
+                    Position = packet.Position,
+                    Key = packet.Key
                 });
             }
         }
 
         public void OnMcsBotPlayerConfigPacketReceived(McsBotPlayerConfigPacket packet)
         {
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 McsBotPlayerConfigPacket");
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
-            if (mcsLeadPlayer == null || !mcsLeadPlayer.IsYourPlayer)
+            if (mcsLeadPlayer == null || mcsLeadPlayer.IsYourPlayer)
             {
                 return;
             }
+
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {packet.McsBotPlayerConfig.PriceThreshold}, ArmorLevelThreshold = {packet.McsBotPlayerConfig.ArmorLevelThreshold}, LootingWishlishItem = {packet.McsBotPlayerConfig.LootingWishlishItem}, LootingQuestItem = {packet.McsBotPlayerConfig.LootingQuestItem}, BlockItemType = {packet.McsBotPlayerConfig.BlockItemType}");
 
             McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
             {
@@ -293,6 +298,11 @@ namespace MiyakoCarryService.Fika
 
         public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
+            if (!FikaBackendUtils.IsClient)
+            {
+                return;
+            }
+
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && @event.McsBotPlayer is FikaPlayer fikaMcsBotPlayer)
             {
@@ -307,9 +317,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkPacket(SubTitleMgrHandleFikaEvent @event)
+        public void SendTalkMsgPacket(SubTitleMgrHandleFikaEvent @event)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送TalkPacket");
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 TalkMsgPacket");
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
             var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
@@ -335,6 +345,11 @@ namespace MiyakoCarryService.Fika
 
         public void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
         {
+            if (!FikaBackendUtils.IsClient)
+            {
+                return;
+            }
+
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerConfig.McsLeadPlayerId);
             if (mcsLeadPlayer == null)
             {
@@ -355,6 +370,7 @@ namespace MiyakoCarryService.Fika
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     }
                 };
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {MiyakoCarryServicePlugin.PriceThreshold.Value}, ArmorLevelThreshold = {MiyakoCarryServicePlugin.ArmorLevelThreshold.Value}, LootingWishlishItem = {MiyakoCarryServicePlugin.LootingWishlishItem.Value}, LootingQuestItem = {MiyakoCarryServicePlugin.LootingQuestItem.Value}, BlockItemType = {(int)MiyakoCarryServicePlugin.BlockItemType.Value}");
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }

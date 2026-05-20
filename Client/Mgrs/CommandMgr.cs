@@ -10,6 +10,7 @@ using EFT;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -43,7 +44,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private List<MongoID> _mcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
+        // public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
 
         protected sealed override void OnRaidStarted()
         {
@@ -355,13 +356,15 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (HandleFikaEvent != null)
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (botOwner.Memory.HaveEnemy)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    if (botOwner.Memory.HaveEnemy)
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
-                        HandleFikaEvent(mcsBotPlayer, ECommandPacketType.ReportAboutEnemy, botOwner.Memory.GoalEnemy.EnemyLastPosition);
-                    }
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ECommandPacketType.ReportAboutEnemy,
+                        Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
+                    });
                 }
             }
             else
@@ -383,10 +386,12 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (HandleFikaEvent != null)
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Regroup, new Vector3());
-                }
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.Regroup,
+                    Position = null
+                });
             }
             else
             {
@@ -405,12 +410,14 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (HandleFikaEvent != null)
+                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
                 {
-                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
-                        HandleFikaEvent(mcsBotPlayer, ECommandPacketType.GoToPoint, raycastHit.point);
-                    }
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ECommandPacketType.GoToPoint,
+                        Position = raycastHit.point
+                    });
                 }
             }
             else
@@ -460,10 +467,12 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (HandleFikaEvent != null)
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.HoldPosition, new Vector3());
-                }
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.HoldPosition,
+                    Position = null
+                });
             }
             else
             {
@@ -625,10 +634,12 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (HandleFikaEvent != null)
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    HandleFikaEvent(mcsBotPlayer, ECommandPacketType.Teleport, new Vector3());
-                }
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.Teleport,
+                    Position = null
+                });
             }
             else
             {
@@ -640,6 +651,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,
                 });
+
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                }
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
                     botOwner.Memory.GoalTarget.Clear();

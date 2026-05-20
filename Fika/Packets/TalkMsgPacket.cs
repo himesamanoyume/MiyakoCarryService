@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Fika.Packets
             base.Serialize(writer);
             writer.PutEnum(PhraseTrigger);
             writer.PutNullableUnmanaged(Position);
-            writer.PutLargeString(Key);
+            writer.Put(Key);
         } 
     }
 }
