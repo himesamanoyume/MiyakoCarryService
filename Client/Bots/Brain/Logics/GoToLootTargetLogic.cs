@@ -46,7 +46,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (_currentLootingRetries > 30)
                 {
                     MiyakoCarryServicePlugin.Logger.LogWarning("重试超时");
-                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
                     _currentLootingRetries = 0;
                     return;
@@ -58,12 +57,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - lootPos;
                 var distance = BotOwner.Position.McsSqrDistance(lootPos);
 
-                Tools.BetterDestination(1f, lootPos, out var targetPos);
+                Tools.BetterDestination(3f, lootPos, out var targetPos);
 
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
 
                 // 到达判定
-                if (distance <= 4f && Math.Abs(offset.y) < 2f)
+                if (distance <= 9f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.TalkMsg(new McsMsg
                     {
@@ -90,7 +89,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
                     MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");
-                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
                     return;
                 }
@@ -99,14 +97,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     BotOwner.CheckStuck();
                 }
-
-                // if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
-                // {
-                //     MiyakoCarryServicePlugin.Logger.LogWarning("取消掠夺");
-                //     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                //     mcsBotPlayerData.IsLooting = false;
-                //     return;
-                // }
 
                 _lastTimeDistance = distance;
             }

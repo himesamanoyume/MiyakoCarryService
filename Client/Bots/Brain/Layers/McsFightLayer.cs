@@ -181,7 +181,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         rotated.y = 0;
                                         rotated *= 7f;
                                         rotated += UnityEngine.Random.insideUnitSphere;
-                                        if (Tools.BetterDestination(1f, mcsLeadPlayerPos + rotated, out var targetPos))
+                                        if (Tools.BetterDestination(3f, mcsLeadPlayerPos + rotated, out var targetPos))
                                         {
                                             BotOwner.GoToSomePointData.SetPoint(targetPos);
                                             return new Action(typeof(GoToProtectLogic), "Mcs:Protect");

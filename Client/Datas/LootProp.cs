@@ -31,17 +31,18 @@ namespace MiyakoCarryService.Client.Datas
             IsHighPriceItem = Offer.Price >= McsAILeadPlayer.McsBotPlayerConfig.PriceThreshold;
         }
 
-        public bool CheckKeywordItem()
+        public void CheckKeywordItem()
         {
             var keywordArray = McsAILeadPlayer.McsBotPlayerConfig.KeywordItemText;
             foreach (var keyword in keywordArray.Split(["||", ",", "，"], StringSplitOptions.RemoveEmptyEntries))
             {
                 if (Item.ShortName.McsLocalized().Contains(keyword) || Item.Name.McsLocalized().Contains(keyword))
                 {
-                    return true;
+                    IsKeywordItem = true;
+                    return;
                 }
             }
-            return false;
+            IsKeywordItem = false;
         }
 
         public void CheckBlockItem(EItemType itemType)

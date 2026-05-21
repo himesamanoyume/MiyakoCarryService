@@ -1,5 +1,4 @@
 
-using System;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
@@ -14,27 +13,7 @@ namespace MiyakoCarryService.Client.Misc
     {
         public McsBotPlayerConfig McsBotPlayerConfig;
         public Player McsLeadPlayer;
-        private WeakReference<GamePlayerOwner> _gamePlayerOwnerRef;
-        public GamePlayerOwner GamePlayerOwner
-        {
-            get
-            {
-                if (_gamePlayerOwnerRef.TryGetTarget(out var leadPlayeGamePlayerOwner))
-                {
-                    return leadPlayeGamePlayerOwner;
-                }
-                else
-                {
-                    var _gamePlayerOwner = McsLeadPlayer.GetComponentInChildren<GamePlayerOwner>();
-                    if (_gamePlayerOwner != null)
-                    {
-                        _gamePlayerOwnerRef = new(_gamePlayerOwner);
-                        return _gamePlayerOwner;
-                    }
-                }
-                return null;
-            }
-        }
+        public GamePlayerOwner GamePlayerOwner => McsLeadPlayer.GetGamePlayerOwner();
         public McsAILeadPlayer(Player player, McsBotPlayerConfig mcsBotPlayerConfig) : base(player)
         {
             McsLeadPlayer = player;

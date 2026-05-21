@@ -21,36 +21,6 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsMoney = false;
         public bool IsLabyrinthSolvePuzzleItem = false;
         public bool IsInSecureContainerItem = false;
-        private Vector3 _lastPos = new();
-        public bool IsNonNavigableItem
-        {
-            get
-            {
-                if (field)
-                {
-                    if (RootTransform.position == _lastPos)
-                    {
-                        field = true;
-                        return field;
-                    }
-                    else
-                    {
-                        field = false;
-                        return field;
-                    }
-                }
-                field = false;
-                return field;
-            }
-            set
-            {
-                field = value;
-                if (field)
-                {
-                    _lastPos = RootTransform.position;
-                }
-            }
-        }
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -97,7 +67,6 @@ namespace MiyakoCarryService.Client.Datas
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
-            IsNonNavigableItem = false;
             _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             IsItemInContainer = false;
             Refresh(mcsAILeadPlayer);

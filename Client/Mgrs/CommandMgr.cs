@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             get
             {
-                return field ??= Singleton<GameWorld>.Instance.MainPlayer.GetComponentInChildren<GamePlayerOwner>();
+                return field ??= Singleton<GameWorld>.Instance.MainPlayer.GetGamePlayerOwner();
             }
         }
 
