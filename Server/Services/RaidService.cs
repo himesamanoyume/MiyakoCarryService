@@ -359,8 +359,6 @@ namespace MiyakoCarryService.Server.Services
                             PriceThreshold = 50000,
                             KeywordItemText = "",
                             LootingKeywordItem = true,
-                            LootingWishlistItem = true,
-                            LootingQuestItem = true,
                             BlockItemType = 0
                         };
                     }

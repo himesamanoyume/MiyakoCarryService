@@ -212,8 +212,6 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.PriceThreshold = mcsBotPlayerConfig.PriceThreshold;
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
-                    oldConfig.LootingWishlistItem = mcsBotPlayerConfig.LootingWishlistItem;
-                    oldConfig.LootingQuestItem = mcsBotPlayerConfig.LootingQuestItem;
                     oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
                     return oldConfig;
                 }

@@ -50,8 +50,6 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<int> PriceThreshold;
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
-        public static ConfigEntry<bool> LootingWishlistItem;
-        public static ConfigEntry<bool> LootingQuestItem;
         public static ConfigEntry<EBlockItemType> BlockItemType;
 
         #endregion
@@ -285,8 +283,6 @@ namespace MiyakoCarryService.Client
                         PriceThreshold = PriceThreshold.Value,
                         KeywordItemText = KeywordItemText.Value,
                         LootingKeywordItem = LootingKeywordItem.Value,
-                        LootingWishlistItem = LootingWishlistItem.Value,
-                        LootingQuestItem = LootingQuestItem.Value,
                         BlockItemType = (int)BlockItemType.Value
                     });
                 };
@@ -363,18 +359,6 @@ namespace MiyakoCarryService.Client
             LootingKeywordItem = Register(
                 EConfigType.BASIC,
                 Locales.LOOTINGKEYWORDITEM_KEY,
-                true
-            );
-
-            LootingWishlistItem = Register(
-                EConfigType.BASIC,
-                Locales.LOOTINGWISHLISTITEM_KEY,
-                true
-            );
-
-            LootingQuestItem = Register(
-                EConfigType.BASIC,
-                Locales.LOOTINGQUESTITEM_KEY,
                 true
             );
 

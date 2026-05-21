@@ -19,12 +19,6 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "LootingKeywordItem")]
         public bool LootingKeywordItem;
 
-        [DataMember(Name = "LootingWishlistItem")]
-        public bool LootingWishlistItem;
-
-        [DataMember(Name = "LootingQuestItem")]
-        public bool LootingQuestItem;
-
         [DataMember(Name = "BlockItemType")]
         public int BlockItemType;
     }

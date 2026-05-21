@@ -28,8 +28,6 @@ namespace MiyakoCarryService.Client.Patches.Events
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
 					KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
 					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-					LootingWishlistItem = MiyakoCarryServicePlugin.LootingWishlistItem.Value,
-					LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
 					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
 				}));
 			}

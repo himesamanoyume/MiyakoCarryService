@@ -11,8 +11,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string KEYWORDITEMTEXT_KEY = "Mcs/KeywordItemText Key";
         public const string KEYWORDITEMTEXT_DESCRIPTION = "Mcs/KeywordItemText Description";
         public const string LOOTINGKEYWORDITEM_KEY = "Mcs/LootingKeywordItem Key";
-        public const string LOOTINGWISHLISTITEM_KEY = "Mcs/LootingWishlistItem Key";
-        public const string LOOTINGQUESTITEM_KEY = "Mcs/LootingQuestItem Key";
         public const string BLOCKITEMTYPE_KEY = "Mcs/BlockItemType Key";
         public const string FUNCTIONENABLED = "Mcs/FunctionEnabled";
         public const string FUNCTIONDISABLED = "Mcs/FunctionDisabled";

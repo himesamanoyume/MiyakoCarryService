@@ -23,8 +23,6 @@
     "Mcs/KeywordItemText Key": "战利品名称关键词",
     "Mcs/KeywordItemText Description": "关键词为物品的完整名称或缩写名称中所含有的文字，支持使用“||”或“,”或“，”进行分割查找多个关键词。",
     "Mcs/LootingKeywordItem Key": "掠夺关键词战利品",
-    "Mcs/LootingWishlistItem Key": "掠夺愿望单战利品",
-    "Mcs/LootingQuestItem Key": "掠夺任务战利品",
     "Mcs/BlockItemType Key": "屏蔽物品类型",
     "Mcs/BlockItemTypeAmmo": "屏蔽子弹",
     "Mcs/BlockItemTypeOther": "屏蔽其他",

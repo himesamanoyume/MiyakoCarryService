@@ -19,12 +19,6 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("LootingKeywordItem")]
         public required bool LootingKeywordItem { get; set; }
 
-        [JsonPropertyName("LootingWishlistItem")]
-        public required bool LootingWishlistItem { get; set; }
-
-        [JsonPropertyName("LootingQuestItem")]
-        public required bool LootingQuestItem { get; set; }
-
         [JsonPropertyName("BlockItemType")]
         public required int BlockItemType { get; set; }
     }

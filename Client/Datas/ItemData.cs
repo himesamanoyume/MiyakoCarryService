@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Client.Datas
             yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
             try
             {
-                MiyakoCarryServicePlugin.Logger.LogWarning($"触发兴趣更新, 配置价值阈值为: {mcsAILeadPlayer.McsBotPlayerConfig.PriceThreshold}");
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"触发兴趣更新, 配置价值阈值为: {mcsAILeadPlayer.McsBotPlayerConfig.PriceThreshold}");
                 RefreshInteresting(mcsAILeadPlayer);
             }
             catch (Exception e)

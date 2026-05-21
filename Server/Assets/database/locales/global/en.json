@@ -23,8 +23,6 @@
     "Mcs/KeywordItemText Key": "Loot Name Keyword",
     "Mcs/KeywordItemText Description": "Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords can be separated using “||”, “,” or “，”",
     "Mcs/LootingKeywordItem Key": "Looting Keyword Item",
-    "Mcs/LootingWishlistItem Key": "Looting Wishlist Item",
-    "Mcs/LootingQuestItem Key": "Looting Quest Item",
     "Mcs/BlockItemType Key": "Blocked Item Type",
     "Mcs/BlockItemTypeAmmo": "Block Ammo",
     "Mcs/BlockItemTypeOther": "Block Other",

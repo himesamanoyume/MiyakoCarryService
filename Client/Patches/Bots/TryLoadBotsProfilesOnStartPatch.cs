@@ -119,8 +119,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-                        LootingWishlistItem = MiyakoCarryServicePlugin.LootingWishlistItem.Value,
-                        LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     };
                     McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
