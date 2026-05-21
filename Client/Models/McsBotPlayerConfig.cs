@@ -13,19 +13,14 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "PriceThreshold")]
         public int PriceThreshold;
 
-        [DataMember(Name = "ArmorLevelThreshold")]
-        public int ArmorLevelThreshold;
+        [DataMember(Name = "KeywordItemText")]
+        public string KeywordItemText;
 
-        // // 子弹穿伤
-        // [DataMember(Name = "BulletPenetrationThreshold")]
-        // public int BulletPenetrationThreshold;
-        
-        // // 子弹肉伤
-        // [DataMember(Name = "BulletDamageThreshold")]
-        // public int BulletDamageThreshold;
+        [DataMember(Name = "LootingKeywordItem")]
+        public bool LootingKeywordItem;
 
-        [DataMember(Name = "LootingWishlishItem")]
-        public bool LootingWishlishItem;
+        [DataMember(Name = "LootingWishlistItem")]
+        public bool LootingWishlistItem;
 
         [DataMember(Name = "LootingQuestItem")]
         public bool LootingQuestItem;

@@ -48,8 +48,9 @@ namespace MiyakoCarryService.Client
         #region BASIC
 
         public static ConfigEntry<int> PriceThreshold;
-        public static ConfigEntry<int> ArmorLevelThreshold;
-        public static ConfigEntry<bool> LootingWishlishItem;
+        public static ConfigEntry<string> KeywordItemText;
+        public static ConfigEntry<bool> LootingKeywordItem;
+        public static ConfigEntry<bool> LootingWishlistItem;
         public static ConfigEntry<bool> LootingQuestItem;
         public static ConfigEntry<EBlockItemType> BlockItemType;
 
@@ -282,8 +283,9 @@ namespace MiyakoCarryService.Client
                     {
                         McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
                         PriceThreshold = PriceThreshold.Value,
-                        ArmorLevelThreshold = ArmorLevelThreshold.Value,
-                        LootingWishlishItem = LootingWishlishItem.Value,
+                        KeywordItemText = KeywordItemText.Value,
+                        LootingKeywordItem = LootingKeywordItem.Value,
+                        LootingWishlistItem = LootingWishlistItem.Value,
                         LootingQuestItem = LootingQuestItem.Value,
                         BlockItemType = (int)BlockItemType.Value
                     });
@@ -351,16 +353,22 @@ namespace MiyakoCarryService.Client
                 new AcceptableValueRange<int>(0, 1500000)
             );
 
-            ArmorLevelThreshold = Register(
+            KeywordItemText = Register(
                 EConfigType.BASIC,
-                Locales.ARMORLEVELTHRESHOLD_KEY,
-                5,
-                acceptableValues: new AcceptableValueRange<int>(1, 6)
+                Locales.KEYWORDITEMTEXT_KEY,
+                "",
+                Locales.KEYWORDITEMTEXT_DESCRIPTION
             );
 
-            LootingWishlishItem = Register(
+            LootingKeywordItem = Register(
                 EConfigType.BASIC,
-                Locales.LOOTINGWISHLISHITEM_KEY,
+                Locales.LOOTINGKEYWORDITEM_KEY,
+                true
+            );
+
+            LootingWishlistItem = Register(
+                EConfigType.BASIC,
+                Locales.LOOTINGWISHLISTITEM_KEY,
                 true
             );
 

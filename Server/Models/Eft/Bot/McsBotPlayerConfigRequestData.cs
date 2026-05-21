@@ -13,19 +13,14 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("PriceThreshold")]
         public required int PriceThreshold { get; set; }
 
-        [JsonPropertyName("ArmorLevelThreshold")]
-        public required int ArmorLevelThreshold { get; set; }
+        [JsonPropertyName("KeywordItemText")]
+        public required string KeywordItemText { get; set; }
 
-        // // 子弹穿伤
-        // [DataMember(Name = "BulletPenetrationThreshold")]
-        // public int BulletPenetrationThreshold;
+        [JsonPropertyName("LootingKeywordItem")]
+        public required bool LootingKeywordItem { get; set; }
 
-        // // 子弹肉伤
-        // [DataMember(Name = "BulletDamageThreshold")]
-        // public int BulletDamageThreshold;
-
-        [JsonPropertyName("LootingWishlishItem")]
-        public required bool LootingWishlishItem { get; set; }
+        [JsonPropertyName("LootingWishlistItem")]
+        public required bool LootingWishlistItem { get; set; }
 
         [JsonPropertyName("LootingQuestItem")]
         public required bool LootingQuestItem { get; set; }

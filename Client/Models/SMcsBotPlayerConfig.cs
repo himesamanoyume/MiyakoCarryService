@@ -5,9 +5,10 @@ namespace MiyakoCarryService.Client.Models
     {
         public int PriceThreshold;
 
-        public int ArmorLevelThreshold;
+        public string KeywordItemText;
+        public bool LootingKeywordItem;
 
-        public bool LootingWishlishItem;
+        public bool LootingWishlistItem;
 
         public bool LootingQuestItem;
 

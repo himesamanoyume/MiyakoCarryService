@@ -91,14 +91,15 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {packet.McsBotPlayerConfig.PriceThreshold}, ArmorLevelThreshold = {packet.McsBotPlayerConfig.ArmorLevelThreshold}, LootingWishlishItem = {packet.McsBotPlayerConfig.LootingWishlishItem}, LootingQuestItem = {packet.McsBotPlayerConfig.LootingQuestItem}, BlockItemType = {packet.McsBotPlayerConfig.BlockItemType}");
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {packet.McsBotPlayerConfig.PriceThreshold}, KeywordItemText = {packet.McsBotPlayerConfig.KeywordItemText}, LootingKeywordItem = {packet.McsBotPlayerConfig.LootingKeywordItem}, LootingWishlistItem = {packet.McsBotPlayerConfig.LootingWishlistItem}, LootingQuestItem = {packet.McsBotPlayerConfig.LootingQuestItem}, BlockItemType = {packet.McsBotPlayerConfig.BlockItemType}");
 
             McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
             {
                 McsLeadPlayerId = mcsLeadPlayer.ProfileId,
                 PriceThreshold = packet.McsBotPlayerConfig.PriceThreshold,
-                ArmorLevelThreshold = packet.McsBotPlayerConfig.ArmorLevelThreshold,
-                LootingWishlishItem = packet.McsBotPlayerConfig.LootingWishlishItem,
+                KeywordItemText = packet.McsBotPlayerConfig.KeywordItemText,
+                LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,
+                LootingWishlistItem = packet.McsBotPlayerConfig.LootingWishlistItem,
                 LootingQuestItem = packet.McsBotPlayerConfig.LootingQuestItem,
                 BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
             });
@@ -364,13 +365,14 @@ namespace MiyakoCarryService.Fika
                     McsBotPlayerConfig = new SMcsBotPlayerConfig
                     {
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-                        ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
-                        LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
+                        KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+                        LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+                        LootingWishlistItem = MiyakoCarryServicePlugin.LootingWishlistItem.Value,
                         LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     }
                 };
-                // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {MiyakoCarryServicePlugin.PriceThreshold.Value}, ArmorLevelThreshold = {MiyakoCarryServicePlugin.ArmorLevelThreshold.Value}, LootingWishlishItem = {MiyakoCarryServicePlugin.LootingWishlishItem.Value}, LootingQuestItem = {MiyakoCarryServicePlugin.LootingQuestItem.Value}, BlockItemType = {(int)MiyakoCarryServicePlugin.BlockItemType.Value}");
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {MiyakoCarryServicePlugin.PriceThreshold.Value}, KeywordItemText = {MiyakoCarryServicePlugin.KeywordItemText.Value}, LootingKeywordItem = {MiyakoCarryServicePlugin.LootingKeywordItem.Value}, LootingWishlistItem = {MiyakoCarryServicePlugin.LootingWishlistItem.Value}, LootingQuestItem = {MiyakoCarryServicePlugin.LootingQuestItem.Value}, BlockItemType = {(int)MiyakoCarryServicePlugin.BlockItemType.Value}");
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }

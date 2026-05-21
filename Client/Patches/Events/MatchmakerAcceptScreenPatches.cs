@@ -26,8 +26,9 @@ namespace MiyakoCarryService.Client.Patches.Events
 				{
 					McsLeadPlayerId = session.Profile.Id,
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-					ArmorLevelThreshold = MiyakoCarryServicePlugin.ArmorLevelThreshold.Value,
-					LootingWishlishItem = MiyakoCarryServicePlugin.LootingWishlishItem.Value,
+					KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+					LootingWishlistItem = MiyakoCarryServicePlugin.LootingWishlistItem.Value,
 					LootingQuestItem = MiyakoCarryServicePlugin.LootingQuestItem.Value,
 					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
 				}));

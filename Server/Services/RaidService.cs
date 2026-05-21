@@ -357,8 +357,9 @@ namespace MiyakoCarryService.Server.Services
                         {
                             McsLeadPlayerId = mcsLeadPlayerId,
                             PriceThreshold = 50000,
-                            ArmorLevelThreshold = 5,
-                            LootingWishlishItem = true,
+                            KeywordItemText = "",
+                            LootingKeywordItem = true,
+                            LootingWishlistItem = true,
                             LootingQuestItem = true,
                             BlockItemType = 0
                         };
