@@ -105,7 +105,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (!lootProp.IsWishListItem && !lootProp.IsHighPriceItem && !lootProp.IsQuestNeedItem)
+                if (!lootProp.IsHighPriceItem && !lootProp.IsKeywordItem)
                 {
                     continue;
                 }
@@ -206,6 +206,13 @@ namespace MiyakoCarryService.Client.Datas
 
                         // 容器已打开，等待一小段时间让物品刷新  
                         yield return new WaitForSeconds(0.5f);
+                    }
+
+                    // 如果是任务物品，则只是说话提醒，而不拾取
+                    if (item.QuestItem)
+                    {
+                        MiyakoCarryServicePlugin.Logger.LogWarning($"任务道具不拾取: {item.ShortName}");
+                        yield break;
                     }
 
                     // 优先尝试拾取到背包中

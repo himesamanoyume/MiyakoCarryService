@@ -97,7 +97,7 @@ namespace MiyakoCarryService.Fika
             {
                 McsLeadPlayerId = mcsLeadPlayer.ProfileId,
                 PriceThreshold = packet.McsBotPlayerConfig.PriceThreshold,
-                KeywordItemText = packet.McsBotPlayerConfig.KeywordItemText,
+                KeywordItemText = packet.KeywordItemText,
                 LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,
                 BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
             });
@@ -360,10 +360,10 @@ namespace MiyakoCarryService.Fika
                 var packet = new McsBotPlayerConfigPacket
                 {
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
+                    KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                     McsBotPlayerConfig = new SMcsBotPlayerConfig
                     {
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-                        KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     }

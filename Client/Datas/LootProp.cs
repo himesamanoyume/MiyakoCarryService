@@ -1,7 +1,9 @@
 
 
+using System;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 
@@ -13,8 +15,7 @@ namespace MiyakoCarryService.Client.Datas
         public McsAILeadPlayer McsAILeadPlayer;
         public TraderOffer Offer;
         public bool IsHighPriceItem = false;
-        public bool IsWishListItem = false;
-        public bool IsQuestNeedItem = false;
+        public bool IsKeywordItem = false;
         public bool IsBlockItem = false;
         
 
@@ -30,24 +31,22 @@ namespace MiyakoCarryService.Client.Datas
             IsHighPriceItem = Offer.Price >= McsAILeadPlayer.McsBotPlayerConfig.PriceThreshold;
         }
 
-        public void CheckWishListItem()
+        public bool CheckKeywordItem()
         {
-            var wishlistManager = McsAILeadPlayer.Player().Profile.WishlistManager;
-            if (wishlistManager != null)
+            var keywordArray = McsAILeadPlayer.McsBotPlayerConfig.KeywordItemText;
+            foreach (var keyword in keywordArray.Split(["||", ",", "，"], StringSplitOptions.RemoveEmptyEntries))
             {
-                IsWishListItem = wishlistManager.IsInWishlist(Item.TemplateId, true, out _);
+                if (Item.ShortName.McsLocalized().Contains(keyword) || Item.Name.McsLocalized().Contains(keyword))
+                {
+                    return true;
+                }
             }
-            IsWishListItem = false;
+            return false;
         }
 
         public void CheckBlockItem(EItemType itemType)
         {
             IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, itemType);
         }
-
-        // public bool CheckQuestNeedItem()
-        // {
-
-        // }
     }
 }

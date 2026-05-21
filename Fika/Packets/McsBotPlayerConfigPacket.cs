@@ -7,6 +7,7 @@ namespace MiyakoCarryService.Fika.Packets
 {
     public sealed class McsBotPlayerConfigPacket : BasePacket
     {
+        public string KeywordItemText;
         public SMcsBotPlayerConfig McsBotPlayerConfig;
 
         public McsBotPlayerConfigPacket()
@@ -17,12 +18,14 @@ namespace MiyakoCarryService.Fika.Packets
         public override void Deserialize(NetDataReader reader)  
         {  
             base.Deserialize(reader);
+            KeywordItemText = reader.GetString();
             McsBotPlayerConfig = reader.GetUnmanaged<SMcsBotPlayerConfig>();
         }  
     
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
+            writer.Put(KeywordItemText);
             writer.PutUnmanaged(McsBotPlayerConfig);
         } 
     }

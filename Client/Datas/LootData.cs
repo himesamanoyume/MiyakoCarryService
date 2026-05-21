@@ -71,11 +71,9 @@ namespace MiyakoCarryService.Client.Datas
                 lootProp = new LootProp(Item, Offer, mcsAILeadPlayer);
                 LootProps[mcsAILeadPlayer] = lootProp;
             }
-            lootProp.CheckWishListItem();
+            lootProp.CheckKeywordItem();
             lootProp.CheckHighPriceItem();
             lootProp.CheckBlockItem(ItemType);
-            // IsQuestNeedItem = this.CheckQuestNeedItem();
-            // IsKeywordItem = this.CheckKeywordItem();
         }
 
         public void ResetOffer()
