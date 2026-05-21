@@ -13,7 +13,7 @@
     "695207e8bcc1dd1e3c80dfcb declinePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "Order declined",
     "695207e8bcc1dd1e3c80dfcb completePlayerMessage 6952ced4bcc1dd1e3c80dfcb 0": "Order settled",
     "695207e8bcc1dd1e3c80dfcb changeQuestMessageText 6952ced4bcc1dd1e3c80dfcb 0": "This order cannot be refreshed",
-    "Mcs/A.Basic": "A. Basic | Not effective yet",
+    "Mcs/A.Basic": "A. Basic",
     "Mcs/B.Command": "B. Command",
     "Mcs/C.Player": "C. Player",
     "Mcs/FunctionEnabled": "Enabled",

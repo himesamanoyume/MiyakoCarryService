@@ -44,10 +44,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 _currentLootingRetries++;
                 if (_currentLootingRetries > 30)
                 {
+                    MiyakoCarryServicePlugin.Logger.LogWarning("重试超时");
                     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
                     _currentLootingRetries = 0;
-
                     return;
                 }
 
@@ -60,7 +60,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
 
                 // 到达判定
-                if (distance <= 4f && Math.Abs(offset.y) < 0.5f)
+                if (distance <= 4f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.TalkMsg(new McsMsg
                     {
@@ -79,7 +79,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (distance <= 5f)
                 {
                     BotOwner.SetTargetMoveSpeed(1f);
-                    BotOwner.SetPose(1f);
                     BotOwner.Steering.LookToMovingDirection();
                     BotOwner.Mover.Sprint(false);
                 }
@@ -87,6 +86,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
                 if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
+                    if (NavMesh.SamplePosition(targetPos, out var navMeshHit, 4f, -1))
+                    {
+                        var nearbyPos = navMeshHit.position;
+                        pathStatus = BotOwner.GoToPoint(nearbyPos, mustHaveWay: true);
+                    }
+                }
+
+                if (pathStatus != NavMeshPathStatus.PathComplete)
+                {
+                    MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");
                     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
                     mcsBotPlayerData.IsLooting = false;
                     return;
@@ -97,12 +106,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
-                {
-                    mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
-                    mcsBotPlayerData.IsLooting = false;
-                    return;
-                }
+                // if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+                // {
+                //     MiyakoCarryServicePlugin.Logger.LogWarning("取消掠夺");
+                //     mcsBotPlayerData.LootingTarget.IsNonNavigableItem = true;
+                //     mcsBotPlayerData.IsLooting = false;
+                //     return;
+                // }
 
                 _lastTimeDistance = distance;
             }

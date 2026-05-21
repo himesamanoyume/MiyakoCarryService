@@ -99,6 +99,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
+            IsNonNavigableItem = false;
             _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             IsItemInContainer = false;
             Refresh(mcsAILeadPlayer);
