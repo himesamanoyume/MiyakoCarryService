@@ -4,6 +4,7 @@ using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -53,9 +54,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 _lastTimeCheckDistance = Time.time + 2f;
 
-                var targetPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
-                var offset = BotOwner.Position - targetPos;
-                var distance = BotOwner.Position.McsSqrDistance(targetPos);
+                var lootPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
+                var offset = BotOwner.Position - lootPos;
+                var distance = BotOwner.Position.McsSqrDistance(lootPos);
+
+                Tools.BetterDestination(1f, lootPos, out var targetPos);
 
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
 
@@ -69,7 +72,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
-                    BotOwner.Steering.LookToPoint(targetPos);
+                    BotOwner.Steering.LookToPoint(lootPos);
                     mcsBotPlayerData.StartLooting();
                     _lastTimeDistance = Mathf.Infinity; // 重置卡脚检测
                     return;
@@ -84,15 +87,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 }
 
                 var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
-                if (pathStatus != NavMeshPathStatus.PathComplete)
-                {
-                    if (NavMesh.SamplePosition(targetPos, out var navMeshHit, 4f, -1))
-                    {
-                        var nearbyPos = navMeshHit.position;
-                        pathStatus = BotOwner.GoToPoint(nearbyPos, mustHaveWay: true);
-                    }
-                }
-
                 if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
                     MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");

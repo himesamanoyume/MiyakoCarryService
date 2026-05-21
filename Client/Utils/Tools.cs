@@ -8,6 +8,7 @@ using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -108,6 +109,34 @@ namespace MiyakoCarryService.Client.Utils
                 result.Add(itemData);
             }
             return result;
+        }
+
+        /// <summary>
+        /// 借鉴LootingBots
+        /// </summary>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        public static bool BetterDestination(float maxDistance, Vector3 destination, out Vector3 betterDestination)
+        {
+            var pointNearbyContainer = NavMesh.SamplePosition(
+                destination,
+                out NavMeshHit navMeshAlignedPoint,
+                maxDistance,
+                NavMesh.AllAreas
+            ) ? navMeshAlignedPoint.position : Vector3.zero;
+
+            var padding = destination - pointNearbyContainer;
+            padding.y = 0;
+            padding.Normalize();
+
+            betterDestination = NavMesh.SamplePosition(
+                destination - (padding * 1.5f),
+                out navMeshAlignedPoint,
+                maxDistance,
+                navMeshAlignedPoint.mask
+            ) ? navMeshAlignedPoint.position : pointNearbyContainer;
+
+            return betterDestination != Vector3.zero;
         }
     }
 }

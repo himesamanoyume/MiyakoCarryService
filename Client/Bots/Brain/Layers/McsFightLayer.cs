@@ -4,6 +4,7 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -126,19 +127,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                             for (int attempt = 0; attempt < 30; attempt++)
                             {
-                                if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                                if (Tools.BetterDestination(7f, newPos, out var targetPos))
                                 {
-                                    if (Mathf.Abs(navMeshHit1.position.y - mcsLeadPlayerPos.y) <= 2f)
+                                    if (Mathf.Abs(targetPos.y - mcsLeadPlayerPos.y) <= 2f)
                                     {
-                                        validPosition = navMeshHit1.position;
+                                        validPosition = targetPos;
                                         break;
                                     }
                                 }
                             }
 
-                            if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                            if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit, 7f, -1))
                             {
-                                validPosition = navMeshHit2.position;
+                                validPosition = navMeshHit.position;
                             }
 
                             if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
@@ -180,9 +181,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         rotated.y = 0;
                                         rotated *= 7f;
                                         rotated += UnityEngine.Random.insideUnitSphere;
-                                        if (NavMesh.SamplePosition(mcsLeadPlayerPos + rotated, out var hit, 1f, -1))
+                                        if (Tools.BetterDestination(1f, mcsLeadPlayerPos + rotated, out var targetPos))
                                         {
-                                            BotOwner.GoToSomePointData.SetPoint(hit.position);
+                                            BotOwner.GoToSomePointData.SetPoint(targetPos);
                                             return new Action(typeof(GoToProtectLogic), "Mcs:Protect");
                                         }
                                     }

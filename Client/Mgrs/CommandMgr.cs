@@ -432,11 +432,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
                     for (int attempt = 0; attempt < 30; attempt++)
                     {
-                        if (NavMesh.SamplePosition(newPos, out var navMeshHit1, 7f, -1))
+                        if (Tools.BetterDestination(7f, newPos, out var targetPos))
                         {
-                            if (Mathf.Abs(navMeshHit1.position.y - raycastHit.point.y) <= 2f)
+                            if (Mathf.Abs(targetPos.y - raycastHit.point.y) <= 2f)
                             {
-                                validPosition = navMeshHit1.position;
+                                validPosition = targetPos;
                                 break;
                             }
                         }
