@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EFT;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Utils

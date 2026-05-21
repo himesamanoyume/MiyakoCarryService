@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
@@ -12,10 +13,31 @@ namespace MiyakoCarryService.Client.Misc
     public class McsAILeadPlayer : AIBossPlayer
     {
         public McsBotPlayerConfig McsBotPlayerConfig;
-        public Player MyPlayer;
+        public Player McsLeadPlayer;
+        private WeakReference<GamePlayerOwner> _gamePlayerOwnerRef;
+        public GamePlayerOwner GamePlayerOwner
+        {
+            get
+            {
+                if (_gamePlayerOwnerRef.TryGetTarget(out var leadPlayeGamePlayerOwner))
+                {
+                    return leadPlayeGamePlayerOwner;
+                }
+                else
+                {
+                    var _gamePlayerOwner = McsLeadPlayer.GetComponentInChildren<GamePlayerOwner>();
+                    if (_gamePlayerOwner != null)
+                    {
+                        _gamePlayerOwnerRef = new(_gamePlayerOwner);
+                        return _gamePlayerOwner;
+                    }
+                }
+                return null;
+            }
+        }
         public McsAILeadPlayer(Player player, McsBotPlayerConfig mcsBotPlayerConfig) : base(player)
         {
-            MyPlayer = player;
+            McsLeadPlayer = player;
             McsBotPlayerConfig = mcsBotPlayerConfig;
         }
 
@@ -65,8 +87,8 @@ namespace MiyakoCarryService.Client.Misc
 
             foreach (var botOwner in mcsBotPlayerBotOwners)
             {
-                MyPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
-                MyPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, botOwner);
+                McsLeadPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
+                McsLeadPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, botOwner);
                 closestEnemy.IsVisible = true;
                 botOwner.Memory.GoalEnemy = closestEnemy;
                 closestEnemy.PriorityIndex = 0;

@@ -19,6 +19,7 @@ using BepInEx.Bootstrap;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Patches.Inventory;
 
 namespace MiyakoCarryService.Client
 {
@@ -178,6 +179,10 @@ namespace MiyakoCarryService.Client
             new ContextInteractionsClassPatch().Enable();
             new GetProfilesPatch().Enable();
             new MenuScreenPatch().Enable();
+            new TryFindChangedContainerPatch().Enable();
+            new CanModifyItemPatch().Enable();
+            new ItemSubtract1Patch().Enable();
+            new ItemSubtract2Patch().Enable();
 
             if (FikaInstalled)
             {

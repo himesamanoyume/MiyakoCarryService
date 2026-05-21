@@ -62,6 +62,8 @@
     "Mcs/TeamForceTeleportCommand TargetName": "清除全队护航仇恨、并尝试使其全部传送至当前位置",
     "Mcs/ForceTeleportCommand Name": "强制传送",
     "Mcs/ForceTeleportCommand TargetName": "清除护航仇恨、并尝试使其传送至当前位置",
+    "Mcs/OpenInventoryCommand Name": "打开背包",
+    "Mcs/OpenInventoryCommand TargetName": "远程打开护航的背包",
     "Mcs/CancelCommand Name": "取消",
     "Mcs/CancelCommand TargetName": "取消下达指令",
     "Mcs/ReportAboutEnemyCommand Name": "报告敌人方位",

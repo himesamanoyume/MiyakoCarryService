@@ -534,6 +534,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(ForceTeleportCommand(ForceTeleportCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(OpenInventoryCommand(OpenInventoryCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
 
             if (actionsReturnClass != null)
@@ -614,6 +615,20 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
+        public ActionsTypesClass OpenInventoryCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = Locales.OPENINVENTORYCOMMAND_NAME,
+                TargetName = Locales.OPENINVENTORYCOMMAND_TARGETNAME,
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
+            };
+        }
+
         public ActionsTypesClass CancelCommand(Action action)
         {
             return new ActionsTypesClass
@@ -662,6 +677,38 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     botOwner.Memory.GoalTarget.Clear();
                     botOwner.Memory.GoalEnemy = null;
+                }
+            }
+            CloseCommandMenuAction();
+        }
+
+        public void OpenInventoryCommandAction(Player mcsBotPlayer)
+        {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var itemOwners = gameWorld.ItemOwners;
+            foreach (var itemOwner in itemOwners)
+            {
+                var rootItem = itemOwner.Key.RootItem;
+                if (!rootItem.IsPlayerInventory)
+                {
+                    continue;
+                }
+
+                var profileId = rootItem.Owner?.ID;
+                if (string.IsNullOrEmpty(profileId))
+                {
+                    continue;
+                }
+
+                if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is TraderControllerClass traderControllerClass)
+                {
+                    var inventoryActionClass = new InventoryActionClass
+                    {
+                        owner = _gamePlayerOwner,
+                        rootItem = rootItem,
+                        lootItemOwner = traderControllerClass
+                    };
+                    inventoryActionClass.method_3();
                 }
             }
             CloseCommandMenuAction();

@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<Player> _leadPlayeRef;
         public Player LeadPlayer => _leadPlayeRef.TryGetTarget(out var leadPlayer) ? leadPlayer : null;
         public List<BotBehavior> BotBehaviors { get; private set; }
+        public GamePlayerOwner McsLeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         private LootData _lootingTarget = null;

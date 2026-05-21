@@ -62,6 +62,8 @@
     "Mcs/TeamForceTeleportCommand TargetName": "Clear goal enemy from all carry service players and attempt to teleport them to your current location",
     "Mcs/ForceTeleportCommand Name": "Force Teleport",
     "Mcs/ForceTeleportCommand TargetName": "Clear carry service player goal enemy and attempt to teleport them to your current location",
+    "Mcs/OpenInventoryCommand Name": "Open Inventory",
+    "Mcs/OpenInventoryCommand TargetName": "Open carry service player inventory remotely",
     "Mcs/CancelCommand Name": "Cancel",
     "Mcs/CancelCommand TargetName": "Cancel the command menu",
     "Mcs/ReportAboutEnemy Name": "Report Enemy Position",

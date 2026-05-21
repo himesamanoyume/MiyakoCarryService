@@ -4,6 +4,14 @@ global using TraderUtilsClass = GClass3130;
 global using IOperationClass = GInterface438;
 global using ContainerClass = GClass3248;
 global using EFTVersionInfoClass = Class1123;
+global using SearchControllerClass = GClass2234;
+global using ContainerDataClass = GClass1802;
+global using InventoryActionClass = GetActionsClass.Class1748;
+global using ItemSubtractClass1 = EFT.Player.PlayerInventoryController.Class1213;
+global using ItemSubtractClass2 = EFT.Player.PlayerInventoryController.Class1214;
+global using UnknownItemManipulationClass = GClass1566;
+global using ItemLockedClass = InteractionsHandlerClass.GClass1606;
+global using CannotMoveItemDuringRaidClass = InteractionsHandlerClass.GClass1600;
 
 // 意图
 global using BaseIntent = GClass26;
