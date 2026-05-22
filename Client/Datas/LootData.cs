@@ -5,7 +5,6 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
@@ -19,8 +18,7 @@ namespace MiyakoCarryService.Client.Datas
         public TraderOffer Offer;
         public bool IsItemInContainer = false;
         public bool IsMoney = false;
-        public bool IsLabyrinthSolvePuzzleItem = false;
-        public bool IsInSecureContainerItem = false;
+        // public bool IsInSecureContainerItem = false;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -31,7 +29,7 @@ namespace MiyakoCarryService.Client.Datas
         {
             ResetOffer();
             CheckItemInteresting(mcsAILeadPlayer);
-            CheckSecureContainerItem();
+            // CheckSecureContainerItem();
         }
 
         public void CheckItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
@@ -55,15 +53,15 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        public void CheckSecureContainerItem()
-        {
-            var parentItem = Item.CurrentAddress?.Container?.ParentItem;
-            if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
-            {
-                IsInSecureContainerItem = true;
-            }
-            IsInSecureContainerItem = false;
-        }
+        // public void CheckSecureContainerItem()
+        // {
+        //     var parentItem = Item.CurrentAddress?.Container?.ParentItem;
+        //     if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
+        //     {
+        //         IsInSecureContainerItem = true;
+        //     }
+        //     IsInSecureContainerItem = false;
+        // }
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {

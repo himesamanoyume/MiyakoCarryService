@@ -8,5 +8,6 @@ namespace MiyakoCarryService.Client.Models
         public EPhraseTrigger PhraseTrigger = EPhraseTrigger.None;
         public Vector3? Position = null;
         public string Key = null;
+        public string Key2 = null;
     }
 }

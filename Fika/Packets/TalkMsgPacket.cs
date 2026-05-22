@@ -10,6 +10,7 @@ namespace MiyakoCarryService.Fika.Packets
         public EPhraseTrigger PhraseTrigger;
         public Vector3? Position;
         public string Key;
+        public string Key2;
 
         public TalkMsgPacket()
         {
@@ -22,6 +23,7 @@ namespace MiyakoCarryService.Fika.Packets
             PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
             Position = reader.GetNullableUnmanaged<Vector3>();
             Key = reader.GetString();
+            Key2 = reader.GetString();
         }  
     
         public override void Serialize(NetDataWriter writer)  
@@ -30,6 +32,7 @@ namespace MiyakoCarryService.Fika.Packets
             writer.PutEnum(PhraseTrigger);
             writer.PutNullableUnmanaged(Position);
             writer.Put(Key);
+            writer.Put(Key2);
         } 
     }
 }

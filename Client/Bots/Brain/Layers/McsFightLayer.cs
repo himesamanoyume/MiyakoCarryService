@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 McsBotPlayerData.ShouldHoldPosition = false;
                 McsBotPlayerData.ShouldGoToPoint = false;
+                McsBotPlayerData.IsLooting = false;
             }
 
             BotOwner.TalkMsg(new McsMsg

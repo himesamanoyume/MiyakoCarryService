@@ -75,7 +75,8 @@ namespace MiyakoCarryService.Fika
                 {
                     PhraseTrigger = packet.PhraseTrigger, 
                     Position = packet.Position,
-                    Key = packet.Key
+                    Key = packet.Key,
+                    Key2 = packet.Key2
                 });
             }
         }
@@ -334,6 +335,7 @@ namespace MiyakoCarryService.Fika
                     PhraseTrigger = @event.Msg.PhraseTrigger,
                     Position = @event.Msg.Position,
                     Key = @event.Msg.Key,
+                    Key2 = @event.Msg.Key2,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

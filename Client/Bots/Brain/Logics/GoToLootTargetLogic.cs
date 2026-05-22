@@ -23,6 +23,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Start()
         {
             base.Start();
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.GoLoot
+            });
         }
 
         public override void Stop()
@@ -45,7 +49,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 _currentLootingRetries++;
                 if (_currentLootingRetries > 30)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogWarning("重试超时");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("重试超时");
                     mcsBotPlayerData.IsLooting = false;
                     _currentLootingRetries = 0;
                     return;
@@ -59,7 +63,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 Tools.BetterDestination(3f, lootPos, out var targetPos);
 
-                MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, 距离: {distance}");
 
                 // 到达判定
                 if (distance <= 9f && Math.Abs(offset.y) < 2f)
@@ -67,7 +71,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnLoot,
-                        Key = mcsBotPlayerData.LootingTarget.Item.Name
+                        Key = mcsBotPlayerData.LootingTarget.Item.Name,
+                        Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
                     });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
@@ -88,7 +93,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
                 if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");
                     mcsBotPlayerData.IsLooting = false;
                     return;
                 }

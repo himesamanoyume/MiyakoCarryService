@@ -218,9 +218,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         // 尝试去拿战利品
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
                     }
-
-                    // 取消当前锁定的目标战利品
-                    // McsBotPlayerData.UnlockLootingTarget();
                 }
 
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();

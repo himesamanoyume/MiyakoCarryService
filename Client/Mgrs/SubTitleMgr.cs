@@ -35,7 +35,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
                 {EPhraseTrigger.Roger, Locales.ROGER},
                 {EPhraseTrigger.OnPosition, Locales.ONPOSITION},
+                {EPhraseTrigger.GoLoot, Locales.GOLOOT},
                 {EPhraseTrigger.OnLoot, Locales.ONLOOT},
+                {EPhraseTrigger.LootGeneric, Locales.LOOTGENERIC},
                 {EPhraseTrigger.Clear, Locales.CLEAR},
                 {EPhraseTrigger.LeftFlank, Locales.LEFTFLANK},
                 {EPhraseTrigger.RightFlank, Locales.RIGHTFLANK},
@@ -44,18 +46,18 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.EnemyDown, Locales.ENEMYDOWN},
                 {EPhraseTrigger.Going, Locales.GOING},
                 {EPhraseTrigger.HoldPosition, Locales.HOLDPOSITION},
-                // {EPhraseTrigger.LootBody, Locales.FOUNDHIGHVALUELOOT},
-                // {EPhraseTrigger.LootContainer , Locales.FOUNDHIGHVALUELOOT},
-                // {EPhraseTrigger.LootGeneric , Locales.FOUNDHIGHVALUELOOT},
-                // {EPhraseTrigger.LootNothing , Locales.FOUNDHIGHVALUELOOT},
                 {EPhraseTrigger.Regroup, Locales.REGROUP},
-                {EPhraseTrigger.StartHeal, Locales.STARTHEAL}
+                {EPhraseTrigger.StartHeal, Locales.STARTHEAL},
+                // 空短语、空内容，用于传递任意Key实现任何对话内容
+                {EPhraseTrigger.PhraseNone, ""}
             };
 
             _phraseHandleMaps = new()
             {
                 {EPhraseTrigger.OnFirstContact, HandleOnFirstContact},
-                {EPhraseTrigger.OnLoot, HandleOnLoot}
+                {EPhraseTrigger.OnLoot, HandleOnLoot},
+                {EPhraseTrigger.LootGeneric, HandleLootGeneric},
+                {EPhraseTrigger.PhraseNone, HandlePhraseNone},
             };
         }
 
@@ -159,8 +161,19 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized());
+            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized(), msg.Key2.McsLocalized());
             return content;
+        }
+
+        public string HandleLootGeneric(string content, McsMsg msg, Player mcsLeadPlayer)
+        {
+            content = string.Format(Locales.LOOTGENERIC.McsLocalized(), msg.Key.McsLocalized());
+            return content;
+        }
+
+        public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer)
+        {
+            return msg.Key.McsLocalized();
         }
 
         public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)

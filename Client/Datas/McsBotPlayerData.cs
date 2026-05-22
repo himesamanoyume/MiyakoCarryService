@@ -12,6 +12,8 @@ using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -23,7 +25,7 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<Player> _leadPlayeRef;
         public Player LeadPlayer => _leadPlayeRef.TryGetTarget(out var leadPlayer) ? leadPlayer : null;
         public List<BotBehavior> BotBehaviors { get; private set; }
-        public GamePlayerOwner McsLeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
+        public GamePlayerOwner LeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         private LootData _lootingTarget = null;
@@ -101,7 +103,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (!lootProp.IsHighPriceItem && !lootProp.IsKeywordItem)
+                if (!lootProp.IsHighPriceItem && (!McsAILeadPlayer.McsBotPlayerConfig.LootingKeywordItem || !lootProp.IsKeywordItem))
                 {
                     continue;
                 }
@@ -142,7 +144,7 @@ namespace MiyakoCarryService.Client.Datas
 
         private IEnumerator InternalStartLooting()
         {
-            MiyakoCarryServicePlugin.Logger.LogWarning("开始掠夺目标战利品");
+            // MiyakoCarryServicePlugin.Logger.LogWarning("开始掠夺目标战利品");
             try
             {
                 if (LootingTarget != null)
@@ -157,7 +159,6 @@ namespace MiyakoCarryService.Client.Datas
                     // 检查物品是否还存在  
                     if (item == null || item.Parent == null)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogWarning($"Item {LootingTarget.Item?.ShortName} no longer exists");
                         yield break;
                     }
 
@@ -165,14 +166,14 @@ namespace MiyakoCarryService.Client.Datas
                     var rootItem = item.GetRootItem();
                     if (rootItem == null || rootItem.Owner == null)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find container for item");
+                        // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find container for item");
                         yield break;
                     }
 
                     var gameWorld = Singleton<GameWorld>.Instance;
                     if (!gameWorld.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
                     {
-                        MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find item owner");
+                        // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find item owner");
                         yield break;
                     }
 
@@ -193,21 +194,31 @@ namespace MiyakoCarryService.Client.Datas
                             yield return new WaitForSeconds(2.5f);
 
                             // 再次检查容器是否打开成功  
-                            if (lootableContainer.DoorState != EDoorState.Open)
+                            if (lootableContainer.DoorState < EDoorState.Open)
                             {
-                                MiyakoCarryServicePlugin.Logger.LogWarning("Failed to open container");
+                                BotOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.PhraseNone,
+                                    Key = Locales.ONLOOTOPENCONTAINERFAILED
+                                });
+                                // MiyakoCarryServicePlugin.Logger.LogWarning("Failed to open container");
                                 yield break;
                             }
                         }
 
                         // 容器已打开，等待一小段时间让物品刷新  
-                        yield return new WaitForSeconds(0.5f);
+                        yield return new WaitForSeconds(3f);
                     }
 
                     // 如果是任务物品，则只是说话提醒，而不拾取
                     if (item.QuestItem)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogWarning($"任务道具不拾取: {item.ShortName}");
+                        BotOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.PhraseNone,
+                            Key = Locales.ONLOOTQUESTITEM
+                        });
+                        // MiyakoCarryServicePlugin.Logger.LogWarning($"任务道具不拾取: {item.ShortName}");
                         yield break;
                     }
 
@@ -228,13 +239,21 @@ namespace MiyakoCarryService.Client.Datas
 
                     if (pickupSuccess)
                     {
-                        var containerText = LootingTarget.IsItemInContainer ? "从容器中" : "";
-                        MiyakoCarryServicePlugin.Logger.LogWarning(string.Format("{0} 从 {1} 拾取了 {2}", BotOwner.Profile.Nickname, containerText, item.ShortName.McsLocalized()));
+                        BotOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.LootGeneric,
+                            Key = item.Name
+                        });
                     }
                     else
                     {
                         // 护航说话并提示空间不足
-                        MiyakoCarryServicePlugin.Logger.LogWarning($"No space for item: {item.ShortName}");
+                        BotOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.PhraseNone,
+                            Key = Locales.ONLOOTNOSPACE
+                        });
+                        // MiyakoCarryServicePlugin.Logger.LogWarning($"No space for item: {item.ShortName}");
                     }
                 }
             }
