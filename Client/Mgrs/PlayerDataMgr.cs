@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             continue;
                         }
 
-                        closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.RootTransform.position, 50f);
+                        closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.RootTransform.position, 30f);
                     }
 
                     // 收集分批所需数据

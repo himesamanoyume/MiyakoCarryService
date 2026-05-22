@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 McsBotPlayerData.ShouldHoldPosition = false;
                 McsBotPlayerData.ShouldGoToPoint = false;
+                McsBotPlayerData.IsLooting = false;
             }
             
             if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())

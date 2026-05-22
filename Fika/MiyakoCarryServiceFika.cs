@@ -255,8 +255,10 @@ namespace MiyakoCarryService.Fika
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.GetMcsBotPlayerData().ShouldGoToPoint = false;
-                botOwner.GetMcsBotPlayerData().ShouldHoldPosition = false;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                mcsBotPlayerData.ShouldGoToPoint = false;
+                mcsBotPlayerData.ShouldHoldPosition = false;
+                mcsBotPlayerData.IsLooting = false;
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Regroup,

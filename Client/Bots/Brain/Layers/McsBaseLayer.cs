@@ -518,7 +518,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndLootingTarget()
         {
-            return !McsBotPlayerData.IsRunningCoroutine && !McsBotPlayerData.IsLooting;
+            return !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting;
         }
 
         protected virtual bool ShouldShootImmediately()
