@@ -6,6 +6,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string COMMAND = "Mcs/B.Command";
         public const string PLAYER = "Mcs/C.Player";
         public const string DEBUG = "Mcs/Z.Debug";
+        public const string ENABLELOOTING_KEY = "Mcs/EnableLooting Key";
+        public const string ENABLELOOTING_DESCRIPTION = "Mcs/EnableLooting Description";
         public const string PRICETHRESHOLD_KEY = "Mcs/PriceThreshold Key";
         public const string PRICETHRESHOLD_DESCRIPTION = "Mcs/PriceThreshold Description";
         public const string KEYWORDITEMTEXT_KEY = "Mcs/KeywordItemText Key";

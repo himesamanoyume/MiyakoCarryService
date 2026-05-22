@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Client
 
         #region BASIC
 
+        public static ConfigEntry<bool> EnableLooting;
         public static ConfigEntry<int> PriceThreshold;
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
@@ -346,6 +347,13 @@ namespace MiyakoCarryService.Client
         private void SetupConfig()
         {
             #region BASIC
+
+            EnableLooting = Register(
+                EConfigType.BASIC,
+                Locales.ENABLELOOTING_KEY,
+                true,
+                Locales.ENABLELOOTING_DESCRIPTION
+            );
 
             PriceThreshold = Register(
                 EConfigType.BASIC,

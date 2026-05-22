@@ -10,6 +10,9 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("McsLeadPlayerId")]
         public required MongoId McsLeadPlayerId { get; set; }
 
+        [JsonPropertyName("EnableLooting")]
+        public required bool EnableLooting { get; set; }
+
         [JsonPropertyName("PriceThreshold")]
         public required int PriceThreshold { get; set; }
 

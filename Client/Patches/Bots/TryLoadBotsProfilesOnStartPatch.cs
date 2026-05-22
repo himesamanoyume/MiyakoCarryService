@@ -116,6 +116,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     mcsBotPlayerConfig = new McsBotPlayerConfig
                     {
                         McsLeadPlayerId = leadPlayer.ProfileId,
+                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,

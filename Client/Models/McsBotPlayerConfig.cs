@@ -10,6 +10,9 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "McsLeadPlayerId")]
         public MongoID McsLeadPlayerId;
 
+        [DataMember(Name = "EnableLooting")]
+        public bool EnableLooting;
+
         [DataMember(Name = "PriceThreshold")]
         public int PriceThreshold;
 

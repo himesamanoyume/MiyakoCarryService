@@ -367,6 +367,7 @@ namespace MiyakoCarryService.Fika
                     KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                     McsBotPlayerConfig = new SMcsBotPlayerConfig
                     {
+                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value

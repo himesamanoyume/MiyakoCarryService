@@ -356,6 +356,7 @@ namespace MiyakoCarryService.Server.Services
                         return new McsBotPlayerConfigRequestData
                         {
                             McsLeadPlayerId = mcsLeadPlayerId,
+                            EnableLooting = true,
                             PriceThreshold = 50000,
                             KeywordItemText = "",
                             LootingKeywordItem = true,
