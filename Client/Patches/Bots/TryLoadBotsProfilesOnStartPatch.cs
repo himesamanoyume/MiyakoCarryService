@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
+        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.TryLoadBotsProfilesOnStart));
 
@@ -170,7 +170,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         botOwner.Settings = settings;
 
                         McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
-                        SubTitleMgr.CreateSubTitle(botOwner.Profile);
+                        SubtitlesMgr.CreateSubTitle(botOwner.Profile);
 
                         if (leadPlayer.BotsGroup != null)
                         {

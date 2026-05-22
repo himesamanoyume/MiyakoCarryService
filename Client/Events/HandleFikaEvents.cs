@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Events
 {
-    public sealed class SubTitleMgrHandleFikaEvent : IMcsEvent
+    public sealed class SubtitlesMgrHandleFikaEvent : IMcsEvent
     {
         public MongoID McsLeadPlayerId { get; set; }
         public MongoID McsBotPlayerId { get; set; }

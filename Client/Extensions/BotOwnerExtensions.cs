@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Extensions
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
+        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
         
@@ -51,7 +51,7 @@ namespace MiyakoCarryService.Client.Extensions
                 {
                     return;
                 }
-                SubTitleMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, msg);
+                SubtitlesMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, msg);
             }
 
             public List<BotBehavior> GetBotBehaviors()

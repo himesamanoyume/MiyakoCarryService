@@ -15,12 +15,12 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class SubTitleMgr : BaseMgr<SubTitleMgr>
+    public sealed class SubtitlesMgr : BaseMgr<SubtitlesMgr>
     {
         private GameObject _mcsDialogScreen;
         private Transform _subsContainer;
         private GameObject _subtitlesViewTemplate;
-        private Dictionary<MongoID, SubTitle> _subTitles = new();
+        private Dictionary<MongoID, Subtitles> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
         // public Action<MongoID, MongoID, McsMsg> HandleFikaEvent;
@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject, MonoBehaviourSingleton<CommonUI>.Instance.transform.GetChild(0));
                     var _traderDialogScreen = _mcsDialogScreen.transform.GetComponentInChildren<TraderDialogScreen>();
                     Destroy(_traderDialogScreen);
-                    _mcsDialogScreen.name = "Mcs SubTitle Screen";
+                    _mcsDialogScreen.name = "Mcs Subtitles Screen";
                     for (int i = 0; i < _mcsDialogScreen.transform.childCount; i++)
                     {
                         var childContainer = _mcsDialogScreen.transform.GetChild(i);
@@ -89,7 +89,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
                     var subtitlesView = _subsContainer.GetChild(0).GetComponent<SubtitlesView>();
                     _subtitlesViewTemplate = subtitlesView.gameObject;
-                    _subtitlesViewTemplate.transform.name = "McsBotPlayerSubtitle";
+                    _subtitlesViewTemplate.transform.name = "McsBotPlayerSubtitles";
                     _mcsDialogScreen.SetActive(true);
                     subtitlesView.HideGameObject();
                     break;
@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                     else
                     {
-                        EventMgr.Notify(new SubTitleMgrHandleFikaEvent
+                        EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
                         {
                             McsLeadPlayerId = mcsLeadPlayer.ProfileId,
                             McsBotPlayerId = mcsBotPlayer.ProfileId,
@@ -178,6 +178,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
         {
+            if (!MiyakoCarryServicePlugin.EnableSubtitles.Value)
+            {
+                return;
+            }
+
             _talkContents.TryGetValue(msg.PhraseTrigger, out var talkContent);
             talkContent = talkContent.McsLocalized();
             if (string.IsNullOrEmpty(talkContent))
@@ -208,7 +213,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             cloneSubtitleViewGameObject.transform.SetParent(_subsContainer);
 
-            var cloneSubTitle = new SubTitle(_gameloop, cloneSubtitleView, mcsBotPlayerProfile);
+            var cloneSubTitle = new Subtitles(_gameloop, cloneSubtitleView, mcsBotPlayerProfile);
             cloneSubTitle.Hide(0f);
             _subTitles[mcsBotPlayerProfile.Id] = cloneSubTitle;
         }
@@ -223,7 +228,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _subTitles.Clear();
         }
 
-        public class SubTitle
+        public class Subtitles
         {
             public SubtitlesView SubtitlesView;
             private TMP_Text _textField;
@@ -233,7 +238,7 @@ namespace MiyakoCarryService.Client.Mgrs
             private Profile _mcsBotPlayerProfile;
             private float _colddown;
 
-            public SubTitle(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
+            public Subtitles(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
             {
                 _lastPhraseTrigger = EPhraseTrigger.None;
                 _mcsBotPlayerProfile = mcsBotPlayerProfile;

@@ -66,6 +66,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> TeammateHighlight;
         public static ConfigEntry<KeyboardShortcut> TeammateHighlightHotKey;
         public static ConfigEntry<Color> TeammateHighlightColor;
+        public static ConfigEntry<bool> EnableSubtitles;
 
         #endregion
 
@@ -401,6 +402,12 @@ namespace MiyakoCarryService.Client
                 EConfigType.PLAYER,
                 Locales.TEAMMATEHIGHLIGHTCOLOR_KEY,
                 Draw.TranslucentTianyi.Rgb
+            );
+
+            EnableSubtitles = Register(
+                EConfigType.PLAYER,
+                Locales.ENABLESUBTITLES_KEY,
+                true
             );
 
             #endregion

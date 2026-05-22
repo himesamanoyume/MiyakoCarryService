@@ -25,12 +25,12 @@ namespace MiyakoCarryService.Fika
     {
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        private SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
+        private SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         public void InitMcsFika()
         {
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
-            EventMgr.Subscribe<SubTitleMgrHandleFikaEvent>(SendTalkMsgPacket, this);
+            EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
             _handleActionsMap = new()
@@ -71,7 +71,7 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
-                SubTitleMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
+                SubtitlesMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
                 {
                     PhraseTrigger = packet.PhraseTrigger, 
                     Position = packet.Position,
@@ -317,7 +317,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkMsgPacket(SubTitleMgrHandleFikaEvent @event)
+        public void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
         {
             // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 TalkMsgPacket");
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);

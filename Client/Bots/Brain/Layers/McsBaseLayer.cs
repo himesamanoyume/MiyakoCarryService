@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return Name;
         }
 
-        protected SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
+        protected SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         public override bool IsCurrentActionEnding()
         {

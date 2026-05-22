@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
         }
 
-        private static SubTitleMgr SubTitleMgr => MgrAccessor.Get<SubTitleMgr>();
+        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAILeadPlayer mcsAILeadPlayer)
         {
@@ -337,7 +337,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     continue;
                 }
-                SubTitleMgr.CreateSubTitle(mcsBotPlayer.Profile);
+                SubtitlesMgr.CreateSubTitle(mcsBotPlayer.Profile);
             }
         }
 

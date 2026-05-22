@@ -136,7 +136,7 @@ namespace MiyakoCarryService.Client
             BrainMgr.Enable();
             PlayerDataMgr.Enable();
             LootDataMgr.Enable();
-            SubTitleMgr.Enable();
+            SubtitlesMgr.Enable();
             CommandMgr.Enable();
             HighlightMgr.Enable();
 
