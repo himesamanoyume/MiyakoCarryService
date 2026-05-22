@@ -38,6 +38,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Stop()
         {
             base.Stop();
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.IsLooting = false;
+            }
         }
 
         public override void Update(CustomLayer.ActionData data)

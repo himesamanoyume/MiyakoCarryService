@@ -90,6 +90,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string GOING = "Mcs/Going";
         public const string HOLDPOSITION = "Mcs/HoldPosition";
         public const string STARTHEAL = "Mcs/StartHeal";
+        public const string ONFRIENDLYDOWN = "Mcs/OnFriendlyDown";
         public const string OPENMCSBOTPLAYERINVENTORY = "Mcs/OpenMcsBotPlayerInventory";
         public const string RETURNTOMAINCHAR = "Mcs/ReturnToMainChar";
         public const string MCSINVENTORYMODE = "Mcs/McsInventoryMode";

@@ -1,8 +1,12 @@
+using System.Linq;
 using System.Reflection;
 using EFT;
 using EFT.HealthSystem;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -51,6 +55,52 @@ namespace MiyakoCarryService.Client.Patches.Events
             var headHp = __instance.GetBodyPartHealth(EBodyPart.Head);
             var chestHp = __instance.GetBodyPartHealth(EBodyPart.Chest);
             var isDead = commonHp.AtMinimum || headHp.AtMinimum || chestHp.AtMinimum;
+
+            if (isDead)
+            {
+                if (isMcsBotInjuredPlayer)
+                {
+                    var mcsLeadPlayer = ___Player.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer;
+                    var mcsBotPlayerBotOwner = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
+                    if (mcsBotPlayerBotOwner != null)
+                    {
+                        EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
+                        {
+                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                            McsBotPlayerId = mcsBotPlayerBotOwner.ProfileId,
+                            Msg = new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.OnFriendlyDown
+                            }
+                        });
+                    }
+                }
+                else if (isMcsBotAttacker && !isMcsLeadInjuredPlayer)
+                {
+                    EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
+                    {
+                        McsLeadPlayerId = attacker.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer.ProfileId,
+                        McsBotPlayerId = attacker.ProfileId,
+                        Msg = new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.EnemyDown
+                        }
+                    });
+                }
+                else if (isMcsLeadInjuredPlayer)
+                {
+                    var mcsLeadPlayer = ___Player.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer;
+                    var mcsBotPlayerBotOwner = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
+                    if (mcsBotPlayerBotOwner != null)
+                    {
+                        EventMgr.Notify(new OnMcsLeadPlayerDownEvent
+                        {
+                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                            McsBotPlayerId = mcsBotPlayerBotOwner.ProfileId
+                        });
+                    }
+                }
+            }
 
             if (isMcsBotAttacker && isMcsLeadInjuredPlayer)
             {

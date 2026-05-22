@@ -111,6 +111,23 @@ namespace MiyakoCarryService.Client.Mgrs
             return null;
         }
 
+        public IEnumerable<BotOwner> GetAllAliveMcsSquadMembersByMcsLeadId(MongoID mcsLeadPlayerId)
+        {
+            _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
+            
+            if (_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
+            {
+                foreach (var botOwner in squadMembers.Values)
+                {
+                    if (botOwner.HealthController.IsAlive)
+                    {
+                        yield return botOwner;
+                    }
+                }
+            }
+            yield return null;
+        }
+
         public bool IsMcsBotPlayer(MongoID mcsBotPlayerId)
         {
             return _mcsBotPlayerIds.Contains(mcsBotPlayerId);
