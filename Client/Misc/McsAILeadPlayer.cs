@@ -49,6 +49,11 @@ namespace MiyakoCarryService.Client.Misc
                     //     return;
                     // }
 
+                    if (!enemyInfo.IsVisible)
+                    {
+                        continue;
+                    }
+
                     list.Add(enemyInfo);
                 }
             }

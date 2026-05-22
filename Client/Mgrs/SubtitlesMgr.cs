@@ -48,8 +48,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.HoldPosition, Locales.HOLDPOSITION},
                 {EPhraseTrigger.Regroup, Locales.REGROUP},
                 {EPhraseTrigger.StartHeal, Locales.STARTHEAL},
-                // 空短语、空内容，用于传递任意Key实现任何对话内容
-                {EPhraseTrigger.PhraseNone, ""}
+                // 空短语、临时内容，用于传递任意Key实现任何对话内容
+                {EPhraseTrigger.PhraseNone, "PhraseNone"}
             };
 
             _phraseHandleMaps = new()

@@ -154,7 +154,7 @@ namespace MiyakoCarryService.Client.Datas
 
                     var player = BotOwner.GetPlayer;
                     var inventoryController = player.InventoryController;
-                    var item = LootingTarget.Item;
+                    var item = LootingTarget?.Item;
 
                     // 检查物品是否还存在  
                     if (item == null || item.Parent == null)
