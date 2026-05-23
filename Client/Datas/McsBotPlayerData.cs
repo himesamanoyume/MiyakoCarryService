@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Datas
