@@ -43,20 +43,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
-                if (ShouldShootImmediately())
-                {
-                    return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");
-                }
-
-                if (IsShootFromCoverConditionAllFine())
-                {
-                    return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
-                }
-
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
                 if (goalEnemy == null)
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
+                }
+
+                CheckWeaponSwitch(goalEnemy);
+
+                if (ShouldUseMeleeAttack(goalEnemy))
+                {
+                    return new Action(typeof(MeleeAttackLogic), "Mcs:MeleeAttack");
+                }
+
+                if (BotOwner.WeaponManager.HaveBullets && ShouldShootImmediately())
+                {
+                    return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");
+                }
+
+                if (BotOwner.WeaponManager.HaveBullets && IsShootFromCoverConditionAllFine())
+                {
+                    return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
                 }
 
                 if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
@@ -91,7 +98,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (safeFire)
                     {
-                        if (goalEnemy.IsVisible)
+                        if (goalEnemy.IsVisible && BotOwner.WeaponManager.HaveBullets)
                         {
                             if (!BotOwner.GoToSomePointData.IsCome())
                             {
@@ -109,14 +116,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        
                         if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f)
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
                         else
                         {
-                            
                             Vector3? validPosition = null;
                             var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
                             var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();

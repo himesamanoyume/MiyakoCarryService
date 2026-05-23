@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
-using HarmonyLib;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
@@ -10,6 +10,7 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -27,6 +28,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _lastPatrolTime = Time.time;
         protected float _lastGoToPointTime = Time.time;
         protected float _lastShootTime = Time.time;
+        protected float _nextWeaponSwitchTime = 0f;
+        protected float _nextMeleeCheckTime = 0f;
+        protected const float WEAPON_SWITCH_COOLDOWN = 1f;
+        protected const float MELEE_CHECK_INTERVAL = 0.5f;
+        protected const float MELEE_ATTACK_DISTANCE = 8f;
+        protected const float LOW_AMMO_RATIO = 0.3f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -81,6 +88,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(ShootFromStationaryLogic), EndShootFromStationary },
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
+                { typeof(MeleeAttackLogic), EndMeleeAttackLogic },
             };
         }
 
@@ -523,11 +531,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool ShouldShootImmediately()
         {
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            var flag = ((goalEnemy != null && goalEnemy.Distance < BotOwner.Settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST) || BotOwner.BotsGroup.AnyBodyShootImmediately) && goalEnemy.CanShoot && Time.time - goalEnemy.AddTime < 5f;
-            var isActive = BotOwner.WeaponManager.UnderbarrelLauncherController.IsActive;
-            BotOwner.BotsGroup.AnyBodyShootImmediately = flag || isActive;
-            return BotOwner.BotsGroup.AnyBodyShootImmediately;
+            try
+            {
+                var goalEnemy = BotOwner.Memory.GoalEnemy;
+                var flag = ((goalEnemy != null && goalEnemy.Distance < BotOwner.Settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST) || BotOwner.BotsGroup.AnyBodyShootImmediately) && goalEnemy.CanShoot && Time.time - goalEnemy.AddTime < 5f;
+                var isActive = BotOwner.WeaponManager.UnderbarrelLauncherController.IsActive;
+                BotOwner.BotsGroup.AnyBodyShootImmediately = flag || isActive;
+                return BotOwner.BotsGroup.AnyBodyShootImmediately;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         protected virtual bool IsShootFromCoverConditionAllFine()
@@ -686,7 +701,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            
+
             if (BotOwner.Mover.IsComeTo(BotOwner.Settings.FileSettings.Move.REACH_DIST, false, null))
             {
                 return true;
@@ -747,6 +762,202 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return player.AIData.BotOwner.Exfiltration.WannaLeave();
             }
             return BotOwner.Exfiltration.WannaLeave();
+        }
+
+        protected virtual bool EndMeleeAttackLogic()
+        {
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager == null)
+            {
+                return true;
+            }
+
+            var meleeData = weaponManager.Melee;
+            if (meleeData == null)
+            {
+                return true;
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+
+            // 如果没有敌人，结束近战  
+            if (goalEnemy == null)
+            {
+                return true;
+            }
+
+            // 如果近战武器应该结束，结束近战  
+            if (meleeData.ShallEndRun)
+            {
+                return true;
+            }
+
+            if (weaponManager.HaveBullets)
+            {
+                return true;
+            }
+
+            if ((Time.time - goalEnemy.PersonalLastSeenTime) > 5f)
+            {
+                return true;
+            }
+
+            if (IsEnemyPosLost())
+            {
+                return true;
+            }
+
+            if (weaponManager.Reload?.Reloading == true)
+            {
+                return true;
+            }
+
+            if (!weaponManager.IsMelee)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>  
+        /// 借鉴SAIN，检查并执行武器切换逻辑  
+        /// </summary>  
+        protected virtual void CheckWeaponSwitch(EnemyInfo goalEnemy)
+        {
+            if (_nextWeaponSwitchTime > Time.time)
+            {
+                return;
+            }
+
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager == null || weaponManager.Selector == null)
+            {
+                return;
+            }
+
+            if (weaponManager.Reload?.Reloading == true || weaponManager.IsMelee)
+            {
+                return;
+            }
+
+            var optimalSlot = FindOptimalWeaponSlot();
+
+            if (optimalSlot != weaponManager.Selector.EquipmentSlot)
+            {
+                TryChangeWeaponSlot(optimalSlot);
+                _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
+            }
+        }
+
+        /// <summary>  
+        /// 借鉴SAIN，检查弹药是否不足  
+        /// </summary>  
+        protected virtual bool IsLowOnAmmo()
+        {
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager?.Reload == null)
+            {
+                return false;
+            }
+
+            var maxAmmo = weaponManager.Reload.MaxBulletCount;
+
+            if (maxAmmo <= 0)
+            {
+                return false;
+            }
+
+            var ammoRatio = weaponManager.Reload.BulletCount / maxAmmo;
+            return ammoRatio < LOW_AMMO_RATIO;
+        }
+
+        /// <summary>  
+        /// 借鉴SAIN，根据距离找到最优武器槽位  
+        /// </summary>  
+        protected virtual EquipmentSlot FindOptimalWeaponSlot()
+        {
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager == null)
+            {
+                return EquipmentSlot.FirstPrimaryWeapon;
+            }
+
+            if (!weaponManager.HaveBullets)
+            {
+                return weaponManager.Selector.EquipmentSlot switch
+                {
+                    EquipmentSlot.FirstPrimaryWeapon => EquipmentSlot.SecondPrimaryWeapon,
+                    EquipmentSlot.SecondPrimaryWeapon => EquipmentSlot.Holster,
+                    EquipmentSlot.Holster => EquipmentSlot.Scabbard,
+                    _ => EquipmentSlot.FirstPrimaryWeapon
+                };
+            }
+
+            return weaponManager.Selector.EquipmentSlot;
+        }
+
+        /// <summary>  
+        /// 借鉴SAIN，尝试切换到指定武器槽位  
+        /// </summary>  
+        protected virtual void TryChangeWeaponSlot(EquipmentSlot slot)
+        {
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager?.Selector == null)
+            {
+                return;
+            }
+
+            switch (slot)
+            {
+                case EquipmentSlot.FirstPrimaryWeapon:
+                    weaponManager.Selector.TryChangeToMain();
+                    break;
+                case EquipmentSlot.SecondPrimaryWeapon:
+                    weaponManager.Selector.ChangeToSecond();
+                    break;
+                case EquipmentSlot.Holster:
+                    weaponManager.Selector.TryChangeWeapon(true);
+                    break;
+                case EquipmentSlot.Scabbard:
+                    weaponManager.Selector.TryChangeToSlot(slot, false);
+                    break;
+            }
+        }
+
+        /// <summary>  
+        /// 借鉴SAIN，检查是否应该使用近战攻击  
+        /// </summary>  
+        protected virtual bool ShouldUseMeleeAttack(EnemyInfo goalEnemy)
+        {
+            if (_nextMeleeCheckTime > Time.time)
+            {
+                return false;
+            }
+
+            _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
+
+            var weaponManager = BotOwner.WeaponManager;
+            if (weaponManager == null)
+            {
+                return false;
+            }
+
+            if (weaponManager.IsMelee)
+            {
+                return true;
+            }
+
+            if (!weaponManager.Selector.CanChangeToMeleeWeapons)
+            {
+                return false;
+            }
+
+            if (!weaponManager.HaveBullets)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
