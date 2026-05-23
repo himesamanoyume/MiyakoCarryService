@@ -13,7 +13,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Events
 {
     /// <summary>
-    /// 监测玩家对护航的误伤情况
+    /// 监测玩家对护航的误伤情况，并视情况触发对应事件
     /// </summary>
     public sealed class ApplyDamagePatch : ModulePatch
     {
@@ -64,44 +64,27 @@ namespace MiyakoCarryService.Client.Patches.Events
                     var mcsBotPlayerBotOwner = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
                     if (mcsBotPlayerBotOwner != null)
                     {
-                        EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
+                        mcsBotPlayerBotOwner.TalkMsg(mcsLeadPlayer, mcsBotPlayerBotOwner.GetPlayer, new McsMsg
                         {
-                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                            McsBotPlayerId = mcsBotPlayerBotOwner.ProfileId,
-                            Msg = new McsMsg
-                            {
-                                PhraseTrigger = EPhraseTrigger.OnFriendlyDown
-                            }
+                            PhraseTrigger = EPhraseTrigger.OnFriendlyDown
                         });
                     }
                 }
                 else if (isMcsBotAttacker && !isMcsLeadInjuredPlayer)
                 {
-                    EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
-                    {
-                        McsLeadPlayerId = attacker.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer.ProfileId,
-                        McsBotPlayerId = attacker.ProfileId,
-                        Msg = new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.EnemyDown
-                        }
-                    });
-                }
-                else if (isMcsLeadInjuredPlayer)
-                {
-                    var mcsLeadPlayer = ___Player.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer;
-                    var mcsBotPlayerBotOwner = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
+                    var mcsBotPlayerBotOwner = attacker.AIData.BotOwner;
                     if (mcsBotPlayerBotOwner != null)
                     {
-                        EventMgr.Notify(new OnMcsLeadPlayerDownEvent
+                        var mcsLeadPlayer = mcsBotPlayerBotOwner.GetMcsBotPlayerData().LeadPlayer;
+                        mcsBotPlayerBotOwner.TalkMsg(mcsLeadPlayer, mcsBotPlayerBotOwner.GetPlayer, new McsMsg
                         {
-                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                            McsBotPlayerId = mcsBotPlayerBotOwner.ProfileId
+                            PhraseTrigger = EPhraseTrigger.EnemyDown
                         });
                     }
                 }
             }
 
+            var notMcsLeaderButIsFikaPlayer = attacker.Profile.Info.GroupId == "Fika";
             if (isMcsBotAttacker && isMcsLeadInjuredPlayer)
             {
                 if (!isDead)

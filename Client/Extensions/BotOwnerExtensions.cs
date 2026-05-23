@@ -54,6 +54,11 @@ namespace MiyakoCarryService.Client.Extensions
                 SubtitlesMgr.TalkMsg(botOwner.GetMcsBotPlayerData().LeadPlayer, botOwner.GetPlayer, msg);
             }
 
+            public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
+            {
+                SubtitlesMgr.TalkMsg(mcsLeadPlayer, mcsBotPlayer, msg);
+            }
+
             public List<BotBehavior> GetBotBehaviors()
             {
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
