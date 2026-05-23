@@ -60,7 +60,7 @@
 					{
 						"label": "client: build",
 						"type": "shell",
-						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore -p:DefineConstants=\"\" --configuration Release",
+						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
 						"dependsOn": "client: restore",
 						"group": {
@@ -70,7 +70,7 @@
 					{
 						"label": "fika: build",
 						"type": "shell",
-						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore -p:DefineConstants=\"\" --configuration Release",
+						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
 						"dependsOn": "fika: restore",
 						"group": {
@@ -98,9 +98,19 @@
 						}
 					},
 					{
+						"label": "fika: debug build",
+						"type": "shell",
+						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Debug",
+						"dependsOrder": "sequence",
+						"dependsOn": "fika: restore",
+						"group": {
+							"kind": "build"
+						}
+					},
+					{
 						"label": "server: build",
 						"type": "shell",
-						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore -p:DefineConstants=\"\" --configuration Release",
+						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
 						"dependsOn": "server: restore",
 						"group": {
@@ -247,7 +257,7 @@
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"client: debug build CC",
-							"fika: build"
+							"fika: debug build"
 						],
 						"group": "build"
 					},

@@ -16,6 +16,7 @@
     "Mcs/A.Basic": "A. 基础",
     "Mcs/B.Command": "B. 指令",
     "Mcs/C.Player": "C. 玩家",
+    "Mcs/Z.Player": "Z. 调试",
     "Mcs/FunctionEnabled": "已开启",
     "Mcs/FunctionDisabled": "已关闭",
     "Mcs/EnableLooting Key": "开启掠夺",

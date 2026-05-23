@@ -36,6 +36,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> RemoveMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
         {
+            await profileController.SaveMcsBotPlayerProfile(mcsLeadPlayerId);
             return httpResponseUtil.NoBody(await profileController.RemoveMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
         }
     }
