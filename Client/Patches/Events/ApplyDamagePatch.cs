@@ -110,9 +110,8 @@ namespace MiyakoCarryService.Client.Patches.Events
                 }
                 McsMgr.SendCompensation(___Player.ProfileId);
             }
-            else if (isMcsBotInjuredPlayer && isMcsLeadAttacker)
+            else if (isMcsBotInjuredPlayer && !isMcsBotAttacker && (notMcsLeaderButIsFikaPlayer || isMcsLeadAttacker))
             {
-                var notMcsLeaderButIsFikaPlayer = attacker.Profile.Info.GroupId == "Fika";
                 McsMgr.AddPunish(attacker.ProfileId, isDead ? 0.1560d : 0.0107d, isDead, notMcsLeaderButIsFikaPlayer);
             }
         }
