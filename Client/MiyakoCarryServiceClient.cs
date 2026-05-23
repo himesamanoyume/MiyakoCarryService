@@ -287,6 +287,7 @@ namespace MiyakoCarryService.Client
                     DebouncedConfigSync(new McsBotPlayerConfig
                     {
                         McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        EnableLooting = EnableLooting.Value,
                         PriceThreshold = PriceThreshold.Value,
                         KeywordItemText = KeywordItemText.Value,
                         LootingKeywordItem = LootingKeywordItem.Value,

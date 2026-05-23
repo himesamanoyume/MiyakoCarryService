@@ -97,6 +97,7 @@ namespace MiyakoCarryService.Fika
             McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
             {
                 McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                EnableLooting = packet.McsBotPlayerConfig.EnableLooting,
                 PriceThreshold = packet.McsBotPlayerConfig.PriceThreshold,
                 KeywordItemText = packet.KeywordItemText,
                 LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,

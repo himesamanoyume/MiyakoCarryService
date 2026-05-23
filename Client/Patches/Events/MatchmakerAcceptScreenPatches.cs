@@ -25,6 +25,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 TasksExtensions.HandleExceptions(McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
 				{
 					McsLeadPlayerId = session.Profile.Id,
+                    EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
 					KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
 					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,

@@ -226,6 +226,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 id => mcsBotPlayerConfig,
                 (id, oldConfig) =>
                 {
+                    oldConfig.EnableLooting = mcsBotPlayerConfig.EnableLooting;
                     oldConfig.PriceThreshold = mcsBotPlayerConfig.PriceThreshold;
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
