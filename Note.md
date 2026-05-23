@@ -1,5 +1,32 @@
 # MiyakoCarryService / 宫子护航店
 
+- [Forge描述示例](https://github.com/sp-tarkov/forge/blob/c7bf0e31232205d351afc954450c40fcc50f0b3f/resources/markdown/exampleModDescription.md)
+
+其中以下代码为Tab导航栏
+```
+## Image Tabset {.tabset}
+
+### Minion Image
+
+![Minion](https://octodex.github.com/images/minion.png)
+
+### Stormtroopocat
+
+![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg 'The Stormtroopocat')
+
+### Image Footnote Format
+
+Like links, Images also have a footnote style syntax
+
+![Alt text][id]
+
+With a reference later in the document defining the URL location.
+
+[id]: https://octodex.github.com/images/dojocat.jpg 'The Dojocat'
+
+{.endtabset}
+```
+
 ## 已知问题
 
 - null
@@ -412,7 +439,7 @@
 
 ## Logic思想指导
 
-- 思想钢印：跟随、巡逻、**不进行掠夺，不打开容器，只会指路高价值物品给老板、帮老板理包**5大主要行为
+- 思想钢印：跟随、巡逻、**帮老板理包**
 - - `HealAnotherTargetBaseLogic`治疗他人，可能需要
 - 护航能够开所有的门，为护航添加订阅老板的射线检测的事件，检测老板Ray的可交互物体是否是上锁的门，如果是就要跑去帮老板开门
 - 当需要吃喝、医疗品时要能够在安全的情况下寻找周围的吃喝、医疗品并使用。因此这也将能够做到你丢出医疗品给他，他会自己去取来用

@@ -98,5 +98,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string MCSINVENTORYMODE = "Mcs/McsInventoryMode";
         public const string RETURNTOMAINCHARREFUSE = "Mcs/ReturnToMainCharRefuse";
         public const string RETURNTOMAINCHARTIP = "Mcs/ReturnToMainCharTip";
+        public const string RETURNTOMAINCHARNOWEAPON = "Mcs/ReturnToMainNoWeapon";
     }
 }
