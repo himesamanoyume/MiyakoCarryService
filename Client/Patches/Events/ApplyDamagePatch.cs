@@ -3,7 +3,6 @@ using System.Reflection;
 using EFT;
 using EFT.HealthSystem;
 using HarmonyLib;
-using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -18,8 +17,31 @@ namespace MiyakoCarryService.Client.Patches.Events
     public sealed class ApplyDamagePatch : ModulePatch
     {
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        
+
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ActiveHealthController), nameof(ActiveHealthController.ApplyDamage));
+
+#if DEBUG
+        [PatchPrefix]
+        public static void Prefix(Player ___Player, EBodyPart bodyPart, ref float damage, DamageInfoStruct damageInfo)
+        {
+            if (___Player == null || ___Player.IsYourPlayer)
+            {
+                return;
+            }
+
+            if (!McsMgr.IsMcsBotPlayer(___Player.ProfileId))
+            {
+                return;
+            }
+
+            if (!MiyakoCarryServicePlugin.McsBotPlayerNoDamage.Value)
+            {
+                return;
+            }
+
+            damage = 0;
+        }
+#endif
 
         [PatchPostfix]
         public static void Postfix(ActiveHealthController __instance, Player ___Player, EBodyPart bodyPart, float damage, DamageInfoStruct damageInfo)

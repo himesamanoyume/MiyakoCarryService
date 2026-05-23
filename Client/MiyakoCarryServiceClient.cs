@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Client
         #region DEBUG
 
 #if DEBUG
-
+        public static ConfigEntry<bool> McsBotPlayerNoDamage;
 #endif
 
         #endregion
@@ -418,6 +418,18 @@ namespace MiyakoCarryService.Client
                 Locales.ENABLESUBTITLES_KEY,
                 true
             );
+
+            #endregion
+            #region DEBUG
+
+#if DEBUG
+            McsBotPlayerNoDamage = Register(
+                EConfigType.DEBUG,
+                "护航无敌",
+                true,
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
+#endif
 
             #endregion
         }
