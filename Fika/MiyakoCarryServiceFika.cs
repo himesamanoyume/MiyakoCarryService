@@ -136,6 +136,7 @@ namespace MiyakoCarryService.Fika
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
+                botOwner.Mover.RecalcWay();
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,

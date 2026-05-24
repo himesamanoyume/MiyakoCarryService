@@ -88,7 +88,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(ShootFromStationaryLogic), EndShootFromStationary },
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
-                { typeof(MeleeAttackLogic), EndMeleeAttackLogic },
+                { typeof(MeleeAttackLogic), EndMeleeAttack },
             };
         }
 
@@ -324,6 +324,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         BotOwner.StopMove();
                         BotOwner.Mover.AllowTeleport();
                         BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                        BotOwner.Mover.RecalcWay();
                     }
                     return true;
                 }
@@ -362,6 +363,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         BotOwner.StopMove();
                         BotOwner.Mover.AllowTeleport();
                         BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                        BotOwner.Mover.RecalcWay();
                     }
                     BotOwner.TalkMsg(new McsMsg
                     {
@@ -380,6 +382,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndAttackMoving()
         {
+            var haveBullets = BotOwner.WeaponManager?.HaveBullets;
+            if (!haveBullets.Value)
+            {
+                return true;
+            }
+
             if (Time.time - BotOwner.ShootData.LastTriggerPressd > 9f)
             {
                 return true;
@@ -764,7 +772,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.Exfiltration.WannaLeave();
         }
 
-        protected virtual bool EndMeleeAttackLogic()
+        protected virtual bool EndMeleeAttack()
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null)
@@ -870,7 +878,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else
                 {
-                    // 切换到远程武器  
                     TryChangeWeaponSlot(targetSlot);
                 }
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
@@ -896,8 +903,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 case EquipmentSlot.Holster:
                     weaponManager.Selector.TryChangeToSlot(slot, false);
                     break;
-                default:
-                    weaponManager.Selector.TryChangeWeapon(true);
+                case EquipmentSlot.Scabbard:
+                    weaponManager.Selector.ChangeToMelee();
                     break;
             }
         }
@@ -942,7 +949,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
 
-            // 1. 检查主武器槽位是否有武器且有弹药  
             if (HasWeaponInSlot(equipment, EquipmentSlot.FirstPrimaryWeapon))
             {
                 if (HasAmmoInSlot(EquipmentSlot.FirstPrimaryWeapon))
@@ -951,7 +957,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            // 2. 检查副武器槽位是否有武器且有弹药  
             if (HasWeaponInSlot(equipment, EquipmentSlot.SecondPrimaryWeapon))
             {
                 if (HasAmmoInSlot(EquipmentSlot.SecondPrimaryWeapon))
@@ -960,7 +965,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            // 3. 检查手枪槽位是否有武器且有弹药  
             if (HasWeaponInSlot(equipment, EquipmentSlot.Holster))
             {
                 if (HasAmmoInSlot(EquipmentSlot.Holster))
@@ -969,13 +973,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            // 4. 检查近战武器槽位是否有武器  
             if (HasWeaponInSlot(equipment, EquipmentSlot.Scabbard))
             {
                 return EquipmentSlot.Scabbard;
             }
 
-            // 5. 如果所有槽位都没有武器，返回当前槽位（不切换）  
             return weaponManager.Selector.EquipmentSlot;
         }
 

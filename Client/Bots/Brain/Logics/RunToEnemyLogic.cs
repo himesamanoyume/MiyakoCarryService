@@ -40,7 +40,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var canRun = method_0(true) == DoorInteractionStatus.CanRun;
                 BotOwner_0.SetTargetMoveSpeed(1f);
                 NotMovingCheck();
-                method_6();
                 BotOwner_0.SetPose(1f);
                 if (canRun && BotOwner_0.Mover.HasPathAndNoComplete)
                 {

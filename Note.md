@@ -464,8 +464,7 @@ With a reference later in the document defining the URL location.
 - 学会切刀、近战、切枪
 - 为防止生成护航时因无枪械武器时而卡死，对护航库存模式返回主角色时增加了合法性检查
 - 修复护航库存模式下保存护航存档时的一些Bug
-- - 老板死亡时已经会自己撤离了，但老板撤离时仍会为活着的状态，因此需要事件告知
-- **AttackMovingLogic、RunToEnemyLogic似乎会强制切换主武器，也许需要重写BaseLogic**
+- 优化了护航的战斗逻辑
 
 #### 0.3.3.0
 

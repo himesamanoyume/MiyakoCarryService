@@ -664,6 +664,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(botOwner.GetMcsBotPlayerData().LeadPlayer.Position, true);
+                botOwner.Mover.RecalcWay();
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,
