@@ -856,23 +856,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (weaponManager.Reload?.Reloading == true || weaponManager.IsMelee)
-            {
-                return;
-            }
-
-            if (weaponManager.IsMelee)
-            {
-                // 如果有任何远程武器有弹药，切换回主武器  
-                if (HasAmmoInSlot(EquipmentSlot.FirstPrimaryWeapon) ||
-                    HasAmmoInSlot(EquipmentSlot.SecondPrimaryWeapon) ||
-                    HasAmmoInSlot(EquipmentSlot.Holster))
-                {
-                    weaponManager.Selector.TryChangeToMain();
-                    _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
-                }
-                return;
-            }
+            weaponManager.Selector.UpdateWeaponsList();
 
             // 按照优先级检查武器弹药情况  
             var targetSlot = DetermineWeaponSlotByAmmo(weaponManager);
@@ -880,18 +864,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             // 如果目标槽位与当前槽位不同，进行切换  
             if (targetSlot != weaponManager.Selector.EquipmentSlot)
             {
-                if (targetSlot == EquipmentSlot.Scabbard)
-                {
-                    // 切换到近战武器  
-                    if (weaponManager.Selector.CanChangeToMeleeWeapons)
-                    {
-                        weaponManager.Selector.ChangeToMelee();
-                    }
-                }
-                else
-                {
-                    TryChangeWeaponSlot(targetSlot);
-                }
+                TryChangeWeaponSlot(targetSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
         }
@@ -907,7 +880,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             switch (slot)
             {
                 case EquipmentSlot.FirstPrimaryWeapon:
-                    weaponManager.Selector.TryChangeToMain();
+                    weaponManager.Selector.ChangeToMain();
                     break;
                 case EquipmentSlot.SecondPrimaryWeapon:
                     weaponManager.Selector.ChangeToSecond();
@@ -916,7 +889,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     weaponManager.Selector.TryChangeToSlot(slot, false);
                     break;
                 case EquipmentSlot.Scabbard:
-                    weaponManager.Selector.ChangeToMelee();
+                    if (weaponManager.Selector.CanChangeToMeleeWeapons)
+                    {
+                        weaponManager.Selector.ChangeToMelee();
+                    }
                     break;
             }
         }

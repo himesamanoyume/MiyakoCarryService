@@ -61,7 +61,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
                 }
 
-
                 if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
                 {
                     BotOwner.Memory.Spotted(false, null, null);
@@ -70,6 +69,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (ShouldUseMeleeAttack())
                 {
                     return new Action(typeof(MeleeAttackLogic), "Mcs:MeleeAttack");
+                }
+
+                if (!haveBullets.Value)
+                {
+                    BotOwner.WeaponManager.Reload.TryReload();
+                }
+
+                if (BotOwner.WeaponManager.UnderbarrelLauncherController.NeedToReload())
+                {
+                    BotOwner.WeaponManager.UnderbarrelLauncherController.TryReload();
                 }
 
                 var canShoot = goalEnemy.CanShoot;

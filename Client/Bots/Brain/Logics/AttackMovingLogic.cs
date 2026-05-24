@@ -65,15 +65,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     _lastPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;
 
-                    // 计算目标位置：敌人位置前方一定距离  
                     var directionToEnemy = (goalEnemy.Person.Position - BotOwner_0.Position).normalized;
-                    var targetPosition = goalEnemy.Person.Position - directionToEnemy;
+                    var targetPosition = goalEnemy.Person.Position - directionToEnemy * 3f;
 
-                    // 移动到目标位置  
                     BotOwner_0.GoToPoint(targetPosition, true, -1f, false, false, true, false, false);
                 }
 
-                // 朝向移动方向  
                 BotOwner_0.Steering.LookToMovingDirection();
             }
 
