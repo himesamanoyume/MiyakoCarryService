@@ -664,7 +664,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(botOwner.GetMcsBotPlayerData().LeadPlayer.Position, true);
+                var playerPosition = mcsBotPlayer.Position;
+                botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
+                botOwner.Mover.LastGoodCastPointTime = Time.time;
+                botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                botOwner.Mover.SetPlayerToNavMesh(playerPosition);
                 botOwner.Mover.RecalcWay();
+                botOwner.Mover.Pause = true;
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,

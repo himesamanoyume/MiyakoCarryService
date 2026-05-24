@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Fika
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
-            
+
             _handleActionsMap = new()
             {
                 {ECommandPacketType.Teleport, HandleTeleport},
@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Fika
             {
                 SubtitlesMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
                 {
-                    PhraseTrigger = packet.PhraseTrigger, 
+                    PhraseTrigger = packet.PhraseTrigger,
                     Position = packet.Position,
                     Key = packet.Key,
                     Key2 = packet.Key2
@@ -136,7 +136,13 @@ namespace MiyakoCarryService.Fika
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
                 mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
+                var playerPosition = mcsBotPlayer.Position;
+                botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
+                botOwner.Mover.LastGoodCastPointTime = Time.time;
+                botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                botOwner.Mover.SetPlayerToNavMesh(playerPosition);
                 botOwner.Mover.RecalcWay();
+                botOwner.Mover.Pause = true;
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,
