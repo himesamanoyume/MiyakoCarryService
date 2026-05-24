@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -35,6 +36,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
+            EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
         }
 
         private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
@@ -386,6 +388,21 @@ namespace MiyakoCarryService.Client.Mgrs
             }
 
             UpdateMcsBotPlayerConfig(@event.McsBotPlayerConfig.McsLeadPlayerId, @event.McsBotPlayerConfig);
+        }
+
+        private void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
+        {
+            if (!IsHost)
+            {
+                return;
+            }
+
+            var botOwners = GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+            foreach (var botOwner in botOwners)
+            {
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                mcsBotPlayerData.ShouldExfil = true;
+            }
         }
     }
 }

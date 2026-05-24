@@ -18,6 +18,7 @@ using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client;
+using MiyakoCarryService.Fika.Patches;
 
 namespace MiyakoCarryService.Fika
 {
@@ -29,10 +30,13 @@ namespace MiyakoCarryService.Fika
 
         public void InitMcsFika()
         {
+            new ExtractPatch().Enable();
+
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
+            
             _handleActionsMap = new()
             {
                 {ECommandPacketType.Teleport, HandleTeleport},

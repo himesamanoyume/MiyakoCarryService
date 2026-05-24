@@ -24,4 +24,9 @@ namespace MiyakoCarryService.Client.Events
     {
         public McsBotPlayerConfig McsBotPlayerConfig { get; set; }
     }
+
+    public sealed class McsLeadPlayerExtractedEvent : IMcsEvent
+    {
+        public MongoID McsLeadPlayerId { get; set; }
+    }
 }

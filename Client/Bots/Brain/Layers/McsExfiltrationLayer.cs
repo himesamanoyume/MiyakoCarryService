@@ -52,6 +52,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
+                if (McsBotPlayerData.ShouldExfil)
+                {
+                    return true;
+                }
+
                 return false;
             }
 

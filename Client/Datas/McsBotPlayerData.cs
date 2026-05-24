@@ -56,6 +56,7 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsTaskRunning = false;
         public bool ShouldHoldPosition = false;
         public bool ShouldGoToPoint = false;
+        public bool ShouldExfil = false;
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
