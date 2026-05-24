@@ -823,7 +823,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// <summary>  
         /// 借鉴SAIN，检查并执行武器切换逻辑  
         /// </summary>  
-        protected virtual void CheckWeaponSwitch(EnemyInfo goalEnemy)
+        protected virtual void CheckWeaponSwitch()
         {
             if (_nextWeaponSwitchTime > Time.time)
             {
@@ -841,65 +841,42 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var optimalSlot = FindOptimalWeaponSlot();
-
-            if (optimalSlot != weaponManager.Selector.EquipmentSlot)
+            if (weaponManager.IsMelee)
             {
-                TryChangeWeaponSlot(optimalSlot);
+                // 如果有任何远程武器有弹药，切换回主武器  
+                if (HasAmmoInSlot(EquipmentSlot.FirstPrimaryWeapon) ||
+                    HasAmmoInSlot(EquipmentSlot.SecondPrimaryWeapon) ||
+                    HasAmmoInSlot(EquipmentSlot.Holster))
+                {
+                    weaponManager.Selector.TryChangeToMain();
+                    _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
+                }
+                return;
+            }
+
+            // 按照优先级检查武器弹药情况  
+            var targetSlot = DetermineWeaponSlotByAmmo(weaponManager);
+
+            // 如果目标槽位与当前槽位不同，进行切换  
+            if (targetSlot != weaponManager.Selector.EquipmentSlot)
+            {
+                if (targetSlot == EquipmentSlot.Scabbard)
+                {
+                    // 切换到近战武器  
+                    if (weaponManager.Selector.CanChangeToMeleeWeapons)
+                    {
+                        weaponManager.Selector.ChangeToMelee();
+                    }
+                }
+                else
+                {
+                    // 切换到远程武器  
+                    TryChangeWeaponSlot(targetSlot);
+                }
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
         }
 
-        /// <summary>  
-        /// 借鉴SAIN，检查弹药是否不足  
-        /// </summary>  
-        protected virtual bool IsLowOnAmmo()
-        {
-            var weaponManager = BotOwner.WeaponManager;
-            if (weaponManager?.Reload == null)
-            {
-                return false;
-            }
-
-            var maxAmmo = weaponManager.Reload.MaxBulletCount;
-
-            if (maxAmmo <= 0)
-            {
-                return false;
-            }
-
-            var ammoRatio = weaponManager.Reload.BulletCount / maxAmmo;
-            return ammoRatio < LOW_AMMO_RATIO;
-        }
-
-        /// <summary>  
-        /// 借鉴SAIN，根据距离找到最优武器槽位  
-        /// </summary>  
-        protected virtual EquipmentSlot FindOptimalWeaponSlot()
-        {
-            var weaponManager = BotOwner.WeaponManager;
-            if (weaponManager == null)
-            {
-                return EquipmentSlot.FirstPrimaryWeapon;
-            }
-
-            if (!weaponManager.HaveBullets)
-            {
-                return weaponManager.Selector.EquipmentSlot switch
-                {
-                    EquipmentSlot.FirstPrimaryWeapon => EquipmentSlot.SecondPrimaryWeapon,
-                    EquipmentSlot.SecondPrimaryWeapon => EquipmentSlot.Holster,
-                    EquipmentSlot.Holster => EquipmentSlot.Scabbard,
-                    _ => EquipmentSlot.FirstPrimaryWeapon
-                };
-            }
-
-            return weaponManager.Selector.EquipmentSlot;
-        }
-
-        /// <summary>  
-        /// 借鉴SAIN，尝试切换到指定武器槽位  
-        /// </summary>  
         protected virtual void TryChangeWeaponSlot(EquipmentSlot slot)
         {
             var weaponManager = BotOwner.WeaponManager;
@@ -917,24 +894,113 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     weaponManager.Selector.ChangeToSecond();
                     break;
                 case EquipmentSlot.Holster:
-                    weaponManager.Selector.TryChangeWeapon(true);
-                    break;
-                case EquipmentSlot.Scabbard:
                     weaponManager.Selector.TryChangeToSlot(slot, false);
                     break;
+                default:
+                    weaponManager.Selector.TryChangeWeapon(true);
+                    break;
             }
+        }
+
+        protected virtual bool HasAmmoInSlot(EquipmentSlot slot)
+        {
+            var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
+
+            // 先检查槽位是否有武器  
+            if (!HasWeaponInSlot(equipment, slot))
+            {
+                return false;
+            }
+
+            // 获取槽位中的武器  
+            var item = equipment.GetSlot(slot).ContainedItem;
+            if (item is not Weapon weapon)
+            {
+                return false;
+            }
+
+            // 检查弹匣中的子弹数  
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot?.ContainedItem is MagazineItemClass magazine)
+            {
+                if (magazine.Count > 0)
+                {
+                    return true;
+                }
+            }
+
+            // 检查武器是否有膛室弹药  
+            if (weapon.ChamberAmmoCount > 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
+        {
+            var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
+
+            // 1. 检查主武器槽位是否有武器且有弹药  
+            if (HasWeaponInSlot(equipment, EquipmentSlot.FirstPrimaryWeapon))
+            {
+                if (HasAmmoInSlot(EquipmentSlot.FirstPrimaryWeapon))
+                {
+                    return EquipmentSlot.FirstPrimaryWeapon;
+                }
+            }
+
+            // 2. 检查副武器槽位是否有武器且有弹药  
+            if (HasWeaponInSlot(equipment, EquipmentSlot.SecondPrimaryWeapon))
+            {
+                if (HasAmmoInSlot(EquipmentSlot.SecondPrimaryWeapon))
+                {
+                    return EquipmentSlot.SecondPrimaryWeapon;
+                }
+            }
+
+            // 3. 检查手枪槽位是否有武器且有弹药  
+            if (HasWeaponInSlot(equipment, EquipmentSlot.Holster))
+            {
+                if (HasAmmoInSlot(EquipmentSlot.Holster))
+                {
+                    return EquipmentSlot.Holster;
+                }
+            }
+
+            // 4. 检查近战武器槽位是否有武器  
+            if (HasWeaponInSlot(equipment, EquipmentSlot.Scabbard))
+            {
+                return EquipmentSlot.Scabbard;
+            }
+
+            // 5. 如果所有槽位都没有武器，返回当前槽位（不切换）  
+            return weaponManager.Selector.EquipmentSlot;
+        }
+
+        protected virtual bool HasWeaponInSlot(InventoryEquipment equipment, EquipmentSlot slot)
+        {
+            if (equipment == null)
+            {
+                return false;
+            }
+
+            Item item = equipment.GetSlot(slot).ContainedItem;
+            return item is Weapon;
         }
 
         /// <summary>  
         /// 借鉴SAIN，检查是否应该使用近战攻击  
         /// </summary>  
-        protected virtual bool ShouldUseMeleeAttack(EnemyInfo goalEnemy)
+        protected virtual bool ShouldUseMeleeAttack()
         {
             if (_nextMeleeCheckTime > Time.time)
             {
                 return false;
             }
 
+            CheckWeaponSwitch();
             _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
 
             var weaponManager = BotOwner.WeaponManager;

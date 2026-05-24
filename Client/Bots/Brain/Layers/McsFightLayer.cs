@@ -49,26 +49,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
                 }
 
-                CheckWeaponSwitch(goalEnemy);
+                var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
 
-                if (ShouldUseMeleeAttack(goalEnemy))
-                {
-                    return new Action(typeof(MeleeAttackLogic), "Mcs:MeleeAttack");
-                }
-
-                if (BotOwner.WeaponManager.HaveBullets && ShouldShootImmediately())
+                if (haveBullets.Value && ShouldShootImmediately())
                 {
                     return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");
                 }
 
-                if (BotOwner.WeaponManager.HaveBullets && IsShootFromCoverConditionAllFine())
+                if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                 {
                     return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
                 }
 
+
                 if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
                 {
                     BotOwner.Memory.Spotted(false, null, null);
+                }
+
+                if (ShouldUseMeleeAttack())
+                {
+                    return new Action(typeof(MeleeAttackLogic), "Mcs:MeleeAttack");
                 }
 
                 var canShoot = goalEnemy.CanShoot;
@@ -96,9 +97,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                     }
 
-                    if (safeFire)
+                    if (safeFire && haveBullets.Value)
                     {
-                        if (goalEnemy.IsVisible && BotOwner.WeaponManager.HaveBullets)
+                        if (goalEnemy.IsVisible)
                         {
                             if (!BotOwner.GoToSomePointData.IsCome())
                             {
@@ -111,7 +112,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                         else
                         {
-                            return new Action(typeof(RunToEnemyLogic), "Mcs:DeltaLastHi");
+                            return new Action(typeof(RunToEnemyLogic), "Mcs:SafeButNotVisible");
                         }
                     }
                     else
