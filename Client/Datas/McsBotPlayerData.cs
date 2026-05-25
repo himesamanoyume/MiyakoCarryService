@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 
 namespace MiyakoCarryService.Client.Datas
@@ -61,6 +62,7 @@ namespace MiyakoCarryService.Client.Datas
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
             _botOwnerRef = new(player.AIData.BotOwner);
+            BotOwner.SetMcsBotPlayerData(this);
             _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
             _leadPlayeRef = new(bossPlayer);
             BotBehaviors = [new BotCarryServiceChecker(BotOwner, LeadPlayer)];
@@ -99,7 +101,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (lootProp.IsUsefulContainer(this))
+                if (lootProp.IsUsefulContainer(BotOwner))
                 {
                     usefulContainers.Add(lootData);
                     continue;

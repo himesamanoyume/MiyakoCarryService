@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
@@ -20,19 +21,14 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsHighPriceItem = false;
         public bool IsKeywordItem = false;
         public bool IsBlockItem = false;
-        public ConcurrentDictionary<McsBotPlayerData, bool> IsUsefulContainers;
+        public ConcurrentDictionary<BotOwner, bool> IsUsefulContainers = new();
+        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public LootProp(LootData lootData, TraderOffer offer, McsAILeadPlayer mcsAILeadPlayer)
         {
             LootData = lootData;
             Offer = offer;
             McsAILeadPlayer = mcsAILeadPlayer;
-            var mcsMgr = MgrAccessor.Get<McsMgr>();
-            var mcsBotPlayerBotOwners = mcsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId);
-            foreach (var botOwner in mcsBotPlayerBotOwners)
-            {
-                IsUsefulContainers.TryAdd(botOwner.GetMcsBotPlayerData(), false);
-            }
         }
 
         public void CheckHighPriceItem()
@@ -59,32 +55,55 @@ namespace MiyakoCarryService.Client.Datas
             IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, LootData.ItemType);
         }
 
-        public bool IsUsefulContainer(McsBotPlayerData mcsBotPlayerData)
+        public bool IsUsefulContainer(BotOwner botOwner)
         {
-            return IsUsefulContainers.TryGetValue(mcsBotPlayerData, out var isUsefulContainer) ? isUsefulContainer : false;
+            return IsUsefulContainers.TryGetValue(botOwner, out var isUsefulContainer) ? isUsefulContainer : false;
         }
 
         public void CheckUsefulContainer()
         {
+            var mcsBotPlayerBotOwners = McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId);
+            if (mcsBotPlayerBotOwners == null)
+            {
+                return;
+            }
+
+            foreach (var botOwner in mcsBotPlayerBotOwners)
+            {
+                if (botOwner != null)
+                {
+                    IsUsefulContainers.AddOrUpdate(botOwner, _botOwner => false, (_botOwner, oldIsUsefulContainer) =>
+                    {
+                        oldIsUsefulContainer = false;
+                        return oldIsUsefulContainer;
+                    });
+                }
+            }
+            
             foreach (var kvp in IsUsefulContainers)
             {
                 var isUseful = false;
-                var mcsBotPlayerData = kvp.Key;
-                var isAlive = mcsBotPlayerData.BotOwner.HealthController.IsAlive;
+                var botOwner = kvp.Key;
+                var isAlive = botOwner.HealthController.IsAlive;
 
-                if (!isUseful && isAlive)
+                if (!isAlive)
                 {
-                    var inventoryController = mcsBotPlayerData.Player.InventoryController;
-                    var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) : 
-                        LootData.ItemType == EItemType.Rig ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    continue;
+                }
 
-                    if (currentSlot == null)
-                    {
-                        isUseful = true;
-                    }
+                var inventoryController = botOwner.GetPlayer.InventoryController;
+                var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) : 
+                    LootData.ItemType == EItemType.Rig ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
+                if (currentSlot == null)
+                {
+                    isUseful = true;
+                }
+
+                if (!isUseful)
+                {
                     var currentContainer = currentSlot.ContainedItem;
-                    if (!isUseful && currentContainer == null)
+                    if (currentContainer == null)
                     {
                         isUseful = true;
                     }
@@ -100,7 +119,7 @@ namespace MiyakoCarryService.Client.Datas
                     }
                 }
 
-                IsUsefulContainers.AddOrUpdate(mcsBotPlayerData, _mcsBotPlayerData => isUseful, (_mcsBotPlayerData, oldIsUsefulContainer) =>
+                IsUsefulContainers.AddOrUpdate(botOwner, _botOwner => isUseful, (_botOwner, oldIsUsefulContainer) =>
                 {
                     oldIsUsefulContainer = isUseful;
                     return oldIsUsefulContainer;

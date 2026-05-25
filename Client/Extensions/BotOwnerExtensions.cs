@@ -44,6 +44,11 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
+            public void SetMcsBotPlayerData(McsBotPlayerData mcsBotPlayerData)
+            {
+                _datas.AddOrUpdate(botOwner, mcsBotPlayerData);
+            }
+
             public void TalkMsg(McsMsg msg)
             {
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();

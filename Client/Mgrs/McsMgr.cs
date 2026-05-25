@@ -249,18 +249,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 PunishEveryone = punishEveryone
             };
 
-            // 使用防抖器触发惩罚  
             _friendlyFireDebouncer.Trigger(friendlyFirePlayerId, penalty);
-
-            // FriendlyFirePenalty friendlyFirePenalty;
-            // if (!_mcsFriendlyFirePenalties.TryGetValue(friendlyFirePlayerId, out friendlyFirePenalty))
-            // {
-            //     friendlyFirePenalty = _mcsFriendlyFirePenalties.GetOrAdd(friendlyFirePlayerId, _ => new());
-            // }
-            // friendlyFirePenalty.FriendlyFirePlayerId = friendlyFirePlayerId;
-            // friendlyFirePenalty.Diff += diff;
-            // friendlyFirePenalty.TeamKill = teamKill;
-            // friendlyFirePenalty.PunishEveryone = punishEveryone;
         }
 
         private FriendlyFirePenalty MergeFriendlyFirePenalty(FriendlyFirePenalty existing, FriendlyFirePenalty newValue)
@@ -286,33 +275,6 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return _allMcsBotPlayerIdInRaid;
         }
-
-        // private IEnumerator SendPunishRequestLoop(float time)
-        // {
-        //     var waitTime = new WaitForSeconds(time);
-        //     while (true)
-        //     {
-        //         yield return waitTime;
-        //         if (_gameloop.IsVaildGameWorld)
-        //         {
-        //             if (!IsHost)
-        //             {
-        //                 continue;
-        //             }
-        //             // MiyakoCarryServicePlugin.Logger.LogInfo("尝试发送惩罚");
-
-        //             foreach (var kvp in _mcsFriendlyFirePenalties)
-        //             {
-        //                 if (kvp.Value != null)
-        //                 {
-        //                     TasksExtensions.HandleExceptions(McsRequestHandler.SendPunishRequest(kvp.Value));
-        //                 }
-        //             }
-        //             _mcsFriendlyFirePenalties.Clear();
-        //         }
-        //         yield return null;
-        //     }
-        // }
 
         private void SendPunishRequests(Dictionary<MongoID, FriendlyFirePenalty> penalties)
         {
@@ -340,7 +302,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 MergeFriendlyFirePenalty
             );
             TasksExtensions.HandleExceptions(RequestAllMcsBotPlayerIdInRaid());
-            // StartCoroutine(SendPunishRequestLoop(10f));
         }
 
         private async Task RequestAllMcsBotPlayerIdInRaid()

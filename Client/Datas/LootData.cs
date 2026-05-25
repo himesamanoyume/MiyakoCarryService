@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Datas
         public int ItemGridCount => Item.Width * Item.Height;
         public int ContainerGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
+        public bool IsEquipableContainer => ItemType is EItemType.Backpack or EItemType.Rig;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -53,7 +54,7 @@ namespace MiyakoCarryService.Client.Datas
             lootProp.CheckKeywordItem();
             lootProp.CheckHighPriceItem();
             lootProp.CheckBlockItem();
-            if (IsContainerWithAdditionalGrid)
+            if (IsEquipableContainer && IsContainerWithAdditionalGrid)
             {
                 lootProp.CheckUsefulContainer();
             }
