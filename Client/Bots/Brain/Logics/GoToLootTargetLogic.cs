@@ -245,7 +245,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             finally
             {
-                mcsBotPlayerData.LootingTarget = null;
+                mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.IsTaskRunning = false;
             }
             // yield return null;

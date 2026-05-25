@@ -83,6 +83,11 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                if (lootData.IsInSecureContainerItem)
+                {
+                    continue;
+                }
+
                 if (!lootData.LootProps.TryGetValue(McsAILeadPlayer, out var lootProp))
                 {
                     continue;

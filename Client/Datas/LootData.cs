@@ -5,6 +5,7 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
@@ -18,18 +19,27 @@ namespace MiyakoCarryService.Client.Datas
         public TraderOffer Offer;
         public bool IsItemInContainer = false;
         public bool IsMoney = false;
-        // public bool IsInSecureContainerItem = false;
+        public bool IsInSecureContainerItem = false;
+        public int ItemGridCount => Item.Width * Item.Height;
+        public int ContainerGridCount = 0;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
             Offer = offer ?? new TraderOffer();
+            if (Item.IsContainer && Item is SearchableItemItemClass containerItem)
+            {
+                foreach (var stashGridClass in containerItem.Grids)
+                {
+                    ContainerGridCount += stashGridClass.GridWidth * stashGridClass.GridHeight;
+                }
+            }
         }
 
         public void Refresh(McsAILeadPlayer mcsAILeadPlayer)
         {
             ResetOffer();
+            CheckSecureContainerItem();
             CheckItemInteresting(mcsAILeadPlayer);
-            // CheckSecureContainerItem();
         }
 
         public void CheckItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
@@ -53,15 +63,15 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        // public void CheckSecureContainerItem()
-        // {
-        //     var parentItem = Item.CurrentAddress?.Container?.ParentItem;
-        //     if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
-        //     {
-        //         IsInSecureContainerItem = true;
-        //     }
-        //     IsInSecureContainerItem = false;
-        // }
+        public void CheckSecureContainerItem()
+        {
+            var parentItem = Item.CurrentAddress?.Container?.ParentItem;
+            if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
+            {
+                IsInSecureContainerItem = true;
+            }
+            IsInSecureContainerItem = false;
+        }
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {

@@ -458,7 +458,6 @@ With a reference later in the document defining the URL location.
 
 #### 0.3.4.0
 
-- **补全`McsCommonLayer`所有空缺**
 - - **实现护航自动寻找食物、医疗品**
 - - **实现护航替换穿戴更好地胸挂、背包。同时实现连续拾取、套包**
 - 学会切刀、近战、切枪
