@@ -22,6 +22,7 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsInSecureContainerItem = false;
         public int ItemGridCount => Item.Width * Item.Height;
         public int ContainerGridCount = 0;
+        public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -46,12 +47,16 @@ namespace MiyakoCarryService.Client.Datas
         {
             if (!LootProps.TryGetValue(mcsAILeadPlayer, out var lootProp))
             {
-                lootProp = new LootProp(Item, Offer, mcsAILeadPlayer);
+                lootProp = new LootProp(this, Offer, mcsAILeadPlayer);
                 LootProps[mcsAILeadPlayer] = lootProp;
             }
             lootProp.CheckKeywordItem();
             lootProp.CheckHighPriceItem();
-            lootProp.CheckBlockItem(ItemType);
+            lootProp.CheckBlockItem();
+            if (IsContainerWithAdditionalGrid)
+            {
+                lootProp.CheckUsefulContainer();
+            }
         }
 
         public void ResetOffer()
