@@ -62,14 +62,10 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
-                #if CHEATERCARRY
-                var currentRequestedItemCount = randomUtil.RandInt(1, 2);
-                #else
                 var currentRequestedItemCount = randomUtil.RandInt(
                     (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * additionMulti * (1 + punishmentMulti)),
                     (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * additionMulti * (1 + punishmentMulti)) + 1
                     );
-                #endif
 
                 var handoverItemCondition = new QuestCondition
                 {

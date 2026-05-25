@@ -16,7 +16,6 @@
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <Trademark>https://sns.oddba.cn/184517.html</Trademark>
     <RootNamespace>MiyakoCarryService.Server</RootNamespace>
-    <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
     <NoWarn>CS0618;CS8632;CS9107</NoWarn>
   </PropertyGroup>
   <ItemGroup>

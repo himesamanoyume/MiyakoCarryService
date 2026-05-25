@@ -16,7 +16,6 @@
     <AssemblyTitle>MiyakoCarryServiceClient</AssemblyTitle>
     <Trademark>https://sns.oddba.cn/184517.html</Trademark>
     <RootNamespace>MiyakoCarryService.Client</RootNamespace>
-    <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\miyakocarryservice" />

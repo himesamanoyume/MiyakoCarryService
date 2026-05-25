@@ -139,9 +139,6 @@ namespace MiyakoCarryService.Client
 
         private void EnableAllPatches()
         {
-#if CHEATERCARRY
-
-#endif
             new TraderScreensGroupShowPatch().Enable();
             new RaidSettingsLocalPatch().Enable();
             new MainMenuControllerClassPatch().Enable();

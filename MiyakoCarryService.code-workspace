@@ -46,21 +46,19 @@
 						],
 					},
 					{
-						"label": "package: CC",
-						"type": "shell",
-						"command": "powershell",
-						"args": [
-							"-NoProfile",
-							"-ExecutionPolicy",
-							"Bypass",
-							"-Command",
-							"$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver-CHEATERCARRY.zip\" -Force"
-						],
-					},
-					{
 						"label": "client: build",
 						"type": "shell",
 						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
+						"dependsOrder": "sequence",
+						"dependsOn": "client: restore",
+						"group": {
+							"kind": "build"
+						}
+					},
+					{
+						"label": "client: debug build",
+						"type": "shell",
+						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
 						"dependsOrder": "sequence",
 						"dependsOn": "client: restore",
 						"group": {
@@ -73,26 +71,6 @@
 						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
 						"dependsOn": "fika: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "client: build CC",
-						"type": "shell",
-						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
-						"dependsOrder": "sequence",
-						"dependsOn": "client: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "client: debug build CC",
-						"type": "shell",
-						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
-						"dependsOrder": "sequence",
-						"dependsOn": "client: restore",
 						"group": {
 							"kind": "build"
 						}
@@ -118,9 +96,9 @@
 						}
 					},
 					{
-						"label": "server: build CC",
+						"label": "server: debug build",
 						"type": "shell",
-						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
+						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Debug",
 						"dependsOrder": "sequence",
 						"dependsOn": "server: restore",
 						"group": {
@@ -145,19 +123,17 @@
 						"dependsOn": [
 							"build: clean",
 							"server: build",
-							"client: build",
 							"fika: build"
 						],
 						"group": "build"
 					},
 					{
-						"label": "all: build CC",
+						"label": "all: debug build",
 						"dependsOrder": "sequence",
 						"dependsOn": [
 							"build: clean",
-							"server: build CC",
-							"client: build CC",
-							"fika: build"
+							"server: debug build",
+							"fika: debug build"
 						],
 						"group": "build"
 					},
@@ -222,59 +198,6 @@
 						"dependsOn": [
 							"all: build",
 							"package"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: CC (build & package)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: build CC",
-							"package: CC"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: CC (build & package)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: build CC",
-							"package: CC"
-						],
-						"group": "build"
-					},
-					{
-						"label": "client: CC build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"client: build CC",
-							"fika: build"
-						],
-						"group": "build"
-					},
-					{
-						"label": "client fika: CC debug build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"client: debug build CC",
-							"fika: debug build"
-						],
-						"group": "build"
-					},
-					{
-						"label": "server: CC build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"server: build CC"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: standard & CC (build & package)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: (build & package)",
-							"all: CC (build & package)"
 						],
 						"group": "build"
 					}

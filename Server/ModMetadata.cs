@@ -8,11 +8,7 @@ namespace MiyakoCarryService.Server
     public record ModMetadata : AbstractModMetadata, IModWebMetadata
     {
         private const string CurrentVersion = "0.3.4.0";
-#if CHEATERCARRY
-        public override string Name { get; init; } = "MiyakoCarryServiceServer 红护版";
-#else
         public override string Name { get; init; } = "MiyakoCarryServiceServer";
-#endif
         public override string Author { get; init; } = "Himesamanoyume";
         public override List<string> Contributors { get; init; }
         public override SemanticVersioning.Version Version { get; init; } = new(string.Join('.', CurrentVersion.Split('.', System.StringSplitOptions.None).Take(3)));

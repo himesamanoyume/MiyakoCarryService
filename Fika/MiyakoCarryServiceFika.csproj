@@ -16,7 +16,6 @@
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://sns.oddba.cn/184517.html</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
-    <DefineConstants>$(DefineConstants);CHEATERCARRY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony" HintPath="..\Ref\0Harmony.dll" Private="false" />
