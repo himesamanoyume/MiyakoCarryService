@@ -70,6 +70,7 @@ namespace MiyakoCarryService.Client.Datas
         {
             // MiyakoCarryServicePlugin.Logger.LogWarning("正在设置目标战利品");
             var filtedLootDatas = new List<LootData>(itemDatas.Count);
+            var usefulContainers = new List<LootData>();
             // 只要是符合条件的，都先筛选出来
             foreach (var itemData in itemDatas)
             {
@@ -98,12 +99,37 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                if (lootProp.IsUsefulContainer(this))
+                {
+                    usefulContainers.Add(lootData);
+                    continue;
+                }
+
                 if (!lootProp.IsHighPriceItem && (!McsAILeadPlayer.McsBotPlayerConfig.LootingKeywordItem || !lootProp.IsKeywordItem))
                 {
                     continue;
                 }
 
                 filtedLootDatas.Add(lootData);
+            }
+
+            usefulContainers.Sort((a, b) => b.ContainerGridCount.CompareTo(a.ContainerGridCount));
+            foreach (var containerData in usefulContainers)
+            {
+                if (_lootDataMgr.IsLockedLootingTarget(containerData))
+                {
+                    continue;
+                }
+
+                if (_lootDataMgr.IsLockedLootingTargetRootTransform(containerData.RootTransform))
+                {
+                    continue;
+                }
+
+                _lootDataMgr.LockLootItemToTarget(containerData);
+                _lootDataMgr.LockLootingTargetRootTransform(containerData.RootTransform);
+                LootingTarget = containerData;
+                return;
             }
 
             filtedLootDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
@@ -124,7 +150,8 @@ namespace MiyakoCarryService.Client.Datas
                 LootingTarget = lootData;
                 return;
             }
-            LootingTarget = null;
+            
+            UnlockLootingTarget();
         }
 
         public void UnlockLootingTarget()

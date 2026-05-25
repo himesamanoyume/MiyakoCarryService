@@ -209,18 +209,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     }
 
                     // 优先尝试拾取到背包中
-                    var pickupSuccess = TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player);
+                    var pickupSuccess = await TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player);
 
                     if (!pickupSuccess)
                     {
                         // 如果背包拾取失败，尝试拾取到口袋中  
-                        pickupSuccess = TryPickupToPockets(mcsBotPlayerData, inventoryController, item, player);
+                        pickupSuccess = await TryPickupToPockets(mcsBotPlayerData, inventoryController, item, player);
                     }
 
                     if (!pickupSuccess)
                     {
                         // 如果口袋拾取失败，尝试拾取到胸挂中  
-                        pickupSuccess = TryPickupToTacticalVest(mcsBotPlayerData, inventoryController, item, player);
+                        pickupSuccess = await TryPickupToTacticalVest(mcsBotPlayerData, inventoryController, item, player);
                     }
 
                     if (pickupSuccess)
@@ -251,7 +251,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             // yield return null;
         }
 
-        private bool TryPickupToPockets(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> TryPickupToPockets(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
         {
             var pocketsSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
             var pockets = pocketsSlot.ContainedItem as SearchableItemItemClass;
@@ -275,7 +275,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
                     var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
+                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
                     return true;
                 }
             }
@@ -283,7 +283,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return false;
         }
 
-        private bool TryPickupToBackpack(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> TryPickupToBackpack(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
         {
             var backpackSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
             var backpack = backpackSlot.ContainedItem as SearchableItemItemClass;
@@ -307,7 +307,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
                     var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
+                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
                     return true;
                 }
             }
@@ -315,7 +315,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return false;
         }
 
-        private bool TryPickupToTacticalVest(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> TryPickupToTacticalVest(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
         {
             var tacticalVestSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
             var tacticalVest = tacticalVestSlot.ContainedItem as SearchableItemItemClass;
@@ -339,7 +339,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
                     var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
+                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
                     return true;
                 }
             }
@@ -347,7 +347,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return false;
         }
 
-        private bool TryPickupToSecureContainer(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> TryPickupToSecureContainer(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
         {
             var secureSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.SecuredContainer);
             var secureContainer = secureSlot.ContainedItem as SearchableItemItemClass;
@@ -371,7 +371,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
                     var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
+                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
                     return true;
                 }
             }
@@ -379,14 +379,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return false;
         }
 
-        private bool TryPickupNormally(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> TryPickupNormally(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
         {
             // 检查是否为装备类物品的根物品（避免拾取整个装备）  
             var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
             if (rootItem is InventoryEquipment && rootItem == item)
             {
                 // 如果物品本身就是装备，仍然尝试拾取到背包中  
-                return TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player) || TryPickupToSecureContainer(mcsBotPlayerData, inventoryController, item, player);
+                return await TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player) || await TryPickupToSecureContainer(mcsBotPlayerData, inventoryController, item, player);
             }
 
             var pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(
@@ -400,7 +400,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (pickupResult.Succeeded && inventoryController.CanExecute(pickupResult.Value))
             {
                 var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                ExecutePickup(player, pickupResult.Value, rootItem, lastOwner);
+                await ExecutePickup(player, pickupResult.Value, rootItem, lastOwner);
                 return true;
             }
 
@@ -421,7 +421,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return null;
         }
 
-        private void ExecutePickup(Player player, GInterface424 pickupAction, Item rootItem, IPlayer lastOwner)
+        private async Task ExecutePickup(Player player, GInterface424 pickupAction, Item rootItem, IPlayer lastOwner)
         {
             // 参考BotItemTaker.method_1的实现  
             var pickupCallback = new Callback((IResult result) =>
@@ -468,6 +468,31 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 // 执行网络事务  
                 player.InventoryController.RunNetworkTransaction(pickupAction, pickupCallback);
             }));
+
+            await OrganizeContainersAfterPickup(player.InventoryController, player);
+        }
+
+        private async Task OrganizeContainersAfterPickup(InventoryController inventoryController, Player player)
+        {
+            var backpackSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+            if (backpackSlot.ContainedItem != null && backpackSlot.ContainedItem is SearchableItemItemClass backpack)
+            {
+                var sortResult = InteractionsHandlerClass.Sort(backpack, inventoryController, true);
+                if (sortResult.Succeeded)
+                {
+                    await inventoryController.TryRunNetworkTransaction(sortResult, null);
+                }
+            }
+
+            var tacticalVestSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+            if (tacticalVestSlot.ContainedItem != null && tacticalVestSlot.ContainedItem is SearchableItemItemClass tacticalVest)
+            {
+                var sortResult = InteractionsHandlerClass.Sort(tacticalVest, inventoryController, true);
+                if (sortResult.Succeeded)
+                {
+                    await inventoryController.TryRunNetworkTransaction(sortResult, null);
+                }
+            }
         }
     }
 }

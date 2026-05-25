@@ -74,6 +74,7 @@ namespace MiyakoCarryService.Client.Datas
             if (parentItem != null && ItemViewFactory.IsSecureContainer(parentItem))
             {
                 IsInSecureContainerItem = true;
+                return;
             }
             IsInSecureContainerItem = false;
         }
