@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         // 进行治疗前先跑去掩体
                         if (!BotOwner.Memory.IsInCover)
                         {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:goforheal:RunToCoverLogic1");
+                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForFirstAid");
                         }
                     }
                 }
@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         if (!BotOwner.Memory.IsInCover)
                         {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:goforheal:RunToCoverLogic2");
+                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgical");
                         }
                     }
                 }
@@ -77,6 +77,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
+                
+                CheckWeaponSwitch();
 
                 if (McsBotPlayerData != null)
                 {

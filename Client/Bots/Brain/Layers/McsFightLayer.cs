@@ -51,11 +51,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
 
-                if (haveBullets.Value && ShouldShootImmediately())
-                {
-                    return new Action(typeof(ShootFromStationaryLogic), "Mcs:ShootImmediately");
-                }
-
                 if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                 {
                     return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
@@ -73,7 +68,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (!haveBullets.Value)
                 {
-                    BotOwner.WeaponManager.Reload.TryReload();
+                    BotOwner.WeaponManager.Reload.McsTryReload();
                 }
 
                 if (BotOwner.WeaponManager.UnderbarrelLauncherController.NeedToReload())

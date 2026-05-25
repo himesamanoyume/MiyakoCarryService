@@ -35,21 +35,7 @@ namespace MiyakoCarryService.Client.Misc
                         continue;
                     }
 
-                    // if (enemyInfo.IsVisible)
-                    // {
-                    //     MiyakoCarryServicePlugin.Logger.LogError("因有可见的敌人，将该敌人设置全体护航的目标敌人");
-                    //     foreach (var _botOwner in mcsBotPlayerBotOwners)
-                    //     {
-                    //         MyPlayer.BotsGroup.AddEnemy(enemyInfo.Person.AIData.BotOwner, EBotEnemyCause.byKill);
-                    //         MyPlayer.BotsGroup.ReportAboutEnemy(enemyInfo.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, _botOwner);
-                    //         enemyInfo.IsVisible = true;
-                    //         _botOwner.Memory.GoalEnemy = enemyInfo;
-                    //         enemyInfo.PriorityIndex = 0;
-                    //     }
-                    //     return;
-                    // }
-
-                    if (!enemyInfo.IsVisible)
+                    if (!enemyInfo.IsVisible && enemyInfo.Distance >= 20)
                     {
                         continue;
                     }

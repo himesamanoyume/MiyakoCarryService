@@ -90,9 +90,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(lootPos);
-                    // mcsBotPlayerData.StartLooting();
                     TasksExtensions.HandleExceptions(StartLooting());
-                    _lastTimeDistance = Mathf.Infinity; // 重置卡脚检测
+                    _lastTimeDistance = Mathf.Infinity;
                     return;
                 }
 
@@ -130,7 +129,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (mcsBotPlayerData.LootingTarget != null)
                 {
                     mcsBotPlayerData.IsTaskRunning = true;
-                    // yield return new WaitForSeconds(1f);
                     await Task.Delay(1000);
 
                     var player = BotOwner.GetPlayer;
@@ -140,7 +138,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     // 检查物品是否还存在  
                     if (item == null || item.Parent == null)
                     {
-                        // yield break;
                         return;
                     }
 
@@ -149,7 +146,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (rootItem == null || rootItem.Owner == null)
                     {
                         // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find container for item");
-                        // yield break;
                         return;
                     }
 
@@ -157,28 +153,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (!gameWorld.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
                     {
                         // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find item owner");
-                        // yield break;
                         return;
                     }
 
                     var lootableContainer = itemOwner.Transform.GetComponent<LootableContainer>();
                     var isActuallyInContainer = lootableContainer != null;
 
-                    // 检查物品是否在容器中  
                     if (isActuallyInContainer)
                     {
-                        // 检查容器是否已经打开（使用枚举比较）  
                         if (lootableContainer.DoorState == EDoorState.Shut || lootableContainer.DoorState == EDoorState.Locked)
                         {
-                            // 使用BotLootOpener的方式打开容器  
                             var interactionResult = new InteractionResult(EInteractionType.Open);
                             player.CurrentManagedState.StartDoorInteraction(lootableContainer, interactionResult, null);
 
-                            // 等待容器打开动画  
-                            // yield return new WaitForSeconds(2.5f);
                             await Task.Delay(2500);
 
-                            // 再次检查容器是否打开成功  
                             if (lootableContainer.DoorState < EDoorState.Open)
                             {
                                 BotOwner.TalkMsg(new McsMsg
@@ -187,17 +176,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                                     Key = Locales.ONLOOTOPENCONTAINERFAILED
                                 });
                                 // MiyakoCarryServicePlugin.Logger.LogWarning("Failed to open container");
-                                // yield break;
                                 return;
                             }
                         }
 
-                        // 容器已打开，等待一小段时间让物品刷新  
-                        // yield return new WaitForSeconds(3f);
                         await Task.Delay(3000);
                     }
 
-                    // 如果是任务物品，则只是说话提醒，而不拾取
                     if (item.QuestItem)
                     {
                         BotOwner.TalkMsg(new McsMsg
@@ -206,22 +191,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                             Key = Locales.ONLOOTQUESTITEM
                         });
                         // MiyakoCarryServicePlugin.Logger.LogWarning($"任务道具不拾取: {item.ShortName}");
-                        // yield break;
                         return;
                     }
 
-                    // 优先尝试拾取到背包中
                     var pickupSuccess = await TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player);
 
                     if (!pickupSuccess)
                     {
-                        // 如果背包拾取失败，尝试拾取到口袋中  
                         pickupSuccess = await TryPickupToPockets(mcsBotPlayerData, inventoryController, item, player);
                     }
 
                     if (!pickupSuccess)
                     {
-                        // 如果口袋拾取失败，尝试拾取到胸挂中  
                         pickupSuccess = await TryPickupToTacticalVest(mcsBotPlayerData, inventoryController, item, player);
                     }
 
@@ -235,7 +216,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     }
                     else
                     {
-                        // 护航说话并提示空间不足
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.PhraseNone,
@@ -250,7 +230,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.IsTaskRunning = false;
             }
-            // yield return null;
         }
 
         private async Task<bool> TryPickupToPockets(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)

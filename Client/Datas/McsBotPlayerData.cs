@@ -73,7 +73,6 @@ namespace MiyakoCarryService.Client.Datas
             // MiyakoCarryServicePlugin.Logger.LogWarning("正在设置目标战利品");
             var filtedLootDatas = new List<LootData>(itemDatas.Count);
             var usefulContainers = new List<LootData>();
-            // 只要是符合条件的，都先筛选出来
             foreach (var itemData in itemDatas)
             {
                 if (itemData == null)

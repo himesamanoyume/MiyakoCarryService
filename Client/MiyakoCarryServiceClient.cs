@@ -182,6 +182,7 @@ namespace MiyakoCarryService.Client
             new CanModifyItemPatch().Enable();
             new ItemSubtract1Patch().Enable();
             new ItemSubtract2Patch().Enable();
+            new TryReloadPatch().Enable();
 
             if (FikaInstalled)
             {

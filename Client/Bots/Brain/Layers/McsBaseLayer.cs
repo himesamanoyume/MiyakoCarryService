@@ -840,33 +840,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        /// <summary>  
-        /// 借鉴SAIN，检查并执行武器切换逻辑  
-        /// </summary>  
-        protected virtual void CheckWeaponSwitch()
+        protected virtual EquipmentSlot CheckWeaponSwitch()
         {
-            if (_nextWeaponSwitchTime > Time.time)
-            {
-                return;
-            }
-
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null || weaponManager.Selector == null)
             {
-                return;
+                return EquipmentSlot.FirstPrimaryWeapon;
+            }
+
+            if (_nextWeaponSwitchTime > Time.time)
+            {
+                return weaponManager.Selector.EquipmentSlot;
             }
 
             weaponManager.Selector.UpdateWeaponsList();
-
-            // 按照优先级检查武器弹药情况  
             var targetSlot = DetermineWeaponSlotByAmmo(weaponManager);
-
-            // 如果目标槽位与当前槽位不同，进行切换  
             if (targetSlot != weaponManager.Selector.EquipmentSlot)
             {
                 TryChangeWeaponSlot(targetSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
+
+            return targetSlot;
         }
 
         protected virtual void TryChangeWeaponSlot(EquipmentSlot slot)
@@ -897,7 +892,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool HasAmmoInSlot(EquipmentSlot slot)
+        protected virtual bool HasAmmoOrBackupAmmo(EquipmentSlot slot)
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
 
@@ -930,6 +925,60 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
+            return HasBackupAmmo(weapon);
+        }
+
+        protected virtual bool HasBackupAmmo(Weapon weapon)
+        {
+            var player = BotOwner.GetPlayer;
+            var inventoryController = player.InventoryController;
+
+            // 检查是否有可用的弹匣  
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot != null)
+            {
+                var preallocatedMagList = new List<MagazineItemClass>();
+                inventoryController.GetReachableItemsOfTypeNonAlloc<MagazineItemClass>(preallocatedMagList, null);
+
+                foreach (var mag in preallocatedMagList)
+                {
+                    if (mag.Count > 0 && magazineSlot.CanAccept(mag))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // 检查是否有可用的散装弹药  
+            var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
+            var preallocatedAmmoList = new List<AmmoItemClass>();
+            inventoryController.GetAcceptableItemsNonAlloc(
+                BotReload.AvailableEquipmentSlots,
+                preallocatedAmmoList,
+                null,
+                null
+            );
+
+            foreach (var ammo in preallocatedAmmoList)
+            {
+                if (ammo.StackObjectsCount > 0)
+                {
+                    if (chamberSlot != null && chamberSlot.CanAccept(ammo))
+                    {
+                        return true;
+                    }
+
+                    if (weapon.GetCurrentMagazine() != null)
+                    {
+                        var currentMag = weapon.GetCurrentMagazine();
+                        if (currentMag.Cartridges.Filters.CheckItemFilter(ammo))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
             return false;
         }
 
@@ -939,7 +988,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (HasWeaponInSlot(equipment, EquipmentSlot.FirstPrimaryWeapon))
             {
-                if (HasAmmoInSlot(EquipmentSlot.FirstPrimaryWeapon))
+                if (HasAmmoOrBackupAmmo(EquipmentSlot.FirstPrimaryWeapon))
                 {
                     return EquipmentSlot.FirstPrimaryWeapon;
                 }
@@ -947,7 +996,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (HasWeaponInSlot(equipment, EquipmentSlot.SecondPrimaryWeapon))
             {
-                if (HasAmmoInSlot(EquipmentSlot.SecondPrimaryWeapon))
+                if (HasAmmoOrBackupAmmo(EquipmentSlot.SecondPrimaryWeapon))
                 {
                     return EquipmentSlot.SecondPrimaryWeapon;
                 }
@@ -955,13 +1004,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (HasWeaponInSlot(equipment, EquipmentSlot.Holster))
             {
-                if (HasAmmoInSlot(EquipmentSlot.Holster))
+                if (HasAmmoOrBackupAmmo(EquipmentSlot.Holster))
                 {
                     return EquipmentSlot.Holster;
                 }
             }
 
-            if (HasWeaponInSlot(equipment, EquipmentSlot.Scabbard))
+            if (HasKnifeInSlot(equipment, EquipmentSlot.Scabbard))
             {
                 return EquipmentSlot.Scabbard;
             }
@@ -980,9 +1029,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return item is Weapon;
         }
 
-        /// <summary>  
-        /// 借鉴SAIN，检查是否应该使用近战攻击  
-        /// </summary>  
+        protected virtual bool HasKnifeInSlot(InventoryEquipment equipment, EquipmentSlot slot)
+        {
+            if (equipment == null)
+            {
+                return false;
+            }
+
+            Item item = equipment.GetSlot(slot).ContainedItem;
+            return item is KnifeItemClass;
+        }
+
         protected virtual bool ShouldUseMeleeAttack()
         {
             if (_nextMeleeCheckTime > Time.time)
@@ -990,26 +1047,26 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            CheckWeaponSwitch();
-            _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
-
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null)
             {
                 return false;
             }
 
-            if (weaponManager.IsMelee)
+            var targetSlot = CheckWeaponSwitch();
+            _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
+
+            if (targetSlot == EquipmentSlot.Scabbard && weaponManager.IsMelee)
             {
                 return true;
             }
 
-            if (!weaponManager.Selector.CanChangeToMeleeWeapons)
+            if (targetSlot == EquipmentSlot.Scabbard && !weaponManager.Selector.CanChangeToMeleeWeapons)
             {
                 return false;
             }
 
-            if (!weaponManager.HaveBullets)
+            if (targetSlot == EquipmentSlot.Scabbard && !weaponManager.HaveBullets)
             {
                 return true;
             }
