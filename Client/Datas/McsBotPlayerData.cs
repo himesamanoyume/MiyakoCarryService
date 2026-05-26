@@ -100,7 +100,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (lootProp.IsUsefulContainer(BotOwner))
+                if (lootProp.IsShouldTakeContainer(BotOwner) || lootProp.IsShouldEquipContainer(BotOwner) || lootProp.IsShouldSwapContainer(BotOwner))
                 {
                     usefulContainers.Add(lootData);
                     continue;

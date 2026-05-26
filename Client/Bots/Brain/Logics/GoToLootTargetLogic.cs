@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -126,104 +127,96 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             try
             {
-                if (mcsBotPlayerData.LootingTarget != null)
+                if (mcsBotPlayerData.LootingTarget == null)
                 {
-                    mcsBotPlayerData.IsTaskRunning = true;
-                    await Task.Delay(1000);
-
-                    var player = BotOwner.GetPlayer;
-                    var inventoryController = player.InventoryController;
-                    var item = mcsBotPlayerData.LootingTarget?.Item;
-
-                    // 检查物品是否还存在  
-                    if (item == null || item.Parent == null)
-                    {
-                        return;
-                    }
-
-                    // 获取容器  
-                    var rootItem = item.GetRootItem();
-                    if (rootItem == null || rootItem.Owner == null)
-                    {
-                        // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find container for item");
-                        return;
-                    }
-
-                    var gameWorld = Singleton<GameWorld>.Instance;
-                    if (!gameWorld.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
-                    {
-                        // MiyakoCarryServicePlugin.Logger.LogWarning("Cannot find item owner");
-                        return;
-                    }
-
-                    var lootableContainer = itemOwner.Transform.GetComponent<LootableContainer>();
-                    var isActuallyInContainer = lootableContainer != null;
-
-                    if (isActuallyInContainer)
-                    {
-                        if (lootableContainer.DoorState == EDoorState.Shut || lootableContainer.DoorState == EDoorState.Locked)
-                        {
-                            var interactionResult = new InteractionResult(EInteractionType.Open);
-                            player.CurrentManagedState.StartDoorInteraction(lootableContainer, interactionResult, null);
-
-                            await Task.Delay(2500);
-
-                            if (lootableContainer.DoorState < EDoorState.Open)
-                            {
-                                BotOwner.TalkMsg(new McsMsg
-                                {
-                                    PhraseTrigger = EPhraseTrigger.PhraseNone,
-                                    Key = Locales.ONLOOTOPENCONTAINERFAILED
-                                });
-                                // MiyakoCarryServicePlugin.Logger.LogWarning("Failed to open container");
-                                return;
-                            }
-                        }
-
-                        await Task.Delay(3000);
-                    }
-
-                    if (item.QuestItem)
-                    {
-                        BotOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.PhraseNone,
-                            Key = Locales.ONLOOTQUESTITEM
-                        });
-                        // MiyakoCarryServicePlugin.Logger.LogWarning($"任务道具不拾取: {item.ShortName}");
-                        return;
-                    }
-
-                    var pickupSuccess = await TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player);
-
-                    if (!pickupSuccess)
-                    {
-                        pickupSuccess = await TryPickupToPockets(mcsBotPlayerData, inventoryController, item, player);
-                    }
-
-                    if (!pickupSuccess)
-                    {
-                        pickupSuccess = await TryPickupToTacticalVest(mcsBotPlayerData, inventoryController, item, player);
-                    }
-
-                    if (pickupSuccess)
-                    {
-                        BotOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.LootGeneric,
-                            Key = item.Name
-                        });
-                    }
-                    else
-                    {
-                        BotOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.PhraseNone,
-                            Key = Locales.ONLOOTNOSPACE
-                        });
-                        // MiyakoCarryServicePlugin.Logger.LogWarning($"No space for item: {item.ShortName}");
-                    }
+                    return;
                 }
+
+                mcsBotPlayerData.IsTaskRunning = true;
+                await Task.Delay(1000);
+
+                var player = BotOwner.GetPlayer;
+                var inventoryController = player.InventoryController;
+                var item = mcsBotPlayerData.LootingTarget?.Item;
+
+                if (item == null || item.Parent == null)
+                {
+                    return;
+                }
+
+                var rootItem = item.GetRootItem();
+                if (rootItem == null || rootItem.Owner == null)
+                {
+                    return;
+                }
+
+                if (!Singleton<GameWorld>.Instance.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
+                {
+                    return;
+                }
+
+                var lootableContainer = itemOwner.Transform.GetComponent<LootableContainer>();
+                var isActuallyInContainer = lootableContainer != null;
+
+                if (isActuallyInContainer)
+                {
+                    if (lootableContainer.DoorState == EDoorState.Shut || lootableContainer.DoorState == EDoorState.Locked)
+                    {
+                        var interactionResult = new InteractionResult(EInteractionType.Open);
+                        player.CurrentManagedState.StartDoorInteraction(lootableContainer, interactionResult, null);
+
+                        await Task.Delay(2500);
+
+                        if (lootableContainer.DoorState < EDoorState.Open)
+                        {
+                            BotOwner.TalkMsg(new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.PhraseNone,
+                                Key = Locales.ONLOOTOPENCONTAINERFAILED
+                            });
+                            return;
+                        }
+                    }
+
+                    await Task.Delay(3000);
+                }
+
+                if (item.QuestItem)
+                {
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.PhraseNone,
+                        Key = Locales.ONLOOTQUESTITEM
+                    });
+                    return;
+                }
+
+                if (await HandleLootAction(mcsBotPlayerData, mcsBotPlayerData.LootingTarget))
+                {
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.LootGeneric,
+                        Key = item.Name
+                    });
+                }
+                else
+                {
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.PhraseNone,
+                        Key = Locales.ONLOOTNOSPACE
+                    });
+                }
+
+                if (isActuallyInContainer)
+                {
+                    var interactionResult2 = new InteractionResult(EInteractionType.Close);
+                    lootableContainer.Interact(interactionResult2);
+                }
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
             }
             finally
             {
@@ -232,248 +225,322 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
-        private async Task<bool> TryPickupToPockets(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData, bool isPickUp = true)
         {
-            var pocketsSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
-            var pockets = pocketsSlot.ContainedItem as SearchableItemItemClass;
-
-            if (pockets == null)
+            var mcsBotPlayer = mcsBotPlayerData.Player;
+            var callback = new Callback((IResult result) =>
             {
-                return false;
-            }
-
-            var stashGrid = pockets.Grids.FirstOrDefault();
-            if (stashGrid == null)
-            {
-                return false;
-            }
-
-            var location = stashGrid.FindLocationForItem(item);
-            if (location != null)
-            {
-                var moveResult = InteractionsHandlerClass.Move(item, location, inventoryController, true);
-                if (moveResult.Succeeded)
+                if (result.Succeed)
                 {
-                    var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
-                    var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
-                    return true;
-                }
-            }
+                    mcsBotPlayer.UpdateInteractionCast();
 
-            return false;
+                    // // 可选触发OnItemTaken事件 
+                    // if (BotOwner.ItemTaker != null)
+                    // {
+                    //     // 当前无需要触发的事件
+                    // }
+                }
+
+                if (isPickUp)
+                {
+                    mcsBotPlayer.CurrentManagedState.Pickup(false, null);
+                }
+                else
+                {
+                    mcsBotPlayer.CurrentManagedState.OnInventory(false);
+                }
+            });
+
+            mcsBotPlayer.CurrentManagedState.Pickup(true, new Action(() =>
+            {
+                if (action is GClass3411 gClass3411)
+                {
+                    if (targetLootData.Item is MagazineItemClass magazineItemClass && magazineItemClass != null)
+                    {
+                        mcsBotPlayer.InventoryController.StrictCheckMagazine(magazineItemClass, false, 0, false, true);
+                    }
+
+                    if (targetLootData.Item is ContainerClass containerClass && containerClass != null)
+                    {
+                        foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<MagazineItemClass>())
+                        {
+                            mcsBotPlayer.InventoryController.StrictCheckMagazine(mag, false, 0, false, true);
+                        }
+                    }
+                    BotOwner.AITaskManager.RegisterDelayedTask(BotOwner, 0.5f, new Action(BotOwner.Medecine.RefreshCurMeds));
+                }
+
+                mcsBotPlayer.InventoryController.RunNetworkTransaction(action, callback);
+            }));
         }
 
-        private async Task<bool> TryPickupToBackpack(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> HandleLootAction(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
         {
-            var backpackSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-            var backpack = backpackSlot.ContainedItem as SearchableItemItemClass;
-
-            if (backpack == null)
+            if (!targetLootData.LootProps.TryGetValue(mcsBotPlayerData.McsAILeadPlayer, out var lootProp))
             {
                 return false;
             }
 
-            var stashGrid = backpack.Grids.FirstOrDefault();
-            if (stashGrid == null)
+            var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
+            var normalTake = false;
+            var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
+                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+
+            if (currentSlot == null)
             {
-                return false;
+                normalTake = true;
             }
 
-            var location = stashGrid.FindLocationForItem(item);
-            if (location != null)
+            if (normalTake)
             {
-                var moveResult = InteractionsHandlerClass.Move(item, location, inventoryController, true);
-                if (moveResult.Succeeded)
+                await InteractionDelay(targetLootData);
+                return await Take(mcsBotPlayerData, targetLootData);
+            }
+            else
+            {
+                var currentContainer = currentSlot.ContainedItem;
+                if (currentContainer == null)
                 {
-                    var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
-                    var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
-                    return true;
+                    return false;
+                }
+
+                var currentItemData = currentContainer.GetData();
+                if (currentItemData == null || currentItemData is not LootData currentLootData)
+                {
+                    return false;
+                }
+
+                if (lootProp.IsShouldEquipContainer(mcsBotPlayerData.BotOwner))
+                {
+                    return await Equip(mcsBotPlayerData, targetLootData);
+                }
+                else if (lootProp.IsShouldSwapContainer(mcsBotPlayerData.BotOwner))
+                {
+                    return await Swap(mcsBotPlayerData, targetLootData);
+                }
+                else if (lootProp.IsShouldTakeContainer(mcsBotPlayerData.BotOwner))
+                {
+                    await InteractionDelay(targetLootData);
+                    return await Take(mcsBotPlayerData, targetLootData);
+                }
+                else
+                {
+                    return false;
                 }
             }
-
-            return false;
         }
 
-        private async Task<bool> TryPickupToTacticalVest(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> Swap(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
         {
-            var tacticalVestSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
-            var tacticalVest = tacticalVestSlot.ContainedItem as SearchableItemItemClass;
+            var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
+            var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
+                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
-            if (tacticalVest == null)
+            if (currentSlot == null)
             {
                 return false;
             }
 
-            var stashGrid = tacticalVest.Grids.FirstOrDefault();
-            if (stashGrid == null)
+            var currentContainer = currentSlot.ContainedItem;
+            if (currentContainer == null)
             {
                 return false;
             }
 
-            var location = stashGrid.FindLocationForItem(item);
-            if (location != null)
+            var currentItemData = currentContainer.GetData();
+            if (currentItemData == null || currentItemData is not LootData currentLootData)
             {
-                var moveResult = InteractionsHandlerClass.Move(item, location, inventoryController, true);
-                if (moveResult.Succeeded)
-                {
-                    var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
-                    var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            if (targetLootData.ItemType == EItemType.Rig || (targetLootData.ItemType == EItemType.Backpack && !currentLootData.IsContainerWithAdditionalGrid))
+            {
+                await Throw(mcsBotPlayerData, currentLootData, targetLootData);
+            }
+            await InteractionDelay(1);
+            await Equip(mcsBotPlayerData, targetLootData);
+            return true;
         }
 
-        private async Task<bool> TryPickupToSecureContainer(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
+        private async Task<bool> Equip(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
         {
-            var secureSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.SecuredContainer);
-            var secureContainer = secureSlot.ContainedItem as SearchableItemItemClass;
+            var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
 
-            if (secureContainer == null)
+            var targets = new List<CompoundItem>();
+
+            var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+            if (rigSlot.ContainedItem != null && rigSlot.ContainedItem is CompoundItem rig)
             {
-                return false;
+                targets.Add(rig);
             }
 
-            var stashGrid = secureContainer.Grids.FirstOrDefault();
-            if (stashGrid == null)
+            var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+            if (backpckSlot.ContainedItem != null && backpckSlot.ContainedItem is CompoundItem backpack)
             {
-                return false;
+                targets.Add(backpack);
             }
 
-            var location = stashGrid.FindLocationForItem(item);
-            if (location != null)
-            {
-                var moveResult = InteractionsHandlerClass.Move(item, location, inventoryController, true);
-                if (moveResult.Succeeded)
-                {
-                    var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
-                    var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                    await ExecutePickup(player, moveResult.Value, rootItem, lastOwner);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private async Task<bool> TryPickupNormally(McsBotPlayerData mcsBotPlayerData, InventoryController inventoryController, Item item, Player player)
-        {
-            // 检查是否为装备类物品的根物品（避免拾取整个装备）  
-            var rootItem = mcsBotPlayerData.LootingTarget.Item.Owner?.RootItem;
-            if (rootItem is InventoryEquipment && rootItem == item)
-            {
-                // 如果物品本身就是装备，仍然尝试拾取到背包中  
-                return await TryPickupToBackpack(mcsBotPlayerData, inventoryController, item, player) || await TryPickupToSecureContainer(mcsBotPlayerData, inventoryController, item, player);
-            }
-
-            var pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(
-                item,
-                inventoryController,
-                inventoryController.Inventory.Equipment.ToEnumerable(),
-                InteractionsHandlerClass.EMoveItemOrder.PickUp,
+            var result = InteractionsHandlerClass.QuickFindAppropriatePlace(
+                targetLootData.Item,
+                mcsBotPlayerInventoryController,
+                targets,
+                InteractionsHandlerClass.EMoveItemOrder.TryEquip,
                 true
             );
 
-            if (pickupResult.Succeeded && inventoryController.CanExecute(pickupResult.Value))
+            if (result.Succeeded)
             {
-                var lastOwner = GetLootItemLastOwner(mcsBotPlayerData.LootingTarget);
-                await ExecutePickup(player, pickupResult.Value, rootItem, lastOwner);
+                await Execute(mcsBotPlayerData, result.Value, targetLootData);
+                await Sort(mcsBotPlayerInventoryController);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 丢东西之前需要先将内部的物品进行转移
+        /// </summary>
+        /// <returns></returns>
+        private async Task Throw(McsBotPlayerData mcsBotPlayerData, LootData throwLootData, LootData retainLootData)
+        {
+            await Transfer(mcsBotPlayerData, throwLootData, retainLootData);
+            var promise = new TaskCompletionSource<IResult>();
+            mcsBotPlayerData.Player.InventoryController.ThrowItem(throwLootData.Item, false, promise.SetResult);
+        }
+
+        /// <summary>
+        /// 转移原容器中最顶层的物品至新容器
+        /// </summary>
+        /// <param name="mcsBotPlayerData"></param>
+        /// <param name="fromLootData"></param>
+        /// <param name="toLootData"></param>
+        /// <returns></returns>
+        private async Task Transfer(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData)
+        {
+            if (fromLootData.Item is ContainerClass containerClass)
+            {
+                var firstLevelItems = containerClass.GetFirstLevelItems();
+                foreach (var firstLevelItem in firstLevelItems)
+                {
+                    var firstLevelItemData = firstLevelItem.GetData();
+                    if (firstLevelItem == null)
+                    {
+                        continue;
+                    }
+
+                    if (firstLevelItemData is LootData firstLevelLootData)
+                    {
+                        await InteractionDelay(1);
+                        await Take(mcsBotPlayerData, firstLevelLootData, toLootData);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 拾取不再只是单纯往胸挂、背包、口袋槽位内拾取，而是包括胸挂、背包、口袋本身以外还有其中嵌套的容器，全部都要进行尝试放入
+        /// </summary>
+        /// <param name="mcsBotPlayerData"></param>
+        /// <param name="fromLootData"></param>
+        /// <returns></returns>
+        private async Task<bool> Take(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData = null)
+        {
+            var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
+            var targets = new List<CompoundItem>();
+
+            if (toLootData != null && toLootData.Item is CompoundItem toContainer)
+            {
+                targets.Add(toContainer);
+            }
+            else
+            {
+                var pocketsSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
+                if (pocketsSlot.ContainedItem != null && pocketsSlot.ContainedItem is CompoundItem pocket)
+                {
+                    targets.Add(pocket);
+                }
+
+                var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+                if (rigSlot.ContainedItem != null && rigSlot.ContainedItem is CompoundItem rig)
+                {
+                    targets.Add(rig);
+                }
+
+                var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+                if (backpckSlot.ContainedItem != null && backpckSlot.ContainedItem is CompoundItem backpack)
+                {
+                    targets.Add(backpack);
+                }
+            }
+
+            var result = InteractionsHandlerClass.QuickFindAppropriatePlace(
+                fromLootData.Item,
+                mcsBotPlayerInventoryController,
+                targets,
+                InteractionsHandlerClass.EMoveItemOrder.PickUp | InteractionsHandlerClass.EMoveItemOrder.TryTransfer,
+                true
+            );
+
+            if (result.Succeeded)
+            {
+                await Execute(mcsBotPlayerData, result.Value, fromLootData);
+                await Sort(mcsBotPlayerInventoryController);
                 return true;
             }
 
             return false;
         }
 
-        private IPlayer GetLootItemLastOwner(LootData lootData)
+        /// <summary>
+        /// 对包括背包、胸挂及其内部的容器全部进行整理，确保空间利用最大化
+        /// </summary>
+        /// <param name="mcsBotPlayerInventoryController"></param>
+        /// <param name="allContainers"></param>
+        /// <returns></returns>
+        private async Task Sort(InventoryController mcsBotPlayerInventoryController, List<Item> allContainers = null)
         {
-            // 尝试从LootItem获取LastOwner  
-            if (lootData.RootTransform != null)
+            await InteractionDelay(2);
+
+            if (allContainers == null)
             {
-                var lootItem = lootData.RootTransform.GetComponent<LootItem>();
-                if (lootItem != null)
+                allContainers = new();
+
+                var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+                if (rigSlot.ContainedItem != null)
                 {
-                    return lootItem.LastOwner;
+                    rigSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                }
+
+                var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+                if (backpckSlot.ContainedItem != null)
+                {
+                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                }
+
+                allContainers = allContainers.Where(i => i.IsContainer).ToList();
+            }
+
+            foreach (var item in allContainers)
+            {
+                if (item is SearchableItemItemClass searchableItemItemClass)
+                {
+                    var sortResult = InteractionsHandlerClass.Sort(searchableItemItemClass, mcsBotPlayerInventoryController, true);
+                    if (sortResult.Succeeded)
+                    {
+                        await mcsBotPlayerInventoryController.TryRunNetworkTransaction(sortResult, null);
+                    }
                 }
             }
-            return null;
         }
 
-        private async Task ExecutePickup(Player player, GInterface424 pickupAction, Item rootItem, IPlayer lastOwner)
+        private async Task InteractionDelay(LootData lootData)
         {
-            // 参考BotItemTaker.method_1的实现  
-            var pickupCallback = new Callback((IResult result) =>
-            {
-                if (result.Succeed)
-                {
-                    player.UpdateInteractionCast();
-
-                    // 触发OnItemTaken事件（如果需要）  
-                    if (BotOwner.ItemTaker != null)
-                    {
-                        // 这里可以触发自定义的拾取完成事件  
-                    }
-                }
-                player.CurrentManagedState.Pickup(false, null);
-            });
-
-            // 设置拾取状态  
-            player.CurrentManagedState.Pickup(true, new Action(() =>
-            {
-                // 执行实际的物品移动操作  
-                if (pickupAction is GClass3411 gClass3411 && lastOwner != null && lastOwner.ProfileId != player.ProfileId)
-                {
-                    // 如果是从其他玩家那里拾取的，需要检查弹匣  
-                    var magazineItemClass = rootItem as MagazineItemClass;
-                    if (magazineItemClass != null)
-                    {
-                        player.InventoryController.StrictCheckMagazine(magazineItemClass, false, 0, false, true);
-                    }
-
-                    var containerClass = rootItem as ContainerClass;
-                    if (containerClass != null)
-                    {
-                        foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<MagazineItemClass>())
-                        {
-                            player.InventoryController.StrictCheckMagazine(mag, false, 0, false, true);
-                        }
-                    }
-
-                    // 刷新医疗物品  
-                    BotOwner.AITaskManager.RegisterDelayedTask(BotOwner, 0.5f, new Action(BotOwner.Medecine.RefreshCurMeds));
-                }
-
-                // 执行网络事务  
-                player.InventoryController.RunNetworkTransaction(pickupAction, pickupCallback);
-            }));
-
-            await OrganizeContainersAfterPickup(player.InventoryController, player);
+            await Task.Delay(TimeSpan.FromMilliseconds(lootData.Item.ExamineTime * 300f));
         }
 
-        private async Task OrganizeContainersAfterPickup(InventoryController inventoryController, Player player)
+        private async Task InteractionDelay(float time)
         {
-            var backpackSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-            if (backpackSlot.ContainedItem != null && backpackSlot.ContainedItem is SearchableItemItemClass backpack)
-            {
-                var sortResult = InteractionsHandlerClass.Sort(backpack, inventoryController, true);
-                if (sortResult.Succeeded)
-                {
-                    await inventoryController.TryRunNetworkTransaction(sortResult, null);
-                }
-            }
-
-            var tacticalVestSlot = inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
-            if (tacticalVestSlot.ContainedItem != null && tacticalVestSlot.ContainedItem is SearchableItemItemClass tacticalVest)
-            {
-                var sortResult = InteractionsHandlerClass.Sort(tacticalVest, inventoryController, true);
-                if (sortResult.Succeeded)
-                {
-                    await inventoryController.TryRunNetworkTransaction(sortResult, null);
-                }
-            }
+            await Task.Delay(TimeSpan.FromMilliseconds(time * 300f));
         }
     }
 }
