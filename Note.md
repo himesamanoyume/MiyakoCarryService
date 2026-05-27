@@ -105,7 +105,7 @@ With a reference later in the document defining the URL location.
 #### 0.3.5.0
 
 - 大幅改进了护航的战利品操作逻辑
-- 实现翻越
+- 实现护航在卡脚时尝试翻越和跳跃
 
 #### 0.3.4.0
 
