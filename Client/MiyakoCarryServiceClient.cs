@@ -166,7 +166,6 @@ namespace MiyakoCarryService.Client
             new MatchmakerAcceptScreenShowPatch().Enable();
             new MatchingAbortPatch().Enable();
             new DisbandRaidGroupPatch().Enable();
-            new ManualUpdatePatch().Enable();
             new MenuTaskBarAwakePatch().Enable();
             new NewNewsCountPatch().Enable();
             new SetGoalEnemyPatch().Enable();
