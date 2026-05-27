@@ -90,11 +90,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (ShouldTryVault())  
-                {  
-                    return new Action(typeof(TryVaultLogic), "Mcs:TryVault");  
-                }  
-
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                 if (mcsLeadPlayerPos == null)
                 {

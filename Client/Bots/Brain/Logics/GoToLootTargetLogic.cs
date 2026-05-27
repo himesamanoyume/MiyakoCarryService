@@ -22,7 +22,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     {
         private int _currentLootingRetries = 0;
         private float _lastTimeCheckDistance = 0f;
-        private float _lastTimeDistance = -1f;
         public GoToLootTargetLogic(BotOwner botOwner) : base(botOwner)
         {
 
@@ -60,7 +59,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (_lastTimeCheckDistance < Time.time)
             {
                 _currentLootingRetries++;
-                if (_currentLootingRetries > 30)
+                if (_currentLootingRetries > 15)
                 {
                     mcsBotPlayerData.IsLooting = false;
                     _currentLootingRetries = 0;
@@ -91,7 +90,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(lootPos);
                     TasksExtensions.HandleExceptions(StartLooting());
-                    _lastTimeDistance = Mathf.Infinity;
                     return;
                 }
 
@@ -109,13 +107,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     mcsBotPlayerData.IsLooting = false;
                     return;
                 }
-
-                if (_lastTimeDistance > 0f)
-                {
-                    BotOwner.CheckStuck();
-                }
-
-                _lastTimeDistance = distance;
             }
         }
 

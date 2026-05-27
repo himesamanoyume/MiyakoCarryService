@@ -30,6 +30,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextWeaponSwitchTime = 0f;
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
+        protected float _lastVaultCheckTime = 0f;
+        protected float _lastJumpCheckTime = 0f;
+        protected const float JUMP_CHECK_INTERVAL = 1f;
+        protected const float STUCK_JUMP_THRESHOLD = 1f;
+        protected const float VAULT_CHECK_INTERVAL = 2f;
+        protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
+        protected const float SPHERECAST_RADIUS = 0.1f;
+        protected const float SPHERECAST_DISTANCE = 2f;
+        protected const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
         protected const float LOOTING_CHECK_INTERVAL = 10f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float MELEE_CHECK_INTERVAL = 0.5f;
@@ -82,7 +91,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(GoToProtectLogic), EndGoToProtect },
                 { typeof(GoToEnemyLogic), EndGoToEnemy },
                 { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(GoToLootTargetLogic), EndLootingTarget },
+                { typeof(GoToLootTargetLogic), EndGoToLootTarget },
                 { typeof(ShootFromPlaceLogic), EndShootFromPlace },
                 { typeof(ShootFromCoverLogic), EndShootFromCover },
                 { typeof(ShootToSmokeLogic), EndShootToSmoke },
@@ -90,7 +99,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
-                { typeof(TryVaultLogic), EndTryVault },
             };
         }
 
@@ -126,6 +134,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected virtual bool EndRunToCover()
         {
             var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
             if (mcsLeadPlayerPos != null)
             {
                 TryFindCover(mcsLeadPlayerPos);
@@ -251,6 +264,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected virtual bool EndGoToCoverPoint()
         {
             var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
             if (mcsLeadPlayerPos != null)
             {
                 TryFindCover(mcsLeadPlayerPos);
@@ -396,6 +414,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndAttackMoving()
         {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
             var haveBullets = BotOwner.WeaponManager?.HaveBullets;
             if (!haveBullets.Value)
             {
@@ -429,6 +451,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Mover.LastPos = pos;
                 BotOwner.Mover.LastTimePosChanged = Time.time;
                 return false;
+            }
+
+            if (_lastVaultCheckTime < Time.time)
+            {
+                _lastVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
+                if (ShouldTryVault())
+                {
+                    TryVault();
+                }
+            }
+
+            if (_lastJumpCheckTime < Time.time)
+            {
+                _lastJumpCheckTime = Time.time + JUMP_CHECK_INTERVAL;
+                if (ShouldTryJump())
+                {
+                    TryJump();
+                }
             }
             return true;
         }
@@ -546,8 +586,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.DogFight.DogFightState > BotDogFightStatus.none;
         }
 
-        protected virtual bool EndLootingTarget()
+        protected virtual bool EndGoToLootTarget()
         {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
             return !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting;
         }
 
@@ -678,6 +722,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndGoToEnemy()
         {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
             if (BotOwner.DogFight.ShallStartCauseHavePlace())
             {
                 return true;
@@ -715,6 +763,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndRunToEnemy()
         {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
             if (BotOwner.DogFight.ShallStartCauseHavePlace())
             {
                 return true;
@@ -769,6 +822,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndGoToExfiltrationPoint()
         {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
             return true;
         }
 
@@ -1016,11 +1073,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndTryVault()
-        {
-            return !BotOwner.Mover.IsMoving || BotOwner.Mover.IsComeTo(1f, false, null);
-        }
-
         protected virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
@@ -1115,16 +1167,106 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
+        /// <summary>
+        /// 参考SAIN
+        /// </summary>
+        /// <returns></returns>
         protected virtual bool ShouldTryVault()
         {
-            if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+            if (BotOwner.GetPlayer == null || BotOwner.GetPlayer.VaultingComponent == null || BotOwner.GetPlayer.VaultingGameplayRestrictions == null)
             {
-                return true;
+                return false;
             }
 
-            if (BotOwner.Mover.IsMoving && Time.time - BotOwner.Mover.LastTimePosChanged > 3f)
+            if (!BotOwner.GetPlayer.VaultingGameplayRestrictions.CanVaulting())
             {
-                return true;
+                return false;
+            }
+
+            if (!BotOwner.Mover.IsMoving)
+            {
+                return false;
+            }
+
+            var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
+            var targetDirection = BotOwner.Mover.NormDirCurPoint;
+            if (Vector3.Dot(lookDirection, targetDirection) < DIRECTION_ALIGNMENT_THRESHOLD)
+            {
+                return false;
+            }
+
+            if (Time.time - BotOwner.Mover.LastTimePosChanged < 3f)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 参考SAIN
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool ShouldTryJump()
+        {
+            var player = BotOwner.GetPlayer;
+            if (player == null || player.MovementContext == null)
+            {
+                return false;
+            }
+
+            if (!player.MovementContext.CanJump)
+            {
+                return false;
+            }
+
+            if (!BotOwner.Mover.IsMoving)
+            {
+                return false;
+            }
+
+            if (Time.time - BotOwner.Mover.LastTimePosChanged < STUCK_JUMP_THRESHOLD)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected virtual void TryVault()
+        {
+            if (CheckForVaultableObstacle())
+            {
+                if (BotOwner.GetPlayer.VaultingComponent.TryVaulting())
+                {
+                    BotOwner.GetPlayer.OnVaulting();
+                }
+            }
+        }
+
+        protected virtual void TryJump()
+        {
+            BotOwner.GetPlayer.MovementContext.TryJump();
+        }
+
+        protected virtual bool CheckForVaultableObstacle()
+        {
+            var startPosition = BotOwner.GetPlayer.WeaponRoot.position;
+            var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
+            var endPosition = startPosition + lookDirection * SPHERECAST_DISTANCE;
+
+            startPosition.y += 0.33f;
+            endPosition.y += 0.33f;
+
+            if (Physics.SphereCast(startPosition, SPHERECAST_RADIUS, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayerMaskClass.PlayerStaticCollisionsMask))
+            {
+                if (hit.collider != null)
+                {
+                    float obstacleHeight = hit.collider.bounds.size.y;
+                    float maxVaultHeight = BotOwner.GetPlayer.VaultingParameters.VaultingHeight;
+
+                    return obstacleHeight < maxVaultHeight && obstacleHeight < VAULT_HEIGHT_THRESHOLD;
+                }
             }
 
             return false;
