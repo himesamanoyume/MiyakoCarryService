@@ -20,18 +20,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
         protected Dictionary<Type, Func<bool>> _endActionMap;
         protected bool _haveCoverToShoot = false;
-        protected float _lastHoldPositionTime = Time.time;
-        protected float _goToCoverTime = Time.time;
+        protected float _lastHoldPositionTime = 0f;
+        protected float _goToCoverTime = 0f;
         protected CustomNavigationPoint _currentNavigationPoint = null;
-        protected float _closeLeadDistance = 20f;
-        protected float _lastPatrolTime = Time.time;
-        protected float _lastGoToPointTime = Time.time;
-        protected float _lastShootTime = Time.time;
+        protected float _lastPatrolTime = 0f;
+        protected float _lastGoToPointTime = 0f;
+        protected float _lastShootTime = 0f;
         protected float _nextWeaponSwitchTime = 0f;
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
         protected float _lastVaultCheckTime = 0f;
         protected float _lastJumpCheckTime = 0f;
+        protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float JUMP_CHECK_INTERVAL = 1f;
         protected const float STUCK_JUMP_THRESHOLD = 1f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
@@ -177,11 +177,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (_goToCoverTime < Time.time)
             {
                 _goToCoverTime = Time.time + 1f;
-                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, _closeLeadDistance, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true, null, null, "Default");
+                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, TOO_FAR_FROM_LEAD_DISTANCE, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true, null, null, "Default");
                 _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
                 if (_currentNavigationPoint != null)
                 {
-                    if (mcsLeadPlayerPos.McsSqrDistance(_currentNavigationPoint.Position) < _closeLeadDistance * _closeLeadDistance && !_currentNavigationPoint.IsSpotted)
+                    if (mcsLeadPlayerPos.McsSqrDistance(_currentNavigationPoint.Position) < TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE && !_currentNavigationPoint.IsSpotted)
                     {
                         BotOwner.Memory.IsInCover = true;
                         return;
@@ -337,7 +337,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     if (MiyakoCarryServicePlugin.SAINInstalled)
                     {
@@ -382,7 +382,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     if (MiyakoCarryServicePlugin.SAINInstalled)
                     {
@@ -452,32 +452,40 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Mover.LastTimePosChanged = Time.time;
                 return false;
             }
+            else
+            {
+                TrySolveStuck();
+            }
+            return true;
+        }
 
+        protected virtual void TrySolveStuck()
+        {
             if (_lastVaultCheckTime < Time.time)
             {
                 _lastVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
                 if (ShouldTryVault())
                 {
-                    TryVault();
+                    if (!TryVault())
+                    {
+                        if (_lastJumpCheckTime < Time.time)
+                        {
+                            _lastJumpCheckTime = Time.time + JUMP_CHECK_INTERVAL;
+                            if (ShouldTryJump())
+                            {
+                                TryJump();
+                            }
+                        }
+                    }
                 }
             }
-
-            if (_lastJumpCheckTime < Time.time)
-            {
-                _lastJumpCheckTime = Time.time + JUMP_CHECK_INTERVAL;
-                if (ShouldTryJump())
-                {
-                    TryJump();
-                }
-            }
-            return true;
         }
 
         protected virtual bool EndHoldPosition()
         {
             UpdateCoverToShoot();
             var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) > _closeLeadDistance * _closeLeadDistance)
+            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) > TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
             {
                 return true;
             }
@@ -1230,18 +1238,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            return true;
+            if (BotOwner.Mover.IsMoving && Time.time - BotOwner.Mover.LastTimePosChanged > 1f)
+            {
+                return true;
+            }
+
+            return false;
         }
 
-        protected virtual void TryVault()
+        protected virtual bool TryVault()
         {
             if (CheckForVaultableObstacle())
             {
                 if (BotOwner.GetPlayer.VaultingComponent.TryVaulting())
                 {
                     BotOwner.GetPlayer.OnVaulting();
+                    return true;
                 }
             }
+            return false;
         }
 
         protected virtual void TryJump()

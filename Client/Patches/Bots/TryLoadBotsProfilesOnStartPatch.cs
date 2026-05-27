@@ -469,29 +469,19 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;
             settings.FileSettings.Shoot.NEXT_SINGLE_SHOT_PAUSE = 0f;
+            settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST = 300f;
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
-            // botOwner.ENEMY_LOOK_AT_ME = Mathf.Cos(settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG * 0.017453292f);
             botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(settings.FileSettings.Core.DamageCoeff);
 
-            // counter SAIN
             botOwner.LookSensor.ShootFromEyes = true;
             settings.FileSettings.Look.SHOOT_FROM_EYES = true;
 
-            // - friendly bot never gets tired
             botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
             botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;
-
-            // - need no food
             botOwner.GetPlayer.HealthController.DisableMetabolism();
-
             botOwner.Tactic.AggressionChange(1f);
-
-            // AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Core.VisibleAngle * 0.017453292f));
-            // AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_LIGHT").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_LIGHT * 0.017453292f));
-            // AccessTools.Field(typeof(LookSensor), "VISIBLE_ANGLE_NIGHTVISION").SetValue(botOwner.LookSensor, Mathf.Cos(settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION * 0.017453292f));
-
             return settings;
         }
     }

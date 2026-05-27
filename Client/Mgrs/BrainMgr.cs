@@ -15,6 +15,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
+
             TasksExtensions.HandleExceptions(GetAllCustomBrainName());
 
             BrainManager.RemoveLayer("Exfiltration", [nameof(EBrainName.PmcUsec), nameof(EBrainName.PmcBear)]);
@@ -33,22 +34,17 @@ namespace MiyakoCarryService.Client.Mgrs
             BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.SAINNotAdjusted.Except([nameof(EBrainName.SctPredvst)]).ToList(), 86);
 
             BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.SctPredvst)], 186);
-
-            if (_customBrainNames != null)
-            {
-                BrainManager.AddCustomLayer(typeof(McsCommonLayer), _customBrainNames, 65);
-                
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 86);
-            }
-            else
-            {
-                MiyakoCarryServicePlugin.Logger.LogError("自定义BrainName为空");
-            }
         }
 
         private async Task GetAllCustomBrainName()
         {
             _customBrainNames = await McsRequestHandler.GetAllCustomBrainName();
+            if (_customBrainNames != null && _customBrainNames.Count > 0)
+            {
+                BrainManager.AddCustomLayer(typeof(McsCommonLayer), _customBrainNames, 65);
+                
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 86);
+            }
         }
     }
 }

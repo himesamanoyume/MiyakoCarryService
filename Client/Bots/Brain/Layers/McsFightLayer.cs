@@ -78,6 +78,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var canShoot = goalEnemy.CanShoot;
+#if DEBUG
+                // if (canShoot)
+                // {
+                //     MiyakoCarryServicePlugin.Logger.LogWarning($"CanShoot: {canShoot}, Distance: {goalEnemy.Distance}, IsVisible: {goalEnemy.IsVisible}");
+                // }
+#endif
                 var isProtectWantKill = ProtectWantKill();
                 var isProtectCareKill = ProtectCareKill();
 
@@ -150,7 +156,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 validPosition = navMeshHit.position;
                             }
 
-                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= _closeLeadDistance * _closeLeadDistance)
+                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                             {
                                 if (validPosition.HasValue)
                                 {
@@ -219,7 +225,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.Memory.HaveEnemy)
             {
-                // BotOwner.TalkMsg(ETalkContentType.EnemySpotted, BotOwner.Memory.GoalEnemy.EnemyLastPosition);
+                // 使护航下的Zyriachy无视目标处于灯塔限定区域时才可视为敌人的限制
+                if (BotOwner.Profile.Info.Settings.Role == WildSpawnType.bossZryachiy)  
+                {  
+                    var goalEnemy = BotOwner.Memory.GoalEnemy;  
+                    if (goalEnemy != null && goalEnemy.Person != null)  
+                    {  
+                        if (BotOwner.Boss.BossLogic is ZyriachyBossLogicClass zyriachyBossLogicClass)  
+                        {  
+                            zyriachyBossLogicClass.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);  
+                        }  
+                    }  
+                } 
                 return true;
             }
 
