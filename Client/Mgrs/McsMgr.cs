@@ -361,7 +361,15 @@ namespace MiyakoCarryService.Client.Mgrs
             var botOwners = GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
             foreach (var botOwner in botOwners)
             {
+                if (botOwner == null)
+                {
+                    continue;
+                }
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    continue;
+                }
                 mcsBotPlayerData.ShouldExfil = true;
             }
         }

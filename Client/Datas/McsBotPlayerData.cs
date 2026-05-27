@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Bots.BotBehaviors;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 
@@ -100,7 +101,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (lootProp.IsShouldTakeContainer(BotOwner) || lootProp.IsShouldEquipContainer(BotOwner) || lootProp.IsShouldSwapContainer(BotOwner) || lootProp.IsShouldNestContainer(BotOwner))
+                if (lootProp.IsShouldTakeContainer(BotOwner) || lootProp.IsShouldEquipContainer(BotOwner) || lootProp.IsShouldSwapContainer(BotOwner) || lootProp.IsShouldNestContainer(BotOwner) is ENestType.In or ENestType.Out)
                 {
                     usefulContainers.Add(lootData);
                     continue;

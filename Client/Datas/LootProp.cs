@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Datas
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldTakeContainers = new();
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldSwapContainers = new();
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldEquipContainers = new();
-        private readonly ConcurrentDictionary<BotOwner, bool> _isShouldNestContainers = new();
+        private readonly ConcurrentDictionary<BotOwner, ENestType> _isShouldNestContainers = new();
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public LootProp(LootData lootData, TraderOffer offer, McsAILeadPlayer mcsAILeadPlayer)
@@ -81,14 +81,23 @@ namespace MiyakoCarryService.Client.Datas
             return _isShouldEquipContainers.TryGetValue(botOwner, out var isShouldEquipContainer) ? isShouldEquipContainer : false;
         }
 
-        public bool IsShouldNestContainer(BotOwner botOwner)
+        public ENestType IsShouldNestContainer(BotOwner botOwner)
         {
-            return _isShouldNestContainers.TryGetValue(botOwner, out var isShouldNestContainer) ? isShouldNestContainer : false;
+            return _isShouldNestContainers.TryGetValue(botOwner, out var nestType) ? nestType : ENestType.None;
         }
 
         public void UpdateContainerProp(ConcurrentDictionary<BotOwner, bool> kvp, BotOwner botOwner, bool value)
         {
             kvp.AddOrUpdate(botOwner, _botOwner => false, (_botOwner, oldValue) =>
+            {
+                oldValue = value;
+                return oldValue;
+            });
+        }
+
+        public void UpdateContainerProp(ConcurrentDictionary<BotOwner, ENestType> kvp, BotOwner botOwner, ENestType value)
+        {
+            kvp.AddOrUpdate(botOwner, _botOwner => ENestType.None, (_botOwner, oldValue) =>
             {
                 oldValue = value;
                 return oldValue;
@@ -101,20 +110,23 @@ namespace MiyakoCarryService.Client.Datas
             {
                 if (botOwner == null)
                 {
+                    Reset(botOwner);
                     continue;
                 }
 
                 if (!botOwner.HealthController.IsAlive)
                 {
+                    Reset(botOwner);
                     continue;
                 }
 
                 var inventoryController = botOwner.GetPlayer.InventoryController;
                 var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) : 
-                    LootData.ItemType == EItemType.Rig ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    LootData.ItemType == EItemType.Equipment ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
                 if (currentSlot == null)
                 {
+                    Reset(botOwner);
                     continue;
                 }
 
@@ -122,7 +134,7 @@ namespace MiyakoCarryService.Client.Datas
                 if (currentContainer == null)
                 {
                     UpdateContainerProp(_isShouldEquipContainers, botOwner, true);
-                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.None);
                     UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
                     UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
                     continue;
@@ -131,13 +143,24 @@ namespace MiyakoCarryService.Client.Datas
                 var itemData = currentContainer.GetData();
                 if (itemData == null || itemData is not LootData currentLootData)
                 {
+                    Reset(botOwner);
                     continue;
                 }
 
-                if (LootData.ItemGridCount <= currentLootData.MaxSingleGridCount)
+                var shouldNestIn = currentLootData.MaxSingleGridCount >= LootData.ItemGridCount;
+                var shouldNestOut = LootData.MaxSingleGridCount >= currentLootData.ItemGridCount;
+
+                if (shouldNestOut || shouldNestIn)
                 {
                     UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
-                    UpdateContainerProp(_isShouldNestContainers, botOwner, true);
+                    if (shouldNestOut)
+                    {
+                        UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.Out);
+                    }
+                    else
+                    {
+                        UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.In);
+                    }
                     UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
                     UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
                     continue;
@@ -146,7 +169,7 @@ namespace MiyakoCarryService.Client.Datas
                 if (LootData.ContainerGridCount > currentLootData.ContainerGridCount)
                 {
                     UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
-                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.None);
                     UpdateContainerProp(_isShouldSwapContainers, botOwner, true);
                     UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
                     continue;
@@ -155,11 +178,22 @@ namespace MiyakoCarryService.Client.Datas
                 if (LootData.IsContainerWithAdditionalGrid)
                 {
                     UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
-                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.None);
                     UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
                     UpdateContainerProp(_isShouldTakeContainers, botOwner, true);
+                    continue;
                 }
+
+                Reset(botOwner);
             }
+        }
+
+        private void Reset(BotOwner botOwner)
+        {
+            UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
+            UpdateContainerProp(_isShouldNestContainers, botOwner, ENestType.None);
+            UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
+            UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
         }
     }
 }

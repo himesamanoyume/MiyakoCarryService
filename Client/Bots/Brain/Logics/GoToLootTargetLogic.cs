@@ -9,6 +9,7 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -61,7 +62,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 _currentLootingRetries++;
                 if (_currentLootingRetries > 30)
                 {
-                    // MiyakoCarryServicePlugin.Logger.LogWarning("重试超时");
                     mcsBotPlayerData.IsLooting = false;
                     _currentLootingRetries = 0;
                     return;
@@ -79,7 +79,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
 #endif
 
-                // 到达判定
                 if (distance <= 9f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.TalkMsg(new McsMsg
@@ -107,7 +106,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
                 if (pathStatus != NavMeshPathStatus.PathComplete)
                 {
-                    // MiyakoCarryServicePlugin.Logger.LogWarning("没有路径");
                     mcsBotPlayerData.IsLooting = false;
                     return;
                 }
@@ -277,7 +275,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var normalTake = false;
             var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
-                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    targetLootData.ItemType == EItemType.Equipment ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
             if (currentSlot == null)
             {
@@ -298,12 +296,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 #endif
                     return await Equip(mcsBotPlayerData, targetLootData);
                 }
-                else if (lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner))
+                else if (lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner) is ENestType.In or ENestType.Out)
                 {
 #if DEBUG
                     MiyakoCarryServicePlugin.Logger.LogWarning("触发嵌套战利品");
 #endif
-                    return await Nest(mcsBotPlayerData, targetLootData);
+                    return await Nest(mcsBotPlayerData, targetLootData, lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner));
                 }
                 else if (lootProp.IsShouldSwapContainer(mcsBotPlayerData.BotOwner))
                 {
@@ -331,7 +329,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
-                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    targetLootData.ItemType == EItemType.Equipment ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
             if (currentSlot == null)
             {
@@ -350,7 +348,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return false;
             }
 
-            if (targetLootData.ItemType == EItemType.Rig || (targetLootData.ItemType == EItemType.Backpack && !currentLootData.IsContainerWithAdditionalGrid))
+            if (targetLootData.ItemType == EItemType.Equipment || (targetLootData.ItemType == EItemType.Backpack && !currentLootData.IsContainerWithAdditionalGrid))
             {
                 await Throw(mcsBotPlayerData, currentLootData, targetLootData);
                 await InteractionDelay(3);
@@ -424,11 +422,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
-        private async Task<bool> Nest(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
+        private async Task<bool> Nest(McsBotPlayerData mcsBotPlayerData, LootData targetLootData, ENestType nestType)
         {
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
-                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    targetLootData.ItemType == EItemType.Equipment ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
             if (currentSlot == null)
             {
@@ -447,8 +445,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return false;
             }
 
-            await Transfer(mcsBotPlayerData, targetLootData, currentLootData);
-            return await Take(mcsBotPlayerData, targetLootData, currentLootData);
+            if (nestType == ENestType.Out)
+            {
+                var result = await Take(mcsBotPlayerData, currentLootData, targetLootData);
+                await InteractionDelay(1);
+                return result && await Equip(mcsBotPlayerData, targetLootData);
+            }
+            else if (nestType == ENestType.In)
+            {
+                await Transfer(mcsBotPlayerData, currentLootData, targetLootData);
+                return await Take(mcsBotPlayerData, targetLootData, currentLootData);
+            }
+
+            return false;
         }
 
         /// <summary>
