@@ -202,16 +202,38 @@ namespace MiyakoCarryService.Client
 
         private void BatchRefreshItems(Dictionary<ItemData, McsAILeadPlayer> updates)
         {
+            int batchSize = Mathf.Clamp(Mathf.CeilToInt(updates.Count / 10f), 5, 300);
+            var batches = new List<List<KeyValuePair<ItemData, McsAILeadPlayer>>>();
+            var currentBatch = new List<KeyValuePair<ItemData, McsAILeadPlayer>>();
+
             foreach (var kvp in updates)
             {
-                try
+                currentBatch.Add(kvp);
+                if (currentBatch.Count >= batchSize)
                 {
-                    kvp.Key.UpdateContainerInfoData();
-                    kvp.Key.RefreshRootItemInteresting(kvp.Value);
+                    batches.Add(currentBatch);
+                    currentBatch.Clear();
                 }
-                catch (Exception e)
+            }
+
+            if (currentBatch.Count > 0)
+            {
+                batches.Add(currentBatch);
+            }
+
+            foreach (var batch in batches)
+            {
+                foreach (var kvp in batch)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogError($"Batch refresh item error: {e}");
+                    try
+                    {
+                        kvp.Key.UpdateContainerInfoData();
+                        kvp.Key.RefreshRootItemInteresting(kvp.Value);
+                    }
+                    catch (Exception e)
+                    {
+                        MiyakoCarryServicePlugin.Logger.LogError($"Batch refresh item error: {e}");
+                    }
                 }
             }
         }

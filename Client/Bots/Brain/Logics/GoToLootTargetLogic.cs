@@ -225,7 +225,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
-        private async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData, bool isPickUp = true)
+        private async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;
             var callback = new Callback((IResult result) =>
@@ -241,14 +241,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     // }
                 }
 
-                if (isPickUp)
-                {
-                    mcsBotPlayer.CurrentManagedState.Pickup(false, null);
-                }
-                else
-                {
-                    mcsBotPlayer.CurrentManagedState.OnInventory(false);
-                }
+                mcsBotPlayer.CurrentManagedState.Pickup(false, null);
             });
 
             mcsBotPlayer.CurrentManagedState.Pickup(true, new Action(() =>
@@ -298,28 +291,32 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             else
             {
-                var currentContainer = currentSlot.ContainedItem;
-                if (currentContainer == null)
-                {
-                    return false;
-                }
-
-                var currentItemData = currentContainer.GetData();
-                if (currentItemData == null || currentItemData is not LootData currentLootData)
-                {
-                    return false;
-                }
-
                 if (lootProp.IsShouldEquipContainer(mcsBotPlayerData.BotOwner))
                 {
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发装备战利品");
+#endif
                     return await Equip(mcsBotPlayerData, targetLootData);
+                }
+                else if (lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner))
+                {
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发嵌套战利品");
+#endif
+                    return await Nest(mcsBotPlayerData, targetLootData);
                 }
                 else if (lootProp.IsShouldSwapContainer(mcsBotPlayerData.BotOwner))
                 {
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发交换战利品");
+#endif
                     return await Swap(mcsBotPlayerData, targetLootData);
                 }
                 else if (lootProp.IsShouldTakeContainer(mcsBotPlayerData.BotOwner))
                 {
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品");
+#endif
                     await InteractionDelay(targetLootData);
                     return await Take(mcsBotPlayerData, targetLootData);
                 }
@@ -356,43 +353,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (targetLootData.ItemType == EItemType.Rig || (targetLootData.ItemType == EItemType.Backpack && !currentLootData.IsContainerWithAdditionalGrid))
             {
                 await Throw(mcsBotPlayerData, currentLootData, targetLootData);
+                await InteractionDelay(3);
+                await Equip(mcsBotPlayerData, targetLootData);
+                return true;
             }
-            await InteractionDelay(1);
-            await Equip(mcsBotPlayerData, targetLootData);
-            return true;
+
+            return false;
         }
 
         private async Task<bool> Equip(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
         {
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
+            var toAddress = mcsBotPlayerInventoryController.FindSlotToPickUp(targetLootData.Item);
 
-            var targets = new List<CompoundItem>();
-
-            var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
-            if (rigSlot.ContainedItem != null && rigSlot.ContainedItem is CompoundItem rig)
+            if (toAddress != null)
             {
-                targets.Add(rig);
-            }
+                var result = InteractionsHandlerClass.Move(
+                    targetLootData.Item,
+                    toAddress,
+                    mcsBotPlayerInventoryController,
+                    true
+                );
 
-            var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-            if (backpckSlot.ContainedItem != null && backpckSlot.ContainedItem is CompoundItem backpack)
-            {
-                targets.Add(backpack);
-            }
-
-            var result = InteractionsHandlerClass.QuickFindAppropriatePlace(
-                targetLootData.Item,
-                mcsBotPlayerInventoryController,
-                targets,
-                InteractionsHandlerClass.EMoveItemOrder.TryEquip,
-                true
-            );
-
-            if (result.Succeeded)
-            {
-                await Execute(mcsBotPlayerData, result.Value, targetLootData);
-                await Sort(mcsBotPlayerInventoryController);
-                return true;
+                if (result.Succeeded)
+                {
+                    await Execute(mcsBotPlayerData, result.Value, targetLootData);
+                    await Sort(mcsBotPlayerInventoryController);
+                    return true;
+                }
             }
             return false;
         }
@@ -404,8 +392,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private async Task Throw(McsBotPlayerData mcsBotPlayerData, LootData throwLootData, LootData retainLootData)
         {
             await Transfer(mcsBotPlayerData, throwLootData, retainLootData);
-            var promise = new TaskCompletionSource<IResult>();
-            mcsBotPlayerData.Player.InventoryController.ThrowItem(throwLootData.Item, false, promise.SetResult);
+            mcsBotPlayerData.Player.InventoryController.ThrowItem(throwLootData.Item);
         }
 
         /// <summary>
@@ -419,7 +406,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             if (fromLootData.Item is ContainerClass containerClass)
             {
-                var firstLevelItems = containerClass.GetFirstLevelItems();
+                var firstLevelItems = containerClass.GetFirstLevelItems().ToList();
                 foreach (var firstLevelItem in firstLevelItems)
                 {
                     var firstLevelItemData = firstLevelItem.GetData();
@@ -430,11 +417,38 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                     if (firstLevelItemData is LootData firstLevelLootData)
                     {
-                        await InteractionDelay(1);
                         await Take(mcsBotPlayerData, firstLevelLootData, toLootData);
+                        await InteractionDelay(1);
                     }
                 }
             }
+        }
+
+        private async Task<bool> Nest(McsBotPlayerData mcsBotPlayerData, LootData targetLootData)
+        {
+            var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
+            var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
+                    targetLootData.ItemType == EItemType.Rig ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+
+            if (currentSlot == null)
+            {
+                return false;
+            }
+
+            var currentContainer = currentSlot.ContainedItem;
+            if (currentContainer == null)
+            {
+                return false;
+            }
+
+            var currentItemData = currentContainer.GetData();
+            if (currentItemData == null || currentItemData is not LootData currentLootData)
+            {
+                return false;
+            }
+
+            await Transfer(mcsBotPlayerData, targetLootData, currentLootData);
+            return await Take(mcsBotPlayerData, targetLootData, currentLootData);
         }
 
         /// <summary>
@@ -448,9 +462,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var targets = new List<CompoundItem>();
 
-            if (toLootData != null && toLootData.Item is CompoundItem toContainer)
+            if (toLootData != null)
             {
-                targets.Add(toContainer);
+                if (toLootData.Item is CompoundItem compoundItem)
+                {
+                    targets.Add(compoundItem);
+                }
             }
             else
             {
@@ -477,7 +494,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 fromLootData.Item,
                 mcsBotPlayerInventoryController,
                 targets,
-                InteractionsHandlerClass.EMoveItemOrder.PickUp | InteractionsHandlerClass.EMoveItemOrder.TryTransfer,
+                InteractionsHandlerClass.EMoveItemOrder.PickUp,
                 true
             );
 
@@ -540,7 +557,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private async Task InteractionDelay(float time)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(time * 300f));
+            await Task.Delay(TimeSpan.FromMilliseconds(time * 1000f));
         }
     }
 }

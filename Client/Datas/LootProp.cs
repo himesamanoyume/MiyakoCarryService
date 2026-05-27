@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
@@ -20,9 +22,17 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsHighPriceItem = false;
         public bool IsKeywordItem = false;
         public bool IsBlockItem = false;
+        public List<BotOwner> McsSquadMembers
+        {
+            get
+            {
+                return field ??= McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId).ToList();
+            }
+        }
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldTakeContainers = new();
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldSwapContainers = new();
         private readonly ConcurrentDictionary<BotOwner, bool> _isShouldEquipContainers = new();
+        private readonly ConcurrentDictionary<BotOwner, bool> _isShouldNestContainers = new();
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public LootProp(LootData lootData, TraderOffer offer, McsAILeadPlayer mcsAILeadPlayer)
@@ -71,6 +81,11 @@ namespace MiyakoCarryService.Client.Datas
             return _isShouldEquipContainers.TryGetValue(botOwner, out var isShouldEquipContainer) ? isShouldEquipContainer : false;
         }
 
+        public bool IsShouldNestContainer(BotOwner botOwner)
+        {
+            return _isShouldNestContainers.TryGetValue(botOwner, out var isShouldNestContainer) ? isShouldNestContainer : false;
+        }
+
         public void UpdateContainerProp(ConcurrentDictionary<BotOwner, bool> kvp, BotOwner botOwner, bool value)
         {
             kvp.AddOrUpdate(botOwner, _botOwner => false, (_botOwner, oldValue) =>
@@ -82,22 +97,12 @@ namespace MiyakoCarryService.Client.Datas
 
         public void CheckUsefulContainer()
         {
-            var mcsBotPlayerBotOwners = McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId);
-            if (mcsBotPlayerBotOwners == null)
-            {
-                return;
-            }
-
-            foreach (var botOwner in mcsBotPlayerBotOwners)
+            foreach (var botOwner in McsSquadMembers)
             {
                 if (botOwner == null)
                 {
                     continue;
                 }
-
-                UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
-                UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
-                UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
 
                 if (!botOwner.HealthController.IsAlive)
                 {
@@ -117,6 +122,9 @@ namespace MiyakoCarryService.Client.Datas
                 if (currentContainer == null)
                 {
                     UpdateContainerProp(_isShouldEquipContainers, botOwner, true);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
                     continue;
                 }
 
@@ -126,14 +134,29 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (LootData.ItemGridCount > currentLootData.ItemGridCount)
+                if (LootData.ItemGridCount <= currentLootData.MaxSingleGridCount)
                 {
+                    UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, true);
+                    UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
+                    continue;
+                }
+
+                if (LootData.ContainerGridCount > currentLootData.ContainerGridCount)
+                {
+                    UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
                     UpdateContainerProp(_isShouldSwapContainers, botOwner, true);
+                    UpdateContainerProp(_isShouldTakeContainers, botOwner, false);
                     continue;
                 }
 
                 if (LootData.IsContainerWithAdditionalGrid)
                 {
+                    UpdateContainerProp(_isShouldEquipContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldNestContainers, botOwner, false);
+                    UpdateContainerProp(_isShouldSwapContainers, botOwner, false);
                     UpdateContainerProp(_isShouldTakeContainers, botOwner, true);
                 }
             }

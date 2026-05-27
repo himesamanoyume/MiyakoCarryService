@@ -71,11 +71,6 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var lootData = new LootData(item, ContainsBestPrice(item));
-                var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
-                foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
-                {
-                    lootData.Refresh(mcsAILeadPlayer);
-                }
                 _datas.Add(item, lootData);
                 return lootData;
             }

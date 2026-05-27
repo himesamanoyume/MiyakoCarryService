@@ -81,6 +81,8 @@ With a reference later in the document defining the URL location.
 - 需要借鉴SAIN实现护航翻越
 - 实现太接近老板时自己让开
 - 重新实现Custom生成护航装备时的耐久度函数以满值生成
+- ~~BUG: 转移物品后东西消失了~~
+- 两个容器之间，如果外部容器的MaxSingleGridCount大于等于当前容器的ItemGridCount，且当前容器具有IsContainerWithAdditionalGrid，那么应该尝试将当前容器放入外部容器
 
 ## Logic思想指导
 

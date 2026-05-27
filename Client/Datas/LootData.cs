@@ -22,8 +22,9 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsInSecureContainerItem = false;
         public int ItemGridCount => Item.Width * Item.Height;
         public int ContainerGridCount = 0;
+        public int MaxSingleGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
-        public bool IsEquipableContainer => ItemType is EItemType.Backpack or EItemType.Rig;
+        public bool IsEquipableContainer => ItemType == EItemType.Backpack || ItemType == EItemType.Rig;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -32,7 +33,12 @@ namespace MiyakoCarryService.Client.Datas
             {
                 foreach (var stashGridClass in containerItem.Grids)
                 {
-                    ContainerGridCount += stashGridClass.GridWidth * stashGridClass.GridHeight;
+                    var singleGridCount = stashGridClass.GridWidth * stashGridClass.GridHeight;
+                    ContainerGridCount += singleGridCount;
+                    if (singleGridCount > MaxSingleGridCount)
+                    {
+                        MaxSingleGridCount = singleGridCount;
+                    }
                 }
             }
         }
@@ -54,7 +60,7 @@ namespace MiyakoCarryService.Client.Datas
             lootProp.CheckKeywordItem();
             lootProp.CheckHighPriceItem();
             lootProp.CheckBlockItem();
-            if (IsEquipableContainer && IsContainerWithAdditionalGrid)
+            if (IsEquipableContainer)
             {
                 lootProp.CheckUsefulContainer();
             }
