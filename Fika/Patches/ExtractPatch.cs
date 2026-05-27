@@ -10,6 +10,9 @@ using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {
+    /// <summary>
+    /// 充当玩家撤离时的事件通知作用
+    /// </summary>
     public class ExtractPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(CoopGame), nameof(CoopGame.Extract));

@@ -183,6 +183,8 @@ namespace MiyakoCarryService.Client
             new ItemSubtract1Patch().Enable();
             new ItemSubtract2Patch().Enable();
             new TryReloadPatch().Enable();
+            new BotWeaponSelectorPatch().Enable();
+            new AdvAssaultTargetPatch().Enable();
 
             if (FikaInstalled)
             {

@@ -1,7 +1,6 @@
 
 using System.Reflection;
 using HarmonyLib;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
@@ -9,20 +8,19 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 此函数也会在最后尝试切换其他武器，遂进行阻止
+    /// 阻止此Layer的启用，时常发生在护航击杀敌人后，会使护航像傻逼一样从敌人面前跑开
     /// </summary>
-    public class TryReloadPatch : ModulePatch
+    public class AdvAssaultTargetPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotReload), nameof(BotReload.TryReload));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Class99), nameof(Class99.ShallUseNow));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(BotReload __instance)
+        public static bool Prefix(Class99 __instance)
         {
             if (McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
             {
-                __instance.McsTryReload();
                 return false;
             }
             return true;

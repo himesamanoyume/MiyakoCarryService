@@ -10,7 +10,6 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -933,23 +932,55 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var player = BotOwner.GetPlayer;
             var inventoryController = player.InventoryController;
 
-            // 检查是否有可用的弹匣  
+            var currentMagazine = weapon.GetCurrentMagazine();
             var magazineSlot = weapon.GetMagazineSlot();
+
             if (magazineSlot != null)
             {
                 var preallocatedMagList = new List<MagazineItemClass>();
-                inventoryController.GetReachableItemsOfTypeNonAlloc<MagazineItemClass>(preallocatedMagList, null);
+                inventoryController.GetReachableItemsOfTypeNonAlloc(preallocatedMagList, null);
+
+                var hasUnusedMagazine = false;
 
                 foreach (var mag in preallocatedMagList)
                 {
-                    if (mag.Count > 0 && magazineSlot.CanAccept(mag))
+                    if (mag == currentMagazine)
+                    {
+                        continue;
+                    }
+
+                    if (magazineSlot.CanAccept(mag))
+                    {
+                        hasUnusedMagazine = true;
+                        if (mag.Count > 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                if (hasUnusedMagazine)
+                {
+                    if (HasLooseAmmoForWeapon(weapon))
                     {
                         return true;
                     }
                 }
             }
 
-            // 检查是否有可用的散装弹药  
+            if (currentMagazine == null)
+            {
+                return HasLooseAmmoForWeapon(weapon);
+            }
+
+            return false;
+        }
+
+        protected virtual bool HasLooseAmmoForWeapon(Weapon weapon)
+        {
+            var player = BotOwner.GetPlayer;
+            var inventoryController = player.InventoryController;
+
             var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
             var preallocatedAmmoList = new List<AmmoItemClass>();
             inventoryController.GetAcceptableItemsNonAlloc(
@@ -1054,6 +1085,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var targetSlot = CheckWeaponSwitch();
+#if DEBUG
+            MiyakoCarryServicePlugin.Logger.LogWarning($"目标武器类型: {targetSlot}");
+#endif
             _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
 
             if (targetSlot == EquipmentSlot.Scabbard && weaponManager.IsMelee)
