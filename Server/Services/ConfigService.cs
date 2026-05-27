@@ -332,8 +332,6 @@ public sealed class ConfigService(
 
     public async Task OnPreLoadAsync()
     {
-        // var coreConfig = configServer.GetConfig<CoreConfig>();
-        // coreConfig.Fixes.RemoveInvalidTradersFromProfile = true;
         await LoadMcsConfig();
         await LoadOrderConfig();
         await LoadSpawnTypeConfig();
@@ -372,5 +370,19 @@ public sealed class ConfigService(
             IsBoss = false,
             DisplayName = Locales.SPAWNTYPECOMMON
         };
+    }
+
+    public List<string> GetAllCustomBrainName()
+    {
+        var customNames = new List<string>();
+        foreach (var kvp in _spawnTypes)
+        {
+            var spawnType = kvp.Value;
+            if (!string.IsNullOrEmpty(spawnType.BrainName))
+            {
+                customNames.Add(spawnType.BrainName);
+            }
+        }
+        return customNames;
     }
 }

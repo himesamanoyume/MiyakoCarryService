@@ -15,11 +15,20 @@ namespace MiyakoCarryService.Server.Callbacks
     )
     {
         /// <summary>
-        /// 处理 XXX 还没做这个路由
+        /// 处理 XXX (还没做这个路由)
         /// </summary>
         public async ValueTask<string> HandleConfig(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.GetBody(configController.GetConfig());
+        }
+
+        
+        /// <summary>
+        /// 处理 /mcs/client/brain/config
+        /// </summary>
+        public async ValueTask<string> GetAllCustomBrainName(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
+        {
+            return httpResponseUtil.NoBody(configController.GetAllCustomBrainName());
         }
     }
 }

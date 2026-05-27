@@ -71,7 +71,7 @@ With a reference later in the document defining the URL location.
 
 ## TODO
 
-- **小鹿还是不会攻击，只会跟随**
+- ~~小鹿还是不会攻击，只会跟随~~
 - **突然发现虽然支持生成第三方AI类型，但是实际上忘记将Layer添加到其类型中了，需要补全相关逻辑。如果第三方的AI没有使用到自带的Brain的话，就会无法作为护航行动(在spawntype中加入string类型的自定义BrainName，并且初始化BrainMgr时从服务端接收自定义BrainName)**
 - **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
 - **安装SAIN后护航战斗结束后经常卡手。背包显示他正在操作某些东西，但是卡住不动**

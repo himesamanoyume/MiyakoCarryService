@@ -190,5 +190,17 @@ namespace MiyakoCarryService.Client.Utils
                 return new Dictionary<string, SPTServerModInfo>();
             }
         }
+
+        public static async Task<List<string>> GetAllCustomBrainName()
+        {
+            var response = await GetJsonAsync<List<string>>("/mcs/client/brain/config");
+            
+            if (response == null)
+            {
+                return new();
+            }
+
+            return response;
+        }
     }
 }
