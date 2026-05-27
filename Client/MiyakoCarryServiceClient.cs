@@ -185,6 +185,7 @@ namespace MiyakoCarryService.Client
             new TryReloadPatch().Enable();
             new BotWeaponSelectorPatch().Enable();
             new AdvAssaultTargetPatch().Enable();
+            new InitVaultComponentPatch().Enable();
 
             if (FikaInstalled)
             {

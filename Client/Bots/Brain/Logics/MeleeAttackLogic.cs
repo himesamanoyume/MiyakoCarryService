@@ -185,12 +185,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 var predictedPos = enemyPos + enemyVelocity;
 
-                if (Tools.BetterDestination(1.5f, predictedPos, out var betterDestination))
+                if (Tools.BetterDestination(0.5f, predictedPos, out var betterDestination))
                 {
                     return betterDestination;
                 }
 
-                return enemyPos;
+                return predictedPos;
             }
 
             private bool CanReachEnemy(BotMeleeWeaponData meleeData, EnemyInfo enemy, out Vector3[] path)

@@ -37,6 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Stop()
         {
             base.Stop();
+            _nextLootingCheckTime = Time.time + LOOTING_CHECK_INTERVAL;
         }
 
         public override Action GetNextAction()

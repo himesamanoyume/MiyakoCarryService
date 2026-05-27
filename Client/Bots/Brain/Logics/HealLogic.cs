@@ -31,10 +31,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            // if (Random.Range(0, 100) > 90)
-            // {
-            //     BotOwner.ShowSubtitleMsg(string.Format("<b>{0}</b>:正在治疗!".McsLocalized(), BotOwner.Profile.Nickname));
-            // }
             _baseLogic.UpdateNodeByMain(data);
         }
     }

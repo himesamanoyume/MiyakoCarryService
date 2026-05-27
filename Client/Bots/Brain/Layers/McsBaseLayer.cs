@@ -29,6 +29,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _lastShootTime = Time.time;
         protected float _nextWeaponSwitchTime = 0f;
         protected float _nextMeleeCheckTime = 0f;
+        protected float _nextLootingCheckTime = 0f;
+        protected const float LOOTING_CHECK_INTERVAL = 10f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float MELEE_CHECK_INTERVAL = 0.5f;
         protected const float MELEE_ATTACK_DISTANCE = 8f;
@@ -88,6 +90,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
+                { typeof(TryVaultLogic), EndTryVault },
             };
         }
 
@@ -1013,6 +1016,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
+        protected virtual bool EndTryVault()
+        {
+            return !BotOwner.Mover.IsMoving || BotOwner.Mover.IsComeTo(1f, false, null);
+        }
+
         protected virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
@@ -1104,6 +1112,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
+            return false;
+        }
+
+        protected virtual bool ShouldTryVault()
+        {
+            if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+            {
+                return true;
+            }
+
+            if (BotOwner.Mover.IsMoving && Time.time - BotOwner.Mover.LastTimePosChanged > 3f)
+            {
+                return true;
+            }
+
             return false;
         }
     }
