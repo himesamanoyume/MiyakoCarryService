@@ -284,6 +284,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (normalTake)
             {
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品1");
+#endif
                 await InteractionDelay(targetLootData);
                 return await Take(mcsBotPlayerData, targetLootData);
             }
@@ -313,7 +316,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 else if (lootProp.IsShouldTakeContainer(mcsBotPlayerData.BotOwner))
                 {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品");
+                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品2");
 #endif
                     await InteractionDelay(targetLootData);
                     return await Take(mcsBotPlayerData, targetLootData);
@@ -480,22 +483,33 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             else
             {
+                var allContainers = new List<Item>();
                 var pocketsSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
-                if (pocketsSlot.ContainedItem != null && pocketsSlot.ContainedItem is CompoundItem pocket)
+                if (pocketsSlot.ContainedItem != null)
                 {
-                    targets.Add(pocket);
+                    pocketsSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
                 }
 
-                var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
-                if (rigSlot.ContainedItem != null && rigSlot.ContainedItem is CompoundItem rig)
+                var tacticalVestSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+                if (tacticalVestSlot.ContainedItem != null)
                 {
-                    targets.Add(rig);
+                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
                 }
 
                 var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-                if (backpckSlot.ContainedItem != null && backpckSlot.ContainedItem is CompoundItem backpack)
+                if (backpckSlot.ContainedItem != null)
                 {
-                    targets.Add(backpack);
+                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                }
+
+                allContainers = allContainers.Where(i => i.IsContainer).ToList();
+
+                foreach (var container in allContainers)
+                {
+                    if (container is CompoundItem compoundItem)
+                    {
+                        targets.Add(compoundItem);
+                    }
                 }
             }
 
@@ -531,10 +545,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 allContainers = new();
 
-                var rigSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
-                if (rigSlot.ContainedItem != null)
+                var tacticalVestSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
+                if (tacticalVestSlot.ContainedItem != null)
                 {
-                    rigSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
                 }
 
                 var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);

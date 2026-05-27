@@ -104,7 +104,7 @@ With a reference later in the document defining the URL location.
 
 #### 0.3.5.0
 
-- **实现护航替换穿戴更好地胸挂、背包。同时实现连续拾取、套包**
+- 实现护航替换穿戴更好地胸挂、背包。**同时实现连续拾取、套包**
 - **实现翻越**
 
 #### 0.3.4.0
