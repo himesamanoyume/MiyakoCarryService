@@ -226,17 +226,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (BotOwner.Memory.HaveEnemy)
             {
                 // 使护航下的Zyriachy无视目标处于灯塔限定区域时才可视为敌人的限制
-                if (BotOwner.Profile.Info.Settings.Role == WildSpawnType.bossZryachiy)  
-                {  
-                    var goalEnemy = BotOwner.Memory.GoalEnemy;  
-                    if (goalEnemy != null && goalEnemy.Person != null)  
-                    {  
-                        if (BotOwner.Boss.BossLogic is ZyriachyBossLogicClass zyriachyBossLogicClass)  
-                        {  
-                            zyriachyBossLogicClass.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);  
-                        }  
-                    }  
-                } 
+                if (BotOwner.Profile.Info.Settings.Role is WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
+                {
+                    var goalEnemy = BotOwner.Memory.GoalEnemy;
+                    if (goalEnemy != null && goalEnemy.Person != null)
+                    {
+                        if (BotOwner.Boss.BossLogic is ZyriachyBossLogicClass zyriachyBossLogicClass)
+                        {
+                            zyriachyBossLogicClass.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
+                        }
+                    }
+                }
                 return true;
             }
 
