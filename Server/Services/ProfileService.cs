@@ -432,12 +432,25 @@ namespace MiyakoCarryService.Server.Services
             return _mcsInventoryModeIds.ContainsKey(mcsLeadPlayerId);
         }
 
+        private int GetRandomLevelByCarryServiceLevel(int carryServiceLevel)
+        {
+            return carryServiceLevel switch
+            {
+                1 => randomUtil.RandInt(1, 15),
+                2 => randomUtil.RandInt(15, 30),
+                3 => randomUtil.RandInt(30, 50),
+                4 => randomUtil.RandInt(50, 70),
+                >=5 => randomUtil.RandInt(70, 79),
+                _ => randomUtil.RandInt(1, 15)
+            };
+        }
+
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)
         {
             var isPmc = orderInfo.SpawnType.WildSpawnType is "common" or "pmcUSEC" or "pmcBEAR";
             var botDifficulty = (BotDifficulty)orderInfo.CarryServiceLevel;
             var role = isPmc ? (completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR") : orderInfo.SpawnType.WildSpawnType;
-            var level = orderInfo.CarryServiceLevel * 10 + 20 + (orderInfo.SpawnType.IsBoss ? 30 : 0);
+            var level = GetRandomLevelByCarryServiceLevel(orderInfo.CarryServiceLevel + (orderInfo.SpawnType.IsBoss ? 1 : 0));
             var botGenerationDetails = new BotGenerationDetails()
             {
                 IsPmc = isPmc,

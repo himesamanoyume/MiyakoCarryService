@@ -74,39 +74,32 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 leadPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
                 {
-                    try
+                    if (damageInfo.Player?.AIData?.BotOwner == null)
                     {
-                        if (damageInfo.Player?.AIData?.BotOwner == null)
-                        {
-                            return;
-                        }
-
-                        var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
-
-                        if (McsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
-                        {
-                            return;
-                        }
-
-                        if (leadPlayer.BotsGroup != null)
-                        {
-                            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
-
-                            if (mcsBotPlayers == null)
-                            {
-                                return;
-                            }
-
-                            var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
-                            if (mcsBotPlayer?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
-                            {
-                                mcsAILeadPlayer.CalcGoalEnemy();
-                            }
-                        }
+                        return;
                     }
-                    catch
+
+                    var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
+
+                    if (McsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
                     {
-                        TasksExtensions.HandleExceptions(McsRequestHandler.SendLog("此为调试警报类型6，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug"));
+                        return;
+                    }
+
+                    if (leadPlayer.BotsGroup != null)
+                    {
+                        var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
+
+                        if (mcsBotPlayers == null)
+                        {
+                            return;
+                        }
+
+                        var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
+                        if (mcsBotPlayer?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
+                        {
+                            mcsAILeadPlayer.CalcGoalEnemy();
+                        }
                     }
                 };
 
@@ -382,19 +375,27 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Cover.SPOTTED_GRENADE_TIME = 7f;
             settings.FileSettings.Cover.SIT_DOWN_WHEN_HOLDING = false;
 
-            var botDifficultyInt = (int)botDifficulty;
+            var botDifficultyInt = (int)botDifficulty + 1;
+            var aimingDifficultyMultiplier = botDifficulty switch
+            {
+                BotDifficulty.easy => 1.0f,
+                BotDifficulty.normal => 0.75f,
+                BotDifficulty.hard => 0.5f,
+                BotDifficulty.impossible => 0.25f,
+                _ => 1.0f
+            };
 
             settings.FileSettings.Aiming.MAX_AIM_PRECICING = 60f;
             // settings.FileSettings.Aiming.BETTER_PRECICING_COEF = 0.7f;
-            settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 0f;
-            settings.FileSettings.Aiming.BOTTOM_COEF = 0f;
+            settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 1f * aimingDifficultyMultiplier;
+            settings.FileSettings.Aiming.BOTTOM_COEF = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.MAX_AIM_TIME = 0.2f;
-            settings.FileSettings.Aiming.COEF_FROM_COVER = 0.2f;
+            settings.FileSettings.Aiming.COEF_FROM_COVER = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.HARD_AIM = 0.2f;
             settings.FileSettings.Aiming.HARD_AIM_CHANCE_100 = 100;
             settings.FileSettings.Aiming.PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
-            settings.FileSettings.Aiming.PANIC_COEF = 1f;
+            settings.FileSettings.Aiming.PANIC_COEF = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.PANIC_ACCURATY_COEF = 1f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 0f;
             settings.FileSettings.Aiming.MIN_TIME_DISCARD_AIM_SEC = 0f;
@@ -407,7 +408,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Aiming.SCATTERING_DIST_MODIF = 0.1f;
             settings.FileSettings.Aiming.SCATTERING_DIST_MODIF_CLOSE = 0.1f;
             settings.FileSettings.Aiming.BASE_SHIEF = 0.1f;
-            settings.FileSettings.Aiming.COEF_IF_MOVE = 1f;
+            settings.FileSettings.Aiming.COEF_IF_MOVE = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.TIME_COEF_IF_MOVE = 1f;
             settings.FileSettings.Aiming.BOT_MOVE_IF_DELTA = 0.01f;
             settings.FileSettings.Aiming.AIMING_TYPE = 6;
@@ -453,9 +454,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
-            // 此选项会让护航将发现很远且没见到的敌人，可能需要下调数值或者一直注释掉
             settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
-            settings.FileSettings.Hearing.DISPERSION_COEF = 10f * botDifficultyInt;
+            settings.FileSettings.Hearing.DISPERSION_COEF = 10f + 10f * botDifficultyInt;
             settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
             settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
             settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 2f;
@@ -464,7 +464,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
             settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.1f;
             settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
-            // end
 
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;

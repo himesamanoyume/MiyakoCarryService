@@ -27,6 +27,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
 
         public static async Task UpdateDailyQuests()
         {
+            await Task.Delay(1000);
             if (_tarkovApplicationTraverse == null)
             {
                 TarkovApplication.Exist(out var tarkovApplication);
@@ -39,19 +40,16 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
             {
                 if (mainMenuControllerClass == null)
                 {
-                    TasksExtensions.HandleExceptions(McsRequestHandler.SendLog("此为调试警报类型1，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug"));
                     return;
                 }
 
                 if (mainMenuControllerClass.LocalQuestControllerClass == null)
                 {
-                    TasksExtensions.HandleExceptions(McsRequestHandler.SendLog("此为调试警报类型2，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug"));
                     return;
                 }
 
                 if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
                 {
-                    TasksExtensions.HandleExceptions(McsRequestHandler.SendLog("此为调试警报类型3，当你看到这条调试信息时，请到Discord频道 #发布 的子区中填写相应调查问卷，以帮助我修复Bug"));
                     return;
                 }
                 mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);

@@ -247,6 +247,21 @@ namespace MiyakoCarryService.Server.Services
                     }
                 }
             }
+
+            var ticketInfos = GetAllTicketInfo();
+            foreach (var ticketInfo in ticketInfos)
+            {
+                var currentTime = timeUtil.GetTimeStamp();
+                if (currentTime >= ticketInfo.ExpirationTime - 1)
+                {
+                    if (ticketInfo.Status == EInfoStatus.AvailableForStart)
+                    {
+                        continue;
+                    }
+                    
+                    mcsBotPlayerIds.GetOrAdd(ticketInfo.McsLeadPlayerId, _ => new());
+                }
+            }
             return mcsBotPlayerIds;
         }
 
@@ -306,7 +321,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 else if (baseInfo is TicketInfo ticketInfo)
                 {
-                    ticketInfo.ExpirationTime = currentTime + 60 * 3600;
+                    ticketInfo.ExpirationTime = currentTime + 300;
                 }
             }
         }

@@ -36,8 +36,8 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                     {
                         var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
                         infoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
-                        break;
                     }
+                    break;
                 }
             }
             var ticketInfos = infoController.GetTicketInfos(sessionID);

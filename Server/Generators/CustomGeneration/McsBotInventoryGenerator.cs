@@ -37,11 +37,11 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         ConfigServer configServer,
         InventoryService inventoryService
     ) : BotInventoryGenerator(
-        logger, randomUtil, profileActivityService, botWeaponGenerator, 
-        botLootGenerator, botGeneratorHelper, profileHelper, botHelper, 
-        weightedRandomHelper, itemHelper, weatherHelper, 
-        serverLocalisationService, botEquipmentFilterService, 
-        botEquipmentModPoolService, botEquipmentModGenerator, 
+        logger, randomUtil, profileActivityService, botWeaponGenerator,
+        botLootGenerator, botGeneratorHelper, profileHelper, botHelper,
+        weightedRandomHelper, itemHelper, weatherHelper,
+        serverLocalisationService, botEquipmentFilterService,
+        botEquipmentModPoolService, botEquipmentModGenerator,
         botInventoryContainerService, configServer
     )
     {
@@ -124,7 +124,6 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
 
             CustomGenerateAndAddEquipmentToBot(botId, templateInventory, wornItemChances, botInventory, botGenerationDetails);
 
-            // Roll weapon spawns (primary/secondary/holster) and generate a weapon for each roll that passed
             GenerateAndAddWeaponsToBot(
                 botId,
                 templateInventory,
@@ -135,10 +134,10 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 itemGenerationLimitsMinMax
             );
 
-            // Pick loot and add to bots containers (rig/backpack/pockets/secure)
             mcsBotLootGenerator.CustomGenerateLoot(botId, botJsonTemplate, botGenerationDetails, botInventory);
 
-            // Inventory cache isn't needed, clear to save memory
+            SetMaxDurabilityForItems(botInventory);
+
             if (botGenerationDetails.ClearBotContainerCacheAfterGeneration)
             {
                 botInventoryContainerService.ClearCache(botId);
@@ -182,35 +181,10 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 }
             }
 
-            // // Is PMC + generating armband + armband forcing is enabled
-            // if (PMCConfig.ForceArmband.Enabled && botGenerationDetails.IsPmc)
-            // {
-            //     // Replace armband pool with single tpl from config
-            //     if (templateInventory.Equipment.TryGetValue(EquipmentSlots.ArmBand, out var armbands))
-            //     {
-            //         // Get tpl based on pmc side
-            //         var armbandTpl =
-            //             botGenerationDetails.RoleLowercase == "pmcusec" ? PMCConfig.ForceArmband.Usec : PMCConfig.ForceArmband.Bear;
-
-            //         armbands.Clear();
-            //         armbands.Add(armbandTpl, 1);
-
-            //         // Force armband spawn to 100%
-            //         wornItemChances.EquipmentChances["Armband"] = 100;
-            //     }
-            // }
-
-            // Get profile of player generating bots, we use their level later on
-            // var pmcProfile = profileHelper.GetPmcProfile(sessionId);
             var botEquipmentRole = botGeneratorHelper.GetBotEquipmentRole(botGenerationDetails.RoleLowercase);
 
-            // Iterate over all equipment slots of bot, do it in specific order to reduce conflicts
-            // e.g. ArmorVest should be generated after TacticalVest
-            // or FACE_COVER before HEADWEAR
             foreach (var (equipmentSlot, itemsWithWeightPool) in templateInventory.Equipment)
             {
-                // Skip some slots as they need to be done in a specific order + with specific parameter values
-                // e.g. Weapons
                 if (_excludedEquipmentSlots.Contains(equipmentSlot))
                 {
                     continue;
@@ -350,21 +324,16 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 }
             );
 
-            // Bot has no armor vest and flagged to be forced to wear armored rig in this event
             if (botEquipConfig.ForceOnlyArmoredRigWhenNoArmor.GetValueOrDefault(false) && !hasArmorVest)
-            // Filter rigs down to only those with armor
             {
                 FilterRigsToThoseWithProtection(templateInventory.Equipment, botGenerationDetails.RoleLowercase);
             }
 
-            // Optimisation - Remove armored rigs from pool
             if (hasArmorVest)
-            // Filter rigs down to only those with armor
             {
                 FilterRigsToThoseWithoutProtection(templateInventory.Equipment, botGenerationDetails.RoleLowercase);
             }
 
-            // Bot is flagged as always needing a vest
             if (botEquipConfig.ForceRigWhenNoVest.GetValueOrDefault(false) && !hasArmorVest)
             {
                 wornItemChances.EquipmentChances["TacticalVest"] = 100;
@@ -390,6 +359,17 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     GeneratingPlayerLevel = 90,
                 }
             );
+        }
+
+        public void SetMaxDurabilityForItems(BotBaseInventory botInventory)
+        {
+            foreach (var item in botInventory.Items)
+            {
+                if (item.Upd?.Repairable != null)
+                {
+                    item.Upd.Repairable.Durability = item.Upd.Repairable.MaxDurability;
+                }
+            }
         }
     }
 }
