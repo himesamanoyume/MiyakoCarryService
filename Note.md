@@ -74,7 +74,6 @@ With a reference later in the document defining the URL location.
 ## TODO
 
 - **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
-- **安装SAIN后护航战斗结束后经常卡手。背包显示他正在操作某些东西，但是卡住不动**
 
 ## 更新日志
 
@@ -91,6 +90,7 @@ With a reference later in the document defining the URL location.
 - 适配Zyriachy
 - 新增罚单功能。输入对应指令，可花钱消除涨价惩罚，具体方式同样使用`help`指令查看
 - 调整护航生成装备的耐久度全部为满值
+- 修复安装SAIN下的护航在战斗结束后会卡住无法进行下一步决策的问题
 
 #### 0.3.5.0
 

@@ -24,16 +24,18 @@ namespace MiyakoCarryService.Client.Mgrs
 
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 65);
 
-            if (!MiyakoCarryServicePlugin.SAINInstalled)
+            if (MiyakoCarryServicePlugin.SAINInstalled)
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy)]).Except(Classification.SAINNotAdjusted).ToList(), 86);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.SAINNotAdjusted.Except([nameof(EBrainName.SctPredvst)]).ToList(), 86);
+
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.SctPredvst)], 186);
+            }
+            else
+            {
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy)]).ToList(), 86);
 
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy)], 186);
             }
-
-            BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.SAINNotAdjusted.Except([nameof(EBrainName.SctPredvst)]).ToList(), 86);
-
-            BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.SctPredvst)], 186);
         }
 
         private async Task GetAllCustomBrainName()

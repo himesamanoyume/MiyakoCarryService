@@ -1,11 +1,9 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -36,7 +34,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     __instance.BotOwner_0.AimingManager.CurrentAiming.LoseTarget();
                 }
 
-                // === 修复点 1：安全移除旧事件 ===
                 if (__instance.EnemyInfo_0 != null)
                 {
                     var oldPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(__instance.EnemyInfo_0.Person.ProfileId);
@@ -50,7 +47,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 var flag = __instance.EnemyInfo_0 != value;
                 __instance.EnemyInfo_0 = value;
 
-                // === 修复点 2：安全添加新事件 ===
                 if (__instance.EnemyInfo_0 != null)
                 {
                     var newPlayer = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(__instance.EnemyInfo_0.Person.ProfileId);
@@ -61,7 +57,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     __instance.method_0();
                 }
 
-                // ...其余逻辑保持不变（也建议加安全调用）
                 if (___action_1 != null && flag)
                 {
                     ___action_1(__instance.BotOwner_0);
@@ -91,27 +86,5 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 
             }
         }
-
-        // [PatchPostfix]
-        // public static void Postfix(BotMemoryClass __instance, ref EnemyInfo value)
-        // {
-        //     if (value == null)
-        //     {
-        //         return;
-        //     }
-
-        //     if (McsMgr.IsMcsLeadPlayer(value.Person.ProfileId))
-        //     {
-        //         if (!McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
-        //         {
-        //             var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(value.Person.ProfileId);
-        //             var leadPlayer = mcsAILeadPlayer.Player() as Player;
-        //             if (leadPlayer.BotsGroup != null)
-        //             {
-        //                 mcsAILeadPlayer.CalcGoalEnemy();
-        //             }
-        //         }
-        //     }
-        // }
     }
 }

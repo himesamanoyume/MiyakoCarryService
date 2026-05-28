@@ -78,7 +78,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
-                
+
                 CheckWeaponSwitch();
 
                 if (McsBotPlayerData != null)
@@ -159,6 +159,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (IsMcsBotPlayer)
             {
+#if DEBUG
+                if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+                {
+                    return false;
+                }
+#endif
                 if (BotOwner.Memory.IsUnderFire)
                 {
                     return false;

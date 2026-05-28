@@ -75,6 +75,7 @@ namespace MiyakoCarryService.Client
 
 #if DEBUG
         public static ConfigEntry<bool> McsBotPlayerNoDamage;
+        public static ConfigEntry<bool> EnableMcsLayer;
 #endif
 
         #endregion
@@ -426,6 +427,13 @@ namespace MiyakoCarryService.Client
             McsBotPlayerNoDamage = Register(
                 EConfigType.DEBUG,
                 "护航无敌",
+                true,
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
+
+            EnableMcsLayer = Register(
+                EConfigType.DEBUG,
+                "启用Mcs层级",
                 true,
                 customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
             );

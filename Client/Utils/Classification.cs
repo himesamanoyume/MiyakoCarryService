@@ -59,13 +59,11 @@ namespace MiyakoCarryService.Client.Utils
 
         public static List<string> SAINNotAdjusted = new()
         {
-            nameof(EBrainName.BossTest),
-            nameof(EBrainName.Marksman),
-            nameof(EBrainName.SectantWarrior),
-            // nameof(EBrainName.SctPredvst),
-            nameof(EBrainName.FlKlnAslt),
-            nameof(EBrainName.KolonSec),
+            nameof(EBrainName.BossZryachiy),
             nameof(EBrainName.Fl_Zraychiy),
+            nameof(EBrainName.SctPredvst),
+            nameof(EBrainName.PrizrakSt),
+            nameof(EBrainName.Oni)
         };
 
         public static HashSet<string> LabyrinthSolvePuzzleItems = new()
