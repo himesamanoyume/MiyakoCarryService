@@ -28,7 +28,7 @@ public sealed class DrawSinglePluginPatch : ModulePatch
         if (guid == MiyakoCarryServicePlugin.McsGUID)
         {
             DrawSinglePluginCustom(__instance, plugin, pluginTraverse);
-            return false; // 跳过原方法
+            return false;
         }
 
         return true;
@@ -243,11 +243,13 @@ public sealed class DrawSinglePluginPatch : ModulePatch
 
     private static GUIStyle CustomDrawCategoryHeaderComponent()
     {
-        var categoryHeaderStyle = new GUIStyle(GUI.skin.label);
-        categoryHeaderStyle.alignment = TextAnchor.UpperCenter;
-        categoryHeaderStyle.wordWrap = true;
-        categoryHeaderStyle.stretchWidth = true;
-        categoryHeaderStyle.fontSize = 14;
+        var categoryHeaderStyle = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.UpperCenter,
+            wordWrap = true,
+            stretchWidth = true,
+            fontSize = 14
+        };
         return categoryHeaderStyle;
     }
 

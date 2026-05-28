@@ -19,7 +19,6 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
 
-        // _mcsBotPlayerIds 只有Host才会使用，注意：CommandMgr也有同名字段，需要优化
         private HashSet<MongoID> _mcsBotPlayerIds = new();
 
         // _allMcsBotPlayerIdInRaid 作为队友高亮的必须数据，每个玩家都会进行获取
@@ -182,7 +181,6 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 return mcsAILeadPlayer;
             }
-            MiyakoCarryServicePlugin.Logger.LogError("mcsAILeadPlayer 返回空");
             return null;
         }
 
@@ -193,7 +191,7 @@ namespace MiyakoCarryService.Client.Mgrs
         }
 
         /// <summary>
-        /// 注意：即便是死亡的BotOwner也会获取
+        /// 即便是死亡的BotOwner也会获取
         /// </summary>
         public List<BotOwner> GetAllMcsBotPlayer()
         {
@@ -205,6 +203,9 @@ namespace MiyakoCarryService.Client.Mgrs
             return mcsBotPlayers;
         }
 
+        /// <summary>
+        /// 只获取活着的BotOwner
+        /// </summary>
         public List<BotOwner> GetAllAliveMcsBotPlayer()
         {
             var mcsBotPlayers = new List<BotOwner>();
@@ -240,7 +241,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void AddPunish(MongoID friendlyFirePlayerId, double diff, bool teamKill, bool punishEveryone)
         {
-            // MiyakoCarryServicePlugin.Logger.LogInfo($"触发惩罚: {diff}");
             var penalty = new FriendlyFirePenalty
             {
                 FriendlyFirePlayerId = friendlyFirePlayerId,

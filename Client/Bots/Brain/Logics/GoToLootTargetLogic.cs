@@ -93,7 +93,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     return;
                 }
 
-                // 移动控制
                 if (distance <= 5f)
                 {
                     BotOwner.SetTargetMoveSpeed(1f);
@@ -112,7 +111,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private async Task StartLooting()
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning("开始掠夺目标战利品");
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             try
             {
@@ -135,6 +133,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 var rootItem = item.GetRootItem();
                 if (rootItem == null || rootItem.Owner == null)
+                {
+                    return;
+                }
+
+                var rootItemData = rootItem.GetData();
+                if (rootItemData is PlayerData playerData && playerData.Player.HealthController.IsAlive)
                 {
                     return;
                 }
@@ -199,6 +203,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 if (isActuallyInContainer)
                 {
+                    await Task.Delay(2000);
                     var interactionResult2 = new InteractionResult(EInteractionType.Close);
                     lootableContainer.Interact(interactionResult2);
                 }
@@ -276,7 +281,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (normalTake)
             {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品1");
+                MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品1");
 #endif
                 await InteractionDelay(targetLootData);
                 return await Take(mcsBotPlayerData, targetLootData);
@@ -380,7 +385,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// <summary>
         /// 丢东西之前需要先将内部的物品进行转移
         /// </summary>
-        /// <returns></returns>
         private async Task Throw(McsBotPlayerData mcsBotPlayerData, LootData throwLootData, LootData retainLootData)
         {
             await Transfer(mcsBotPlayerData, throwLootData, retainLootData);
@@ -390,10 +394,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// <summary>
         /// 转移原容器中最顶层的物品至新容器
         /// </summary>
-        /// <param name="mcsBotPlayerData"></param>
-        /// <param name="fromLootData"></param>
-        /// <param name="toLootData"></param>
-        /// <returns></returns>
         private async Task Transfer(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData)
         {
             if (fromLootData.Item is ContainerClass containerClass)
@@ -457,9 +457,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// <summary>
         /// 拾取不再只是单纯往胸挂、背包、口袋槽位内拾取，而是包括胸挂、背包、口袋本身以外还有其中嵌套的容器，全部都要进行尝试放入
         /// </summary>
-        /// <param name="mcsBotPlayerData"></param>
-        /// <param name="fromLootData"></param>
-        /// <returns></returns>
         private async Task<bool> Take(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData = null)
         {
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
@@ -525,9 +522,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// <summary>
         /// 对包括背包、胸挂及其内部的容器全部进行整理，确保空间利用最大化
         /// </summary>
-        /// <param name="mcsBotPlayerInventoryController"></param>
-        /// <param name="allContainers"></param>
-        /// <returns></returns>
         private async Task Sort(InventoryController mcsBotPlayerInventoryController, List<Item> allContainers = null)
         {
             await InteractionDelay(2);

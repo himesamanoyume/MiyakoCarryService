@@ -3,8 +3,6 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -16,8 +14,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
     public sealed class SetGoalEnemyPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BotMemoryClass), nameof(BotMemoryClass.GoalEnemy));
-
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static bool Prefix(BotMemoryClass __instance, Action<BotOwner> ___action_1, ref EnemyInfo value)

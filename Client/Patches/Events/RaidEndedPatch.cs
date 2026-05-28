@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events

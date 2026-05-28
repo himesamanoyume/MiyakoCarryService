@@ -605,14 +605,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool ShouldEndPatrol()
         {
-            // if (!IsBossOrFollower())
-            // {
-            //     if (BotOwner.EatDrinkData.HaveActions())
-            //     {
-            //         return true;
-            //     }
-            // }
-
             if (BotOwner.PeaceLook.HaveActions())
             {
                 return true;
@@ -741,10 +733,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            // if (this.method_22())
-            // {
-            //     return false;
-            // }
+
             if (!BotOwner.LookSensor.EnoughDistToShoot(out var enough))
             {
                 return true;
@@ -899,13 +888,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var goalEnemy = BotOwner.Memory.GoalEnemy;
 
-            // 如果没有敌人，结束近战  
             if (goalEnemy == null)
             {
                 return true;
             }
 
-            // 如果近战武器应该结束，结束近战  
             if (meleeData.ShallEndRun)
             {
                 return true;
@@ -995,20 +982,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
 
-            // 先检查槽位是否有武器  
             if (!HasWeaponInSlot(equipment, slot))
             {
                 return false;
             }
 
-            // 获取槽位中的武器  
             var item = equipment.GetSlot(slot).ContainedItem;
             if (item is not Weapon weapon)
             {
                 return false;
             }
 
-            // 检查弹匣中的子弹数  
             var magazineSlot = weapon.GetMagazineSlot();
             if (magazineSlot?.ContainedItem is MagazineItemClass magazine)
             {
@@ -1018,7 +1002,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            // 检查武器是否有膛室弹药  
             if (weapon.ChamberAmmoCount > 0)
             {
                 return true;

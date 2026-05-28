@@ -1,7 +1,6 @@
 
 using System.Reflection;
 using HarmonyLib;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;

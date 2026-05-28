@@ -162,7 +162,6 @@ namespace MiyakoCarryService.Server.Services
                 return null;
             }
 
-            // Get template id from config based on side and type of quest
             var typeIds = new Dictionary<string, MongoId>()
             {
                 {"Completion", "695207e8bcc1dd1e3c80dfcb"}

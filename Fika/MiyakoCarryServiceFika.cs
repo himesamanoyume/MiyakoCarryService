@@ -64,7 +64,6 @@ namespace MiyakoCarryService.Fika
 
         public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 TalkMsgPacket");
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
@@ -87,7 +86,6 @@ namespace MiyakoCarryService.Fika
 
         public void OnMcsBotPlayerConfigPacketReceived(McsBotPlayerConfigPacket packet)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 McsBotPlayerConfigPacket");
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
@@ -95,8 +93,6 @@ namespace MiyakoCarryService.Fika
             {
                 return;
             }
-
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"接收到 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {packet.McsBotPlayerConfig.PriceThreshold}, KeywordItemText = {packet.McsBotPlayerConfig.KeywordItemText}, LootingKeywordItem = {packet.McsBotPlayerConfig.LootingKeywordItem}, BlockItemType = {packet.McsBotPlayerConfig.BlockItemType}");
 
             McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
             {
@@ -333,12 +329,10 @@ namespace MiyakoCarryService.Fika
 
         public void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 TalkMsgPacket");
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
             var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
             {
-                // MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
                 return;
             }
 
@@ -368,7 +362,6 @@ namespace MiyakoCarryService.Fika
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerConfig.McsLeadPlayerId);
             if (mcsLeadPlayer == null)
             {
-                // MiyakoCarryServicePlugin.Logger.LogError($"mcsLeadPlayer 或 mcsBotPlayer 其中之一为空");
                 return;
             }
             if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer)
@@ -385,7 +378,6 @@ namespace MiyakoCarryService.Fika
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
                     }
                 };
-                // MiyakoCarryServicePlugin.Logger.LogWarning($"尝试发送 {mcsLeadPlayer.Profile.Nickname} 的配置更新\nPriceThreshold = {MiyakoCarryServicePlugin.PriceThreshold.Value}, KeywordItemText = {MiyakoCarryServicePlugin.KeywordItemText.Value}, LootingKeywordItem = {MiyakoCarryServicePlugin.LootingKeywordItem.Value}, BlockItemType = {(int)MiyakoCarryServicePlugin.BlockItemType.Value}");
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }

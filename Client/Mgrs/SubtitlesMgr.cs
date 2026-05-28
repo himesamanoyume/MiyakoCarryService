@@ -23,7 +23,6 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, Subtitles> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
-        // public Action<MongoID, MongoID, McsMsg> HandleFikaEvent;
 
         public sealed override void Start()
         {
@@ -116,7 +115,6 @@ namespace MiyakoCarryService.Client.Mgrs
                             McsBotPlayerId = mcsBotPlayer.ProfileId,
                             Msg = msg
                         });
-                        // HandleFikaEvent(mcsLeadPlayer.ProfileId, mcsBotPlayer.ProfileId, msg);
                     }
                 }
             }

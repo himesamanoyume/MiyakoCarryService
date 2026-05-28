@@ -1,7 +1,5 @@
-using Comfort.Common;
 using EFT;
 using EFT.UI;
-using EFT.UI.Screens;
 using HarmonyLib;
 using MiyakoCarryService.Client.Patches.Group;
 using SPT.Reflection.Patching;

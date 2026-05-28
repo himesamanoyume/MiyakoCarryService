@@ -51,7 +51,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	}
 
 	/// <summary>
-	/// 如果不Patch该函数，就会导致护航准备完成后立即回退到战局设置界面
+	/// 如果不Patch该函数，似乎就会导致护航准备完成后立即回退到战局设置界面
 	/// </summary>
 	public sealed class MatchMakerAcceptScreenCallbackPatch : ModulePatch
 	{

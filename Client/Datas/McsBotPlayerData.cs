@@ -68,7 +68,6 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
-            // MiyakoCarryServicePlugin.Logger.LogWarning("正在设置目标战利品");
             var filtedLootDatas = new List<LootData>(itemDatas.Count);
             var usefulContainers = new List<LootData>();
             foreach (var itemData in itemDatas)

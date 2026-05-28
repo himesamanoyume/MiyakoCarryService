@@ -165,12 +165,10 @@ namespace MiyakoCarryService.Server.Services
 
             try
             {
-                // logger.Info($"正在清除 {mcsLeadPlayerId} 的小队成员");
                 _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
                 var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
                 foreach (var matchPlayerId in matchPlayerIds)
                 {
-                    // logger.Info($"正在清除房主 {mcsLeadPlayerId} 的联机队友 {matchPlayerId} 的小队成员");
                     _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
                 }
             }
@@ -213,9 +211,7 @@ namespace MiyakoCarryService.Server.Services
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
-                        // var notification2 = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerFullProfile);
                         notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
-                        // notificationSendHelper.SendMessage(mcsLeadPlayerId, notification2);
                     }
                 }
                 finally

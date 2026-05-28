@@ -170,7 +170,6 @@ namespace MiyakoCarryService.Client
             new MenuTaskBarAwakePatch().Enable();
             new NewNewsCountPatch().Enable();
             new SetGoalEnemyPatch().Enable();
-            // new InitRepeatableQuestsDisposePatch().Enable();
             new ChatSendMessagePatch().Enable();
             new LocalQuestControllerClassPatch().Enable();
             new RaidReadyListFixAidPatch().Enable();

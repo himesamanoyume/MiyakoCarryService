@@ -43,14 +43,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         public BotBase CustomPrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails)
         {
             var botBaseClone = GetPreparedBotBaseClone(
-                botGenerationDetails.EventRole ?? botGenerationDetails.Role, // Use eventRole if provided
+                botGenerationDetails.EventRole ?? botGenerationDetails.Role,
                 botGenerationDetails.Side,
                 botGenerationDetails.BotDifficulty
             );
 
-            // Get raw json data for bot (Cloned)
             var botRole = botGenerationDetails.IsPmc
-                ? botBaseClone.Info.Side // Use side to get usec.json or bear.json when bot will be PMC
+                ? botBaseClone.Info.Side
                 : botGenerationDetails.Role;
             var botJsonTemplateClone = cloner.Clone(botHelper.GetBotTemplate(botRole));
             if (botJsonTemplateClone is null)
@@ -88,10 +87,8 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         {
             botGenerationDetails.RoleLowercase = botGenerationDetails.Role.ToLowerInvariant();
 
-            // Generate Id/AId for bot
             AddIdsToBot(bot);
 
-            // Only filter bot equipment, never players
             if (!botGenerationDetails.IsPlayerScav)
             {
                 botEquipmentFilterService.FilterBotEquipment(sessionId, botJsonTemplate, botGenerationDetails);
@@ -103,10 +100,8 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 BotConfig.BotRolesThatMustHaveUniqueName
             );
 
-            // Only PMCs need a lower nickname
             bot.Info.LowerNickname = botGenerationDetails.IsPmc ? bot.Info.Nickname.ToLowerInvariant() : string.Empty;
 
-            // Only run when generating a 'fake' playerscav, not actual player scav
             if (!botGenerationDetails.IsPlayerScav && ShouldSimulatePlayerScav(botGenerationDetails.RoleLowercase))
             {
                 botNameService.AddRandomPmcNameToBotMainProfileNicknameProperty(bot);
@@ -114,7 +109,6 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             }
 
             if (!seasonalEventService.ChristmasEventEnabled())
-            // Process all bots EXCEPT gifter, he needs christmas items
             {
                 if (botGenerationDetails.Role != "gifter")
                 {
@@ -124,13 +118,12 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
 
             RemoveBlacklistedLootFromBotTemplate(botJsonTemplate.BotInventory);
 
-            // Remove hideout data if bot is not a PMC or pscav - match what live sends
             if (!(botGenerationDetails.IsPmc || botGenerationDetails.IsPlayerScav))
             {
                 bot.Hideout = null;
             }
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;  
+            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
             bot.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
             bot.Info.Level = botGenerationDetails.PlayerLevel;
             bot.Info.Settings.Experience = GetExperienceRewardForKillByDifficulty(
@@ -170,7 +163,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
 
             if (botGenerationDetails.IsPmc)
             {
-                bot.Info.IsStreamerModeAvailable = true; // Set to true so client patches can pick it up later - client sometimes alters botrole to assaultGroup
+                bot.Info.IsStreamerModeAvailable = true;
                 SetRandomisedGameVersionAndCategory(bot.Info);
                 if (bot.Info.GameVersion == GameEditions.UNHEARD)
                 {
@@ -180,7 +173,6 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 botGenerationDetails.GameVersion = bot.Info.GameVersion;
             }
 
-            // Add drip
             SetBotAppearance(bot, botJsonTemplate.BotAppearance, botGenerationDetails);
 
             bot.Inventory = mcsBotInventoryGenerator.CustomGenerateInventory(bot.Id.Value, sessionId, botJsonTemplate, botGenerationDetails);
@@ -190,10 +182,8 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 AddDogtagToBot(bot);
             }
 
-            // Generate new inventory ID
             GenerateInventoryId(bot);
 
-            // Set role back to originally requested now it has been generated
             if (botGenerationDetails.EventRole is not null)
             {
                 bot.Info.Settings.Role = botGenerationDetails.EventRole;

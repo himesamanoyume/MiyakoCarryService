@@ -39,7 +39,6 @@ namespace MiyakoCarryService.Server.Services
         JsonUtil jsonUtil,
         CompatibilityService compatibilityService,
         FileUtil fileUtil,
-        // ISptLogger<TraderService> logger,
         ItemHelper itemHelper,
         MailSendService mailSendService,
         ConfigService configService
@@ -323,7 +322,6 @@ namespace MiyakoCarryService.Server.Services
                 
                 if (info.PunishEveryone && compatibilityService.HasFikaServer)
                 {
-                    // logger.Info($"尝试惩罚 {info.FriendlyFirePlayerId} 但其并不是老板, 转而惩罚房间内全体玩家");
                     var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
                     var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
                     var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [playerId]);
@@ -351,7 +349,6 @@ namespace MiyakoCarryService.Server.Services
                 }
             }
 
-            // logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
             ModifyPunishmentMulti(info.Diff, true);
         }
 

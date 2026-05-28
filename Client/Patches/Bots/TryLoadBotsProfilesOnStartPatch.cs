@@ -1,6 +1,5 @@
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -269,13 +268,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = notScav;
 
             settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
-            // settings.FileSettings.Mind.VALID_REASONS_TO_ADD_ENEMY = [];
-            // settings.FileSettings.Mind.REACT_ADD_DRUNK_ENEMY = true;
             settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = notScav ? EWarnBehaviour.AlwaysEnemies : EWarnBehaviour.Neutral;
             settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
 
-            // - hardcode some settings to make the bot more efficient
             settings.FileSettings.Move.REACH_DIST = 1.5f;
             settings.FileSettings.Move.REACH_DIST_COVER = 2f;
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
@@ -386,7 +382,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             };
 
             settings.FileSettings.Aiming.MAX_AIM_PRECICING = 60f;
-            // settings.FileSettings.Aiming.BETTER_PRECICING_COEF = 0.7f;
             settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.BOTTOM_COEF = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.MAX_AIM_TIME = 0.2f;

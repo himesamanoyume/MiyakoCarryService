@@ -52,10 +52,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     return;
                 }
 
-                // 直接向敌人方向移动，而不是搜索覆盖点  
                 MoveTowardsEnemy(goalEnemy);
-
-                // 保持瞄准和射击  
                 AimingAndShoot(data);
             }
 

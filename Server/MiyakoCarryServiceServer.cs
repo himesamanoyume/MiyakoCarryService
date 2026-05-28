@@ -59,11 +59,11 @@ namespace MiyakoCarryService.Server
                     return;
                 }
 
-                // var currentVersion = new System.Version("0.1.7.0"); // Test
                 var currentVersion = configService.GetClientVersion();
                 using var httpClient = new HttpClient();
                 try
                 {
+                    // 这是为了方便中国大陆网络环境无法访问github的妥协方式
                     var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
 
                     var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.0.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
@@ -71,10 +71,9 @@ namespace MiyakoCarryService.Server
                     if (match.Success)
                     {
                         var latestVersion = new System.Version(match.Groups[1].Value.Trim());
-                        // logger.Info("尝试检测更新:" + latestVersion);
                         if (latestVersion.CompareTo(currentVersion) > 0)
                         {
-                            logger.Success($"MiyakoCarryService 有新版本: {currentVersion} ---> {latestVersion} | 目前请在Discord频道获取更新");
+                            logger.Success($"MiyakoCarryService New Version: {currentVersion} ---> {latestVersion}");
                         }
                     }
                 }

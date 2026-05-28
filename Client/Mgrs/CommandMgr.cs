@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        private List<MongoID> _mcsBotPlayerIds = new();
+        private List<MongoID> _mySquadMcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
         // public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
 
@@ -55,14 +55,14 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private async Task GetMcsBotPlayerIds()
         {
-            _mcsBotPlayerIds = await McsRequestHandler.GetMcsBotPlayerIds(new()
+            _mySquadMcsBotPlayerIds = await McsRequestHandler.GetMcsBotPlayerIds(new()
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
 
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                 {
                     var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                     if (mcsBotPlayer == null)
@@ -79,7 +79,7 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            _mcsBotPlayerIds.Clear();
+            _mySquadMcsBotPlayerIds.Clear();
             _mcsBotPlayers.Clear();
             _gamePlayerOwner = null;
         }
@@ -114,7 +114,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void BuildMainCommandMenu()
         {
-            if (_gamePlayerOwner == null || _mcsBotPlayerIds.Count == 0)
+            if (_gamePlayerOwner == null || _mySquadMcsBotPlayerIds.Count == 0)
             {
                 return;
             }
@@ -125,7 +125,7 @@ namespace MiyakoCarryService.Client.Mgrs
             };
 
             var mcsBotPlayers = new List<Player>();
-            foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+            foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
             {
                 var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                 if (mcsBotPlayer == null)
@@ -157,7 +157,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void BuildTeamCommandMenu()
         {
-            if (_gamePlayerOwner == null || _mcsBotPlayerIds.Count == 0)
+            if (_gamePlayerOwner == null || _mySquadMcsBotPlayerIds.Count == 0)
             {
                 return;
             }
@@ -220,7 +220,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 Name = Locales.TEAMCOMMAND_NAME,
                 TargetName = Locales.TEAMCOMMAND_TARGETNAME,
                 Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
-                // p中的某个元素为空导致菜单无法打开
                 Action = action
             };
         }
@@ -232,7 +231,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 Name = mcsBotPlayer.Profile.Info.Nickname,
                 TargetName = Locales.MEMBERCOMMAND_TARGETNAME,
                 Disabled = !mcsBotPlayer.HealthController.IsAlive,
-                // p中的某个元素为空导致菜单无法打开
                 Action = new Action(() =>
                 {
                     action(mcsBotPlayer);
@@ -249,7 +247,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = false,
                 Action = new Action(() =>
                 {
-                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
@@ -277,7 +275,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = false,
                 Action = new Action(() =>
                 {
-                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
@@ -305,7 +303,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = false,
                 Action = new Action(() =>
                 {
-                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
@@ -333,7 +331,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = false,
                 Action = new Action(() =>
                 {
-                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
@@ -498,7 +496,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = MiyakoCarryServicePlugin.SAINInstalled,
                 Action = new Action(() =>
                 {
-                    foreach (var mcsBotPlayerId in _mcsBotPlayerIds)
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                     {
                         var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
                         if (mcsBotPlayer == null)
@@ -519,7 +517,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void BuildMemberCommandMenu(Player mcsBotPlayer)
         {
-            if (_gamePlayerOwner == null || _mcsBotPlayerIds.Count == 0)
+            if (_gamePlayerOwner == null || _mySquadMcsBotPlayerIds.Count == 0)
             {
                 return;
             }

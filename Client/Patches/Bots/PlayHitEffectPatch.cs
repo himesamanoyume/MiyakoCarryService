@@ -21,35 +21,27 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(EffectsCommutator __instance, EftBulletClass info, ShotInfoClass playerHitInfo)
         {
-            try
+            var shooter = info.Player;
+            if (shooter == null)
             {
-                var shooter = info.Player;
-                if (shooter == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                if (McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
-                {
-                    return;
-                }
+            if (McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
+            {
+                return;
+            }
 
-                if (!__instance.IsHitPointAlreadyProcessed(info.HitPoint))
+            if (!__instance.IsHitPointAlreadyProcessed(info.HitPoint))
+            {
+                foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
                 {
-                    foreach (var botOwner in McsMgr.GetAllAliveMcsBotPlayer())
+                    if (botOwner.Position.McsSqrDistance(info.HitPoint) <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                     {
-                        if (botOwner.Position.McsSqrDistance(info.HitPoint) <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
-                        {
-                            botOwner.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
-                        }
+                        botOwner.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
                     }
                 }
             }
-            catch (Exception e)
-            {
-                MiyakoCarryServicePlugin.Logger.LogError($"PlayHitEffectPatch 报错: {e}");
-            }
-
         }
     }
 }

@@ -37,7 +37,6 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(ReloadDataLoop(1f));
             StartCoroutine(LoadLootData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
-            // StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(2f));
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
             {
@@ -60,8 +59,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 yield return waitTime;
                 if (_gameloop.IsVaildGameWorld)
                 {
-                    // 收集护航周围的根战利品信息
-                    // MiyakoCarryServicePlugin.Logger.LogWarning("正在收集战利品信息");
                     var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
                     var closeRootItemDataDict = new Dictionary<McsBotPlayerData, List<ItemData>>();
                     foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
@@ -71,7 +68,6 @@ namespace MiyakoCarryService.Client.Mgrs
                             continue;
                         }
 
-                        // 若当前有掠夺目标，则不进行获取新的掠夺目标
                         if (mcsBotPlayerData.LootingTarget != null)
                         {
                             continue;
@@ -80,7 +76,6 @@ namespace MiyakoCarryService.Client.Mgrs
                         closeRootItemDataDict[mcsBotPlayerData] = Tools.GetRangeOwnerItemData(mcsBotPlayerData.RootTransform.position, 30f);
                     }
 
-                    // 收集分批所需数据
                     var totalRootItemCount = 0;
                     foreach (var list in closeRootItemDataDict.Values)
                     {
@@ -93,13 +88,13 @@ namespace MiyakoCarryService.Client.Mgrs
                         totalRootItemDatas.AddRange(list);
                     }
 
-                    // 为各批次填充数据
                     var batchSize = Mathf.Clamp(Mathf.CeilToInt(totalRootItemCount / 10f), 100, 2000);
                     var itemBatches = new List<List<ItemData>>();
+                    var batch = new List<ItemData>();
 
                     for(int i = 0; i < totalRootItemCount; i += batchSize)
                     {
-                        var batch = new List<ItemData>();
+                        batch.Clear();
                         int endIndex = Math.Min(i + batchSize, totalRootItemCount);
                         for (int j = i; j < endIndex; j++)
                         {
@@ -108,11 +103,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         itemBatches.Add(batch);
                     }
 
-                    // 分批次、依据每位老板的设置进行刷新
                     var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
-                    foreach (var batch in itemBatches)
+                    foreach (var _batch in itemBatches)
                     {
-                        foreach (var rootItemData in batch)
+                        foreach (var rootItemData in _batch)
                         {
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
@@ -122,7 +116,6 @@ namespace MiyakoCarryService.Client.Mgrs
                         yield return publicTime;
                     }
 
-                    // 让每位护航都获取到当前范围内未被锁定的最高优先级的战利品
                     foreach (var keyValuePair in closeRootItemDataDict)
                     {
                         var mcsBotPlayerData = keyValuePair.Key;
@@ -261,7 +254,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             if (!blocked)
                             {
-                                // MiyakoCarryServicePlugin.Logger.LogWarning("观测到玩家目视的敌人");
                                 mcsAILeadPlayer.CalcGoalEnemy();
                                 break;
                             }

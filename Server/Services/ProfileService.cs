@@ -763,7 +763,6 @@ namespace MiyakoCarryService.Server.Services
                 }
                 else
                 {
-                    // 更新现有物品的模板  
                     existingInventoryItem.Template = stage.Container.Value;
                 }
             }

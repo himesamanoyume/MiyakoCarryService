@@ -58,16 +58,14 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             var requestedItemCount = completionConfig.RequestedItemCount;
             questTemplate.Conditions.AvailableForFinish = [];
 
-            var additionMulti = spawnType.IsBoss ? 2f : 1f;
-
             for (int i = 0; i < players; i++)
             {
 #if DEBUG
                 var currentRequestedItemCount = randomUtil.RandInt(1, 2);;
 #else
                 var currentRequestedItemCount = randomUtil.RandInt(
-                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * additionMulti * (1 + punishmentMulti)),
-                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * additionMulti * (1 + punishmentMulti)) + 1
+                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * (1 + punishmentMulti)),
+                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * (1 + punishmentMulti)) + 1
                     );
 #endif
 

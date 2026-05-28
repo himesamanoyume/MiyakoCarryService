@@ -44,7 +44,6 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 while (orderQuestsQueue.Count > 0)
                 {
                     var quest = orderQuestsQueue.Dequeue();
-                    // Console.WriteLine("加入新任务");
                     quest.Side = Enum.GetName(orderConfig.Side);
                     quest.ChangeCost.FirstOrDefault(x => x.TemplateId == ItemTpl.MONEY_ROUBLES).Count = (int)(currentTime + orderConfig.ResetTime);
                     generatedOrder.ActiveQuests.Add(quest);
@@ -59,7 +58,6 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 QuestsQueueDict.Remove(sessionID);
             }
 
-            // Console.WriteLine("将尝试清除过期订单、任务");
             questController.ProcessExpiredQuests(generatedOrder, pmcData);
             var mcsBotPlayerIds = infoController.GetExpiredMcsBotPlayerIds();
             foreach (var kvp in mcsBotPlayerIds)

@@ -15,14 +15,13 @@ using UnityEngine;
 using System.Linq;
 using BepInEx;
 using MiyakoCarryService.Client.Utils;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Patches.Group;
 using UnityEngine.UI;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
 /// <summary>
-/// 修改调查按钮的提醒数值并修改颜色
+/// 收集错误信息，可用于反馈
 /// </summary>
 public sealed class MenuTaskBarAwakePatch : ModulePatch
 {
@@ -88,7 +87,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
 
             _bigSurveyButton = _bigSurveyGameObject.transform.GetChild(0).gameObject;
             _bigSurveyButton.name = "BigSurveyButton";
-            _bigSurveyButton.GetComponentInChildren<LocalizedText>().LocalizationKey = "获取日志";
+            _bigSurveyButton.GetComponentInChildren<LocalizedText>().LocalizationKey = "Big Survey";
 
             _bigSurveyNewInformation = _bigSurveyGameObject.transform.GetChild(1).gameObject;
             _bigSurveyNewNodes = _bigSurveyNewInformation.transform.GetChild(0).gameObject;
@@ -101,21 +100,21 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                 {
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                     var stringBuilder = new StringBuilder();
-                    stringBuilder.Append("Mcs 版本: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
-                    stringBuilder.Append("EFT版本: ").Append(EFTVersionInfoClass.String_0).Append("\n")
-                        .Append("SPT版本: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
-                        .Append("系统: ").Append(SystemInfo.operatingSystem).Append("\n")
-                        .Append("CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("核心)\n")
-                        .Append("内存: ").Append(SystemInfo.systemMemorySize).Append(" MB\n")
-                        .Append("显卡: ").Append(" ").Append(SystemInfo.graphicsDeviceName).Append(" (").Append(SystemInfo.graphicsMemorySize).Append(" MB显存)\n")
-                        .Append("全部Client模组:\n")
+                    stringBuilder.Append("Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
+                    stringBuilder.Append("EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
+                        .Append("SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
+                        .Append("System: ").Append(SystemInfo.operatingSystem).Append("\n")
+                        .Append("CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("Core)\n")
+                        .Append("Memory: ").Append(SystemInfo.systemMemorySize).Append(" MB\n")
+                        .Append("GPU: ").Append(" ").Append(SystemInfo.graphicsDeviceName).Append(" (").Append(SystemInfo.graphicsMemorySize).Append(" MB Memroy)\n")
+                        .Append("All Client Mode:\n")
                         .Append(string.Join(", ", Chainloader.PluginInfos.Values.Select(x => x.Instance)
                                 .Where(plugin => plugin != null)
                                 .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => p.Info.Metadata.Name)
                                 .ToArray())).Append("\n")
-                        .Append("全部Server模组:\n")
+                        .Append("All Server Server:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => x.Name))).Append('\n')
-                        .Append("总计异常: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
+                        .Append("Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())
                     {
@@ -124,7 +123,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     }
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
-                    NotificationManagerClass.DisplayMessageNotification($"共捕获到 {MiyakoCarryServicePlugin.LogBuffer.GetLogCount} 个错误，已复制错误日志文本，可直接粘贴并发送到Discord频道 Rabbit1 Gaming 中（注意：此日志会捕获任何报错，并不一定与宫子护航店有关）");
+                    NotificationManagerClass.DisplayMessageNotification($"Total exception: {MiyakoCarryServicePlugin.LogBuffer.GetLogCount} ，text copied");
                     NewBigSurveyCount = 0;
                     _animatedToggle.ToggleSilent(false);
                 });

@@ -98,9 +98,6 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 HideoutCustomizationStashId = hideoutCustomizationStashId,
             };
 
-            // // Get generated raid details bot will be spawned in
-            // var raidConfig = profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
-
             if (botGenerationDetails.Role is "pmcUSEC" or "pmcBEAR")
             {
                 var equipment = inventoryService.GetEquipment();
@@ -167,15 +164,12 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             }
             var randomistionDetails = botHelper.GetBotRandomizationDetails(100, botEquipConfig);
 
-            // Apply nighttime changes if its nighttime + there's changes to make
             if (randomistionDetails?.NighttimeChanges is not null)
             {
                 foreach (var (equipment, weight) in randomistionDetails.NighttimeChanges.EquipmentModsModifiers)
                 {
                     if (randomistionDetails.EquipmentMods.TryGetValue(equipment, out var value))
                     {
-                        // Never let mod chance go outside 0 - 100
-                        // var newWeight = weight + value;
                         randomistionDetails.EquipmentMods[equipment] = 100;
                     }
                 }
@@ -212,13 +206,11 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 );
             }
 
-            // Generate below in specific order
             GenerateEquipment(
                 new GenerateEquipmentProperties
                 {
                     BotId = botId,
                     RootEquipmentSlot = EquipmentSlots.Pockets,
-                    // Unheard profiles have unique sized pockets
                     RootEquipmentPool = GetPocketPoolByGameEdition(
                         botGenerationDetails.GameVersion,
                         templateInventory,

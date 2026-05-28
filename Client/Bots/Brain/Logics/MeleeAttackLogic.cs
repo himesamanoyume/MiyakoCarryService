@@ -128,7 +128,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     {
                         BotOwner_0.SetTargetMoveSpeed(MOVE_SPEED_WHILE_ATTACKING);
 
-                        // 预测敌人位置并移动  
                         if (_lastPathUpdateTime < Time.time)
                         {
                             _lastPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;

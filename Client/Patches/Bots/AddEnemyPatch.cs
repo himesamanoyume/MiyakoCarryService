@@ -46,11 +46,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         __result = false;
                         return false;
                     }
-
-                    // if (!(person.Profile.Info.Settings.Role is WildSpawnType.assault or WildSpawnType.marksman or WildSpawnType.assaultGroup or WildSpawnType.pmcBEAR or WildSpawnType.pmcUSEC))
-                    // {
-                    //     MiyakoCarryServicePlugin.Logger.LogError($"护航 {botOwner.Profile.Info.Nickname} 正在尝试将 {person.Profile.Info.Settings.Role} 添加为敌人");
-                    // }
                 }
             }
             return true;

@@ -33,7 +33,6 @@ namespace MiyakoCarryService.Server.Patches.Trader
 
             var traderController = ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>();
             var traderAssort = traderController.GetMcsBotPlayerInventoryModeAssort();
-            // __result = traderController.GetMcsBotPlayerInventoryModeAssort();
 
             if (profileController.IsMcsBotPlayerInventoryMode(sessionId))
             {

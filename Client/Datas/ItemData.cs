@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Datas
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogInfo(e);
+                MiyakoCarryServicePlugin.Logger.LogError(e);
             }
         }
 

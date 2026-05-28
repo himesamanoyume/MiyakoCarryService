@@ -114,8 +114,6 @@ namespace MiyakoCarryService.Client.Utils
         /// <summary>
         /// 借鉴LootingBots
         /// </summary>
-        /// <param name="destination"></param>
-        /// <returns></returns>
         public static bool BetterDestination(float maxDistance, Vector3 destination, out Vector3 betterDestination)
         {
             var pointNearbyContainer = NavMesh.SamplePosition(

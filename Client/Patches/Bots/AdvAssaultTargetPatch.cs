@@ -17,10 +17,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(Class99 __instance)
+        public static bool Prefix(Class99 __instance, ref bool __result)
         {
             if (McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
             {
+                __result = false;
                 return false;
             }
             return true;
