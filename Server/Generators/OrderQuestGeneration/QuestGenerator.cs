@@ -108,7 +108,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             #if DEBUG
             var currentRequestedItemCount = percent;
             #else
-            var currentRequestedItemCount = percent * TraderService.TicketPricePerPercent;
+            var currentRequestedItemCount = percent * Services.TraderService.TicketPricePerPercent;
             #endif
             var handoverItemCondition = new QuestCondition
             {

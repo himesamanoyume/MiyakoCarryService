@@ -87,7 +87,7 @@ With a reference later in the document defining the URL location.
 
 #### 0.3.6.0
 
-- 适配Zyriachy
+- 再次适配Zyriachy，修复其不攻击的问题
 - 新增罚单功能。输入对应指令，可花钱消除涨价惩罚，具体方式同样使用`help`指令查看
 - 调整护航生成装备的耐久度全部为满值
 - 修复安装SAIN下的护航在战斗结束后会卡住无法进行下一步决策的问题
