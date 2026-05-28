@@ -21,10 +21,10 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class OrderInfoService(
+    public sealed class InfoService(
         ConfigService configService,
         NotificationSendHelper notificationSendHelper,
-        ISptLogger<OrderInfoService> logger,
+        ISptLogger<InfoService> logger,
         NotificationHelper notificationHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         ServerLocalisationService serverLocalisationService,
@@ -37,11 +37,18 @@ namespace MiyakoCarryService.Server.Services
 
         // 此处的MongoId为QuestId，而不是玩家Id
         private readonly ConcurrentDictionary<MongoId, OrderInfo> _orderInfos = new();
+        private readonly ConcurrentDictionary<MongoId, TicketInfo> _ticketInfos = new();
+        // end
         private SemaphoreSlim _saveLock = new(1, 1);
 
         public void AddOrderInfo(OrderInfo orderInfo)
         {
             _orderInfos.TryAdd(orderInfo.QuestId, orderInfo);
+        }
+
+        public void AddTicketInfo(TicketInfo tickInfo)
+        {
+            _ticketInfos.TryAdd(tickInfo.QuestId, tickInfo);
         }
 
         public void AddOrderInfos(List<OrderInfo> orderInfos)
@@ -52,16 +59,29 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        public void AddTicketInfos(List<TicketInfo> tickInfos)
+        {
+            foreach (var tickInfo in tickInfos)
+            {
+                AddTicketInfo(tickInfo);
+            }
+        }
+
         public void RemoveOrderInfo(OrderInfo orderInfo)
         {
             _orderInfos.TryRemove(orderInfo.QuestId, out _);
+        }
+
+        public void RemoveTicketInfo(TicketInfo tickInfo)
+        {
+            _ticketInfos.TryRemove(tickInfo.QuestId, out _);
         }
 
         public bool CheckMcsBotPlayerExist(MongoId mcsBotPlayerId)
         {
             foreach (var orderInfo in _orderInfos.Values)
             {
-                if (orderInfo.Status is not EOrderInfoStatus.Started)
+                if (orderInfo.Status is not EInfoStatus.Started)
                 {
                     continue;
                 }
@@ -89,13 +109,26 @@ namespace MiyakoCarryService.Server.Services
                 SpawnType = spawnType,
                 CarryServiceLevel = carryServiceLevel,
                 Duration = duration,
-                Status = EOrderInfoStatus.AvailableForStart,
+                Status = EInfoStatus.AvailableForStart,
                 ExpirationTime = timeUtil.GetTimeStamp() + configService.GetOrderConfig().OrderQuests.First().ResetTime
             };
             AddOrderInfo(orderInfo);
         }
 
-        public async Task SaveOrderInfo()
+        public void CreateTicketInfo(MongoId mcsLeadPlayerId, int percent, MongoId questId)
+        {
+            var orderInfo = new TicketInfo()
+            {
+                McsLeadPlayerId = mcsLeadPlayerId,
+                QuestId = questId,
+                Percent = percent,
+                Status = EInfoStatus.AvailableForStart,
+                ExpirationTime = timeUtil.GetTimeStamp() + configService.GetOrderConfig().OrderQuests.First().ResetTime
+            };
+            AddTicketInfo(orderInfo);
+        }
+
+        public async Task SaveOrderAndTicketInfo()
         {
             if (_saveLock is null)
             {
@@ -111,6 +144,11 @@ namespace MiyakoCarryService.Server.Services
                     var orderInfos = _orderInfos.Values.ToList();
                     var jsonOrderInfos = jsonUtil.Serialize(orderInfos, true);
                     await fileUtil.WriteFileAsync(orderPath, jsonOrderInfos);
+
+                    var ticketPath = System.IO.Path.Combine(_orderFolderDir, "ticketinfo.json");
+                    var ticketInfos = _ticketInfos.Values.ToList();
+                    var jsonTicketInfos = jsonUtil.Serialize(ticketInfos, true);
+                    await fileUtil.WriteFileAsync(ticketPath, jsonTicketInfos);
                 }
                 catch (Exception e)
                 {
@@ -138,9 +176,29 @@ namespace MiyakoCarryService.Server.Services
             return targetOrderInfos;
         }
 
+        public List<TicketInfo> GetTicketInfos(MongoId mcsLeadPlayerId)
+        {
+            List<TicketInfo> targetTicketInfos = new();
+
+            foreach (var ticketInfo in _ticketInfos.Values.ToList())
+            {
+                if (ticketInfo.McsLeadPlayerId == mcsLeadPlayerId)
+                {
+                    targetTicketInfos.Add(ticketInfo);
+                }
+            }
+
+            return targetTicketInfos;
+        }
+
         public List<OrderInfo> GetAllOrderInfo()
         {
             return _orderInfos.Values.ToList();
+        }
+
+        public List<TicketInfo> GetAllTicketInfo()
+        {
+            return _ticketInfos.Values.ToList();
         }
 
         public async Task LoadAllOrderInfos()
@@ -155,6 +213,18 @@ namespace MiyakoCarryService.Server.Services
             AddOrderInfos(orderInfos);
         }
 
+        public async Task LoadAllTicketInfos()
+        {
+            var ticketPath = System.IO.Path.Combine(_orderFolderDir, "ticketinfo.json");
+            if (!fileUtil.FileExists(ticketPath))
+            {
+                await fileUtil.WriteFileAsync(ticketPath, "[]");
+            }
+
+            var ticketInfos = await jsonUtil.DeserializeFromFileAsync<List<TicketInfo>>(ticketPath);
+            AddTicketInfos(ticketInfos);
+        }
+
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredMcsBotPlayerIds()
         {
             var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
@@ -165,7 +235,7 @@ namespace MiyakoCarryService.Server.Services
                 var currentTime = timeUtil.GetTimeStamp();
                 if (currentTime >= orderInfo.ExpirationTime - 1)
                 {
-                    if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+                    if (orderInfo.Status == EInfoStatus.AvailableForStart)
                     {
                         continue;
                     }
@@ -180,7 +250,7 @@ namespace MiyakoCarryService.Server.Services
             return mcsBotPlayerIds;
         }
 
-        public void ProcessExpiredOrderInfo(MongoId mcsLeadPlayerId)
+        public void ProcessExpiredOrderAndTicketInfo(MongoId mcsLeadPlayerId)
         {
             var orderInfos = GetAllOrderInfo();
             foreach (var orderInfo in orderInfos)
@@ -191,7 +261,16 @@ namespace MiyakoCarryService.Server.Services
                     RemoveOrderInfo(orderInfo);
                 }
             }
-            _ = SaveOrderInfo();
+            var ticketInfos = GetAllTicketInfo();
+            foreach (var ticketInfo in ticketInfos)
+            {
+                var currentTime = timeUtil.GetTimeStamp();
+                if (ticketInfo.McsLeadPlayerId == mcsLeadPlayerId && currentTime >= ticketInfo.ExpirationTime - 1)
+                {
+                    RemoveTicketInfo(ticketInfo);
+                }
+            }
+            _ = SaveOrderAndTicketInfo();
         }
 
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)
@@ -211,17 +290,24 @@ namespace MiyakoCarryService.Server.Services
                     }
                 }
             }
-            _ = SaveOrderInfo();
+            _ = SaveOrderAndTicketInfo();
             return mcsBotPlayerIds;
         }
 
-        public void SetOrderInfoStarted(OrderInfo orderInfo)
+        public void SetBaseInfoStarted(BaseInfo baseInfo)
         {
-            if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+            if (baseInfo.Status == EInfoStatus.AvailableForStart)
             {
-                orderInfo.Status = EOrderInfoStatus.Started;
+                baseInfo.Status = EInfoStatus.Started;
                 var currentTime = timeUtil.GetTimeStamp();
-                orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
+                if (baseInfo is OrderInfo orderInfo)
+                {
+                    orderInfo.ExpirationTime = currentTime + orderInfo.Duration * 3600;
+                }
+                else if (baseInfo is TicketInfo ticketInfo)
+                {
+                    ticketInfo.ExpirationTime = currentTime + 60 * 3600;
+                }
             }
         }
 
@@ -249,9 +335,15 @@ namespace MiyakoCarryService.Server.Services
             );
         }
 
+        public void WaivePunish()
+        {
+            
+        }
+
         public async Task OnPostLoadAsync()
         {
             await LoadAllOrderInfos();
+            await LoadAllTicketInfos();
         }
     }
 }

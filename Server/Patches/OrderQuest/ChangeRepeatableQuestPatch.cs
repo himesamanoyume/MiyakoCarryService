@@ -49,19 +49,29 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             
             if (repeatables.RepeatableType.Name == "Order")
             {
-                var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
-                var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
-                var orderInfos = orderInfoController.GetAllOrderInfo();
+                var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
+                var orderQuestController = ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>();
+                var orderInfos = infoController.GetAllOrderInfo();
                 foreach (var orderInfo in orderInfos)
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
                         orderQuestController.Refund(sessionID, questToReplace, pmcData);
-                        orderInfoController.RemoveOrderInfo(orderInfo);
-                        _ = orderInfoController.SaveOrderInfo();
+                        infoController.RemoveOrderInfo(orderInfo);
                         break;
                     }
                 }
+                var ticketInfos = infoController.GetAllTicketInfo();
+                foreach (var ticketInfo in ticketInfos)
+                {
+                    if (ticketInfo.QuestId == questToReplace.Id)
+                    {
+                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
+                        infoController.RemoveTicketInfo(ticketInfo);
+                        break;
+                    }
+                }
+                _ = infoController.SaveOrderAndTicketInfo();
                 __result = output;
                 return false;
             }

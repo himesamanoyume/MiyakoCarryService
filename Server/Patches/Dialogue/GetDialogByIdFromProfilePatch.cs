@@ -22,8 +22,8 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
         [PatchPrefix]
         public static bool Prefix(SptProfile profile, GetMailDialogViewRequestData request, ref SPTarkov.Server.Core.Models.Eft.Profile.Dialogue __result)
         {
-            var orderInfoController = ServiceLocator.ServiceProvider.GetService<Controllers.OrderInfoController>();
-            if (orderInfoController.CheckMcsBotPlayerExist(request.DialogId))
+            var infoController = ServiceLocator.ServiceProvider.GetService<Controllers.InfoController>();
+            if (infoController.CheckMcsBotPlayerExist(request.DialogId))
             {
                 if (profile.DialogueRecords is null || profile.DialogueRecords.ContainsKey(request.DialogId))
                 {

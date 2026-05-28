@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Server.Services
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         BotNameService botNameService,
         MailSendService mailSendService,
-        OrderInfoService orderInfoService,
+        InfoService infoService,
         DatabaseService databaseService,
         CompatibilityService compatibilityService
     )
@@ -135,7 +135,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void TeamKillPunish(MongoId mcsLeadPlayerId)
         {
-            var mcsBotPlayerIds = orderInfoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
+            var mcsBotPlayerIds = infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
             foreach (var kvp in mcsBotPlayerIds)
             {
                 ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
@@ -212,7 +212,7 @@ namespace MiyakoCarryService.Server.Services
                         var mcsBotPlayerId = System.IO.Path.GetFileNameWithoutExtension(file);
                         if (MongoId.IsValidMongoId(mcsBotPlayerId))
                         {
-                            if (orderInfoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
+                            if (infoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
                             {
                                 await LoadMcsBotPlayerProfileAsync(mcsLeadPlayerId, mcsBotPlayerId);
                             }

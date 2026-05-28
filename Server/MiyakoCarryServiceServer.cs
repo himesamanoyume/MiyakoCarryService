@@ -88,10 +88,10 @@ namespace MiyakoCarryService.Server
         [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
         public sealed class MiyakoCarryServiceServerPostLoad(
             LocaleService localeService,
-            OrderQuestService orderQuestService,
+            QuestService questService,
             TraderService traderService,
             ProfileService profileService,
-            OrderInfoService orderInfoService,
+            InfoService infoService,
             CompatibilityService compatibilityService,
             ConfigService configService,
             InventoryService inventoryService,
@@ -102,21 +102,21 @@ namespace MiyakoCarryService.Server
             {
                 await localeService.OnPostLoadAsync();
                 await traderService.OnPostLoadAsync();
-                await orderInfoService.OnPostLoadAsync();
+                await infoService.OnPostLoadAsync();
                 await profileService.OnPostLoadAsync();
-                await orderQuestService.OnPostLoadAsync();
+                await questService.OnPostLoadAsync();
                 await compatibilityService.OnPostLoadAsync();
                 await inventoryService.OnPostLoadAsync();
                 await Task.Run(() =>
                 {
-                    var mcsBotPlayerIds = orderInfoService.GetExpiredMcsBotPlayerIds();
+                    var mcsBotPlayerIds = infoService.GetExpiredMcsBotPlayerIds();
                     foreach (var kvp in mcsBotPlayerIds)
                     {
                         if (profileService.IsMcsBotPlayerInventoryMode(kvp.Key))
                         {
                             continue;
                         }
-                        orderInfoService.ProcessExpiredOrderInfo(kvp.Key);
+                        infoService.ProcessExpiredOrderAndTicketInfo(kvp.Key);
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });

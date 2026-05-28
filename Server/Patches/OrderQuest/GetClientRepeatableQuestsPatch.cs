@@ -21,24 +21,24 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     public sealed class GetClientRepeatableQuestsPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.GetClientRepeatableQuests));
-        public static Dictionary<MongoId, Queue<RepeatableQuest>> OrderQuestsQueueDict = new();
+        public static Dictionary<MongoId, Queue<RepeatableQuest>> QuestsQueueDict = new();
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
         {
             var configController = ServiceLocator.ServiceProvider.GetService<ConfigController>();
-            var orderQuestController = ServiceLocator.ServiceProvider.GetService<OrderQuestController>();
+            var questController = ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>();
             var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-            var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
+            var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
             var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
             var timeUtil = ServiceLocator.ServiceProvider.GetService<TimeUtil>();
             var currentTime = timeUtil.GetTimeStamp();
             var fullProfile = profileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
             var orderConfig = configController.GetOrderConfig().OrderQuests.First();
-            var generatedOrder = orderQuestController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
+            var generatedOrder = questController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
 
-            if (OrderQuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
+            if (QuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
             {
                 generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
                 while (orderQuestsQueue.Count > 0)
@@ -56,19 +56,19 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                         }
                     );
                 }
-                OrderQuestsQueueDict.Remove(sessionID);
+                QuestsQueueDict.Remove(sessionID);
             }
 
             // Console.WriteLine("将尝试清除过期订单、任务");
-            orderQuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            var mcsBotPlayerIds = orderInfoController.GetExpiredMcsBotPlayerIds();
+            questController.ProcessExpiredQuests(generatedOrder, pmcData);
+            var mcsBotPlayerIds = infoController.GetExpiredMcsBotPlayerIds();
             foreach (var kvp in mcsBotPlayerIds)
             {
                 if (profileController.IsMcsBotPlayerInventoryMode(kvp.Key))
                 {
                     continue;
                 }
-                orderInfoController.ProcessExpiredOrderInfo(kvp.Key);
+                infoController.ProcessExpiredOrderInfo(kvp.Key);
                 profileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
             }
 

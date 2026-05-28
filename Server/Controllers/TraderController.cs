@@ -32,5 +32,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return traderService.GetMcsBotPlayerInventoryModeAssort();
         }
+
+        public void ModifyPunishmentMulti(double diff, bool isIncrease = true)
+        {
+            traderService.ModifyPunishmentMulti(diff, isIncrease);
+        }
     }
 }

@@ -10,28 +10,33 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
-    public class OrderQuestController(
-        OrderQuestService orderQuestService
+    public class QuestController(
+        QuestService questService
     )
     {
         public void CreateOrderQuest(MongoId mcsLeadPlayerId, int players, SpawnType spawnType, int carryServiceLevel, int duration)
         {
-            orderQuestService.CreateOrderQuest(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration);
+            questService.CreateOrderQuest(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration);
+        }
+
+        public void CreateTicketQuest(MongoId mcsLeadPlayerId, int percent)
+        {
+            questService.CreateTicketQuest(mcsLeadPlayerId, percent);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
         {
-            orderQuestService.ProcessExpiredQuests(generatedRepeatables, bossPmcData);
+            questService.ProcessExpiredQuests(generatedRepeatables, bossPmcData);
         }
 
         public PmcDataRepeatableQuest GetRepeatableQuestSubTypeFromProfile(RepeatableQuestConfig repeatableConfig, PmcData pmcData)
         {
-            return orderQuestService.GetRepeatableQuestSubTypeFromProfile(repeatableConfig, pmcData);
+            return questService.GetRepeatableQuestSubTypeFromProfile(repeatableConfig, pmcData);
         }
 
         public void Refund(MongoId sessionId, RepeatableQuest questToReplace, PmcData pmcData)
         {
-            orderQuestService.Refund(sessionId, questToReplace, pmcData);
+            questService.Refund(sessionId, questToReplace, pmcData);
         }
     }
 }

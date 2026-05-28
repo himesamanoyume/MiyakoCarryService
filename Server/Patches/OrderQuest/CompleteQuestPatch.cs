@@ -13,7 +13,7 @@ using SPTarkov.Server.Core.Models.Eft.Quests;
 namespace MiyakoCarryService.Server.Patches.OrderQuest
 {
     /// <summary>
-    /// 对应的Order任务完成时，根据订单信息生成对应的护航存档
+    /// 对应的Order或Ticket任务完成时，根据订单信息生成对应的护航存档，或是减免全局涨价惩罚
     /// </summary>
     public sealed class CompleteQuestPatch : AbstractPatch
     {
@@ -22,23 +22,35 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         [PatchPostfix]
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
         {
-            var orderInfoController = ServiceLocator.ServiceProvider.GetService<OrderInfoController>();
+            var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
+            var traderController = ServiceLocator.ServiceProvider.GetService<TraderController>();
             var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
             var completedQuestId = request.QuestId;
-            var orderInfos = orderInfoController.GetOrderInfos(sessionID);
+            var orderInfos = infoController.GetOrderInfos(sessionID);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    orderInfoController.SetOrderInfoStarted(orderInfo);
+                    infoController.SetBaseInfoStarted(orderInfo);
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
                         var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                        orderInfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        infoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        break;
                     }
                 }
             }
-            _ = orderInfoController.SaveOrderInfo();
+            var ticketInfos = infoController.GetTicketInfos(sessionID);
+            foreach (var ticketInfo in ticketInfos)
+            {
+                if (completedQuestId == ticketInfo.QuestId)
+                {
+                    infoController.SetBaseInfoStarted(ticketInfo);
+                    traderController.ModifyPunishmentMulti(ticketInfo.Percent / 100d, false);
+                    break;
+                }
+            }
+            _ = infoController.SaveOrderAndTicketInfo();
         }
     }
 }

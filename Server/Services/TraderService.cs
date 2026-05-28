@@ -18,7 +18,6 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -40,7 +39,7 @@ namespace MiyakoCarryService.Server.Services
         JsonUtil jsonUtil,
         CompatibilityService compatibilityService,
         FileUtil fileUtil,
-        ISptLogger<TraderService> logger,
+        // ISptLogger<TraderService> logger,
         ItemHelper itemHelper,
         MailSendService mailSendService,
         ConfigService configService
@@ -51,6 +50,7 @@ namespace MiyakoCarryService.Server.Services
 
         // 因为SPT会检查行动任务的商人Id是否存在，为了防止频繁提示存档被标记为不合法，因此创建任务时临时使用此商人Id
         public const string TempOrderTraderId = "6864e812f9fe664cb8b8e152";
+        public const int TicketPricePerPercent = 300000;
         private Punish _punishmentMulti;
         private SemaphoreSlim _saveLock = new(1, 1);
 
@@ -274,9 +274,9 @@ namespace MiyakoCarryService.Server.Services
             traderConfig.UpdateTime.Add(traderRefreshRecord);
         }
 
-        private void AddPunishmentMulti(double diff)
+        public void ModifyPunishmentMulti(double diff, bool isIncrease = true)
         {
-            _punishmentMulti.PunishmentMulti = Math.Round(_punishmentMulti.PunishmentMulti + diff, 4);
+            _punishmentMulti.PunishmentMulti = Math.Round(_punishmentMulti.PunishmentMulti + (isIncrease ? diff : -diff), 4);
             if (_punishmentMulti.PunishmentMulti < 0d)
             {
                 _punishmentMulti.PunishmentMulti = 0d;
@@ -323,7 +323,7 @@ namespace MiyakoCarryService.Server.Services
                 
                 if (info.PunishEveryone && compatibilityService.HasFikaServer)
                 {
-                    logger.Info($"尝试惩罚 {info.FriendlyFirePlayerId} 但其并不是老板, 转而惩罚房间内全体玩家");
+                    // logger.Info($"尝试惩罚 {info.FriendlyFirePlayerId} 但其并不是老板, 转而惩罚房间内全体玩家");
                     var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
                     var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
                     var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [playerId]);
@@ -351,8 +351,8 @@ namespace MiyakoCarryService.Server.Services
                 }
             }
 
-            logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
-            AddPunishmentMulti(info.Diff);
+            // logger.Warning($"进行全局 {Math.Round(info.Diff * 100d, 4)}% 的涨价惩罚");
+            ModifyPunishmentMulti(info.Diff, true);
         }
 
         public void Compensation(CompensationRequestData info)

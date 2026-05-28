@@ -22,14 +22,14 @@ using SPTarkov.Server.Core.Utils.Logger;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class OrderQuestService(
+    public sealed class QuestService(
         ModHelper modHelper,
         ConfigService configService,
-        SptLogger<OrderQuestService> logger,
-        OrderQuestGenerator orderQuestGenerator,
+        SptLogger<QuestService> logger,
+        QuestGenerator questGenerator,
         ProfileFixerService profileFixerService,
         TimeUtil timeUtil,
-        OrderInfoService orderInfoService,
+        InfoService infoService,
         ICloner cloner,
         ServerLocalisationService serverLocalisationService,
         TraderService traderService,
@@ -60,25 +60,52 @@ namespace MiyakoCarryService.Server.Services
             var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
             var pmcData = fullProfile.CharacterData.PmcData;
             var punishmentMulti = traderService.GetGlobalPunishmentMulti();
-            var orderQuest = orderQuestGenerator.GenerateOrderQuest(pmcData, players, spawnType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
-                RepeatableQuestType.Completion, TraderService.MiyakoTraderId,
-                mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration
+            var orderQuest = questGenerator.GenerateOrderQuest(pmcData, players, spawnType, carryServiceLevel, duration, configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First(), GenerateOrderTemplate(
+                RepeatableQuestType.Completion, TraderService.MiyakoTraderId, mcsLeadPlayerId,
+                new QuestDescription
+                {
+                    Players = players,
+                    SpawnType = spawnType,
+                    CarryServiceLevel = carryServiceLevel,
+                    Duration = duration 
+                }
             ), punishmentMulti);
-            if (GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var orderQuestsQueue))
+            if (GetClientRepeatableQuestsPatch.QuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var questsQueue))
             {
-                orderQuestsQueue.Enqueue(orderQuest);
+                questsQueue.Enqueue(orderQuest);
             }
             else
             {
-                GetClientRepeatableQuestsPatch.OrderQuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
+                GetClientRepeatableQuestsPatch.QuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
             }
-            orderInfoService.CreateOrderInfo(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration, orderQuest.Id);
+            infoService.CreateOrderInfo(mcsLeadPlayerId, players, spawnType, carryServiceLevel, duration, orderQuest.Id);
+        }
+
+        public void CreateTicketQuest(MongoId mcsLeadPlayerId, int percent)
+        {
+            var ticketQuest = questGenerator.GenerateTicketQuest(percent, GenerateOrderTemplate(RepeatableQuestType.Completion, TraderService.MiyakoTraderId, mcsLeadPlayerId, new QuestDescription
+            {
+                Fines = percent
+            }));
+            if (GetClientRepeatableQuestsPatch.QuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var questsQueue))
+            {
+                questsQueue.Enqueue(ticketQuest);
+            }
+            else
+            {
+                GetClientRepeatableQuestsPatch.QuestsQueueDict.Add(mcsLeadPlayerId, new([ticketQuest]));
+            }
+            infoService.CreateTicketInfo(mcsLeadPlayerId, percent, ticketQuest.Id);
         }
 
         public void ProcessExpiredQuests(PmcDataRepeatableQuest generatedRepeatables, PmcData bossPmcData)
         {
             var questsToKeep = new List<RepeatableQuest>();
-            var orderInfos = orderInfoService.GetOrderInfos(bossPmcData.Id.Value);
+            var infos = new List<BaseInfo>();
+            var orderInfos = infoService.GetOrderInfos(bossPmcData.Id.Value);
+            var ticketInfos = infoService.GetTicketInfos(bossPmcData.Id.Value);
+            infos.AddRange(orderInfos);
+            infos.AddRange(ticketInfos);
             foreach (var activeQuest in generatedRepeatables.ActiveQuests)
             {
                 var currentTime = timeUtil.GetTimeStamp();
@@ -100,13 +127,13 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
-                var orderInfo = orderInfos.FirstOrDefault(orderInfo => orderInfo.QuestId == questStatusInProfile.QId);
-                if (orderInfo is null)
+                var info = infos.FirstOrDefault(info => info.QuestId == questStatusInProfile.QId);
+                if (info is null)
                 {
                     continue;
                 }
 
-                if (orderInfo.Status == EOrderInfoStatus.AvailableForStart)
+                if (info.Status == EInfoStatus.AvailableForStart)
                 {
                     Refund(bossPmcData.Id.Value, activeQuest, bossPmcData);
                 }
@@ -119,10 +146,7 @@ namespace MiyakoCarryService.Server.Services
             generatedRepeatables.ActiveQuests = questsToKeep;
         }
 
-        public RepeatableQuest GenerateOrderTemplate(
-            RepeatableQuestType type, MongoId traderId, MongoId sessionId,
-            int players, SpawnType spawnType, int carryServiceLevel, int duration
-        )
+        public RepeatableQuest GenerateOrderTemplate(RepeatableQuestType type, MongoId traderId, MongoId sessionId, QuestDescription questDescription)
         {
             var questData = GetClonedQuestTemplateForType(type, TraderService.TempOrderTraderId);
             if (questData is null)
@@ -149,7 +173,14 @@ namespace MiyakoCarryService.Server.Services
 
             questData.Note = questData.Note?.Replace("{traderId}", traderId).Replace("{templateId}", questData.TemplateId);
 
-            questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), players, serverLocalisationService.GetText(spawnType.DisplayName), carryServiceLevel, duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
+            if (questDescription.Fines > 0)
+            {
+                questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETDESCRIPTION), questDescription.Fines);
+            }
+            else
+            {
+                questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), questDescription.Players, serverLocalisationService.GetText(questDescription.SpawnType.DisplayName), questDescription.CarryServiceLevel, questDescription.Duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
+            }
 
             questData.SuccessMessageText = questData
                 .SuccessMessageText?.Replace("{traderId}", traderId)
@@ -190,7 +221,6 @@ namespace MiyakoCarryService.Server.Services
 
             return questData;
         }
-
         public RepeatableQuest GetClonedQuestTemplateForType(RepeatableQuestType type, MongoId traderId)
         {
             var orderTemplate = GetOrderTemplate();

@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
         [PatchPostfix]
         public static void Postfix(string id, int type, string text, string replyTo, Callback<string> callback)
         {
-            if (text.Contains("mcs order"))
+            if (text.Contains("mcs order") || text.Contains("mcs ticket"))
             {
                 TasksExtensions.HandleExceptions(TraderScreensGroupShowPatch.UpdateDailyQuests());
             }

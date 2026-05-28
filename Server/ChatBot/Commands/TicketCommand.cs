@@ -1,4 +1,5 @@
 
+using System;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,22 +18,21 @@ using SPTarkov.Server.Core.Services;
 namespace MiyakoCarryService.Server.ChatBot.Commands
 {
     [Injectable]
-    public partial class OrderCommand(
+    public partial class TicketCommand(
         ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
         QuestController orderQuestController,
-        TraderService traderService,
-        ConfigService configService
+        TraderService traderService
     ) : IMcsCommand
     {
-        [GeneratedRegex(@"^mcs\s+order\s+([1-4])\s+(0|[1-9]\d*)\s+([1-5])\s+([1-9]\d*)$")]
+        [GeneratedRegex(@"^mcs\s+ticket\s+(100|[1-9]\d?)$")]
         private static partial Regex OrderCommandRegex();
 
         public string Command
         {
             get
             {
-                return "order";
+                return "ticket";
             }
         }
 
@@ -40,32 +40,17 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         {
             get
             {
-                var completionConfig = configService.GetOrderConfig().OrderQuests.First().QuestConfig.CompletionConfig.First();
-                var punishmentMulti = traderService.GetGlobalPunishmentMulti();
-
-                var sb = new StringBuilder();
-                foreach (var kvp in configService.GetSpawnTypes())
-                {
-                    sb.Append(kvp.Key).Append(": ").Append(kvp.Value.IsBoss ? "[Boss] " : "").Append(serverLocalisationService.GetText(kvp.Value.DisplayName)).Append('\n');
-                }
-
                 return [
                     string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP1), 
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP1), 
                         Command, 
                         Command, 
                         Command
                         ), 
                     string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP2), 
-                        (int)(completionConfig.RequestedItemCount.Max * .8f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .85f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .9f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .95f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * (1 + punishmentMulti))
-                        ),
-                    serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP3) + sb.ToString(),
-                    ];
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP2), 
+                        TraderService.TicketPricePerPercent
+                )];
             }
         }
 
@@ -75,21 +60,18 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             var match = OrderCommandRegex().Match(request.Text);
             if (match.Success)
             {
-                var players = int.Parse(match.Groups[1].Value);
-                var intBotType = int.Parse(match.Groups[2].Value);
-                var spawnType = configService.TryGetSpawnType(intBotType);
-                var level = int.Parse(match.Groups[3].Value);
-                var duration = int.Parse(match.Groups[4].Value);
+                int percent = int.Parse(match.Groups[1].Value);
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId, 
                     TraderService.MiyakoTraderId, 
                     MessageType.NpcTraderMessage, 
-                    Locales.MIYAKOTRADERORDERNEWQUEST,
+                    Locales.MIYAKOTRADERTICKETNEWQUEST,
                     null
                 );
 
-                orderQuestController.CreateOrderQuest(sessionId, players, spawnType, level, duration);
+                var punishmentMulti = traderService.GetGlobalPunishmentMulti();
+                orderQuestController.CreateTicketQuest(sessionId, (int)Math.Ceiling(Math.Min(percent, punishmentMulti * 100)));
             }
             else
             {

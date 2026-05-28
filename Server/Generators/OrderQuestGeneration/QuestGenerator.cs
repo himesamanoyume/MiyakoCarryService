@@ -11,7 +11,7 @@ using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
-    public class OrderQuestGenerator(
+    public class QuestGenerator(
         RandomUtil randomUtil,
         OrderQuestRewardGenerator orderQuestRewardGenerator
     )
@@ -62,10 +62,14 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 
             for (int i = 0; i < players; i++)
             {
+#if DEBUG
+                var currentRequestedItemCount = randomUtil.RandInt(1, 2);;
+#else
                 var currentRequestedItemCount = randomUtil.RandInt(
                     (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * additionMulti * (1 + punishmentMulti)),
                     (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * additionMulti * (1 + punishmentMulti)) + 1
                     );
+#endif
 
                 var handoverItemCondition = new QuestCondition
                 {
@@ -74,7 +78,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                     ParentId = string.Empty,
                     DynamicLocale = true,
                     VisibilityConditions = [],
-                    Target = new ListOrT<string>([new (ItemTpl.MONEY_ROUBLES)], null),
+                    Target = new ListOrT<string>([new(ItemTpl.MONEY_ROUBLES)], null),
                     Value = currentRequestedItemCount * duration,
                     OnlyFoundInRaid = false,
                     IsEncoded = false,
@@ -83,6 +87,43 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             }
             questTemplate.Rewards = orderQuestRewardGenerator.GenerateReward(players, carryServiceLevel, traderId);
+            return questTemplate;
+        }
+
+        public RepeatableQuest GenerateTicketQuest(
+            int percent,
+            RepeatableQuest questTemplate
+        )
+        {
+            var order = Generate(percent, questTemplate);
+            return order;
+        }
+
+        private RepeatableQuest Generate(
+            int percent,
+            RepeatableQuest questTemplate
+        )
+        {
+            questTemplate.Conditions.AvailableForFinish = [];
+            #if DEBUG
+            var currentRequestedItemCount = percent;
+            #else
+            var currentRequestedItemCount = percent * TraderService.TicketPricePerPercent;
+            #endif
+            var handoverItemCondition = new QuestCondition
+            {
+                Id = new(),
+                Index = 0,
+                ParentId = string.Empty,
+                DynamicLocale = true,
+                VisibilityConditions = [],
+                Target = new ListOrT<string>([new(ItemTpl.MONEY_ROUBLES)], null),
+                Value = currentRequestedItemCount,
+                OnlyFoundInRaid = false,
+                IsEncoded = false,
+                ConditionType = "HandoverItem",
+            };
+            questTemplate.Conditions.AvailableForFinish.Add(handoverItemCondition);
             return questTemplate;
         }
     }
