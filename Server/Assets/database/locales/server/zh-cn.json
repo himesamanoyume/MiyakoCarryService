@@ -11,11 +11,12 @@
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "可用的 \"{0}\" 指令前缀:",
     "Mcs/SpawnTypeCommon": "普通玩家",
     "Mcs/MiyakoTraderOrderCommandHelp1": "mcs {0}\n下单指令:\nmcs {1} {{人数}} {{类型}} {{护航级别}} {{时间}}\n护航级别: 1~5\n时长: 整数, 单位为小时\n示例: mcs {2} 4 0 5 24\n代表下单4人护航，普通玩家类型，护航级别5，时长24小时，将收取4份24小时时长的卢布",
-    "Mcs/MiyakoTraderOrderCommandHelp2": "基准价格:\n普通玩家类型:\n护航级别1: {0} 卢布/小时\n护航级别2: {1} 卢布/小时\n护航级别3: {2} 卢布/小时\n护航级别4: {3} 卢布/小时\n护航级别5: {4} 卢布/小时\nBoss护航类型价格翻倍",
+    "Mcs/MiyakoTraderOrderCommandHelp2": "基准价格:\n普通玩家类型:\n护航级别1: {0} 卢布/小时\n护航级别2: {1} 卢布/小时\n护航级别3: {2} 卢布/小时\n护航级别4: {3} 卢布/小时\n护航级别5: {4} 卢布/小时",
     "Mcs/MiyakoTraderOrderCommandHelp3": "类型列表:\n",
     "Mcs/MiyakoTraderTicketCommandHelp1": "mcs {0}\n罚单指令:\nmcs {1} {{百分比值}}\n百分比值: 1~100%\n示例: mcs {2} 80\n代表接取一个免除80%涨价惩罚的罚单，上缴罚款后，将消除80%的涨价惩罚",
     "Mcs/MiyakoTraderTicketCommandHelp2": "基准价格:\n {0} 卢布/百分比",
     "Mcs/CurrentPriceIncrease": "当前永久涨价: {0}%",
     "Mcs/GenerateProfileError": "生成护航的 {0} 存档异常，已生成对应默认存档",
-    "Mcs/McsInventoryModeRagfairRefuse": "处于护航库存模式，无法在跳蚤市场上架交易单"
+    "Mcs/McsInventoryModeRagfairRefuse": "处于护航库存模式，无法在跳蚤市场上架交易单",
+    "Mcs/NewVersionNotify": "宫子护航店 检测到新版本: {0} ---> {1}"
 }

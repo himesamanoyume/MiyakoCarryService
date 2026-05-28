@@ -17,6 +17,7 @@ using BepInEx;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.Group;
 using UnityEngine.UI;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -87,7 +88,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
 
             _bigSurveyButton = _bigSurveyGameObject.transform.GetChild(0).gameObject;
             _bigSurveyButton.name = "BigSurveyButton";
-            _bigSurveyButton.GetComponentInChildren<LocalizedText>().LocalizationKey = "Big Survey";
+            _bigSurveyButton.GetComponentInChildren<LocalizedText>().LocalizationKey = Locales.BIGSURVEY;
 
             _bigSurveyNewInformation = _bigSurveyGameObject.transform.GetChild(1).gameObject;
             _bigSurveyNewNodes = _bigSurveyNewInformation.transform.GetChild(0).gameObject;
@@ -123,7 +124,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     }
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
-                    NotificationManagerClass.DisplayMessageNotification($"Total exception: {MiyakoCarryServicePlugin.LogBuffer.GetLogCount} ，text copied");
+                    NotificationManagerClass.DisplayMessageNotification(string.Format(Locales.BIGSURVEYNOTIFY.McsLocalized(), MiyakoCarryServicePlugin.LogBuffer.GetLogCount));
                     NewBigSurveyCount = 0;
                     _animatedToggle.ToggleSilent(false);
                 });

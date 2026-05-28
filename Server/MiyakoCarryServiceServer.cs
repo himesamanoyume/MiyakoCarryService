@@ -13,6 +13,8 @@ using SPTarkov.Server.Core.Utils;
 using System.Collections.Generic;
 using MiyakoCarryService.Server.Patches.Profile;
 using MiyakoCarryService.Server.Patches.Trader;
+using SPTarkov.Server.Core.Services;
+using MiyakoCarryService.Server.Utils;
 
 namespace MiyakoCarryService.Server
 {
@@ -21,6 +23,7 @@ namespace MiyakoCarryService.Server
         [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
         public sealed class MiyakoCarryServiceServerPreLoad(
             ConfigService configService,
+            ServerLocalisationService serverLocalisationService,
             ISptLogger<MiyakoCarryServiceServerPreLoad> logger
         ) : IOnLoad
         {
@@ -73,7 +76,7 @@ namespace MiyakoCarryService.Server
                         var latestVersion = new System.Version(match.Groups[1].Value.Trim());
                         if (latestVersion.CompareTo(currentVersion) > 0)
                         {
-                            logger.Success($"MiyakoCarryService New Version: {currentVersion} ---> {latestVersion}");
+                            logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
                         }
                     }
                 }
@@ -86,7 +89,7 @@ namespace MiyakoCarryService.Server
 
         [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
         public sealed class MiyakoCarryServiceServerPostLoad(
-            LocaleService localeService,
+            Services.LocaleService localeService,
             QuestService questService,
             TraderService traderService,
             ProfileService profileService,

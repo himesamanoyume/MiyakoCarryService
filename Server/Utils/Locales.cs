@@ -32,5 +32,6 @@ namespace MiyakoCarryService.Server.Utils
         public const string MIYAKOTRADERREFUND = "Mcs/MiyakoTraderRefund";
         public const string MIYAKOTRADERCOMPENSATION = "Mcs/MiyakoTraderCompensation";
         public const string MCSINVENTORYMODERAGFAIRREFUSE = "Mcs/McsInventoryModeRagfairRefuse";
+        public const string NEWVERSIONNOTIFY = "Mcs/NewVersionNotify";
     }
 }

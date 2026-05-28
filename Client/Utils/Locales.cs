@@ -96,6 +96,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string OPENMCSBOTPLAYERINVENTORY = "Mcs/OpenMcsBotPlayerInventory";
         public const string RETURNTOMAINCHAR = "Mcs/ReturnToMainChar";
         public const string MCSINVENTORYMODE = "Mcs/McsInventoryMode";
+        public const string BIGSURVEY = "Mcs/BigSurvey";
+        public const string BIGSURVEYNOTIFY = "Mcs/BigSurveyNotify";
         public const string RETURNTOMAINCHARREFUSE = "Mcs/ReturnToMainCharRefuse";
         public const string RETURNTOMAINCHARTIP = "Mcs/ReturnToMainCharTip";
         public const string RETURNTOMAINCHARNOWEAPON = "Mcs/ReturnToMainNoWeapon";
