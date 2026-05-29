@@ -21,17 +21,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
         protected Dictionary<Type, Func<bool>> _endActionMap;
         protected bool _haveCoverToShoot = false;
-        protected float _lastHoldPositionTime = 0f;
+        protected float _nextHoldPositionTime = 0f;
         protected float _goToCoverTime = 0f;
         protected CustomNavigationPoint _currentNavigationPoint = null;
-        protected float _lastPatrolTime = 0f;
-        protected float _lastGoToPointTime = 0f;
-        protected float _lastShootTime = 0f;
+        protected float _nextPatrolTime = 0f;
+        protected float _nextShootTime = 0f;
         protected float _nextWeaponSwitchTime = 0f;
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
-        protected float _lastVaultCheckTime = 0f;
-        protected float _lastJumpCheckTime = 0f;
+        protected float _nextVaultCheckTime = 0f;
+        protected float _nextJumpCheckTime = 0f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float JUMP_CHECK_INTERVAL = 1f;
         protected const float STUCK_JUMP_THRESHOLD = 1f;
@@ -44,8 +43,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float LOOTING_FINNISHED_COLDDOWN = 5f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float MELEE_CHECK_INTERVAL = 0.5f;
-        protected const float MELEE_ATTACK_DISTANCE = 8f;
-        protected const float LOW_AMMO_RATIO = 0.3f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -231,9 +228,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (_lastHoldPositionTime < Time.time)
+            if (_nextHoldPositionTime < Time.time)
             {
-                _lastHoldPositionTime = Time.time + 1f;
+                _nextHoldPositionTime = Time.time + 1f;
                 Vector3 leadPos;
 
                 if (McsBotPlayerData.LeadPlayer.HealthController == null)
@@ -494,16 +491,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual void TrySolveStuck()
         {
-            if (_lastVaultCheckTime < Time.time)
+            if (_nextVaultCheckTime < Time.time)
             {
-                _lastVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
+                _nextVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
                 if (ShouldTryVault())
                 {
                     if (!TryVault())
                     {
-                        if (_lastJumpCheckTime < Time.time)
+                        if (_nextJumpCheckTime < Time.time)
                         {
-                            _lastJumpCheckTime = Time.time + JUMP_CHECK_INTERVAL;
+                            _nextJumpCheckTime = Time.time + JUMP_CHECK_INTERVAL;
                             if (ShouldTryJump())
                             {
                                 TryJump();
@@ -723,9 +720,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            if (_lastShootTime < Time.time)
+            if (_nextShootTime < Time.time)
             {
-                _lastShootTime = Time.time + 3f;
+                _nextShootTime = Time.time + 3f;
                 if (BotOwner.BotLay.CanShootPos(BotOwner.Memory.GoalEnemy, true, false))
                 {
                     return true;

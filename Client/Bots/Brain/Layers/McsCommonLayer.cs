@@ -131,9 +131,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else
                 {
-                    if (_lastPatrolTime < Time.time)
+                    if (_nextPatrolTime < Time.time)
                     {
-                        _lastPatrolTime = Time.time + 8f;
+                        _nextPatrolTime = Time.time + 8f;
                         if (validPosition.HasValue)
                         {
                             BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
