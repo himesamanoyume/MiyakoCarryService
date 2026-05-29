@@ -313,11 +313,14 @@ namespace MiyakoCarryService.Fika
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                botOwner.TalkMsg(new McsMsg
+                if (botOwner.Memory.HaveEnemy)
                 {
-                    PhraseTrigger = EPhraseTrigger.OnFirstContact,
-                    Position = packet.Position
-                });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.OnFirstContact,
+                        Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
+                    });
+                }
             }
         }
 

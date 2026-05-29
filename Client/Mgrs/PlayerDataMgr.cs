@@ -124,7 +124,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         var closeAllLootData = new List<ItemData>();
                         foreach (var closeRootItem in closeRootItemDatas)
                         {
-                            closeAllLootData.AddRange(closeRootItem.ItemsInContainer);
+                            if (closeRootItem != null)
+                            {
+                                closeAllLootData.AddRange(closeRootItem.ItemsInContainer);
+                            }
                         }
 
                         mcsBotPlayerData.SetLootingTarget(closeAllLootData);
@@ -177,7 +180,10 @@ namespace MiyakoCarryService.Client.Mgrs
             if (_gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
-                datasList.AddRange(_datas);
+                if (_datas.Count > 0)
+                {
+                    datasList.AddRange(_datas);
+                }
                 int batchSize = Mathf.Clamp(Mathf.CeilToInt(_datas.Count / 10f), 8, 50);
                 var playerBatches = new List<List<BaseData>>();
                 for (int i = 0; i < _datas.Count; i += batchSize)

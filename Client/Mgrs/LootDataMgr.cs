@@ -108,7 +108,10 @@ namespace MiyakoCarryService.Client.Mgrs
             if (_gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
-                datasList.AddRange(_datas);
+                if (_datas != null)
+                {
+                    datasList.AddRange(_datas);
+                }
                 int batchSize = Mathf.Clamp(Mathf.CeilToInt(_datas.Count / 10f), 8, 50);
                 var lootBatches = new List<List<BaseData>>();
                 for (int i = 0; i < _datas.Count; i += batchSize)

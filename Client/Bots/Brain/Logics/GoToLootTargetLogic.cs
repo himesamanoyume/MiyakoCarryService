@@ -475,19 +475,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var pocketsSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
                 if (pocketsSlot.ContainedItem != null)
                 {
-                    pocketsSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    pocketsSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
                 }
 
                 var tacticalVestSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
                 if (tacticalVestSlot.ContainedItem != null)
                 {
-                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
                 }
 
                 var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
                 if (backpckSlot.ContainedItem != null)
                 {
-                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
                 }
 
                 allContainers = allContainers.Where(i => i.IsContainer).ToList();
