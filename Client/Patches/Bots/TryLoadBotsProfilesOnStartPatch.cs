@@ -22,6 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             await __result;
             McsMgr.IsHost = true;
+            TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
         }
     }
 }

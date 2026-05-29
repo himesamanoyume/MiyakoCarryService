@@ -31,6 +31,7 @@ namespace MiyakoCarryService.Fika
         public void InitMcsFika()
         {
             new ExtractPatch().Enable();
+            new OnLoadingProfilePacketReceivedPatch().Enable();
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
