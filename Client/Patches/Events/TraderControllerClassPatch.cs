@@ -43,8 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                             }
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                itemData.UpdateContainerInfoData();
-                                itemData.UnlockRefreshRootItemInteresting(mcsAILeadPlayer);
+                                GameLoop.Instance.StartCoroutine(itemData.UnlockRefreshRootItemInteresting(mcsAILeadPlayer));
                             }
                         }
                         catch (Exception e)

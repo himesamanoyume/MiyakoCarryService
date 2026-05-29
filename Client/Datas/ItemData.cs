@@ -29,15 +29,51 @@ namespace MiyakoCarryService.Client.Datas
             ItemType = ItemViewFactory.GetItemType(item.GetType());
         }
 
-        public abstract void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer);
-        public abstract void UnlockRefreshInteresting(McsAILeadPlayer mcsAILeadPlayer);
+        public virtual void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer, bool unlock)
+        {
+            UpdateContainerInfoData();
+            if (unlock)
+            {
+                _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
+            }
+
+            foreach (var itemData in ItemsInContainer)
+            {
+                if (itemData == null)
+                {
+                    continue;
+                }
+
+                if (itemData.Item.Id == Item.Id)
+                {
+                    continue;
+                }
+
+                if (this == itemData)
+                {
+                    continue;
+                }
+
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                if (unlock)
+                {
+                    _lootDataMgr.UnlockLootingTarget(lootData);
+                }
+                lootData.Refresh(mcsAILeadPlayer);
+                lootData.IsItemInContainer = true;
+            }
+        }
 
         public IEnumerator UnlockRefreshRootItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
-            yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
+            yield return null;
             try
             {
-                UnlockRefreshInteresting(mcsAILeadPlayer);
+                RefreshInteresting(mcsAILeadPlayer, true);
             }
             catch (Exception e)
             {

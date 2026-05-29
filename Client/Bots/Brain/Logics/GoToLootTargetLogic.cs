@@ -68,6 +68,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 _lastTimeCheckDistance = Time.time + 2f;
 
+                if (!mcsBotPlayerData.LootingTarget.IsLocked())
+                {
+                    mcsBotPlayerData.IsLooting = false;
+                    return;
+                }
+
                 var lootPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
                 var offset = BotOwner.Position - lootPos;
                 var distance = BotOwner.Position.McsSqrDistance(lootPos);
@@ -121,6 +127,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 mcsBotPlayerData.IsTaskRunning = true;
                 await Task.Delay(1000);
+                if (!mcsBotPlayerData.LootingTarget.IsLocked())
+                {
+                    return;
+                }
 
                 var player = BotOwner.GetPlayer;
                 var inventoryController = player.InventoryController;

@@ -1,7 +1,6 @@
 
 
 using System.Collections.Generic;
-using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -86,80 +85,10 @@ namespace MiyakoCarryService.Client.Datas
             IsInSecureContainerItem = false;
         }
 
-        public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
+        public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer, bool unlock)
         {
-            IsItemInContainer = false;
             Refresh(mcsAILeadPlayer);
-
-            if (ItemsInContainer == null)
-            {
-                ItemsInContainer = Item.GetAllDatas().ToList();
-            }
-
-            foreach (var itemData in ItemsInContainer)
-            {
-                if (itemData == null)
-                {
-                    continue;
-                }
-
-                if (itemData.Item.Id == Item.Id)
-                {
-                    continue;
-                }
-
-                if (this == itemData)
-                {
-                    continue;
-                }
-
-                if (itemData is not LootData lootData)
-                {
-                    continue;
-                }
-
-                lootData.Refresh(mcsAILeadPlayer);
-                IsItemInContainer = true;
-            }
-        }
-
-        public override void UnlockRefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
-        {
-            _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
-            IsItemInContainer = false;
-            Refresh(mcsAILeadPlayer);
-
-            if (ItemsInContainer == null)
-            {
-                ItemsInContainer = Item.GetAllDatas().ToList();
-            }
-
-            foreach (var itemData in ItemsInContainer)
-            {
-                if (itemData == null)
-                {
-                    continue;
-                }
-
-                if (itemData.Item.Id == Item.Id)
-                {
-                    continue;
-                }
-
-                if (this == itemData)
-                {
-                    continue;
-                }
-
-                if (itemData is not LootData lootData)
-                {
-                    continue;
-                }
-
-                _lootDataMgr.UnlockLootingTarget(lootData);
-                lootData.Refresh(mcsAILeadPlayer);
-                IsItemInContainer = true;
-            }
+            base.RefreshInteresting(mcsAILeadPlayer, unlock);
         }
 
         public void SetMoneyCurrency()
@@ -213,6 +142,11 @@ namespace MiyakoCarryService.Client.Datas
             {
                 return null;
             }
+        }
+
+        public bool IsLocked()
+        {
+            return _lootDataMgr.IsLockedLootingTarget(this) && _lootDataMgr.IsLockedLootingTargetRootTransform(RootTransform);
         }
     }
 }
