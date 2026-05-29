@@ -56,6 +56,11 @@ namespace MiyakoCarryService.Fika
 
         public void OnCommandPacketReceived(CommandPacket packet)
         {
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
             if (_handleActionsMap.TryGetValue(packet.CommandType, out var action))
             {
                 action(packet);
@@ -64,6 +69,11 @@ namespace MiyakoCarryService.Fika
 
         public void OnTalkPacketReceived(TalkMsgPacket packet)
         {
+            if (!FikaBackendUtils.IsClient)
+            {
+                return;
+            }
+
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
@@ -86,6 +96,11 @@ namespace MiyakoCarryService.Fika
 
         public void OnMcsBotPlayerConfigPacketReceived(McsBotPlayerConfigPacket packet)
         {
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
             var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
             fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
 
@@ -329,6 +344,11 @@ namespace MiyakoCarryService.Fika
 
         public void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
         {
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
             var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
             var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
@@ -348,6 +368,7 @@ namespace MiyakoCarryService.Fika
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
 
+                // 为了适配老版本Fika无法获取NetPeer，使用流量损耗更大的广播方式
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }

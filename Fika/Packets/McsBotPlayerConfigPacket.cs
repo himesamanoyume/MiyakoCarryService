@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Fika.Packets
         public override void Serialize(NetDataWriter writer)  
         {  
             base.Serialize(writer);
-            writer.Put(KeywordItemText);
+            writer.Put(KeywordItemText, 0);
             writer.PutUnmanaged(McsBotPlayerConfig);
         } 
     }

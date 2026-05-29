@@ -354,16 +354,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                var botOwner = mcsBotPlayer.AIData.BotOwner;
-                if (botOwner.Memory.HaveEnemy)
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    EventMgr.Notify(new CommandMgrHandleFikaEvent
-                    {
-                        McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandPacketType.ReportAboutEnemy,
-                        Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
-                    });
-                }
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.ReportAboutEnemy
+                });
             }
             else
             {

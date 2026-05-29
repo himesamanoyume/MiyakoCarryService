@@ -31,8 +31,8 @@ namespace MiyakoCarryService.Fika.Packets
             base.Serialize(writer);
             writer.PutEnum(PhraseTrigger);
             writer.PutNullableUnmanaged(Position);
-            writer.Put(Key);
-            writer.Put(Key2);
+            writer.Put(Key, 0);
+            writer.Put(Key2, 0);
         } 
     }
 }
