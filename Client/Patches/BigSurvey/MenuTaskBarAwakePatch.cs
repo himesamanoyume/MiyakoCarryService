@@ -101,27 +101,29 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                 {
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                     var stringBuilder = new StringBuilder();
-                    stringBuilder.Append("Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
-                    stringBuilder.Append("EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
-                        .Append("SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
-                        .Append("System: ").Append(SystemInfo.operatingSystem).Append("\n")
-                        .Append("CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("Core)\n")
-                        .Append("Memory: ").Append(SystemInfo.systemMemorySize).Append(" MB\n")
-                        .Append("GPU: ").Append(" ").Append(SystemInfo.graphicsDeviceName).Append(" (").Append(SystemInfo.graphicsMemorySize).Append(" MB Memroy)\n")
-                        .Append("All Client Mode:\n")
+                    stringBuilder.Append("- Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
+                    stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
+                        .Append("- SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
+                        .Append("- System: ").Append(SystemInfo.operatingSystem).Append("\n")
+                        .Append("- CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("Core)\n")
+                        .Append("- Memory: ").Append(SystemInfo.systemMemorySize).Append(" MB\n")
+                        .Append("- GPU: ").Append(" ").Append(SystemInfo.graphicsDeviceName).Append(" (").Append(SystemInfo.graphicsMemorySize).Append(" MB Memroy)\n")
+                        .Append("- All Client Mod:\n")
                         .Append(string.Join(", ", Chainloader.PluginInfos.Values.Select(x => x.Instance)
                                 .Where(plugin => plugin != null)
                                 .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => p.Info.Metadata.Name)
                                 .ToArray())).Append("\n")
-                        .Append("All Server Server:\n")
+                        .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => x.Name))).Append('\n')
-                        .Append("Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
+                        .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
+                    stringBuilder.Append("```log\n");
                     foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())
                     {
                         stringBuilder.Append(logEntry.Condition).Append("\n");
                         stringBuilder.Append(logEntry.StackTrace).Append("\n");
                     }
+                    stringBuilder.Append("```");
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
                     NotificationManagerClass.DisplayMessageNotification(string.Format(Locales.BIGSURVEYNOTIFY.McsLocalized(), MiyakoCarryServicePlugin.LogBuffer.GetLogCount));
