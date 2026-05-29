@@ -40,7 +40,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float SPHERECAST_RADIUS = 0.1f;
         protected const float SPHERECAST_DISTANCE = 2f;
         protected const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
-        protected const float LOOTING_CHECK_INTERVAL = 10f;
+        protected const float ENTER_COMMON_LOOTING_COLDDOWN = 10f;
+        protected const float LOOTING_FINNISHED_COLDDOWN = 5f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float MELEE_CHECK_INTERVAL = 0.5f;
         protected const float MELEE_ATTACK_DISTANCE = 8f;
@@ -624,7 +625,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 CheckStuck();
             }
-            return !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting;
+
+            if (!McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
+            {
+                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COLDDOWN;
+                return true;
+            }
+            return false;
         }
 
         protected virtual bool ShouldShootImmediately()

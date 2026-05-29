@@ -24,15 +24,7 @@ namespace MiyakoCarryService.Client.Datas
         public LootData LootingTarget
         {
             get => _lootingTarget;
-            set
-            {
-                if (_lootingTarget != null)
-                {
-                    _lootDataMgr.UnlockLootingTarget(_lootingTarget);
-                    _lootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
-                }
-                _lootingTarget = value;
-            }
+            set => _lootingTarget = value;
         }
         public bool IsLooting
         {
@@ -148,13 +140,6 @@ namespace MiyakoCarryService.Client.Datas
                 LootingTarget = lootData;
                 return;
             }
-            
-            UnlockLootingTarget();
-        }
-
-        public void UnlockLootingTarget()
-        {
-            IsLooting = false;
         }
     }
 }

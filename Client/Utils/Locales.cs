@@ -26,7 +26,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string BLOCKITEMTYPEGOGGLES = "Mcs/BlockItemTypeGoggles";
         public const string BLOCKITEMTYPERIG = "Mcs/BlockItemTypeRig";
         public const string BLOCKITEMTYPEARMOR = "Mcs/BlockItemTypeArmor";
-        public const string BLOCKITEMTYPEEQUIPMENT = "Mcs/BlockItemTypeEquipment";
+        public const string BLOCKITEMTYPEHEADPHONE = "Mcs/BlockItemTypeHeadphone";
+        public const string BLOCKITEMTYPETACTICALVEST = "Mcs/BlockItemTypeTacticalVest";
         public const string BLOCKITEMTYPEGRENADE = "Mcs/BlockItemTypeGrenade";
         public const string BLOCKITEMTYPEINFO = "Mcs/BlockItemTypeInfo";
         public const string BLOCKITEMTYPEKEYS = "Mcs/BlockItemTypeKeys";

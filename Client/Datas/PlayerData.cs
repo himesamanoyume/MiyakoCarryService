@@ -29,7 +29,6 @@ namespace MiyakoCarryService.Client.Datas
                 {
                     return null;
                 }
-                
             }
         }
 
@@ -39,6 +38,39 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
+        {
+            if (ItemsInContainer == null)
+            {
+                ItemsInContainer = Item.GetAllDatas().ToList();
+            }
+
+            foreach (var itemData in ItemsInContainer)
+            {
+                if (itemData == null)
+                {
+                    continue;
+                }
+
+                if (itemData.Item.Id == Item.Id)
+                {
+                    continue;
+                }
+
+                if (this == itemData)
+                {
+                    continue;
+                }
+
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                lootData.Refresh(mcsAILeadPlayer);
+            }
+        }
+
+        public override void UnlockRefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             if (ItemsInContainer == null)

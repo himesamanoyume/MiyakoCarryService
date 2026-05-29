@@ -30,13 +30,14 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         public abstract void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer);
+        public abstract void UnlockRefreshInteresting(McsAILeadPlayer mcsAILeadPlayer);
 
-        public IEnumerator RefreshRootItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
+        public IEnumerator UnlockRefreshRootItemInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             yield return new WaitForSeconds(UnityEngine.Random.Range(1f, 3f));
             try
             {
-                RefreshInteresting(mcsAILeadPlayer);
+                UnlockRefreshInteresting(mcsAILeadPlayer);
             }
             catch (Exception e)
             {

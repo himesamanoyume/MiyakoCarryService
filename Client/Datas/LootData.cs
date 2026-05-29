@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Datas
         public int ContainerGridCount = 0;
         public int MaxSingleGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
-        public bool IsEquipableContainer => ItemType == EItemType.Backpack || ItemType == EItemType.Equipment;
+        public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && Item is not HeadphonesItemClass);
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
@@ -87,6 +87,43 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         public override void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
+        {
+            IsItemInContainer = false;
+            Refresh(mcsAILeadPlayer);
+
+            if (ItemsInContainer == null)
+            {
+                ItemsInContainer = Item.GetAllDatas().ToList();
+            }
+
+            foreach (var itemData in ItemsInContainer)
+            {
+                if (itemData == null)
+                {
+                    continue;
+                }
+
+                if (itemData.Item.Id == Item.Id)
+                {
+                    continue;
+                }
+
+                if (this == itemData)
+                {
+                    continue;
+                }
+
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                lootData.Refresh(mcsAILeadPlayer);
+                IsItemInContainer = true;
+            }
+        }
+
+        public override void UnlockRefreshInteresting(McsAILeadPlayer mcsAILeadPlayer)
         {
             _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             IsItemInContainer = false;

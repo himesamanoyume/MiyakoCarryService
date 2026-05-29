@@ -63,7 +63,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public void CheckBlockItem()
         {
-            IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, LootData.ItemType);
+            IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, LootData);
         }
 
         public bool IsShouldTakeContainer(BotOwner botOwner)

@@ -228,7 +228,7 @@ namespace MiyakoCarryService.Client
                     try
                     {
                         kvp.Key.UpdateContainerInfoData();
-                        kvp.Key.RefreshRootItemInteresting(kvp.Value);
+                        kvp.Key.UnlockRefreshRootItemInteresting(kvp.Value);
                     }
                     catch (Exception e)
                     {

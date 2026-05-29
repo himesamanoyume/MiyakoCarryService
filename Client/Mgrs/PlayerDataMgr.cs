@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         var closeAllLootData = new List<ItemData>();
                         foreach (var closeRootItem in closeRootItemDatas)
                         {
-                            if (closeRootItem != null)
+                            if (closeRootItem.ItemsInContainer != null)
                             {
                                 closeAllLootData.AddRange(closeRootItem.ItemsInContainer);
                             }

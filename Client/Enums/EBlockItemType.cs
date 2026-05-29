@@ -24,29 +24,31 @@ namespace MiyakoCarryService.Client.Enums
         Rig = 64,
         [Description(Locales.BLOCKITEMTYPEARMOR)]
         Armor = 128,
-        [Description(Locales.BLOCKITEMTYPEEQUIPMENT)]
-        Equipment = 256,
+        [Description(Locales.BLOCKITEMTYPEHEADPHONE)]
+        Headphone = 256,
+        [Description(Locales.BLOCKITEMTYPETACTICALVEST)]
+        TacticalVest = 512,
         [Description(Locales.BLOCKITEMTYPEGRENADE)]
-        Grenade = 512,
+        Grenade = 1024,
         [Description(Locales.BLOCKITEMTYPEINFO)]
-        Info = 1024,
+        Info = 2048,
         [Description(Locales.BLOCKITEMTYPEKEYS)]
-        Keys = 2048,
+        Keys = 4096,
         [Description(Locales.BLOCKITEMTYPEKNIFE)]
-        Knife = 4096,
+        Knife = 8192,
         [Description(Locales.BLOCKITEMTYPEMAGAZINE)]
-        Magazine = 8192,
+        Magazine = 16384,
         [Description(Locales.BLOCKITEMTYPEMEDS)]
-        Meds = 16384,
+        Meds = 32768,
         [Description(Locales.BLOCKITEMTYPEMOD)]
-        Mod = 32768,
+        Mod = 65536,
         [Description(Locales.BLOCKITEMTYPESPECIAL)]
-        Special = 65536,
+        Special = 131072,
         [Description(Locales.BLOCKITEMTYPEWEAPON)]
-        Weapon = 131072,
+        Weapon = 262144,
         [Description(Locales.BLOCKITEMTYPEOTHER)]
-        Other = 262144,
+        Other = 524288,
         [Description(Locales.BLOCKITEMTYPEALL)]
-        All = Ammo | Barter | Container | Food | Backpack | Goggles | Rig | Armor | Equipment | Grenade | Info | Keys | Knife | Magazine | Meds | Mod | Special | Weapon | Other
+        All = Ammo | Barter | Container | Food | Backpack | Goggles | Rig | Armor | Headphone | TacticalVest | Grenade | Info | Keys | Knife | Magazine | Meds | Mod | Special | Weapon | Other
     }
 }

@@ -20,9 +20,9 @@ namespace MiyakoCarryService.Client.Utils
             return stringTemplateId == CommonId.DefaultInventory;
         }
 
-        public static bool IsBlockItem(EBlockItemType blockItemType, EItemType itemType)
+        public static bool IsBlockItem(EBlockItemType blockItemType, LootData lootData)
         {
-
+            var itemType = lootData.ItemType;
             if (blockItemType == 0)
             {
                 return false;
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Client.Utils
                 EItemType.Goggles => blockItemType.HasFlag(EBlockItemType.Goggles),
                 EItemType.Rig => blockItemType.HasFlag(EBlockItemType.Rig),
                 EItemType.Armor => blockItemType.HasFlag(EBlockItemType.Armor),
-                EItemType.Equipment => blockItemType.HasFlag(EBlockItemType.Equipment),
+                EItemType.Equipment => lootData.Item is HeadphonesItemClass ? blockItemType.HasFlag(EBlockItemType.Headphone) : blockItemType.HasFlag(EBlockItemType.TacticalVest),
                 EItemType.Grenade => blockItemType.HasFlag(EBlockItemType.Grenade),
                 EItemType.Info => blockItemType.HasFlag(EBlockItemType.Info),
                 EItemType.Keys => blockItemType.HasFlag(EBlockItemType.Keys),

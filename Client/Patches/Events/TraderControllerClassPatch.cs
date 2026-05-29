@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
                                 itemData.UpdateContainerInfoData();
-                                itemData.RefreshRootItemInteresting(mcsAILeadPlayer);
+                                itemData.UnlockRefreshRootItemInteresting(mcsAILeadPlayer);
                             }
                         }
                         catch (Exception e)
