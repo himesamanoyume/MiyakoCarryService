@@ -310,16 +310,6 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
-
-            foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
-            {
-                var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    continue;
-                }
-                SubtitlesMgr.CreateSubTitle(mcsBotPlayer.Profile);
-            }
         }
 
         protected override void OnRaidEnded()

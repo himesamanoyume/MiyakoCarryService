@@ -193,6 +193,11 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 talkContent = action(talkContent, msg, mcsLeadPlayer);
             }
+
+            if (!_subTitles.ContainsKey(mcsBotPlayer.Profile.Id))
+            {
+                CreateSubTitle(mcsBotPlayer.Profile);
+            }
             
             if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))
             {
