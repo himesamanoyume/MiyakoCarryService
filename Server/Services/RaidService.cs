@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public IEnumerable<MongoId> GetMcsBotPlayerIds(MongoId mcsLeadPlayerId, SideType side)
+        public IEnumerable<MongoId> GetMySquadMcsBotPlayerIds(MongoId mcsLeadPlayerId, SideType side)
         {
             if (_saveLock is null)
             {

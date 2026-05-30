@@ -146,7 +146,7 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<List<MongoID>> GetMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
+        public static async Task<List<MongoID>> GetMySquadMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
         {
             var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);
             

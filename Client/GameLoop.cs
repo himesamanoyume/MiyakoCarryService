@@ -166,6 +166,7 @@ namespace MiyakoCarryService.Client
             Reset();
             if (_updateDebouncer != null)
             {
+                _updateDebouncer.Flush();
                 _updateDebouncer.Clear();
             }
             _updateDebouncer = null;

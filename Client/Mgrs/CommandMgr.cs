@@ -1,5 +1,4 @@
 
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,44 +42,28 @@ namespace MiyakoCarryService.Client.Mgrs
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         private List<MongoID> _mySquadMcsBotPlayerIds = new();
-        private ConcurrentDictionary<MongoID, Player> _mcsBotPlayers = new();
-        // public Action<Player, ECommandPacketType, Vector3?> HandleFikaEvent = null;
+        private ConcurrentDictionary<MongoID, Player> _mySquadMcsBotPlayers = new();
 
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            TasksExtensions.HandleExceptions(GetMcsBotPlayerIds());
+            TasksExtensions.HandleExceptions(GetMySquadMcsBotPlayerIds());
             _gamePlayerOwner = null;
         }
 
-        private async Task GetMcsBotPlayerIds()
+        private async Task GetMySquadMcsBotPlayerIds()
         {
-            _mySquadMcsBotPlayerIds = await McsRequestHandler.GetMcsBotPlayerIds(new()
+            _mySquadMcsBotPlayerIds = await McsRequestHandler.GetMySquadMcsBotPlayerIds(new()
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
-
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
-            {
-                foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                {
-                    var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                    if (mcsBotPlayer == null)
-                    {
-                        continue;
-                    }
-                    mcsBotPlayer.Profile.Info.GroupId = "Fika";
-                    mcsBotPlayer.Profile.Info.TeamId = "Fika";
-                }
-            }
-
         }
 
         protected sealed override void OnRaidEnded()
         {
             base.OnRaidEnded();
             _mySquadMcsBotPlayerIds.Clear();
-            _mcsBotPlayers.Clear();
+            _mySquadMcsBotPlayers.Clear();
             _gamePlayerOwner = null;
         }
 
@@ -99,16 +82,31 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
         {
-            return _mcsBotPlayers.AddOrUpdate(
+            return _mySquadMcsBotPlayers.AddOrUpdate(
                 mcsBotPlayerId,
-                id => Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id),
+                id =>
+                {
+                    var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    {
+                        mcsBotPlayer.Profile.Info.GroupId = "Fika";
+                        mcsBotPlayer.Profile.Info.TeamId = "Fika";
+                    }
+                    return mcsBotPlayer;
+                },
                 (id, oldPlayer) =>
                 {
                     if (oldPlayer != null)
                     {
                         return oldPlayer;
                     }
-                    return Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
+                    var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    {
+                        mcsBotPlayer.Profile.Info.GroupId = "Fika";
+                        mcsBotPlayer.Profile.Info.TeamId = "Fika";
+                    }
+                    return mcsBotPlayer;
                 });
         }
 

@@ -18,10 +18,6 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
-
-        private HashSet<MongoID> _mcsBotPlayerIds = new();
-
-        // _allMcsBotPlayerIdInRaid 作为队友高亮的必须数据，每个玩家都会进行获取
         private List<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
@@ -38,8 +34,6 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
         }
 
-        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
-
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAILeadPlayer mcsAILeadPlayer)
         {
             if (!_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
@@ -55,7 +49,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
-            _mcsBotPlayerIds.Add(mcsBotPlayerId);
             _mcsAILeadPlayers[mcsLeadPlayerId] = mcsAILeadPlayer;
         }
 
@@ -131,7 +124,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public bool IsMcsBotPlayer(MongoID mcsBotPlayerId)
         {
-            return _mcsBotPlayerIds.Contains(mcsBotPlayerId);
+            return _allMcsBotPlayerIdInRaid.Contains(mcsBotPlayerId);
         }
 
         public bool IsMyMcsBotPlayer(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
@@ -273,6 +266,19 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public List<MongoID> GetAllMcsBotPlayerIdInRaid()
         {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !IsHost)
+            {
+                foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
+                {
+                    var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(mcsBotPlayerId);
+                    if (mcsBotPlayer == null)
+                    {
+                        continue;
+                    }
+                    mcsBotPlayer.Profile.Info.GroupId = "Fika";
+                    mcsBotPlayer.Profile.Info.TeamId = "Fika";
+                }
+            }
             return _allMcsBotPlayerIdInRaid;
         }
 
@@ -315,12 +321,15 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            _friendlyFireDebouncer.Flush();  
+            if (_friendlyFireDebouncer != null)
+            {
+                _friendlyFireDebouncer.Flush();  
+                _friendlyFireDebouncer.Clear();
+            }
             _friendlyFireDebouncer = null; 
             _mcsDeadBotPlayerIds.Clear();
             _mcsSquadDict.Clear();
             _mcsLeadPlayerIds.Clear();
-            _mcsBotPlayerIds.Clear();
             _mcsAILeadPlayers.Clear();
             _allMcsBotPlayerIdInRaid.Clear();
             McsLeadPlayerConfigs.Clear();
