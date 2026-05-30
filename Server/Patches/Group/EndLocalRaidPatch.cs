@@ -23,12 +23,10 @@ namespace MiyakoCarryService.Server.Patches.Group
         public static void Prefix(MongoId sessionId, EndLocalRaidRequestData request)
         {
             var isTransfer = request.Results.IsMapToMapTransfer();
-            // System.Console.WriteLine($"[Mcs-Debug] 本次战局结束, 撤离状态: {request.Results.Result}");
             if (isTransfer)
             {
                 return;
             }
-            // System.Console.WriteLine($"[Mcs-Debug] 进行护航小队清理");
             var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
             raidController.ClearGroupMember(sessionId);
         }

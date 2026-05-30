@@ -164,9 +164,15 @@ namespace MiyakoCarryService.Client
         private void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             Reset();
-            _updateDebouncer.Clear();
+            if (_updateDebouncer != null)
+            {
+                _updateDebouncer.Clear();
+            }
             _updateDebouncer = null;
-            _loadedMcsLeadPlayer.Clear();
+            if (_loadedMcsLeadPlayer != null)
+            {
+                _loadedMcsLeadPlayer.Clear();
+            }
         }
 
         private void Reset()

@@ -269,10 +269,13 @@ namespace MiyakoCarryService.Client.Mgrs
                     _gameLoop.StopCoroutine(_coroutine);
                 }
                 _textField.text = $"<b>{_mcsBotPlayerProfile.Nickname}</b>: " + msg;
-                SubtitlesView.ShowGameObject();
-                _colddown = Time.time + 2f;
-                _lastPhraseTrigger = talkContentType;
-                _coroutine = _gameLoop.StartCoroutine(Hide(4f));
+                if (SubtitlesView != null)
+                {
+                    SubtitlesView.ShowGameObject();
+                    _colddown = Time.time + 2f;
+                    _lastPhraseTrigger = talkContentType;
+                    _coroutine = _gameLoop.StartCoroutine(Hide(4f));
+                }
             }
 
             public string CurrentMsg()
@@ -283,8 +286,11 @@ namespace MiyakoCarryService.Client.Mgrs
             public IEnumerator Hide(float time)
             {
                 yield return new WaitForSeconds(time);
-                SubtitlesView.HideGameObject();
-                _textField.text = string.Empty;
+                if (SubtitlesView != null)
+                {
+                    SubtitlesView.HideGameObject();
+                    _textField.text = string.Empty;
+                }
             }
         }
     }
