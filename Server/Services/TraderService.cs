@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Server.Services
 
         private async Task LoadTrader()
         {
-            var iconPath = System.IO.Path.Join(_traderFolderDir, "miyako_halo.jpg");
+            var iconPath = System.IO.Path.Join(_traderFolderDir, $"{MiyakoTraderId}.jpg");
             var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderFolderDir, "base.json");
             imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
             AddTraderWithEmptyAssortToDb(traderBase);

@@ -1,7 +1,9 @@
 <div>
 <h1>
-    <img src="favicon.jpg" align="right" style="border-radius: 30px;">
-    Miyako Carry Service<br>
+    <p>
+        <img src="./Server/Assets/database/traders/6952ced4bcc1dd1e3c80dfcb/6952ced4bcc1dd1e3c80dfcb.jpg" align="right" style="border-radius: 30px;">
+        Miyako Carry Service<br>
+    </p>
 </h1>
 
 [简体中文](README.md) | English
