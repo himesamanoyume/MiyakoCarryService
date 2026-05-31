@@ -17,15 +17,15 @@
 
 ### 预览
 
-![tutorial](./Preview/tutorial.png)
+![tutorial](./Preview/tutorial.webp)
 
-![fika](./Preview/fika.png)
+![fika](./Preview/fika.webp)
 
-![custombottype](./Preview/custombottype.png)
+![custombottype](./Preview/custombottype.webp)
 
-![customspawntype](./Preview/customspawntype.png)
+![customspawntype](./Preview/customspawntype.webp)
 
-![mcsinventorymode](./Preview/mcsinventorymode.png)
+![mcsinventorymode](./Preview/mcsinventorymode.webp)
 
 ### 鸣谢
 

@@ -10,7 +10,7 @@ Supports full customization of `McsBotPlayer` equipment through Mcs Inventory Mo
 
 ![Fika][id-fika]
 
-[id-fika]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/fika.png 'Fika'
+[id-fika]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/fika.webp 'Fika'
 
 In Fika multiplayer, each player can have their own `McsBotPlayer` squad.
 
@@ -18,7 +18,7 @@ In Fika multiplayer, each player can have their own `McsBotPlayer` squad.
 
 ![custombottype][id-custombottype]
 
-[id-custombottype]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/custombottype.png 'CustomBotType'
+[id-custombottype]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/custombottype.webp 'CustomBotType'
 
 Allows any type of AI to become your teammate, even Bosses
 
@@ -26,7 +26,7 @@ You can even generate AI types provided by third-party mods such as [Black Divis
 
 ![customspawntype][id-customspawntype]
 
-[id-customspawntype]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/customspawntype.png 'CustomSpawnType'
+[id-customspawntype]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/customspawntype.webp 'CustomSpawnType'
 
 ## Tutorial
 
@@ -45,7 +45,7 @@ Mcs mimics a carry service in the gaming industry. In this process, you need to 
 
 ![totorial][id-totorial]
 
-[id-totorial]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/tutorial.png 'How To Generate McsBotPlayer'
+[id-totorial]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/tutorial.webp 'How To Generate McsBotPlayer'
 
 _Currently Mcs does not provide indefinite service. When the service period you set expires, `McsBotPlayer` will automatically delete the friend._
 
@@ -61,7 +61,7 @@ _Currently Mcs does not provide indefinite service. When the service period you 
 6. When entering Mcs Inventory Mode, the Miyako trader will provide all items for purchase at 1 ruble
 7. To return to the main character, there are two ways: one is to right-click on the `McsBotPlayer` through the `Invite to group` interface again and select `RETURN TO MAIN CHARACTER`; the other is to directly click the green Mcs Inventory Mode button on the bottom bar, which can also return to the main character.
 
-![McsInventoryMode](https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/mcsinventorymode.png)
+![McsInventoryMode](https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/mcsinventorymode.webp)
 
 _1. Mcs Inventory Mode modifies the `McsBotPlayer`'s equipment only in PMC mode. As is well known, PMC mode and SCAV mode are two different characters. According to game settings, you cannot control the SCAV character's equipment, so Mcs will also maintain this setting._
 
