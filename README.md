@@ -1,7 +1,7 @@
 
 <div>
 <h1>
-    <img src=".\Server\Assets\database\traders\6952ced4bcc1dd1e3c80dfcb\miyako_halo.jpg" align="right" style="max-width: 180px; max-height: 180px; border-radius: 30px;">
+    <img src="favicon.jpg" align="right" style="border-radius: 30px;">
     Miyako Carry Service<br>
 </h1>
 
