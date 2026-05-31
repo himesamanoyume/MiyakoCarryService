@@ -946,32 +946,6 @@
         <span style="font-size: 20px;"><b>宫子护航店</b> (MiyakoCarryService) 是一个生成AI队友的模组，以高兼容性为目标，允许Fika联机使用，允许所有联机玩家使用各自的护航配置参数进行生成，允许护航使用SAIN的战斗层级。</span>
     </p>
     &nbsp;&nbsp;
-    <div style="background-color: var(--body-bg-color);box-shadow: 3px 0 0 0 #d85959 inset; margin: 10px 0 0 0;padding: 5px;">
-        <ol class="list-paddingleft-2">
-            <li>
-                <p><b>本模组目前仍处于究极早期测试阶段（Early Access），暂时仅在我的<span style="color: rgb(192, 0, 0);">Discord频道</span>里发布，属于小规模测试，回复后可见。</b>因为本模组的定位是高兼容性，那我自然没那么多精力去把别的模组一个一个试，所以才需要有帕鲁帮我试，等到模组功能基本稳定后才会公开发布</p>
-            </li>
-            <li>
-                <p>至于为何先发在Discord里，首先Oddba帖子刷新一周后除非再次刷新否则就没法编辑内容，对于模组早期版本可能随时想要更新来说并不方便，更别说每层楼只能显示100个回复，对于问题收集十分麻烦</p>
-            </li>
-            <li>
-                <p>并且我本人不希望过多被动接收模组相关的讯息，如果开的是QQ群，那我可能要不停地收到各种人发的消息、问题，我只希望在想看的时候才看</p>
-            </li>
-            <li>
-                <p>本模组目标是免费版开源并上架Forge，看情况以后可能会开放给国际友人进来交流，所以国内社区平台基本难以胜任</p>
-            </li>
-            <li>
-                <p>Discord还可以关联爱发电等账号，对于赞助者来说上身份标识更方便，而且Discord的可玩性比QQ群啥的高出不止一个档次，很利好开发者做各种定制化</p>
-            </li>
-            <li>
-                <p>因此Discord是介于Oddba和Q群之间十分完美的选择，至于科学上网问题还请各位自己解决，因为这就是我设下的一个初步的门槛机制</p>
-            </li>
-            <li>
-                <p>宫子护航店 是免费的，如果您为此付了钱，说明您被骗了，请举报卖家并退款</p>
-            </li>
-        </ol>
-    </div>
-    &nbsp;&nbsp;
     <p><span style="font-size: 25px;"><strong>食用方式</strong></span></p>
     <img src="https://ods5.oddba.cn/user_files/23687/bbs/35529095_1776484381.png"/>
     <img src="https://ods5.oddba.cn/user_files/23687/bbs/24108994_1776483836.png"/>
@@ -990,10 +964,10 @@
     
     <ul style="list-style-type: disc;">
         <li>
-            <p>Q: 与 FriendlyPMC (PitFireTeam) 相比有何区别、有什么特色</p>
+            <p>Q: 宫子护航店 有什么功能</p>
         </li>
         <li>
-            <p>A: FriendlyPMC 可以随意带入指定数量的AI队友进入战局（好像？），但反正 Mcs 在Pmc模式下最大仅支持4位，Scav模式下最大仅支持3位，符合原版组队设定；FriendlyPMC 功能更完善，比如能对AI队友下达指令，修改AI队友的装备，<del>这些 Mcs 都还不支持，但这只是迟早的事，不要想着一开始 Mcs 就能做到尽善尽美，再怎么说 SAIN 和 FriendlyPMC 都是开发了数年的模组；</del>Mcs 已经基本追赶上了。<b>FriendlyPMC 不主动适配 Fika ，Mcs 会主动适配 Fika</b>；<b>FriendlyPMC 无法使用 SAIN 的战斗层级，而 Mcs 护航可以</b>。<b>FriendlyPMC 无法轻易适配其他AI Boss，而 Mcs 可以轻易适配</b>；<b>FriendlyPMC 无法生成其他Mod的AI类型，而 Mcs 支持生成第三方Mod的AI类型</b>，因此你将可以通过 Mcs 做到...</p>
+            <p>A: 支持通过护航库存模式完全自定义护航的装备、支持生成任意类型的AI作为护航，甚至可以是其他Mod提供的AI类型、支持护航拾取指定战利品、支持通过指令系统命令护航、支持护航使用SAIN的战斗逻辑、全部功能支持Fika联机使用</p>
         </li>
         &nbsp;&nbsp;
         <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/29648841_1776483848.png"/></p>
@@ -1001,14 +975,6 @@
         &nbsp;&nbsp;
         <p><img src="https://ods5.oddba.cn/user_files/23687/bbs/35371127_1771827285.png"/></p>
         <p style="text-align: center;">使用 《WTT - Black Division Home》 生成的黑色军团小队</p>
-    </ul>
-    <ul style="list-style-type: disc;">
-        <li>
-            <p>Q: 其他兼容性</p>
-        </li>
-        <li>
-            <p>A: 目前是只测试了 SAIN、Fika 兼容，LootingBots 、Questing Bot 这些其他AI模组没测试过</p>
-        </li>
     </ul>
     <p>
         <span style="font-size: 25px;"><strong>服务端</strong></span>
@@ -1033,8 +999,24 @@
             width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
-                    <td>目前预先写有一些配置项，但是当前版本的所有配置项均不会生效</td>
-                    <td></td>
+                    <td>开启掠夺</td>
+                    <td>护航是否会尝试掠夺战利品</td>
+                </tr>
+                <tr>
+                    <td>价值阈值</td>
+                    <td>小于此价值阈值的战利品会被过滤</td>
+                </tr>
+                <tr>
+                    <td>战利品名称关键词</td>
+                    <td>关键词为物品的完整名称或缩写名称中所含有的文字，支持使用“||”或“,”或“，”进行分割查找多个关键词</td>
+                </tr>
+                <tr>
+                    <td>掠夺关键词战利品</td>
+                    <td>护航是否会尝试掠夺关键词战利品</td>
+                </tr>
+                <tr>
+                    <td>屏蔽物品类型</td>
+                    <td>支持全选、全不选：子弹、交换品、情报类、容器、食物、背包、护目镜、口袋、胸挂、背心、耳机、手雷、钥匙、近战武器、弹匣、医疗品、配件、特殊道具、枪械、其他</td>
                 </tr>
             </tbody>
         </table>
@@ -1046,8 +1028,64 @@
             width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
-                    <td>打开指令菜单快捷键</td>
-                    <td></td>
+                    <td>指令菜单快捷键</td>
+                    <td>自行绑定</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>单人指令</p>
+        <table style="margin: 15px;
+            width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>报告敌人方位</td>
+                    <td>若护航此时正在交战，命令护航报告已知的敌人方位</td>
+                </tr>
+                <tr>
+                    <td>集结</td>
+                    <td>若护航此时不处于交战，命令护航跟随老板</td>
+                </tr>
+                <tr>
+                    <td>前往</td>
+                    <td>若护航此时不处于交战，命令护航前往指定地点</td>
+                </tr>
+                <tr>
+                    <td>驻守</td>
+                    <td>若护航此时不处于交战，命令护航停留在原地</td>
+                </tr>
+                <tr>
+                    <td>强制传送</td>
+                    <td>清除护航仇恨、并尝试使其传送至当前位置</td>
+                </tr>
+                <tr>
+                    <td>打开背包</td>
+                    <td>远程打开护航背包，用于转移其拾取到的战利品</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>全队指令</p>
+        <table style="margin: 15px;
+            width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>全队报告敌人方位</td>
+                    <td>若队伍中有护航此时正在交战，命令护航报告已知的敌人方位</td>
+                </tr>
+                <tr>
+                    <td>全队集结</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航跟随老板</td>
+                </tr>
+                <tr>
+                    <td>全队前往</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航前往指定地点</td>
+                </tr>
+                <tr>
+                    <td>全队驻守</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航停留在原地</td>
+                </tr>
+                <tr>
+                    <td>全队强制传送</td>
+                    <td>清除全队护航仇恨、并尝试使其全部传送至当前位置</td>
                 </tr>
             </tbody>
         </table>
@@ -1059,18 +1097,225 @@
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
                     <td>护航高亮</td>
-                    <td>使战局内所有护航高亮，已适配Fika</td>
+                    <td>是否使战局内的所有护航人物高亮</td>
                 </tr>
                 <tr>
                     <td>护航高亮快捷键</td>
-                    <td></td>
+                    <td>自行绑定</td>
                 </tr>
                 <tr>
                     <td>护航高亮颜色</td>
                     <td></td>
                 </tr>
+                <tr>
+                    <td>开启护航字幕</td>
+                    <td>是否使用字幕展示护航的汇报</td>
+                </tr>
             </tbody>
         </table>
+    </details>
+    &nbsp;&nbsp;
+    <details>
+        <summary id="summary"><span style="font-size: 18px;"><strong>具体功能说明</strong></span></summary>
+        &nbsp;&nbsp;
+        <p><span style="font-size: 25px;"><strong>如何自定义护航装备</strong></span></p>
+        <div>
+            <ol class="list-paddingleft-2">
+                <li>你需要有已加为好友的护航</li>
+                <li>从底部栏左下角点开邀请至队伍界面</li>
+                <li>对着护航右键弹出右键菜单，选择打开库存</li>
+                <li>此时将进入护航库存模式</li>
+                <li>你可以在护航库存模式下通过与正常游玩时一模一样的操作来自定义护航的装备</li>
+                <li>进入护航库存模式时，宫子商人将提供全物品1卢布价格购买</li>
+                <li>若要返回主角色，则有两种方式：一是同样通过邀请至队伍界面对着护航右键弹出右键菜单，选择返回主角色；二是直接点击底部栏的绿色护航库存模式按钮，也一样可以返回主角色</li>
+                <li>温馨提示1：护航库存模式修改的是护航在PMC模式下的装备，总所周知，PMC模式和SCAV模式是两个不同的角色，按照游戏设定SCAV角色你无法控制其装备，因此Mcs也会保留这个设定</li>
+                <li>温馨提示2：护航的好友位是有期限的，到期会自动删除好友，如果不想精心调整的护航装备因到期而被删除，建议下单更长时间的护航</li>
+                <li>补一张图</li>
+            </ol>
+        </div>
+        &nbsp;&nbsp;
+        <p><span style="font-size: 25px;"><strong>战局中如何获取护航拾取的战利品</strong></span></p>
+        <div>
+            <ol class="list-paddingleft-2">
+                <li>当护航拾取了目标战利品后，要拿护航身上的东西除了护航死亡后去翻尸体，还有就是通过Mcs指令系统中对单个护航使用"打开背包"指令，即可在护航存活状态下远程打开护航的背包。</li>
+                <li>If you want it, then you'll have to take it, as you have already known.</li>
+            </ol>
+        </div>
+        &nbsp;&nbsp;
+        <p><span style="font-size: 25px;"><strong>如何自定义护航类型</strong></span></p>
+        <div>
+            <ol class="list-paddingleft-2">
+                <li>先启动一次服务端，MiyakoCarryServiceServer/configs下会生成spawntype.json</li>
+                <li>接下来的内容如果不太懂的建议别自己乱动，修改错误会导致报错，如果实现想改，再往下看。以及你可以交给AI来做，如果还是改错了，那就把spawntype.json删了，然后重启服务端，会再次重新生成一份新的文件</li>
+                <li>首先你需要知道Json的格式规则，最好使用类似VS Code的编辑器能够对Json格式进行检查</li>
+                <li>然后你需要知道第三方Mod提供的，或者原版自带的AI的WildSpawnType名称</li>
+                <li>拿BlackDiv Mod举例，其提供了一个黑色军团的WildSpawnType：blackDivAssault</li>
+                <li>那么现在你就要在spawntype.json里以正确的格式多添加一个类型</li>
+<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, &quot;Courier New&quot;, monospace; font-size: 14px; line-height: 8px; white-space: pre;">
+    <span>
+    {
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;sectantOni&quot;</span>,
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">true</span>,
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;Oni&quot;</span>
+    </span>
+    <span>
+    }, <span style="color: #6a9955;">// 上面是默认自带的，往后新加类型的时候要在 `}` 后带上 `,`</span>
+    </span>
+    <span>
+    {
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;blackspanAssault&quot;</span>, <span style="color: #6a9955;">// 这里写上WildSpawnType的名称</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">false</span>, <span style="color: #6a9955;">// 是否作为Boss类型，使用help指令时就会为这个类型添加`[Boss]`的前缀</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;Black spanision Assault&quot;</span> 
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #6a9955;">// 展示名称，使用help指令时就只会展示这个名称，而不是WildSpawnType的名称</span>
+    </span>
+    <span>
+    } <span style="color: #6a9955;">// 最后一个 `}` 不要带 `,`</span>
+    </span>
+</div>
+<p><br/></p>
+<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, &quot;Courier New&quot;, monospace; font-size: 14px; line-height: 8px; white-space: pre;">
+    <span>
+    {
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;xxxWildSpawnType&quot;</span>,
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">false</span>,
+    </span>
+    <span>&nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;xxxDisplayName&quot;</span>,
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;BrainName&quot;</span>: <span style="color: #ce9178;">&quot;xxxBrainName&quot;</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #6a9955;">// 如果这个第三方Mod的WildSpawnType使用的不是原版自带的Brain</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #6a9955;">// 那么你需要额外多填写一个BrainName</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #6a9955;">// 至于这个BrainName叫什么，需要你自己从这个Mod里去找</span>
+    </span>
+    <span>
+    &nbsp; &nbsp; <span style="color: #6a9955;">// 上面所提供的WildSpawnType全部都不需要填BrainName</span>
+    </span>
+    <span>
+    }
+    </span>
+</div>
+            <li>确保json格式正确，数据也填写正确后，重启服务端，此时与宫子商人聊天界面使用help指令，列出的可用类型中就会显示出所有的类型</li>
+            <li>如果填写的自定义类型在生成时出现异常，会在服务端收到报错提醒，并改为生成默认的pmc类型护航，此时你需要检查是否填写的自定义类型有错误</li>
+            </ol>
+            <details>
+                <summary id="summary"><span style="font-size: 18px;"><strong>常用WildSpawnType</strong></span></summary>
+                <p>每个类型对应谁自己查</p>
+                <p><b>原版</b></p>
+                <ul>
+                    <li>marksman</li>
+                    <li>assault</li>
+                    <li>bossTest</li>
+                    <li>bossBully</li>
+                    <li>followerTest</li>
+                    <li>followerBully</li>
+                    <li>bossKilla</li>
+                    <li>bossKojaniy</li>
+                    <li>followerKojaniy</li>
+                    <li>pmcBot</li>
+                    <li>cursedAssault</li>
+                    <li>bossGluhar</li>
+                    <li>followerGluharAssault</li>
+                    <li>followerGluharSecurity</li>
+                    <li>followerGluharScout</li>
+                    <li>followerGluharSnipe</li>
+                    <li>followerSanitar</li>
+                    <li>bossSanitar</li>
+                    <li>test</li>
+                    <li>assaultGroup</li>
+                    <li>sectantWarrior</li>
+                    <li>sectantPriest</li>
+                    <li>bossTagilla</li>
+                    <li>followerTagilla</li>
+                    <li>exUsec</li>
+                    <li>gifter</li>
+                    <li>bossKnight</li>
+                    <li>followerBigPipe</li>
+                    <li>followerBirdEye</li>
+                    <li>bossZryachiy</li>
+                    <li>followerZryachiy</li>
+                    <li>bossBoar</li>
+                    <li>followerBoar</li>
+                    <li>arenaFighter</li>
+                    <li>arenaFighterEvent</li>
+                    <li>bossBoarSniper</li>
+                    <li>crazyAssaultEvent</li>
+                    <li>peacefullZryachiyEvent</li>
+                    <li>sectactPriestEvent</li>
+                    <li>ravangeZryachiyEvent</li>
+                    <li>followerBoarClose1</li>
+                    <li>followerBoarClose2</li>
+                    <li>bossKolontay</li>
+                    <li>followerKolontayAssault</li>
+                    <li>followerKolontaySecurity</li>
+                    <li>shooterBTR</li>
+                    <li>bossPartisan</li>
+                    <li>spiritWinter</li>
+                    <li>spiritSpring</li>
+                    <li>peacemaker</li>
+                    <li>pmcBEAR</li>
+                    <li>pmcUSEC</li>
+                    <li>skier</li>
+                    <li>sectantPredvestnik</li>
+                    <li>sectantPrizrak</li>
+                    <li>sectantOni</li>
+                    <li>infectedAssault</li>
+                    <li>infectedPmc</li>
+                    <li>infectedCivil</li>
+                    <li>infectedLaborant</li>
+                    <li>infectedTagilla</li>
+                    <li>bossTagillaAgro</li>
+                    <li>bossKillaAgro</li>
+                    <li>tagillaHelperAgro</li>
+                </ul>
+                <p><b>WTT - Black Division Home</b></p> 
+                <p>作者: TacticalToaster</p>
+                <ul>
+                    <li>blackDivAssault</li>
+                </ul>
+                <p><b>UNTAR Go Home!</b></p> 
+                <p>作者: TacticalToaster</p>
+                <ul>
+                    <li>followeruntar</li>
+                    <li>bossuntarlead</li>
+                    <li>followeruntarmarksman</li>
+                    <li>bossuntaroffice</li>
+                </ul>
+                <p><b>RUAF Come Home!</b></p> 
+                <p>作者: TacticalToaster</p>
+                <ul>
+                    <li>ruafRifleman</li>
+                    <li>ruafRiflemanSenior</li>
+                    <li>ruafAutorifleman</li>
+                    <li>ruafGrenadier</li>
+                    <li>ruafMarksman</li>
+                    <li>ruafMachinegunner</li>
+                </ul>
+            </details>
+        </div>
     </details>
     <hr style="background-color: var(--font-color); margin: 40px auto; max-width: 150px; width: 30%; height: 2px; opacity: .55; border: 0; box-sizing: content-box; overflow: visible;" />
     <p>
@@ -1088,60 +1333,143 @@
             <a href="https://ifdian.net/a/himesamanoyume" target="_blank" id="afadian">[爱发电]简简单单恰个米 [s-44] </a>
         </p>
         <p><span style="font-size: 20px;"><strong>更新日志</strong></span></p>
-        <p>未公开发布期间更新日志不会时刻更新到最新进度，以Discord频道为准</p>
         <p>
-            <strong>[4.0.X] 0.3.1.0</strong>
+            <strong>[4.0.X] 1.0.0.0</strong>
         </p>
         <ul style="list-style-type: disc;">
             <li>
-                <p>为鼓励下单长期护航，护航每小时基础价格`-70%`(手动绿色),当前最贵基础价格为每小时<del>100000</del><b>30000</b>卢布，惩罚涨价最大值`-80%`(手动绿色), 当前惩罚涨价最大值为<del>500%</del><b>100%</b></p>
-            </li>
-            <li>
-                <p>新的本地化适配</p>
-            </li>
-            <li>
-                <p>修复<b>护航库存模式</b>下的藏身处异常、购买商品后出现某些异常的问题</p>
-            </li>
-            <li>
-                <p>修复生成护航存档时的仓库内物品存放问题，调整了生成护航时的藏身处数据，直接全部设施满级</p>
-            </li>
-            <li>
-                <p><b>护航库存模式</b>下宫子商人全物品供货适配跳蚤市场，便于更好地对护航的武器装备进行自定义</p>
-            </li>
-            <li>
-                <p>现在当处于<b>护航库存模式</b>下时，直接点击底部绿色标识也可以返回主角色了</p>
+                <p>占位</p>
             </li>
         </ul>
         <p>
-            <strong>[4.0.X] 0.3.0.0</strong>
+            <strong>[4.0.X] 0.3.6.1 ~ 0.3.6.3</strong>
         </p>
         <ul style="list-style-type: disc;">
             <li>
-                <p>修复带有护航的战局无法使用转移的问题</p>
+                <p>优化并修复了护航库存模式在特定情况下会导致的bug</p>
             </li>
             <li>
-                <p>新增<b>护航库存模式</b>。你将能够完全自定义护航的一切。</p>
+                <p>使护航生成时自带一定的技能等级</p>
+            </li>
+            <li>
+                <p>修复好几个bug</p>
+            </li>
+            <li>
+                <p>延后了生成护航的时机。防止因Fika联机时加入房间的速度差异产生的某些时机错失导致没有正常生成护航</p>
+            </li>
+            <li>
+                <p>优化了屏蔽战利品类型的分类</p>
+            </li>
+            <li>
+                <p>大量bug修复</p>
+            </li>
+            <li>
+                <p>Boss类型的护航价格不再翻倍</p>
             </li>
         </ul>
-        <ol>
-            <li>
-                <p>你需要在"邀请至队伍"界面右键护航玩家，点击"打开库存"来切换至<b>护航库存模式</b></p>
-            </li>
-            <li>
-                <p>处于<b>护航库存模式</b>下时，你可以为你的护航做绝大多数平时你能做的事</p>
-            </li>
-            <li>
-                <p>处于<b>护航库存模式</b>下时，宫子商人将提供全物品购买，供你自由地搭配护航的武器装备</p>
-            </li>
-            <li>
-                <p>若要返回主角色，也是一样通过"邀请至队伍"界面右键护航玩家，点击"返回主角色"来切换回主角色</p>
-            </li>
-            <li>
-                <p><b>护航库存模式</b>主要用于玩家自定义护航的武器装备，且护航库存模式是为了后续更新新类型的护航打下基础，因此目前只适合搭配下单长期的护航来使用</p>
-            </li>
-        </ol>
         <details>
             <summary>往期更新</summary>
+            <p>
+                <strong>[4.0.X] 0.3.2.0 ~ 0.3.6.0</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>再次适配Zyriachy，修复其不攻击的问题</p>
+                </li>
+                <li>
+                    <p>新增罚单功能。输入对应指令，可花钱消除涨价惩罚，具体方式同样使用 help 指令查看</p>
+                </li>
+                <li>
+                    <p>调整护航生成装备的耐久度全部为满值</p>
+                </li>
+                <li>
+                    <p>修复安装SAIN下的护航在战斗结束后会卡住无法进行下一步决策的问题</p>
+                </li>
+                <li>
+                    <p>大幅改进了护航的战利品操作逻辑</p>
+                </li>
+                <li>
+                    <p>实现护航在卡脚时尝试翻越和跳跃</p>
+                </li>
+                <li>
+                    <p>优化了护航的战斗逻辑</p>
+                </li>
+                <li>
+                    <p>为防止生成护航时因无枪械武器时而卡死，对护航库存模式返回主角色时增加了合法性检查</p>
+                </li>
+                <li>
+                    <p>修复护航库存模式下保存护航存档时的一些Bug</p>
+                </li>
+                <li>
+                    <p>增加了一些护航的对话</p>
+                </li>
+                <li>
+                    <p>配置项新增护航是否进行掠夺开关、护航字幕新增开关是否关闭</p>
+                </li>
+                <li>
+                    <p>修复了一些bug，调整了护航的一些行为</p>
+                </li>
+                <li>
+                    <p>护航个人指令新增打开护航背包</p>
+                </li>
+                <li>
+                    <p>实现基础的护航根据要求拾取战利品功能</p>
+                </li>
+                <li>
+                    <p>修复Scav模式下会错误地显示投保界面的问题</p>
+                </li>
+            </ul>
+            <p>
+                <strong>[4.0.X] 0.3.1.0</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>为鼓励下单长期护航，护航每小时基础价格`-70%`(手动绿色),当前最贵基础价格为每小时<del>100000</del><b>30000</b>卢布，惩罚涨价最大值`-80%`(手动绿色), 当前惩罚涨价最大值为<del>500%</del><b>100%</b></p>
+                </li>
+                <li>
+                    <p>新的本地化适配</p>
+                </li>
+                <li>
+                    <p>修复<b>护航库存模式</b>下的藏身处异常、购买商品后出现某些异常的问题</p>
+                </li>
+                <li>
+                    <p>修复生成护航存档时的仓库内物品存放问题，调整了生成护航时的藏身处数据，直接全部设施满级</p>
+                </li>
+                <li>
+                    <p><b>护航库存模式</b>下宫子商人全物品供货适配跳蚤市场，便于更好地对护航的武器装备进行自定义</p>
+                </li>
+                <li>
+                    <p>现在当处于<b>护航库存模式</b>下时，直接点击底部绿色标识也可以返回主角色了</p>
+                </li>
+            </ul>
+            <p>
+                <strong>[4.0.X] 0.3.0.0</strong>
+            </p>
+            <ul style="list-style-type: disc;">
+                <li>
+                    <p>修复带有护航的战局无法使用转移的问题</p>
+                </li>
+                <li>
+                    <p>新增<b>护航库存模式</b>。你将能够完全自定义护航的一切。</p>
+                </li>
+            </ul>
+            <ol>
+                <li>
+                    <p>你需要在"邀请至队伍"界面右键护航玩家，点击"打开库存"来切换至<b>护航库存模式</b></p>
+                </li>
+                <li>
+                    <p>处于<b>护航库存模式</b>下时，你可以为你的护航做绝大多数平时你能做的事</p>
+                </li>
+                <li>
+                    <p>处于<b>护航库存模式</b>下时，宫子商人将提供全物品购买，供你自由地搭配护航的武器装备</p>
+                </li>
+                <li>
+                    <p>若要返回主角色，也是一样通过"邀请至队伍"界面右键护航玩家，点击"返回主角色"来切换回主角色</p>
+                </li>
+                <li>
+                    <p><b>护航库存模式</b>主要用于玩家自定义护航的武器装备，且护航库存模式是为了后续更新新类型的护航打下基础，因此目前只适合搭配下单长期的护航来使用</p>
+                </li>
+            </ol>
             <p>
                 <strong>[4.0.X] 0.2.3.0 ~ 0.2.5.2</strong>
             </p>
@@ -1252,7 +1580,7 @@
                     <p>开放其他护航类型（默认支持Kaban, Reshala, Glukhar,Killa, Knight, BigPipe, BirdEye, Kollontay, Shturman, Sanitar, Tagilla, Partisan, Zryachiy, Tagilla Agro, Killa Agro, Infected Tagilla, Rouge, Infected Pmc, Infected Assault, Raider）</p>
                 </li>
                 <li>
-                    <p>支持生成自定义护航类型（目标是允许生成第三方Mod提供的AI类型，比如BlackDivision，此功能需要重点测试）</p>
+                    <p>支持生成自定义护航类型（目标是允许生成第三方Mod提供的AI类型，比如BlackDivision）</p>
                 </li>
                 <li>
                     <p>下单护航的价格不再几乎免费，而是恢复为需要正常的价格</p>

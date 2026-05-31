@@ -2,31 +2,6 @@
 
 - [Forge描述示例](https://github.com/sp-tarkov/forge/blob/c7bf0e31232205d351afc954450c40fcc50f0b3f/resources/markdown/exampleModDescription.md)
 
-其中以下代码为Tab导航栏
-```
-## Image Tabset {.tabset}
-
-### Minion Image
-
-![Minion](https://octodex.github.com/images/minion.png)
-
-### Stormtroopocat
-
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg 'The Stormtroopocat')
-
-### Image Footnote Format
-
-Like links, Images also have a footnote style syntax
-
-![Alt text][id]
-
-With a reference later in the document defining the URL location.
-
-[id]: https://octodex.github.com/images/dojocat.jpg 'The Dojocat'
-
-{.endtabset}
-```
-
 ## 已知问题
 
 - null
@@ -67,23 +42,55 @@ With a reference later in the document defining the URL location.
 ]
 ```
 
-## 疑难杂症
+## 已知问题
 
+- 进入护航库存模式后，似乎会必定导致
+```log
+KeyNotFoundException: The given key '6a1bb92582b7352e4c672b5f' was not present in the dictionary.
+  at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) [0x0001e] in <8ce0bd04a7a04b4b9395538239d3fdd8>:0 
+  at GClass4014.RemoveProfileQuestTemplate (System.String profileId, RawQuestClass template) [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at QuestBookClass.RemoveQuestTemplate (RawQuestClass template) [0x00005] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at GClass4005.method_4 (GClass3996 quest) [0x00057] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at QuestBookClass+Class3603.method_2 () [0x0000f] in <ad47400a25db462cbf0a531df654c3c3>:0 
+  at GClass3996.method_9 () [0x000bc] in <ad47400a25db462cbf0a531df654c3c3>:0 
+Rethrow as AggregateException: One or more errors occurred. (The given key '6a1bb92582b7352e4c672b5f' was not present in the dictionary.)
+```
 - **平衡隐患：拥有了护航库存模式宫子商人0元购，战局中打开护航背包指令后，实际上玩家可以通过护航带入大量物品并能十分轻易地转移全物品**
+- **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
 
 ## TODO
 
-- **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
+- null
 
 ## 更新日志
 
-#### 1.1.0.0 计划
+#### 1.?.0.0 计划
+
+- 新增类型：真实固排
+
+#### 1.?.0.0 计划
 
 - 新增玩法：成为护航打手
 
-#### 1.0.0.X 计划
+#### 1.0.0.0 正式版
 
-- 正式版
+- null
+
+#### 0.3.6.3
+
+- 优化并修复了护航库存模式在特定情况下会导致的bug
+- 使护航生成时自带一定的技能等级
+
+#### 0.3.6.2
+
+- 修复好几个bug
+
+#### 0.3.6.1
+
+- 延后了生成护航的时机。防止因Fika联机时加入房间的速度差异产生的某些时机错失导致没有正常生成护航
+- 优化了屏蔽战利品类型的分类
+- 大量bug修复
+- Boss类型的护航价格不再翻倍
 
 #### 0.3.6.0
 
