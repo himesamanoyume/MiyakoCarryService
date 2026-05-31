@@ -18,6 +18,7 @@ using System.Linq;
 using MiyakoCarryService.Client.Models;
 using System.Diagnostics;
 using System.Threading;
+using HarmonyLib;
 
 namespace MiyakoCarryService.Client
 {
@@ -154,6 +155,87 @@ namespace MiyakoCarryService.Client
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
+            EventMgr.Subscribe<UpdateProfileEvent>(OnUpdateProfile, this);
+            EventMgr.Subscribe<UpdateDailyQuestsEvent>(OnUpdateDailyQuests, this);
+            EventMgr.Subscribe<UpdateMiyakoTraderAssortmentEvent>(OnUpdateMiyakoTraderAssortment, this);
+        }
+
+        public void OnUpdateProfile(UpdateProfileEvent @event)
+        {
+            TasksExtensions.HandleExceptions(UpdateProfile());
+        }
+
+        public void OnUpdateDailyQuests(UpdateDailyQuestsEvent @event)
+        {
+            TasksExtensions.HandleExceptions(UpdateDailyQuests());
+        }
+
+        public void OnUpdateMiyakoTraderAssortment(UpdateMiyakoTraderAssortmentEvent @event)
+        {
+            TasksExtensions.HandleExceptions(UpdateMiyakoTraderAssortmentEvent());
+        }
+
+        private async Task UpdateDailyQuests()
+        {
+            await Task.Delay(1000);
+            TarkovApplication.Exist(out var tarkovApplication);
+            var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
+
+            var mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+            var array = await Session.GetDailyQuests();
+            if (!array.IsNullOrEmpty())
+            {
+                if (mainMenuControllerClass == null)
+                {
+                    return;
+                }
+
+                if (mainMenuControllerClass.LocalQuestControllerClass == null)
+                {
+                    return;
+                }
+
+                if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
+                {
+                    return;
+                }
+                mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
+            }
+        }
+
+        private async Task UpdateMiyakoTraderAssortmentEvent()
+        {
+            foreach (var trader in Session.Traders)
+            {
+                if (trader.Id == MiyakoCarryServicePlugin.MiyakoTraderId)
+                {
+                    TasksExtensions.HandleExceptions(trader.RefreshAssortment(true, true));
+                    break;
+                }
+            }
+        }
+
+        private async Task UpdateProfile()
+        {
+            var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
+            if (Session is SessionBackendClass sessionBackendClass)
+            {
+                var profile = sessionBackendClass.Profile;
+                var correctInfo = profile.Info;
+
+                foreach (var (traderId, traderInfo) in profile.TradersInfo)
+                {
+                    if (traderInfo.ProfileInfo != correctInfo)
+                    {
+                        traderInfo.ProfileInfo = correctInfo;
+                    }
+                }
+
+                if (sessionBackendClass.Dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
+                {
+                    profileUpdater.UpdateProfile(profileChangesPocoClass);
+                }
+            }
         }
 
         private void OnGameWorldStarted(GameWorldStartedEvent @event)

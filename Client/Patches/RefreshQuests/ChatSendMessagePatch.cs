@@ -2,6 +2,8 @@
 using System.Reflection;
 using Comfort.Common;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
@@ -18,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
         {
             if (text.Contains("mcs order") || text.Contains("mcs ticket"))
             {
-                TasksExtensions.HandleExceptions(TraderScreensGroupShowPatch.UpdateDailyQuests());
+                EventMgr.Notify(new UpdateDailyQuestsEvent());
             }
         }
     }

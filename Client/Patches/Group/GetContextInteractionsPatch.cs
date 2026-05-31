@@ -7,7 +7,9 @@ using EFT.Communications;
 using EFT.InventoryLogic;
 using EFT.UI;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
@@ -80,6 +82,8 @@ namespace MiyakoCarryService.Client.Patches.Group
             IsMcsBotPlayerInventoryMode = false;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            EventMgr.Notify(new UpdateProfileEvent());
+            EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
@@ -154,6 +158,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             IsMcsBotPlayerInventoryMode = true;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            EventMgr.Notify(new UpdateProfileEvent());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }
     }

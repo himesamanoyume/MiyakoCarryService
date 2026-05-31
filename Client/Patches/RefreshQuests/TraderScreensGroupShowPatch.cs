@@ -1,82 +1,25 @@
 
 using System.Reflection;
-using System.Threading.Tasks;
-using EFT;
 using EFT.UI;
 using HarmonyLib;
-using MiyakoCarryService.Client.Utils;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
 {
     /// <summary>
-    /// 用于在打开任务界面时刷新
+    /// 用于在打开商人界面时刷新
     /// </summary>
     public sealed class TraderScreensGroupShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderScreensGroup), nameof(TraderScreensGroup.Show), [typeof(TraderScreensGroup.GClass3888)]);
 
-        private static Traverse _tarkovApplicationTraverse;
-
         [PatchPostfix]
         public static void Postfix(TraderScreensGroup.GClass3888 controller)
         {
-            TasksExtensions.HandleExceptions(UpdateProfile());
-            TasksExtensions.HandleExceptions(UpdateDailyQuests());
-        }
-
-        public static async Task UpdateDailyQuests()
-        {
-            await Task.Delay(1000);
-            if (_tarkovApplicationTraverse == null)
-            {
-                TarkovApplication.Exist(out var tarkovApplication);
-                _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
-            }
-
-            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
-            var array = await GameLoop.Instance.Session.GetDailyQuests();
-            if (!array.IsNullOrEmpty())
-            {
-                if (mainMenuControllerClass == null)
-                {
-                    return;
-                }
-
-                if (mainMenuControllerClass.LocalQuestControllerClass == null)
-                {
-                    return;
-                }
-
-                if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
-                {
-                    return;
-                }
-                mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
-            }
-        }
-
-        private static async Task UpdateProfile()
-        {
-            var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
-            if (GameLoop.Instance.Session is SessionBackendClass sessionBackendClass)
-            {
-                var profile = sessionBackendClass.Profile;
-                var correctInfo = profile.Info;
-
-                foreach (var (traderId, traderInfo) in profile.TradersInfo)
-                {
-                    if (traderInfo.ProfileInfo != correctInfo)  
-                    {  
-                        traderInfo.ProfileInfo = correctInfo;  
-                    }  
-                }
-
-                if (sessionBackendClass.Dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
-                {
-                    profileUpdater.UpdateProfile(profileChangesPocoClass);
-                }
-            }
+            EventMgr.Notify(new UpdateProfileEvent());
+            EventMgr.Notify(new UpdateDailyQuestsEvent());
         }
     }
 }

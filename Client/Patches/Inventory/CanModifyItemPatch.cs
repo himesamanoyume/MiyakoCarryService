@@ -33,26 +33,25 @@ namespace MiyakoCarryService.Client.Patches.Inventory
                 combinedList.Add(parent);
             }
 
-            using (IEnumerator<Item> enumerator = combinedList.GetEnumerator())
+            foreach (var _item in combinedList)
             {
-                while (enumerator.MoveNext())
+                if (_item.PinLockState == EItemPinLockState.Locked)
                 {
-                    if (enumerator.Current.PinLockState == EItemPinLockState.Locked)
-                    {
-                        error = new ItemLockedClass(item);
-                        __result = false;
-                        return false;
-                    }
+                    error = new ItemLockedClass(item);
+                    __result = false;
+                    return false;
                 }
             }
+
             if (from.GetOwner() != controller && from.IsSpecialSlotAddress())
             {
                 error = new CannotMoveItemDuringRaidClass(item, from.Container.ID);
                 __result = false;
                 return false;
             }
+            
             var observerItemState = controller.SearchController.GetObserverItemState(item, from);
-            error = (observerItemState == EObserverItemState.Known) ? null : new UnknownItemManipulationClass(item, observerItemState);
+            error = observerItemState == EObserverItemState.Known ? null : new UnknownItemManipulationClass(item, observerItemState);
             __result = true;
             return false;
         }

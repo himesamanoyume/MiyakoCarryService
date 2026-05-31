@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 {
                     foreach (var quest in dailyQuestClass.Quests)
                     {
-                        quest.TraderId = "6952ced4bcc1dd1e3c80dfcb";
+                        quest.TraderId = MiyakoCarryServicePlugin.MiyakoTraderId;
                     }
                     break;
                 }
