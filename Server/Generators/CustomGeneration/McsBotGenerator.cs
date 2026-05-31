@@ -1,6 +1,7 @@
 
 using System;
 using System.Linq;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
@@ -21,6 +22,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         ISptLogger<BotGenerator> logger,
         HashUtil hashUtil,
         RandomUtil randomUtil,
+        TimeUtil timeUtil,
         DatabaseService databaseService,
         BotInventoryGenerator botInventoryGenerator,
         McsBotInventoryGenerator mcsBotInventoryGenerator,
@@ -40,7 +42,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         configServer, cloner
     )
     {
-        public BotBase CustomPrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails)
+        public BotBase CustomPrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails, OrderInfo orderInfo)
         {
             var botBaseClone = GetPreparedBotBaseClone(
                 botGenerationDetails.EventRole ?? botGenerationDetails.Role,
@@ -80,10 +82,10 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 botJsonTemplateClone.BotChances.WeaponModsChances[slot] = 100;
             }
 
-            return CustomGenerateBot(sessionId, botBaseClone, botJsonTemplateClone, botGenerationDetails);
+            return CustomGenerateBot(sessionId, botBaseClone, botJsonTemplateClone, botGenerationDetails, orderInfo);
         }
 
-        protected BotBase CustomGenerateBot(MongoId sessionId, BotBase bot, BotType botJsonTemplate, BotGenerationDetails botGenerationDetails)
+        protected BotBase CustomGenerateBot(MongoId sessionId, BotBase bot, BotType botJsonTemplate, BotGenerationDetails botGenerationDetails, OrderInfo orderInfo)
         {
             botGenerationDetails.RoleLowercase = botGenerationDetails.Role.ToLowerInvariant();
 
@@ -151,9 +153,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     .Select(skill => new CommonSkill
                     {
                         Id = skill,
-                        Progress = 0,
+                        Progress = GetRandomProgressByCarryServiceLevel(orderInfo.CarryServiceLevel),
                         PointsEarnedDuringSession = 0,
-                        LastAccess = 0,
+                        LastAccess = timeUtil.GetTimeStamp(),
                     }).ToList(),
                 Mastering = GetMasteringSkillsWithRandomisedProgressValue(botJsonTemplate.BotSkills.Mastering),
                 Points = 0,
@@ -190,6 +192,19 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             }
 
             return bot;
+        }
+
+        private double GetRandomProgressByCarryServiceLevel(int carryServiceLevel)
+        {
+            return carryServiceLevel switch
+            {
+                1 => randomUtil.RandInt(0, 1000),
+                2 => randomUtil.RandInt(1000, 2000),
+                3 => randomUtil.RandInt(2000, 3000),
+                4 => randomUtil.RandInt(3000, 4000),
+                >=5 => randomUtil.RandInt(4000, 5100),
+                _ => randomUtil.RandInt(0, 1000)
+            };
         }
     }
 }

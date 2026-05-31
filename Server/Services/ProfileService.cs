@@ -97,13 +97,13 @@ namespace MiyakoCarryService.Server.Services
             {
                 var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
                 logger.Error(errorInfo);
-                throw new NullReferenceException(errorInfo);
+                // throw new NullReferenceException(errorInfo);
             }
 
-            _ = new Timer(
-                _ =>
-                {
-                    try
+            try
+            {
+                _ = new Timer(
+                    _ =>
                     {
                         if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                         {
@@ -112,17 +112,16 @@ namespace MiyakoCarryService.Server.Services
                             notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                             notificationSendHelper.SendMessage(mcsLeadPlayerId, notification2);
                         }
-                    }
-                    finally
-                    {
-                        RemoveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
-                    }
-
-                },
-                null,
-                TimeSpan.FromMicroseconds(1000),
-                Timeout.InfiniteTimeSpan
-            );
+                    },
+                    null,
+                    TimeSpan.FromMicroseconds(1000),
+                    Timeout.InfiniteTimeSpan
+                );
+            }
+            finally
+            {
+                RemoveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            }
         }
 
         public void ProcessExpiredMcsBotPlayerProfiles(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
@@ -440,7 +439,7 @@ namespace MiyakoCarryService.Server.Services
                 2 => randomUtil.RandInt(15, 30),
                 3 => randomUtil.RandInt(30, 50),
                 4 => randomUtil.RandInt(50, 70),
-                >=5 => randomUtil.RandInt(70, 79),
+                >= 5 => randomUtil.RandInt(70, 79),
                 _ => randomUtil.RandInt(1, 15)
             };
         }
@@ -472,7 +471,7 @@ namespace MiyakoCarryService.Server.Services
             PmcData pmcData;
             try
             {
-                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails, orderInfo);
 
             }
             catch (Exception e)
@@ -489,7 +488,7 @@ namespace MiyakoCarryService.Server.Services
                 );
                 botGenerationDetails.Side = completeQuestPmcData.Info.Side;
                 botGenerationDetails.Role = completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR";
-                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails);
+                pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails, orderInfo);
             }
 
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
@@ -497,7 +496,7 @@ namespace MiyakoCarryService.Server.Services
             PmcData scavData;
             try
             {
-                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, clonedBotGenerationDetails, pmcData, orderInfo) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
             catch (Exception e)
             {
@@ -513,7 +512,7 @@ namespace MiyakoCarryService.Server.Services
                 );
 
                 clonedBotGenerationDetails.Role = "assault";
-                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, orderInfo.CarryServiceLevel, clonedBotGenerationDetails, pmcData) : GenerateScavData(pmcData, clonedBotGenerationDetails);
+                scavData = isPmc ? GenerateScavData(mcsLeadPlayerId, clonedBotGenerationDetails, pmcData, orderInfo) : GenerateScavData(pmcData, clonedBotGenerationDetails);
             }
 
             scavData.Info.Bans = [];
@@ -531,9 +530,9 @@ namespace MiyakoCarryService.Server.Services
             return fullProfile;
         }
 
-        private PmcData GeneratePmcData(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, BotGenerationDetails botGenerationDetails)
+        private PmcData GeneratePmcData(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, BotGenerationDetails botGenerationDetails, OrderInfo orderInfo)
         {
-            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails, orderInfo);
 
             var playerName = randomUtil.GetArrayValue(_ifdianNames);
             if (playerName is not null)
@@ -787,9 +786,9 @@ namespace MiyakoCarryService.Server.Services
             return scavData;
         }
 
-        private PmcData GenerateScavData(MongoId mcsLeadPlayerId, int carryServiceLevel, BotGenerationDetails botGenerationDetails, PmcData pmcData)
+        private PmcData GenerateScavData(MongoId mcsLeadPlayerId, BotGenerationDetails botGenerationDetails, PmcData pmcData, OrderInfo orderInfo)
         {
-            var scavKarmaLevel = Math.Clamp(carryServiceLevel + 2, -7, 6);
+            var scavKarmaLevel = Math.Clamp(orderInfo.CarryServiceLevel + 2, -7, 6);
             var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
 
             if (!playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings))
@@ -806,7 +805,7 @@ namespace MiyakoCarryService.Server.Services
             var playerScavGeneratorTraverse = Traverse.Create(playerScavGenerator);
             playerScavGeneratorTraverse.Method("AdjustBotTemplateWithKarmaSpecificSettings", [playerScavKarmaSettings, baseBotNode]).GetValue();
 
-            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails);
+            var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails, orderInfo);
 
             var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
             botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
