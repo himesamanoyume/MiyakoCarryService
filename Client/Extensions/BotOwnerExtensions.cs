@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EFT;
+using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
-using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
@@ -41,6 +41,16 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
                 return null;
+            }
+
+            public List<BotBehavior> GetBotBehaviors()
+            {
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    return new();
+                }
+                return mcsBotPlayerData.BotBehaviors;
             }
 
             public void SetMcsBotPlayerData(McsBotPlayerData mcsBotPlayerData)

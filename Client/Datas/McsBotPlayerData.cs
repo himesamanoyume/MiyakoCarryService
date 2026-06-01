@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
+using MiyakoCarryService.Client.Bots.BotBehaviors;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
@@ -17,6 +18,7 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<Player> _leadPlayeRef;
         public Player LeadPlayer => _leadPlayeRef.TryGetTarget(out var leadPlayer) ? leadPlayer : null;
         public GamePlayerOwner LeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
+        public List<BotBehavior> BotBehaviors { get; private set; }
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         private LootData _lootingTarget = null;
@@ -56,6 +58,7 @@ namespace MiyakoCarryService.Client.Datas
             BotOwner.SetMcsBotPlayerData(this);
             _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
             _leadPlayeRef = new(bossPlayer);
+            BotBehaviors = [new BotCarryServiceChecker(BotOwner, LeadPlayer)];
         }
 
         public void SetLootingTarget(List<ItemData> itemDatas)
