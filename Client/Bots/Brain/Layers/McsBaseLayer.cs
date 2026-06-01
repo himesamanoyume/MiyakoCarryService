@@ -1173,7 +1173,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var targetSlot = CheckWeaponSwitch();
 #if DEBUG
-            MiyakoCarryServicePlugin.Logger.LogWarning($"目标武器类型: {targetSlot}");
+            // MiyakoCarryServicePlugin.Logger.LogWarning($"目标武器类型: {targetSlot}");
 #endif
             _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
 

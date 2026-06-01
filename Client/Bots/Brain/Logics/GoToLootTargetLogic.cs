@@ -81,7 +81,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 Tools.BetterDestination(3f, lootPos, out var targetPos);
 
 #if DEBUG
-                MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
 #endif
 
                 if (distance <= 9f && Math.Abs(offset.y) < 2f)
@@ -291,7 +291,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (normalTake)
             {
 #if DEBUG
-                MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品1");
+                // MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品1");
 #endif
                 await InteractionDelay(targetLootData);
                 return await Take(mcsBotPlayerData, targetLootData);
@@ -301,28 +301,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (lootProp.IsShouldEquipContainer(mcsBotPlayerData.BotOwner))
                 {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发装备战利品");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("触发装备战利品");
 #endif
                     return await Equip(mcsBotPlayerData, targetLootData);
                 }
                 else if (lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner) is ENestType.In or ENestType.Out)
                 {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发嵌套战利品");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("触发嵌套战利品");
 #endif
                     return await Nest(mcsBotPlayerData, targetLootData, lootProp.IsShouldNestContainer(mcsBotPlayerData.BotOwner));
                 }
                 else if (lootProp.IsShouldSwapContainer(mcsBotPlayerData.BotOwner))
                 {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发交换战利品");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("触发交换战利品");
 #endif
                     return await Swap(mcsBotPlayerData, targetLootData);
                 }
                 else if (lootProp.IsShouldTakeContainer(mcsBotPlayerData.BotOwner))
                 {
 #if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品2");
+                    // MiyakoCarryServicePlugin.Logger.LogWarning("触发拿取战利品2");
 #endif
                     await InteractionDelay(targetLootData);
                     return await Take(mcsBotPlayerData, targetLootData);

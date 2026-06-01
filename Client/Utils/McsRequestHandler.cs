@@ -166,9 +166,9 @@ namespace MiyakoCarryService.Client.Utils
             });
         }
 
-        public static async Task<List<MongoID>> GetAllMcsBotPlayerIdInRaid(McsBotPlayerType mcsBotPlayerType)
+        public static async Task<HashSet<MongoID>> GetAllMcsBotPlayerIdInRaid(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/botids/get", mcsBotPlayerType);
+            var response = await PostJsonAsync<McsBotPlayerType, HashSet<MongoID>>("/mcs/singleplayer/info/botids/get", mcsBotPlayerType);
 
             if (response == null)
             {

@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         private Dictionary<MongoID, Dictionary<MongoID, BotOwner>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
-        private List<MongoID> _allMcsBotPlayerIdInRaid = new();
+        private HashSet<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private Dictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
@@ -49,6 +49,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
+            _allMcsBotPlayerIdInRaid.Add(mcsBotPlayerId);
             _mcsAILeadPlayers[mcsLeadPlayerId] = mcsAILeadPlayer;
         }
 
@@ -264,7 +265,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }));
         }
 
-        public List<MongoID> GetAllMcsBotPlayerIdInRaid()
+        public HashSet<MongoID> GetAllMcsBotPlayerIdInRaid()
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !IsHost)
             {

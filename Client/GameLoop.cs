@@ -515,7 +515,7 @@ namespace MiyakoCarryService.Client
                         {
                             botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
                             {
-                                if (mcsMgr.IsMcsLeadPlayer(enemy.ProfileId) || mcsMgr.IsMcsBotPlayer(enemy.ProfileId))
+                                if (enemy.Profile.Info.GroupId is "Mcs" or "Fika" || mcsMgr.IsMcsLeadPlayer(enemy.ProfileId) || mcsMgr.IsMcsBotPlayer(enemy.ProfileId))
                                 {
                                     return;
                                 }
