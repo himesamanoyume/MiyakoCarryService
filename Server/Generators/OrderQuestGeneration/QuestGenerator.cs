@@ -61,7 +61,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
             for (int i = 0; i < players; i++)
             {
 #if DEBUG
-                var currentRequestedItemCount = randomUtil.RandInt(1, 2);;
+                var currentRequestedItemCount = randomUtil.RandInt(1, 2); ;
 #else
                 var currentRequestedItemCount = randomUtil.RandInt(
                     (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * (1 + punishmentMulti)),
@@ -103,11 +103,11 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
         )
         {
             questTemplate.Conditions.AvailableForFinish = [];
-            #if DEBUG
+#if DEBUG
             var currentRequestedItemCount = percent;
-            #else
+#else
             var currentRequestedItemCount = percent * Services.TraderService.TicketPricePerPercent;
-            #endif
+#endif
             var handoverItemCondition = new QuestCondition
             {
                 Id = new(),

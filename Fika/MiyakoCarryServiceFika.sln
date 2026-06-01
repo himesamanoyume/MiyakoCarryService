@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiyakoCarryServiceFika", "MiyakoCarryServiceFika.csproj", "{EFCB4831-1159-43EE-59BC-7320918C8774}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiyakoCarryServiceClient", "..\Client\MiyakoCarryServiceClient.csproj", "{696AB45E-1303-48B7-9D03-C691EC3EAF71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,11 @@ Global
 		{EFCB4831-1159-43EE-59BC-7320918C8774}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFCB4831-1159-43EE-59BC-7320918C8774}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFCB4831-1159-43EE-59BC-7320918C8774}.Release|Any CPU.Build.0 = Release|Any CPU
+		
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
