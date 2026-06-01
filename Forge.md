@@ -1,3 +1,5 @@
+This mod will check for updates online.
+
 # {.tabset}
 
 ## Description

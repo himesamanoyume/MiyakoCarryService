@@ -72,7 +72,7 @@ Rethrow as AggregateException: One or more errors occurred. (The given key '6a1b
 
 - 新增玩法：成为护航打手
 
-#### 1.0.0.0 正式版
+#### 1.0.0.X 正式版
 
 - null
 
