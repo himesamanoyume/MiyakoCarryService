@@ -284,7 +284,7 @@ public sealed class DrawSinglePluginPatch : ModulePatch
         }
 
         var origColor = GUI.color;
-        if (setting.IsAdvanced == true || MiyakoCarryServicePlugin.CheaterEditionOnlyList.Contains(setting.DispName))
+        if (setting.IsAdvanced == true)
         {
             GUI.color = advancedSettingColor;
         }

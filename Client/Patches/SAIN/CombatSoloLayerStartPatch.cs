@@ -5,7 +5,6 @@ using DrakiaXYZ.BigBrain.Brains;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -37,12 +36,6 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                     mcsBotPlayerData.ShouldGoToPoint = false;
                     mcsBotPlayerData.IsLooting = false;
                 }
-
-                __instance.BotOwner.TalkMsg(new McsMsg
-                {
-                    PhraseTrigger = EPhraseTrigger.OnFirstContact,
-                    Position = __instance.BotOwner.Memory.GoalEnemy.EnemyLastPosition
-                });
             }
         }
     }

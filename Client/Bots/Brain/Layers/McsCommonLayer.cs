@@ -3,9 +3,7 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Utils;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -97,33 +95,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
                 }
 
-                Vector3? validPosition = null;
-                var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
-
-                for (int attempt = 0; attempt < 30; attempt++)
+                if (_nextUpdatePosTime < Time.time)
                 {
-                    if (Tools.BetterDestination(3f, newPos, out var targetPos))
-                    {
-                        if (Mathf.Abs(targetPos.y - mcsLeadPlayerPos.y) <= 2f)
-                        {
-                            validPosition = targetPos;
-                            break;
-                        }
-                    }
+                    UpdateMoveTarget(out float nextTime);
+                    _nextUpdatePosTime = Time.time + nextTime;
                 }
 
-                if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit, 7f, -1))
+                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE)
                 {
-                    validPosition = navMeshHit.position;
-                }
-
-                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
-                {
-                    if (validPosition.HasValue)
+                    if (_currentMoveTarget.HasValue)
                     {
-                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
                         return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                     }
 
@@ -134,6 +116,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_nextPatrolTime < Time.time)
                     {
                         _nextPatrolTime = Time.time + 8f;
+                        var validPosition = GetPosNearMcsLeadPlayer(mcsLeadPlayerPos);
                         if (validPosition.HasValue)
                         {
                             BotOwner.GoToSomePointData.SetPoint(validPosition.Value);

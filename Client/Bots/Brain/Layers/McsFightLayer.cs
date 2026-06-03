@@ -6,7 +6,6 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -100,6 +99,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
                     }
 
+                    if (_nextUpdatePosTime < Time.time)
+                    {
+                        UpdateMoveTarget(out float nextTime);
+                        _nextUpdatePosTime = Time.time + nextTime;
+                    }
+
                     var safeFire = false;
                     if (canShoot)
                     {
@@ -133,33 +138,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                         else
                         {
-                            Vector3? validPosition = null;
-                            var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                            var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                            var newPos = mcsLeadPlayerPos + new Vector3(xOffset, 0f, zOffset);
-
-                            for (int attempt = 0; attempt < 30; attempt++)
+                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE)
                             {
-                                if (Tools.BetterDestination(3f, newPos, out var targetPos))
+                                if (_currentMoveTarget.HasValue)
                                 {
-                                    if (Mathf.Abs(targetPos.y - mcsLeadPlayerPos.y) <= 2f)
-                                    {
-                                        validPosition = targetPos;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit, 7f, -1))
-                            {
-                                validPosition = navMeshHit.position;
-                            }
-
-                            if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
-                            {
-                                if (validPosition.HasValue)
-                                {
-                                    BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
                                     return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                                 }
 
@@ -170,6 +153,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 if (_nextPatrolTime + 4f < Time.time)
                                 {
                                     _nextPatrolTime = Time.time + 4f;
+
+                                    var validPosition = GetPosNearMcsLeadPlayer(mcsLeadPlayerPos);
                                     if (validPosition.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(validPosition.Value);

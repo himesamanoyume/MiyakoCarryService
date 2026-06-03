@@ -419,13 +419,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
                 {
                     Vector3? validPosition = null;
-                    var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                    var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
+                    var xOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
+                    var zOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
                     var newPos = raycastHit.point + new Vector3(xOffset, 0f, zOffset);
 
                     for (int attempt = 0; attempt < 30; attempt++)
                     {
-                        if (Tools.BetterDestination(7f, newPos, out var targetPos))
+                        if (Tools.BetterDestination(3f, newPos, out var targetPos))
                         {
                             if (Mathf.Abs(targetPos.y - raycastHit.point.y) <= 2f)
                             {
@@ -435,7 +435,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
                     }
 
-                    if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
+                    if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 3f, -1))
                     {
                         validPosition = navMeshHit2.position;
                     }
@@ -446,6 +446,19 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             PhraseTrigger = EPhraseTrigger.Going,
                         });
+
+                        var leadDir = botOwner.Position - validPosition.Value;
+                        leadDir.y = 0;
+                        leadDir = leadDir.normalized * 2f;
+
+                        if (NavMesh.Raycast(validPosition.Value, leadDir + validPosition.Value, out var rayHit, -1))
+                        {
+                            validPosition = rayHit.position;
+                        }
+                        else
+                        {
+                            validPosition = leadDir + validPosition.Value;
+                        }
                         botOwner.GetMcsBotPlayerData().ShouldGoToPoint = true;
                         botOwner.Mover.LastTimePosChanged = Time.time;
                         botOwner.StopMove();
@@ -486,7 +499,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Name = Locales.TEAMFORCETELEPORTCOMMAND_NAME,
                 TargetName = Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = MiyakoCarryServicePlugin.SAINInstalled,
+                Disabled = false,
                 Action = new Action(() =>
                 {
                     foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
@@ -600,7 +613,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Name = Locales.FORCETELEPORTCOMMAND_NAME,
                 TargetName = Locales.FORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = MiyakoCarryServicePlugin.SAINInstalled,
+                Disabled = false,
                 Action = new Action(() =>
                 {
                     action(mcsBotPlayer);

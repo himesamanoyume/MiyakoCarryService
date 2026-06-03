@@ -205,7 +205,6 @@ namespace MiyakoCarryService.Client
         }
 
         private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
-        public static readonly List<string> CheaterEditionOnlyList = new();
         public static readonly List<string> HideList = new();
 
         private class ConfigSection
@@ -231,7 +230,6 @@ namespace MiyakoCarryService.Client
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
             bool needNotify = true,
-            bool isCheaterEditionOnly = false,
             bool isHide = false
         )
         {
@@ -239,11 +237,6 @@ namespace MiyakoCarryService.Client
             {
                 section = new ConfigSection(type);
                 _sections[type] = section;
-            }
-
-            if (isCheaterEditionOnly)
-            {
-                CheaterEditionOnlyList.Add(key);
             }
 
             if (isHide)
