@@ -20,6 +20,7 @@ using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Patches.Inventory;
+using MiyakoCarryService.Client.Patches.SAIN;
 
 namespace MiyakoCarryService.Client
 {
@@ -190,6 +191,12 @@ namespace MiyakoCarryService.Client
             if (FikaInstalled)
             {
 
+            }
+
+            if (SAINInstalled)
+            {
+                new CombatSoloLayerStartPatch().Enable();
+                new BotDecisionManagerGetDecisionPatch().Enable();
             }
 
 #if DEBUG
