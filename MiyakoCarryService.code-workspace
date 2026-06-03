@@ -70,7 +70,10 @@
 						"type": "shell",
 						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
 						"dependsOrder": "sequence",
-						"dependsOn": "fika: restore",
+						"dependsOn": [
+                            "client: restore",
+                            "fika: restore"
+                        ],
 						"group": {
 							"kind": "build"
 						}
@@ -80,7 +83,10 @@
 						"type": "shell",
 						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Debug",
 						"dependsOrder": "sequence",
-						"dependsOn": "fika: restore",
+						"dependsOn": [
+                            "client: restore",
+                            "fika: restore"
+                        ],
 						"group": {
 							"kind": "build"
 						}

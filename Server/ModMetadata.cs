@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Server
 {
     public record ModMetadata : AbstractModMetadata, IModWebMetadata
     {
-        private const string CurrentVersion = "1.0.0.4";
+        private const string CurrentVersion = "1.0.1.0";
         public override string Name { get; init; } = "MiyakoCarryServiceServer";
         public override string Author { get; init; } = "Himesamanoyume";
         public override List<string> Contributors { get; init; }
