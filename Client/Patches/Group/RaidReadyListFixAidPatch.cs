@@ -13,26 +13,32 @@ namespace MiyakoCarryService.Client.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RaidReadyList.Class3311), nameof(RaidReadyList.Class3311.method_0));
 
+        private static bool _hasAidAdded = false; 
+
         [PatchPrefix]
         public static bool Prefix(RaidReadyList.Class3311 __instance, ref GroupPlayerViewModelClass player, RaidReadyPlayerPanel playerPanel)
         {
-            if (player.Info.Nickname != "SPT")
+            if (!_hasAidAdded)
             {
-                return true;
-            }
-
-            if (player.AccountId != "1234566")
-            {
-                return true;
-            }
-
-            player.AccountId = "1234568";
-            foreach (var friend in __instance.friends)
-            {
-                if (friend.AccountId == "1234566")
+                if (player.Info.Nickname != "SPT")
                 {
-                    friend.AccountId = "1234568";
-                    break;
+                    return true;
+                }
+
+                if (player.AccountId != "1234566")
+                {
+                    return true;
+                }
+
+                player.AccountId = "1234568";
+                foreach (var friend in __instance.friends)
+                {
+                    if (friend.AccountId == "1234566")
+                    {
+                        friend.AccountId = "1234568";
+                        _hasAidAdded = true;
+                        break;
+                    }
                 }
             }
             return true;

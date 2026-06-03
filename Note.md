@@ -44,6 +44,8 @@
 
 ## 已知问题
 
+- 宫子若作为商人与玩家聊天，会留下商人类型的聊天记录，当移除Mcs后就会导致EFT进行商人聊天类型分支的代码随后报错。只要还使用商人类型的消息，这个问题就无法解决
+- `UpdateProfile()`可能因为异步时序导致返回主角色时仍然获取到护航的数据，导致没能成功更新商人信息
 - 进入护航库存模式后，似乎会必定导致
 ```log
 KeyNotFoundException: The given key '6a1bb92582b7352e4c672b5f' was not present in the dictionary.
@@ -71,6 +73,13 @@ Rethrow as AggregateException: One or more errors occurred. (The given key '6a1b
 #### 1.?.0.0 计划
 
 - 新增玩法：成为护航打手
+
+#### 1.0.1.0
+
+- 新增其他语言的本地化内容
+- 完善修复Aid重复的问题
+- 优化护航的移动
+- 进一步优化与SAIN的适配
 
 #### 1.0.0.X 正式版
 
