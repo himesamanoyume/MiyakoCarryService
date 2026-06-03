@@ -104,7 +104,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 for (int attempt = 0; attempt < 30; attempt++)
                 {
-                    if (Tools.BetterDestination(7f, newPos, out var targetPos))
+                    if (Tools.BetterDestination(3f, newPos, out var targetPos))
                     {
                         if (Mathf.Abs(targetPos.y - mcsLeadPlayerPos.y) <= 2f)
                         {
@@ -119,7 +119,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     validPosition = navMeshHit.position;
                 }
 
-                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE)
+                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     if (validPosition.HasValue)
                     {

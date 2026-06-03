@@ -16,6 +16,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Start()
         {
             base.Start();
+            BotOwner.SetTargetMoveSpeed(1f);
+            BotOwner.Sprint(true, true);
+            BotOwner.SetPose(1f);
         }
 
         public override void Stop()

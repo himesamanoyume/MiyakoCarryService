@@ -193,7 +193,7 @@ namespace MiyakoCarryService.Fika
 
                 for (int attempt = 0; attempt < 30; attempt++)
                 {
-                    if (Tools.BetterDestination(7f, newPos, out var targetPos))
+                    if (Tools.BetterDestination(3f, newPos, out var targetPos))
                     {
                         if (Mathf.Abs(targetPos.y - packet.Position.Value.y) <= 2f)
                         {

@@ -5,6 +5,7 @@ using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Extensions
 {
@@ -17,7 +18,7 @@ namespace MiyakoCarryService.Client.Extensions
         private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
-        
+
         extension(BotOwner botOwner)
         {
             public bool IsMcsBotPlayer => McsMgr.IsMcsBotPlayer(botOwner.ProfileId);
@@ -59,6 +60,26 @@ namespace MiyakoCarryService.Client.Extensions
             public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
             {
                 SubtitlesMgr.TalkMsg(mcsLeadPlayer, mcsBotPlayer, msg);
+            }
+
+            public Vector3 GetMcsLeadPlayerPos(McsBotPlayerData mcsBotPlayerData)
+            {
+                if (mcsBotPlayerData != null && mcsBotPlayerData.LeadPlayer != null && mcsBotPlayerData.LeadPlayer.HealthController.IsAlive)
+                {
+                    return mcsBotPlayerData.LeadPlayer.Position;
+                }
+                else if (botOwner.BotFollower.HaveBoss)
+                {
+                    return botOwner.BotFollower.BossToFollow.Position;
+                }
+                else
+                {
+                    if (botOwner.Position == null)
+                    {
+                        return new();
+                    }
+                    return botOwner.Position;
+                }
             }
         }
     }

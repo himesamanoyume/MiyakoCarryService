@@ -26,15 +26,15 @@ namespace MiyakoCarryService.Client.Mgrs
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.SAINNotAdjusted.Except([nameof(EBrainName.SctPredvst)]).ToList(), 86);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 66);
 
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.SctPredvst)], 186);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)], 186);
             }
             else
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy)]).ToList(), 86);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 86);
 
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy)], 186);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)], 186);
             }
         }
 

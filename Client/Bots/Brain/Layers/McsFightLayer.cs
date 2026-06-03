@@ -140,7 +140,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                             for (int attempt = 0; attempt < 30; attempt++)
                             {
-                                if (Tools.BetterDestination(7f, newPos, out var targetPos))
+                                if (Tools.BetterDestination(3f, newPos, out var targetPos))
                                 {
                                     if (Mathf.Abs(targetPos.y - mcsLeadPlayerPos.y) <= 2f)
                                     {
@@ -167,9 +167,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             }
                             else
                             {
-                                if (_nextPatrolTime + 8f < Time.time)
+                                if (_nextPatrolTime + 4f < Time.time)
                                 {
-                                    _nextPatrolTime = Time.time + 8f;
+                                    _nextPatrolTime = Time.time + 4f;
                                     if (validPosition.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
