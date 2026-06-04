@@ -13,12 +13,13 @@ namespace MiyakoCarryService.Client.Patches.Events
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)]);
 
 		public static ESideType CurrentType = ESideType.Pmc;
+        public static GClass1628<GroupPlayerViewModelClass> GroupPlayers = new();
 
 		/// <summary>
 		/// 在准备开始匹配前发送配置文件
 		/// </summary>
 		[PatchPrefix]
-		public static void Prefix(ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Prefix(MatchmakerPlayerControllerClass ___MatchmakerPlayersController, ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			if (MiyakoCarryServicePlugin.FikaInstalled)
 			{
@@ -31,6 +32,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
 					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
 				}));
+                GroupPlayers = ___MatchmakerPlayersController.GroupPlayers;
 			}
 			CurrentType = raidSettings.Side;
 		}

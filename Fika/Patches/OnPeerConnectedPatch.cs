@@ -1,0 +1,69 @@
+using System.Collections.Generic;
+using System.Reflection;
+using EFT;
+using Fika.Core.Networking;
+using Fika.Core.Networking.LiteNetLib;
+using Fika.Core.Networking.Packets.Backend;
+using HarmonyLib;
+using MiyakoCarryService.Client;
+using MiyakoCarryService.Client.Patches.Events;
+using SPT.Reflection.Patching;
+
+namespace MiyakoCarryService.Fika.Patches
+{
+    /// <summary>
+    /// 用于副机同步护航信息至主机
+    /// </summary>
+    public class FikaClientOnPeerConnectedPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(FikaClient), nameof(FikaClient.OnPeerConnected));
+
+        [PatchPostfix]
+        public static void Postfix(FikaClient __instance, NetPeer peer)
+        {
+            foreach (var groupPlayerViewModelClass in MatchmakerAcceptScreenShowPatch.GroupPlayers)
+            {
+                if (groupPlayerViewModelClass.Id == GameLoop.Instance.Session.Profile.Id)
+                {
+                    continue;
+                }
+
+                var profiles = new Dictionary<Profile, bool>();
+                var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
+                {
+                    AccountId = groupPlayerViewModelClass.AccountId,
+                    Id = groupPlayerViewModelClass.Id,
+                    Info = new ProfileInfoClass()
+                    {
+                        Level = groupPlayerViewModelClass.Info.Level,
+                        PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
+                        MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
+                        SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
+                        Nickname = groupPlayerViewModelClass.Info.Nickname,
+                        Side = groupPlayerViewModelClass.Info.Side,
+                        GameVersion = groupPlayerViewModelClass.Info.GameVersion,
+                        HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
+                        SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
+                    },
+                    Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
+                    Health = new(),
+                    InsuredItems = [],
+                    Inventory = new()
+                    {
+                        Equipment = EFTItemSerializerClass.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, GClass2240.Instance)
+                    },
+                    TaskConditionCounters = [],
+                    Encyclopedia = []
+                };
+
+                var profile = new Profile(completeProfileDescriptorClass);
+                profiles.Add(profile, false);
+                var profilePacket = new LoadingProfilePacket()
+                {
+                    Profiles = profiles
+                };
+                __instance.SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
+            }
+        }
+    }
+}
