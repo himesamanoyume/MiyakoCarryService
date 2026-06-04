@@ -103,7 +103,8 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (McsMgr.IsHost)
                 {
-                    if (McsMgr.IsMyMcsBotPlayer(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, mcsBotPlayer.ProfileId))
+                    var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                    if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
                     {
                         ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
                     }
@@ -198,7 +199,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 CreateSubTitle(mcsBotPlayer.Profile);
             }
-            
+
             if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))
             {
                 if (subTitle.CurrentMsg() == talkContent)

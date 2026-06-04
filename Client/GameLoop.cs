@@ -342,6 +342,11 @@ namespace MiyakoCarryService.Client
                 Side = currentType
             });
 
+            if (mcsProfilesDict.Count == 0)
+            {
+                return;
+            }
+
             var mcsMgr = MgrAccessor.Get<McsMgr>();
             var subtitlesMgr = MgrAccessor.Get<SubtitlesMgr>();
 
@@ -370,9 +375,28 @@ namespace MiyakoCarryService.Client
                 .Where(leadPlayer => leadPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
+            if (botGame == null)
+            {
+                return;
+            }
+
             var botsController = botGame.BotsController;
+            if (botsController == null)
+            {
+                return;
+            }
+
             var botSpawner = botsController.BotSpawner;
+            if (botSpawner == null)
+            {
+                return;
+            }
+
             var botCreator = botSpawner.BotCreator;
+            if (botCreator == null)
+            {
+                return;
+            }
 
             foreach (var leadPlayer in leadPlayers)
             {
