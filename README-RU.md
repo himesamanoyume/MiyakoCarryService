@@ -6,9 +6,9 @@
     </p>
 </h1>
 
-[简体中文](README.md) | English | [Русский](README-RU.md)
+[简体中文](README.md) | [English](README-EN.md) | Русский
 
-MiyakoCarryService is a mod that generates AI teammates.
+MiyakoCarryService - Это мод для генерации товарищей по команде, которыми управляет искусственный интеллект.
 
 <p>
     <img alt="" src="https://img.shields.io/github/v/release/himesamanoyume/MiyakoCarryService?style=flat-square&logo=github&labelColor=40405f&color=66ccff" />
@@ -16,9 +16,14 @@ MiyakoCarryService is a mod that generates AI teammates.
 </p>
 </div>
 
-### Preview
 
-![tutorial](./Preview/tutorial.webp)
+### Инструкция по использованию
+
+![tutorial](./Preview/tutorial-ru.webp)
+
+---
+
+### Демонстрация игрового процесса
 
 ![fika](./Preview/fika.webp)
 
@@ -30,7 +35,7 @@ MiyakoCarryService is a mod that generates AI teammates.
 
 ---
 
-### Credits
+### Титры
 
 [SPT](https://github.com/sp-tarkov)
 
