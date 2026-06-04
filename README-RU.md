@@ -19,7 +19,7 @@ MiyakoCarryService - Это мод для генерации товарищей 
 
 ### Инструкция по использованию
 
-![tutorial](./Preview/tutorial.webp)
+![tutorial](./Preview/tutorial-ru.webp)
 
 ---
 
