@@ -5,7 +5,7 @@
     宫子护航店<br>
 </h1>
 
-简体中文 | [English](README-EN.md)
+简体中文 | [English](README-EN.md) | [Русский](README-RU.md)
 
 宫子护航店 (MiyakoCarryService) 是一个生成AI队友的模组
 
