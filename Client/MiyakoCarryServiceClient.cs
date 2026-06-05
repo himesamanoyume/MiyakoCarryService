@@ -37,7 +37,11 @@ namespace MiyakoCarryService.Client
         public const string FikaGUID = "com.fika.core";
         public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
         public const string BigBrainGUID = "xyz.drakia.bigbrain";
+#if DEBUG
+        public const string McsPluginName = "姫様の夢 MiyakoCarryService DebugBuild";
+#else
         public const string McsPluginName = "姫様の夢 MiyakoCarryService";
+#endif
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
         public static MiyakoCarryServicePlugin Instance;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
