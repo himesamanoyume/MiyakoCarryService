@@ -1,222 +1,270 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"tasks": {
-		"version": "2.0.0",
-		"options": {
-			"env": {
-				"DOTNET_NOLOGO": "yes",
-				"DOTNET_CLI_TELEMETRY_OPTOUT": "yes"
-			}
-		},
-		"tasks": [
-					{
-						"label": "copy: ref dlls from game",
-						"type": "shell",
-						"command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$ErrorActionPreference = 'Stop'; try { $files = @( 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\ConfigurationManager.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-common.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-core.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-custom.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-debugging.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-reflection.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\spt\\spt-singleplayer.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\0Harmony.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\core\\BepInEx.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Assembly-CSharp.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\CommonExtensions.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.CoreModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.IMGUIModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.PhysicsModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.TextRenderingModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.AIModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.AssetBundleModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Unity.TextMeshPro.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Comfort.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\UnityEngine.InputLegacyModule.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Sirenix.Serialization.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\DissonanceVoip.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Comfort.Unity.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\Newtonsoft.Json.dll', 'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\EscapeFromTarkov_Data\\Managed\\ItemComponent.Types.dll' ); foreach($file in $files) { if(Test-Path $file) { Copy-Item $file '${workspaceFolder}\\Ref\\' -Force; Write-Host \\\"Copied: $file\\\" } else { Write-Host \\\"Warning: $file not found\\\" } } } catch { Write-Host \\\"Error: $_\\\"; exit 1 }\""
-					},
-					{
-						"label": "client: restore",
-						"type": "shell",
-						"command": "dotnet restore Client/MiyakoCarryServiceClient.sln --nologo",
-					},
-					{
-						"label": "fika: restore",
-						"type": "shell",
-						"command": "dotnet restore Fika/MiyakoCarryServiceFika.sln --nologo",
-					},
-					{
-						"label": "server: restore",
-						"type": "shell",
-						"command": "dotnet restore Server/MiyakoCarryServiceServer.sln --nologo",
-					},
-					{
-						"label": "package",
-						"type": "shell",
-						"command": "powershell",
-						"args": [
-							"-NoProfile",
-							"-ExecutionPolicy",
-							"Bypass",
-							"-Command",
-							"$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver.zip\" -Force"
-						],
-					},
-					{
-						"label": "client: build",
-						"type": "shell",
-						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
-						"dependsOrder": "sequence",
-						"dependsOn": "client: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "client: debug build",
-						"type": "shell",
-						"command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
-						"dependsOrder": "sequence",
-						"dependsOn": "client: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "fika: build",
-						"type": "shell",
-						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-                            "client: restore",
-                            "fika: restore"
-                        ],
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "fika: debug build",
-						"type": "shell",
-						"command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Debug",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-                            "client: restore",
-                            "fika: restore"
-                        ],
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "server: build",
-						"type": "shell",
-						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
-						"dependsOrder": "sequence",
-						"dependsOn": "server: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "server: debug build",
-						"type": "shell",
-						"command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Debug",
-						"dependsOrder": "sequence",
-						"dependsOn": "server: restore",
-						"group": {
-							"kind": "build"
-						}
-					},
-					{
-						"label": "build: clean",
-						"type": "shell",
-						"command": "powershell",
-						"args": [
-							"-NoProfile",
-							"-ExecutionPolicy",
-							"Bypass",
-							"-Command",
-							"if (Test-Path '${workspaceFolder}\\Build') { Remove-Item '${workspaceFolder}\\Build\\*' -Recurse -Force }"
-						]
-					},
-					{
-						"label": "all: build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"build: clean",
-							"server: build",
-							"fika: build"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: debug build",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"build: clean",
-							"server: debug build",
-							"fika: debug build"
-						],
-						"group": "build"
-					},
-					{
-						"label": "client: move",
-						"type": "shell",
-						"command": "xcopy",
-						"args": [
-							"/E",
-							"/I",
-							"/Y",
-							"'${workspaceFolder}\\Build\\BepInEx\\'",
-							"'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\'"
-						]
-					},
-					{
-						"label": "client headless: move",
-						"type": "shell",
-						"command": "xcopy",
-						"args": [
-							"/E",
-							"/I",
-							"/Y",
-							"'${workspaceFolder}\\Build\\BepInEx\\'",
-							"'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\'"
-						]
-					},
-					{
-						"label": "server: move",
-						"type": "shell",
-						"command": "xcopy",
-						"args": [
-							"/E",
-							"/I",
-							"/Y",
-							"'${workspaceFolder}\\Build\\SPT\\user\\'",
-							"'D:\\OtherGames\\SPT4.0.X\\Server-4.0.X\\SPT\\user'"
-						]
-					},
-					{
-						"label": "all: move",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"server: move",
-							"client: move",
-							"client headless: move"
-						],
-						"group": "build"
-					},
-					{
-						"label": "client fika: move",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"client: move",
-							"client headless: move"
-						],
-						"group": "build"
-					},
-					{
-						"label": "all: (build & package)",
-						"dependsOrder": "sequence",
-						"dependsOn": [
-							"all: build",
-							"package"
-						],
-						"group": "build"
-					}
-				]
-			},
-			"settings": {
-				"window.title": "Himesamanoyume.MiyakoCarryService-4.0.X",
-				"dotnet.preferCSharpExtension": true,
-				"dotnet.defaultSolution": "MiyakoCarryService.slnx"
-			},
-			"extensions": {
-				"recommendations": [
-					"ms-dotnettools.csharp"
-				]
-			}
-		}
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "tasks": {
+        "version": "2.0.0",
+        "options": {
+            "env": {
+                "DOTNET_NOLOGO": "yes",
+                "DOTNET_CLI_TELEMETRY_OPTOUT": "yes"
+            }
+        },
+        "tasks": [
+            {
+                "label": "copy: ref dlls from game",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/copy_ref_dlls.ps1",
+                    "-WorkspaceFolder",
+                    "${workspaceFolder}"
+                ]
+            },
+            {
+                "label": "client: restore",
+                "type": "shell",
+                "command": "dotnet restore Client/MiyakoCarryServiceClient.sln --nologo",
+            },
+            {
+                "label": "fika: restore",
+                "type": "shell",
+                "command": "dotnet restore Fika/MiyakoCarryServiceFika.sln --nologo",
+            },
+            {
+                "label": "server: restore",
+                "type": "shell",
+                "command": "dotnet restore Server/MiyakoCarryServiceServer.sln --nologo",
+            },
+            {
+                "label": "package",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver.zip\" -Force"
+                ],
+            },
+            {
+                "label": "client: build",
+                "type": "shell",
+                "command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Release",
+                "dependsOrder": "sequence",
+                "dependsOn": "client: restore",
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "client: debug build",
+                "type": "shell",
+                "command": "dotnet build Client/MiyakoCarryServiceClient.sln --nologo --no-restore --configuration Debug",
+                "dependsOrder": "sequence",
+                "dependsOn": "client: restore",
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "fika: build",
+                "type": "shell",
+                "command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "client: restore",
+                    "fika: restore"
+                ],
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "fika: debug build",
+                "type": "shell",
+                "command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Debug",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "client: restore",
+                    "fika: restore"
+                ],
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "server: build",
+                "type": "shell",
+                "command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
+                "dependsOrder": "sequence",
+                "dependsOn": "server: restore",
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "server: debug build",
+                "type": "shell",
+                "command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Debug",
+                "dependsOrder": "sequence",
+                "dependsOn": "server: restore",
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "build: clean",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "if (Test-Path '${workspaceFolder}\\Build') { Remove-Item '${workspaceFolder}\\Build\\*' -Recurse -Force }"
+                ]
+            },
+            {
+                "label": "all: build",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "build: clean",
+                    "server: build",
+                    "fika: build"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "all: debug build",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "build: clean",
+                    "server: debug build",
+                    "fika: debug build"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "client: move",
+                "type": "shell",
+                "command": "xcopy",
+                "args": [
+                    "/E",
+                    "/I",
+                    "/Y",
+                    "'${workspaceFolder}\\Build\\BepInEx\\'",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\'"
+                ]
+            },
+            {
+                "label": "client headless: move",
+                "type": "shell",
+                "command": "xcopy",
+                "args": [
+                    "/E",
+                    "/I",
+                    "/Y",
+                    "'${workspaceFolder}\\Build\\BepInEx\\'",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\'"
+                ]
+            },
+            {
+                "label": "server: move",
+                "type": "shell",
+                "command": "xcopy",
+                "args": [
+                    "/E",
+                    "/I",
+                    "/Y",
+                    "'${workspaceFolder}\\Build\\SPT\\user\\'",
+                    "'D:\\OtherGames\\SPT4.0.X\\Server-4.0.X\\SPT\\user'"
+                ]
+            },
+            {
+                "label": "all: move",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "server: move",
+                    "client: move",
+                    "client headless: move"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "client fika: move",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "client: move",
+                    "client headless: move"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "all: (build & package)",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "all: build",
+                    "package"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "upload to virustotal",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/Scripts/upload_to_vt.ps1",
+                    "-WorkspaceFolder",
+                    "${workspaceFolder}"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "create draft release",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/create_draft_release.ps1",
+                    "-WorkspaceFolder",
+                    "${workspaceFolder}"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "all: virustotal & draft",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "upload to virustotal",
+                    "create draft release"
+                ],
+                "group": "build"
+            }
+        ]
+    },
+    "settings": {
+        "window.title": "Himesamanoyume.MiyakoCarryService-4.0.X",
+        "dotnet.preferCSharpExtension": true,
+        "dotnet.defaultSolution": "MiyakoCarryService.slnx"
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-dotnettools.csharp"
+        ]
+    }
+}
