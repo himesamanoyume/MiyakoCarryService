@@ -119,5 +119,6 @@
     "Mcs/BigSurveyNotify": "Total exception: {0}，log text copied",
     "Mcs/ReturnToMainCharRefuse": "This player is not a carry service player, unable to open inventory",
     "Mcs/ReturnToMainCharTip": "Please select the carry service player currently in Mcs Inventory Mode to return to the main character",
-    "Mcs/ReturnToMainNoWeapon": "Please equip the carry service player with at least one gun"
+    "Mcs/ReturnToMainCharNoWeapon": "Please equip the carry service player with at least one gun",
+    "Mcs/CannotRaidInMcsInventoryMode": "Currently in Mcs Inventory Mode, unable to enter the raid"
 }

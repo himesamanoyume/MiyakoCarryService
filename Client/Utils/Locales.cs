@@ -101,6 +101,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string BIGSURVEYNOTIFY = "Mcs/BigSurveyNotify";
         public const string RETURNTOMAINCHARREFUSE = "Mcs/ReturnToMainCharRefuse";
         public const string RETURNTOMAINCHARTIP = "Mcs/ReturnToMainCharTip";
-        public const string RETURNTOMAINCHARNOWEAPON = "Mcs/ReturnToMainNoWeapon";
+        public const string RETURNTOMAINCHARNOWEAPON = "Mcs/ReturnToMainCharNoWeapon";
+        public const string CANNOTRAIDINMCSINVENTORYMODE = "Mcs/CannotRaidInMcsInventoryMode";
     }
 }

@@ -119,5 +119,6 @@
     "Mcs/BigSurveyNotify": "共捕获到 {0} 个错误，已复制日志文本",
     "Mcs/ReturnToMainCharRefuse": "此玩家不是护航玩家，无法打开库存",
     "Mcs/ReturnToMainCharTip": "请选择当前护航库存模式的角色来返回主角色",
-    "Mcs/ReturnToMainNoWeapon": "请为护航玩家装备至少一件枪械武器"
+    "Mcs/ReturnToMainCharNoWeapon": "请为护航玩家装备至少一件枪械武器",
+    "Mcs/CannotRaidInMcsInventoryMode": "正处于护航库存模式，无法进入战局"
 }
