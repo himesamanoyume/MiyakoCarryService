@@ -40,6 +40,7 @@ namespace MiyakoCarryService.Fika.Patches
                     Info = new ProfileInfoClass()
                     {
                         Level = groupPlayerViewModelClass.Info.Level,
+                        Experience = InfoClass.GetExperience(groupPlayerViewModelClass.Info.Level),
                         PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
                         MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
                         SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
