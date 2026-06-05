@@ -100,8 +100,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     UpdateMoveTarget(out float nextTime);
                     _nextUpdatePosTime = Time.time + nextTime;
                 }
-
-                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE)
+                
+                var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
+                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE || sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE)
                 {
                     if (_currentMoveTarget.HasValue)
                     {

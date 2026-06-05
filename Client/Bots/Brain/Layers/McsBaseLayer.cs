@@ -38,6 +38,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;  
         protected const float FOLLOW_DISTANCE = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
+        protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
         protected const float JUMP_CHECK_INTERVAL = 1f;
         protected const float STUCK_JUMP_THRESHOLD = 1f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
