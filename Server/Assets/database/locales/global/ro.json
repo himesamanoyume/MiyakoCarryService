@@ -21,6 +21,7 @@
     "Mcs/FunctionDisabled": "Disabled",
     "Mcs/EnableLooting Key": "Enable Looting",
     "Mcs/EnableLooting Description": "Whether carry service players perform the behavior of looting loot",
+    "Mcs/EnableLootingHotKey Key": "Enable Looting Hotkey",
     "Mcs/PriceThreshold Key": "Price Threshold",
     "Mcs/PriceThreshold Description": "Loot below this price will be ignored",
     "Mcs/KeywordItemText Key": "Loot Name Keyword",

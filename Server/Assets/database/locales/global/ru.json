@@ -21,6 +21,7 @@
     "Mcs/FunctionDisabled": "Выключено",
     "Mcs/EnableLooting Key": "Включить подбор лута",
     "Mcs/EnableLooting Description": "Можно ли наёмнику собирать вещи.",
+    "Mcs/EnableLootingHotKey Key": "Enable Looting Hotkey",
     "Mcs/PriceThreshold Key": "Ценовой порог",
     "Mcs/PriceThreshold Description": "Добыча ниже этой цены будет игнорироваться.",
     "Mcs/KeywordItemText Key": "Ключевое слово имени добычи",

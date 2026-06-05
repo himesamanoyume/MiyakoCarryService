@@ -21,6 +21,7 @@
     "Mcs/FunctionDisabled": "已关闭",
     "Mcs/EnableLooting Key": "开启掠夺",
     "Mcs/EnableLooting Description": "护航是否进行掠夺战利品的行为",
+    "Mcs/EnableLootingHotKey Key": "开启掠夺快捷键",
     "Mcs/PriceThreshold Key": "价值阈值",
     "Mcs/PriceThreshold Description": "低于该值的战利品会被忽略",
     "Mcs/KeywordItemText Key": "战利品名称关键词",

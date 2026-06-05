@@ -55,6 +55,7 @@ namespace MiyakoCarryService.Client
         #region BASIC
 
         public static ConfigEntry<bool> EnableLooting;
+        public static ConfigEntry<KeyboardShortcut> EnableLootingHotKey;
         public static ConfigEntry<int> PriceThreshold;
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
@@ -360,6 +361,12 @@ namespace MiyakoCarryService.Client
                 Locales.ENABLELOOTING_KEY,
                 true,
                 Locales.ENABLELOOTING_DESCRIPTION
+            );
+
+            EnableLootingHotKey = Register(
+                EConfigType.BASIC,
+                Locales.ENABLELOOTINGHOTKEY_KEY,
+                new KeyboardShortcut()
             );
 
             PriceThreshold = Register(
