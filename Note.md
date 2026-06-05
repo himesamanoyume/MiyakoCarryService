@@ -1,7 +1,5 @@
 # MiyakoCarryService / 宫子护航店
 
-- [Forge描述示例](https://github.com/sp-tarkov/forge/blob/c7bf0e31232205d351afc954450c40fcc50f0b3f/resources/markdown/exampleModDescription.md)
-
 ## 已知问题
 
 - null
@@ -26,7 +24,6 @@
 - 实现太接近老板时自己让开
 - 最好能使用上大模型，语音识别。游戏中通过语音识别、或扩展指令系统来发出指令
 - 解锁红护：护航AI使用魔法子弹、无视障碍索敌，帮你吸物资
-- 我发现其实原版在小队成员超出4人时，Scav角色会显示人数超额，但这只在Scav冷却中才会显示，是否可以利用
 - 战局中增配护航功能。如果有护航减员可以在转移点生成其他已点的护航进入战局
 - 护航能够开所有的门，为护航添加订阅老板的射线检测的事件，检测老板Ray的可交互物体是否是上锁的门，如果是就要跑去帮老板开门
 - 当需要吃喝、医疗品时要能够在安全的情况下寻找周围的吃喝、医疗品并使用。因此这也将能够做到你丢出医疗品给他，他会自己去取来用
@@ -47,17 +44,6 @@
 - **最新版仍然有人反馈被护航杀**
 - 宫子若作为商人与玩家聊天，会留下商人类型的聊天记录，当移除Mcs后就会导致EFT进行商人聊天类型分支的代码随后报错。只要还使用商人类型的消息，这个问题就无法解决
 - `UpdateProfile()`可能因为异步时序导致返回主角色时仍然获取到护航的数据，导致没能成功更新商人信息
-- 进入护航库存模式后，似乎会必定导致
-```log
-KeyNotFoundException: The given key '6a1bb92582b7352e4c672b5f' was not present in the dictionary.
-  at System.Collections.Generic.Dictionary`2[TKey,TValue].get_Item (TKey key) [0x0001e] in <8ce0bd04a7a04b4b9395538239d3fdd8>:0 
-  at GClass4014.RemoveProfileQuestTemplate (System.String profileId, RawQuestClass template) [0x00000] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at QuestBookClass.RemoveQuestTemplate (RawQuestClass template) [0x00005] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at GClass4005.method_4 (GClass3996 quest) [0x00057] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at QuestBookClass+Class3603.method_2 () [0x0000f] in <ad47400a25db462cbf0a531df654c3c3>:0 
-  at GClass3996.method_9 () [0x000bc] in <ad47400a25db462cbf0a531df654c3c3>:0 
-Rethrow as AggregateException: One or more errors occurred. (The given key '6a1bb92582b7352e4c672b5f' was not present in the dictionary.)
-```
 - **平衡隐患：拥有了护航库存模式宫子商人0元购，战局中打开护航背包指令后，实际上玩家可以通过护航带入大量物品并能十分轻易地转移全物品**
 - **下单后刷不出任务的问题，疑似还在，数个版本后再发起一次调查问卷吧**
 
