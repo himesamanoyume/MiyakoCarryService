@@ -1,6 +1,6 @@
 param(
     [string]$WorkspaceFolder,
-    [string]$OutputFile = ".vt_report_url.txt"
+    [string]$OutputFile = "vt_report_url.txt"
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,7 +57,11 @@ try {
         $reportRes = $reportJson | ConvertFrom-Json
         
         if ($reportRes.data.attributes.status -eq "completed") {
-            $reportUrl = $reportRes.data.links.self.Replace("api/v3/analyses/", "gui/file/")
+            $sha256 = $reportRes.meta.file_info.sha256
+            if (-not $sha256) {
+                throw "Scan completed but SHA256 not found in response metadata."
+            }
+            $reportUrl = "https://www.virustotal.com/gui/file/$sha256"
             break
         }
         
@@ -74,6 +78,7 @@ try {
     $outputPath = Join-Path $WorkspaceFolder $OutputFile
     Set-Content -Path $outputPath -Value $reportUrl -Force
     Write-Host "Scan complete! Report URL saved to $outputPath"
+    Write-Host "URL: $reportUrl"
     
 } catch {
     Write-Host "VirusTotal API Error: $_"
