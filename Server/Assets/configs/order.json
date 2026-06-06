@@ -12,29 +12,29 @@
             "minPlayerLevel": 0,
             "rewardScaling": {
                 "levels": [
-                    0
+                    1
                 ],
                 "experience": [
-                    0
+                    1
                 ],
                 "roubles": [
-                    0
+                    1
                 ],
                 "gpCoins": [
-                    0
+                    1
                 ],
                 "items": [
-                    0
+                    1
                 ],
                 "reputation": [
-                    0
+                    1
                 ],
-                "rewardSpread": 0,
+                "rewardSpread": 0.01,
                 "skillRewardChance": [
-                    0
+                    1
                 ],
                 "skillPointReward": [
-                    0
+                    1
                 ]
             },
             "locations": {
@@ -47,16 +47,16 @@
                 "Exploration": [
                     {
                         "levelRange": {
-                            "min": 0,
-                            "max": 0
+                            "min": 1,
+                            "max": 1
                         },
-                        "minExtracts": 0,
-                        "maxExtracts": 0,
-                        "minExtractsWithSpecificExit": 0,
-                        "maxExtractsWithSpecificExit": 0,
+                        "minExtracts": 1,
+                        "maxExtracts": 1,
+                        "minExtractsWithSpecificExit": 1,
+                        "maxExtractsWithSpecificExit": 1,
                         "possibleSkillRewards": [],
                         "specificExits": {
-                            "chance": 0,
+                            "chance": 1,
                             "passageRequirementWhitelist": []
                         }
                     }
@@ -64,7 +64,7 @@
                 "Completion": [
                     {
                         "levelRange": {
-                            "min": 0,
+                            "min": 1,
                             "max": 9999
                         },
                         "possibleSkillRewards": [],
@@ -73,19 +73,19 @@
                             "max": 30000
                         },
                         "uniqueItemCount": {
-                            "min": 0,
-                            "max": 0
+                            "min": 1,
+                            "max": 1
                         },
                         "requestedBulletCount": {
-                            "min": 0,
-                            "max": 0
+                            "min": 1,
+                            "max": 1
                         },
                         "useWhitelist": false,
                         "useBlacklist": false,
                         "requiredItemsAreFiR": false,
                         "requiredItemMinDurabilityMinMax": {
-                            "min": 0,
-                            "max": 0
+                            "min": 1,
+                            "max": 1
                         },
                         "requiredItemTypeBlacklist": []
                     }
@@ -93,26 +93,26 @@
                 "Elimination": [
                     {
                         "levelRange": {
-                            "min": 0,
-                            "max": 0
+                            "min": 1,
+                            "max": 1
                         },
                         "possibleSkillRewards": [],
                         "targets": [],
-                        "bodyPartChance": 0,
+                        "bodyPartChance": 1,
                         "bodyParts": [],
-                        "specificLocationChance": 0,
+                        "specificLocationChance": 1,
                         "distLocationBlacklist": [],
-                        "distProb": 0,
-                        "maxDist": 0,
-                        "minDist": 0,
-                        "maxKills": 0,
-                        "minKills": 0,
-                        "maxBossKills": 0,
-                        "minBossKills": 0,
-                        "maxPmcKills": 0,
-                        "minPmcKills": 0,
-                        "weaponRequirementChance": 0,
-                        "weaponCategoryRequirementChance": 0,
+                        "distProb": 1,
+                        "maxDist": 1,
+                        "minDist": 1,
+                        "maxKills": 1,
+                        "minKills": 1,
+                        "maxBossKills": 1,
+                        "minBossKills": 1,
+                        "maxPmcKills": 1,
+                        "minPmcKills": 1,
+                        "weaponRequirementChance": 1,
+                        "weaponCategoryRequirementChance": 1,
                         "weaponCategoryRequirements": [],
                         "weaponRequirements": []
                     }
@@ -120,7 +120,7 @@
             },
             "rewardBaseTypeBlacklist": [],
             "rewardBlacklist": [],
-            "rewardAmmoStackMinSize": 0,
+            "rewardAmmoStackMinSize": 1,
             "freeChangesAvailable": 0,
             "freeChanges": 0,
             "keepDailyQuestTypeOnReplacement": false,

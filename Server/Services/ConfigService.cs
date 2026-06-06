@@ -88,18 +88,18 @@ public sealed class ConfigService(
                     Types = ["Completion"],
                     ResetTime = 900,
                     NumQuests = 100,
-                    MinPlayerLevel = 0,
+                    MinPlayerLevel = 1,
                     RewardScaling = new RewardScaling
                     {
-                        Levels = [0],
-                        Experience = [0],
-                        Roubles = [0],
-                        GpCoins = [0],
-                        Items = [0],
-                        Reputation = [0],
+                        Levels = [1],
+                        Experience = [1],
+                        Roubles = [1],
+                        GpCoins = [1],
+                        Items = [1],
+                        Reputation = [1],
                         RewardSpread = 0,
-                        SkillRewardChance = [0],
-                        SkillPointReward = [0]
+                        SkillRewardChance = [1],
+                        SkillPointReward = [1]
                     },
                     Locations = new() {
                         {ELocationName.any, ["any"]}
@@ -109,58 +109,58 @@ public sealed class ConfigService(
                     {
                         ExplorationConfig = [new ExplorationConfig
                         {
-                            LevelRange = new MinMax<int> {Min = 0, Max = 0},
-                            MinimumExtracts = 0,
-                            MaximumExtracts = 0,
-                            MinimumExtractsWithSpecificExit = 0,
-                            MaximumExtractsWithSpecificExit = 0,
+                            LevelRange = new MinMax<int> {Min = 1, Max = 1},
+                            MinimumExtracts = 1,
+                            MaximumExtracts = 1,
+                            MinimumExtractsWithSpecificExit = 1,
+                            MaximumExtractsWithSpecificExit = 1,
                             PossibleSkillRewards = [],
                             SpecificExits = new SpecificExits
                             {
-                                Chance = 0,
+                                Chance = 1,
                                 PassageRequirementWhitelist = []
                             }
                         }],
                         CompletionConfig = [new CompletionConfig
                         {
-                            LevelRange = new MinMax<int> {Min = 0, Max = 9999},
+                            LevelRange = new MinMax<int> {Min = 1, Max = 9999},
                             PossibleSkillRewards = [],
                             RequestedItemCount = new MinMax<int> {Min = 30000, Max = 30000},
-                            UniqueItemCount = new MinMax<int> {Min = 0, Max = 0},
-                            RequestedBulletCount = new MinMax<int> {Min = 0, Max = 0},
+                            UniqueItemCount = new MinMax<int> {Min = 1, Max = 1},
+                            RequestedBulletCount = new MinMax<int> {Min = 1, Max = 1},
                             UseWhitelist = false,
                             UseBlacklist = false,
                             RequiredItemsAreFiR = false,
-                            RequiredItemMinDurabilityMinMax = new MinMax<int> {Min = 0, Max = 0},
+                            RequiredItemMinDurabilityMinMax = new MinMax<int> {Min = 1, Max = 1},
                             RequiredItemTypeBlacklist = []
                         }],
                         Elimination = [new EliminationConfig
                         {
-                            LevelRange = new MinMax<int> {Min = 0, Max = 0},
+                            LevelRange = new MinMax<int> {Min = 1, Max = 1},
                             PossibleSkillRewards = [],
                             Targets = [],
-                            BodyPartChance = 0,
+                            BodyPartChance = 1,
                             BodyParts = [],
-                            SpecificLocationChance = 0,
+                            SpecificLocationChance = 1,
                             DistLocationBlacklist = [],
-                            DistanceProbability = 0,
-                            MaxDistance = 0,
-                            MinDistance = 0,
-                            MaxKills = 0,
-                            MinKills = 0,
-                            MaxBossKills = 0,
-                            MinBossKills = 0,
-                            MaxPmcKills = 0,
-                            MinPmcKills = 0,
-                            WeaponRequirementChance = 0,
-                            WeaponCategoryRequirementChance = 0,
+                            DistanceProbability = 1,
+                            MaxDistance = 1,
+                            MinDistance = 1,
+                            MaxKills = 1,
+                            MinKills = 1,
+                            MaxBossKills = 1,
+                            MinBossKills = 1,
+                            MaxPmcKills = 1,
+                            MinPmcKills = 1,
+                            WeaponRequirementChance = 1,
+                            WeaponCategoryRequirementChance = 1,
                             WeaponCategoryRequirements = [],
                             WeaponRequirements = []
                         }]
                     },
                     RewardBaseTypeBlacklist = [],
                     RewardBlacklist = [],
-                    RewardAmmoStackMinSize = 0,
+                    RewardAmmoStackMinSize = 1,
                     FreeChangesAvailable = 0,
                     FreeChanges = 0,
                     KeepDailyQuestTypeOnReplacement = false,
