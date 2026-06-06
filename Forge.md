@@ -225,6 +225,7 @@ Whether to use subtitles to display `McsBotPlayer` reports.
 
 - English (AI Translate)
 - 简体中文
+- русский язык (Contributed by NotDifficult)
 
 ## WildSpawnType
 

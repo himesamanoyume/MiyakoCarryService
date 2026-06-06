@@ -74,10 +74,22 @@ try {
         -ContentType "application/zip"
 
     Write-Host "Asset uploaded successfully: $($uploadRes.browser_download_url)"
-    Write-Host "`nAll done! Draft release is ready for review."
+    Write-Host "`nAll done! Draft release is ready for review.`n"
+
+    $finalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$fileName"
+
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "Download URL : $finalDownloadUrl"
+    if ($vtUrl) {
+        Write-Host "VT Report    : $vtUrl"
+    } else {
+        Write-Host "VT Report    : (Not available)" -ForegroundColor Yellow
+    }
+    Write-Host "Draft Page   : $($releaseRes.html_url)"
+    Write-Host "`========================================" -ForegroundColor Cyan
 
 } catch {
-    Write-Host "❌ GitHub API Error: $_"
+    Write-Host "GitHub API Error: $_"
     if ($_.Exception.Response) {
         $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
         $reader.BaseStream.Position = 0
