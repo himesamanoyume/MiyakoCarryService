@@ -118,26 +118,6 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        public void LoadMcsFika()
-        {
-            var pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
-            if (!File.Exists(assemblyPath))
-            {
-                return;
-            }
-
-            var assembly = Assembly.LoadFrom(assemblyPath);
-            var mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
-
-            if (mcsFikaType != null)
-            {
-                var mcsFika = Activator.CreateInstance(mcsFikaType);
-                var initMethod = mcsFikaType.GetMethod("InitMcsFika");
-                initMethod?.Invoke(mcsFika, null);
-            }
-        }
-
         public void Init()
         {
             LoadAssetBundle();
@@ -149,11 +129,6 @@ namespace MiyakoCarryService.Client
             SubtitlesMgr.Enable();
             CommandMgr.Enable();
             HighlightMgr.Enable();
-
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                LoadMcsFika();
-            }
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);

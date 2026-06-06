@@ -1,7 +1,7 @@
 param(
     [string]$WorkspaceFolder,
     [string]$RepoName = "Himesamanoyume/MiyakoCarryService",
-    [string]$VtReportFile = ".vt_report_url.txt"
+    [string]$VtReportFile = "vt_report_url.txt"
 )
 
 $ErrorActionPreference = "Stop"

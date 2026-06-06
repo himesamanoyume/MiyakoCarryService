@@ -21,6 +21,8 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Patches.Inventory;
 using MiyakoCarryService.Client.Patches.SAIN;
+using System.IO;
+using System.Reflection;
 
 namespace MiyakoCarryService.Client
 {
@@ -196,7 +198,7 @@ namespace MiyakoCarryService.Client
 
             if (FikaInstalled)
             {
-
+                LoadMcsFika();
             }
 
             if (SAINInstalled)
@@ -208,6 +210,26 @@ namespace MiyakoCarryService.Client
 #if DEBUG
 
 #endif
+        }
+
+        private void LoadMcsFika()
+        {
+            var pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
+            if (!File.Exists(assemblyPath))
+            {
+                return;
+            }
+
+            var assembly = Assembly.LoadFrom(assemblyPath);
+            var mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
+
+            if (mcsFikaType != null)
+            {
+                var mcsFika = Activator.CreateInstance(mcsFikaType);
+                var initMethod = mcsFikaType.GetMethod("InitMcsFika");
+                initMethod?.Invoke(mcsFika, null);
+            }
         }
 
         private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
