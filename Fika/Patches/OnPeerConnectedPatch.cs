@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using EFT;
 using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
@@ -19,8 +20,9 @@ namespace MiyakoCarryService.Fika.Patches
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(FikaClient), nameof(FikaClient.OnPeerConnected));
 
         [PatchPostfix]
-        public static void Postfix(FikaClient __instance, NetPeer peer)
+        public static async void Postfix(FikaClient __instance, NetPeer peer)
         {
+            await Task.Delay(1000);
             foreach (var groupPlayerViewModelClass in MatchmakerAcceptScreenShowPatch.GroupPlayers)
             {
                 if (groupPlayerViewModelClass.Id == GameLoop.Instance.Session.Profile.Id)
@@ -64,6 +66,7 @@ namespace MiyakoCarryService.Fika.Patches
                     Profiles = profiles
                 };
                 __instance.SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
+                await Task.Delay(1000);
             }
         }
     }
