@@ -46,6 +46,7 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         public bool IsTaskRunning = false;
+        public bool ShouldRegroup = false;
         public bool ShouldHoldPosition = false;
         public bool ShouldGoToPoint = false;
         public bool ShouldExfil = false;

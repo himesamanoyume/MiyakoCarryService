@@ -88,7 +88,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 }
 
                 var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
+                if (mcsBotPlayerData.ShouldRegroup || mcsBotPlayerData.ShouldGoToPoint || mcsBotPlayerData.ShouldHoldPosition || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
                 {
                     botDecisionManagerTraverse.Method("SetDecisions", [_combatDecisionType, _squadDecisionType, _selfActionType, _enemyType]).GetValue([_combatDecisionValue, _squadDecisionValue, _selfActionTypeValue, null]);
                     return false;

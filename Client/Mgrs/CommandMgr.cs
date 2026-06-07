@@ -361,6 +361,11 @@ namespace MiyakoCarryService.Client.Mgrs
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.IsLooting = false;
+                }
                 if (botOwner.Memory.HaveEnemy)
                 {
                     botOwner.TalkMsg(new McsMsg
@@ -388,9 +393,13 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                mcsBotPlayerData.ShouldGoToPoint = false;
-                mcsBotPlayerData.ShouldHoldPosition = false;
-                mcsBotPlayerData.IsLooting = false;
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldRegroup = true;
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.IsLooting = false;
+                }
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Regroup,
@@ -459,7 +468,12 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             validPosition = leadDir + validPosition.Value;
                         }
-                        botOwner.GetMcsBotPlayerData().ShouldGoToPoint = true;
+                        var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                        if (mcsBotPlayerData != null)
+                        {
+                            mcsBotPlayerData.ShouldGoToPoint = true;
+                            mcsBotPlayerData.IsLooting = false;
+                        }
                         botOwner.Mover.LastTimePosChanged = Time.time;
                         botOwner.StopMove();
                         botOwner.GoToSomePointData.SetPoint(validPosition.Value);
@@ -484,7 +498,12 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
-                botOwner.GetMcsBotPlayerData().ShouldHoldPosition = true;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.ShouldHoldPosition = true;
+                }
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.HoldPosition,
@@ -667,7 +686,14 @@ namespace MiyakoCarryService.Client.Mgrs
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
-                mcsBotPlayer.Teleport(botOwner.GetMcsBotPlayerData().LeadPlayer.Position, true);
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
+                }
                 var playerPosition = mcsBotPlayer.Position;
                 botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
                 botOwner.Mover.LastGoodCastPointTime = Time.time;
@@ -680,13 +706,6 @@ namespace MiyakoCarryService.Client.Mgrs
                     PhraseTrigger = EPhraseTrigger.Roger,
                 });
 
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
-                    mcsBotPlayerData.IsLooting = false;
-                }
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
                     botOwner.Memory.GoalTarget.Clear();
