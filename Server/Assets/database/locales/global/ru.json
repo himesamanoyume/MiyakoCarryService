@@ -26,7 +26,7 @@
     "Mcs/PriceThreshold Description": "Добыча ниже этой цены будет игнорироваться.",
     "Mcs/KeywordItemText Key": "Ключевые слова названия предметов",
     "Mcs/KeywordItemText Description": "Ключевые слова — это подстроки, содержащиеся в полном или сокращенном названии элемента. Несколько ключевых слов можно разделить с помощью “||”, “,” or “，”",
-    "Mcs/LootingKeywordItem Key": "Собирать предметы по ключевому слову",
+    "Mcs/LootingKeywordItem Key": "Подбирать предметы по ключевому слову",
     "Mcs/BlockItemType Key": "Не подбирать предметы с галочкой",
     "Mcs/BlockItemTypeAmmo": "Патроны",
     "Mcs/BlockItemTypeOther": "Другое",
