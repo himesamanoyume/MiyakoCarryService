@@ -30,10 +30,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Start()
         {
             base.Start();
-            BotOwner.TalkMsg(new McsMsg
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+
+            if (mcsBotPlayerData != null)
             {
-                PhraseTrigger = EPhraseTrigger.GoLoot
-            });
+                mcsBotPlayerData.IsLooting = true;
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.GoLoot
+                });
+            }
         }
 
         public override void Stop()
@@ -49,12 +55,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Update(CustomLayer.ActionData data)
         {
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData.IsTaskRunning)
+
+            if (mcsBotPlayerData == null)
             {
                 return;
             }
 
-            mcsBotPlayerData.IsLooting = true;
+            if (!mcsBotPlayerData.IsLooting)
+            {
+                return;
+            }
+
+            if (mcsBotPlayerData.IsTaskRunning)
+            {
+                return;
+            }
 
             if (_lastTimeCheckDistance < Time.time)
             {
@@ -120,6 +135,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             try
             {
+                if (mcsBotPlayerData == null)
+                {
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.IsTaskRunning = false;
+                    return;
+                }
+
                 if (mcsBotPlayerData.LootingTarget == null)
                 {
                     return;

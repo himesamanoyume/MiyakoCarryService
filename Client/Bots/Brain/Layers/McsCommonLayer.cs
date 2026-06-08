@@ -18,10 +18,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             base.Start();
             _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN;
-            if (McsBotPlayerData != null)
-            {
-                McsBotPlayerData.ShouldRegroup = false;
-            }
         }
 
         public override void Stop()

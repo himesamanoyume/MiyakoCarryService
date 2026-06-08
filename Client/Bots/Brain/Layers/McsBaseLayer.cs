@@ -803,6 +803,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndRunToEnemy()
         {
+            if (McsBotPlayerData.ShouldRegroup)
+            {
+                return true;
+            }
+
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
