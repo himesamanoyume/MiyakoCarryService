@@ -43,6 +43,7 @@ namespace MiyakoCarryService.Fika.Patches
                         MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
                         SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
                         Nickname = groupPlayerViewModelClass.Info.Nickname,
+                        MainProfileNickname = groupPlayerViewModelClass.Info.Nickname,
                         Side = groupPlayerViewModelClass.Info.Side,
                         GameVersion = groupPlayerViewModelClass.Info.GameVersion,
                         HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
