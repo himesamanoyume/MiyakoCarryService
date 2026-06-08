@@ -28,8 +28,8 @@ $vtUrl = ""
 $vtReportPath = Join-Path $WorkspaceFolder $VtReportFile
 if (Test-Path $vtReportPath) {
     $vtUrl = Get-Content $vtReportPath | Select-Object -First 1
-    Remove-Item $vtReportPath -Force
-    Write-Host "VT report URL loaded and temp file cleaned up."
+    # Remove-Item $vtReportPath -Force
+    # Write-Host "VT report URL loaded and temp file cleaned up."
 } else {
     Write-Host "Warning: VT report file not found, releasing without scan link."
 }

@@ -50,7 +50,7 @@ try {
     Start-Sleep -Seconds 20
     
     $reportUrl = ""
-    $maxRetries = 12
+    $maxRetries = 36
     for ($i = 0; $i -lt $maxRetries; $i++) {
         $reportResponse = $client.GetAsync("https://www.virustotal.com/api/v3/analyses/$analysisId").Result
         $reportJson = $reportResponse.Content.ReadAsStringAsync().Result
