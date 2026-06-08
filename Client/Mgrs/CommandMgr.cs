@@ -297,8 +297,8 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = Locales.TEAMREGROUPCOMMAND_NAME,
-                TargetName = Locales.TEAMREGROUPCOMMAND_TARGETNAME,
+                Name = Locales.TEAMONYOUROWNCOMMAND_NAME,
+                TargetName = Locales.TEAMONYOUROWNCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {
@@ -399,7 +399,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     botOwner.TalkMsg(new McsMsg
                     {
-                        PhraseTrigger = EPhraseTrigger.StartHeal,
+                        PhraseTrigger = EPhraseTrigger.OnFirstContact,
                         Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
                     });
                 }

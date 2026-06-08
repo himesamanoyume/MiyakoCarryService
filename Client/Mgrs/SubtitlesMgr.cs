@@ -106,6 +106,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                     if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
                     {
+                        mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
                         ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
                     }
                     else
@@ -121,6 +122,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
+                mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
                 ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
             }
         }

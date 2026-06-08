@@ -82,7 +82,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData != null)
                 {
                     // 检测周围是否有符合条件的战利品
-                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time)
+                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.ShouldRegroup)
                     {
                         // 尝试去拿战利品
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
