@@ -168,6 +168,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
             actionsReturnClass.Actions.Add(TeamReportAboutEnemyCommand(ReportAboutEnemyCommandAction));
+            actionsReturnClass.Actions.Add(TeamOnYourOwnCommand(OnYourOwnCommandAction));
             actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
             actionsReturnClass.Actions.Add(TeamGoToPointCommand(GoToPointCommandAction));
             actionsReturnClass.Actions.Add(TeamHoldPositionCommand(HoldPositionCommandAction));
@@ -292,6 +293,34 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
+        public ActionsTypesClass TeamOnYourOwnCommand(Action<Player> action)
+        {
+            return new ActionsTypesClass
+            {
+                Name = Locales.TEAMREGROUPCOMMAND_NAME,
+                TargetName = Locales.TEAMREGROUPCOMMAND_TARGETNAME,
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
+                    {
+                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                })
+            };
+        }
+
         public ActionsTypesClass TeamGoToPointCommand(Action<Player> action)
         {
             return new ActionsTypesClass
@@ -374,6 +403,36 @@ namespace MiyakoCarryService.Client.Mgrs
                         Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
                     });
                 }
+            }
+            CloseCommandMenuAction();
+        }
+
+        public void OnYourOwnCommandAction(Player mcsBotPlayer)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.OnYourOwn,
+                    Position = null
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldRegroup = false;
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.IsLooting = false;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
             }
             CloseCommandMenuAction();
         }
@@ -555,6 +614,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
 
             actionsReturnClass.Actions.Add(ReportAboutEnemyCommand(ReportAboutEnemyCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(OnYourOwnCommand(OnYourOwnCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(RegroupCommand(RegroupCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
@@ -576,6 +636,20 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Name = Locales.REPORTABOUTENEMYCOMMAND_NAME,
                 TargetName = Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME,
+                Disabled = false,
+                Action = new Action(() =>
+                {
+                    action(mcsBotPlayer);
+                })
+            };
+        }
+
+        public ActionsTypesClass OnYourOwnCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = Locales.ONYOUROWNCOMMAND_NAME,
+                TargetName = Locales.ONYOUROWNCOMMAND_TARGETNAME,
                 Disabled = false,
                 Action = new Action(() =>
                 {

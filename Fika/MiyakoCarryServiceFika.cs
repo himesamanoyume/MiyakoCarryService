@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Fika
                 {ECommandPacketType.HoldPosition, HandleHoldPosition},
                 {ECommandPacketType.Regroup, HandleRegroup},
                 {ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy},
+                {ECommandPacketType.OnYourOwn, HandleOnYourOwn},
             };
         }
 
@@ -324,6 +325,45 @@ namespace MiyakoCarryService.Fika
                         Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
                     });
                 }
+            }
+        }
+
+        private void HandleOnYourOwn(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.OnYourOwn)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldRegroup = false;
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.IsLooting = false;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
             }
         }
 

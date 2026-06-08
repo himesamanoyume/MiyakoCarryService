@@ -58,6 +58,10 @@ namespace MiyakoCarryService.Client.Utils
         public const string REPORTABOUTENEMYCOMMAND_TARGETNAME = "Mcs/ReportAboutEnemyCommand TargetName";
         public const string TEAMREPORTABOUTENEMYCOMMAND_NAME = "Mcs/TeamReportAboutEnemyCommand Name";
         public const string TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME = "Mcs/TeamReportAboutEnemyCommand TargetName";
+        public const string ONYOUROWNCOMMAND_NAME = "Mcs/OnYourOwnCommand Name";
+        public const string ONYOUROWNCOMMAND_TARGETNAME = "Mcs/OnYourOwnCommand TargetName";
+        public const string TEAMONYOUROWNCOMMAND_NAME = "Mcs/TeamOnYourOwnCommand Name";
+        public const string TEAMONYOUROWNCOMMAND_TARGETNAME = "Mcs/TeamOnYourOwnCommand TargetName";
         public const string REGROUPCOMMAND_NAME = "Mcs/RegroupCommand Name";
         public const string REGROUPCOMMAND_TARGETNAME = "Mcs/RegroupCommand TargetName";
         public const string TEAMREGROUPCOMMAND_NAME = "Mcs/TeamRegroupCommand Name";
