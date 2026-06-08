@@ -21,6 +21,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (McsBotPlayerData != null)
             {
+                McsBotPlayerData.ShouldRegroup = false;
                 McsBotPlayerData.ShouldHoldPosition = false;
                 McsBotPlayerData.ShouldGoToPoint = false;
                 McsBotPlayerData.IsLooting = false;

@@ -531,6 +531,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         if (mcsBotPlayerData != null)
                         {
                             mcsBotPlayerData.ShouldGoToPoint = true;
+                            mcsBotPlayerData.ShouldHoldPosition = false;
                             mcsBotPlayerData.IsLooting = false;
                         }
                         botOwner.Mover.LastTimePosChanged = Time.time;

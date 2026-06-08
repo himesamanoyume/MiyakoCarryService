@@ -217,7 +217,13 @@ namespace MiyakoCarryService.Fika
                     {
                         PhraseTrigger = EPhraseTrigger.Going,
                     });
-                    botOwner.GetMcsBotPlayerData().ShouldGoToPoint = true;
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.ShouldGoToPoint = true;
+                        mcsBotPlayerData.ShouldHoldPosition = false;
+                        mcsBotPlayerData.IsLooting = false;
+                    }
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     botOwner.GoToSomePointData.SetPoint(validPosition.Value);
@@ -283,9 +289,13 @@ namespace MiyakoCarryService.Fika
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                mcsBotPlayerData.ShouldGoToPoint = false;
-                mcsBotPlayerData.ShouldHoldPosition = false;
-                mcsBotPlayerData.IsLooting = false;
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.ShouldRegroup = true;
+                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.IsLooting = false;
+                }
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Regroup,
