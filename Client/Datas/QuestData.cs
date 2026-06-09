@@ -1,6 +1,6 @@
 
 using System;
-using EFT.InventoryLogic;
+using EFT.Quests;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -9,19 +9,14 @@ namespace MiyakoCarryService.Client.Datas
     {
         private WeakReference<QuestDataClass> _questRef;
         public QuestDataClass Quest => _questRef.TryGetTarget(out var quest) ? quest : null;
-        private WeakReference<Item> _itemRef;
-        public Item QuestItem => _itemRef != null ? _itemRef.TryGetTarget(out var questItem) ? questItem : null : null;
+        private WeakReference<Condition> _conditionRef;
+        public Condition QuestCondition => _conditionRef != null ? _conditionRef.TryGetTarget(out var condition) ? condition : null : null;
         private WeakReference<Transform> _transformRef;
         private Transform _questTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
 
-        public QuestData(QuestDataClass quest, Item questItem, Transform questTransform) : base()
+        public QuestData(QuestDataClass quest, Transform questTransform, Condition condition) : base()
         {
-            _questRef = new WeakReference<QuestDataClass>(quest);
-            _itemRef = new WeakReference<Item>(questItem);
-            _transformRef = new WeakReference<Transform>(questTransform);
-        }
-        public QuestData(QuestDataClass quest, Transform questTransform) : base()
-        {
+            _conditionRef = new WeakReference<Condition>(condition);
             _questRef = new WeakReference<QuestDataClass>(quest);
             _transformRef = new WeakReference<Transform>(questTransform);
         }
@@ -32,7 +27,7 @@ namespace MiyakoCarryService.Client.Datas
         {
             base.Dispose();
             _questRef = null;
-            _itemRef = null;
+            _conditionRef = null;
             _transformRef = null;
         }
     }

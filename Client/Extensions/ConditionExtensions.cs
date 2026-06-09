@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public QuestData InitData(QuestDataClass questDataClass, Transform transform)
             {
-                var data = new QuestData(questDataClass, transform);
+                var data = new QuestData(questDataClass, transform, condition);
                 _dataDict.Add(condition, data);
                 return data;
             }

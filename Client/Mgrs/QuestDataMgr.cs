@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public class QuestDataMgr : TriggerDataMgr<QuestDataMgr>
     {
-        private TriggerWithId[] _triggersWithIds;
+        private List<TriggerWithId> _triggersWithIds;
         public HashSet<string> QuestNeedItemList { get; private set; } = new();
 
         public sealed override void Start()
@@ -28,6 +28,16 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
+            _triggersWithIds.Clear();
+            _triggersWithIds = null;
+        }
+
+        protected override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            QuestNeedItemList.Clear();
+            QuestNeedItemList = null;
+            _triggersWithIds.Clear();
             _triggersWithIds = null;
         }
 
@@ -189,10 +199,35 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                 case ConditionCounterCreator conditionCounterCreator:
                     {
-                        foreach (var _condition in conditionCounterCreator.Conditions)
+                        var zones = new List<TriggerWithId>();
+                        foreach (var t in _triggersWithIds)
                         {
-                            LoadQuest(datas, questNeedItemList, _condition, quest);
+                            foreach (var _condition in conditionCounterCreator.Conditions)
+                            {
+                                if (_condition is ConditionVisitPlace conditionVisitPlace && t.Id == conditionVisitPlace.target)
+                                {
+                                    zones.Add(t);
+                                    break;
+                                }
+                            }
                         }
+                        
+                        foreach (var zone in zones)
+                        {
+                            if (zone.transform == null)
+                            {
+                                continue;
+                            }
+                            var data = condition.GetData(quest, zone.transform);
+                            if (data != null)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+                        // foreach (var _condition in conditionCounterCreator.Conditions)
+                        // {
+                        //     LoadQuest(datas, questNeedItemList, _condition, quest);
+                        // }
                         break;
                     }
                 case ConditionItem conditionItem:
@@ -241,7 +276,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             if (_triggersWithIds == null)
             {
-                _triggersWithIds = FindObjectsOfType<TriggerWithId>();
+                _triggersWithIds = FindObjectsOfType<TriggerWithId>().ToList();
             }
 
             var questNeedItemList = new HashSet<string>();
@@ -275,6 +310,25 @@ namespace MiyakoCarryService.Client.Mgrs
                 _datas.Add(data);
             }
             QuestNeedItemList = questNeedItemList;
+        }
+
+        public Dictionary<QuestDataClass, List<QuestData>> GetQuestDataByGroup()
+        {
+            var questDataGroup = new Dictionary<QuestDataClass, List<QuestData>>();
+            foreach (QuestData questData in _datas)
+            {
+                if (!questDataGroup.ContainsKey(questData.Quest))
+                {
+                    questDataGroup.Add(questData.Quest, new() { questData });
+                    continue;
+                }
+
+                if (questDataGroup.TryGetValue(questData.Quest, out var questDatas))
+                {
+                    questDatas.Add(questData);
+                }
+            }
+            return questDataGroup;
         }
     }
 }
