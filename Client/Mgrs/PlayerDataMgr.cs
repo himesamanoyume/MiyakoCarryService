@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class PlayerDataMgr : DataMgr<PlayerDataMgr>
+    public sealed class PlayerDataMgr : ItemDataMgr<PlayerDataMgr>
     {
         public List<McsBotPlayerData> GetMcsBotPlayerDatas()
         {
@@ -33,8 +33,8 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            StartCoroutine(ReloadDataLoop<PlayerData>(1f));
-            StartCoroutine(LoadItemData(1f));
+            StartCoroutine(ReloadDataLoop(1f, LoadItemData<PlayerData>));
+            StartCoroutine(UpdateItemData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)

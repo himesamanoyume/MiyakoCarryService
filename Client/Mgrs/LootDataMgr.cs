@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class LootDataMgr : DataMgr<LootDataMgr>
+    public sealed class LootDataMgr : ItemDataMgr<LootDataMgr>
     {
         public HashSet<LootData> LockedLootingTarget = new();
         public HashSet<Transform> LockedLootingTargetRootTransform = new();
@@ -48,8 +48,8 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            StartCoroutine(ReloadDataLoop<LootData>(1f));
-            StartCoroutine(LoadItemData(1f));
+            StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>));
+            StartCoroutine(UpdateItemData(1f));
             LockedLootingTarget.Clear();
             LockedLootingTargetRootTransform.Clear();
         }

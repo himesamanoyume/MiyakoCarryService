@@ -251,7 +251,7 @@ namespace MiyakoCarryService.Client
             return (T)Mgrs[typeof(T)];
         }
 
-        public HashSet<T> GetDatas<T, K>() where T : BaseData where K : IMgr
+        public HashSet<T> GetDatas<T, K>() where T : BaseData where K : DataMgr<K>
         {
             var mgr = GetMgr<K>();
             return mgr.GetDatas<T>();

@@ -120,7 +120,7 @@ namespace MiyakoCarryService.Client
                 return;
             }
 
-            if (type == LogType.Exception || type == LogType.Error)
+            if (type is LogType.Exception or LogType.Error)
             {
                 LogBuffer.AddEntryIfNotFull(condition, _stackRegex.Replace(stackTrace, ""));
             }

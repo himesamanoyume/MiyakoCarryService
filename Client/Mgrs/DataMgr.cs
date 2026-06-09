@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Utils;
@@ -12,94 +11,27 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public abstract class DataMgr<T> : BaseMgr<T> where T : MonoBehaviour
     {
+        protected HashSet<BaseData> _datas;
         protected McsMgr McsMgr { get; private set; }
 
         public override void Start()
         {
             base.Start();
             _datas = new HashSet<BaseData>();
-            McsMgr = _gameloop.GetMgr<McsMgr>();
+            McsMgr = MgrAccessor.Get<McsMgr>();
         }
 
-        protected IEnumerator ReloadDataLoop<K>(float time) where K : BaseData
+        public HashSet<K> GetDatas<K>() where K : BaseData
         {
-            var waitTime = new WaitForSeconds(time);
-            while (true)
+            var result = new HashSet<K>();
+            foreach (BaseData item in _datas)
             {
-                yield return waitTime;
-
-                if (_gameloop.IsVaildGameWorld)
+                if (item is K k)
                 {
-                    var datas = new HashSet<K>();
-                    foreach (var item in Tools.GetAllOwnerItemData())
-                    {
-                        if (item is K k)
-                        {
-                            datas.Add(k);
-                        }
-                    }
-                    var dataLeft = _datas.Except(datas).ToList();
-                    var dataJoined = datas.Except(_datas).ToList();
-                    foreach (var data in dataLeft)
-                    {
-                        _datas.Remove(data);
-                    }
-                    foreach (var data in dataJoined)
-                    {
-                        _datas.Add(data);
-                    }
-                }
-                else
-                {
-                    yield return null;
-                    continue;
+                    result.Add(k);
                 }
             }
-        }
-
-        protected IEnumerator LoadItemData(float time)
-        {
-            yield return new WaitForSeconds(time);
-            var publicTime = new WaitForSeconds(.1f);
-            if (_gameloop.IsVaildGameWorld)
-            {
-                var datasList = new List<BaseData>();
-                if (_datas != null)
-                {
-                    datasList.AddRange(_datas);
-                }
-                int batchSize = Mathf.Clamp(Mathf.CeilToInt(_datas.Count / 10f), 8, 50);
-                var baseDataBatches = new List<List<BaseData>>();
-                for (int i = 0; i < _datas.Count; i += batchSize)
-                {
-                    int endIndex = Math.Min(i + batchSize, _datas.Count);
-                    var batch = datasList.GetRange(i, endIndex - i);
-                    baseDataBatches.Add(batch);
-                }
-
-                foreach (var batch in baseDataBatches)
-                {
-                    try
-                    {
-                        foreach (ItemData itemData in batch)
-                        {
-                            foreach (var mcsAILeadPlayer in McsMgr.GetAllMcsAILeadPlayer())
-                            {
-                                itemData.RefreshInteresting(mcsAILeadPlayer, false);
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                    yield return publicTime;
-                }
-            }
-            else
-            {
-                yield return null;
-            }
+            return result;
         }
 
         protected override void OnGameWorldStarted(GameWorldStartedEvent @event)
@@ -115,6 +47,32 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (data is IDisposable disposable)
                 {
                     disposable.Dispose();
+                }
+            }
+            _datas.Clear();
+        }
+
+        protected IEnumerator ReloadDataLoop(float time, Action action)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                LoadData(action);
+            }
+        }
+
+        protected void LoadData(Action action)
+        {
+            if (_gameloop.IsVaildGameWorld)
+            {
+                try
+                {
+                    action.Invoke();
+                }
+                catch (Exception e)
+                {
+                    MiyakoCarryServicePlugin.Logger.LogError(e);
                 }
             }
         }

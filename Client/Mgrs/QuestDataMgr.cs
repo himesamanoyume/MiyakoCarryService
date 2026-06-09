@@ -1,0 +1,279 @@
+using System.Collections.Generic;
+using EFT.Interactive;
+using EFT.Quests;
+using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
+using Comfort.Common;
+using EFT;
+using System.Linq;
+
+namespace MiyakoCarryService.Client.Mgrs
+{
+    public class QuestDataMgr : TriggerDataMgr<QuestDataMgr>
+    {
+        private TriggerWithId[] _triggersWithIds;
+        public HashSet<string> QuestNeedItemList { get; private set; } = new();
+
+        public sealed override void Start()
+        {
+            base.Start();
+        }
+
+        protected sealed override void OnRaidStarted()
+        {
+            StartCoroutine(ReloadDataLoop(10f, LoadQuestData));
+        }
+
+        protected override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
+            _triggersWithIds = null;
+        }
+
+        protected void LoadQuest(HashSet<QuestData> datas, HashSet<string> questNeedItemList, Condition condition, QuestDataClass quest)
+        {
+            if (_triggersWithIds == null)
+            {
+                return;
+            }
+
+            switch (condition)
+            {
+                case ConditionZone conditionZone:
+                    {
+                        var zones = new List<TriggerWithId>();
+                        foreach (var t in _triggersWithIds)
+                        {
+                            if (t.Id == conditionZone.zoneId)
+                            {
+                                zones.Add(t);
+                            }
+                        }
+                        foreach (var zone in zones)
+                        {
+                            if (zone.transform == null)
+                            {
+                                continue;
+                            }
+
+                            var data = condition.GetData(quest, zone.transform);
+                            if (data != null)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+                        break;
+                    }
+                case ConditionLaunchFlare conditionLaunchFlare:
+                    {
+                        var zones = new List<TriggerWithId>();
+                        foreach (var t in _triggersWithIds)
+                        {
+                            if (t.Id == conditionLaunchFlare.zoneID)
+                            {
+                                zones.Add(t);
+                            }
+                        }
+                        foreach (var zone in zones)
+                        {
+                            if (zone.transform == null)
+                            {
+                                continue;
+                            }
+                            var data = condition.GetData(quest, zone.transform);
+                            if (data != null)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+                        break;
+                    }
+                case ConditionVisitPlace conditionVisitPlace:
+                    {
+                        var zones = new List<TriggerWithId>();
+                        foreach (var t in _triggersWithIds)
+                        {
+                            if (t.Id == conditionVisitPlace.target)
+                            {
+                                zones.Add(t);
+                            }
+                        }
+                        foreach (var zone in zones)
+                        {
+                            if (zone.transform == null)
+                            {
+                                continue;
+                            }
+                            var data = condition.GetData(quest, zone.transform);
+                            if (data != null)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+                        break;
+                    }
+                case ConditionExitName conditionExitName:
+                    {
+                        var exfilDataMgr = _gameloop.GetMgr<ExfilDataMgr>();
+                        if (exfilDataMgr == null)
+                        {
+                            break;
+                        }
+
+                        ExfilData specifiedExit = null;
+
+                        foreach (var exfilData in exfilDataMgr.GetDatas<ExfilData>())
+                        {
+                            if (exfilData.ExfiltrationPoint != null &&
+                                exfilData.ExfiltrationPoint.Settings != null &&
+                                exfilData.ExfiltrationPoint.Settings.Name == conditionExitName.exitName)
+                            {
+                                specifiedExit = exfilData;
+                                break;
+                            }
+                        }
+
+                        if (specifiedExit != null)
+                        {
+                            if (specifiedExit.ExfiltrationPoint.transform.transform == null)
+                            {
+                                break;
+                            }
+                            var data = condition.GetData(quest, specifiedExit.ExfiltrationPoint.transform);
+                            if (data != null)
+                            {
+                                datas.Add(data);
+                            }
+                        }
+                        break;
+                    }
+                case ConditionInZone conditionInZone:
+                    {
+                        foreach (var zoneId in conditionInZone.zoneIds)
+                        {
+                            var zones = new List<TriggerWithId>();
+                            foreach (var t in _triggersWithIds)
+                            {
+                                if (t.Id == zoneId)
+                                {
+                                    zones.Add(t);
+                                }
+                            }
+                            foreach (var zone in zones)
+                            {
+                                if (zone.transform == null)
+                                {
+                                    continue;
+                                }
+                                var data = condition.GetData(quest, zone.transform);
+                                if (data != null)
+                                {
+                                    datas.Add(data);
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+                case ConditionFindItem conditionFindItem:
+                    {
+                        foreach (var questItemId in conditionFindItem.target)
+                        {
+                            if (!questNeedItemList.Contains(questItemId))
+                            {
+                                questNeedItemList.Add(questItemId);
+                            }
+                        }
+                        break;
+                    }
+                case ConditionCounterCreator conditionCounterCreator:
+                    {
+                        foreach (var _condition in conditionCounterCreator.Conditions)
+                        {
+                            LoadQuest(datas, questNeedItemList, _condition, quest);
+                        }
+                        break;
+                    }
+                case ConditionItem conditionItem:
+                    {
+                        foreach (var questItemId in conditionItem.target)
+                        {
+                            if (!questNeedItemList.Contains(questItemId))
+                            {
+                                questNeedItemList.Add(questItemId);
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+        }
+
+        protected void LoadQuestData()
+        {
+            var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+            if (myPlayer == null)
+            {
+                return;
+            }
+
+            var datas = new HashSet<QuestData>();
+            var startedQuests = new List<QuestDataClass>();
+            if (myPlayer.Profile?.QuestsData != null)
+            {
+                foreach (var questDataClass in myPlayer.Profile.QuestsData)
+                {
+                    if (questDataClass.Status == EQuestStatus.Started && questDataClass.Template != null)
+                    {
+                        startedQuests.Add(questDataClass);
+                    }
+                }
+            }
+
+            if (startedQuests.Count == 0)
+            {
+                return;
+            }
+
+            if (_triggersWithIds == null)
+            {
+                _triggersWithIds = FindObjectsOfType<TriggerWithId>();
+            }
+
+            var questNeedItemList = new HashSet<string>();
+
+            foreach (var quest in startedQuests)
+            {
+                if (quest.Template == null)
+                {
+                    continue;
+                }
+
+                foreach (var condition in quest.Template.Conditions[EQuestStatus.AvailableForFinish])
+                {
+                    if (quest.CompletedConditions.Contains(condition.id))
+                    {
+                        continue;
+                    }
+
+                    LoadQuest(datas, questNeedItemList, condition, quest);
+                }
+            }
+
+            var dataLeft = _datas.Except(datas).ToList();
+            var dataJoined = datas.Except(_datas).ToList();
+            foreach (var data in dataLeft)
+            {
+                _datas.Remove(data);
+            }
+            foreach (var data in dataJoined)
+            {
+                _datas.Add(data);
+            }
+            QuestNeedItemList = questNeedItemList;
+        }
+    }
+}
