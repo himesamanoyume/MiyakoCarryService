@@ -111,10 +111,10 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                         .Append("- All Client Mod:\n")
                         .Append(string.Join(", ", Chainloader.PluginInfos.Values.Select(x => x.Instance)
                                 .Where(plugin => plugin != null)
-                                .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => p.Info.Metadata.Name)
+                                .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => $"{p.Info.Metadata.Name}({p.Info.Metadata.Version})")
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
-                        .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => x.Name))).Append('\n')
+                        .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
                         .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     stringBuilder.Append("```log\n");
