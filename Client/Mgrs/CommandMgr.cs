@@ -188,8 +188,8 @@ namespace MiyakoCarryService.Client.Mgrs
             PreBuildCommandMenu(out var actionsReturnClass);
 
             actionsReturnClass.Actions.Add(TeamQuestEscortCommand(BuildTeamQuestEscortCommandMenu, mcsBotPlayers));
-            // actionsReturnClass.Actions.Add(TeamTransitEscortCommand(BuildTeamTransitEscortCommandMenu, mcsBotPlayers));
-            // actionsReturnClass.Actions.Add(TeamExfilEscortCommand(BuildTeamExfilEscortCommandMenu, mcsBotPlayers));
+            actionsReturnClass.Actions.Add(TeamTransitEscortCommand(BuildTeamTransitEscortCommandMenu, mcsBotPlayers));
+            actionsReturnClass.Actions.Add(TeamExfilEscortCommand(BuildTeamExfilEscortCommandMenu, mcsBotPlayers));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -198,9 +198,9 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(QuestEscortCommand(BuildQuestEscortCommandMenu, mcsBotPlayer));
-            // actionsReturnClass.Actions.Add(TransitEscortCommand(BuildTransitEscortCommandMenu, mcsBotPlayer));
-            // actionsReturnClass.Actions.Add(ExfilEscortCommand(BuildExfilEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MemberQuestEscortCommand(BuildQuestEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MemberTransitEscortCommand(BuildTransitEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MemberExfilEscortCommand(BuildExfilEscortCommandMenu, mcsBotPlayer));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -209,8 +209,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var transitDataMgr = MgrAccessor.Get<TransitDataMgr>();
-
+            var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
+            foreach (var transitData in transitDatas)
+            {
+                actionsReturnClass.Actions.Add(TeamGoToTransitPosCommand(GoToTransitPosCommandAction, mcsBotPlayers, transitData));
+            }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -219,7 +222,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var exfilDataMgr = MgrAccessor.Get<ExfilDataMgr>();
+            var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+            foreach (var exfilData in exfilDatas)
+            {
+                actionsReturnClass.Actions.Add(TeamGoToExfilPosCommand(GoToExfilPosCommandAction, mcsBotPlayers, exfilData));
+            }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -262,7 +269,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            
+            var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
+            foreach (var transitData in transitDatas)
+            {
+                actionsReturnClass.Actions.Add(GoToTransitPosCommand(GoToTransitPosCommandAction, mcsBotPlayer, transitData));
+            }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -271,7 +282,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            
+            var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+            foreach (var exfilData in exfilDatas)
+            {
+                actionsReturnClass.Actions.Add(GoToExfilPosCommand(GoToExfilPosCommandAction, mcsBotPlayer, exfilData));
+            }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -332,7 +347,89 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = questData.QuestCondition.id.ToString().McsLocalized(),
-                TargetName = "",
+                TargetName = $"护送前往 {questData.QuestCondition.id.ToString().McsLocalized()} 条件的位置",
+                Disabled = false,
+                Action = () =>
+                {
+                    action(mcsBotPlayer);
+                }
+            };
+        }
+
+        public ActionsTypesClass TeamGoToTransitPosCommand(Action<Player> action, List<Player> mcsBotPlayers, TransitData transitData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = transitData.TransitPoint.parameters.description.McsLocalized(),
+                TargetName = $"全队护送前往 {transitData.TransitPoint.parameters.description.McsLocalized()}",
+                Disabled = false,
+                Action = () =>
+                {
+                    foreach (var mcsBotPlayer in mcsBotPlayers)
+                    {
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                }
+            };
+        }
+
+        public ActionsTypesClass GoToTransitPosCommand(Action<Player> action, Player mcsBotPlayer, TransitData transitData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = transitData.TransitPoint.parameters.description.McsLocalized(),
+                TargetName = $"护送前往 {transitData.TransitPoint.parameters.description.McsLocalized()}",
+                Disabled = false,
+                Action = () =>
+                {
+                    action(mcsBotPlayer);
+                }
+            };
+        }
+        
+        public ActionsTypesClass TeamGoToExfilPosCommand(Action<Player> action, List<Player> mcsBotPlayers, ExfilData exfilData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = exfilData.ExfiltrationPoint.Settings.Name.McsLocalized(),
+                TargetName = $"全队护送前往 {exfilData.ExfiltrationPoint.Settings.Name.McsLocalized()}",
+                Disabled = false,
+                Action = () =>
+                {
+                    foreach (var mcsBotPlayer in mcsBotPlayers)
+                    {
+                        if (mcsBotPlayer == null)
+                        {
+                            continue;
+                        }
+
+                        if (!mcsBotPlayer.HealthController.IsAlive)
+                        {
+                            continue;
+                        }
+
+                        action(mcsBotPlayer);
+                    }
+                }
+            };
+        }
+
+        public ActionsTypesClass GoToExfilPosCommand(Action<Player> action, Player mcsBotPlayer, ExfilData exfilData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = exfilData.ExfiltrationPoint.Settings.Name.McsLocalized(),
+                TargetName = $"护送前往 {exfilData.ExfiltrationPoint.Settings.Name.McsLocalized()}",
                 Disabled = false,
                 Action = () =>
                 {
@@ -343,7 +440,17 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void GoToQuestPosCommandAction(Player mcsBotPlayer)
         {
-            
+            CloseCommandMenuAction();
+        }
+
+        public void GoToExfilPosCommandAction(Player mcsBotPlayer)
+        {
+            CloseCommandMenuAction();
+        }
+
+        public void GoToTransitPosCommandAction(Player mcsBotPlayer)
+        {
+            CloseCommandMenuAction();
         }
 
         private void OnCurrentActionChanged()
@@ -422,7 +529,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return new ActionsTypesClass
             {
                 Name = "全队护送至任务目标",
-                TargetName = "",
+                TargetName = "全队护送至任务目标",
                 Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
                 Action = () =>
                 {
@@ -444,13 +551,41 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             };
         }
+        
+        public ActionsTypesClass MemberEscortCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "护送",
+                TargetName = "指定成员护送至指定地点",
+                Disabled = false,
+                Action = () =>
+                {
+                    action(mcsBotPlayer);
+                }
+            };
+        }
+
+        public ActionsTypesClass MemberQuestEscortCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return new ActionsTypesClass
+            {
+                Name = "护送至任务目标",
+                TargetName = "护送至任务目标",
+                Disabled = false,
+                Action = () =>
+                {
+                    action(mcsBotPlayer);
+                }
+            };
+        }
 
         public ActionsTypesClass TeamExfilEscortCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
         {
             return new ActionsTypesClass
             {
-                Name = "",
-                TargetName = "",
+                Name = "全队护送至撤离点",
+                TargetName = "全队护送至撤离点",
                 Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
                 Action = () =>
                 {
@@ -463,26 +598,12 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return new ActionsTypesClass
             {
-                Name = "",
-                TargetName = "",
+                Name = "全队护送至转移点",
+                TargetName = "全队护送至转移点",
                 Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
                 Action = () =>
                 {
                     action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass QuestEscortCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = "护送至任务目标",
-                TargetName = "",
-                Disabled = !mcsBotPlayer.HealthController.IsAlive,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
                 }
             };
         }
@@ -501,12 +622,12 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass ExfilEscortCommand(Action<Player> action, Player mcsBotPlayer)
+        public ActionsTypesClass MemberExfilEscortCommand(Action<Player> action, Player mcsBotPlayer)
         {
             return new ActionsTypesClass
             {
-                Name = "",
-                TargetName = "",
+                Name = "护送至撤离点",
+                TargetName = "护送至撤离点",
                 Disabled = false,
                 Action = () =>
                 {
@@ -515,12 +636,12 @@ namespace MiyakoCarryService.Client.Mgrs
             };
         }
 
-        public ActionsTypesClass TransitEscortCommand(Action<Player> action, Player mcsBotPlayer)
+        public ActionsTypesClass MemberTransitEscortCommand(Action<Player> action, Player mcsBotPlayer)
         {
             return new ActionsTypesClass
             {
-                Name = "",
-                TargetName = "",
+                Name = "护送至转移点",
+                TargetName = "护送至转移点",
                 Disabled = false,
                 Action = () =>
                 {
@@ -902,7 +1023,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(OpenInventoryCommand(OpenInventoryCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(QuestEscortCommand(BuildQuestEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MemberEscortCommand(BuildEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(ForceTeleportCommand(ForceTeleportCommandAction, mcsBotPlayer));
 
             PostBuildCommandMenu(actionsReturnClass);
