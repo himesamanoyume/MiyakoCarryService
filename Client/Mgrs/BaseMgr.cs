@@ -26,6 +26,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void OnDestroy()
         {
+            OnMgrDestroy();
+        }
+
+        protected virtual void OnMgrDestroy()
+        {
             EventMgr.UnsubscribeAll(this); 
         }
 

@@ -42,14 +42,7 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             base.OnGameWorldEnded(@event);
-            foreach (var data in _datas)
-            {
-                if (data is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            }
-            _datas.Clear();
+            DataClear();
         }
 
         protected IEnumerator ReloadDataLoop(float time, Action action)
@@ -75,6 +68,24 @@ namespace MiyakoCarryService.Client.Mgrs
                     MiyakoCarryServicePlugin.Logger.LogError(e);
                 }
             }
+        }
+
+        protected void DataClear()
+        {
+            foreach (var data in _datas)
+            {
+                if (data is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+            _datas.Clear();
+        }
+
+        protected override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            DataClear();
         }
     }
 }
