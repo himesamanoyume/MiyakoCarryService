@@ -129,6 +129,9 @@ namespace MiyakoCarryService.Client
             SubtitlesMgr.Enable();
             CommandMgr.Enable();
             HighlightMgr.Enable();
+            ExfilDataMgr.Enable();
+            TransitDataMgr.Enable();
+            QuestDataMgr.Enable();
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);

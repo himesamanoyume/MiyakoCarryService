@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         protected sealed override void OnRaidStarted()
         {
-            StartCoroutine(ReloadDataLoop(10f, LoadExfiltrationPoints));
+            LoadData(LoadExfiltrationPoints);
         }
 
         protected override void OnRaidEnded()

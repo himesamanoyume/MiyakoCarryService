@@ -21,6 +21,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         protected sealed override void OnRaidStarted()
         {
+            LoadData(LoadQuestData);
             StartCoroutine(ReloadDataLoop(10f, LoadQuestData));
         }
 
