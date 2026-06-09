@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<Item> _itemRef;
         public Item QuestItem => _itemRef != null ? _itemRef.TryGetTarget(out var questItem) ? questItem : null : null;
         private WeakReference<Transform> _transformRef;
-        public Transform QuestTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
+        private Transform _questTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
 
         public QuestData(QuestDataClass quest, Item questItem, Transform questTransform) : base()
         {
@@ -24,6 +24,16 @@ namespace MiyakoCarryService.Client.Datas
         {
             _questRef = new WeakReference<QuestDataClass>(quest);
             _transformRef = new WeakReference<Transform>(questTransform);
+        }
+
+        protected override Transform GetTransfrom() => _questTransform;
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _questRef = null;
+            _itemRef = null;
+            _transformRef = null;
         }
     }
 }

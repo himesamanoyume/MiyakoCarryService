@@ -50,5 +50,11 @@ namespace MiyakoCarryService.Client.Datas
                 return null;
             }
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _playerRef = null;
+        }
     }
 }

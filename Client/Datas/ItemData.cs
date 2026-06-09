@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Datas
 {
     public abstract class ItemData : BaseData
     {
-        private WeakReference<Item> _itemRef;
+        protected WeakReference<Item> _itemRef;
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
@@ -87,5 +87,14 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         protected abstract Transform GetRootTransfrom();
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _itemRef = null;
+            ItemsInContainer.Clear();
+            ItemsInContainer = null;
+            _lootDataMgr = null;
+        }
     }
 }

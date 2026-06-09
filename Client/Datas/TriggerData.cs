@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class TriggerData : BaseData
+    public abstract class TriggerData : BaseData
     {
-        
+        protected abstract Transform GetTransfrom();
     }
 }

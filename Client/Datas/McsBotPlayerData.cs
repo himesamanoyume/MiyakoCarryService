@@ -142,5 +142,15 @@ namespace MiyakoCarryService.Client.Datas
                 return;
             }
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _botOwnerRef = null;
+            _leadPlayeRef = null;
+            _mcsAILeadPlayerRef = null;
+            _isLooting = false;
+            _lootingTarget = null;
+        }
     }
 }

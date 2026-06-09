@@ -148,5 +148,12 @@ namespace MiyakoCarryService.Client.Datas
         {
             return _lootDataMgr.IsLockedLootingTarget(this) && _lootDataMgr.IsLockedLootingTargetRootTransform(RootTransform);
         }
+
+        public override void Dispose()
+        {
+            LootProps.Clear();
+            LootProps = null;
+            Offer = null;
+        }
     }
 }

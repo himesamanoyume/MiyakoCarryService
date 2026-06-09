@@ -1,5 +1,6 @@
 using System;
 using EFT.Interactive;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -12,6 +13,14 @@ namespace MiyakoCarryService.Client.Datas
         public ExfilData(ExfiltrationPoint exfiltrationPoint) : base()
         {
             _exfilRef = new WeakReference<ExfiltrationPoint>(exfiltrationPoint);
+        }
+
+        protected override Transform GetTransfrom() => ExfiltrationPoint.transform;
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _exfilRef = null;
         }
     }
 }
