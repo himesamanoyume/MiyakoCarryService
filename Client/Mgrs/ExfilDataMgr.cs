@@ -46,6 +46,19 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
                     }
                 }
+
+                var secretExfiltrationPoints = exfiltrationController.SecretEligiblePoints();
+                if (secretExfiltrationPoints != null)
+                {
+                    for (int i = 0; i < secretExfiltrationPoints.Length; i++)
+                    {
+                        var secretExfiltrationPoint = secretExfiltrationPoints[i];
+                        if (secretExfiltrationPoint != null)
+                        {
+                            _datas.Add(secretExfiltrationPoint.GetData());
+                        }
+                    }
+                }
             });
         }
     }

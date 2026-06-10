@@ -22,9 +22,8 @@ namespace MiyakoCarryService.Client.Datas
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.transform.position)));
         public override bool IsDisabled() => ExfiltrationPoint.Status switch
         {
-            EExfiltrationStatus.RegularMode or
-            EExfiltrationStatus.Countdown => false,
-            _ => true
+            EExfiltrationStatus.NotPresent => true,
+            _ => false
         };
 
         public override void Dispose()
