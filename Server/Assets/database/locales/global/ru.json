@@ -54,6 +54,7 @@
     "Mcs/MiyakoTraderCommandError": "Ошибка команды",
     "Mcs/MiyakoTraderOrderNewQuest": "Ваш заказ был размещен! Вы можете просмотреть детали своего заказа в меню «Задания» у торговца.\nТеперь примите задание, оплатите заказ передав деньги, и завершите его.",
     "Mcs/MiyakoTraderTicketNewQuest": "Выдан новый билет. Подробности можно просмотреть в меню «Задания» у торговца.\nПримите билет и произведите оплату, чтобы отказаться от части штрафа за повышение цены.",
+    "Mcs/MiyakoTraderTicketRefuse": "There is no longer any price increase, no fine needs to be paid.",
     "Mcs/MiyakoTraderUnrecognizedCommand": "Неизвестная команда! напишите \"help\" чтобы увидеть доступные команды.",
     "Mcs/MiyakoTraderInventoryModeRefuse": "В настоящее время вы находитесь в режиме инвентаря вашего наёмника и не можете использовать команды.",
     "Mcs/MiyakoTraderAvailableCommandsList": "Доступные команды будут перечислены ниже:",

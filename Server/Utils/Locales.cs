@@ -13,6 +13,7 @@ namespace MiyakoCarryService.Server.Utils
         public const string MIYAKOTRADERCOMMANDERROR = "Mcs/MiyakoTraderCommandError";
         public const string MIYAKOTRADERORDERNEWQUEST = "Mcs/MiyakoTraderOrderNewQuest";
         public const string MIYAKOTRADERTICKETNEWQUEST = "Mcs/MiyakoTraderTicketNewQuest";
+        public const string MIYAKOTRADERTICKETREFUSE = "Mcs/MiyakoTraderTicketRefuse";
         public const string MIYAKOTRADERORDERDESCRIPTION = "Mcs/MiyakoTraderOrderDescription";
         public const string MIYAKOTRADERTICKETDESCRIPTION = "Mcs/MiyakoTraderTicketDescription";
         public const string MIYAKOTRADERUNRECOGNIZEDCOMMAND = "Mcs/MiyakoTraderUnrecognizedCommand";

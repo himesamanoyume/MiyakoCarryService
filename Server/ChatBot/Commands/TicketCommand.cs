@@ -1,7 +1,5 @@
 
 using System;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
@@ -60,18 +58,32 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             var match = OrderCommandRegex().Match(request.Text);
             if (match.Success)
             {
-                int percent = int.Parse(match.Groups[1].Value);
-
-                mailSendService.SendLocalisedNpcMessageToPlayer(
-                    sessionId, 
-                    TraderService.MiyakoTraderId, 
-                    MessageType.NpcTraderMessage, 
-                    Locales.MIYAKOTRADERTICKETNEWQUEST,
-                    null
-                );
-
+                var percent = int.Parse(match.Groups[1].Value);
                 var punishmentMulti = traderService.GetGlobalPunishmentMulti();
-                orderQuestController.CreateTicketQuest(sessionId, (int)Math.Ceiling(Math.Min(percent, punishmentMulti * 100)));
+                var newPercent = (int)Math.Ceiling(Math.Min(percent, punishmentMulti * 100));
+
+                if (newPercent > 0)
+                {
+                    mailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId, 
+                        TraderService.MiyakoTraderId, 
+                        MessageType.NpcTraderMessage, 
+                        Locales.MIYAKOTRADERTICKETNEWQUEST,
+                        null
+                    );
+                    
+                    orderQuestController.CreateTicketQuest(sessionId, newPercent);
+                }
+                else
+                {
+                    mailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId, 
+                        TraderService.MiyakoTraderId, 
+                        MessageType.NpcTraderMessage, 
+                        Locales.MIYAKOTRADERTICKETREFUSE,
+                        null
+                    );
+                }
             }
             else
             {

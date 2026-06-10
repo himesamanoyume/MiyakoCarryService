@@ -54,6 +54,7 @@
     "Mcs/MiyakoTraderCommandError": "Command Error",
     "Mcs/MiyakoTraderOrderNewQuest": "You have successfully placed your order! You can view your order details in the Trader Tasks menu.\nJust accept the order and proceed with payment!",
     "Mcs/MiyakoTraderTicketNewQuest": "A new ticket has been issued. You can view the details in the Trader Tasks menu.\nAccept the ticket and make the payment to waive part of the price increase penalty.",
+    "Mcs/MiyakoTraderTicketRefuse": "There is no longer any price increase, no fine needs to be paid.",
     "Mcs/MiyakoTraderUnrecognizedCommand": "Unknown command! Type \"help\" to see available commands.",
     "Mcs/MiyakoTraderInventoryModeRefuse": "You are currently in mcs player inventory mode and cannot use commands.",
     "Mcs/MiyakoTraderAvailableCommandsList": "The available commands will be listed below:",

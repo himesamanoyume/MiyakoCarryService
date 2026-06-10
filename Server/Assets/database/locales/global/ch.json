@@ -54,6 +54,7 @@
     "Mcs/MiyakoTraderCommandError": "指令错误",
     "Mcs/MiyakoTraderOrderNewQuest": "您已成功下单！您的订单信息可到商人任务界面查看\n接取订单并进行付款即可~",
     "Mcs/MiyakoTraderTicketNewQuest": "新的罚单已下发，罚单信息可到商人任务界面查看\n接取罚单并进行付款即可免除部分涨价惩罚。",
+    "Mcs/MiyakoTraderTicketRefuse": "当前价格已没有任何涨价，无需上交罚款。",
     "Mcs/MiyakoTraderUnrecognizedCommand": "未知指令! 输入 \"help\" 来查看可用指令",
     "Mcs/MiyakoTraderInventoryModeRefuse": "当前您处于护航库存模式，无法使用指令。",
     "Mcs/MiyakoTraderAvailableCommandsList": "以下将列出可用的指令:",
