@@ -137,8 +137,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 if (mcsBotPlayerData == null)
                 {
-                    mcsBotPlayerData.IsLooting = false;
-                    mcsBotPlayerData.IsTaskRunning = false;
                     return;
                 }
 
@@ -246,8 +244,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             finally
             {
-                mcsBotPlayerData.IsLooting = false;
-                mcsBotPlayerData.IsTaskRunning = false;
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.IsTaskRunning = false;
+                }
             }
         }
 
