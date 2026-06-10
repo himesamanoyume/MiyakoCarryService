@@ -156,7 +156,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     _nextPatrolTime = Time.time + 4f;
 
-                                    var validPosition = GetPosNearMcsLeadPlayer(mcsLeadPlayerPos);
+                                    var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
                                     if (validPosition.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     _nextPatrolTime = Time.time + 4f;
 
-                                    var validPosition = GetPosNearMcsLeadPlayer(mcsLeadPlayerPos);
+                                    var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
                                     if (validPosition.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(validPosition.Value);

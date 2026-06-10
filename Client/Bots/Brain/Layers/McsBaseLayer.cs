@@ -12,7 +12,6 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -37,11 +36,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextUpdatePosTime = 0f;  
         protected Vector3? _currentMoveTarget = null;  
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;  
-        protected const float FOLLOW_DISTANCE = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
-        protected const float JUMP_CHECK_INTERVAL = 1f;
-        protected const float STUCK_JUMP_THRESHOLD = 1f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
         protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
         protected const float SPHERECAST_RADIUS = 0.1f;
@@ -1292,7 +1288,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var movePosition = GetPosNearMcsLeadPlayer(leadPos);
+            var movePosition = Tools.GetPosNearTarget(leadPos, BotOwner);
             if (movePosition == null)
             {
                 nextUpdateTime = 0.25f;
@@ -1302,49 +1298,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             _lastLeadPos = leadPos;
             _currentMoveTarget = movePosition.Value;
             nextUpdateTime = 1f;
-        }
-
-        protected virtual Vector3? GetPosNearMcsLeadPlayer(Vector3 leadPos)
-        {
-            Vector3? result = null;
-            var xOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
-            var zOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
-            var newPos = leadPos + new Vector3(xOffset, 0f, zOffset);
-
-            for (int attempt = 0; attempt < 30; attempt++)
-            {
-                if (Tools.BetterDestination(3f, newPos, out var targetPos))
-                {
-                    if (Mathf.Abs(targetPos.y - leadPos.y) <= 2f)
-                    {
-                        result = targetPos;
-                        break;
-                    }
-                }
-            }
-
-            if (result == null && NavMesh.SamplePosition(newPos, out var navMeshHit, 3f, -1))
-            {
-                result = navMeshHit.position;
-            }
-
-            if (result.HasValue)
-            {
-                var leadDir = BotOwner.Position - result.Value;
-                leadDir.y = 0;
-                leadDir = leadDir.normalized * FOLLOW_DISTANCE;
-
-                if (NavMesh.Raycast(result.Value, leadDir + result.Value, out var rayHit, -1))
-                {
-                    result = rayHit.position;
-                }
-                else
-                {
-                    result = leadDir + result.Value;
-                }
-            }
-
-            return result;
         }
     }
 }

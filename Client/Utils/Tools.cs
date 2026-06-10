@@ -136,5 +136,52 @@ namespace MiyakoCarryService.Client.Utils
 
             return betterDestination != Vector3.zero;
         }
+
+        public static Vector3? GetPosNearTarget(Vector3 targetPos, BotOwner botOwner = null)
+        {
+            Vector3? result = null;
+            var xOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
+            var zOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
+            var newPos = targetPos + new Vector3(xOffset, 0f, zOffset);
+
+            for (int attempt = 0; attempt < 30; attempt++)
+            {
+                if (BetterDestination(3f, newPos, out var pos))
+                {
+                    if (Mathf.Abs(pos.y - targetPos.y) <= 2f)
+                    {
+                        result = pos;
+                        break;
+                    }
+                }
+            }
+
+            if (result == null && NavMesh.SamplePosition(newPos, out var navMeshHit, 3f, -1))
+            {
+                result = navMeshHit.position;
+            }
+
+            if (result.HasValue)
+            {
+                var leadDir = new Vector3();
+                if (botOwner != null)
+                {
+                    leadDir = botOwner.Position - result.Value;
+                    leadDir.y = 0;
+                    leadDir = leadDir.normalized * 2f;
+                }
+
+                if (NavMesh.Raycast(result.Value, leadDir + result.Value, out var rayHit, -1))
+                {
+                    result = rayHit.position;
+                }
+                else
+                {
+                    result = leadDir + result.Value;
+                }
+            }
+
+            return result;
+        }
     }
 }

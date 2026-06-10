@@ -4,6 +4,7 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -118,7 +119,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_nextPatrolTime < Time.time)
                     {
                         _nextPatrolTime = Time.time + 8f;
-                        var validPosition = GetPosNearMcsLeadPlayer(mcsLeadPlayerPos);
+                        var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
                         if (validPosition.HasValue)
                         {
                             BotOwner.GoToSomePointData.SetPoint(validPosition.Value);

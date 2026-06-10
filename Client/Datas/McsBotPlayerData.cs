@@ -7,6 +7,7 @@ using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -21,6 +22,7 @@ namespace MiyakoCarryService.Client.Datas
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
+        public Vector3? EscortPos = null;
         public LootData LootingTarget
         {
             get => _lootingTarget;

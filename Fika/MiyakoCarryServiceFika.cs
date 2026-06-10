@@ -189,29 +189,8 @@ namespace MiyakoCarryService.Fika
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                Vector3? validPosition = null;
-                var xOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                var zOffset = GClass856.Random(3f, 4f) * GClass856.RandomSing();
-                var newPos = packet.Position.Value + new Vector3(xOffset, 0f, zOffset);
-
-                for (int attempt = 0; attempt < 30; attempt++)
-                {
-                    if (Tools.BetterDestination(3f, newPos, out var targetPos))
-                    {
-                        if (Mathf.Abs(targetPos.y - packet.Position.Value.y) <= 2f)
-                        {
-                            validPosition = targetPos;
-                            break;
-                        }
-                    }
-                }
-
-                if (validPosition == null && NavMesh.SamplePosition(newPos, out var navMeshHit2, 7f, -1))
-                {
-                    validPosition = navMeshHit2.position;
-                }
-
-                if (validPosition.HasValue)
+                var pos = Tools.GetPosNearTarget(packet.Position.Value, botOwner);
+                if (pos.HasValue)
                 {
                     botOwner.TalkMsg(new McsMsg
                     {
@@ -225,7 +204,7 @@ namespace MiyakoCarryService.Fika
                     }
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
-                    botOwner.GoToSomePointData.SetPoint(validPosition.Value);
+                    botOwner.GoToSomePointData.SetPoint(pos.Value);
                 }
             }
         }
