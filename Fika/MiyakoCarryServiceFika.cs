@@ -18,6 +18,8 @@ using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Fika.Patches;
+using MiyakoCarryService.Client.Patches.Events;
+using HarmonyLib;
 
 namespace MiyakoCarryService.Fika
 {
@@ -32,7 +34,6 @@ namespace MiyakoCarryService.Fika
             new ExtractPatch().Enable();
             new OnLoadingProfilePacketReceivedPatch().Enable();
             new FikaClientOnPeerConnectedPatch().Enable();
-            new FikaServerInitPatch().Enable();
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
@@ -56,6 +57,51 @@ namespace MiyakoCarryService.Fika
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
             fikaEvent.Manager.RegisterPacket<McsBotPlayerConfigPacket>(OnMcsBotPlayerConfigPacketReceived);
+
+            // 用于主机同步护航信息至副机
+            if (fikaEvent.Manager is FikaServer fikaServer && !FikaBackendUtils.IsHeadless)
+            {
+                var visualProfiles = (Dictionary<Profile, bool>)AccessTools.Field(typeof(FikaServer), "_visualProfiles").GetValue(fikaServer);
+            
+                foreach (var groupPlayerViewModelClass in MatchmakerAcceptScreenShowPatch.GroupPlayers)
+                {
+                    if (groupPlayerViewModelClass.Id == GameLoop.Instance.Session.Profile.Id)
+                    {
+                        continue;
+                    }
+
+                    var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
+                    {
+                        AccountId = groupPlayerViewModelClass.AccountId,
+                        Id = groupPlayerViewModelClass.Id,
+                        Info = new ProfileInfoClass()
+                        {
+                            Level = groupPlayerViewModelClass.Info.Level,
+                            Experience = InfoClass.GetExperience(groupPlayerViewModelClass.Info.Level),
+                            PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
+                            MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
+                            SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
+                            Nickname = groupPlayerViewModelClass.Info.Nickname,
+                            Side = groupPlayerViewModelClass.Info.Side,
+                            GameVersion = groupPlayerViewModelClass.Info.GameVersion,
+                            HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
+                            SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
+                        },
+                        Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
+                        Health = new(),
+                        InsuredItems = [],
+                        Inventory = new()
+                        {
+                            Equipment = EFTItemSerializerClass.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, GClass2240.Instance)
+                        },
+                        TaskConditionCounters = [],
+                        Encyclopedia = []
+                    };
+
+                    var profile = new Profile(completeProfileDescriptorClass);
+                    visualProfiles.Add(profile, false);
+                }
+            }
         }
 
         public void OnCommandPacketReceived(CommandPacket packet)
