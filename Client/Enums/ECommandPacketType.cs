@@ -7,6 +7,7 @@ namespace MiyakoCarryService.Client.Enums
         HoldPosition,
         Regroup,
         ReportAboutEnemy,
-        OnYourOwn
+        OnYourOwn,
+        Escort
     }
 }

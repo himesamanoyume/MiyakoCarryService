@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -88,7 +89,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 }
 
                 var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (mcsBotPlayerData.ShouldRegroup || mcsBotPlayerData.ShouldGoToPoint || mcsBotPlayerData.ShouldHoldPosition || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
+                if (mcsBotPlayerData.HasDecision(EDecision.ShouldRegroup) || mcsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) || mcsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
                 {
                     botDecisionManagerTraverse.Method("SetDecisions", [_combatDecisionType, _squadDecisionType, _selfActionType, _enemyType]).GetValue([_combatDecisionValue, _squadDecisionValue, _selfActionTypeValue, null]);
                     return false;

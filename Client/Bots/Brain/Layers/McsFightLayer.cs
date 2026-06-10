@@ -2,6 +2,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -127,12 +128,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (McsBotPlayerData != null)
                             {
-                                if (McsBotPlayerData.ShouldGoToPoint)
+                                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                                 {
                                     return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                                 }
 
-                                if (McsBotPlayerData.ShouldHoldPosition)
+                                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                                 {
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
@@ -193,7 +194,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && McsBotPlayerData != null && !McsBotPlayerData.ShouldRegroup)
+                        if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && McsBotPlayerData != null && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
@@ -201,12 +202,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (McsBotPlayerData != null)
                             {
-                                if (McsBotPlayerData.ShouldGoToPoint)
+                                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                                 {
                                     return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                                 }
 
-                                if (McsBotPlayerData.ShouldHoldPosition)
+                                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                                 {
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }

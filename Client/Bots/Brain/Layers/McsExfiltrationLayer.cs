@@ -1,6 +1,7 @@
 
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
@@ -21,9 +22,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (McsBotPlayerData != null)
             {
-                McsBotPlayerData.ShouldRegroup = false;
-                McsBotPlayerData.ShouldHoldPosition = false;
-                McsBotPlayerData.ShouldGoToPoint = false;
+                McsBotPlayerData.SetDecision();
                 McsBotPlayerData.IsLooting = false;
             }
             
@@ -53,7 +52,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
-                if (McsBotPlayerData.ShouldExfil)
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldExfil))
                 {
                     return true;
                 }

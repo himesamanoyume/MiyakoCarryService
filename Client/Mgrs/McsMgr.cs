@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
@@ -109,7 +110,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public IEnumerable<BotOwner> GetAllAliveMcsSquadMembersByMcsLeadId(MongoID mcsLeadPlayerId)
         {
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
-            
             if (_mcsSquadDict.TryGetValue(mcsLeadPlayerId, out var squadMembers))
             {
                 foreach (var botOwner in squadMembers.Values)
@@ -324,10 +324,10 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
             if (_friendlyFireDebouncer != null)
             {
-                _friendlyFireDebouncer.Flush();  
+                _friendlyFireDebouncer.Flush();
                 _friendlyFireDebouncer.Clear();
             }
-            _friendlyFireDebouncer = null; 
+            _friendlyFireDebouncer = null;
             _mcsDeadBotPlayerIds.Clear();
             _mcsSquadDict.Clear();
             _mcsLeadPlayerIds.Clear();
@@ -370,7 +370,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     continue;
                 }
-                mcsBotPlayerData.ShouldExfil = true;
+                mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
             }
         }
     }

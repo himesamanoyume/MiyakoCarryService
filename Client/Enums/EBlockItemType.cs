@@ -4,50 +4,49 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Enums
 {
-    
     [Flags]
     public enum EBlockItemType
     {
         [Description(Locales.BLOCKITEMTYPEAMMO)]
-        Ammo = 1,
+        Ammo = 1 << 0,
         [Description(Locales.BLOCKITEMTYPEBARTER)]
-        Barter = 2,
+        Barter = 1 << 1,
         [Description(Locales.BLOCKITEMTYPECONTAINER)]
-        Container = 4,
+        Container = 1 << 2,
         [Description(Locales.BLOCKITEMTYPEFOOD)]
-        Food = 8,
+        Food = 1 << 3,
         [Description(Locales.BLOCKITEMTYPEBACKPACK)]
-        Backpack = 16,
+        Backpack = 1 << 4,
         [Description(Locales.BLOCKITEMTYPEGOGGLES)]
-        Goggles = 32,
+        Goggles = 1 << 5,
         [Description(Locales.BLOCKITEMTYPERIG)]
-        Rig = 64,
+        Rig = 1 << 6,
         [Description(Locales.BLOCKITEMTYPEARMOR)]
-        Armor = 128,
+        Armor = 1 << 7,
         [Description(Locales.BLOCKITEMTYPEHEADPHONE)]
-        Headphone = 256,
+        Headphone = 1 << 8,
         [Description(Locales.BLOCKITEMTYPETACTICALVEST)]
-        TacticalVest = 512,
+        TacticalVest = 1 << 9,
         [Description(Locales.BLOCKITEMTYPEGRENADE)]
-        Grenade = 1024,
+        Grenade = 1 << 10,
         [Description(Locales.BLOCKITEMTYPEINFO)]
-        Info = 2048,
+        Info = 1 << 11,
         [Description(Locales.BLOCKITEMTYPEKEYS)]
-        Keys = 4096,
+        Keys = 1 << 12,
         [Description(Locales.BLOCKITEMTYPEKNIFE)]
-        Knife = 8192,
+        Knife = 1 << 13,
         [Description(Locales.BLOCKITEMTYPEMAGAZINE)]
-        Magazine = 16384,
+        Magazine = 1 << 14,
         [Description(Locales.BLOCKITEMTYPEMEDS)]
-        Meds = 32768,
+        Meds = 1 << 15,
         [Description(Locales.BLOCKITEMTYPEMOD)]
-        Mod = 65536,
+        Mod = 1 << 16,
         [Description(Locales.BLOCKITEMTYPESPECIAL)]
-        Special = 131072,
+        Special = 1 << 17,
         [Description(Locales.BLOCKITEMTYPEWEAPON)]
-        Weapon = 262144,
+        Weapon = 1 << 18,
         [Description(Locales.BLOCKITEMTYPEOTHER)]
-        Other = 524288,
+        Other = 1 << 19,
         [Description(Locales.BLOCKITEMTYPEALL)]
         All = Ammo | Barter | Container | Food | Backpack | Goggles | Rig | Armor | Headphone | TacticalVest | Grenade | Info | Keys | Knife | Magazine | Meds | Mod | Special | Weapon | Other
     }

@@ -32,8 +32,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
 
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldHoldPosition = false;
-                    mcsBotPlayerData.ShouldGoToPoint = false;
+                    mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
                 }
             }

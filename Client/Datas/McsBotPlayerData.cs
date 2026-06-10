@@ -46,10 +46,36 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         public bool IsTaskRunning = false;
-        public bool ShouldRegroup = false;
-        public bool ShouldHoldPosition = false;
-        public bool ShouldGoToPoint = false;
-        public bool ShouldExfil = false;
+        private EDecision _decision = EDecision.None;
+
+        public void SetDecision(EDecision[] exclude = null, params EDecision[] decisions)
+        {
+            _decision = EDecision.None;
+            foreach (var decision in decisions)
+            {
+                _decision |= decision;
+            }
+
+            if (exclude != null)
+            {
+                foreach (var e in exclude)
+                {
+                    _decision &= ~e;
+                }
+            }
+        }
+
+        public bool HasDecision(params EDecision[] decisions)
+        {
+            foreach (var decision in decisions)
+            {
+                if (!_decision.HasFlag(decision))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {

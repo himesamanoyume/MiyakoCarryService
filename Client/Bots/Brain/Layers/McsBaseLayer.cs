@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -359,10 +360,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (BotOwner.GoToSomePointData.IsCome())
             {
-                if (McsBotPlayerData.ShouldGoToPoint)
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                 {
-                    McsBotPlayerData.ShouldGoToPoint = false;
-                    McsBotPlayerData.ShouldHoldPosition = true;
+                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                 }
                 return true;
             }
@@ -394,10 +394,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
-                    if (McsBotPlayerData.ShouldGoToPoint)
+                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                     {
-                        McsBotPlayerData.ShouldGoToPoint = false;
-                        McsBotPlayerData.ShouldHoldPosition = true;
+                        McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     }
                     return true;
                 }
@@ -803,7 +802,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndRunToEnemy()
         {
-            if (McsBotPlayerData.ShouldRegroup)
+            if (McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
             {
                 return true;
             }

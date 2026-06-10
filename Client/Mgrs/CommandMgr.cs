@@ -212,7 +212,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
-                actionsReturnClass.Actions.Add(TeamGoToTriggerPosCommand(GoToTransitPosCommandAction, mcsBotPlayers, transitData));
+                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, transitData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -225,7 +225,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
-                actionsReturnClass.Actions.Add(TeamGoToTriggerPosCommand(GoToExfilPosCommandAction, mcsBotPlayers, exfilData));
+                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, exfilData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -272,7 +272,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
-                actionsReturnClass.Actions.Add(GoToTriggerPosCommand(GoToTransitPosCommandAction, mcsBotPlayer, transitData));
+                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, transitData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -285,7 +285,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
-                actionsReturnClass.Actions.Add(GoToTriggerPosCommand(GoToExfilPosCommandAction, mcsBotPlayer, exfilData));
+                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, exfilData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -297,7 +297,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var questData in questDatas)
             {
-                actionsReturnClass.Actions.Add(TeamGoToTriggerPosCommand(GoToQuestPosCommandAction, mcsBotPlayers, questData));
+                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, questData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -309,13 +309,13 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var questData in questDatas)
             {
-                actionsReturnClass.Actions.Add(GoToTriggerPosCommand(GoToQuestPosCommandAction, mcsBotPlayer, questData));
+                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, questData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public ActionsTypesClass TeamGoToTriggerPosCommand(Action<Player> action, List<Player> mcsBotPlayers, TriggerData triggerData)
+        public ActionsTypesClass TeamEscortToTriggerPosCommand(Action<Player, TriggerData> action, List<Player> mcsBotPlayers, TriggerData triggerData)
         {
             return new ActionsTypesClass
             {
@@ -336,13 +336,13 @@ namespace MiyakoCarryService.Client.Mgrs
                             continue;
                         }
 
-                        action(mcsBotPlayer);
+                        action(mcsBotPlayer, triggerData);
                     }
                 }
             };
         }
 
-        public ActionsTypesClass GoToTriggerPosCommand(Action<Player> action, Player mcsBotPlayer, TriggerData triggerData)
+        public ActionsTypesClass EscortToTriggerPosCommand(Action<Player, TriggerData> action, Player mcsBotPlayer, TriggerData triggerData)
         {
             return new ActionsTypesClass
             {
@@ -351,23 +351,36 @@ namespace MiyakoCarryService.Client.Mgrs
                 Disabled = triggerData.IsDisabled(),
                 Action = () =>
                 {
-                    action(mcsBotPlayer);
+                    action(mcsBotPlayer, triggerData);
                 }
             };
         }
 
-        public void GoToQuestPosCommandAction(Player mcsBotPlayer)
+        public void EscortToTriggerPosCommandAction(Player mcsBotPlayer, TriggerData triggerData)
         {
-            CloseCommandMenuAction();
-        }
-
-        public void GoToExfilPosCommandAction(Player mcsBotPlayer)
-        {
-            CloseCommandMenuAction();
-        }
-
-        public void GoToTransitPosCommandAction(Player mcsBotPlayer)
-        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.Escort,
+                    Position = triggerData.GetTransfrom().position
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                    mcsBotPlayerData.IsLooting = false;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.FollowMe,
+                });
+            }
             CloseCommandMenuAction();
         }
 
@@ -755,9 +768,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldRegroup = false;
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
                 }
                 botOwner.TalkMsg(new McsMsg
@@ -785,9 +796,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldRegroup = true;
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldRegroup);
                     mcsBotPlayerData.IsLooting = false;
                 }
                 botOwner.TalkMsg(new McsMsg
@@ -861,8 +870,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                         if (mcsBotPlayerData != null)
                         {
-                            mcsBotPlayerData.ShouldGoToPoint = true;
-                            mcsBotPlayerData.ShouldHoldPosition = false;
+                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldGoToPoint);
                             mcsBotPlayerData.IsLooting = false;
                         }
                         botOwner.Mover.LastTimePosChanged = Time.time;
@@ -893,7 +901,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.IsLooting = false;
-                    mcsBotPlayerData.ShouldHoldPosition = true;
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
@@ -1080,8 +1088,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
                 }

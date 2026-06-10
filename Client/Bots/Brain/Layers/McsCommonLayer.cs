@@ -2,6 +2,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
@@ -31,12 +32,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData != null)
                 {
-                    if (McsBotPlayerData.ShouldGoToPoint)
+                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                     {
                         return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                     }
 
-                    if (McsBotPlayerData.ShouldHoldPosition)
+                    if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                     {
                         return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                     }
@@ -82,7 +83,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData != null)
                 {
                     // 检测周围是否有符合条件的战利品
-                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.ShouldRegroup)
+                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
                     {
                         // 尝试去拿战利品
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");

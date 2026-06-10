@@ -220,8 +220,7 @@ namespace MiyakoCarryService.Fika
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
                     {
-                        mcsBotPlayerData.ShouldGoToPoint = true;
-                        mcsBotPlayerData.ShouldHoldPosition = false;
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldGoToPoint);
                         mcsBotPlayerData.IsLooting = false;
                     }
                     botOwner.Mover.LastTimePosChanged = Time.time;
@@ -256,11 +255,15 @@ namespace MiyakoCarryService.Fika
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
-                botOwner.GetMcsBotPlayerData().ShouldHoldPosition = true;
-                botOwner.TalkMsg(new McsMsg
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
                 {
-                    PhraseTrigger = EPhraseTrigger.HoldPosition,
-                });
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.HoldPosition,
+                    });
+                }
             }
         }
 
@@ -291,9 +294,7 @@ namespace MiyakoCarryService.Fika
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldRegroup = true;
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldRegroup);
                     mcsBotPlayerData.IsLooting = false;
                 }
                 botOwner.TalkMsg(new McsMsg
@@ -365,9 +366,7 @@ namespace MiyakoCarryService.Fika
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.ShouldRegroup = false;
-                    mcsBotPlayerData.ShouldGoToPoint = false;
-                    mcsBotPlayerData.ShouldHoldPosition = false;
+                    mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
                 }
                 botOwner.TalkMsg(new McsMsg
