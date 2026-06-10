@@ -50,11 +50,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner_0.LookData.SetLookPointByHearing(null);
                 }
                 BotOwner_0.Sprint(true, true);
-                if (!BotOwner_0.Mover.IsComeTo(BotOwner_0.Settings.FileSettings.Move.REACH_DIST, false, null))
+                if (BotOwner_0.Mover.IsComeTo(BotOwner_0.Settings.FileSettings.Move.REACH_DIST, false, null))
                 {
-                    return;
+                    BotOwner_0.StopMove();
                 }
-                method_7();
             }
         }
     }

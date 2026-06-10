@@ -104,8 +104,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 
                 var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE;
-                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE || tooClose)
+                var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
+                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
                 {
                     if (_currentMoveTarget.HasValue)
                     {

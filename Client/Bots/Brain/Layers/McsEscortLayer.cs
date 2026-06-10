@@ -80,7 +80,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
+            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort) && McsBotPlayerData.EscortPos.HasValue)
             {
                 return true;
             }
