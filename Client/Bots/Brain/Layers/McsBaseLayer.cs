@@ -42,6 +42,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected Vector3? _currentMoveTarget = null;  
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;  
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
+        protected const float TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT = 10f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
         protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
@@ -138,6 +139,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunToEnemyLogic), EndRunToEnemy },
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
+                { typeof(RunToPointLogic), EndGoToPoint },
+                { typeof(EscortToPointLogic), EndEscortToPoint },
             };
         }
 
@@ -396,6 +399,59 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                    {
+                        McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        protected virtual bool EndEscortToPoint()
+        {
+            if (BotOwner.GoToSomePointData.IsCome())
+            {
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
+                {
+                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                }
+                return true;
+            }
+            else
+            {
+                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+                {
+                    CheckStuck();
+                }
+
+                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT * TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT)
+                {
+                    return true;
+                }
+
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
+                {
+                    if (MiyakoCarryServicePlugin.SAINInstalled)
+                    {
+                        BotOwner.StopMove();
+                        BotOwner.Mover.AllowTeleport();
+                        BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
+                        var playerPosition = McsBotPlayerData.Player.Position;
+                        BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                        BotOwner.Mover.LastGoodCastPointTime = Time.time;
+                        BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                        BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                        BotOwner.Mover.RecalcWay();
+                        BotOwner.Mover.Pause = true;
+                    }
+                    return true;
+                }
+
+                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+                {
+                    if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
                     {
                         McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     }

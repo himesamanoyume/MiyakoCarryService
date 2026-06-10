@@ -1,7 +1,9 @@
 
+using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -23,11 +25,37 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            if (true)
+            try
             {
-                return new Action(typeof(GoToPointLogic), "Mcs:EscortToPos");
+                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                if (mcsLeadPlayerPos == null)
+                {
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                }
+
+                var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
+                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT * TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:WaitForLead");
+                }
+                else
+                {
+                    if (McsBotPlayerData != null && McsBotPlayerData.EscortPos != null)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(McsBotPlayerData.EscortPos.Value);
+                        return new Action(typeof(EscortToPointLogic), "Mcs:EscortToPoint");
+                    }
+                    else
+                    {
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortPos");
+                    }
+                }
             }
-            return new Action(typeof(HoldPositionLogic), "Mcs:WaitForLead");
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
+            }
         }
 
         public override bool IsActive()

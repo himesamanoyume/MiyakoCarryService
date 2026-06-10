@@ -1,4 +1,5 @@
 
+using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
@@ -22,6 +23,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 McsBotPlayerData.IsLooting = false;
                 McsBotPlayerData.EscortPos = null;
+                McsBotPlayerData.SetDecision();
             }
         }
 
@@ -30,11 +32,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
+            try
             {
-                return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");
+                if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
+                {
+                    return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");
+                }
+                return new Action(typeof(HoldPositionLogic), "Mcs:HoldExf");
             }
-            return new Action(typeof(HoldPositionLogic), "Mcs:HoldExf");
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
+            }
         }
 
         public override bool IsActive()

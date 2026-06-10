@@ -44,13 +44,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (canRun && BotOwner_0.Mover.HasPathAndNoComplete)
                 {
                     BotOwner_0.Steering.LookToMovingDirection();
-                    BotOwner_0.Sprint(true, true);
                 }
                 else
                 {
                     BotOwner_0.LookData.SetLookPointByHearing(null);
-                    BotOwner_0.Sprint(true, true);
                 }
+                BotOwner_0.Sprint(true, true);
                 if (!BotOwner_0.Mover.IsComeTo(BotOwner_0.Settings.FileSettings.Move.REACH_DIST, false, null))
                 {
                     return;

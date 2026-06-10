@@ -104,15 +104,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 
                 var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE || sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE)
+                var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE;
+                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE || tooClose)
                 {
                     if (_currentMoveTarget.HasValue)
                     {
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
+                        if (tooClose)
+                        {
+                            return new Action(typeof(GoToPointLogic), "Mcs:TooClose");
+                        }
+                        else
+                        {
+                            return new Action(typeof(RunToPointLogic), "Mcs:TooFar");
+                        }
                     }
 
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath1");
                 }
                 else
                 {
@@ -126,7 +134,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                         }
 
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath2");
                     }
                     else
                     {
@@ -137,7 +145,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:Exception");
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
             }
         }
 
@@ -164,7 +172,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
-            
+
             return true;
         }
     }

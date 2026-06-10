@@ -96,7 +96,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                     if (mcsLeadPlayerPos == null)
                     {
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
                     }
 
                     if (_nextUpdatePosTime < Time.time)
@@ -149,7 +149,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                                 }
 
-                                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
+                                return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath1");
                             }
                             else
                             {
@@ -164,7 +164,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                     }
 
-                                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
+                                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath2");
                                 }
                                 else
                                 {
@@ -223,7 +223,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     return new Action(typeof(GoToPointLogic), "Mcs:GoToPointLogic");
                                 }
 
-                                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath1");
+                                return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath3");
                             }
                             else
                             {
@@ -238,7 +238,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                     }
 
-                                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:CannotFindPath2");
+                                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath4");
                                 }
                                 else
                                 {
@@ -272,7 +272,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:Exception");
+                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
             }
         }
 
