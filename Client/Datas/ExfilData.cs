@@ -1,5 +1,6 @@
 using System;
 using EFT.Interactive;
+using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -15,7 +16,15 @@ namespace MiyakoCarryService.Client.Datas
             _exfilRef = new WeakReference<ExfiltrationPoint>(exfiltrationPoint);
         }
 
-        protected override Transform GetTransfrom() => ExfiltrationPoint.transform;
+        public override Transform GetTransfrom() => ExfiltrationPoint.transform;
+        public override string GetActionName() => ExfiltrationPoint.Settings.Name.McsLocalized();
+        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format("距离我 {0} M", Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.transform.position)));
+        public override bool IsDisabled() => ExfiltrationPoint.Status switch
+        {
+            EExfiltrationStatus.RegularMode or
+            EExfiltrationStatus.Countdown => false,
+            _ => true
+        };
 
         public override void Dispose()
         {
