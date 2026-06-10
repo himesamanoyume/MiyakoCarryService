@@ -2,6 +2,7 @@
 using System;
 using EFT.Quests;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -24,7 +25,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override Transform GetTransfrom() => _questTransform;
         public override string GetActionName() => QuestCondition.id.ToString().McsLocalized();
-        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format("距离我 {0} M", Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
+        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
         public override bool IsDisabled() => false;
 
         public override void Dispose()

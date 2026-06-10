@@ -1,6 +1,7 @@
 using System;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -18,7 +19,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override Transform GetTransfrom() => ExfiltrationPoint.transform;
         public override string GetActionName() => ExfiltrationPoint.Settings.Name.McsLocalized();
-        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format("距离我 {0} M", Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.transform.position)));
+        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.transform.position)));
         public override bool IsDisabled() => ExfiltrationPoint.Status switch
         {
             EExfiltrationStatus.RegularMode or
