@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Mgrs
             BrainManager.AddCustomLayer(typeof(McsExfiltrationLayer), Classification.AllBrainNames, 89);
 
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 65);
+            BrainManager.AddCustomLayer(typeof(McsEscortLayer), Classification.AllBrainNames, 66);
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
             {
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Client.Mgrs
             if (_customBrainNames != null && _customBrainNames.Count > 0)
             {
                 BrainManager.AddCustomLayer(typeof(McsCommonLayer), _customBrainNames, 65);
-                
+                BrainManager.AddCustomLayer(typeof(McsEscortLayer), _customBrainNames, 66);
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 86);
             }
         }

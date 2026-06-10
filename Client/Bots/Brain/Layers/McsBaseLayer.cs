@@ -15,8 +15,13 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public abstract class McsBaseLayer<T>(BotOwner botOwner, int priority) : CustomLayer(botOwner, priority) where T : McsBaseLayer<T>
+    public abstract class McsBaseLayer<T> : CustomLayer where T : McsBaseLayer<T>
     {
+        protected McsBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        {
+            InitActionMap();
+        }
+
         private bool? _isMcsBotPlayer = null;
 
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;

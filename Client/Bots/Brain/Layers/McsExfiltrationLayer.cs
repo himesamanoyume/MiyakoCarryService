@@ -12,7 +12,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            InitActionMap();
+            
+        }
+
+        public override void Start()
+        {
+            base.Start();
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.IsLooting = false;
+                McsBotPlayerData.EscortPos = null;
+            }
         }
 
         private float _lastPositionUpdateTime = 0f;
@@ -20,12 +30,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override Action GetNextAction()
         {
-            if (McsBotPlayerData != null)
-            {
-                McsBotPlayerData.SetDecision();
-                McsBotPlayerData.IsLooting = false;
-            }
-            
             if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
             {
                 return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");

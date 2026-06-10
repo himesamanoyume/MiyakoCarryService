@@ -34,6 +34,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 {
                     mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
             }
         }

@@ -384,17 +384,15 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             PhraseTrigger = EPhraseTrigger.FollowMe,
                         });
-
+                        botOwner.Mover.LastTimePosChanged = Time.time;
+                        botOwner.StopMove();
                         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                         if (mcsBotPlayerData != null)
                         {
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                            mcsBotPlayerData.EscortPos = pos.Value;
                             mcsBotPlayerData.IsLooting = false;
                         }
-
-                        botOwner.Mover.LastTimePosChanged = Time.time;
-                        botOwner.StopMove();
-                        botOwner.GoToSomePointData.SetPoint(pos.Value);
                     }
                 }
             }
@@ -755,6 +753,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 if (botOwner.Memory.HaveEnemy)
                 {
@@ -787,6 +786,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
@@ -815,6 +815,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     mcsBotPlayerData.SetDecision(null, EDecision.ShouldRegroup);
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
@@ -856,6 +857,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldGoToPoint);
                             mcsBotPlayerData.IsLooting = false;
+                            mcsBotPlayerData.EscortPos = null;
                         }
                         botOwner.Mover.LastTimePosChanged = Time.time;
                         botOwner.StopMove();
@@ -884,8 +886,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
@@ -1074,6 +1077,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                     mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
                 }
                 var playerPosition = mcsBotPlayer.Position;

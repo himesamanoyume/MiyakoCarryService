@@ -13,7 +13,6 @@ using EFT;
 using Fika.Core.Networking.LiteNetLib;
 using UnityEngine;
 using MiyakoCarryService.Client.Extensions;
-using UnityEngine.AI;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Events;
@@ -48,6 +47,7 @@ namespace MiyakoCarryService.Fika
                 {ECommandPacketType.Regroup, HandleRegroup},
                 {ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy},
                 {ECommandPacketType.OnYourOwn, HandleOnYourOwn},
+                {ECommandPacketType.Escort, HandleEscort},
             };
         }
 
@@ -201,10 +201,55 @@ namespace MiyakoCarryService.Fika
                     {
                         mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldGoToPoint);
                         mcsBotPlayerData.IsLooting = false;
+                        mcsBotPlayerData.EscortPos = null;
                     }
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     botOwner.GoToSomePointData.SetPoint(pos.Value);
+                }
+            }
+        }
+
+        private void HandleEscort(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.Escort)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var pos = Tools.GetPosNearTarget(packet.Position.Value, botOwner);
+                if (pos.HasValue)
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.FollowMe,
+                    });
+                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.StopMove();
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                        mcsBotPlayerData.EscortPos = pos.Value;
+                        mcsBotPlayerData.IsLooting = false;
+                    }
                 }
             }
         }
@@ -275,6 +320,7 @@ namespace MiyakoCarryService.Fika
                 {
                     mcsBotPlayerData.SetDecision(null, EDecision.ShouldRegroup);
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
@@ -347,6 +393,7 @@ namespace MiyakoCarryService.Fika
                 {
                     mcsBotPlayerData.SetDecision();
                     mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.EscortPos = null;
                 }
                 botOwner.TalkMsg(new McsMsg
                 {

@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     {
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            InitActionMap();
+            
         }
 
         public override void Start()
@@ -143,25 +143,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            if (IsMcsBotPlayer)
+            if (!IsMcsBotPlayer)
             {
-#if DEBUG
-                if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
-                {
-                    return false;
-                }
-#endif
-                if (BotOwner.Memory.IsUnderFire)
-                {
-                    return false;
-                }
-                if (BotOwner.Memory.HaveEnemy && MiyakoCarryServicePlugin.SAINInstalled)
-                {
-                    return false;
-                }
-                return true;
+                return false;
             }
-            return false;
+
+#if DEBUG
+            if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+            {
+                return false;
+            }
+#endif
+
+            if (BotOwner.Memory.IsUnderFire)
+            {
+                return false;
+            }
+
+            if (BotOwner.Memory.HaveEnemy && MiyakoCarryServicePlugin.SAINInstalled)
+            {
+                return false;
+            }
+            
+            return true;
         }
     }
 }

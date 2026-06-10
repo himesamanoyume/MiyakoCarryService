@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     {
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            InitActionMap();
+            
         }
 
         public override void Start()
@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsLooting = false;
+                McsBotPlayerData.EscortPos = null;
             }
 
             BotOwner.TalkMsg(new McsMsg

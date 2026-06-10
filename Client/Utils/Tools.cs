@@ -179,9 +179,10 @@ namespace MiyakoCarryService.Client.Utils
                 {
                     result = leadDir + result.Value;
                 }
-            }
 
-            return result;
+                return result;
+            }
+            return targetPos;
         }
     }
 }
