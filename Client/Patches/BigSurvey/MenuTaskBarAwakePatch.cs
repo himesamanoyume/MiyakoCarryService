@@ -18,6 +18,7 @@ using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.Group;
 using UnityEngine.UI;
 using MiyakoCarryService.Client.Extensions;
+using System;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -81,7 +82,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
 
         if (_tempNewsGameObject != null)
         {
-            _bigSurveyGameObject = Object.Instantiate(_tempNewsGameObject);
+            _bigSurveyGameObject = UnityEngine.Object.Instantiate(_tempNewsGameObject);
             _bigSurveyGameObject.name = "BigSurvey";
             _bigSurveyGameObject.transform.SetParent(_tempNewsGameObject.transform.parent, false);
             _bigSurveyGameObject.transform.SetSiblingIndex(10);
@@ -101,6 +102,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                 {
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                     var stringBuilder = new StringBuilder();
+                    stringBuilder.Append("- DateTime: ").Append(DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")).Append("\n");
                     stringBuilder.Append("- Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
                     stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
                         .Append("- SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
@@ -111,7 +113,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                         .Append("- All Client Mod:\n")
                         .Append(string.Join(", ", Chainloader.PluginInfos.Values.Select(x => x.Instance)
                                 .Where(plugin => plugin != null)
-                                .Union(Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => $"{p.Info.Metadata.Name}({p.Info.Metadata.Version})")
+                                .Union(UnityEngine.Object.FindObjectsOfType(typeof(BaseUnityPlugin)).Cast<BaseUnityPlugin>()).Select(p => $"{p.Info.Metadata.Name}({p.Info.Metadata.Version})")
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
@@ -137,7 +139,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
 
         if (_tempBackGameObject != null)
         {
-            _mcsBotPlayerInventoryModeGameObject = Object.Instantiate(_tempBackGameObject);
+            _mcsBotPlayerInventoryModeGameObject = UnityEngine.Object.Instantiate(_tempBackGameObject);
             _mcsBotPlayerInventoryModeGameObject.name = "McsBotPlayerInventoryModeInfo";
             _mcsBotPlayerInventoryModeGameObject.transform.SetParent(_tempBackGameObject.transform.parent, false);
             _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).gameObject.SetActive(true);
@@ -173,7 +175,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
         {
             ____toggleButtons.Remove(EMenuType.NewsHub);
             ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
-            Object.Destroy(_tempNewsGameObject.gameObject);
+            UnityEngine.Object.Destroy(_tempNewsGameObject.gameObject);
             List<GameObject> newList = [.. ____newInformation];
             if (newList.Count > 0)
             {
