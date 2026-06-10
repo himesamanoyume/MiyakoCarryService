@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.Regroup, Locales.REGROUP},
                 {EPhraseTrigger.StartHeal, Locales.STARTHEAL},
                 {EPhraseTrigger.OnFriendlyDown, Locales.ONFRIENDLYDOWN},
+                {EPhraseTrigger.FollowMe, Locales.FOLLOWME},
                 // 空短语、临时内容，用于传递任意Key实现任何对话内容
                 {EPhraseTrigger.PhraseNone, "PhraseNone"}
             };

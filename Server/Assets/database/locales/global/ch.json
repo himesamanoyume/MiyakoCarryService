@@ -135,6 +135,7 @@
     "Mcs/HoldPosition": "正在原地驻守待命。",
     "Mcs/StartHeal": "我正在治疗。",
     "Mcs/OnFriendlyDown": "队友倒下！",
+    "Mcs/FollowMe": "跟我来。",
     "Mcs/OpenMcsBotPlayerInventory": "打开库存",
     "Mcs/ReturnToMainChar": "返回主角色",
     "Mcs/McsInventoryMode": "护航库存模式",
