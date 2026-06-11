@@ -475,6 +475,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
+                if (Time.time - BotOwner.Mover.LastTimePosChanged >= 2f)
+                {
+                    return true;
+                }
+
                 return false;
             }
         }
@@ -1389,17 +1394,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (!McsBotPlayerData.EscortPos.HasValue)
             {
-                nextUpdateTime = 1f;
+                nextUpdateTime = 0.25f;
                 return;
             }
 
             var leadPos = GetMcsLeadPlayerPos();
-            nextUpdateTime = 0.2f;
-            if (CanGetPathToRun(leadPos, McsBotPlayerData.EscortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            if (leadPos == null)
             {
-                _lastLeadPos = leadPos;
-                _currentMoveTarget = GetPointAlongPathAtDistance(corners, 13f);
+                nextUpdateTime = 1f;
+                return;
             }
+
+            var leadVelocity = McsBotPlayerData.LeadPlayer.Velocity;
+            var predictedPos = leadPos + leadVelocity * 2;
+
+            if (!CanGetPathToRun(predictedPos, McsBotPlayerData.EscortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            {
+                nextUpdateTime = 0.25f;
+                return;
+            }
+
+            var targetPos = GetPointAlongPathAtDistance(corners, 13f);
+            _currentMoveTarget = targetPos;
+            nextUpdateTime = 0.2f;
         }
 
         protected virtual bool CanGetPathToRun(Vector3 leadPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
@@ -1426,7 +1443,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            if (!flag && Tools.BetterDestination(1f, targetPos, out var betterDest))
+            if (!flag && Tools.BetterDestination(2.6f, targetPos, out var betterDest))
             {
                 navMeshPath = new NavMeshPath();
                 NavMesh.CalculatePath(leadPos, betterDest, -1, navMeshPath);
