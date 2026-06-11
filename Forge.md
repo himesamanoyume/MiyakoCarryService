@@ -161,6 +161,10 @@ Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`
 
 If `McsBotPlayer` is currently in combat, command `McsBotPlayer` to report known enemy positions.
 
+- On Your Own
+
+Command `McsBotPlayer` to act independently.
+
 - Regroup
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to follow the `McsLeadPlayer`.
@@ -181,11 +185,19 @@ Clear `McsBotPlayer`'s aggro and attempt to teleport them to current location.
 
 Remotely open `McsBotPlayer`'s inventory remotely, used to transfer loot they have picked up.
 
+- Escort
+
+If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort to the designated location.
+
 #### TeamCommand
 
 - Team Report Enemy Position
 
 If there are `McsBotPlayers` in the team currently in combat, command `McsBotPlayers` to report known enemy positions.
+
+- Team On Your Own
+
+Command `McsBotPlayers` to act independently.
 
 - Team Regroup
 
@@ -202,6 +214,10 @@ If there are `McsBotPlayers` in the team not currently in combat, command `McsBo
 - Team Force Teleport
 
 Clear aggro for all team `McsBotPlayers` and attempt to teleport all of them to current location.
+
+- Team Escort
+
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayer` to escort to the designated location.
 
 *When SAIN is installed, Force Teleport will be automatically disabled.*
 
