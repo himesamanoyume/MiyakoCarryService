@@ -9,7 +9,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 避免护航Bot将护航老板当做敌人，同时让护航Bot立即将把护航老板或护航Bot视为敌人的敌人也视为敌人，并且面对友好Bot类型时不主动开火
+    /// 避免护航Bot将护航老板当做敌人，同时让护航Bot同步敌人信息，并且面对友好Bot类型时不主动开火
     /// </summary>
     public sealed class AddEnemyPatch : ModulePatch
     {
@@ -65,13 +65,16 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             string mcsLeadPlayerId = null;
-            if (McsMgr.IsMcsLeadPlayer(person.ProfileId))
+            foreach (var member in __instance.Members)
             {
-                mcsLeadPlayerId = person.ProfileId;
-            }
-            else if (McsMgr.IsMcsBotPlayer(person.ProfileId))
-            {
-                mcsLeadPlayerId = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(person.ProfileId).GetPlayer.ProfileId;
+                if (McsMgr.IsMcsBotPlayer(member.ProfileId))
+                {
+                    mcsLeadPlayerId = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(member.ProfileId)?.GetPlayer?.ProfileId;
+                    if (mcsLeadPlayerId != null)
+                    {
+                        break;
+                    }
+                }
             }
 
             if (mcsLeadPlayerId == null)
@@ -92,9 +95,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         continue;
                     }
 
-                    foreach (var attacker in __instance.Members)
+                    foreach (var enemy in person.AIData.BotOwner.BotsGroup.Members)
                     {
-                        botGroup.AddEnemy(attacker, EBotEnemyCause.byKill);
+                        botGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
                     }
                 }
             }
