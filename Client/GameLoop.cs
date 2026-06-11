@@ -432,7 +432,7 @@ namespace MiyakoCarryService.Client
                     };
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }
-                var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer, mcsBotPlayerConfig);
+                var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer);
                 leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "Fika" ? "Fika" : "Mcs";
 
                 if (mcsProfilesDict[leadPlayer.ProfileId].Count() == 0)

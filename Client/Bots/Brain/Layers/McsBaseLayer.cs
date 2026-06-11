@@ -1459,7 +1459,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            if (!flag && Tools.BetterDestination(2.6f, targetPos, out var betterDest))
+            if (!flag && Tools.BetterDestination(1f, targetPos, out var betterDest))
             {
                 navMeshPath = new NavMeshPath();
                 NavMesh.CalculatePath(leadPos, betterDest, -1, navMeshPath);

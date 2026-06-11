@@ -11,13 +11,35 @@ namespace MiyakoCarryService.Client.Misc
 {
     public class McsAILeadPlayer : AIBossPlayer
     {
-        public McsBotPlayerConfig McsBotPlayerConfig;
+        public McsBotPlayerConfig McsBotPlayerConfig
+        {
+            get
+            {
+                if (McsMgr.McsLeadPlayerConfigs.TryGetValue(McsLeadPlayer.ProfileId, out var mcsBotPlayerConfig))
+                {
+                    return mcsBotPlayerConfig;
+                }
+                else
+                {
+                    mcsBotPlayerConfig = new McsBotPlayerConfig
+                    {
+                        McsLeadPlayerId = McsLeadPlayer.ProfileId,
+                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
+                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                        KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+                        LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+                    };
+                    McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
+                    return mcsBotPlayerConfig;
+                }
+            }
+        }
         public Player McsLeadPlayer;
         public GamePlayerOwner GamePlayerOwner => McsLeadPlayer.GetGamePlayerOwner();
-        public McsAILeadPlayer(Player player, McsBotPlayerConfig mcsBotPlayerConfig) : base(player)
+        public McsAILeadPlayer(Player player) : base(player)
         {
             McsLeadPlayer = player;
-            McsBotPlayerConfig = mcsBotPlayerConfig;
         }
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
