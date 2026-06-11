@@ -36,13 +36,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
         protected float _nextVaultCheckTime = 0f;
-        protected float _nextJumpCheckTime = 0f;
-        protected Vector3 _lastLeadPos = new();  
-        protected float _nextUpdatePosTime = 0f;  
-        protected Vector3? _currentMoveTarget = null;  
-        protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;  
+        protected Vector3 _lastLeadPos = Vector3.zero;
+        protected float _nextUpdatePosTime = 0f;
+        protected Vector3? _currentMoveTarget = null;
+        protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
-        protected const float TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT = 10f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
         protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
@@ -140,7 +138,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
                 { typeof(RunToPointLogic), EndGoToPoint },
-                { typeof(EscortToPointLogic), EndEscortToPoint },
+                { typeof(EscortToPointByWayLogic), EndEscortToPointByWay },
             };
         }
 
@@ -367,6 +365,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                 {
                     McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.OnPosition
+                    });
                 }
                 return true;
             }
@@ -401,6 +403,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                     {
                         McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                        BotOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.OnPosition
+                        });
                     }
                     return true;
                 }
@@ -408,13 +414,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool EndEscortToPoint()
+        protected virtual bool EndEscortToPointByWay()
         {
             if (BotOwner.GoToSomePointData.IsCome())
             {
                 if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
                 {
-                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup]);
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.OnPosition
+                    });
                 }
                 return true;
             }
@@ -426,7 +436,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     CheckStuck();
                 }
 
-                if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT * TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT)
+                if (McsBotPlayerData.EscortPos == null)
                 {
                     return true;
                 }
@@ -449,14 +459,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
-                {
-                    if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
-                    {
-                        McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
-                    }
-                    return true;
-                }
                 return false;
             }
         }
@@ -1343,7 +1345,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (_lastLeadPos.SqrDistance(leadPos) < LEAD_POSITION_CHANGE_THRESHOLD * LEAD_POSITION_CHANGE_THRESHOLD)
+            if (_lastLeadPos.McsSqrDistance(leadPos) < LEAD_POSITION_CHANGE_THRESHOLD * LEAD_POSITION_CHANGE_THRESHOLD)
             {
                 nextUpdateTime = 1f;
                 return;

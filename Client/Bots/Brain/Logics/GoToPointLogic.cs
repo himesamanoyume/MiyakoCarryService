@@ -15,6 +15,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            BotOwner.SetTargetMoveSpeed(1f);
+            BotOwner.Sprint(true, false);
+            BotOwner.SetPose(1f);
             _baseLogic.UpdateNodeByMain(data);
         }
     }

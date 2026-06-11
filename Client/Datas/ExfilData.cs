@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override Transform GetTransfrom() => ExfiltrationPoint.transform;
         public override string GetActionName() => ExfiltrationPoint.Settings.Name.McsLocalized();
-        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.transform.position)));
+        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, ExfiltrationPoint.gameObject.transform.position)));
         public override bool IsDisabled() => ExfiltrationPoint.Status switch
         {
             EExfiltrationStatus.NotPresent => true,

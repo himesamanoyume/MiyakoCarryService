@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public override Transform GetTransfrom() => TransitPoint.transform;
         public override string GetActionName() => TransitPoint.parameters.description.McsLocalized();
-        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, TransitPoint.transform.position)));
+        public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, TransitPoint.gameObject.transform.position)));
         public override bool IsDisabled() => !TransitPoint.IsActive;
 
         public override void Dispose()

@@ -283,10 +283,13 @@ namespace MiyakoCarryService.Fika
                 var pos = Tools.GetPosNearTarget(packet.Position.Value, botOwner);
                 if (pos.HasValue)
                 {
-                    botOwner.TalkMsg(new McsMsg
+                    if (botOwner.Memory.HaveEnemy)
                     {
-                        PhraseTrigger = EPhraseTrigger.FollowMe,
-                    });
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Negative,
+                        });
+                    }
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();

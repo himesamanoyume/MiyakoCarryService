@@ -3,7 +3,6 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
-using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -27,28 +26,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
-                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
-                if (mcsLeadPlayerPos == null)
+                if (McsBotPlayerData == null)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
                 }
 
-                var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT * TOO_FAR_FROM_LEAD_DISTANCE_WHEN_ESCORT)
+                if (McsBotPlayerData.EscortPos.HasValue)
                 {
-                    return new Action(typeof(HoldPositionLogic), "Mcs:WaitForLead");
+                    BotOwner.GoToSomePointData.SetPoint(McsBotPlayerData.EscortPos.Value);
+                    BotOwner.GoToSomePointData.UpdateToGo(true);
+                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
                 }
                 else
                 {
-                    if (McsBotPlayerData != null && McsBotPlayerData.EscortPos != null)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(McsBotPlayerData.EscortPos.Value);
-                        return new Action(typeof(EscortToPointLogic), "Mcs:EscortToPoint");
-                    }
-                    else
-                    {
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortPos");
-                    }
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortPos");
                 }
             }
             catch (Exception e)
