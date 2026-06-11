@@ -35,6 +35,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Stop()
         {
             base.Stop();
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.Clear,
+            });
         }
 
         public override Action GetNextAction()

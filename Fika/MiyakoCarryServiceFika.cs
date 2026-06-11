@@ -410,6 +410,13 @@ namespace MiyakoCarryService.Fika
                         Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
                     });
                 }
+                else
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Clear,
+                    });
+                }
             }
         }
 

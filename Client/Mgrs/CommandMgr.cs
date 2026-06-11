@@ -766,6 +766,13 @@ namespace MiyakoCarryService.Client.Mgrs
                         Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
                     });
                 }
+                else
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Clear,
+                    });
+                }
             }
             CloseCommandMenuAction();
         }
