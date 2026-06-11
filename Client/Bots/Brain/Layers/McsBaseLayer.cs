@@ -40,9 +40,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected Vector3 _lastLeadPos = Vector3.zero;
         protected float _nextUpdatePosTime = 0f;
         protected Vector3? _currentMoveTarget = null;
+        public Vector3? CurrentMoveTarget
+        {
+            get => _currentMoveTarget;
+        }
         private Vector3 _lastPathTargetPos = Vector3.zero;
         private Vector3[] _lastCalcCorners = null;
         private bool _lastCanRunResult = false;
+        private int _currentEscortRetries = 0;
         private const float LEAD_POS_CHANGE_THRESHOLD_SQR = 1f;
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
@@ -1426,6 +1431,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (targetUnchanged && leadUnchanged && _lastCalcCorners != null)
             {
+                _currentEscortRetries = 0;
                 corners = _lastCalcCorners;
                 return _lastCanRunResult;
             }
@@ -1455,16 +1461,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (!flag)
             {
-                corners = null;
-                _lastCanRunResult = false;
-                mcsBotPlayerData.EscortPos = null;
-                BotOwner.TalkMsg(new McsMsg
+                _currentEscortRetries += 1;
+                if (_currentEscortRetries >= 5 || !_lastCanRunResult)
                 {
-                    PhraseTrigger = EPhraseTrigger.Negative,
-                });
+                    _currentEscortRetries = 0;
+                    corners = null;
+                    _lastCanRunResult = false;
+                    mcsBotPlayerData.EscortPos = null;
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                    return _lastCanRunResult;
+                }
+                
+                corners = _lastCalcCorners;
                 return _lastCanRunResult;
             }
 
+            _currentEscortRetries = 0;
             _lastPathTargetPos = targetPos;
             _lastLeadPos = leadPos;
             _lastCalcCorners = navMeshPath.corners;
