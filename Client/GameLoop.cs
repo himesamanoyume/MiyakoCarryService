@@ -743,7 +743,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 200f + 20f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 10f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
@@ -757,11 +757,11 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
             settings.FileSettings.Look.LOOK_THROUGH_GRASS = false;
-            settings.FileSettings.Look.DIST_REPEATED_SEEN = 100.0f;
+            settings.FileSettings.Look.DIST_REPEATED_SEEN = 50.0f;
             settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 0.01f;
             settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = 0.01f;
-            settings.FileSettings.Look.NO_GREEN_DIST = 100.0f;
-            settings.FileSettings.Look.NO_GRASS_DIST = 100.0f;
+            settings.FileSettings.Look.NO_GREEN_DIST = 20.0f;
+            settings.FileSettings.Look.NO_GRASS_DIST = 20.0f;
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
 
