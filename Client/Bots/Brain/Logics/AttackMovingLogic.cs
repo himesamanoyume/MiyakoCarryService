@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             public override void UpdateNodeByBrain(BaseIntent data)
             {
-                method_0(true);
+                method_0();
                 BotOwner_0.SetTargetMoveSpeed(1f);
                 BotOwner_0.Sprint(false, true);
                 BotOwner_0.SetPose(1f);

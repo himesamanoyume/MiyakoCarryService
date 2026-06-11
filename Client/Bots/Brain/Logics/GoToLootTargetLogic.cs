@@ -52,8 +52,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
+        private DoorInteractionStatus HandleDoor(bool deavtivatingMines = true)
+        {
+            HandleDanger(deavtivatingMines);
+            return BotOwner.DoorOpener.UpdateDoorInteractionStatus();
+        }
+
+        private void HandleDanger(bool deavtivatingMines = true)
+        {
+            if (deavtivatingMines)
+            {
+                BotOwner.BewarePlantedMine.Update();
+            }
+
+            BotOwner.BotAvoidDangerPlaces.Update();
+        }
+
         public override void Update(CustomLayer.ActionData data)
         {
+            HandleDoor();
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
             if (mcsBotPlayerData == null)

@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             public override void UpdateNodeByBrain(BaseIntent data)
             {
-                var canRun = method_0(true) == DoorInteractionStatus.CanRun;
+                var canRun = method_0() == DoorInteractionStatus.CanRun;
                 BotOwner_0.SetTargetMoveSpeed(1f);
                 NotMovingCheck();
                 BotOwner_0.SetPose(1f);
