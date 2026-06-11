@@ -118,6 +118,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string STARTHEAL = "Mcs/StartHeal";
         public const string ONFRIENDLYDOWN = "Mcs/OnFriendlyDown";
         public const string FOLLOWME = "Mcs/FollowMe";
+        public const string NEGATIVE = "Mcs/Negative";
         public const string OPENMCSBOTPLAYERINVENTORY = "Mcs/OpenMcsBotPlayerInventory";
         public const string RETURNTOMAINCHAR = "Mcs/ReturnToMainChar";
         public const string MCSINVENTORYMODE = "Mcs/McsInventoryMode";
