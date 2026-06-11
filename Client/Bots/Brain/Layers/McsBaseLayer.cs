@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.InventoryLogic;
@@ -424,29 +425,38 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
+        private async Task DelaySetDecisions(float delaySeconds, EDecision[] exclude = null, params EDecision[] decisions)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.SetDecision(exclude, decisions);
+            }
+        }
+
         protected virtual bool EndEscortToPointByWay()
         {
-            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData == null)
+            if (McsBotPlayerData == null)
             {
                 return true;
             }
 
-            if (!mcsBotPlayerData.EscortPos.HasValue)
+            if (!McsBotPlayerData.EscortPos.HasValue)
             {
                 return true;
             }
 
-            var sqrDistance = mcsBotPlayerData.EscortPos.Value.McsSqrDistance(BotOwner.Position);
+            var sqrDistance = McsBotPlayerData.EscortPos.Value.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
                 if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
                 {
-                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup]);
+                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
                     });
+                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [EDecision.ShouldRegroup, EDecision.ShouldGoToPoint, EDecision.ShouldEscort, EDecision.ShouldGoToPoint]));
                 }
                 return true;
             }
