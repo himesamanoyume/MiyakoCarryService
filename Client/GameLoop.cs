@@ -594,8 +594,8 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
-            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 40f;
-            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 30f;
+            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 10f;
+            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
             settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = 100f;
             settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 50f;
 
@@ -743,7 +743,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 10f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 5f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
