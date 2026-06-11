@@ -12,6 +12,7 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -39,6 +40,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected Vector3 _lastLeadPos = Vector3.zero;
         protected float _nextUpdatePosTime = 0f;
         protected Vector3? _currentMoveTarget = null;
+        private Vector3 _lastPathTargetPos = Vector3.zero;
+        private Vector3[] _lastCalcCorners = null;
+        private bool _lastCanRunResult = false;
+        private const float LEAD_POS_CHANGE_THRESHOLD_SQR = 1f;
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -416,7 +421,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndEscortToPointByWay()
         {
-            if (BotOwner.GoToSomePointData.IsCome())
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return true;
+            }
+
+            if (!mcsBotPlayerData.EscortPos.HasValue)
+            {
+                return true;
+            }
+
+            var sqrDistance = mcsBotPlayerData.EscortPos.Value.McsSqrDistance(BotOwner.Position);
+            if (sqrDistance < 2f * 2f)
             {
                 if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
                 {
@@ -428,17 +445,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 return true;
             }
+            else if (BotOwner.GoToSomePointData.IsCome())
+            {
+                return true;
+            }
             else
             {
                 var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
-                }
-
-                if (McsBotPlayerData.EscortPos == null)
-                {
-                    return true;
                 }
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
@@ -1352,7 +1368,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var movePosition = Tools.GetPosNearTarget(leadPos, BotOwner);
-            if (movePosition == null)
+            if (!movePosition.HasValue)
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1361,6 +1377,99 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             _lastLeadPos = leadPos;
             _currentMoveTarget = movePosition.Value;
             nextUpdateTime = 1f;
+        }
+
+        protected virtual void UpdateEscortMoveTarget(out float nextUpdateTime)
+        {
+            if (McsBotPlayerData == null)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            if (!McsBotPlayerData.EscortPos.HasValue)
+            {
+                nextUpdateTime = 1f;
+                return;
+            }
+
+            var leadPos = GetMcsLeadPlayerPos();
+            nextUpdateTime = 0.2f;
+            if (CanGetPathToRun(leadPos, McsBotPlayerData.EscortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            {
+                _lastLeadPos = leadPos;
+                _currentMoveTarget = GetPointAlongPathAtDistance(corners, 13f);
+            }
+        }
+
+        protected virtual bool CanGetPathToRun(Vector3 leadPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
+        {
+            var targetUnchanged = _lastPathTargetPos.McsSqrDistance(targetPos) < 0.09f;
+            var leadUnchanged = _lastLeadPos.McsSqrDistance(leadPos) < LEAD_POS_CHANGE_THRESHOLD_SQR;
+
+            if (targetUnchanged && leadUnchanged && _lastCalcCorners != null)
+            {
+                corners = _lastCalcCorners;
+                return _lastCanRunResult;
+            }
+
+            var navMeshPath = new NavMeshPath();
+            NavMesh.CalculatePath(leadPos, targetPos, -1, navMeshPath);
+            var flag = false;
+
+            if (navMeshPath.status == NavMeshPathStatus.PathComplete)
+            {
+                flag = true;
+                if ((targetPos - navMeshPath.corners[navMeshPath.corners.Length - 1]).magnitude > 2f)
+                {
+                    flag = false;
+                }
+            }
+
+            if (!flag && Tools.BetterDestination(1f, targetPos, out var betterDest))
+            {
+                navMeshPath = new NavMeshPath();
+                NavMesh.CalculatePath(leadPos, betterDest, -1, navMeshPath);
+                if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
+                {
+                    flag = true;
+                }
+            }
+
+            if (!flag)
+            {
+                corners = null;
+                _lastCanRunResult = false;
+                mcsBotPlayerData.EscortPos = null;
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Negative,
+                });
+                return _lastCanRunResult;
+            }
+
+            _lastPathTargetPos = targetPos;
+            _lastLeadPos = leadPos;
+            _lastCalcCorners = navMeshPath.corners;
+            corners = _lastCalcCorners;
+            _lastCanRunResult = true;
+            return _lastCanRunResult;
+        }
+
+        protected virtual Vector3 GetPointAlongPathAtDistance(Vector3[] corners, float distance)
+        {
+            var accumulated = 0f;
+            for (int i = 0; i < corners.Length - 1; i++)
+            {
+                var segLen = Vector3.Distance(corners[i], corners[i + 1]);
+                if (accumulated + segLen >= distance)
+                {
+                    var t = (distance - accumulated) / segLen;
+                    return Vector3.Lerp(corners[i], corners[i + 1], t);
+                }
+                accumulated += segLen;
+            }
+            return corners[corners.Length - 1];
         }
     }
 }

@@ -3,6 +3,9 @@ using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Models;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -19,6 +22,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsLooting = false;
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.FollowMe
+                });
             }
         }
 
@@ -33,9 +40,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.EscortPos.HasValue)
                 {
-                    BotOwner.GoToSomePointData.SetPoint(McsBotPlayerData.EscortPos.Value);
-                    BotOwner.GoToSomePointData.UpdateToGo(true);
-                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
+                    if (_nextUpdatePosTime < Time.time)
+                    {
+                        UpdateEscortMoveTarget(out float nextTime);
+                        _nextUpdatePosTime = Time.time + nextTime;
+                    }
+
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
+                    }
+
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortNearPath");
                 }
                 else
                 {
