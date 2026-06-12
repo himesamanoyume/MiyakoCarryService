@@ -157,29 +157,32 @@ namespace MiyakoCarryService.Client
 
         private async Task UpdateDailyQuests()
         {
-            await Task.Delay(1000);
-            TarkovApplication.Exist(out var tarkovApplication);
-            var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
-
-            var mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
-            var array = await Session.GetDailyQuests();
-            if (!array.IsNullOrEmpty())
+            for (int i = 0; i < 5; i++)
             {
-                if (mainMenuControllerClass == null)
-                {
-                    return;
-                }
+                await Task.Delay(1000);
+                TarkovApplication.Exist(out var tarkovApplication);
+                var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
 
-                if (mainMenuControllerClass.LocalQuestControllerClass == null)
+                var mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+                var array = await Session.GetDailyQuests();
+                if (!array.IsNullOrEmpty())
                 {
-                    return;
-                }
+                    if (mainMenuControllerClass == null)
+                    {
+                        return;
+                    }
 
-                if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
-                {
-                    return;
+                    if (mainMenuControllerClass.LocalQuestControllerClass == null)
+                    {
+                        return;
+                    }
+
+                    if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
+                    {
+                        return;
+                    }
+                    mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
                 }
-                mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
             }
         }
 

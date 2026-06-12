@@ -49,6 +49,8 @@ Mcs mimics a carry service in the gaming industry. In this process, you need to 
 
 [id-totorial]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/tutorial.webp 'How To Generate McsBotPlayer'
 
+If you cannot see the Group Panel, please check whether you have UI Fixes installed, then open Advanced Settings in the Configuration Manager, navigate to Interface -> Show Group Panel, and enable it.
+
 _Currently Mcs does not provide indefinite service. When the service period you set expires, `McsBotPlayer` will automatically delete the friend._
 
 ---
