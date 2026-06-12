@@ -838,7 +838,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, (int)AccessTools.Field(typeof(GameWorld), "int_2").GetValue(Singleton<GameWorld>.Instance)))
+                if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
                 {
                     EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
