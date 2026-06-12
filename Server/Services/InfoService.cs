@@ -85,7 +85,7 @@ namespace MiyakoCarryService.Server.Services
                 {
                     continue;
                 }
-                
+
                 if (orderInfo.PlayerIds.Contains(mcsBotPlayerId))
                 {
                     return true;
@@ -134,7 +134,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 _saveLock = new(1, 1);
             }
-            
+
             await _saveLock.WaitAsync();
             try
             {
@@ -239,7 +239,7 @@ namespace MiyakoCarryService.Server.Services
                     {
                         continue;
                     }
-                    
+
                     mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
@@ -258,7 +258,7 @@ namespace MiyakoCarryService.Server.Services
                     {
                         continue;
                     }
-                    
+
                     mcsBotPlayerIds.GetOrAdd(ticketInfo.McsLeadPlayerId, _ => new());
                 }
             }
@@ -328,31 +328,22 @@ namespace MiyakoCarryService.Server.Services
 
         public void CompleteOrderQuestSendFriendRequest(SptProfile mcsBotPlayerProfile, MongoId mcsLeadPlayerId)
         {
-            _ = new Timer(
-                _ =>
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1000);
+                try
                 {
-                    try
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
-                        if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
-                        {
-                            var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
-                            notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
-                        }
+                        var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
+                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                     }
-                    finally
-                    {
-                        
-                    }
-                },
-                null,
-                TimeSpan.FromMicroseconds(1000),
-                Timeout.InfiniteTimeSpan
-            );
-        }
+                }
+                finally
+                {
 
-        public void WaivePunish()
-        {
-            
+                }
+            });
         }
 
         public async Task OnPostLoadAsync()

@@ -17,7 +17,6 @@ using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Mgrs
 {

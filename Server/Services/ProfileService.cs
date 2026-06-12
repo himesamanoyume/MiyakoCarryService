@@ -102,8 +102,10 @@ namespace MiyakoCarryService.Server.Services
 
             try
             {
-                _ = new Timer(
-                    _ =>
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(1000);
+                    try
                     {
                         if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                         {
@@ -112,11 +114,12 @@ namespace MiyakoCarryService.Server.Services
                             notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                             notificationSendHelper.SendMessage(mcsLeadPlayerId, notification2);
                         }
-                    },
-                    null,
-                    TimeSpan.FromMicroseconds(1000),
-                    Timeout.InfiniteTimeSpan
-                );
+                    }
+                    finally
+                    {
+
+                    }
+                });
             }
             finally
             {
