@@ -153,26 +153,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             };
         }
 
-        protected Vector3 GetMcsLeadPlayerPos()
-        {
-            if (McsBotPlayerData != null && McsBotPlayerData.LeadPlayer != null && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
-            {
-                return McsBotPlayerData.LeadPlayer.Position;
-            }
-            else if (BotOwner.BotFollower.HaveBoss)
-            {
-                return BotOwner.BotFollower.BossToFollow.Position;
-            }
-            else
-            {
-                if (BotOwner.Position == null)
-                {
-                    return new();
-                }
-                return BotOwner.Position;
-            }
-        }
-
         protected virtual bool EndHeal()
         {
             if (!BotOwner.Medecine.FirstAid.Have2Do)
@@ -184,7 +164,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndRunToCover()
         {
-            var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+            var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
@@ -314,7 +294,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndGoToCoverPoint()
         {
-            var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+            var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
@@ -385,7 +365,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             else
             {
-                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
@@ -466,7 +446,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             else
             {
-                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
@@ -507,7 +487,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             else
             {
-                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
@@ -615,7 +595,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected virtual bool EndHoldPosition()
         {
             UpdateCoverToShoot();
-            var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+            var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) > TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
             {
                 return true;
@@ -1374,7 +1354,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual void UpdateMoveTarget(out float nextUpdateTime)
         {
-            var leadPos = GetMcsLeadPlayerPos();
+            var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (leadPos == null)
             {
                 nextUpdateTime = 1f;
@@ -1413,7 +1393,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var leadPos = GetMcsLeadPlayerPos();
+            var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (leadPos == null)
             {
                 nextUpdateTime = 1f;

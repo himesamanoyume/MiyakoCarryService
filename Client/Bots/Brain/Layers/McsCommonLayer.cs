@@ -91,7 +91,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                var mcsLeadPlayerPos = GetMcsLeadPlayerPos();
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (mcsLeadPlayerPos == null)
                 {
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
