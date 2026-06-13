@@ -22,13 +22,12 @@ namespace MiyakoCarryService.Server
     {
         [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
         public sealed class MiyakoCarryServiceServerPreLoad(
-            ConfigService configService,
-            ServerLocalisationService serverLocalisationService,
-            ISptLogger<MiyakoCarryServiceServerPreLoad> logger
+            ConfigService configService
         ) : IOnLoad
         {
             public async Task OnLoad()
             {
+                await configService.OnPreLoadAsync();
                 new GetClientRepeatableQuestsPatch().Enable();
                 new ChangeRepeatableQuestPatch().Enable();
                 new CompleteQuestPatch().Enable();
@@ -51,39 +50,6 @@ namespace MiyakoCarryService.Server
                 new GetAssortPatch().Enable();
                 new GetTraderAssortsByTraderIdPatch().Enable();
                 new AddOfferPatch().Enable();
-                await configService.OnPreLoadAsync();
-                _ = CheckForUpdate();
-            }
-
-            private async Task CheckForUpdate()
-            {
-                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckUpdate)
-                {
-                    return;
-                }
-
-                var currentVersion = configService.GetClientVersion();
-                using var httpClient = new HttpClient();
-                try
-                {
-                    // 这是为了方便中国大陆网络环境无法访问github的妥协方式
-                    var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
-
-                    var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.0.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
-                    var match = versionPattern.Match(data);
-                    if (match.Success)
-                    {
-                        var latestVersion = new System.Version(match.Groups[1].Value.Trim());
-                        if (latestVersion.CompareTo(currentVersion) > 0)
-                        {
-                            logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
-                        }
-                    }
-                }
-                catch //(Exception e)
-                {
-                    // logger.Info($"检查更新失败: {e.Message}");
-                }
             }
         }
 
@@ -97,6 +63,8 @@ namespace MiyakoCarryService.Server
             CompatibilityService compatibilityService,
             ConfigService configService,
             InventoryService inventoryService,
+            ServerLocalisationService serverLocalisationService,
+            ISptLogger<MiyakoCarryServiceServerPostLoad> logger,
             JsonUtil jsonUtil
         ) : IOnLoad
         {
@@ -122,6 +90,7 @@ namespace MiyakoCarryService.Server
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });
+                _ = CheckForUpdate();
                 _ = CheckForIfdianUpdate();
             }
 
@@ -151,6 +120,37 @@ namespace MiyakoCarryService.Server
                 catch
                 {
                     
+                }
+            }
+
+            private async Task CheckForUpdate()
+            {
+                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckUpdate)
+                {
+                    return;
+                }
+
+                var currentVersion = configService.GetClientVersion();
+                using var httpClient = new HttpClient();
+                try
+                {
+                    // 这是为了方便中国大陆网络环境无法访问github的妥协方式
+                    var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
+
+                    var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.0.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
+                    var match = versionPattern.Match(data);
+                    if (match.Success)
+                    {
+                        var latestVersion = new System.Version(match.Groups[1].Value.Trim());
+                        if (latestVersion.CompareTo(currentVersion) > 0)
+                        {
+                            logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
+                        }
+                    }
+                }
+                catch// (Exception e)
+                {
+                    // logger.Info($"检查更新失败: {e.Message}");
                 }
             }
         }
