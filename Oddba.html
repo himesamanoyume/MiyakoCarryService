@@ -948,6 +948,7 @@
     &nbsp;&nbsp;
     <p><span style="font-size: 25px;"><strong>食用方式</strong></span></p>
     <img src="https://ods5.oddba.cn/user_files/23687/bbs/35529095_1776484381.png"/>
+    <p>如果你找不到左下角的邀请至队伍按钮, 请检查你是否安装了UI Fixes, 若有，则需要按F12到配置管理器中顶部打开Advanced Settings, 找到UI Fixes的Interface -> Show Group Panel, 开启即可。</p>
     <img src="https://ods5.oddba.cn/user_files/23687/bbs/24108994_1776483836.png"/>
     &nbsp;&nbsp;
     <p>
@@ -1042,6 +1043,10 @@
                     <td>若护航此时正在交战，命令护航报告已知的敌人方位</td>
                 </tr>
                 <tr>
+                    <td>自主行动</td>
+                    <td>命令护航自行决策</td>
+                </tr>
+                <tr>
                     <td>集结</td>
                     <td>若护航此时不处于交战，命令护航跟随老板</td>
                 </tr>
@@ -1052,6 +1057,10 @@
                 <tr>
                     <td>驻守</td>
                     <td>若护航此时不处于交战，命令护航停留在原地</td>
+                </tr>
+                <tr>
+                    <td>护送</td>
+                    <td>若护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点</td>
                 </tr>
                 <tr>
                     <td>强制传送</td>
@@ -1072,6 +1081,10 @@
                     <td>若队伍中有护航此时正在交战，命令护航报告已知的敌人方位</td>
                 </tr>
                 <tr>
+                    <td>全队自主行动</td>
+                    <td>让所有护航自行决策</td>
+                </tr>
+                <tr>
                     <td>全队集结</td>
                     <td>若队伍中有护航此时不处于交战，命令护航跟随老板</td>
                 </tr>
@@ -1082,6 +1095,10 @@
                 <tr>
                     <td>全队驻守</td>
                     <td>若队伍中有护航此时不处于交战，命令护航停留在原地</td>
+                </tr>
+                <tr>
+                    <td>全队护送</td>
+                    <td>若护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点</td>
                 </tr>
                 <tr>
                     <td>全队强制传送</td>
@@ -1130,8 +1147,9 @@
                 <li>若要返回主角色，则有两种方式：一是同样通过邀请至队伍界面对着护航右键弹出右键菜单，选择返回主角色；二是直接点击底部栏的绿色护航库存模式按钮，也一样可以返回主角色</li>
                 <li>温馨提示1：护航库存模式修改的是护航在PMC模式下的装备，总所周知，PMC模式和SCAV模式是两个不同的角色，按照游戏设定SCAV角色你无法控制其装备，因此Mcs也会保留这个设定</li>
                 <li>温馨提示2：护航的好友位是有期限的，到期会自动删除好友，如果不想精心调整的护航装备因到期而被删除，建议下单更长时间的护航</li>
-                <li>补一张图</li>
             </ol>
+            <p><img src="https://ods6.oddba.cn/user_files/23687/bbs/84094084_1781335922.png"/></p>
+            <p style="text-align: center;">护航库存模式预览</p>
         </div>
         &nbsp;&nbsp;
         <p><span style="font-size: 25px;"><strong>战局中如何获取护航拾取的战利品</strong></span></p>
@@ -1151,72 +1169,54 @@
                 <li>然后你需要知道第三方Mod提供的，或者原版自带的AI的WildSpawnType名称</li>
                 <li>拿BlackDiv Mod举例，其提供了一个黑色军团的WildSpawnType：blackDivAssault</li>
                 <li>那么现在你就要在spawntype.json里以正确的格式多添加一个类型</li>
-<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, &quot;Courier New&quot;, monospace; font-size: 14px; line-height: 8px; white-space: pre;">
-    <span>
-    {
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;sectantOni&quot;</span>,
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">true</span>,
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;Oni&quot;</span>
-    </span>
-    <span>
-    }, <span style="color: #6a9955;">// 上面是默认自带的，往后新加类型的时候要在 `}` 后带上 `,`</span>
-    </span>
-    <span>
-    {
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;blackspanAssault&quot;</span>, <span style="color: #6a9955;">// 这里写上WildSpawnType的名称</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">false</span>, <span style="color: #6a9955;">// 是否作为Boss类型，使用help指令时就会为这个类型添加`[Boss]`的前缀</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;Black spanision Assault&quot;</span> 
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #6a9955;">// 展示名称，使用help指令时就只会展示这个名称，而不是WildSpawnType的名称</span>
-    </span>
-    <span>
-    } <span style="color: #6a9955;">// 最后一个 `}` 不要带 `,`</span>
-    </span>
+<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, Courier New, monospace; font-size: 14px; line-height: 6px; white-space: pre;">
+<span>
+{</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"sectantOni"</span>,</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">true</span>,</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"Oni"</span></span>
+<span>
+}, <span style="color: #6a9955;">// 上面是默认自带的，往后新加类型的时候要在 `}` 后带上 `,`</span></span>
+<span>
+{</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"blackDivAssault"</span>, <span style="color: #6a9955;">// 这里写上WildSpawnType的名称</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">false</span>, <span style="color: #6a9955;">// 是否作为Boss类型，使用help指令时就会为这个类型添加`[Boss]`的前缀</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"Black Division Assault"</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #6a9955;">// 展示名称，使用help指令时就只会展示这个名称，而不是WildSpawnType的名称</span></span>
+<span>
+} <span style="color: #6a9955;">// 最后一个 `}` 不要带 `,`</span>
+</span>
 </div>
 <p><br/></p>
-<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, &quot;Courier New&quot;, monospace; font-size: 14px; line-height: 8px; white-space: pre;">
-    <span>
-    {
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;WildSpawnType&quot;</span>: <span style="color: #ce9178;">&quot;xxxWildSpawnType&quot;</span>,
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;IsBoss&quot;</span>: <span style="color: #569cd6;">false</span>,
-    </span>
-    <span>&nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;DisplayName&quot;</span>: <span style="color: #ce9178;">&quot;xxxDisplayName&quot;</span>,
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #9cdcfe;">&quot;BrainName&quot;</span>: <span style="color: #ce9178;">&quot;xxxBrainName&quot;</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #6a9955;">// 如果这个第三方Mod的WildSpawnType使用的不是原版自带的Brain</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #6a9955;">// 那么你需要额外多填写一个BrainName</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #6a9955;">// 至于这个BrainName叫什么，需要你自己从这个Mod里去找</span>
-    </span>
-    <span>
-    &nbsp; &nbsp; <span style="color: #6a9955;">// 上面所提供的WildSpawnType全部都不需要填BrainName</span>
-    </span>
-    <span>
-    }
-    </span>
+<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, Courier New, monospace; font-size: 14px; line-height: 6px; white-space: pre;">
+<span>
+{</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"xxxWildSpawnType"</span>,</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">false</span>,</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"xxxDisplayName"</span>,</span>
+<span>
+&nbsp; &nbsp; <span style="color: #9cdcfe;">"BrainName"</span>: <span style="color: #ce9178;">"xxxBrainName"</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #6a9955;">// 如果这个第三方Mod的WildSpawnType使用的不是原版自带的Brain</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #6a9955;">// 那么你需要额外多填写一个BrainName</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #6a9955;">// 至于这个BrainName叫什么，需要你自己从这个Mod里去找</span></span>
+<span>
+&nbsp; &nbsp; <span style="color: #6a9955;">// 上面所提供的WildSpawnType全部都不需要填BrainName</span></span>
+<span>
+}
+</span>
 </div>
             <li>确保json格式正确，数据也填写正确后，重启服务端，此时与宫子商人聊天界面使用help指令，列出的可用类型中就会显示出所有的类型</li>
             <li>如果填写的自定义类型在生成时出现异常，会在服务端收到报错提醒，并改为生成默认的pmc类型护航，此时你需要检查是否填写的自定义类型有错误</li>
@@ -1328,7 +1328,9 @@
         <span style="font-size: 20px;">本模组建议安装的模组：DrakiaXYZ-Waypoints</span>
     </p>
     &nbsp;&nbsp;
-    <p><a href="https://discord.gg/UJy8pYbZHs" target="_blank">也可以来Discord，通常最新抢先测试版都会先发布至Discord进行测试，也方便反馈交流，Discord链接：https://discord.gg/UJy8pYbZHs</a></p>
+    <p>也可以来Discord，通常最新抢先测试版都会先发布至Discord进行测试，也方便反馈交流，Discord链接：<a href="https://discord.gg/UJy8pYbZHs" target="_blank">https://discord.gg/UJy8pYbZHs</a></p>
+    &nbsp;&nbsp;
+    <p><a href="https://github.com/himesamanoyume/MiyakoCarryService" target="_blank">Github仓库</a></p>
     &nbsp;&nbsp;
     <p>当前不再提供附件下载，只推荐去<a href="https://forge.sp-tarkov.com/mod/2709/miyako-carry-service" target="_blank">Forge</a>上下载，每次更新都要两头跑太累了，去Forge上下载还能给我涨涨下载量</p>
     &nbsp;&nbsp;

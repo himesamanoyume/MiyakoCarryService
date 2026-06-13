@@ -86,6 +86,7 @@ try {
         Write-Host "VT Report    : (Not available)" -ForegroundColor Yellow
     }
     Write-Host "Draft Page   : $($releaseRes.html_url)"
+    Write-Host "Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service"
     Write-Host "`========================================" -ForegroundColor Cyan
 
 } catch {
