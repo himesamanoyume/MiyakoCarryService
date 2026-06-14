@@ -200,6 +200,7 @@ namespace MiyakoCarryService.Client
             new AdvAssaultTargetPatch().Enable();
             new InitVaultComponentPatch().Enable();
             new MatchMakerSideSelectionScreenPatch().Enable();
+            new ActionPanelAnchorPatch().Enable();
 
             if (FikaInstalled)
             {
