@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -107,10 +106,26 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayer.Profile.Info.TeamId = "Fika";
                     }
                     return mcsBotPlayer;
-                });
+                }
+            );
         }
 
-        public void BuildMainCommandMenu()
+        private void ForEachAliveBot(Action<Player> action)
+        {
+            foreach (var id in _mySquadMcsBotPlayerIds)
+            {
+                var mcsBotPlayer = TryGetMcsBotPlayer(id);
+                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                {
+                    continue;
+                }
+                action(mcsBotPlayer);
+            }
+        }
+
+        #region Menu
+
+        private void BuildMainCommandMenu()
         {
             if (_gamePlayerOwner == null || _mySquadMcsBotPlayerIds.Count == 0)
             {
@@ -131,11 +146,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(TeamCommand(BuildTeamCommandMenu, mcsBotPlayers));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamCommandMenu, mcsBotPlayers));
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                actionsReturnClass.Actions.Add(MemberCommand(BuildMemberCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(BuildMemberCommandMenu, mcsBotPlayer));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -151,11 +166,40 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
         }
 
+        private void OnCurrentActionChanged()
+        {
+            if (!Singleton<CommonUI>.Instantiated)
+            {
+                return;
+            }
+
+            var actionPanel = Singleton<CommonUI>.Instance.EftBattleUIScreen?.ActionPanel;
+            if (actionPanel == null)
+            {
+                return;
+            }
+
+            var itemName = AccessTools.Field(typeof(ActionPanel), "_itemName").GetValue(actionPanel) as TextMeshProUGUI;
+
+            var selectedAction = _gamePlayerOwner?.AvailableInteractionState?.Value?.SelectedAction;
+            if (selectedAction == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(selectedAction.TargetName))
+            {
+                return;
+            }
+
+            itemName.text = selectedAction.TargetName.McsLocalized().ToUpper();
+        }
+
         private void PostBuildCommandMenu(ActionsReturnClass actionsReturnClass)
         {
             if (actionsReturnClass != null)
             {
-                actionsReturnClass.Actions.Add(CancelCommand(CloseCommandMenuAction));
+                actionsReturnClass.Actions.Add(MakeCommand(Locales.CANCELCOMMAND_NAME, Locales.CANCELCOMMAND_TARGETNAME, false, CloseCommandMenuAction));
                 actionsReturnClass.InitSelected();
             }
 
@@ -167,44 +211,65 @@ namespace MiyakoCarryService.Client.Mgrs
             _gamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
         }
 
-        public void BuildTeamCommandMenu(List<Player> mcsBotPlayers)
+        private void CloseCommandMenuAction()
+        {
+            _gamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
+        }
+
+        private void BuildTeamCommandMenu(List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(TeamReportAboutEnemyCommand(ReportAboutEnemyCommandAction));
-            actionsReturnClass.Actions.Add(TeamOnYourOwnCommand(OnYourOwnCommandAction));
-            actionsReturnClass.Actions.Add(TeamRegroupCommand(RegroupCommandAction));
-            actionsReturnClass.Actions.Add(TeamGoToPointCommand(GoToPointCommandAction));
-            actionsReturnClass.Actions.Add(TeamHoldPositionCommand(HoldPositionCommandAction));
-            actionsReturnClass.Actions.Add(TeamEscortCommand(BuildTeamEscortCommandMenu, mcsBotPlayers));
-            actionsReturnClass.Actions.Add(TeamForceTeleportCommand(ForceTeleportCommandAction));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, RegroupCommandAction));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamEscortCommandMenu, mcsBotPlayers, Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTeamEscortCommandMenu(List<Player> mcsBotPlayers)
+        private void BuildMemberCommandMenu(Player mcsBotPlayer)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(TeamQuestEscortCommand(BuildTeamQuestEscortCommandMenu, mcsBotPlayers));
-            actionsReturnClass.Actions.Add(TeamTransitEscortCommand(BuildTeamTransitEscortCommandMenu, mcsBotPlayers));
-            actionsReturnClass.Actions.Add(TeamExfilEscortCommand(BuildTeamExfilEscortCommandMenu, mcsBotPlayers));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.REPORTABOUTENEMYCOMMAND_NAME, Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.REGROUPCOMMAND_NAME, Locales.REGROUPCOMMAND_TARGETNAME, RegroupCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, OpenInventoryCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildEscortCommandMenu(Player mcsBotPlayer)
+        private void BuildTeamEscortCommandMenu(List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(QuestEscortCommand(BuildQuestEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(TransitEscortCommand(BuildTransitEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(ExfilEscortCommand(BuildExfilEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamQuestEscortCommandMenu, mcsBotPlayers, Locales.TEAMQUESTESCORTCOMMAND_NAME, Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamTransitEscortCommandMenu, mcsBotPlayers, Locales.TEAMTRANSITESCORTCOMMAND_NAME, Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamExfilEscortCommandMenu, mcsBotPlayers, Locales.TEAMEXFILESCORTCOMMAND_NAME, Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTeamTransitEscortCommandMenu(List<Player> mcsBotPlayers)
+        private void BuildEscortCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTESCORTCOMMAND_NAME, Locales.QUESTESCORTCOMMAND_TARGETNAME, BuildQuestEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.TRANSITESCORTCOMMAND_NAME, Locales.TRANSITESCORTCOMMAND_TARGETNAME, BuildTransitEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.EXFILESCORTCOMMAND_NAME, Locales.EXFILESCORTCOMMAND_TARGETNAME, BuildExfilEscortCommandMenu, mcsBotPlayer));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildTeamTransitEscortCommandMenu(List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -217,7 +282,7 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTeamExfilEscortCommandMenu(List<Player> mcsBotPlayers)
+        private void BuildTeamExfilEscortCommandMenu(List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -230,7 +295,7 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTeamQuestEscortCommandMenu(List<Player> mcsBotPlayers)
+        private void BuildTeamQuestEscortCommandMenu(List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -240,14 +305,14 @@ namespace MiyakoCarryService.Client.Mgrs
                 var questDataGroup = questDataMgr.GetQuestDataByGroup();
                 foreach ((var questDataClass, var questDatas) in questDataGroup)
                 {
-                    actionsReturnClass.Actions.Add(TeamSubQuestEscortCommand(BuildTeamSubQuestEscortCommandMenu, questDatas, mcsBotPlayers, questDataClass));
+                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildTeamSubQuestEscortCommandMenu(questDatas, mcsBotPlayers)));
                 }
             }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildQuestEscortCommandMenu(Player mcsBotPlayer)
+        private void BuildQuestEscortCommandMenu(Player mcsBotPlayer)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -257,14 +322,14 @@ namespace MiyakoCarryService.Client.Mgrs
                 var questDataGroup = questDataMgr.GetQuestDataByGroup();
                 foreach ((var questDataClass, var questDatas) in questDataGroup)
                 {
-                    actionsReturnClass.Actions.Add(SubQuestEscortCommand(BuildSubQuestEscortCommandMenu, questDatas, mcsBotPlayer, questDataClass));
+                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildSubQuestEscortCommandMenu(questDatas, mcsBotPlayer)));
                 }
             }
 
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTransitEscortCommandMenu(Player mcsBotPlayer)
+        private void BuildTransitEscortCommandMenu(Player mcsBotPlayer)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -277,7 +342,7 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildExfilEscortCommandMenu(Player mcsBotPlayer)
+        private void BuildExfilEscortCommandMenu(Player mcsBotPlayer)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -290,7 +355,7 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildTeamSubQuestEscortCommandMenu(List<QuestData> questDatas, List<Player> mcsBotPlayers)
+        private void BuildTeamSubQuestEscortCommandMenu(List<QuestData> questDatas, List<Player> mcsBotPlayers)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -302,7 +367,7 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public void BuildSubQuestEscortCommandMenu(List<QuestData> questDatas, Player mcsBotPlayer)
+        private void BuildSubQuestEscortCommandMenu(List<QuestData> questDatas, Player mcsBotPlayer)
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
@@ -314,7 +379,49 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
-        public ActionsTypesClass TeamEscortToTriggerPosCommand(Action<Player, TriggerData> action, List<Player> mcsBotPlayers, TriggerData triggerData)
+        #endregion
+
+        private static ActionsTypesClass MakeCommand(string name, string targetName, bool disabled, Action action)
+        {
+            return new ActionsTypesClass { Name = name, TargetName = targetName, Disabled = disabled, Action = action };
+        }
+
+        private static ActionsTypesClass MakeCommand(string name, string targetName, bool disabled, Action<List<Player>> action, List<Player> mcsBotPlayers)
+        {
+            return new ActionsTypesClass { Name = name, TargetName = targetName, Disabled = disabled, Action = () => action(mcsBotPlayers) };
+        }
+
+        private ActionsTypesClass MakeMemberCommand(string name, string targetName, Action<Player> action, Player mcsBotPlayer)
+        {
+            return MakeCommand(name, targetName, false, () => action(mcsBotPlayer));
+        }
+
+        private ActionsTypesClass MakeMemberCommand(string name, string targetName, bool disabled, Action<Player> action, Player mcsBotPlayer)
+        {
+            return MakeCommand(name, targetName, disabled, () => action(mcsBotPlayer));
+        }
+
+        private ActionsTypesClass MakeTeamCommand(string name, string targetName, Action<Player> action)
+        {
+            return MakeCommand(name, targetName, false, () => ForEachAliveBot(action));
+        }
+
+        private ActionsTypesClass TeamCommandSubMenu(Action<List<Player>> action, List<Player> mcsBotPlayers)
+        {
+            return TeamCommandSubMenu(action, mcsBotPlayers, Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME);
+        }
+
+        private ActionsTypesClass TeamCommandSubMenu(Action<List<Player>> action, List<Player> mcsBotPlayers, string name, string targetName)
+        {
+            return MakeCommand(name, targetName, mcsBotPlayers.All(p => !p.HealthController.IsAlive), action, mcsBotPlayers);
+        }
+
+        private ActionsTypesClass MakeMemberCommand(Action<Player> action, Player mcsBotPlayer)
+        {
+            return MakeMemberCommand(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, !mcsBotPlayer.HealthController.IsAlive, action, mcsBotPlayer);
+        }
+
+        private ActionsTypesClass TeamEscortToTriggerPosCommand(Action<Player, TriggerData> action, List<Player> mcsBotPlayers, TriggerData triggerData)
         {
             return new ActionsTypesClass
             {
@@ -325,37 +432,30 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     foreach (var mcsBotPlayer in mcsBotPlayers)
                     {
-                        if (mcsBotPlayer == null)
+                        if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
                         {
                             continue;
                         }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
                         action(mcsBotPlayer, triggerData);
                     }
                 }
             };
         }
 
-        public ActionsTypesClass EscortToTriggerPosCommand(Action<Player, TriggerData> action, Player mcsBotPlayer, TriggerData triggerData)
+        private ActionsTypesClass EscortToTriggerPosCommand(Action<Player, TriggerData> action, Player mcsBotPlayer, TriggerData triggerData)
         {
             return new ActionsTypesClass
             {
                 Name = triggerData.GetActionName(),
                 TargetName = triggerData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
                 Disabled = triggerData.IsDisabled(),
-                Action = () =>
-                {
-                    action(mcsBotPlayer, triggerData);
-                }
+                Action = () => action(mcsBotPlayer, triggerData)
             };
         }
 
-        public void EscortToTriggerPosCommandAction(Player mcsBotPlayer, TriggerData triggerData)
+        #region Action
+
+        private void EscortToTriggerPosCommandAction(Player mcsBotPlayer, TriggerData triggerData)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -401,344 +501,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        private void OnCurrentActionChanged()
-        {
-            if (!Singleton<CommonUI>.Instantiated)
-            {
-                return;
-            }
-
-            var actionPanel = Singleton<CommonUI>.Instance.EftBattleUIScreen?.ActionPanel;
-            if (actionPanel == null)
-            {
-                return;
-            }
-
-            var itemName = AccessTools.Field(typeof(ActionPanel), "_itemName").GetValue(actionPanel) as TextMeshProUGUI;
-
-            var selectedAction = _gamePlayerOwner?.AvailableInteractionState?.Value?.SelectedAction;
-            if (selectedAction == null)
-            {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(selectedAction.TargetName))
-            {
-                return;
-            }
-
-            itemName.text = selectedAction.TargetName.McsLocalized().ToUpper();
-        }
-
-        public ActionsTypesClass TeamCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMCOMMAND_NAME,
-                TargetName = Locales.TEAMCOMMAND_TARGETNAME,
-                Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
-                Action = () =>
-                {
-                    action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass MemberCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = mcsBotPlayer.Profile.Info.Nickname,
-                TargetName = Locales.MEMBERCOMMAND_TARGETNAME,
-                Disabled = !mcsBotPlayer.HealthController.IsAlive,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamEscortCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMESCORTCOMMAND_NAME,
-                TargetName = Locales.TEAMESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamQuestEscortCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMQUESTESCORTCOMMAND_NAME,
-                TargetName = Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamExfilEscortCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMEXFILESCORTCOMMAND_NAME,
-                TargetName = Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamTransitEscortCommand(Action<List<Player>> action, List<Player> mcsBotPlayers)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMTRANSITESCORTCOMMAND_NAME,
-                TargetName = Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamSubQuestEscortCommand(Action<List<QuestData>, List<Player>> action, List<QuestData> questDatas, List<Player> mcsBotPlayers, QuestDataClass questDataClass)
-        {
-            return new ActionsTypesClass
-            {
-                Name = questDataClass.Template.Name.McsLocalized(),
-                TargetName = Locales.SUBQUESTESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(questDatas, mcsBotPlayers);
-                }
-            };
-        }
-
-        public ActionsTypesClass SubQuestEscortCommand(Action<List<QuestData>, Player> action, List<QuestData> questDatas, Player mcsBotPlayer, QuestDataClass questDataClass)
-        {
-            return new ActionsTypesClass
-            {
-                Name = questDataClass.Template.Name.McsLocalized(),
-                TargetName = Locales.SUBQUESTESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(questDatas, mcsBotPlayer);
-                }
-            };
-        }
-        
-        public ActionsTypesClass EscortCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.ESCORTCOMMAND_NAME,
-                TargetName = Locales.TEAMESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
-                }
-            };
-        }
-
-        public ActionsTypesClass QuestEscortCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.QUESTESCORTCOMMAND_NAME,
-                TargetName = Locales.QUESTESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
-                }
-            };
-        }
-
-        public ActionsTypesClass ExfilEscortCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.EXFILESCORTCOMMAND_NAME,
-                TargetName = Locales.EXFILESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
-                }
-            };
-        }
-
-        public ActionsTypesClass TransitEscortCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TRANSITESCORTCOMMAND_NAME,
-                TargetName = Locales.TRANSITESCORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = () =>
-                {
-                    action(mcsBotPlayer);
-                }
-            };
-        }
-
-        public ActionsTypesClass TeamReportAboutEnemyCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME,
-                TargetName = Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public ActionsTypesClass TeamRegroupCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMREGROUPCOMMAND_NAME,
-                TargetName = Locales.TEAMREGROUPCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public ActionsTypesClass TeamOnYourOwnCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMONYOUROWNCOMMAND_NAME,
-                TargetName = Locales.TEAMONYOUROWNCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public ActionsTypesClass TeamGoToPointCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMGOTOPOINTCOMMAND_NAME,
-                TargetName = Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public ActionsTypesClass TeamHoldPositionCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMHOLDPOSITIONCOMMAND_NAME,
-                TargetName = Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
+        private void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -776,7 +539,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public void OnYourOwnCommandAction(Player mcsBotPlayer)
+        private void OnYourOwnCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -805,7 +568,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public void RegroupCommandAction(Player mcsBotPlayer)
+        private void RegroupCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -834,7 +597,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public void GoToPointCommandAction(Player mcsBotPlayer)
+        private void GoToPointCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -877,7 +640,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public void HoldPositionCommandAction(Player mcsBotPlayer)
+        private void HoldPositionCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -907,165 +670,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public ActionsTypesClass TeamForceTeleportCommand(Action<Player> action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.TEAMFORCETELEPORTCOMMAND_NAME,
-                TargetName = Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-                    {
-                        var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                        if (mcsBotPlayer == null)
-                        {
-                            continue;
-                        }
-
-                        if (!mcsBotPlayer.HealthController.IsAlive)
-                        {
-                            continue;
-                        }
-
-                        action(mcsBotPlayer);
-                    }
-                })
-            };
-        }
-
-        public void BuildMemberCommandMenu(Player mcsBotPlayer)
-        {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            actionsReturnClass.Actions.Add(ReportAboutEnemyCommand(ReportAboutEnemyCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(OnYourOwnCommand(OnYourOwnCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(RegroupCommand(RegroupCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(GoToPointCommand(GoToPointCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(HoldPositionCommand(HoldPositionCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(OpenInventoryCommand(OpenInventoryCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(EscortCommand(BuildEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(ForceTeleportCommand(ForceTeleportCommandAction, mcsBotPlayer));
-
-            PostBuildCommandMenu(actionsReturnClass);
-        }
-
-        public ActionsTypesClass ReportAboutEnemyCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.REPORTABOUTENEMYCOMMAND_NAME,
-                TargetName = Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass OnYourOwnCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.ONYOUROWNCOMMAND_NAME,
-                TargetName = Locales.ONYOUROWNCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass RegroupCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.REGROUPCOMMAND_NAME,
-                TargetName = Locales.REGROUPCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass GoToPointCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.GOTOPOINTCOMMAND_NAME,
-                TargetName = Locales.GOTOPOINTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass HoldPositionCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.HOLDPOSITIONCOMMAND_NAME,
-                TargetName = Locales.HOLDPOSITIONCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass ForceTeleportCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.FORCETELEPORTCOMMAND_NAME,
-                TargetName = Locales.FORCETELEPORTCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass OpenInventoryCommand(Action<Player> action, Player mcsBotPlayer)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.OPENINVENTORYCOMMAND_NAME,
-                TargetName = Locales.OPENINVENTORYCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = new Action(() =>
-                {
-                    action(mcsBotPlayer);
-                })
-            };
-        }
-
-        public ActionsTypesClass CancelCommand(Action action)
-        {
-            return new ActionsTypesClass
-            {
-                Name = Locales.CANCELCOMMAND_NAME,
-                TargetName = Locales.CANCELCOMMAND_TARGETNAME,
-                Disabled = false,
-                Action = action
-            };
-        }
-
-        public void CloseCommandMenuAction()
-        {
-            _gamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
-        }
-
-        public void ForceTeleportCommandAction(Player mcsBotPlayer)
+        private void ForceTeleportCommandAction(Player mcsBotPlayer)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
@@ -1110,7 +715,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        public void OpenInventoryCommandAction(Player mcsBotPlayer)
+        private void OpenInventoryCommandAction(Player mcsBotPlayer)
         {
             var gameWorld = Singleton<GameWorld>.Instance;
             var itemOwners = gameWorld.ItemOwners;
@@ -1141,5 +746,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             CloseCommandMenuAction();
         }
+
+        #endregion
     }
 }
