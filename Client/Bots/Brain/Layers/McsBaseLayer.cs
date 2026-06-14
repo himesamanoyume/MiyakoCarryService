@@ -1409,14 +1409,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var targetPos = GetPointAlongPathAtDistance(corners, 13f);
+            var targetPos = GetPointAlongPathAtDistance(corners, 15f);
             _currentMoveTarget = targetPos;
             nextUpdateTime = 0.2f;
         }
 
         protected virtual bool CanGetPathToRun(Vector3 leadPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
         {
-            var targetUnchanged = _lastPathTargetPos.McsSqrDistance(targetPos) < 0.09f;
+            var targetUnchanged = _lastPathTargetPos.McsSqrDistance(targetPos) < 1f;
             var leadUnchanged = _lastLeadPos.McsSqrDistance(leadPos) < LEAD_POS_CHANGE_THRESHOLD_SQR;
 
             if (targetUnchanged && leadUnchanged && _lastCalcCorners != null)
@@ -1430,16 +1430,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             NavMesh.CalculatePath(leadPos, targetPos, -1, navMeshPath);
             var flag = false;
 
-            if (navMeshPath.status == NavMeshPathStatus.PathComplete)
+            var sqrDistanceToTarget = leadPos.McsSqrDistance(targetPos);
+            var sampleRadius = sqrDistanceToTarget > 50f * 50f ? 5f : 1f;
+
+            if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
             {
                 flag = true;
-                if ((targetPos - navMeshPath.corners[navMeshPath.corners.Length - 1]).magnitude > 2f)
+                if ((targetPos - navMeshPath.corners[navMeshPath.corners.Length - 1]).magnitude > Math.Max(2f, sampleRadius))
                 {
                     flag = false;
                 }
             }
 
-            if (!flag && Tools.BetterDestination(1f, targetPos, out var betterDest))
+            if (!flag && Tools.BetterDestination(sampleRadius, targetPos, out var betterDest))
             {
                 navMeshPath = new NavMeshPath();
                 NavMesh.CalculatePath(leadPos, betterDest, -1, navMeshPath);
