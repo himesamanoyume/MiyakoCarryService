@@ -120,6 +120,11 @@ namespace MiyakoCarryService.Client
                 return;
             }
 
+            if (condition.Contains("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced."))
+            {
+                return;
+            }
+
             if (type is LogType.Exception or LogType.Error)
             {
                 LogBuffer.AddEntryIfNotFull(condition, _stackRegex.Replace(stackTrace, ""));

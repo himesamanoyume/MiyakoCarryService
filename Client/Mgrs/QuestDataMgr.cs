@@ -6,6 +6,7 @@ using MiyakoCarryService.Client.Extensions;
 using Comfort.Common;
 using EFT;
 using System.Linq;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -125,7 +126,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                 case ConditionExitName conditionExitName:
                     {
-                        var exfilDataMgr = _gameloop.GetMgr<ExfilDataMgr>();
+                        var exfilDataMgr = MgrAccessor.Get<ExfilDataMgr>();
                         if (exfilDataMgr == null)
                         {
                             break;

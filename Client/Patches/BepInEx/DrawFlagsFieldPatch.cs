@@ -12,7 +12,6 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {
-
     public sealed class DrawFlagsFieldPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager).Assembly.GetType("ConfigurationManager.SettingFieldDrawer"), "DrawFlagsField");
