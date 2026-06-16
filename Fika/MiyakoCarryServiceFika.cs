@@ -280,8 +280,7 @@ namespace MiyakoCarryService.Fika
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                var pos = Tools.GetPosNearTarget(packet.Position.Value, botOwner);
-                if (pos.HasValue)
+                if (packet.Position.HasValue)
                 {
                     if (botOwner.Memory.HaveEnemy)
                     {
@@ -296,7 +295,7 @@ namespace MiyakoCarryService.Fika
                     if (mcsBotPlayerData != null)
                     {
                         mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
-                        mcsBotPlayerData.EscortPos = pos.Value;
+                        mcsBotPlayerData.EscortPos = packet.Position.Value;
                         mcsBotPlayerData.IsLooting = false;
                     }
                 }

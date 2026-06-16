@@ -476,25 +476,21 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (transform != null)
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    var pos = Tools.GetPosNearTarget(transform.position);
-                    if (pos.HasValue)
+                    if (botOwner.Memory.HaveEnemy)
                     {
-                        if (botOwner.Memory.HaveEnemy)
+                        botOwner.TalkMsg(new McsMsg
                         {
-                            botOwner.TalkMsg(new McsMsg
-                            {
-                                PhraseTrigger = EPhraseTrigger.Negative,
-                            });
-                        }
-                        botOwner.Mover.LastTimePosChanged = Time.time;
-                        botOwner.StopMove();
-                        var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                        if (mcsBotPlayerData != null)
-                        {
-                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
-                            mcsBotPlayerData.EscortPos = pos.Value;
-                            mcsBotPlayerData.IsLooting = false;
-                        }
+                            PhraseTrigger = EPhraseTrigger.Negative,
+                        });
+                    }
+                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.StopMove();
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                        mcsBotPlayerData.EscortPos = transform.position;
+                        mcsBotPlayerData.IsLooting = false;
                     }
                 }
             }
