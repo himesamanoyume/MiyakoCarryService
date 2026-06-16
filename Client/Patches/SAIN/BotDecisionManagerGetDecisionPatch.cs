@@ -74,28 +74,36 @@ namespace MiyakoCarryService.Client.Patches.SAIN
         {
             var botDecisionManagerTraverse = Traverse.Create(__instance);
             var botOwner = botDecisionManagerTraverse.Property("BotOwner").GetValue<BotOwner>();
-            if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
+            if (!McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
             {
-                var goalEnemy = botOwner?.Memory?.GoalEnemy;
-                if (goalEnemy == null)
-                {
-                    return true;
-                }
-
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData == null)
-                {
-                    return true;
-                }
-
-                var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (mcsBotPlayerData.HasDecision(EDecision.ShouldRegroup) || mcsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) || mcsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
-                {
-                    botDecisionManagerTraverse.Method("SetDecisions", [_combatDecisionType, _squadDecisionType, _selfActionType, _enemyType]).GetValue([_combatDecisionValue, _squadDecisionValue, _selfActionTypeValue, null]);
-                    return false;
-                }
                 return true;
             }
+
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return true;
+            }
+
+            var shouldLimit = mcsBotPlayerData.HasDecision(EDecision.ShouldRegroup)  
+                || mcsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint)  
+                || mcsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition); 
+
+            if (!shouldLimit)  
+            {  
+                var goalEnemy = botOwner?.Memory?.GoalEnemy;  
+                if (goalEnemy != null)  
+                {  
+                    var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);  
+                    shouldLimit = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f;  
+                }  
+            }  
+        
+            if (shouldLimit)  
+            {  
+                botDecisionManagerTraverse.Method("SetDecisions", [_combatDecisionType, _squadDecisionType, _selfActionType, _enemyType]).GetValue([_combatDecisionValue, _squadDecisionValue, _selfActionTypeValue, null]);  
+                return false;  
+            } 
             return true;
         }
     }

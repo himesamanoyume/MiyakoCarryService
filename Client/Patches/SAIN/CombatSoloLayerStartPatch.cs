@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using DrakiaXYZ.BigBrain.Brains;
 using HarmonyLib;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -30,9 +31,9 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                     return;
                 }
 
-                if (mcsBotPlayerData != null)
+                if (mcsBotPlayerData != null && __instance.BotOwner.Memory.HaveEnemy)
                 {
-                    mcsBotPlayerData.SetDecision();
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup]);
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.EscortPos = null;
                 }
