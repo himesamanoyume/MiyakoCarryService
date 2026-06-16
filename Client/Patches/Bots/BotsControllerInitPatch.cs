@@ -1,6 +1,6 @@
 
 using System.Reflection;
-using System.Threading.Tasks;
+using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -11,16 +11,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 只有主机才会执行此函数，用于标识自身为主机
     /// </summary>
-    public sealed class TryLoadBotsProfilesOnStartPatch : ModulePatch
+    public sealed class BotsControllerInitPatch : ModulePatch
     {
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.TryLoadBotsProfilesOnStart));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsController), nameof(BotsController.Init));
 
         [PatchPostfix]
-        public static async void Postfix(Task __result)
+        public static void Postfix()
         {
-            await __result;
             McsMgr.IsHost = true;
             TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
         }

@@ -158,7 +158,7 @@ namespace MiyakoCarryService.Client
             new RaidSettingsLocalPatch().Enable();
             new MainMenuControllerClassPatch().Enable();
             new MatchMakerAcceptScreenReadyPatch().Enable();
-            new TryLoadBotsProfilesOnStartPatch().Enable();
+            new BotsControllerInitPatch().Enable();
             new AddEnemyPatch().Enable();
             new TraderClassConstructorPatch().Enable();
             new TraderControllerClassConstructorPatch().Enable();
