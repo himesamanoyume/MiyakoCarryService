@@ -32,6 +32,8 @@ public sealed class ConfigService(
     private ConcurrentDictionary<int, SpawnType> _spawnTypes = new();
     private readonly ModMetadata McsModMetadata = new();
     public static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
+    private System.Version _latestVersion = new("1.0.0.0");
+    public bool HaveUpdate = false;
 
     public string GetModPath()
     {
@@ -51,6 +53,16 @@ public sealed class ConfigService(
     public string GetModUrl()
     {
         return McsModMetadata.Url;
+    }
+
+    public void UpdateLatestVersion(System.Version version)
+    {
+        _latestVersion = version;
+    }
+
+    public System.Version GetLatestVersion()
+    {
+        return _latestVersion;
     }
 
     private async Task LoadMcsConfig()

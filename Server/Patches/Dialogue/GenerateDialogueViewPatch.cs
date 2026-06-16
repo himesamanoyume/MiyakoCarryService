@@ -30,6 +30,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                 var mailSendService = ServiceLocator.ServiceProvider.GetService<MailSendService>();
                 var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
                 var traderService = ServiceLocator.ServiceProvider.GetService<TraderService>();
+                var configService = ServiceLocator.ServiceProvider.GetService<ConfigService>();
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId, 
@@ -46,6 +47,17 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                     string.Format(serverLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
+
+                if (configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckUpdate && configService.HaveUpdate)
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), configService.GetClientVersion(), configService.GetLatestVersion()),
+                        null
+                    );
+                }
                 request.Type = MessageType.NpcTraderMessage;
             }
         }
