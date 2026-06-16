@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Fika.Patches
     /// <summary>
     /// 用于副机同步护航信息至主机
     /// </summary>
-    public class FikaClientOnPeerConnectedPatch : ModulePatch
+    public class OnPeerConnectedPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(FikaClient), nameof(FikaClient.OnPeerConnected));
 

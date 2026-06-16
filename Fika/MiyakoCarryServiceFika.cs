@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Fika
         {
             new ExtractPatch().Enable();
             new OnLoadingProfilePacketReceivedPatch().Enable();
-            new FikaClientOnPeerConnectedPatch().Enable();
+            new OnPeerConnectedPatch().Enable();
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
