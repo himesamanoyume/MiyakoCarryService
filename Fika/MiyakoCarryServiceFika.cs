@@ -20,6 +20,7 @@ using MiyakoCarryService.Client;
 using MiyakoCarryService.Fika.Patches;
 using MiyakoCarryService.Client.Patches.Events;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika
 {
@@ -28,12 +29,18 @@ namespace MiyakoCarryService.Fika
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
+        private List<ModulePatch> _patches = new();
 
         public void InitMcsFika()
         {
-            new ExtractPatch().Enable();
-            new OnLoadingProfilePacketReceivedPatch().Enable();
-            new OnPeerConnectedPatch().Enable();
+            _patches.Add(new ExtractPatch());
+            _patches.Add(new OnLoadingProfilePacketReceivedPatch());
+            _patches.Add(new OnPeerConnectedPatch());
+
+            foreach (var patch in _patches)
+            {
+                patch.Enable();
+            }
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
@@ -50,6 +57,20 @@ namespace MiyakoCarryService.Fika
                 {ECommandPacketType.OnYourOwn, HandleOnYourOwn},
                 {ECommandPacketType.Escort, HandleEscort},
             };
+        }
+
+        public void CleanMcsFika()
+        {
+            foreach (var patch in _patches)
+            {
+                patch.Disable();
+            }
+            _handleActionsMap.Clear();
+            _handleActionsMap = null;
+            FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
+            EventMgr.Unsubscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket);
+            EventMgr.Unsubscribe<CommandMgrHandleFikaEvent>(SendCommandPacket);
+            EventMgr.Unsubscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket);
         }
 
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)

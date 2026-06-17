@@ -49,5 +49,35 @@ namespace MiyakoCarryService.Client.Mgrs
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 86);
             }
         }
+
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            BrainManager.RestoreLayers(["Exfiltration"], [nameof(EBrainName.PmcUsec), nameof(EBrainName.PmcBear)]);
+            BrainManager.RemoveLayer(nameof(McsExfiltrationLayer), Classification.AllBrainNames);
+
+            BrainManager.RemoveLayer(nameof(McsCommonLayer), Classification.AllBrainNames);
+            BrainManager.RemoveLayer(nameof(McsEscortLayer), Classification.AllBrainNames);
+
+            if (MiyakoCarryServicePlugin.SAINInstalled)
+            {
+                BrainManager.RemoveLayer(nameof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList());
+
+                BrainManager.RemoveLayer(nameof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]);
+            }
+            else
+            {
+                BrainManager.RemoveLayer(nameof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList());
+
+                BrainManager.RemoveLayer(nameof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]);
+            }
+
+            if (_customBrainNames != null && _customBrainNames.Count > 0)
+            {
+                BrainManager.RemoveLayer(nameof(McsCommonLayer), _customBrainNames);
+                BrainManager.RemoveLayer(nameof(McsEscortLayer), _customBrainNames);
+                BrainManager.RemoveLayer(nameof(McsFightLayer), _customBrainNames);
+            }
+        }
     }
 }

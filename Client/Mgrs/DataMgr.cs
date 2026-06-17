@@ -82,7 +82,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _datas.Clear();
         }
 
-        protected override void OnMgrDestroy()
+        public override void OnMgrDestroy()
         {
             base.OnMgrDestroy();
             DataClear();

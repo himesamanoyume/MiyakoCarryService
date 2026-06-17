@@ -247,9 +247,34 @@ namespace MiyakoCarryService.Client
             OpticCamera = null;
         }
 
-        private void OnDestroy()
+        public override void Destroy()
         {
             EventMgr.UnsubscribeAll(this);
+            Reset();
+            if (_updateDebouncer != null)
+            {
+                _updateDebouncer.Flush();
+                _updateDebouncer.Clear();
+                _updateDebouncer = null;
+            }
+            if (_loadedMcsLeadPlayer != null)
+            {
+                _loadedMcsLeadPlayer.Clear();
+                _loadedMcsLeadPlayer = null;
+            }
+            HighlightShader = null;
+            if (Mgrs != null)
+            {
+                Mgrs.Clear();
+            }
+            Mgrs = null;
+            if (ItemBestPriceDict != null)
+            {
+                ItemBestPriceDict.Clear();
+            }
+            ItemBestPriceDict = null;
+            Destroy(this);
+            // base.Destroy();
         }
 
         public T GetMgr<T>() where T : IMgr

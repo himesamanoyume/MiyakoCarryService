@@ -17,6 +17,12 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
         }
 
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            OnRaidEnded();
+        }
+
         private void LoadExfiltrationPoints()
         {
             Singleton<GameWorld>.Instance.AllPlayersEverExisted.ExecuteForEach((Player player) =>

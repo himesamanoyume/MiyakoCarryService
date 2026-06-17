@@ -16,6 +16,12 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
         }
 
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            OnRaidEnded();
+        }
+
         private void LoadTransitPoints()
         {
             foreach (var transitPoint in LocationScene.GetAllObjects<TransitPoint>())

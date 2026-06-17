@@ -61,6 +61,15 @@ namespace MiyakoCarryService.Client.Mgrs
             _opticCameraInitialized = false;
         }
 
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            OnRaidEnded();
+            Clear();
+            _mainCameraInitialized = false;
+            _opticCameraInitialized = false;
+        }
+
         void Update()
         {
             if (KeyInput.KeyDown(MiyakoCarryServicePlugin.TeammateHighlightHotKey.Value, MiyakoCarryServicePlugin.TeammateHighlight))

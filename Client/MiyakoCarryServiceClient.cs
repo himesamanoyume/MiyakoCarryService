@@ -23,6 +23,7 @@ using MiyakoCarryService.Client.Patches.Inventory;
 using MiyakoCarryService.Client.Patches.SAIN;
 using System.IO;
 using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client
 {
@@ -46,6 +47,9 @@ namespace MiyakoCarryService.Client
 #endif
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
         public static MiyakoCarryServicePlugin Instance;
+        private List<ModulePatch> _patches = new();
+        private object _mcsFika = null;
+        private Type _mcsFikaType = null;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
         public static bool IsFikaHeadless { get; private set; } = false;
@@ -92,9 +96,6 @@ namespace MiyakoCarryService.Client
         void Awake()
         {
             Instance = this;
-            new ContainsSearchStringPatch().Enable();
-            new DrawSinglePluginPatch().Enable();
-            new DrawFlagsFieldPatch().Enable();
         }
 
         void Start()
@@ -154,74 +155,99 @@ namespace MiyakoCarryService.Client
 
         private void EnableAllPatches()
         {
-            new TraderScreensGroupShowPatch().Enable();
-            new RaidSettingsLocalPatch().Enable();
-            new MainMenuControllerClassPatch().Enable();
-            new MatchMakerAcceptScreenReadyPatch().Enable();
-            new BotsControllerInitPatch().Enable();
-            new AddEnemyPatch().Enable();
-            new TraderClassConstructorPatch().Enable();
-            new TraderControllerClassConstructorPatch().Enable();
-            new TraderControllerClassAddItemEventInvokePatch().Enable();
-            new TraderControllerClassRemoveItemEventInvokePatch().Enable();
-            new TraderControllerClassOutProcessPatch().Enable();
-            new TraderControllerClassInProcessPatch().Enable();
-            new ApplyDamagePatch().Enable();
-            new OnGameStartedPatch().Enable();
-            new RaidEndedPatch().Enable();
-            new BotHearingSensorPatch().Enable();
-            new PlayerSayPatch().Enable();
-            new PlayHitEffectPatch().Enable();
-            new TransitPointPatch1().Enable();
-            new TransitPointPatch2().Enable();
-            new MatchmakerTimeHasComePatch().Enable();
-            new MatchMakerAcceptScreenCallbackPatch().Enable();
-            new GroupPlayerViewModelClassPatch().Enable();
-            new GetDailyQuestsPatch().Enable();
-            new MatchmakerAcceptScreenShowPatch().Enable();
-            new MatchingAbortPatch().Enable();
-            new DisbandRaidGroupPatch().Enable();
-            new MenuTaskBarAwakePatch().Enable();
-            new NewNewsCountPatch().Enable();
-            new SetGoalEnemyPatch().Enable();
-            new ChatSendMessagePatch().Enable();
-            new LocalQuestControllerClassPatch().Enable();
-            new RaidReadyListFixAidPatch().Enable();
-            new GetContextInteractionsPatch().Enable();
-            new ContextInteractionsClassPatch().Enable();
-            new GetProfilesPatch().Enable();
-            new MenuScreenPatch().Enable();
-            new TryFindChangedContainerPatch().Enable();
-            new CanModifyItemPatch().Enable();
-            new ItemSubtract1Patch().Enable();
-            new ItemSubtract2Patch().Enable();
-            new TryReloadPatch().Enable();
-            new BotWeaponSelectorPatch().Enable();
-            new AdvAssaultTargetPatch().Enable();
-            new InitVaultComponentPatch().Enable();
-            new MatchMakerSideSelectionScreenPatch().Enable();
-            new ActionPanelAnchorPatch().Enable();
-            new PartyInfoPanelScrollPatch().Enable();
+            _patches.Add(new ContainsSearchStringPatch());
+            _patches.Add(new DrawSinglePluginPatch());
+            _patches.Add(new DrawFlagsFieldPatch());
+            _patches.Add(new TraderScreensGroupShowPatch());
+            _patches.Add(new RaidSettingsLocalPatch());
+            _patches.Add(new MainMenuControllerClassPatch());
+            _patches.Add(new MatchMakerAcceptScreenReadyPatch());
+            _patches.Add(new BotsControllerInitPatch());
+            _patches.Add(new AddEnemyPatch());
+            _patches.Add(new TraderClassConstructorPatch());
+            _patches.Add(new TraderControllerClassConstructorPatch());
+            _patches.Add(new TraderControllerClassAddItemEventInvokePatch());
+            _patches.Add(new TraderControllerClassRemoveItemEventInvokePatch());
+            _patches.Add(new TraderControllerClassOutProcessPatch());
+            _patches.Add(new TraderControllerClassInProcessPatch());
+            _patches.Add(new ApplyDamagePatch());
+            _patches.Add(new OnGameStartedPatch());
+            _patches.Add(new RaidEndedPatch());
+            _patches.Add(new BotHearingSensorPatch());
+            _patches.Add(new PlayerSayPatch());
+            _patches.Add(new PlayHitEffectPatch());
+            _patches.Add(new TransitPointPatch1());
+            _patches.Add(new TransitPointPatch2());
+            _patches.Add(new MatchmakerTimeHasComePatch());
+            _patches.Add(new MatchMakerAcceptScreenCallbackPatch());
+            _patches.Add(new GroupPlayerViewModelClassPatch());
+            _patches.Add(new GetDailyQuestsPatch());
+            _patches.Add(new MatchmakerAcceptScreenShowPatch());
+            _patches.Add(new MatchingAbortPatch());
+            _patches.Add(new DisbandRaidGroupPatch());
+            _patches.Add(new MenuTaskBarAwakePatch());
+            _patches.Add(new NewNewsCountPatch());
+            _patches.Add(new SetGoalEnemyPatch());
+            _patches.Add(new ChatSendMessagePatch());
+            _patches.Add(new LocalQuestControllerClassPatch());
+            _patches.Add(new RaidReadyListFixAidPatch());
+            _patches.Add(new GetContextInteractionsPatch());
+            _patches.Add(new ContextInteractionsClassPatch());
+            _patches.Add(new GetProfilesPatch());
+            _patches.Add(new MenuScreenPatch());
+            _patches.Add(new TryFindChangedContainerPatch());
+            _patches.Add(new CanModifyItemPatch());
+            _patches.Add(new ItemSubtract1Patch());
+            _patches.Add(new ItemSubtract2Patch());
+            _patches.Add(new TryReloadPatch());
+            _patches.Add(new BotWeaponSelectorPatch());
+            _patches.Add(new AdvAssaultTargetPatch());
+            _patches.Add(new InitVaultComponentPatch());
+            _patches.Add(new MatchMakerSideSelectionScreenPatch());
+            _patches.Add(new ActionPanelAnchorPatch());
+            _patches.Add(new PartyInfoPanelScrollPatch());
 
             if (FikaInstalled)
             {
-                LoadMcsFika();
+                var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                if (!string.IsNullOrEmpty(assemblyLocation))
+                {
+                    LoadMcsFika();
+                }
             }
 
             if (SAINInstalled)
             {
-                new CombatSoloLayerStartPatch().Enable();
-                new CombatSoloLayerIsActivePatch().Enable();
+                _patches.Add(new CombatSoloLayerStartPatch());
+                _patches.Add(new CombatSoloLayerIsActivePatch());
             }
 
 #if DEBUG
 
 #endif
+
+            foreach (var patch in _patches)
+            {
+                patch.Enable();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            Logger.LogWarning("有在销毁");
+            foreach (var patch in _patches)
+            {
+                patch.Disable();
+            }
+            UnloadMcsFika();
+            GameLoop.Instance.Destroy();
+            Destroy(this);
         }
 
         private void LoadMcsFika()
         {
-            var pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            var pluginDir = string.IsNullOrEmpty(assemblyLocation) ? Path.Combine(BepInEx.Paths.PluginPath, "MiyakoCarryServiceClient") : Path.GetDirectoryName(assemblyLocation);
             var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
             if (!File.Exists(assemblyPath))
             {
@@ -229,13 +255,23 @@ namespace MiyakoCarryService.Client
             }
 
             var assembly = Assembly.LoadFrom(assemblyPath);
-            var mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
+            _mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
 
-            if (mcsFikaType != null)
+            if (_mcsFikaType != null)
             {
-                var mcsFika = Activator.CreateInstance(mcsFikaType);
-                var initMethod = mcsFikaType.GetMethod("InitMcsFika");
-                initMethod?.Invoke(mcsFika, null);
+                _mcsFika = Activator.CreateInstance(_mcsFikaType);
+                var initMethod = _mcsFikaType.GetMethod("InitMcsFika");
+                initMethod?.Invoke(_mcsFika, null);
+            }
+        }
+
+        // 我无法使用AppDomain和AssemblyLoadContext，因此只能不完全卸载
+        private void UnloadMcsFika()
+        {
+            if (_mcsFikaType != null)
+            {
+                var cleanMethod = _mcsFikaType.GetMethod("CleanMcsFika");
+                cleanMethod?.Invoke(_mcsFika, null);
             }
         }
 

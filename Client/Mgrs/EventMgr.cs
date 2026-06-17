@@ -71,5 +71,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
         }
+
+        public static void OnMgrDestroy()
+        {
+            _eventHandlers.Clear();
+            _subscriberEventTypes.Clear();
+            _eventHandlers = null;
+            _subscriberEventTypes = null;
+        }
     }
 }

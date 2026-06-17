@@ -29,17 +29,22 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            _triggersWithIds.Clear();
+            if (_triggersWithIds != null)
+            {
+                _triggersWithIds.Clear();
+            }
             _triggersWithIds = null;
         }
 
-        protected override void OnMgrDestroy()
+        public override void OnMgrDestroy()
         {
             base.OnMgrDestroy();
-            QuestNeedItemList.Clear();
+            OnRaidEnded();
+            if (QuestNeedItemList != null)
+            {
+                QuestNeedItemList.Clear();
+            }
             QuestNeedItemList = null;
-            _triggersWithIds.Clear();
-            _triggersWithIds = null;
         }
 
         protected void LoadQuest(HashSet<QuestData> datas, HashSet<string> questNeedItemList, Condition condition, QuestDataClass quest)

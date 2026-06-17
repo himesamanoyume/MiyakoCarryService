@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Mgrs
             OnMgrDestroy();
         }
 
-        protected virtual void OnMgrDestroy()
+        public virtual void OnMgrDestroy()
         {
             EventMgr.UnsubscribeAll(this); 
         }

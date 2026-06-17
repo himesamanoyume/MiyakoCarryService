@@ -237,6 +237,12 @@ namespace MiyakoCarryService.Client.Mgrs
             _subTitles.Clear();
         }
 
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            OnRaidEnded();
+        }
+
         public class Subtitles
         {
             public SubtitlesView SubtitlesView;
