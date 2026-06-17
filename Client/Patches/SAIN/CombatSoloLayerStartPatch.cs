@@ -33,9 +33,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
 
                 if (mcsBotPlayerData != null && __instance.BotOwner.Memory.HaveEnemy)
                 {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup]);
                     mcsBotPlayerData.IsLooting = false;
-                    mcsBotPlayerData.EscortPos = null;
                 }
             }
         }

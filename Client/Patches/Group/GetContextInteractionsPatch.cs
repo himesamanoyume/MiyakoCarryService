@@ -58,6 +58,7 @@ namespace MiyakoCarryService.Client.Patches.Group
         private static async void OnRefreshFriendList()
         {
             var session = GameLoop.Instance.Session;
+            session.SocialNetwork.FriendsList.Clear();
             session.GetFriendsList(result =>
             {
                 if (!result.Succeed)
