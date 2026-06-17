@@ -210,7 +210,7 @@ namespace MiyakoCarryService.Client
             if (SAINInstalled)
             {
                 new CombatSoloLayerStartPatch().Enable();
-                new BotDecisionManagerGetDecisionPatch().Enable();
+                new CombatSoloLayerIsActivePatch().Enable();
             }
 
 #if DEBUG

@@ -25,16 +25,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 McsBotPlayerData.IsLooting = false;
             }
 
-            BotOwner.TalkMsg(new McsMsg
+            if (BotOwner.Memory.GoalEnemy != BotOwner.Memory.LastEnemy)
             {
-                PhraseTrigger = EPhraseTrigger.OnFirstContact,
-                Position = BotOwner.Memory.GoalEnemy.EnemyLastPosition
-            });
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.OnFirstContact,
+                    Position = BotOwner.Memory.GoalEnemy.EnemyLastPosition
+                });
+            }
         }
 
         public override void Stop()
         {
             base.Stop();
+            foreach (var member in BotOwner.BotsGroup.Members)
+            {
+                if (member.Memory.HaveEnemy)
+                {
+                    return;
+                }
+            }
+            
             BotOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Clear,
@@ -199,7 +210,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && McsBotPlayerData != null && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
+                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
