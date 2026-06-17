@@ -201,6 +201,7 @@ namespace MiyakoCarryService.Client
             new InitVaultComponentPatch().Enable();
             new MatchMakerSideSelectionScreenPatch().Enable();
             new ActionPanelAnchorPatch().Enable();
+            new PartyInfoPanelScrollPatch().Enable();
 
             if (FikaInstalled)
             {
