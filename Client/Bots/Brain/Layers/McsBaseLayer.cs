@@ -45,6 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             get => _currentMoveTarget;
         }
+        private Vector3? _lastEscortPos = null;
         private Vector3 _lastPathTargetPos = Vector3.zero;
         private Vector3[] _lastCalcCorners = null;
         private bool _lastCanRunResult = false;
@@ -1393,6 +1394,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
+            if (_lastEscortPos != McsBotPlayerData.EscortPos)
+            {
+                _lastEscortPos = McsBotPlayerData.EscortPos;
+                _lastCalcCorners = null;
+                _lastCanRunResult = false;
+                _lastPathTargetPos = default;
+                _lastLeadPos = default;
+                _currentEscortRetries = 0;
+            }
+
             var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (leadPos == null)
             {
@@ -1402,6 +1413,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var leadVelocity = McsBotPlayerData.LeadPlayer.Velocity;
             var predictedPos = leadPos + leadVelocity * 2;
+
+            if (NavMesh.SamplePosition(predictedPos, out var hit, 1f, -1))
+            {
+                predictedPos = hit.position;
+            }
+            else
+            {
+                predictedPos = leadPos;
+            }
 
             if (!CanGetPathToRun(predictedPos, McsBotPlayerData.EscortPos.Value, McsBotPlayerData, out Vector3[] corners))
             {
@@ -1467,7 +1487,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     });
                     return _lastCanRunResult;
                 }
-                
+
+                _lastPathTargetPos = targetPos;
+                _lastLeadPos = leadPos;
                 corners = _lastCalcCorners;
                 return _lastCanRunResult;
             }
