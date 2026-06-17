@@ -52,19 +52,25 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetDecision(EDecision[] exclude = null, params EDecision[] decisions)
         {
+            var preserved = EDecision.None;
+            if (exclude != null)
+            {
+                foreach (var e in exclude)
+                {
+                    if (_decision.HasFlag(e))
+                    {
+                        preserved |= e;
+                    }
+                }
+            }
+
             _decision = EDecision.None;
             foreach (var decision in decisions)
             {
                 _decision |= decision;
             }
 
-            if (exclude != null)
-            {
-                foreach (var e in exclude)
-                {
-                    _decision &= ~e;
-                }
-            }
+            _decision |= preserved;
         }
 
         public bool HasDecision(params EDecision[] decisions)
