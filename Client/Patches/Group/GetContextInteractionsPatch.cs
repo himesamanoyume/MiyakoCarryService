@@ -13,6 +13,7 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
+using UI.Matchmaker.Group;
 
 namespace MiyakoCarryService.Client.Patches.Group
 {
@@ -30,6 +31,12 @@ namespace MiyakoCarryService.Client.Patches.Group
         [PatchPostfix]
         public static void Postfix(GroupPlayerDataClass player, ContextInteractionsClass __result)
         {
+            __result.method_2(
+                id: "RefreshFriendList",
+                key: Locales.REFRESHFRIENDLIST.McsLocalized(),
+                callback: OnRefreshFriendList
+            );
+
             if (IsMcsBotPlayerInventoryMode)
             {
                 __result.method_2(
@@ -46,6 +53,21 @@ namespace MiyakoCarryService.Client.Patches.Group
                 key: Locales.OPENMCSBOTPLAYERINVENTORY.McsLocalized(),
                 callback: () => OnOpenMcsBotPlayerInventoryMode(player.AccountId)
             );
+        }
+
+        private static async void OnRefreshFriendList()
+        {
+            var session = GameLoop.Instance.Session;
+            session.GetFriendsList(result =>
+            {
+                if (!result.Succeed)
+                {
+                    return;
+                }
+
+                session.SocialNetwork.method_13(result);  
+                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.method_0(); 
+            });
         }
 
         public static async void OnExitMcsBotPlayerInventoryMode(string aid)

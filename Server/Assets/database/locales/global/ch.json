@@ -138,6 +138,7 @@
     "Mcs/OnFriendlyDown": "队友倒下！",
     "Mcs/FollowMe": "跟我来。",
     "Mcs/Negative": "办不到。",
+    "Mcs/RefreshFriendList": "刷新",
     "Mcs/OpenMcsBotPlayerInventory": "打开库存",
     "Mcs/ReturnToMainChar": "返回主角色",
     "Mcs/McsInventoryMode": "护航库存模式",
