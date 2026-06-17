@@ -459,39 +459,31 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
-                var transform = triggerData.GetTransfrom();
-                if (transform != null)
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    EventMgr.Notify(new CommandMgrHandleFikaEvent
-                    {
-                        McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandPacketType.Escort,
-                        Position = transform.position
-                    });
-                }
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.Escort,
+                    Position = triggerData.GetPos()
+                });
             }
             else
             {
-                var transform = triggerData.GetTransfrom();
-                if (transform != null)
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (botOwner.Memory.HaveEnemy)
                 {
-                    var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    if (botOwner.Memory.HaveEnemy)
+                    botOwner.TalkMsg(new McsMsg
                     {
-                        botOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.Negative,
-                        });
-                    }
-                    botOwner.Mover.LastTimePosChanged = Time.time;
-                    botOwner.StopMove();
-                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                    if (mcsBotPlayerData != null)
-                    {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
-                        mcsBotPlayerData.EscortPos = transform.position;
-                        mcsBotPlayerData.IsLooting = false;
-                    }
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                }
+                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.StopMove();
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                    mcsBotPlayerData.EscortPos = triggerData.GetPos();
+                    mcsBotPlayerData.IsLooting = false;
                 }
             }
             CloseCommandMenuAction();

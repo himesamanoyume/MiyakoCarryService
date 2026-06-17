@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Client.Datas
             _transformRef = new WeakReference<Transform>(questTransform);
         }
 
-        public override Transform GetTransfrom() => _questTransform;
+        public override Vector3 GetPos() => _questTransform.position;
         public override string GetActionName() => QuestCondition.id.ToString().McsLocalized();
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
         public override bool IsDisabled() => false;
