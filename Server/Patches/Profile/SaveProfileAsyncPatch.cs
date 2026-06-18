@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Server.Patches.Profile
 
             if (profileController.IsMcsBotPlayerInventoryMode(sessionID))  
             {  
-                __result = profileController.SaveMcsBotPlayerProfile(sessionID);  
+                __result = profileController.SaveAllMcsBotPlayerProfile(sessionID);  
                 return false;
             }  
             return true;  

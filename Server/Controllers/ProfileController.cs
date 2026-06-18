@@ -30,9 +30,9 @@ namespace MiyakoCarryService.Server.Controllers
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
         }
 
-        public async Task<long> SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
+        public async Task<long> SaveAllMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
         {
-            return await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId);
+            return await profileService.SaveAllMcsBotPlayerProfile(mcsLeadPlayerId);
         }
 
         public SptProfile Generate(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId, PmcData completeQuestPmcData, OrderInfo orderInfo)

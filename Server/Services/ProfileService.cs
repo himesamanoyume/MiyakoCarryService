@@ -13,7 +13,6 @@ using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Mcs;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -170,7 +169,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        public async Task<long> SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
+        public async Task<long> SaveAllMcsBotPlayerProfile(MongoId mcsLeadPlayerId)
         {
             var mcsBotPlayerProfiles = _profiles[mcsLeadPlayerId].Values;
             var start = Stopwatch.StartNew();
@@ -182,7 +181,7 @@ namespace MiyakoCarryService.Server.Services
             return start.ElapsedMilliseconds;
         }
 
-        private async Task LoadMcsBotPlayerProfileAsync(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
+        private async Task LoadMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             var filePath = System.IO.Path.Combine(_profileFolderDir, mcsLeadPlayerId, $"{mcsBotPlayerId}.json");
             if (fileUtil.FileExists(filePath))
@@ -195,7 +194,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        private async Task LoadAllMcsBotPlayerProfileAsync()
+        private async Task LoadAllMcsBotPlayerProfile()
         {
             if (!fileUtil.DirectoryExists(_profileFolderDir))
             {
@@ -217,7 +216,7 @@ namespace MiyakoCarryService.Server.Services
                         {
                             if (infoService.CheckMcsBotPlayerExist(mcsBotPlayerId))
                             {
-                                await LoadMcsBotPlayerProfileAsync(mcsLeadPlayerId, mcsBotPlayerId);
+                                await LoadMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
                             }
                         }
                     }
@@ -902,7 +901,7 @@ namespace MiyakoCarryService.Server.Services
 
         public async Task OnPostLoadAsync()
         {
-            await LoadAllMcsBotPlayerProfileAsync();
+            await LoadAllMcsBotPlayerProfile();
             await LoadIfdianPmcName();
         }
     }
