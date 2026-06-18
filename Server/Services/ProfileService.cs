@@ -13,6 +13,7 @@ using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Mcs;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -494,6 +495,7 @@ namespace MiyakoCarryService.Server.Services
                 pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails, orderInfo);
             }
 
+            pmcData.Encyclopedia.Add(ItemTpl.SECURE_CONTAINER_BOSS, true);
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
             PmcData scavData;
