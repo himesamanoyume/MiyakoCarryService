@@ -212,6 +212,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new MatchMakerSideSelectionScreenPatch());
             _patches.Add(new ActionPanelAnchorPatch());
             _patches.Add(new PartyInfoPanelScrollPatch());
+            _patches.Add(new EquipmentBuildsScreenShowPatch());
 
             if (FikaInstalled && !_isLoadedByScriptEngine)
             {
