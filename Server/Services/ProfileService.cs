@@ -494,7 +494,13 @@ namespace MiyakoCarryService.Server.Services
                 pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails, orderInfo);
             }
 
-            pmcData.Encyclopedia.Add(ItemTpl.SECURE_CONTAINER_BOSS, true);
+            if (pmcData.Inventory.Items != null)
+            {
+                foreach (var item in pmcData.Inventory.Items)
+                {
+                    pmcData.Encyclopedia.TryAdd(item.Template, true);
+                }
+            }
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
             PmcData scavData;
