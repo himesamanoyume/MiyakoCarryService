@@ -32,8 +32,8 @@ public sealed class ConfigService(
     private ConcurrentDictionary<int, SpawnType> _spawnTypes = new();
     private readonly ModMetadata McsModMetadata = new();
     public static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true };
-    private System.Version _latestVersion = new("1.0.5.1");
-    public bool HaveUpdate = false;
+    private System.Version _latestVersion = new("1.0.0.0");
+    public bool HaveUpdate => _latestVersion.CompareTo(GetClientVersion()) > 0;
 
     public string GetModPath()
     {
