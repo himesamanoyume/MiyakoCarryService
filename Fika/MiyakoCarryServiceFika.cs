@@ -65,7 +65,10 @@ namespace MiyakoCarryService.Fika
             {
                 patch.Disable();
             }
-            _handleActionsMap.Clear();
+            if (_handleActionsMap != null)
+            {
+                _handleActionsMap.Clear();
+            }
             _handleActionsMap = null;
             FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Unsubscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket);

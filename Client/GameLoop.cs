@@ -273,8 +273,7 @@ namespace MiyakoCarryService.Client
                 ItemBestPriceDict.Clear();
             }
             ItemBestPriceDict = null;
-            Destroy(this);
-            // base.Destroy();
+            base.Destroy();
         }
 
         public T GetMgr<T>() where T : IMgr
