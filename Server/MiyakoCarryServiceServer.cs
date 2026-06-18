@@ -50,6 +50,9 @@ namespace MiyakoCarryService.Server
                 new GetAssortPatch().Enable();
                 new GetTraderAssortsByTraderIdPatch().Enable();
                 new AddOfferPatch().Enable();
+                new RemovePlayerBuildPatch().Enable();
+                new SaveEquipmentBuildPatch().Enable();
+                new SaveWeaponBuildPatch().Enable();
             }
         }
 
@@ -58,8 +61,9 @@ namespace MiyakoCarryService.Server
             Services.LocaleService localeService,
             QuestService questService,
             TraderService traderService,
-            ProfileService profileService,
+            BuildsService buildsService,
             InfoService infoService,
+            ProfileService profileService,
             CompatibilityService compatibilityService,
             ConfigService configService,
             InventoryService inventoryService,
@@ -72,6 +76,7 @@ namespace MiyakoCarryService.Server
             {
                 await localeService.OnPostLoadAsync();
                 await traderService.OnPostLoadAsync();
+                await buildsService.OnPostLoadAsync();
                 await infoService.OnPostLoadAsync();
                 await profileService.OnPostLoadAsync();
                 await questService.OnPostLoadAsync();

@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Server.Services
         ConfigServer configServer,
         BotHelper botHelper,
         ProfileHelper profileHelper,
+        BuildsService buildsService,
         InventoryHelper inventoryHelper,
         ItemHelper itemHelper,
         ServerLocalisationService serverLocalisationService,
@@ -493,14 +494,6 @@ namespace MiyakoCarryService.Server.Services
                 botGenerationDetails.Role = completeQuestPmcData.Info.Side == "Usec" ? "pmcUSEC" : "pmcBEAR";
                 pmcData = GeneratePmcData(mcsLeadPlayerId, mcsBotPlayerId, botGenerationDetails, orderInfo);
             }
-
-            if (pmcData.Inventory.Items != null)
-            {
-                foreach (var item in pmcData.Inventory.Items)
-                {
-                    pmcData.Encyclopedia.TryAdd(item.Template, true);
-                }
-            }
             pmcData.Info.Level = botGenerationDetails.PlayerLevel;
 
             PmcData scavData;
@@ -536,6 +529,21 @@ namespace MiyakoCarryService.Server.Services
             scavData.Info.Experience = pmcData.Info.Experience;
 
             var fullProfile = GenerateFullProfile(pmcData, scavData);
+            var userBuilds = buildsService.GetUserBuilds(mcsLeadPlayerId);
+            if (userBuilds != null)
+            {
+                fullProfile.UserBuildData = userBuilds;
+            }
+
+            if (fullProfile.CharacterData.PmcData.Inventory.Items != null)
+            {
+                foreach (var item in fullProfile.CharacterData.PmcData.Inventory.Items)
+                {
+                    fullProfile.CharacterData.PmcData.Encyclopedia.TryAdd(item.Template, true);
+                }
+            }
+
+            buildsService.ExaminedUserBuildsItem(fullProfile, fullProfile.UserBuildData);
             _ = SaveMcsBotPlayerProfile(mcsLeadPlayerId, fullProfile);
             return fullProfile;
         }

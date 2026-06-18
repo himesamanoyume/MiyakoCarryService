@@ -107,6 +107,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
+            TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
@@ -182,6 +183,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
             TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
             EventMgr.Notify(new UpdateProfileEvent());
+            TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }
     }
