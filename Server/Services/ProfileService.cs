@@ -49,7 +49,6 @@ namespace MiyakoCarryService.Server.Services
         ProfileHelper profileHelper,
         BuildsService buildsService,
         InventoryHelper inventoryHelper,
-        ItemHelper itemHelper,
         ServerLocalisationService serverLocalisationService,
         NotificationHelper notificationHelper,
         BotInventoryContainerService botInventoryContainerService,
@@ -690,10 +689,10 @@ namespace MiyakoCarryService.Server.Services
 
             var currencies = new Dictionary<MongoId, int>
             {
-                { Money.ROUBLES, 1000000 },
-                { Money.DOLLARS, 50000 },
-                { Money.EUROS, 50000 },
-                { Money.GP, 1000 }
+                { Money.EUROS, 114514 },
+                { Money.DOLLARS, 1919810 },
+                { Money.ROUBLES, 151560107 },
+                { Money.GP, 1314 }
             };
 
             var stashId = pmcData.Inventory.Stash.Value;
@@ -711,27 +710,20 @@ namespace MiyakoCarryService.Server.Services
                     }
                 };
 
-                var currencyStacks = itemHelper.SplitStackIntoSeparateItems(item);
                 var stashFS2D = inventoryHelperTraverse.Method("GetStashSlotMap", [pmcData]).GetValue<int[,]>();
-                foreach (var stacks in currencyStacks)
+                var placeResult = inventoryHelper.PlaceItemInContainer(
+                    stashFS2D,
+                    [item],
+                    stashId,
+                    "hideout"
+                );
+
+                if (!placeResult.Success.GetValueOrDefault(false))
                 {
-                    foreach (var stack in stacks)
-                    {
-                        var placeResult = inventoryHelper.PlaceItemInContainer(
-                            stashFS2D,
-                            [stack],
-                            stashId,
-                            "hideout"
-                        );
-
-                        if (!placeResult.Success.GetValueOrDefault(false))
-                        {
-                            continue;
-                        }
-
-                        pmcData.Inventory.Items.Add(stack);
-                    }
+                    continue;
                 }
+
+                pmcData.Inventory.Items.Add(item);
             }
 
             if (pmcData.Inventory.HideoutAreaStashes == null)
