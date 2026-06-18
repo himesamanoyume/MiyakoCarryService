@@ -136,35 +136,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             _hoverTooltipArea = _bigSurveyGameObject.GetComponentInChildren<HoverTooltipArea>();
             SetBigSurveyButtonInteractable(true);
         }
-
-        if (_tempBackGameObject != null)
-        {
-            _mcsBotPlayerInventoryModeGameObject = UnityEngine.Object.Instantiate(_tempBackGameObject);
-            _mcsBotPlayerInventoryModeGameObject.name = "McsBotPlayerInventoryModeInfo";
-            _mcsBotPlayerInventoryModeGameObject.transform.SetParent(_tempBackGameObject.transform.parent, false);
-            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).gameObject.SetActive(true);
-            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
-            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
-
-            var matchingStatus = _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(1);
-            var textMeshProUGUI = matchingStatus.GetComponentInChildren<TextMeshProUGUI>();
-            if (textMeshProUGUI != null)
-            {
-                var localizedText = textMeshProUGUI.gameObject.AddComponent<LocalizedText>();
-                localizedText.LocalizationKey = Locales.MCSINVENTORYMODE;
-            }
-
-            var button = _mcsBotPlayerInventoryModeGameObject.GetComponentInChildren<Button>();
-            if (button != null)
-            {
-                button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(() =>
-                {
-                    GetContextInteractionsPatch.OnExitMcsBotPlayerInventoryMode(GetContextInteractionsPatch.McsBotPlayerAid);
-                });
-            }
-            ShowMcsBotPlayerInventoryModeInfo(false);
-        }
+        ShowMcsBotPlayerInventoryModeInfo(false);
     }
 
     [PatchPostfix]
@@ -199,8 +171,43 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
         }
     }
 
+    private static void InstantiateMcsBotPlayerInventoryModeInfo()
+    {
+        if (_tempBackGameObject != null && _mcsBotPlayerInventoryModeGameObject == null)
+        {
+            _mcsBotPlayerInventoryModeGameObject = UnityEngine.Object.Instantiate(_tempBackGameObject);
+            _mcsBotPlayerInventoryModeGameObject.name = "McsBotPlayerInventoryModeInfo";
+            _mcsBotPlayerInventoryModeGameObject.transform.SetParent(_tempBackGameObject.transform.parent, false);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).gameObject.SetActive(true);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+            _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(3).gameObject.SetActive(false);
+
+            var matchingStatus = _mcsBotPlayerInventoryModeGameObject.transform.GetChild(0).GetChild(1);
+            var textMeshProUGUI = matchingStatus.GetComponentInChildren<TextMeshProUGUI>();
+            if (textMeshProUGUI != null)
+            {
+                var localizedText = textMeshProUGUI.gameObject.AddComponent<LocalizedText>();
+                localizedText.LocalizationKey = Locales.MCSINVENTORYMODE;
+            }
+
+            var button = _mcsBotPlayerInventoryModeGameObject.GetComponentInChildren<Button>();
+            if (button != null)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() =>
+                {
+                    GetContextInteractionsPatch.OnExitMcsBotPlayerInventoryMode(GetContextInteractionsPatch.McsBotPlayerAid);
+                });
+            }
+        }
+    }
+
     public static void ShowMcsBotPlayerInventoryModeInfo(bool active)
     {
-        _mcsBotPlayerInventoryModeGameObject.SetActive(active);
+        InstantiateMcsBotPlayerInventoryModeInfo();
+        if (_mcsBotPlayerInventoryModeGameObject != null)
+        {
+            _mcsBotPlayerInventoryModeGameObject.SetActive(active);
+        }
     }
 }
