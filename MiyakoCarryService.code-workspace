@@ -165,6 +165,18 @@
                 ]
             },
             {
+                "label": "client: debug se move",
+                "type": "shell",
+                "command": "cmd",
+                "args": [
+                    "/c",
+                    "move",
+                    "/Y",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                ]
+            },
+            {
                 "label": "client headless: move",
                 "type": "shell",
                 "command": "xcopy",
@@ -174,6 +186,18 @@
                     "/Y",
                     "'${workspaceFolder}\\Build\\BepInEx\\'",
                     "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\'"
+                ]
+            },
+            {
+                "label": "client headless: debug se move",
+                "type": "shell",
+                "command": "cmd",
+                "args": [
+                    "/c",
+                    "move",
+                    "/Y",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
+                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
                 ]
             },
             {
