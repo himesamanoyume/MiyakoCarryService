@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using EFT;
@@ -34,12 +35,19 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
-            if (!MiyakoCarryServicePlugin.McsBotPlayerNoDamage.Value)
+            if (MiyakoCarryServicePlugin.McsBotPlayerNoDamage.Value)
             {
+                damage = 0;
                 return;
             }
 
-            damage = 0;
+            if (MiyakoCarryServicePlugin.McsBotPlayerKeepAlive.Value)
+            {
+                var healthController = ___Player.ActiveHealthController;
+                var currentHealth = healthController.GetBodyPartHealth(bodyPart, false);
+                damage = Math.Max(0, currentHealth.Current - 1f);
+                return;
+            }
         }
 #endif
 

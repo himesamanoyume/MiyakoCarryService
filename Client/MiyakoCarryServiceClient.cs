@@ -89,6 +89,7 @@ namespace MiyakoCarryService.Client
 
 #if DEBUG
         public static ConfigEntry<bool> McsBotPlayerNoDamage;
+        public static ConfigEntry<bool> McsBotPlayerKeepAlive;
         public static ConfigEntry<bool> EnableMcsLayer;
 #endif
 
@@ -504,7 +505,14 @@ namespace MiyakoCarryService.Client
 #if DEBUG
             McsBotPlayerNoDamage = Register(
                 EConfigType.DEBUG,
-                "护航无敌",
+                "护航免伤",
+                true,
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
+
+            McsBotPlayerKeepAlive = Register(
+                EConfigType.DEBUG,
+                "护航锁血",
                 true,
                 customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
             );
