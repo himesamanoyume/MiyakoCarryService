@@ -43,6 +43,11 @@ namespace MiyakoCarryService.Client.Mgrs
         private List<MongoID> _mySquadMcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mySquadMcsBotPlayers = new();
 
+        public bool IsMcsMemberPlayer(MongoID mcsBotPlayerId)
+        {
+            return _mySquadMcsBotPlayerIds.Contains(mcsBotPlayerId);
+        }
+
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();

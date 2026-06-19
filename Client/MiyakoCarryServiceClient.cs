@@ -215,6 +215,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new PartyInfoPanelScrollPatch());
             _patches.Add(new EquipmentBuildsScreenShowPatch());
             _patches.Add(new BotFirstAidClassMinPercentPatch());
+            _patches.Add(new OnBeenKilledByAggressorPatch());
 
             if (FikaInstalled && !_isLoadedByScriptEngine)
             {
