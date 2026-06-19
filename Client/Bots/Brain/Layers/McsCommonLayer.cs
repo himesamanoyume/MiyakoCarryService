@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     {
         public McsCommonLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            
+
         }
 
         public override void Start()
@@ -31,6 +31,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                BotOwner.Medecine.GetDamaged();
+
                 if (McsBotPlayerData != null)
                 {
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
@@ -40,19 +42,41 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                     {
+                        if (BotOwner.Medecine.FirstAid.Damaged)
+                        {
+                            if (BotOwner.Medecine.FirstAid.HaveSmth2Use)
+                            {
+                                if (!BotOwner.Memory.IsInCover)
+                                {
+                                    return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForFirstAid");
+                                }
+                            }
+                        }
+
+                        if (BotOwner.Medecine.SurgicalKit.Damaged)
+                        {
+                            if (BotOwner.Medecine.SurgicalKit.HaveSmth2Use)
+                            {
+                                if (!BotOwner.Memory.IsInCover)
+                                {
+                                    return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgical");
+                                }
+                            }
+                        }
+
+                        if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                        {
+                            return new Action(typeof(HealLogic), "Mcs:Healing");
+                        }
+
                         return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                     }
                 }
 
-                // 刷新自身受伤状态
-                BotOwner.Medecine.GetDamaged();
-                // 是否受到了非部位摧毁伤害
                 if (BotOwner.Medecine.FirstAid.Damaged)
                 {
-                    // 是否没有医疗物品
                     if (BotOwner.Medecine.FirstAid.HaveSmth2Use)
                     {
-                        // 进行治疗前先跑去掩体
                         if (!BotOwner.Memory.IsInCover)
                         {
                             return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForFirstAid");
@@ -60,20 +84,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                // 是否受到了部位摧毁伤害
                 if (BotOwner.Medecine.SurgicalKit.Damaged)
                 {
-                    // 是否没有手术包
                     if (BotOwner.Medecine.SurgicalKit.HaveSmth2Use)
                     {
                         if (!BotOwner.Memory.IsInCover)
                         {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgical");
+                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgicalKit");
                         }
                     }
                 }
 
-                // 老板健康无大碍，且医疗物品和掩体也都准备就绪后，才治疗自己
                 if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                 {
                     return new Action(typeof(HealLogic), "Mcs:Healing");
@@ -102,7 +123,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     UpdateMoveTarget(out float nextTime);
                     _nextUpdatePosTime = Time.time + nextTime;
                 }
-                
+
                 var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
                 var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
                 if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
