@@ -20,10 +20,13 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPostfix]
         public static void Postfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            HandleSharedExperience(__instance, aggressor);
+            if (!MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                HandleSharedExperience(__instance, aggressor);
+            }
         }
 
-        public static void HandleSharedExperience(Player __instance, IPlayer aggressor)
+        public static void HandleSharedExperience(Player __instance, IPlayer aggressor, bool sharedKillExp = true, bool sharedBossExp = true)
         {
             if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
             {
@@ -48,14 +51,17 @@ namespace MiyakoCarryService.Client.Patches.Events
                     experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
                 }
 
-                if (countAsBoss)
+                if (sharedKillExp && !countAsBoss)
                 {
                     sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
                     sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
                 }
 
-                sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-                sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                if (sharedBossExp && countAsBoss)
+                {
+                    sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
+                    sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                }
 
                 MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsLeadPlayer.Profile.Nickname} 获取护航共享击杀经验");
             }
