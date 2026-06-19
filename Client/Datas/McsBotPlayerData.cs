@@ -41,8 +41,8 @@ namespace MiyakoCarryService.Client.Datas
                 _isLooting = value;
                 if (!_isLooting && _lootingTarget != null)
                 {
-                    _lootDataMgr.UnlockLootingTarget(_lootingTarget);
-                    _lootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
+                    LootDataMgr.UnlockLootingTarget(_lootingTarget);
+                    LootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
                     _lootingTarget = null;
                 }
             }
@@ -141,18 +141,18 @@ namespace MiyakoCarryService.Client.Datas
             usefulContainers.Sort((a, b) => b.ContainerGridCount.CompareTo(a.ContainerGridCount));
             foreach (var containerData in usefulContainers)
             {
-                if (_lootDataMgr.IsLockedLootingTarget(containerData))
+                if (LootDataMgr.IsLockedLootingTarget(containerData))
                 {
                     continue;
                 }
 
-                if (_lootDataMgr.IsLockedLootingTargetRootTransform(containerData.RootTransform))
+                if (LootDataMgr.IsLockedLootingTargetRootTransform(containerData.RootTransform))
                 {
                     continue;
                 }
 
-                _lootDataMgr.LockLootItemToTarget(containerData);
-                _lootDataMgr.LockLootingTargetRootTransform(containerData.RootTransform);
+                LootDataMgr.LockLootItemToTarget(containerData);
+                LootDataMgr.LockLootingTargetRootTransform(containerData.RootTransform);
                 LootingTarget = containerData;
                 return;
             }
@@ -160,18 +160,18 @@ namespace MiyakoCarryService.Client.Datas
             filtedLootDatas.Sort((a, b) => b.Offer.Price.CompareTo(a.Offer.Price));
             foreach (var lootData in filtedLootDatas)
             {
-                if (_lootDataMgr.IsLockedLootingTarget(lootData))
+                if (LootDataMgr.IsLockedLootingTarget(lootData))
                 {
                     continue;
                 }
 
-                if (_lootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                if (LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
                 {
                     continue;
                 }
 
-                _lootDataMgr.LockLootItemToTarget(lootData);
-                _lootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
+                LootDataMgr.LockLootItemToTarget(lootData);
+                LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                 LootingTarget = lootData;
                 return;
             }

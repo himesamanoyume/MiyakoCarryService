@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Client.Datas
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         public Transform RootTransform => GetRootTransfrom();
-        protected LootDataMgr _lootDataMgr = MgrAccessor.Get<LootDataMgr>();
+        protected LootDataMgr LootDataMgr = MgrAccessor.Get<LootDataMgr>();
 
         public ItemData(Item item)
         {
@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Client.Datas
             UpdateContainerInfoData();
             if (unlock)
             {
-                _lootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
+                LootDataMgr.UnlockLootingTargetRootTransform(RootTransform);
             }
 
             foreach (var itemData in ItemsInContainer)
@@ -61,7 +61,7 @@ namespace MiyakoCarryService.Client.Datas
 
                 if (unlock)
                 {
-                    _lootDataMgr.UnlockLootingTarget(lootData);
+                    LootDataMgr.UnlockLootingTarget(lootData);
                 }
                 lootData.Refresh(mcsAILeadPlayer);
                 lootData.IsItemInContainer = true;
@@ -92,9 +92,11 @@ namespace MiyakoCarryService.Client.Datas
         {
             base.Dispose();
             _itemRef = null;
-            ItemsInContainer.Clear();
+            if (ItemsInContainer != null)
+            {
+                ItemsInContainer.Clear();
+            }
             ItemsInContainer = null;
-            _lootDataMgr = null;
         }
     }
 }

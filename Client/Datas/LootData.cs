@@ -146,7 +146,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public bool IsLocked()
         {
-            return _lootDataMgr.IsLockedLootingTarget(this) && _lootDataMgr.IsLockedLootingTargetRootTransform(RootTransform);
+            return LootDataMgr.IsLockedLootingTarget(this) && LootDataMgr.IsLockedLootingTargetRootTransform(RootTransform);
         }
 
         public override void Dispose()
