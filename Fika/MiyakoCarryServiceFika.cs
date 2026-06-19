@@ -36,7 +36,8 @@ namespace MiyakoCarryService.Fika
             _patches.Add(new ExtractPatch());
             _patches.Add(new OnLoadingProfilePacketReceivedPatch());
             _patches.Add(new OnPeerConnectedPatch());
-            _patches.Add(new FikaOnBeenKilledByAggressorPatch());
+            _patches.Add(new FikaOnBeenKilledByAggressorPatch1());
+            _patches.Add(new FikaOnBeenKilledByAggressorPatch2());
 
             foreach (var patch in _patches)
             {

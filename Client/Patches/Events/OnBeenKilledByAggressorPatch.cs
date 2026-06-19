@@ -62,8 +62,6 @@ namespace MiyakoCarryService.Client.Patches.Events
                     sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
                     sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
                 }
-
-                MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsLeadPlayer.Profile.Nickname} 获取护航共享击杀经验");
             }
         }
     }
