@@ -14,16 +14,9 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(PartyInfoPanel), nameof(PartyInfoPanel.Show));
 
-        private static bool _scrollSetupDone = false;
-
         [PatchPostfix]
         public static void Postfix(PartyInfoPanel __instance, Transform ____playersContainer)
         {
-            if (_scrollSetupDone)
-            {
-                return;
-            }
-
             var panelRect = __instance.GetComponent<RectTransform>();
             if (panelRect == null)
             {
@@ -66,8 +59,6 @@ namespace MiyakoCarryService.Client.Patches.Events
             scrollRect.vertical = true;
             scrollRect.scrollSensitivity = 30f;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
-
-            _scrollSetupDone = true;
         }
     }
 }
