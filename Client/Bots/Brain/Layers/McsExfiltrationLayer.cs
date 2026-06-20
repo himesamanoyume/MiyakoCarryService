@@ -55,7 +55,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return false;
                 }
 
+                if (BotOwner.Memory.HaveEnemy)
+                {
+                    return false;
+                }
+
                 if (BotOwner.Memory.IsUnderFire)
+                {
+                    return false;
+                }
+
+                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                 {
                     return false;
                 }

@@ -31,8 +31,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
-                BotOwner.Medecine.GetDamaged();
-
                 if (McsBotPlayerData != null)
                 {
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))

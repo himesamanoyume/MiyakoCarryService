@@ -970,7 +970,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 CheckStuck();
             }
-            return true;
+
+            if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f)
+            {
+                BotOwner.StopMove();
+                BotOwner.Mover.AllowTeleport();
+                BotOwner.GetPlayer.Teleport(BotOwner.PatrollingData.ExfiltrationData.CachedExfiltrationPoint.Position, true);
+                var playerPosition = McsBotPlayerData.Player.Position;
+                BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                BotOwner.Mover.LastGoodCastPointTime = Time.time;
+                BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                BotOwner.Mover.RecalcWay();
+                BotOwner.Mover.Pause = true;
+                return true;
+            }
+            return false;
         }
 
         protected virtual bool IsWannaLeave()
