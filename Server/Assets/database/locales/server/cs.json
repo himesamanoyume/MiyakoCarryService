@@ -6,7 +6,7 @@
     "Mcs/FailedLoadMcsPlayerProfile": "Failed to load Mcs player profile",
     "Mcs/AccountidIsInvaild": "Account ID {0} is invalid",
     "Mcs/MiyakoTraderOrderDescription": "Order information:\nNumber of Carry Service player: {0}\nBot Type: {1}\nCarry Service level: {2}\nDuration: {3} hours\nOrder price increase: {4}%",
-    "Mcs/MiyakoTraderTicketDescription": "Ticket information:\nNumber of Carry Service player: {0}\nBot Type: {1}\nCarry Service level: {2}\nDuration: {3} hours\nOrder price increase: {4}%",
+    "Mcs/MiyakoTraderTicketDescription": "Ticket information:\nExemption: {0}%",
     "Mcs/MiyakoTraderSubCommand": "Subcommand {0}:\n{1}",
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "Commands available for \"{0}\" prefix:",
     "Mcs/SpawnTypeCommon": "Common Player",
