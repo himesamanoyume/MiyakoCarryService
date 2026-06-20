@@ -8,6 +8,7 @@ namespace MiyakoCarryService.Client.Enums
         Regroup,
         ReportAboutEnemy,
         OnYourOwn,
-        Escort
+        Escort,
+        GoToExfil
     }
 }

@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
+            EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
         }
 
         private GamePlayerOwner _gamePlayerOwner
@@ -744,6 +745,46 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
             CloseCommandMenuAction();
+        }
+
+        private void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
+                {
+                    var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                    if (mcsBotPlayer == null)
+                    {
+                        continue;
+                    }
+
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
+                    {
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ECommandPacketType.GoToExfil,
+                        Position = null
+                    });
+                }
+            }
+            else
+            {
+                var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+                foreach (var botOwner in botOwners)
+                {
+                    if (botOwner == null)
+                    {
+                        continue;
+                    }
+
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData == null)
+                    {
+                        continue;
+                    }
+                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
+                }
+            }
         }
 
         #endregion

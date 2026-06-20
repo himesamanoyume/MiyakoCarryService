@@ -32,7 +32,6 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
-            EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
         }
 
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, BotOwner botOwner, McsAILeadPlayer mcsAILeadPlayer)
@@ -355,29 +354,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
 
             UpdateMcsBotPlayerConfig(@event.McsBotPlayerConfig.McsLeadPlayerId, @event.McsBotPlayerConfig);
-        }
-
-        private void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
-        {
-            if (!IsHost)
-            {
-                return;
-            }
-
-            var botOwners = GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
-            foreach (var botOwner in botOwners)
-            {
-                if (botOwner == null)
-                {
-                    continue;
-                }
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData == null)
-                {
-                    continue;
-                }
-                mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
-            }
         }
     }
 }

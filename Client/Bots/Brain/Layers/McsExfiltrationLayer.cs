@@ -23,7 +23,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 McsBotPlayerData.IsLooting = false;
                 McsBotPlayerData.EscortPos = null;
-                McsBotPlayerData.SetDecision();
             }
         }
 

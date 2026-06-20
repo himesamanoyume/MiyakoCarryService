@@ -58,6 +58,7 @@ namespace MiyakoCarryService.Fika
                 {ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy},
                 {ECommandPacketType.OnYourOwn, HandleOnYourOwn},
                 {ECommandPacketType.Escort, HandleEscort},
+                {ECommandPacketType.GoToExfil, HandleGoToExfil},
             };
         }
 
@@ -160,6 +161,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 SubtitlesMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
                 {
                     PhraseTrigger = packet.PhraseTrigger,
@@ -219,6 +225,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 botOwner.Mover.AllowTeleport();
@@ -260,6 +271,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 var pos = Tools.GetPosNearTarget(packet.Position.Value, botOwner);
                 if (pos.HasValue)
@@ -305,6 +321,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 if (packet.Position.HasValue)
                 {
@@ -324,6 +345,45 @@ namespace MiyakoCarryService.Fika
                         mcsBotPlayerData.EscortPos = packet.Position.Value;
                         mcsBotPlayerData.IsLooting = false;
                     }
+                }
+            }
+        }
+
+        private void HandleGoToExfil(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.GoToExfil)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.EscortPos = null;
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
                 }
             }
         }
@@ -351,6 +411,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 botOwner.StopMove();
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
@@ -388,6 +453,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
@@ -426,6 +496,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 if (botOwner.Memory.HaveEnemy)
                 {
@@ -468,6 +543,11 @@ namespace MiyakoCarryService.Fika
 
             if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
             {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)

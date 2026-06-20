@@ -22,18 +22,10 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPrefix]
         public static void Prefix(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
         {
-            if (!McsMgr.IsHost)
+            EventMgr.Notify(new McsLeadPlayerExtractedEvent
             {
-                return;
-            }
-
-            if (McsMgr.IsMcsLeadPlayer(player.ProfileId))
-            {
-                EventMgr.Notify(new McsLeadPlayerExtractedEvent
-                {
-                    McsLeadPlayerId = player.ProfileId
-                });
-            }
+                McsLeadPlayerId = player.ProfileId
+            });
         }
     }
 }
