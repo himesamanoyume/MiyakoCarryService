@@ -50,7 +50,7 @@ namespace MiyakoCarryService.Client
         private List<ModulePatch> _patches = new();
         private object _mcsFika = null;
         private Type _mcsFikaType = null;
-        private bool _isLoadedByScriptEngine = false;
+        public static bool IsLoadedByScriptEngine = false;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
         public static bool IsFikaHeadless { get; private set; } = false;
@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Client
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
             if (string.IsNullOrEmpty(assemblyLocation))
             {
-                _isLoadedByScriptEngine = true;
+                IsLoadedByScriptEngine = true;
             }
         }
 
@@ -217,7 +217,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new BotFirstAidClassMinPercentPatch());
             _patches.Add(new OnBeenKilledByAggressorPatch());
 
-            if (FikaInstalled && !_isLoadedByScriptEngine)
+            if (FikaInstalled && !IsLoadedByScriptEngine)
             {
                 LoadMcsFika();
             }
@@ -251,7 +251,7 @@ namespace MiyakoCarryService.Client
 
         private void LoadMcsFika()
         {
-            var pluginDir = _isLoadedByScriptEngine ? Path.Combine(BepInEx.Paths.PluginPath, "MiyakoCarryServiceClient") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var pluginDir = IsLoadedByScriptEngine ? Path.Combine(BepInEx.Paths.PluginPath, "MiyakoCarryServiceClient") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
             if (!File.Exists(assemblyPath))
             {

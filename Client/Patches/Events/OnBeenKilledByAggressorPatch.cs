@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -5,6 +6,7 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -20,14 +22,20 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPostfix]
         public static void Postfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            if (!MiyakoCarryServicePlugin.FikaInstalled)
+            if (!MiyakoCarryServicePlugin.FikaInstalled || MiyakoCarryServicePlugin.IsLoadedByScriptEngine)
             {
                 HandleSharedExperience(__instance, aggressor);
+                HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart);
             }
         }
 
         public static void HandleSharedExperience(Player __instance, IPlayer aggressor, bool sharedKillExp = true, bool sharedBossExp = true)
         {
+            if (!sharedKillExp && !sharedBossExp)
+            {
+                return;
+            }
+
             if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
             {
                 var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
@@ -61,6 +69,71 @@ namespace MiyakoCarryService.Client.Patches.Events
                 {
                     sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
                     sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                }
+            }
+        }
+
+        public static void HandleSharedQuestCondition(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, bool easyKillConditions = true)
+        {
+            if (!easyKillConditions)
+            {
+                return;
+            }
+
+            if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
+            {
+                var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                if (mcsLeadPlayer == null)
+                {
+                    return;
+                }
+
+                if (!mcsLeadPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var settings = __instance.Profile.Info.Settings;
+                var playerSide = __instance.Side;
+
+                if (settings.Role != WildSpawnType.pmcBEAR)
+                {
+                    if (settings.Role == WildSpawnType.pmcUSEC)
+                    {
+                        playerSide = EPlayerSide.Usec;
+                    }
+                }
+                else
+                {
+                    playerSide = EPlayerSide.Bear;
+                }
+
+                List<string> list = ["Any"];
+                switch (playerSide)
+                {
+                    case EPlayerSide.Usec:
+                        list.Add("Usec");
+                        list.Add("AnyPmc");
+                        list.Add("Enemy");
+                        break;
+                    case EPlayerSide.Bear:
+                        list.Add("Bear");
+                        list.Add("AnyPmc");
+                        list.Add("Enemy");
+                        break;
+                    case EPlayerSide.Savage:
+                        list.Add("Savage");
+                        list.Add("Bot");
+                        break;
+                }
+
+                foreach (var target in list)
+                {
+                    mcsLeadPlayer.AbstractQuestControllerClass.CheckKillConditionCounter(target, __instance.ProfileId, 
+                        __instance.Inventory.EquippedInSlotsTemplateIds, damageInfo.Weapon, bodyPart, mcsLeadPlayer.Location, 
+                        Vector3.Distance(aggressor.Position, __instance.Position), settings.Role.ToStringNoBox(), 
+                        mcsLeadPlayer.CurrentHour, __instance.HealthController.BodyPartEffects, 
+                        aggressor.HealthController.BodyPartEffects, __instance.TriggerZones, aggressor.HealthController.ActiveBuffsNames());
                 }
             }
         }
