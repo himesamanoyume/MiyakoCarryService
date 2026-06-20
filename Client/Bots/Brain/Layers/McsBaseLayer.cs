@@ -1382,8 +1382,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (hit.collider != null)
                 {
-                    float obstacleHeight = hit.collider.bounds.size.y;
-                    float maxVaultHeight = BotOwner.GetPlayer.VaultingParameters.VaultingHeight;
+                    var obstacleHeight = hit.collider.bounds.size.y;
+                    var maxVaultHeight = BotOwner.GetPlayer.VaultingParameters.VaultingHeight;
 
                     return obstacleHeight < maxVaultHeight && obstacleHeight < VAULT_HEIGHT_THRESHOLD;
                 }
