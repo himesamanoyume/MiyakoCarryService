@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Controllers
 {
     [Injectable]
     public class ConfigController(
-        ConfigService configService,
-        JsonUtil jsonUtil
+        ConfigService configService
     )
     {
-        public string GetMcsPluginConfig()
+        public McsPluginConfig GetMcsPluginConfig()
         {
-            var config = configService.GetMcsPluginConfig();
-            var cfgStr = jsonUtil.Serialize(config);
-            return cfgStr;
+            return configService.GetMcsPluginConfig();
         }
 
         public OrderConfig GetOrderConfig()

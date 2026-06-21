@@ -3,8 +3,8 @@ namespace MiyakoCarryService.Client.Models
 {
     public class McsPluginConfig
     {
-        public McsPluginClientConfig Client = new();
-        public McsPluginServerConfig Server = new();
+        public McsPluginClientConfig Client;
+        public McsPluginServerConfig Server;
         public struct McsPluginClientConfig
         {
 

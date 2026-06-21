@@ -19,10 +19,9 @@ namespace MiyakoCarryService.Server.Callbacks
         /// </summary>
         public async ValueTask<string> GetMcsPluginConfig(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.GetBody(configController.GetMcsPluginConfig());
+            return httpResponseUtil.NoBody(configController.GetMcsPluginConfig());
         }
 
-        
         /// <summary>
         /// 处理 /mcs/client/brain/config
         /// </summary>
