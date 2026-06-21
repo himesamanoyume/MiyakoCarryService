@@ -27,7 +27,7 @@ public sealed class ConfigService(
 )
 {
     private readonly string _configsFolderPath = Path.Join(modHelper.GetAbsolutePathToModFolder(Assembly.GetExecutingAssembly()), "Assets", "configs");
-    private McsPluginConfig _mcsConfig;
+    private McsPluginConfig _mcsPluginConfig;
     private OrderConfig _orderConfig;
     private ConcurrentDictionary<int, SpawnType> _spawnTypes = new();
     private readonly ModMetadata McsModMetadata = new();
@@ -65,24 +65,26 @@ public sealed class ConfigService(
         return _latestVersion;
     }
 
-    private async Task LoadMcsConfig()
+    private async Task LoadMcsPluginConfig()
     {
-        var mcsConfigPath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
-        if (!fileUtil.FileExists(mcsConfigPath))
+        var mcsPluginConfigPath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
+        if (!fileUtil.FileExists(mcsPluginConfigPath))
         {
-            await fileUtil.WriteFileAsync(mcsConfigPath, jsonUtil.Serialize(new McsPluginConfig
+            await fileUtil.WriteFileAsync(mcsPluginConfigPath, jsonUtil.Serialize(new McsPluginConfig
             {
-                ClientConfig = new McsPluginClientConfig()
-                {
-
-                },
-                ServerConfig = new McsPluginServerConfig()
-                {
-
-                }
+                ClientConfig = new(),
+                ServerConfig = new()
             }, true));
         }
-        _mcsConfig = await jsonUtil.DeserializeFromFileAsync<McsPluginConfig>(mcsConfigPath);
+        _mcsPluginConfig = await jsonUtil.DeserializeFromFileAsync<McsPluginConfig>(mcsPluginConfigPath);
+        await SaveMcsPluginConfig();
+    }
+
+    private async Task SaveMcsPluginConfig()
+    {
+        var mcsPluginConfigPath = Path.Combine(_configsFolderPath, "mcsconfig.jsonc");
+        var jsonMcsPluginConfig = jsonUtil.Serialize(_mcsPluginConfig, true);
+        await fileUtil.WriteFileAsync(mcsPluginConfigPath, jsonMcsPluginConfig);
     }
 
     private async Task LoadOrderConfig()
@@ -344,14 +346,14 @@ public sealed class ConfigService(
 
     public async Task OnPreLoadAsync()
     {
-        await LoadMcsConfig();
+        await LoadMcsPluginConfig();
         await LoadOrderConfig();
         await LoadSpawnTypeConfig();
     }
 
-    public McsPluginConfig GetMiyakoCarryServiceConfig()
+    public McsPluginConfig GetMcsPluginConfig()
     {
-        return _mcsConfig;
+        return _mcsPluginConfig;
     }
 
     public OrderConfig GetOrderConfig()

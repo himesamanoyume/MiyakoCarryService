@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Server
 
             private async Task CheckForIfdianUpdate()
             {
-                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckIfdian)
+                if (!configService.GetMcsPluginConfig().ServerConfig.CheckIfdian)
                 {
                     return;
                 }
@@ -130,7 +130,7 @@ namespace MiyakoCarryService.Server
 
             private async Task CheckForUpdate()
             {
-                if (!configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckUpdate)
+                if (!configService.GetMcsPluginConfig().ServerConfig.CheckUpdate)
                 {
                     return;
                 }

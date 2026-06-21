@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client
 #endif
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
         public static MiyakoCarryServicePlugin Instance;
+        public static McsPluginConfig McsPluginConfig = null;
         private List<ModulePatch> _patches = new();
         private object _mcsFika = null;
         private Type _mcsFikaType = null;
@@ -112,6 +113,7 @@ namespace MiyakoCarryService.Client
             IsFikaHeadless = !CheckPlugin(["com.fika.headless"]);
             SAINInstalled = !CheckPlugin(["me.sol.sain"]);
             SetupConfig();
+            McsPluginConfig = McsRequestHandler.GetMcsPluginConfig();
             DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
             foreach (var kvp in LocalLocales.LoadingLocales)
             {

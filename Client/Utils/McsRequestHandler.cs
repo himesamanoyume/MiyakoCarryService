@@ -202,5 +202,18 @@ namespace MiyakoCarryService.Client.Utils
 
             return response;
         }
+
+        public static McsPluginConfig GetMcsPluginConfig()
+        {
+            try
+            {
+                var response = GetJson<McsPluginConfig>("/mcs/config");
+                return response;
+            }
+            catch
+            {
+                return new();
+            }
+        }
     }
 }

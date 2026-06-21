@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                     null
                 );
 
-                if (configService.GetMiyakoCarryServiceConfig().ServerConfig.CheckUpdate && configService.HaveUpdate)
+                if (configService.GetMcsPluginConfig().ServerConfig.CheckUpdate && configService.HaveUpdate)
                 {
                     mailSendService.SendDirectNpcMessageToPlayer(
                         sessionId,

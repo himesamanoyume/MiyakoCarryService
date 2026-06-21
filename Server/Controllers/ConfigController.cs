@@ -13,9 +13,9 @@ namespace MiyakoCarryService.Server.Controllers
         JsonUtil jsonUtil
     )
     {
-        public string GetConfig()
+        public string GetMcsPluginConfig()
         {
-            var config = configService.GetMiyakoCarryServiceConfig();
+            var config = configService.GetMcsPluginConfig();
             var cfgStr = jsonUtil.Serialize(config);
             return cfgStr;
         }

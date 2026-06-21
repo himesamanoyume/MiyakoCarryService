@@ -15,11 +15,11 @@ namespace MiyakoCarryService.Server.Callbacks
     )
     {
         /// <summary>
-        /// 处理 XXX (还没做这个路由)
+        /// 处理 /mcs/config
         /// </summary>
-        public async ValueTask<string> HandleConfig(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
+        public async ValueTask<string> GetMcsPluginConfig(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
-            return httpResponseUtil.GetBody(configController.GetConfig());
+            return httpResponseUtil.GetBody(configController.GetMcsPluginConfig());
         }
 
         
