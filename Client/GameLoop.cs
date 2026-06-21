@@ -622,6 +622,21 @@ namespace MiyakoCarryService.Client
 
                             botOwner.GetPlayer.OnPlayerDead += (Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) =>
                             {
+                                var slots = InventoryEquipment.AllSlotNames
+                                    .Where(slotName => slotName != EquipmentSlot.Backpack && slotName != EquipmentSlot.TacticalVest && slotName != EquipmentSlot.Pockets)
+                                    .Select(slotName => botOwner.Profile.Inventory.Equipment.GetSlot(slotName))
+                                    .ToArray();
+
+                                foreach (var slot in slots)
+                                {
+                                    if (slot == null || slot.ContainedItem == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    slot.RemoveItemWithoutRestrictions();
+                                }
+
                                 var allItems = botOwner.Profile.Inventory.Equipment.GetAllItems();
                                 var allLootDatas = new List<LootData>();
                                 foreach (var item in allItems)

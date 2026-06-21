@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Extensions
                         CorpseTraderControllerClass c => c?.KilledProfileID,
                         _ => item.Owner?.ID
                     };
-                    
+
                     var player = !string.IsNullOrEmpty(profileId) ? gameWorld.GetEverExistedPlayerByID(profileId) : null;
 
                     if (player == null)
