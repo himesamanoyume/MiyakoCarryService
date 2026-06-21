@@ -35,6 +35,32 @@ namespace MiyakoCarryService.Client.Extensions
                 }
             }
 
+            public bool McsRemoveItem()
+            {
+                try
+                {
+                    var iItemOwner = item.Parent.GetOwner();
+                    if (iItemOwner is not TraderControllerClass traderControllerClass)
+                    {
+                        return false;
+                    }
+
+                    var result = InteractionsHandlerClass.Discard(item, traderControllerClass, false);
+                    if (result.Error != null)
+                    {
+                        return false;
+                    }
+
+                    result.Value.RaiseEvents(traderControllerClass, CommandStatus.Begin);
+                    result.Value.RaiseEvents(traderControllerClass, CommandStatus.Succeed);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
             private ItemData InitData()
             {
                 if (item.IsPlayerInventory)

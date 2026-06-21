@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Client.Datas
         public int MaxSingleGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
         public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && Item is not HeadphonesItemClass);
+        public bool VanishingCurse = false;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {

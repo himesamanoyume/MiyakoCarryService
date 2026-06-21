@@ -19,6 +19,8 @@ using MiyakoCarryService.Client.Models;
 using System.Diagnostics;
 using System.Threading;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions;
+using EFT.InventoryLogic;
 
 namespace MiyakoCarryService.Client
 {
@@ -590,6 +592,62 @@ namespace MiyakoCarryService.Client
                             var pointChooser = PatrollingData.GetPointChooser(botOwner, PatrolMode.bossRoundProtectWithStay, botOwner.SpawnProfileData);
                             botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                             botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
+
+                            if (!MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+                            {
+                                return;
+                            }
+
+                            var allItems = botOwner.Profile.Inventory.Equipment.GetAllItems();
+                            foreach (var item in allItems)
+                            {
+                                var itemData = item.GetData();
+                                if (itemData == null)
+                                {
+                                    continue;
+                                }
+
+                                if (itemData is not LootData lootData)
+                                {
+                                    continue;
+                                }
+
+                                if (lootData.ItemType is EItemType.Backpack or EItemType.Equipment)
+                                {
+                                    continue;
+                                }
+
+                                lootData.VanishingCurse = true;
+                            }
+
+                            botOwner.GetPlayer.OnPlayerDead += (Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) =>
+                            {
+                                var allItems = botOwner.Profile.Inventory.Equipment.GetAllItems();
+                                var allLootDatas = new List<LootData>();
+                                foreach (var item in allItems)
+                                {
+                                    var itemData = item.GetData();
+                                    if (itemData == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (itemData is not LootData lootData)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (lootData.VanishingCurse)
+                                    {
+                                        allLootDatas.Add(lootData);
+                                    }
+                                }
+
+                                foreach (var lootData in allLootDatas)
+                                {
+                                    lootData.Item.McsRemoveItem();
+                                }
+                            };
                         });
 
                         botSpawner.InSpawnProcess += 1;
