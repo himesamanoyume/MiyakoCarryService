@@ -221,9 +221,16 @@ namespace MiyakoCarryService.Client
             _patches.Add(new TriggerWithIdEnterPatch());
             _patches.Add(new TriggerWithIdExitPatch());
 
-            if (FikaInstalled && !IsLoadedByScriptEngine)
+            if (FikaInstalled)
             {
-                LoadMcsFika();
+                if (!IsLoadedByScriptEngine)
+                {
+                    LoadMcsFika();
+                }
+            }
+            else
+            {
+                _patches.Add(new PlayerOnDeadPatch());
             }
 
             if (SAINInstalled)

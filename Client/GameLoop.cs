@@ -598,47 +598,19 @@ namespace MiyakoCarryService.Client
                                 return;
                             }
 
-                            var allItems = botOwner.Profile.Inventory.Equipment.GetAllItems();
-                            foreach (var item in allItems)
+                            var slots = InventoryEquipment.AllSlotNames
+                                .Where(slotName => slotName is not EquipmentSlot.Dogtag)
+                                .Select(botOwner.Profile.Inventory.Equipment.GetSlot)
+                                .ToArray();
+
+                            foreach (var slot in slots)
                             {
-                                var itemData = item.GetData();
-                                if (itemData == null)
+                                if (slot.ContainedItem == null)
                                 {
                                     continue;
                                 }
 
-                                if (itemData is not LootData lootData)
-                                {
-                                    continue;
-                                }
-
-                                if (lootData.ItemType is EItemType.Backpack or EItemType.Equipment)
-                                {
-                                    continue;
-                                }
-
-                                lootData.VanishingCurse = true;
-                            }
-
-                            botOwner.GetPlayer.OnPlayerDead += (Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) =>
-                            {
-                                var slots = InventoryEquipment.AllSlotNames
-                                    .Where(slotName => slotName != EquipmentSlot.Backpack && slotName != EquipmentSlot.TacticalVest && slotName != EquipmentSlot.Pockets)
-                                    .Select(slotName => botOwner.Profile.Inventory.Equipment.GetSlot(slotName))
-                                    .ToArray();
-
-                                foreach (var slot in slots)
-                                {
-                                    if (slot == null || slot.ContainedItem == null)
-                                    {
-                                        continue;
-                                    }
-
-                                    slot.RemoveItemWithoutRestrictions();
-                                }
-
-                                var allItems = botOwner.Profile.Inventory.Equipment.GetAllItems();
-                                var allLootDatas = new List<LootData>();
+                                var allItems = slot.ContainedItem.GetAllItems();
                                 foreach (var item in allItems)
                                 {
                                     var itemData = item.GetData();
@@ -652,17 +624,14 @@ namespace MiyakoCarryService.Client
                                         continue;
                                     }
 
-                                    if (lootData.VanishingCurse)
+                                    if (lootData.ItemType is EItemType.Backpack or EItemType.Equipment)
                                     {
-                                        allLootDatas.Add(lootData);
+                                        continue;
                                     }
-                                }
 
-                                foreach (var lootData in allLootDatas)
-                                {
-                                    lootData.Item.McsRemoveItem();
+                                    lootData.VanishingCurse = true;
                                 }
-                            };
+                            }
                         });
 
                         botSpawner.InSpawnProcess += 1;
