@@ -230,11 +230,14 @@ namespace MiyakoCarryService.Client.Mgrs
         protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            foreach (var subTitle in _subTitles.Values)
+            if (_subTitles != null)
             {
-                Destroy(subTitle.SubtitlesView.gameObject);
+                foreach (var subTitle in _subTitles.Values)
+                {
+                    Destroy(subTitle.SubtitlesView.gameObject);
+                }
+                _subTitles.Clear();
             }
-            _subTitles.Clear();
         }
 
         public override void OnMgrDestroy()
