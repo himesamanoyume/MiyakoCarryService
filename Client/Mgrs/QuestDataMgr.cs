@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Mgrs
     public class QuestDataMgr : TriggerDataMgr<QuestDataMgr>
     {
         private List<TriggerWithId> _triggersWithIds;
-        public HashSet<string> QuestNeedItemList { get; private set; } = new();
+        // public HashSet<string> QuestNeedItemList { get; private set; } = new();
 
         public sealed override void Start()
         {
@@ -40,14 +40,14 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.OnMgrDestroy();
             OnRaidEnded();
-            if (QuestNeedItemList != null)
-            {
-                QuestNeedItemList.Clear();
-            }
-            QuestNeedItemList = null;
+            // if (QuestNeedItemList != null)
+            // {
+            //     QuestNeedItemList.Clear();
+            // }
+            // QuestNeedItemList = null;
         }
 
-        protected void LoadQuest(HashSet<QuestData> datas, HashSet<string> questNeedItemList, Condition condition, QuestDataClass quest)
+        protected void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
         {
             if (_triggersWithIds == null)
             {
@@ -137,7 +137,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             break;
                         }
 
-                        ExfilData specifiedExit = null;
+                        ExfilData specifiedExfil = null;
 
                         foreach (var exfilData in exfilDataMgr.GetDatas<ExfilData>())
                         {
@@ -145,18 +145,18 @@ namespace MiyakoCarryService.Client.Mgrs
                                 exfilData.ExfiltrationPoint.Settings != null &&
                                 exfilData.ExfiltrationPoint.Settings.Name == conditionExitName.exitName)
                             {
-                                specifiedExit = exfilData;
+                                specifiedExfil = exfilData;
                                 break;
                             }
                         }
 
-                        if (specifiedExit != null)
+                        if (specifiedExfil != null)
                         {
-                            if (specifiedExit.ExfiltrationPoint.transform.transform == null)
+                            if (specifiedExfil.ExfiltrationPoint.transform.transform == null)
                             {
                                 break;
                             }
-                            var data = condition.GetData(quest, specifiedExit.ExfiltrationPoint.transform);
+                            var data = condition.GetData(quest, specifiedExfil.ExfiltrationPoint.transform);
                             if (data != null)
                             {
                                 datas.Add(data);
@@ -192,17 +192,17 @@ namespace MiyakoCarryService.Client.Mgrs
 
                         break;
                     }
-                case ConditionFindItem conditionFindItem:
-                    {
-                        foreach (var questItemId in conditionFindItem.target)
-                        {
-                            if (!questNeedItemList.Contains(questItemId))
-                            {
-                                questNeedItemList.Add(questItemId);
-                            }
-                        }
-                        break;
-                    }
+                // case ConditionFindItem conditionFindItem:
+                //     {
+                //         foreach (var questItemId in conditionFindItem.target)
+                //         {
+                //             if (!questNeedItemList.Contains(questItemId))
+                //             {
+                //                 questNeedItemList.Add(questItemId);
+                //             }
+                //         }
+                //         break;
+                //     }
                 case ConditionCounterCreator conditionCounterCreator:
                     {
                         var zones = new List<TriggerWithId>();
@@ -230,23 +230,19 @@ namespace MiyakoCarryService.Client.Mgrs
                                 datas.Add(data);
                             }
                         }
-                        // foreach (var _condition in conditionCounterCreator.Conditions)
-                        // {
-                        //     LoadQuest(datas, questNeedItemList, _condition, quest);
-                        // }
                         break;
                     }
-                case ConditionItem conditionItem:
-                    {
-                        foreach (var questItemId in conditionItem.target)
-                        {
-                            if (!questNeedItemList.Contains(questItemId))
-                            {
-                                questNeedItemList.Add(questItemId);
-                            }
-                        }
-                        break;
-                    }
+                // case ConditionItem conditionItem:
+                //     {
+                //         foreach (var questItemId in conditionItem.target)
+                //         {
+                //             if (!questNeedItemList.Contains(questItemId))
+                //             {
+                //                 questNeedItemList.Add(questItemId);
+                //             }
+                //         }
+                //         break;
+                //     }
                 default:
                     {
                         break;
@@ -285,7 +281,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 _triggersWithIds = FindObjectsOfType<TriggerWithId>().ToList();
             }
 
-            var questNeedItemList = new HashSet<string>();
+            // var questNeedItemList = new HashSet<string>();
 
             foreach (var quest in startedQuests)
             {
@@ -301,7 +297,8 @@ namespace MiyakoCarryService.Client.Mgrs
                         continue;
                     }
 
-                    LoadQuest(datas, questNeedItemList, condition, quest);
+                    // LoadQuest(datas, questNeedItemList, condition, quest);
+                    LoadQuest(datas, condition, quest);
                 }
             }
 
@@ -315,7 +312,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 _datas.Add(data);
             }
-            QuestNeedItemList = questNeedItemList;
+            // QuestNeedItemList = questNeedItemList;
         }
 
         public Dictionary<QuestDataClass, List<QuestData>> GetQuestDataByGroup()
