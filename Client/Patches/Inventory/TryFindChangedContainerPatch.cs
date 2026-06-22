@@ -18,6 +18,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         public static void Postfix(ItemAddress address, [CanBeNull] out ContainerDataClass changedContainer, ref bool __result)
         {
             changedContainer = null;
+            if (MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+            {
+                return;
+            }
             __result = false;
         }
     }

@@ -23,6 +23,11 @@ namespace MiyakoCarryService.Client.Patches.Inventory
                 return true;
             }
 
+            if (MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+            {
+                return true;
+            }
+
             var combinedList = new List<Item>
             {
                 item
