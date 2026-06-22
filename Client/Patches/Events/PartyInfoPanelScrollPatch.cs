@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -15,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(PartyInfoPanel), nameof(PartyInfoPanel.Show));
 
         [PatchPostfix]
-        public static void Postfix(PartyInfoPanel __instance, Transform ____playersContainer)
+        public static void Postfix(PartyInfoPanel __instance, Transform ____playersContainer, GameObject ____separator)
         {
             var panelRect = __instance.GetComponent<RectTransform>();
             if (panelRect == null)
@@ -59,6 +60,13 @@ namespace MiyakoCarryService.Client.Patches.Events
             scrollRect.vertical = true;
             scrollRect.scrollSensitivity = 30f;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            TasksExtensions.HandleExceptions(SetIndex(____separator));
+        }
+
+        private static async Task SetIndex(GameObject separator)
+        {
+            await Task.Delay(1000);
+            separator.transform.SetSiblingIndex(2);
         }
     }
 }
