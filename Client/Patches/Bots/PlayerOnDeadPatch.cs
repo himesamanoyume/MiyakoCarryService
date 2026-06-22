@@ -47,8 +47,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             var slots = InventoryEquipment.AllSlotNames
                         .Where(slotName => slotName is not (EquipmentSlot.Backpack or EquipmentSlot.TacticalVest or EquipmentSlot.Pockets or EquipmentSlot.Dogtag))
-                        .Select(player.AIData.BotOwner.Profile.Inventory.Equipment.GetSlot)
-                        .ToArray();
+                        .Select(player.AIData.BotOwner.Profile.Inventory.Equipment.GetSlot);
 
             foreach (var slot in slots)
             {
@@ -57,7 +56,21 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     continue;
                 }
 
-                slot.RemoveItemWithoutRestrictions();
+                var itemData = slot.ContainedItem.GetData();
+                if (itemData == null)
+                {
+                    continue;
+                }
+
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                if (lootData.VanishingCurse)
+                {
+                    slot.RemoveItemWithoutRestrictions();
+                }
             }
 
             var allItems = player.AIData.BotOwner.Profile.Inventory.Equipment.GetAllItems();
