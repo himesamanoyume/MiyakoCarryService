@@ -23,7 +23,6 @@ namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
     public sealed class QuestService(
-        ModHelper modHelper,
         ConfigService configService,
         SptLogger<QuestService> logger,
         QuestGenerator questGenerator,
@@ -35,6 +34,8 @@ namespace MiyakoCarryService.Server.Services
         TraderService traderService,
         MailSendService mailSendService,
         ItemHelper itemHelper,
+        FileUtil fileUtil,
+        JsonUtil jsonUtil,
         ProfileHelper profileHelper
     )
     {
@@ -42,12 +43,88 @@ namespace MiyakoCarryService.Server.Services
         private RepeatableQuest _orderTemplate;
         public async Task OnPostLoadAsync()
         {
-            LoadOrderTemplate();
+            await LoadOrderTemplate();
         }
 
-        private void LoadOrderTemplate()
+        private async Task LoadOrderTemplate()
         {
-            _orderTemplate = modHelper.GetJsonDataFromFile<RepeatableQuest>(_traderFolderDir, "orderQuests.json");
+            var orderQuestsPath = System.IO.Path.Combine(_traderFolderDir, "orderQuests.json");
+            if (!fileUtil.FileExists(orderQuestsPath))
+            {
+                await fileUtil.WriteFileAsync(orderQuestsPath, jsonUtil.Serialize(new RepeatableQuest
+                {
+                    Id = "67d03016c971a7faef94af07",
+                    TraderId = "6864e812f9fe664cb8b8e152",
+                    Location = "any",
+                    Image = "/files/quest/icon/62bd61b1b818ff064405b827.jpg",
+                    Type = QuestTypeEnum.Completion,
+                    IsKey = false,
+                    Restartable = false,
+                    InstantComplete = false,
+                    SecretQuest = false,
+                    CanShowNotificationsInGame = true,
+                    Rewards = new()
+                    {
+                        { "Success", [] },
+                        { "Started", [] },
+                        { "Fail", [] },
+                    },
+                    Conditions = new()
+                    {
+                        AvailableForStart = [],
+                        AvailableForFinish = [new(){
+                            Id = "64cfb3818db9f48b3f0b0a6f",
+                            ParentId = "",
+                            DynamicLocale = true,
+                            Index = 0,
+                            VisibilityConditions = [],
+                            GlobalQuestCounterId = "",
+                            Target = new([ItemTpl.MONEY_ROUBLES], null),
+                            Value = 10000,
+                            MinDurability = 0,
+                            MaxDurability = 100,
+                            DogtagLevel = 0,
+                            OnlyFoundInRaid = false,
+                            IsEncoded = false,
+                            CountInRaid = true,
+                            ConditionType = "HandoverItem"
+                        }],
+                        Fail = []
+                    },
+                    Side = "Pmc",
+                    Name = "{templateId} name {traderId}",
+                    Note = "{templateId} note {traderId}",
+                    Description = "{templateId} description {traderId} 0",
+                    SuccessMessageText = "{templateId} successMessageText {traderId} 0",
+                    FailMessageText = "{templateId} failMessageText {traderId} 0",
+                    StartedMessageText = "{templateId} startedMessageText {traderId} 0",
+                    ChangeQuestMessageText = "{templateId} changeQuestMessageText {traderId} 0",
+                    AcceptPlayerMessage = "{templateId} acceptPlayerMessage {traderId} 0",
+                    DeclinePlayerMessage = "{templateId} declinePlayerMessage {traderId} 0",
+                    CompletePlayerMessage = "{templateId} completePlayerMessage {traderId} 0",
+                    Status = 0,
+                    AcceptanceAndFinishingSource = "eft",
+                    ProgressSource = "eft",
+                    RankingModes = [],
+                    GameModes = [],
+                    ArenaLocations = [],
+                    ChangeCost = [new(){
+                        TemplateId = ItemTpl.MONEY_ROUBLES,
+                        Count = 12000
+                    }],
+                    ChangeStandingCost = 0,
+                    QuestStatus = new()
+                    {
+                        Id = "000000000000000000000000",
+                        Uid = "playerId",
+                        QId = "000000000000000000000000",
+                        StartTime = 0,
+                        Status = 0,
+                        StatusTimers = {}
+                    }
+                }, true));
+            }
+            _orderTemplate = await jsonUtil.DeserializeFromFileAsync<RepeatableQuest>(orderQuestsPath);
         }
 
         public RepeatableQuest GetOrderTemplate()

@@ -28,7 +28,6 @@ namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
     public sealed class TraderService(
-        ModHelper modHelper,
         ICloner cloner,
         ImageRouter imageRouter,
         ConfigServer configServer,
@@ -66,7 +65,125 @@ namespace MiyakoCarryService.Server.Services
         private async Task LoadTrader()
         {
             var iconPath = System.IO.Path.Join(_traderFolderDir, $"{MiyakoTraderId}.jpg");
-            var traderBase = modHelper.GetJsonDataFromFile<TraderBase>(_traderFolderDir, "base.json");
+            var traderBasePath = System.IO.Path.Combine(_traderFolderDir, "base.json");
+            if (!fileUtil.FileExists(traderBasePath))
+            {
+                await fileUtil.WriteFileAsync(traderBasePath, jsonUtil.Serialize(new TraderBase
+                {
+                    Id = MiyakoTraderId,
+                    AvailableInRaid = false,
+                    Avatar = "/files/trader/avatar/6952ced4bcc1dd1e3c80dfcb.jpg",
+                    BalanceDollar = 0,
+                    BalanceEuro = 0,
+                    BalanceRub = 700000,
+                    BuyerUp = false,
+                    Currency = CurrencyType.RUB,
+                    CustomizationSeller = false,
+                    Discount = 0,
+                    DiscountEnd = 0,
+                    GridHeight = 30,
+                    Insurance = new()
+                    {
+                        Availability = false,
+                        ExcludedCategory = [],
+                        MaxReturnHour = 0,
+                        MaxStorageTime = 72,
+                        MinPayment = 0,
+                        MinReturnHour = 0,
+                    },
+                    IsAvailableInPVE = true,
+                    IsCanTransferItems = false,
+                    IsCanTransferItemsFromPve = false,
+                    ItemsBuy = new()
+                    {
+                        Category = [],
+                        IdList = []
+                    },
+                    ItemsBuyProhibited = new()
+                    {
+                        Category = [],
+                        IdList = []
+                    },
+                    ItemsSell = [],
+                    Location = "Kivotos",
+                    LoyaltyLevels = new()
+                    {
+                        new()
+                        {
+                            BuyPriceCoefficient = 0,
+                            ExchangePriceCoefficient = 0,
+                            HealPriceCoefficient = 0,
+                            InsurancePriceCoefficient = 0,
+                            MinLevel = 1,
+                            MinSalesSum = 0,
+                            MinStanding = 0,
+                            RepairPriceCoefficient = 0
+                        },
+                        new()
+                        {
+                            BuyPriceCoefficient = 0,
+                            ExchangePriceCoefficient = 0,
+                            HealPriceCoefficient = 0,
+                            InsurancePriceCoefficient = 0,
+                            MinLevel = 1,
+                            MinSalesSum = 0,
+                            MinStanding = 3,
+                            RepairPriceCoefficient = 0
+                        },
+                        new()
+                        {
+                            BuyPriceCoefficient = 0,
+                            ExchangePriceCoefficient = 0,
+                            HealPriceCoefficient = 0,
+                            InsurancePriceCoefficient = 0,
+                            MinLevel = 1,
+                            MinSalesSum = 0,
+                            MinStanding = 6,
+                            RepairPriceCoefficient = 0
+                        },
+                        new()
+                        {
+                            BuyPriceCoefficient = 0,
+                            ExchangePriceCoefficient = 0,
+                            HealPriceCoefficient = 0,
+                            InsurancePriceCoefficient = 0,
+                            MinLevel = 1,
+                            MinSalesSum = 0,
+                            MinStanding = 10,
+                            RepairPriceCoefficient = 0
+                        },
+                    },
+                    MainDialogue = null,
+                    Medic = false,
+                    Name = "Tsukiyuki Miyako",
+                    NextResupply = 0,
+                    Nickname = "Tsukiyuki Miyako",
+                    ProhibitedTransferableItems = new()
+                    {
+                        Category = [],
+                        IdList = []
+                    },
+                    Repair = new()
+                    {
+                        Availability = false,
+                        Currency = ItemTpl.MONEY_ROUBLES,
+                        CurrencyCoefficient = 1,
+                        ExcludedCategory = [],
+                        ExcludedIdList = [],
+                        Quality = 0
+                    },
+                    SellCategory = [],
+                    ProhibitedItemsSellModifier = 0,
+                    Surname = "Tsukiyuki Miyako",
+                    TransferableItems = new()
+                    {
+                        Category = [],
+                        IdList = []
+                    },
+                    UnlockedByDefault = true
+                }, true));
+            }
+            var traderBase = await jsonUtil.DeserializeFromFileAsync<TraderBase>(traderBasePath);
             imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
             AddTraderWithEmptyAssortToDb(traderBase);
             SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
@@ -82,7 +199,10 @@ namespace MiyakoCarryService.Server.Services
             var punishPath = System.IO.Path.Combine(_traderFolderDir, "punish.json");
             if (!fileUtil.FileExists(punishPath))
             {
-                await fileUtil.WriteFileAsync(punishPath, jsonUtil.Serialize(new Punish(){ PunishmentMulti = 0}));
+                await fileUtil.WriteFileAsync(punishPath, jsonUtil.Serialize(new Punish()
+                { 
+                    PunishmentMulti = 0
+                }, true));
             }
             _punishmentMulti = await jsonUtil.DeserializeFromFileAsync<Punish>(punishPath);
             if (_punishmentMulti.PunishmentMulti < 0d)
