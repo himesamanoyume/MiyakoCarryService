@@ -6,7 +6,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 {
     public record McsPluginClientConfig
     {
-
+        [JsonPropertyName("BalanceRestriction")]
+        public bool BalanceRestriction { get; set; } = false;
     }
 
     public record McsPluginServerConfig
@@ -17,8 +18,6 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("CheckIfdian")]
         public bool CheckIfdian { get; set; } = true;
 
-        [JsonPropertyName("BalanceRestriction")]
-        public bool BalanceRestriction { get; set; } = false;
     }
 
     public record McsPluginConfig

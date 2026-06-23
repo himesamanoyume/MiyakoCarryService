@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         {
             if (GameLoop.Instance.IsVaildGameWorld)
             {
-                if (MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+                if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                 {
                     return true;
                 }
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         {
             if (GameLoop.Instance.IsVaildGameWorld)
             {
-                if (MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+                if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                 {
                     return true;
                 }

@@ -11,9 +11,9 @@ namespace MiyakoCarryService.Server.Controllers
         ConfigService configService
     )
     {
-        public McsPluginConfig GetMcsPluginConfig()
+        public McsPluginClientConfig GetMcsPluginClientConfig()
         {
-            return configService.GetMcsPluginConfig();
+            return configService.GetMcsPluginClientConfig();
         }
 
         public OrderConfig GetOrderConfig()

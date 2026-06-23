@@ -15,8 +15,8 @@ namespace MiyakoCarryService.Server.Routers.Static
         jsonUtil,
         [
             new RouteAction<EmptyRequestData>(
-                "/mcs/config",
-                async (url, info, sessionId, output) => await configCallbacks.GetMcsPluginConfig(url, info, sessionId)
+                "/mcs/client/config",
+                async (url, info, sessionId, output) => await configCallbacks.GetMcsPluginClientConfig(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/brain/config",

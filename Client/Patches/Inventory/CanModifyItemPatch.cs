@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
                 return true;
             }
 
-            if (MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+            if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
             {
                 return true;
             }

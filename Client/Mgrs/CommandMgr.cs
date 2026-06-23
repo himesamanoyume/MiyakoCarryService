@@ -252,7 +252,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.REGROUPCOMMAND_NAME, Locales.REGROUPCOMMAND_TARGETNAME, RegroupCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
 

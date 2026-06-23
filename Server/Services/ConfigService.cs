@@ -356,6 +356,11 @@ public sealed class ConfigService(
         return _mcsPluginConfig;
     }
 
+    public McsPluginClientConfig GetMcsPluginClientConfig()
+    {
+        return _mcsPluginConfig.ClientConfig;
+    }
+
     public OrderConfig GetOrderConfig()
     {
         return _orderConfig;

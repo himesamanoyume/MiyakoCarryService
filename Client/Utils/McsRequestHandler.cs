@@ -203,11 +203,11 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static McsPluginConfig GetMcsPluginConfig()
+        public static McsPluginClientConfig GetMcsPluginClientConfig()
         {
             try
             {
-                var response = GetJson<McsPluginConfig>("/mcs/config");
+                var response = GetJson<McsPluginClientConfig>("/mcs/client/config");
                 return response;
             }
             catch

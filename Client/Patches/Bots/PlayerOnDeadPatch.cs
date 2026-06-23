@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (!MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+            if (!MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
             {
                 return;
             }

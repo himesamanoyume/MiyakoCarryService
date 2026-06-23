@@ -593,7 +593,7 @@ namespace MiyakoCarryService.Client
                             botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                             botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
 
-                            if (!MiyakoCarryServicePlugin.McsPluginConfig.Server.BalanceRestriction)
+                            if (!MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                             {
                                 return;
                             }
