@@ -35,17 +35,18 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             var currentTime = timeUtil.GetTimeStamp();
             var fullProfile = profileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
-            var orderConfig = configController.GetOrderConfig().OrderQuests.First();
+            var orderConfig = configController.GetOrderConfig().OrderQuests.FirstOrDefault();
+            var orderPendingPaymentTime = configController.GetMcsPluginConfig().ServerConfig.OrderPendingPaymentTime;
             var generatedOrder = questController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
 
             if (QuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
             {
-                generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
+                generatedOrder.EndTime = currentTime + orderPendingPaymentTime;
                 while (orderQuestsQueue.Count > 0)
                 {
                     var quest = orderQuestsQueue.Dequeue();
                     quest.Side = Enum.GetName(orderConfig.Side);
-                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == ItemTpl.MONEY_ROUBLES).Count = (int)(currentTime + orderConfig.ResetTime);
+                    quest.ChangeCost.FirstOrDefault(x => x.TemplateId == ItemTpl.MONEY_ROUBLES).Count = (int)(currentTime + orderPendingPaymentTime);
                     generatedOrder.ActiveQuests.Add(quest);
                     generatedOrder.ChangeRequirement.Add(
                         quest.Id,
@@ -77,7 +78,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 return;
             }
 
-            generatedOrder.EndTime = currentTime + orderConfig.ResetTime;
+            generatedOrder.EndTime = currentTime + orderPendingPaymentTime;
             generatedOrder.InactiveQuests = [];
             generatedOrder.ChangeRequirement = [];
 

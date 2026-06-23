@@ -100,7 +100,7 @@ public sealed class ConfigService(
                     Name = "Order",
                     Side = PlayerGroup.Pmc,
                     Types = ["Completion"],
-                    ResetTime = 900,
+                    ResetTime = _mcsPluginConfig.ServerConfig.OrderPendingPaymentTime,
                     NumQuests = 100,
                     MinPlayerLevel = 1,
                     RewardScaling = new RewardScaling

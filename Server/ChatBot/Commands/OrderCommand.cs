@@ -49,6 +49,13 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                     sb.Append(kvp.Key).Append(": ").Append(kvp.Value.IsBoss ? "[Boss] " : "").Append(serverLocalisationService.GetText(kvp.Value.DisplayName)).Append('\n');
                 }
 
+                var carryServicePriceDict = configService.GetMcsPluginConfig().ServerConfig.CarryServiceLevelPrice;
+                carryServicePriceDict.TryGetValue(1, out var carryServiceLevel1Price);
+                carryServicePriceDict.TryGetValue(2, out var carryServiceLevel2Price);
+                carryServicePriceDict.TryGetValue(3, out var carryServiceLevel3Price);
+                carryServicePriceDict.TryGetValue(4, out var carryServiceLevel4Price);
+                carryServicePriceDict.TryGetValue(5, out var carryServiceLevel5Price);
+
                 return [
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP1), 
@@ -58,11 +65,11 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         ), 
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP2), 
-                        (int)(completionConfig.RequestedItemCount.Max * .8f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .85f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .9f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * .95f * (1 + punishmentMulti)), 
-                        (int)(completionConfig.RequestedItemCount.Max * (1 + punishmentMulti))
+                        (int)(carryServiceLevel1Price.Max * (1 + punishmentMulti)), 
+                        (int)(carryServiceLevel2Price.Max * (1 + punishmentMulti)), 
+                        (int)(carryServiceLevel3Price.Max * (1 + punishmentMulti)), 
+                        (int)(carryServiceLevel4Price.Max * (1 + punishmentMulti)), 
+                        (int)(carryServiceLevel5Price.Max * (1 + punishmentMulti))
                         ),
                     serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP3) + sb.ToString(),
                     ];

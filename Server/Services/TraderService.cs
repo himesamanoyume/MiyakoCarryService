@@ -49,7 +49,6 @@ namespace MiyakoCarryService.Server.Services
 
         // 因为SPT会检查行动任务的商人Id是否存在，为了防止频繁提示存档被标记为不合法，因此创建任务时临时使用此商人Id
         public const string TempOrderTraderId = "6864e812f9fe664cb8b8e152";
-        public const int TicketPricePerPercent = 300000;
         private Punish _punishmentMulti;
         private SemaphoreSlim _saveLock = new(1, 1);
 
@@ -91,9 +90,9 @@ namespace MiyakoCarryService.Server.Services
                 _punishmentMulti.PunishmentMulti = 0d;
                 _ = SavePunishmentMulti();
             }
-            else if (_punishmentMulti.PunishmentMulti > 1d)
+            else if (_punishmentMulti.PunishmentMulti > configService.GetMcsPluginConfig().ServerConfig.PunishmentMultiMax)
             {
-                _punishmentMulti.PunishmentMulti = 1d;
+                _punishmentMulti.PunishmentMulti = configService.GetMcsPluginConfig().ServerConfig.PunishmentMultiMax;
                 _ = SavePunishmentMulti();
             }
         }
@@ -280,9 +279,9 @@ namespace MiyakoCarryService.Server.Services
             {
                 _punishmentMulti.PunishmentMulti = 0d;
             }
-            else if (_punishmentMulti.PunishmentMulti > 1d)
+            else if (_punishmentMulti.PunishmentMulti > configService.GetMcsPluginConfig().ServerConfig.PunishmentMultiMax)
             {
-                _punishmentMulti.PunishmentMulti = 1d;
+                _punishmentMulti.PunishmentMulti = configService.GetMcsPluginConfig().ServerConfig.PunishmentMultiMax;
             }
             _ = SavePunishmentMulti();
         }
@@ -358,7 +357,7 @@ namespace MiyakoCarryService.Server.Services
             {  
                 Id = new MongoId(),  
                 Template = ItemTpl.MONEY_ROUBLES,  
-                Upd = new Upd { StackObjectsCount = 300000 },  
+                Upd = new Upd { StackObjectsCount = configService.GetMcsPluginConfig().ServerConfig.CompensationPrice },  
             };  
 
             mailSendService.SendLocalisedNpcMessageToPlayer(

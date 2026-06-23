@@ -3,26 +3,24 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
-using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using MiyakoCarryService.Server.Services;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {
     [Injectable]
     public class QuestGenerator(
         RandomUtil randomUtil,
+        ConfigService configService,
         OrderQuestRewardGenerator orderQuestRewardGenerator
     )
     {
         public RepeatableQuest GenerateOrderQuest(
             PmcData pmcData,
             int players,
-            SpawnType spawnType,
             int carryServiceLevel,
             int duration,
-            CompletionConfig completionConfig,
             RepeatableQuest questTemplate,
             double punishmentMulti
         )
@@ -39,23 +37,21 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 5 => 0.92f,
                 _ => 1f,
             };
-            var order = Generate(players, spawnType, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, completionConfig, questTemplate, punishmentMulti);
+            var order = Generate(players, carryServiceLevel, duration, discount, Services.TraderService.MiyakoTraderId, questTemplate, punishmentMulti);
             return order;
         }
 
         private RepeatableQuest Generate(
             int players,
-            SpawnType spawnType,
             int carryServiceLevel,
             int duration,
             float discount,
             MongoId traderId,
-            CompletionConfig completionConfig,
             RepeatableQuest questTemplate,
             double punishmentMulti
         )
         {
-            var requestedItemCount = completionConfig.RequestedItemCount;
+            configService.GetMcsPluginConfig().ServerConfig.CarryServiceLevelPrice.TryGetValue(carryServiceLevel, out var carryServiceLevelPrice);
             questTemplate.Conditions.AvailableForFinish = [];
 
             for (int i = 0; i < players; i++)
@@ -64,8 +60,8 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
                 var currentRequestedItemCount = randomUtil.RandInt(1, 2); ;
 #else
                 var currentRequestedItemCount = randomUtil.RandInt(
-                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel - 0.02f) * (1 + punishmentMulti)),
-                    (int)(requestedItemCount.Max * discount * (0.75f + 0.05f * carryServiceLevel + 0.02f) * (1 + punishmentMulti)) + 1
+                    (int)(carryServiceLevelPrice.Min * discount * (1 + punishmentMulti)),
+                    (int)(carryServiceLevelPrice.Max * discount * (1 + punishmentMulti)) + 1
                     );
 #endif
 
@@ -106,7 +102,7 @@ namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 #if DEBUG
             var currentRequestedItemCount = percent;
 #else
-            var currentRequestedItemCount = percent * Services.TraderService.TicketPricePerPercent;
+            var currentRequestedItemCount = percent * configService.GetMcsPluginConfig().ServerConfig.TicketPricePerPercent;
 #endif
             var handoverItemCondition = new QuestCondition
             {

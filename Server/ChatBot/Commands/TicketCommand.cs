@@ -20,6 +20,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
         ServerLocalisationService serverLocalisationService,
         MailSendService mailSendService,
         QuestController orderQuestController,
+        ConfigService configService,
         TraderService traderService
     ) : IMcsCommand
     {
@@ -47,7 +48,7 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                         ), 
                     string.Format(
                         serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP2), 
-                        TraderService.TicketPricePerPercent
+                        configService.GetMcsPluginConfig().ServerConfig.TicketPricePerPercent
                 )];
             }
         }
