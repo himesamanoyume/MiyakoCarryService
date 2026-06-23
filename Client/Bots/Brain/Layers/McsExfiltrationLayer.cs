@@ -26,9 +26,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        private float _lastPositionUpdateTime = 0f;
-        private Vector3 _lastRecordedPosition = new(0,0,0);
-
         public override Action GetNextAction()
         {
             try
@@ -81,26 +78,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 return false;
-            }
-
-            if (IsWannaLeave() && !BotOwner.Memory.HaveEnemy && BotOwner.PatrollingData.ExfiltrationData.HaveActions())
-            {
-                BotOwner.Exfiltration.ResetLeaveTime();
-                return true;
-            }
-
-            var timeSinceLastPositionUpdate = Time.time - _lastPositionUpdateTime;
-
-            if (timeSinceLastPositionUpdate >= 25f && timeSinceLastPositionUpdate <= 60f && !BotOwner.Exfiltration.BotInExfiltrationArea())
-            {
-                BotOwner.Exfiltration.ResetLeaveTime();
-                return false;
-            }
-
-            if (BotOwner.Position.McsSqrDistance(_lastRecordedPosition) > 1f)
-            {
-                _lastRecordedPosition = BotOwner.Position;
-                _lastPositionUpdateTime = Time.time;
             }
 
             return false;
