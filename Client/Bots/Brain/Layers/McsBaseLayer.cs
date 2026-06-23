@@ -151,6 +151,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
                 { typeof(RunToPointLogic), EndGoToPoint },
                 { typeof(EscortToPointByWayLogic), EndEscortToPointByWay },
+                { typeof(DeactivateMineLogic), EndDeactivateMine },
             };
         }
 
@@ -1556,6 +1557,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 accumulated += segLen;
             }
             return corners[corners.Length - 1];
+        }
+
+        protected virtual void CheckDanger(bool deavtivatingMines = true)
+        {
+            if (deavtivatingMines)
+            {
+                BotOwner.BewarePlantedMine.Update();
+            }
+
+            BotOwner.BotAvoidDangerPlaces.Update();
+        }
+
+        protected virtual bool EndDeactivateMine()
+        {
+            return true;
         }
     }
 }

@@ -701,6 +701,9 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
             settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
+            settings.FileSettings.Mind.IGNORE_TRAP = false;
+            settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
+            settings.FileSettings.Mind.CHACE_TO_DEACTIVATE = 100f;
 
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_SAVAGE = leadPlayer.Side == EPlayerSide.Savage;
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_BEAR = leadPlayer.Side == EPlayerSide.Bear;

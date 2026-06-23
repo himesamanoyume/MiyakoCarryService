@@ -100,6 +100,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
+                CheckDanger(true);
+
+                if (BotOwner.BewarePlantedMine.CanDeactivate())
+                {
+                    return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
+                }
+
                 if (McsBotPlayerData != null)
                 {
                     // 检测周围是否有符合条件的战利品
