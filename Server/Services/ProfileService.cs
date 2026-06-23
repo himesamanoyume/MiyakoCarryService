@@ -232,6 +232,17 @@ namespace MiyakoCarryService.Server.Services
             }
 
             var ifdianFilePath = System.IO.Path.Join(_ifdianFolderDir, "ifdian.json");
+            if (!fileUtil.FileExists(ifdianFilePath))
+            {
+                await fileUtil.WriteFileAsync(ifdianFilePath, jsonUtil.Serialize(new Ifdian
+                {
+                    Timestamp = 0,
+                    Supporter = [
+                        "姫様の夢",
+                        "月雪ミヤコ"
+                    ]
+                }, true));
+            }
             _ifdian = await jsonUtil.DeserializeFromFileAsync<Ifdian>(ifdianFilePath);
             _ifdianNames = _ifdian.Supporter;
         }
