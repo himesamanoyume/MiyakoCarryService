@@ -34,11 +34,11 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("CarryServiceLevelPrice")]
         public Dictionary<int, MinMax<int>> CarryServiceLevelPrice { get; set; } = new()
         {
-            {1, new () { Min = 24000, Max = 24000} },
-            {2, new () { Min = 25500, Max = 25500} },
-            {3, new () { Min = 27000, Max = 27000} },
-            {4, new () { Min = 28500, Max = 28500} },
-            {5, new () { Min = 30000, Max = 30000} }
+            { 1, new () { Min = 24000, Max = 24000} },
+            { 2, new () { Min = 25500, Max = 25500} },
+            { 3, new () { Min = 27000, Max = 27000} },
+            { 4, new () { Min = 28500, Max = 28500} },
+            { 5, new () { Min = 30000, Max = 30000} }
         };
     }
 
