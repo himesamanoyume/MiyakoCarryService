@@ -9,6 +9,7 @@ namespace MiyakoCarryService.Client.Enums
         ReportAboutEnemy,
         OnYourOwn,
         Escort,
-        GoToExfil
+        GoToExfil,
+        ProxyAction
     }
 }

@@ -10,6 +10,8 @@ namespace MiyakoCarryService.Fika.Packets
     {
         public ECommandPacketType CommandType;
         public Vector3? Position;
+        public string InteractiveId;
+        public int WaitTime;
 
         public CommandPacket()
         {
@@ -21,6 +23,8 @@ namespace MiyakoCarryService.Fika.Packets
             base.Deserialize(reader);
             CommandType = reader.GetEnum<ECommandPacketType>();
             Position = reader.GetNullableUnmanaged<Vector3>();
+            InteractiveId = reader.GetString();
+            WaitTime = reader.GetInt();
         }
 
         public override void Serialize(NetDataWriter writer)
@@ -28,6 +32,8 @@ namespace MiyakoCarryService.Fika.Packets
             base.Serialize(writer);
             writer.PutEnum(CommandType);
             writer.PutNullableUnmanaged(Position);
+            writer.Put(InteractiveId, 0);
+            writer.Put(WaitTime);
         }
     }
 }

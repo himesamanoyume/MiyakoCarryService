@@ -26,6 +26,5 @@ namespace MiyakoCarryService.Client.Datas
             base.Dispose();
             _transitRef = null;
         }
-
     }
 }

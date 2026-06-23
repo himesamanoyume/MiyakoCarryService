@@ -1,10 +1,11 @@
 
+using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public abstract class TriggerData : BaseData
+    public abstract class TriggerData : BaseData, IActor
     {
         protected Collider _collider;
         public Vector3 GetPos()
