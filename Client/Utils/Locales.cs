@@ -129,5 +129,31 @@ namespace MiyakoCarryService.Client.Utils
         public const string RETURNTOMAINCHARTIP = "Mcs/ReturnToMainCharTip";
         public const string RETURNTOMAINCHARNOWEAPON = "Mcs/ReturnToMainCharNoWeapon";
         public const string CANNOTRAIDINMCSINVENTORYMODE = "Mcs/CannotRaidInMcsInventoryMode";
+        public const string POWERSWITCH = "Mcs/PowerSwitch";
+        public const string HERMETICSWITCH = "Mcs/HermeticSwitch";
+        public const string D2GATESWITCH = "Mcs/D2GateSwitch";
+        public const string ZB013POWERSWITCH = "Mcs/ZB013PowerSwitch";
+        public const string LIGHTHOUSEGATEWAYOUTSIDESWITCH = "Mcs/LightHouseGatewayOutsideSwitch";
+        public const string LIGHTHOUSEGATEWAYINNERSWITCH = "Mcs/LightHouseGatewayInnerSwitch";
+        public const string PRYDOOR = "Mcs/PryDoor";
+        public const string MAINELEVATORPOWERSWITCH = "Mcs/MainElevatorPowerSwitch";
+        public const string CARGOELEVATORPOWERSWITCH = "Mcs/CargoElevatorPowerSwitch";
+        public const string MEDELEVATORPOWERSWITCH = "Mcs/MedElevatorPowerSwitch";
+        public const string DRAINAGESWITCH = "Mcs/DrainageSwitch";
+        public const string CONTAINMENTBLOCKPOWERSWITCH = "Mcs/ContainmentBlockPowerSwitch";
+        public const string BROADCASTSWITCH = "Mcs/BroadcastSwitch";
+        public const string PARKINGGATESWITCH = "Mcs/ParkingGateSwitch";
+        public const string ALARMSWITCH = "Mcs/AlarmSwitch";
+        public const string FLAMETRAPSWITCH = "Mcs/FlameTrapSwitch";
+        public const string POISONBRIDGESWITCH = "Mcs/PoisonBridgeSwitch";
+        public const string POISONDRAINAGESWITCH = "Mcs/PoisonDrainageSwitch";
+        public const string METALLOCK = "Mcs/MetalLock";
+        public const string SHOTGUNTRAPSWITCH = "Mcs/ShotgunTrapSwitch";
+        public const string GASVALVE = "Mcs/GasValve";
+        public const string SAFEROOMPOWERSWITCH = "Mcs/SaferoomPowerSwitch";
+        public const string KIBASHOPALARMSWITCH = "Mcs/KibaShopAlarmSwitch";
+        public const string SAFEROOMLOCKDOORSWITCH = "Mcs/SaferoomLockDoorSwitch";
+        public const string GENERATORSWITCH = "Mcs/GeneratorSwitch";
+        public const string FLUSHURINAL = "Mcs/FlushUrinal";
     }
 }

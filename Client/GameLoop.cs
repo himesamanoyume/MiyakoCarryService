@@ -134,6 +134,8 @@ namespace MiyakoCarryService.Client
             ExfilDataMgr.Enable();
             TransitDataMgr.Enable();
             QuestDataMgr.Enable();
+            DoorDataMgr.Enable();
+            SwitchDataMgr.Enable();
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);

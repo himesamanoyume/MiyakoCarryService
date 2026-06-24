@@ -32,5 +32,7 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled() => false;
 
         public override bool IsProxyActionAllowed() => true;
+
+        public override string Id() => Door.Id;
     }
 }

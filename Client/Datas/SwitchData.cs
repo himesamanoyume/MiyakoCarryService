@@ -32,5 +32,7 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled() => Switch.DoorState is not EDoorState.Shut;
 
         public override bool IsProxyActionAllowed() => true;
+
+        public override string Id() => Switch.Id;
     }
 }
