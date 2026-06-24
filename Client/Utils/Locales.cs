@@ -155,5 +155,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string SAFEROOMLOCKDOORSWITCH = "Mcs/SaferoomLockDoorSwitch";
         public const string GENERATORSWITCH = "Mcs/GeneratorSwitch";
         public const string FLUSHURINAL = "Mcs/FlushUrinal";
+        public const string SWITCH = "Mcs/Switch";
     }
 }

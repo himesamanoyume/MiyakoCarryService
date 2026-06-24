@@ -26,7 +26,9 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         public override string GetActionName() => QuestCondition.id.ToString().McsLocalized();
+
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
+        
         public override bool IsDisabled() => false;
 
         public bool IsProxyActionAllowed()
@@ -43,7 +45,21 @@ namespace MiyakoCarryService.Client.Datas
 
         public void ExcuteProxyAction()
         {
-            
+            switch (QuestCondition)
+            {
+                case ConditionVisitPlace:
+
+                    break;
+                case ConditionLaunchFlare:
+
+                    break;
+                case ConditionZone:
+
+                    break;
+                case ConditionInZone:
+
+                    break;
+            }
         }
 
         public override void Dispose()

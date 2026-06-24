@@ -173,5 +173,6 @@
     "Mcs/KibaShopAlarmSwitch": "Kiba Shop Alarm Switch",
     "Mcs/SaferoomLockDoorSwitch": "Saferoom Lock Door Switch",
     "Mcs/GeneratorSwitch": "Generator Switch",
-    "Mcs/FlushUrinal": "Flush Urinal"
+    "Mcs/FlushUrinal": "Flush Urinal",
+    "Mcs/Switch": "Switch"
 }

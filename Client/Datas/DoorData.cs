@@ -14,11 +14,6 @@ namespace MiyakoCarryService.Client.Datas
             _doorRef = new WeakReference<Door>(door);
         }
 
-        public override void ExcuteProxyAction()
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GetActionName()
         {
             throw new NotImplementedException();
@@ -29,10 +24,24 @@ namespace MiyakoCarryService.Client.Datas
             throw new NotImplementedException();
         }
 
-        public override bool IsDisabled() => false;
+        public override bool IsDisabled()
+        {
+            throw new NotImplementedException();
+        }
 
+        public override void ExcuteProxyAction()
+        {
+            
+        }
+        
         public override bool IsProxyActionAllowed() => true;
 
         public override string Id() => Door.Id;
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _doorRef = null;
+        }
     }
 }

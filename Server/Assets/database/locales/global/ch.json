@@ -173,5 +173,6 @@
     "Mcs/KibaShopAlarmSwitch": "Kiba商店警报开关",
     "Mcs/SaferoomLockDoorSwitch": "安全屋锁门开关",
     "Mcs/GeneratorSwitch": "发电机开关",
-    "Mcs/FlushUrinal": "便池冲水"
+    "Mcs/FlushUrinal": "便池冲水",
+    "Mcs/Switch": "开关"
 }

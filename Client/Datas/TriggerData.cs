@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public abstract class TriggerData : GameWorldData
+    public abstract class TriggerData : WorldData
     {
         protected Collider _collider;
         public Vector3 GetPos()

@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                if (Classification.SwitchBlacklistTips.Contains(@switch.ContextMenuTip))
+                if (@switch.ContextMenuTip.Contains("toggle_light"))
                 {
                     continue;
                 }

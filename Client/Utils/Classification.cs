@@ -103,11 +103,6 @@ namespace MiyakoCarryService.Client.Utils
 
         public static List<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
 
-        public static List<string> SwitchBlacklistTips = new()
-        {
-            "toggle_light"
-        };
-
         public static Dictionary<string, string> ImportantSwitchIdsInfo = new()
         {
             { "autoId_000632_EXFIL", Locales.POWERSWITCH },
