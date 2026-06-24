@@ -174,5 +174,12 @@
     "Mcs/SaferoomLockDoorSwitch": "Saferoom Lock Door Switch",
     "Mcs/GeneratorSwitch": "Generator Switch",
     "Mcs/FlushUrinal": "Flush Urinal",
-    "Mcs/Switch": "Switch"
+    "Mcs/Switch": "Switch",
+    "Mcs/ProxyCommand Name": "Proxy Action",
+    "Mcs/ProxyCommand TargetName" : "Command carry service player proxy to execute action",
+    "Mcs/QuestProxyCommand Name": "Proxy Execute Task",
+    "Mcs/QuestProxyCommand TargetName": "Command carry service player proxy to execute task",
+    "Mcs/SwitchProxyCommand Name": "Proxy Operate Switch",
+    "Mcs/SwitchProxyCommand TargetName": "Command carry service player proxy to operate switch",
+    "Mcs/SubQuestProxyCommand TargetName": "Select a quest for proxy"
 }
