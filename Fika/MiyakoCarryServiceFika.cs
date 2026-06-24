@@ -60,6 +60,7 @@ namespace MiyakoCarryService.Fika
                 { ECommandPacketType.OnYourOwn, HandleOnYourOwn },
                 { ECommandPacketType.Escort, HandleEscort },
                 { ECommandPacketType.GoToExfil, HandleGoToExfil },
+                { ECommandPacketType.AimingBodyPart, HandleAimingBodyPart },
             };
         }
 
@@ -346,6 +347,47 @@ namespace MiyakoCarryService.Fika
                         mcsBotPlayerData.EscortPos = packet.Position.Value;
                         mcsBotPlayerData.IsLooting = false;
                     }
+                }
+            }
+        }
+
+        private void HandleAimingBodyPart(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.AimingBodyPart)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.AimingBodyPartType = packet.AimingBodyPartType;
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger,
+                    });
                 }
             }
         }

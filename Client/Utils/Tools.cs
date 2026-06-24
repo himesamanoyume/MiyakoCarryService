@@ -62,6 +62,20 @@ namespace MiyakoCarryService.Client.Utils
             };
         }
 
+        public static string GetBodyPartTypeLocales(BodyPartType bodyPartType)
+        {
+            return bodyPartType switch
+            {
+                BodyPartType.head => Locales.HEAD,
+                BodyPartType.body => Locales.BODY,
+                BodyPartType.leftArm => Locales.LEFTARM,
+                BodyPartType.leftLeg => Locales.LEFTLEG,
+                BodyPartType.rightArm => Locales.RIGHTARM,
+                BodyPartType.rightLeg => Locales.RIGHTLEG,
+                _ => ""
+            };
+        }
+
         public static List<ItemData> GetAllOwnerItemData()
         {
             var result = new List<ItemData>();

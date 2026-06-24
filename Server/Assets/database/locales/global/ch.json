@@ -115,6 +115,10 @@
     "Mcs/TeamSwitchEscortCommand TargetName": "全队护送至开关",
     "Mcs/SubQuestEscortCommand TargetName": "选择一个任务进行护送",
     "Mcs/GetActionTargetName TargetName": "距离: {0} M",
+    "Mcs/TeamChangeAimingBodyPartTypeCommand Name": "全队改变瞄准部位",
+    "Mcs/TeamChangeAimingBodyPartTypeCommand TargetName": "全队改变战斗时优先瞄准的部位",
+    "Mcs/ChangeAimingBodyPartTypeCommand Name": "改变瞄准部位",
+    "Mcs/ChangeAimingBodyPartTypeCommand TargetName": "命令护航改变战斗时优先瞄准的部位",
     "Mcs/TeammateHighlight Key": "护航高亮",
     "Mcs/TeammateHighlightHotKey Key": "护航高亮快捷键",
     "Mcs/TeammateHighlightColor Key": "护航高亮颜色",
@@ -178,5 +182,11 @@
     "Mcs/SaferoomLockDoorSwitch": "安全屋锁门开关",
     "Mcs/GeneratorSwitch": "发电机开关",
     "Mcs/FlushUrinal": "便池冲水",
-    "Mcs/Switch": "开关"
+    "Mcs/Switch": "开关",
+    "Mcs/Head": "头部",
+    "Mcs/Body": "身体",
+    "Mcs/LeftArm": "左臂",
+    "Mcs/RightArm": "右臂",
+    "Mcs/LeftLeg": "左腿",
+    "Mcs/RightLeg": "右腿"
 }

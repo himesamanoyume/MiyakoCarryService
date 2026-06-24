@@ -96,6 +96,10 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMSWITCHESCORTCOMMAND_NAME = "Mcs/TeamSwitchEscortCommand Name";
         public const string TEAMSWITCHESCORTCOMMAND_TARGETNAME = "Mcs/TeamSwitchEscortCommand TargetName";
         public const string GETACTIONTARGETNAME_TARGETNAME = "Mcs/GetActionTargetName TargetName";
+        public const string TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME = "Mcs/TeamChangeAimingBodyPartTypeCommand Name";
+        public const string TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME = "Mcs/TeamChangeAimingBodyPartTypeCommand TargetName";
+        public const string CHANGEAIMINGBODYPARTTYPECOMMAND_NAME = "Mcs/ChangeAimingBodyPartTypeCommand Name";
+        public const string CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME = "Mcs/ChangeAimingBodyPartTypeCommand TargetName";
         public const string TEAMMATEHIGHLIGHT_KEY = "Mcs/TeammateHighlight Key";
         public const string TEAMMATEHIGHLIGHTHOTKEY_KEY = "Mcs/TeammateHighlightHotKey Key";
         public const string TEAMMATEHIGHLIGHTCOLOR_KEY = "Mcs/TeammateHighlightColor Key";
@@ -160,5 +164,11 @@ namespace MiyakoCarryService.Client.Utils
         public const string GENERATORSWITCH = "Mcs/GeneratorSwitch";
         public const string FLUSHURINAL = "Mcs/FlushUrinal";
         public const string SWITCH = "Mcs/Switch";
+        public const string HEAD = "Mcs/Head";
+        public const string BODY = "Mcs/Body";
+        public const string LEFTARM = "Mcs/LeftArm";
+        public const string RIGHTARM = "Mcs/RightArm";
+        public const string LEFTLEG = "Mcs/LeftLeg";
+        public const string RIGHTLEG = "Mcs/RightLeg";
     }
 }

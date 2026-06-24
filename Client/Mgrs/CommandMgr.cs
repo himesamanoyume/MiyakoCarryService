@@ -136,6 +136,19 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
+        private void ForEachAliveBot(Action<Player, BodyPartType> action, BodyPartType bodyPartType)
+        {
+            foreach (var id in _mySquadMcsBotPlayerIds)
+            {
+                var mcsBotPlayer = TryGetMcsBotPlayer(id);
+                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                {
+                    continue;
+                }
+                action(mcsBotPlayer, bodyPartType);
+            }
+        }
+
         #region Menu
 
         private void BuildMainCommandMenu()
@@ -239,6 +252,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction));
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction));
             actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamEscortCommandMenu, mcsBotPlayers, Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamAimingTypeCommandMenu, mcsBotPlayers, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME));
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction));
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -254,6 +268,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, BuildAimingTypeCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
 
@@ -280,6 +295,56 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.TRANSITESCORTCOMMAND_NAME, Locales.TRANSITESCORTCOMMAND_TARGETNAME, BuildTransitEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.EXFILESCORTCOMMAND_NAME, Locales.EXFILESCORTCOMMAND_TARGETNAME, BuildExfilEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHESCORTCOMMAND_NAME, Locales.SWITCHESCORTCOMMAND_TARGETNAME, BuildSwitchEscortCommandMenu, mcsBotPlayer));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildTeamAimingTypeCommandMenu(List<Player> mcsBotPlayers)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(head, head, ChangeAimingBodyPartCommandAction, BodyPartType.head));
+
+            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(body, body, ChangeAimingBodyPartCommandAction, BodyPartType.body));
+
+            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(leftArm, leftArm, ChangeAimingBodyPartCommandAction, BodyPartType.leftArm));
+
+            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(rightArm, rightArm, ChangeAimingBodyPartCommandAction, BodyPartType.rightArm));
+
+            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(leftLeg, leftLeg, ChangeAimingBodyPartCommandAction, BodyPartType.leftLeg));
+
+            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(rightLeg, rightLeg, ChangeAimingBodyPartCommandAction, BodyPartType.rightLeg));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildAimingTypeCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(head, head, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.head));
+
+            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(body, body, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.body));
+
+            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(leftArm, leftArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftArm));
+
+            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(rightArm, rightArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightArm));
+
+            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(leftLeg, leftLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftLeg));
+            
+            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(rightLeg, rightLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightLeg));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -437,6 +502,11 @@ namespace MiyakoCarryService.Client.Mgrs
             return MakeCommand(name, targetName, false, () => action(mcsBotPlayer));
         }
 
+        private ActionsTypesClass MakeMemberCommand(string name, string targetName, bool disabled, Action<Player, BodyPartType> action, Player mcsBotPlayer, BodyPartType bodyPartType)
+        {
+            return MakeCommand(name, targetName, disabled, () => action(mcsBotPlayer, bodyPartType));
+        }
+
         private ActionsTypesClass MakeMemberCommand(string name, string targetName, bool disabled, Action<Player> action, Player mcsBotPlayer)
         {
             return MakeCommand(name, targetName, disabled, () => action(mcsBotPlayer));
@@ -445,6 +515,11 @@ namespace MiyakoCarryService.Client.Mgrs
         private ActionsTypesClass MakeTeamCommand(string name, string targetName, Action<Player> action)
         {
             return MakeCommand(name, targetName, false, () => ForEachAliveBot(action));
+        }
+
+        private ActionsTypesClass MakeTeamCommand(string name, string targetName, Action<Player, BodyPartType> action, BodyPartType bodyPartType)
+        {
+            return MakeCommand(name, targetName, false, () => ForEachAliveBot(action, bodyPartType));
         }
 
         private ActionsTypesClass TeamCommandSubMenu(Action<List<Player>> action, List<Player> mcsBotPlayers)
@@ -665,6 +740,34 @@ namespace MiyakoCarryService.Client.Mgrs
                         botOwner.GoToSomePointData.SetPoint(pos.Value);
                     }
                 }
+            }
+            CloseCommandMenuAction();
+        }
+
+        private void ChangeAimingBodyPartCommandAction(Player mcsBotPlayer, BodyPartType aimingBodyPartType)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.AimingBodyPart,
+                    Position = null,
+                    AimingBodyPartType = aimingBodyPartType
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.AimingBodyPartType = aimingBodyPartType;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
             }
             CloseCommandMenuAction();
         }

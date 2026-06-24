@@ -220,6 +220,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new OnBeenKilledByAggressorPatch());
             _patches.Add(new TriggerWithIdEnterPatch());
             _patches.Add(new TriggerWithIdExitPatch());
+            _patches.Add(new GetPartToShootPatch());
 
             if (FikaInstalled)
             {

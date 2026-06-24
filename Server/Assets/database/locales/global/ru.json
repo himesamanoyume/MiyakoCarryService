@@ -115,6 +115,10 @@
     "Mcs/TeamSwitchEscortCommand TargetName": "All carry service players escort to the switch",
     "Mcs/SubQuestEscortCommand TargetName": "Выберите задание для сопровождения",
     "Mcs/GetActionTargetName TargetName": "Дистанция: {0} M",
+    "Mcs/TeamChangeAimingBodyPartTypeCommand Name": "Team Change Aiming Body Part",
+    "Mcs/TeamChangeAimingBodyPartTypeCommand TargetName": "All carry service players to change preferred combat aiming body part",
+    "Mcs/ChangeAimingBodyPartTypeCommand Name": "Change Aiming Body Part",
+    "Mcs/ChangeAimingBodyPartTypeCommand TargetName": "Command carry service player to change preferred combat aiming body part",
     "Mcs/TeammateHighlight Key": "Подцветка наёмников",
     "Mcs/TeammateHighlightHotKey Key": "Кнопка включения подцветки наёмников",
     "Mcs/TeammateHighlightColor Key": "Цвет подцвеки наёмников",
@@ -178,5 +182,11 @@
     "Mcs/SaferoomLockDoorSwitch": "Saferoom Lock Door Switch",
     "Mcs/GeneratorSwitch": "Generator Switch",
     "Mcs/FlushUrinal": "Flush Urinal",
-    "Mcs/Switch": "Switch"
+    "Mcs/Switch": "Switch",
+    "Mcs/Head": "Head",
+    "Mcs/Body": "Body",
+    "Mcs/LeftArm": "Left Arm",
+    "Mcs/RightArm": "Right Arm",
+    "Mcs/LeftLeg": "Left Leg",
+    "Mcs/RightLeg": "Right Leg"
 }
