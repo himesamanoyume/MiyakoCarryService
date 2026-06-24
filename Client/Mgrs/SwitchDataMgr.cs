@@ -4,6 +4,7 @@ using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -43,6 +44,23 @@ namespace MiyakoCarryService.Client.Mgrs
 
                 _datas.Add(@switch.GetData());
             }
+        }
+
+        public Switch FindSwitch(string switchId)
+        {
+            if (string.IsNullOrEmpty(switchId))
+            {
+                return null;
+            }
+
+            foreach (SwitchData switchData in _datas)
+            {
+                if (switchData.Switch.Id == switchId)
+                {
+                    return switchData.Switch;
+                }
+            }
+            return null;
         }
     }
 }

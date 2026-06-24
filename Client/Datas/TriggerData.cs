@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Datas
     public abstract class TriggerData : WorldData
     {
         protected Collider _collider;
-        public Vector3 GetPos()
+        public override Vector3 GetPos()
         {
             var bounds = _collider.bounds;
             var center = bounds.center;

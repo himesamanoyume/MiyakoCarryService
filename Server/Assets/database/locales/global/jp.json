@@ -109,6 +109,10 @@
     "Mcs/TransitEscortCommand TargetName": "Command carry service player to escort to transit point",
     "Mcs/TeamTransitEscortCommand Name": "Team Escort to Transit Point",
     "Mcs/TeamTransitEscortCommand TargetName": "All carry service players to escort to transit point",
+    "Mcs/SwitchEscortCommand Name": "Escort to Switch",
+    "Mcs/SwitchEscortCommand TargetName": "Command carry service player to escort to the switch",
+    "Mcs/TeamSwitchEscortCommand Name": "Team Escort to Switch",
+    "Mcs/TeamSwitchEscortCommand TargetName": "All carry service players escort to the switch",
     "Mcs/SubQuestEscortCommand TargetName": "Select a quest to escort",
     "Mcs/GetActionTargetName TargetName": "Distance: {0} M",
     "Mcs/TeammateHighlight Key": "Teammate Highlight",
@@ -174,12 +178,5 @@
     "Mcs/SaferoomLockDoorSwitch": "Saferoom Lock Door Switch",
     "Mcs/GeneratorSwitch": "Generator Switch",
     "Mcs/FlushUrinal": "Flush Urinal",
-    "Mcs/Switch": "Switch",
-    "Mcs/ProxyCommand Name": "Proxy Action",
-    "Mcs/ProxyCommand TargetName" : "Command carry service player proxy to execute action",
-    "Mcs/QuestProxyCommand Name": "Proxy Execute Task",
-    "Mcs/QuestProxyCommand TargetName": "Command carry service player proxy to execute task",
-    "Mcs/SwitchProxyCommand Name": "Proxy Operate Switch",
-    "Mcs/SwitchProxyCommand TargetName": "Command carry service player proxy to operate switch",
-    "Mcs/SubQuestProxyCommand TargetName": "Select a quest for proxy"
+    "Mcs/Switch": "Switch"
 }

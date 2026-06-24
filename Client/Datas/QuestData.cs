@@ -2,13 +2,12 @@
 using System;
 using EFT.Quests;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class QuestData : TriggerData, IProxyActor
+    public class QuestData : TriggerData
     {
         private WeakReference<QuestDataClass> _questRef;
         public QuestDataClass Quest => _questRef.TryGetTarget(out var quest) ? quest : null;
@@ -30,34 +29,6 @@ namespace MiyakoCarryService.Client.Datas
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
         
         public override bool IsDisabled() => false;
-
-        public bool IsProxyActionDisabled()
-        {
-            return QuestCondition switch
-            {
-                ConditionVisitPlace => false,
-                _ => true
-            };
-        }
-
-        public void ExcuteProxyAction()
-        {
-            switch (QuestCondition)
-            {
-                case ConditionVisitPlace:
-
-                    break;
-                case ConditionLaunchFlare:
-
-                    break;
-                case ConditionZone:
-
-                    break;
-                case ConditionInZone:
-
-                    break;
-            }
-        }
 
         public override void Dispose()
         {
