@@ -10,7 +10,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class QuestDataMgr : TriggerDataMgr<QuestDataMgr>
+    public sealed class QuestDataMgr : GameWorldDataMgr<QuestDataMgr>
     {
         private List<TriggerWithId> _triggersWithIds;
         // public HashSet<string> QuestNeedItemList { get; private set; } = new();
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Mgrs
             // QuestNeedItemList = null;
         }
 
-        protected void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
+        private void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
         {
             if (_triggersWithIds == null)
             {
@@ -250,7 +250,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected void LoadQuestData()
+        private void LoadQuestData()
         {
             var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (myPlayer == null)

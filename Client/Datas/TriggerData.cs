@@ -1,11 +1,10 @@
 
-using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public abstract class TriggerData : BaseData, IActor
+    public abstract class TriggerData : GameWorldData
     {
         protected Collider _collider;
         public Vector3 GetPos()
@@ -29,9 +28,5 @@ namespace MiyakoCarryService.Client.Datas
             }
             return _collider.transform.position;
         }
-
-        public abstract string GetActionName();
-        public abstract string GetActionTargetName(Vector3 myPlayerPos);
-        public abstract bool IsDisabled();
     }
 }
