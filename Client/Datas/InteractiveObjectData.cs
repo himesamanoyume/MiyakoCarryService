@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Datas
     {
         public abstract string Id();
         
-        public abstract bool IsProxyActionAllowed();
+        public abstract bool IsProxyActionDisabled();
 
         public abstract void ExcuteProxyAction();
     }

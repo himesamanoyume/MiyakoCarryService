@@ -31,15 +31,12 @@ namespace MiyakoCarryService.Client.Datas
         
         public override bool IsDisabled() => false;
 
-        public bool IsProxyActionAllowed()
+        public bool IsProxyActionDisabled()
         {
             return QuestCondition switch
             {
-                ConditionVisitPlace or
-                ConditionLaunchFlare or
-                ConditionZone or
-                ConditionInZone => true,
-                _ => false
+                ConditionVisitPlace => false,
+                _ => true
             };
         }
 

@@ -23,6 +23,8 @@ namespace MiyakoCarryService.Client.Datas
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
         public Vector3? EscortPos = null;
+        public Vector3? ProxyPos = null;
+        public string ProxyTargetId = null;
         public LootData LootingTarget
         {
             get => _lootingTarget;

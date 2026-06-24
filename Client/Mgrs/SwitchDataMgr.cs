@@ -5,7 +5,6 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {

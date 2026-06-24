@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            
+
         }
 
         public override void Start()
@@ -45,6 +45,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (IsMcsBotPlayer)
             {
+#if DEBUG
+                if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+                {
+                    return false;
+                }
+#endif
+
                 if (McsBotPlayerData == null)
                 {
                     return false;

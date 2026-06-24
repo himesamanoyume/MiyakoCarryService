@@ -9,11 +9,11 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public class McsEscortLayer : McsBaseLayer<McsEscortLayer>
+    public class McsProxyLayer : McsBaseLayer<McsProxyLayer>
     {
-        public McsEscortLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        public McsProxyLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            
+
         }
 
         public override void Start()
@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 McsBotPlayerData.IsLooting = false;
                 BotOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.FollowMe
+                    PhraseTrigger = EPhraseTrigger.Going
                 });
             }
         }
@@ -38,21 +38,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
                 }
 
-                if (McsBotPlayerData.EscortPos.HasValue)
+                if (McsBotPlayerData.ProxyPos.HasValue)
                 {
-                    if (_nextUpdatePosTime < Time.time)
-                    {
-                        UpdateEscortMoveTarget(out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
-                    }
-
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortNearPath");
+                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
+                }
+                else if (!string.IsNullOrEmpty(McsBotPlayerData.ProxyTargetId))
+                {
+                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
                 }
                 else
                 {
@@ -95,7 +87,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort) && McsBotPlayerData.EscortPos.HasValue)
+            if (McsBotPlayerData.HasDecision(EDecision.ShouldProxyAction) && (McsBotPlayerData.ProxyPos.HasValue || !string.IsNullOrEmpty(McsBotPlayerData.ProxyTargetId)))
             {
                 return true;
             }

@@ -18,16 +18,16 @@ namespace MiyakoCarryService.Client.Datas
 
         public override void ExcuteProxyAction()
         {
-            throw new NotImplementedException();
+        
         }
 
         public override string GetActionName() => Classification.ImportantSwitchIdsInfo.TryGetValue(Switch.Id, out var info) ? info.McsLocalized() : Locales.SWITCH.McsLocalized();
 
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, Switch.transform.position)));
 
-        public override bool IsDisabled() => Switch.DoorState is not EDoorState.Shut;
+        public override bool IsDisabled() => false;
 
-        public override bool IsProxyActionAllowed() => true;
+        public override bool IsProxyActionDisabled() => Switch.DoorState is not EDoorState.Shut;
 
         public override string Id() => Switch.Id;
 

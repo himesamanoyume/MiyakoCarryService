@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     {
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
-            
+
         }
 
         public override void Start()
@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return;
                 }
             }
-            
+
             BotOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Clear,
@@ -298,6 +298,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
+
+#if DEBUG
+            if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+            {
+                return false;
+            }
+#endif
 
             if (BotOwner.Memory.HaveEnemy)
             {

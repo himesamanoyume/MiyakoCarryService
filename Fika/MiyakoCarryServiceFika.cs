@@ -52,14 +52,15 @@ namespace MiyakoCarryService.Fika
 
             _handleActionsMap = new()
             {
-                {ECommandPacketType.Teleport, HandleTeleport},
-                {ECommandPacketType.GoToPoint, HandleGoToPoint},
-                {ECommandPacketType.HoldPosition, HandleHoldPosition},
-                {ECommandPacketType.Regroup, HandleRegroup},
-                {ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy},
-                {ECommandPacketType.OnYourOwn, HandleOnYourOwn},
-                {ECommandPacketType.Escort, HandleEscort},
-                {ECommandPacketType.GoToExfil, HandleGoToExfil},
+                { ECommandPacketType.Teleport, HandleTeleport },
+                { ECommandPacketType.GoToPoint, HandleGoToPoint },
+                { ECommandPacketType.HoldPosition, HandleHoldPosition },
+                { ECommandPacketType.Regroup, HandleRegroup },
+                { ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy },
+                { ECommandPacketType.OnYourOwn, HandleOnYourOwn },
+                { ECommandPacketType.Escort, HandleEscort },
+                { ECommandPacketType.GoToExfil, HandleGoToExfil },
+                { ECommandPacketType.ProxyAction, HandleProxyAction },
             };
         }
 
@@ -347,6 +348,61 @@ namespace MiyakoCarryService.Fika
                         mcsBotPlayerData.IsLooting = false;
                     }
                 }
+            }
+        }
+
+        private void HandleProxyAction(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.ProxyAction)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldProxyAction);
+                    if (packet.Position == null)
+                    {
+                        // 任务视察
+                        mcsBotPlayerData.ProxyPos = packet.Position;
+                        mcsBotPlayerData.ProxyTargetId = null;
+                    }
+                    else
+                    {
+                        // 交互
+                        mcsBotPlayerData.ProxyPos = null;
+                        mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                    }
+                    mcsBotPlayerData.EscortPos = null;
+                    mcsBotPlayerData.IsLooting = false;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
             }
         }
 
