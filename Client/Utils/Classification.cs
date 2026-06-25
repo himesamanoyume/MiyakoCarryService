@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Enums;
@@ -99,6 +100,32 @@ namespace MiyakoCarryService.Client.Utils
             EBotEnemyCause.AddNewMember,
             EBotEnemyCause.warn,
             EBotEnemyCause.addBotNoGroup
+        };
+
+        public static Dictionary<ELabyrinthTrapType, HashSet<string>> LabyrinthTrapIds = new()
+        {
+            { ELabyrinthTrapType.Flame, new() {
+                "flame_enter_zone_493925125",
+                "flame_enter_zone_1349880479"
+            }},
+            { ELabyrinthTrapType.Valve, new() {
+                "steam_enter_zone_115583983",
+                "steam_exit_zone_3704346085"
+            }},
+            { ELabyrinthTrapType.Water, new() {
+                "toxicZoneEnter1_2612876931",
+                "toxicZoneEnter2_2612876931"
+            }},
+            { ELabyrinthTrapType.LiftingGrate, new() {
+                "Luquid_enter_zone_3486811782",
+                "Luquid_enter_zone_2773347541"
+            }},
+            { ELabyrinthTrapType.Gun, new() {
+                "guntrap_trigger_1628276106",
+                "guntrap_trigger_2131128863",
+                "guntrap_trigger_1446364582",
+                "guntrap_trigger_2505672369"
+            }}
         };
 
         public static List<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];

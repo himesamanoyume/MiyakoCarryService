@@ -1,0 +1,29 @@
+
+
+using EFT.Interactive;
+using MiyakoCarryService.Client.Extensions;
+
+namespace MiyakoCarryService.Client.Mgrs
+{
+    public sealed class DamageTriggerDataMgr : DataMgr<DamageTriggerDataMgr>
+    {
+        protected sealed override void OnRaidStarted()
+        {
+            base.OnRaidStarted();
+            LoadData(LoadDamageTrigger);
+        }
+
+        private void LoadDamageTrigger()
+        {
+            var damageTriggers = FindObjectsOfType<DamageTrigger>();
+            foreach (var damageTrigger in damageTriggers)
+            {
+                var data = damageTrigger.GetData();
+                if (data != null)
+                {
+                    _datas.Add(data);
+                }
+            }
+        }
+    }
+}
