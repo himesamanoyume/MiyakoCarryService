@@ -9,6 +9,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadExfiltrationPoints);
         }
 
@@ -26,7 +27,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     exfiltrationController.EligiblePoints(player.Profile).ExecuteForEach((exfiltrationPoint) =>
                     {
-                        _datas.Add(exfiltrationPoint.GetData());
+                        var data = exfiltrationPoint.GetData();
+                        if (data != null)
+                        {
+                            _datas.Add(data);
+                        }
                     });
                 }
                 else
@@ -37,7 +42,11 @@ namespace MiyakoCarryService.Client.Mgrs
                         if ((mask & (1 << i)) != 0)
                         {
                             var scavExfiltrationPoint = exfiltrationController.ScavExfiltrationPoints[i];
-                            _datas.Add(scavExfiltrationPoint.GetData());
+                            var data = scavExfiltrationPoint.GetData();
+                            if (data != null)
+                            {
+                                _datas.Add(data);
+                            }
                         }
                     }
                 }
@@ -50,7 +59,11 @@ namespace MiyakoCarryService.Client.Mgrs
                         var secretExfiltrationPoint = secretExfiltrationPoints[i];
                         if (secretExfiltrationPoint != null)
                         {
-                            _datas.Add(secretExfiltrationPoint.GetData());
+                            var data = secretExfiltrationPoint.GetData();
+                            if (data != null)
+                            {
+                                _datas.Add(data);
+                            }
                         }
                     }
                 }

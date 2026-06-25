@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -15,7 +16,7 @@ namespace MiyakoCarryService.Client.Datas
         public ExfilData(ExfiltrationPoint exfiltrationPoint) : base()
         {
             _exfilRef = new WeakReference<ExfiltrationPoint>(exfiltrationPoint);
-            _collider = exfiltrationPoint.transform.GetComponent<Collider>();
+            _colliders = exfiltrationPoint.transform.GetComponentsInChildren<Collider>().ToList();
         }
 
         public override string GetActionName() => ExfiltrationPoint.Settings.Name.McsLocalized();

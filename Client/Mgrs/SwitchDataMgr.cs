@@ -13,6 +13,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadSwitches);
         }
 
@@ -30,8 +31,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     continue;
                 }
-
-                _datas.Add(@switch.GetData());
+                var data = @switch.GetData();
+                if (data != null)
+                {
+                    _datas.Add(data);
+                }
             }
         }
 

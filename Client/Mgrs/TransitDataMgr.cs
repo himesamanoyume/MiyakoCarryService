@@ -8,6 +8,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadTransitPoints);
         }
 
@@ -15,7 +16,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             foreach (var transitPoint in LocationScene.GetAllObjects<TransitPoint>())
             {
-                _datas.Add(transitPoint.GetData());
+                var data = transitPoint.GetData();
+                if (data != null)
+                {
+                    _datas.Add(data);
+                }
             }
         }
     }

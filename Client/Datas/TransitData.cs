@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -14,7 +15,7 @@ namespace MiyakoCarryService.Client.Datas
         public TransitData(TransitPoint transitPoint) : base()
         {
             _transitRef = new WeakReference<TransitPoint>(transitPoint);
-            _collider = transitPoint.transform.GetComponent<Collider>();
+            _colliders = transitPoint.transform.GetComponentsInChildren<Collider>().ToList();
         }
 
         public override string GetActionName() => TransitPoint.parameters.description.McsLocalized();

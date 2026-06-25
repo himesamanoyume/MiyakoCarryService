@@ -15,13 +15,9 @@ namespace MiyakoCarryService.Client.Mgrs
         private List<TriggerWithId> _triggersWithIds;
         // public HashSet<string> QuestNeedItemList { get; private set; } = new();
 
-        public sealed override void Start()
-        {
-            base.Start();
-        }
-
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadQuestData);
             StartCoroutine(ReloadDataLoop(10f, LoadQuestData));
         }
