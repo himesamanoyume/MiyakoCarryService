@@ -150,6 +150,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             bot.Skills = new Skills
             {
                 Common = Enum.GetValues<SkillTypes>()
+                    .Where(skill => skill is not (SkillTypes.BotReload or SkillTypes.BotSound))
                     .Select(skill => new CommonSkill
                     {
                         Id = skill,
