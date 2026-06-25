@@ -64,7 +64,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void OnMgrDestroy()
         {
             base.OnMgrDestroy();
-            OnRaidEnded();
             LockedLootingTarget.Clear();
             LockedLootingTargetRootTransform.Clear();
         }

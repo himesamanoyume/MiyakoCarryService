@@ -340,12 +340,6 @@ namespace MiyakoCarryService.Client.Mgrs
             IsHost = false;
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         private void UpdateMcsBotPlayerConfig(ConfigEntrySettingChangedEvent @event)
         {
             if (!IsHost)

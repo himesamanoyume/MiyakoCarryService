@@ -240,12 +240,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         public class Subtitles
         {
             public SubtitlesView SubtitlesView;

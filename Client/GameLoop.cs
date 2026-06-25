@@ -268,6 +268,10 @@ namespace MiyakoCarryService.Client
             HighlightShader = null;
             if (Mgrs != null)
             {
+                foreach (var mgr in Mgrs.Values)
+                {
+                    mgr.OnMgrDestroy();
+                }
                 Mgrs.Clear();
             }
             Mgrs = null;

@@ -11,17 +11,6 @@ namespace MiyakoCarryService.Client.Mgrs
             LoadData(LoadTransitPoints);
         }
 
-        protected override void OnRaidEnded()
-        {
-            base.OnRaidEnded();
-        }
-
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         private void LoadTransitPoints()
         {
             foreach (var transitPoint in LocationScene.GetAllObjects<TransitPoint>())

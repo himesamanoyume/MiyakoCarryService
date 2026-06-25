@@ -36,17 +36,6 @@ namespace MiyakoCarryService.Client.Mgrs
             _triggersWithIds = null;
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-            // if (QuestNeedItemList != null)
-            // {
-            //     QuestNeedItemList.Clear();
-            // }
-            // QuestNeedItemList = null;
-        }
-
         private void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
         {
             if (_triggersWithIds == null)

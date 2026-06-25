@@ -72,12 +72,6 @@ namespace MiyakoCarryService.Client.Mgrs
             _gamePlayerOwner = null;
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         void Update()
         {
             if (!_gameloop.IsVaildGameWorld)

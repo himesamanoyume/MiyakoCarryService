@@ -16,17 +16,6 @@ namespace MiyakoCarryService.Client.Mgrs
             LoadData(LoadSwitches);
         }
 
-        protected override void OnRaidEnded()
-        {
-            base.OnRaidEnded();
-        }
-
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         private void LoadSwitches()
         {
             var switches = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Switch>();

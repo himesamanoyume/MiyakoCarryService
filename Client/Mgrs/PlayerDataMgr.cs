@@ -44,17 +44,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected override void OnRaidEnded()
-        {
-            base.OnRaidEnded();
-        }
-
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         private IEnumerator RefreshMcsBotPlayersInterestingLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
