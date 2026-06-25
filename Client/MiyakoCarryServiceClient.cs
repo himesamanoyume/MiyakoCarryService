@@ -221,6 +221,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new TriggerWithIdEnterPatch());
             _patches.Add(new TriggerWithIdExitPatch());
             _patches.Add(new GetPartToShootPatch());
+            _patches.Add(new IsAllowedPlayerPatch());
 
             if (FikaInstalled)
             {
