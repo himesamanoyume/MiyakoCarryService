@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             TrapDatas = new();
             LoadData(LoadRoomTrap);
-            StartCoroutine(ReloadDataLoop(5f, RefreshTrapState));
+            StartCoroutine(ReloadDataLoop(2f, RefreshTrapState));
         }
 
         protected sealed override void OnRaidEnded()

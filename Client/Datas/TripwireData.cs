@@ -28,10 +28,10 @@ namespace MiyakoCarryService.Client.Datas
             var magnitude = dir.magnitude;
             var forward = (magnitude > 0.0001f) ? (dir / magnitude) : Vector3.forward;
 
-            var length = Mathf.Max(0.3f, magnitude + 0.9f);
+            var length = Mathf.Max(0.3f, magnitude + 0.3f);
             var center = (fromPosition + toPosition) * 0.5f;
             var rotation = Quaternion.LookRotation(forward, Vector3.up);
-            var size = new Vector3(0.35f, 1.8f, length);
+            var size = new Vector3(0.2f, 1.8f, length);
 
             var gameObject = new GameObject("BoxCollider");
             gameObject.transform.position = center;
