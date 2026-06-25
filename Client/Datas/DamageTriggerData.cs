@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class DamageTriggerData : TriggerData
+    public class DamageTriggerData : ObstacleData
     {
         private WeakReference<DamageTrigger> _damageTriggerRef;
         public DamageTrigger DamageTrigger => _damageTriggerRef.TryGetTarget(out var damageTrigger) ? damageTrigger : null;
@@ -15,6 +15,7 @@ namespace MiyakoCarryService.Client.Datas
         {
             _damageTriggerRef = new WeakReference<DamageTrigger>(damageTrigger);
             _colliders = damageTrigger.GetComponentsInChildren<Collider>().ToList();
+            InitObstacle();
         }
 
         public override string GetActionName()
@@ -30,6 +31,12 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled()
         {
             throw new NotImplementedException();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _damageTriggerRef = null;
         }
     }
 }

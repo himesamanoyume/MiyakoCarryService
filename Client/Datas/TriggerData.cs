@@ -9,6 +9,7 @@ namespace MiyakoCarryService.Client.Datas
     public abstract class TriggerData : WorldData
     {
         protected List<Collider> _colliders;
+        
         public override Vector3 GetPos()
         {
             if (_colliders.Count > 0)
@@ -38,6 +39,15 @@ namespace MiyakoCarryService.Client.Datas
         public List<Collider> GetColliders()
         {
             return _colliders;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            if (_colliders != null)
+            {
+                _colliders.Clear();
+            }
         }
     }
 }

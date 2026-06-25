@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class TripwireData : TriggerData
+    public class TripwireData : ObstacleData
     {
         private WeakReference<TripwireSynchronizableObject> _tripwireRef;
         public TripwireSynchronizableObject Tripwire => _tripwireRef.TryGetTarget(out var tripwire) ? tripwire : null;
@@ -18,6 +18,7 @@ namespace MiyakoCarryService.Client.Datas
             {
                 CreateBoxCollider(tripwire.FromPosition, tripwire.ToPosition)
             };
+            InitObstacle();
         }
 
         private BoxCollider CreateBoxCollider(Vector3 fromPosition, Vector3 toPosition)
@@ -56,6 +57,12 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled()
         {
             throw new NotImplementedException();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _tripwireRef = null;
         }
     }
 }

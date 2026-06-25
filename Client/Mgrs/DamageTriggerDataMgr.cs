@@ -3,10 +3,11 @@
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class DamageTriggerDataMgr : DataMgr<DamageTriggerDataMgr>
+    public sealed class DamageTriggerDataMgr : LabyrinthDataMgr<DamageTriggerDataMgr>
     {
         protected sealed override void OnRaidStarted()
         {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class BarbedWireData : TriggerData
+    public class BarbedWireData : ObstacleData
     {
         private WeakReference<TrapSyncable> _barbedWireRef;
         public TrapSyncable BarbedWire => _barbedWireRef.TryGetTarget(out var barbedWire) ? barbedWire : null;
@@ -15,6 +15,7 @@ namespace MiyakoCarryService.Client.Datas
         {
             _barbedWireRef = new WeakReference<TrapSyncable>(barbedWire);
             _colliders = barbedWire.transform.GetChild(0).GetComponentsInChildren<Collider>().ToList();
+            InitObstacle();
         }
 
         public override string GetActionName()
@@ -30,6 +31,12 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled()
         {
             throw new NotImplementedException();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _barbedWireRef = null;
         }
     }
 }

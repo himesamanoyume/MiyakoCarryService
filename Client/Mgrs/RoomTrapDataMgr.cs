@@ -11,7 +11,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class RoomTrapDataMgr : LabyrinthDataMgr
+    public class RoomTrapDataMgr : LabyrinthDataMgr<RoomTrapDataMgr>
     {
         public ConcurrentDictionary<ELabyrinthTrapType, HashSet<TriggerZoneData>> TrapDatas;
 

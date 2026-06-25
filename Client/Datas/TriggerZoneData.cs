@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class TriggerZoneData : TriggerData
+    public class TriggerZoneData : ObstacleData
     {
         private WeakReference<TriggerZone> _triggerZoneRef;
         public TriggerZone TriggerZone => _triggerZoneRef.TryGetTarget(out var triggerZone) ? triggerZone : null;
@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Client.Datas
             _triggerZoneRef = new WeakReference<TriggerZone>(triggerZone);
             _colliders = triggerZone.GetComponentsInChildren<Collider>().ToList();
             Id = triggerZoneId;
+            InitObstacle();
         }
 
         public override string GetActionName()
@@ -32,6 +33,12 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsDisabled()
         {
             throw new NotImplementedException();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _triggerZoneRef = null;
         }
     }
 }
