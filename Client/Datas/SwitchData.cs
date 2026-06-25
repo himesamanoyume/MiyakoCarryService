@@ -3,6 +3,7 @@ using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -28,6 +29,23 @@ namespace MiyakoCarryService.Client.Datas
             _switchRef = null;
         }
 
-        public override Vector3 GetPos() => Switch.transform.position;
+        public override Vector3 GetPos()
+        {
+            var center = Switch.transform.position;
+            for (int attempt = 0; attempt < 30; attempt++)
+            {
+                var samplePos = new Vector3(
+                    center.x + GClass856.Random(-1, 1),
+                    center.y + GClass856.Random(-1, 1),
+                    center.z + GClass856.Random(-1, 1)
+                );
+
+                if (NavMesh.SamplePosition(samplePos, out var hit, 1f, -1))
+                {
+                    return hit.position;
+                }
+            }
+            return center;
+        }
     }
 }
