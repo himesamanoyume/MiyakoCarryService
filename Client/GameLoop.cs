@@ -752,7 +752,7 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Boss.SHALL_WARN = false;
             settings.FileSettings.Boss.BIG_PIPE_ARTILLERY_COUNT = 1;
-            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 40f;
+            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 30f;
 
             settings.FileSettings.Core.CanGrenade = true;
             settings.FileSettings.Core.CanRun = true;
@@ -865,7 +865,7 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
-            botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(settings.FileSettings.Core.DamageCoeff);
+            botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(1f);
 
             botOwner.LookSensor.ShootFromEyes = true;
             settings.FileSettings.Look.SHOOT_FROM_EYES = true;
