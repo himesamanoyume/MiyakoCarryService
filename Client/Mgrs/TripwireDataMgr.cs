@@ -6,6 +6,7 @@ using EFT;
 using EFT.SynchronizableObjects;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -14,6 +15,10 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            if (!Tools.IsHost)
+            {
+                return;
+            }
             LoadData(LoadTripwires);
             StartCoroutine(ReloadDataLoop(2f, LoadTripwires));
         }

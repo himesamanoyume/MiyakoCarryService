@@ -18,6 +18,10 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            if (!Tools.IsHost)
+            {
+                return;
+            }
             if (!_shouldInit)
             {
                 return;
@@ -82,7 +86,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            
+
         } 
     }
 }

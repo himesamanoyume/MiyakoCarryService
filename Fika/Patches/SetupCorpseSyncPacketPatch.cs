@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPrefix]
         public static void Prefix(FikaPlayer __instance, NetworkHealthSyncPacketStruct packet)
         {
-            if (!McsMgr.IsHost)
+            if (!Tools.IsHost)
             {
                 return;
             }

@@ -15,6 +15,9 @@ namespace MiyakoCarryService.Client.Utils
     public static class Tools
     {
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+
+        public static bool IsHost => McsMgr.IsHost;
+        
         public static bool IsPlayerInventory(string stringTemplateId)
         {
             return stringTemplateId == CommonId.DefaultInventory;

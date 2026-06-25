@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
-            if (!McsMgr.IsHost)
+            if (!Tools.IsHost)
             {
                 return;
             }

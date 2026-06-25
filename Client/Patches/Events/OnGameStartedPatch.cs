@@ -16,13 +16,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
 
         [PatchPrefix]
         public static void Prefix()
         {
-            if (McsMgr.IsHost)
+            if (Tools.IsHost)
             {
                 TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
             }

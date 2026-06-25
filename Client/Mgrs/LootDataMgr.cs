@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -48,6 +49,10 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            if (!Tools.IsHost)
+            {
+                return;
+            }
             StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>));
             StartCoroutine(UpdateItemData(1f));
             LockedLootingTarget.Clear();

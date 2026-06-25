@@ -92,7 +92,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 id =>
                 {
                     var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
                     {
                         mcsBotPlayer.Profile.Info.GroupId = "Fika";
                         mcsBotPlayer.Profile.Info.TeamId = "Fika";
@@ -106,7 +106,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         return oldPlayer;
                     }
                     var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
                     {
                         mcsBotPlayer.Profile.Info.GroupId = "Fika";
                         mcsBotPlayer.Profile.Info.TeamId = "Fika";
@@ -566,7 +566,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void EscortToWorldPosCommandAction(Player mcsBotPlayer, WorldData worldData)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -600,7 +600,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -638,7 +638,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void OnYourOwnCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -667,7 +667,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void RegroupCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -696,7 +696,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void GoToPointCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
                 {
@@ -739,7 +739,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void ChangeAimingBodyPartCommandAction(Player mcsBotPlayer, BodyPartType aimingBodyPartType)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -767,7 +767,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void HoldPositionCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -797,7 +797,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void ForceTeleportCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -874,7 +874,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                 {

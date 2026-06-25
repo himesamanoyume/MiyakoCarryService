@@ -2,6 +2,7 @@
 
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -10,6 +11,10 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            if (!Tools.IsHost)
+            {
+                return;
+            }
             LoadData(LoadDamageTrigger);
         }
 

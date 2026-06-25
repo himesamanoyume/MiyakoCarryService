@@ -135,6 +135,11 @@ namespace MiyakoCarryService.Client
             TransitDataMgr.Enable();
             QuestDataMgr.Enable();
             SwitchDataMgr.Enable();
+            TripwireDataMgr.Enable();
+            BarbedWireDataMgr.Enable();
+            BorderZoneDataMgr.Enable();
+            DamageTriggerDataMgr.Enable();
+            RoomTrapDataMgr.Enable();
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
