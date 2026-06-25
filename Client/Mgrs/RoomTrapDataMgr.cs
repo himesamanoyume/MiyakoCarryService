@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return false;
             }
             var triggerZoneDatas = TrapDatas.GetOrAdd(labyrinthTrapType, _ => new());
-            return triggerZoneDatas.All(triggerZoneData => GClass3592.Instance.HashSet_0.Contains(triggerZoneData.Id));
+            return !triggerZoneDatas.All(triggerZoneData => GClass3592.Instance.HashSet_0.Contains(triggerZoneData.Id));
         }
 
         private void RefreshTrapState()
@@ -86,7 +86,14 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-
+            foreach ((var labyrinthTrapType, var triggerZoneDatas) in TrapDatas)
+            {
+                var isTrapDisabled = IsTrapDisabled(labyrinthTrapType);
+                foreach (var triggerZoneData in triggerZoneDatas)
+                {
+                    triggerZoneData.SetObstacle(isTrapDisabled);
+                }
+            }
         } 
     }
 }

@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Datas
                 if (collider is BoxCollider boxCollider)
                 {
                     obstacle.center = boxCollider.center;  
-                    obstacle.size = new Vector3(boxCollider.size.x + padding, Mathf.Max(height, boxCollider.size.y), boxCollider.size.z + height); 
+                    obstacle.size = new Vector3(boxCollider.size.x + padding, Mathf.Max(height, boxCollider.size.y), boxCollider.size.z + padding); 
                 }
                 else
                 {

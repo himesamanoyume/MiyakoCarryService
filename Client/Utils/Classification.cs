@@ -110,7 +110,7 @@ namespace MiyakoCarryService.Client.Utils
             }},
             { ELabyrinthTrapType.Valve, new() {
                 "steam_enter_zone_115583983",
-                "steam_exit_zone_3704346085"
+                "steam_enter_zone_3704346085"
             }},
             { ELabyrinthTrapType.Water, new() {
                 "toxicZoneEnter1_2612876931",

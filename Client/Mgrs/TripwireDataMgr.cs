@@ -21,6 +21,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             LoadData(LoadTripwires);
             StartCoroutine(ReloadDataLoop(2f, LoadTripwires));
+            StartCoroutine(ReloadDataLoop(1f, RefreshTripwireState));
         }
 
         private void LoadTripwires()
@@ -33,11 +34,26 @@ namespace MiyakoCarryService.Client.Mgrs
                     var data = tripwireSynchronizableObject.GetData();
                     if (data != null)
                     {
-                        _datas.Add(data);
+                        datas.Add(data);
                     }
                 }
             }
             _datas = datas;
         }
+
+        private void RefreshTripwireState()
+        {
+            foreach (TripwireData tripwireData in _datas)
+            {
+                if (tripwireData.Tripwire.TripwireState is ETripwireState.Wait or ETripwireState.Active or ETripwireState.Exploding)
+                {
+                    tripwireData.SetObstacle(true);
+                }
+                else
+                {
+                    tripwireData.SetObstacle(false);
+                }
+            }
+        } 
     }
 }
