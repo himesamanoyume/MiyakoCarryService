@@ -121,9 +121,9 @@ namespace MiyakoCarryService.Client.Utils
                 "Luquid_enter_zone_2773347541"
             }},
             { ELabyrinthTrapType.Gun, new() {
+                "guntrap_trigger_1446364582",
                 "guntrap_trigger_1628276106",
                 "guntrap_trigger_2131128863",
-                "guntrap_trigger_1446364582",
                 "guntrap_trigger_2505672369"
             }}
         };

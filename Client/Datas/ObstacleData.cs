@@ -22,20 +22,20 @@ namespace MiyakoCarryService.Client.Datas
                 obstacle.carving = true;
                 obstacle.carveOnlyStationary = true;
                 obstacle.shape = NavMeshObstacleShape.Box;
-                var height = 1.5f;
                 var xPadding = 0.6f;
+                var yPadding = 0.1f;
                 var zPadding = 0.1f;
 
                 if (collider is BoxCollider boxCollider)
                 {
                     obstacle.center = boxCollider.center;  
-                    obstacle.size = new Vector3(boxCollider.size.x + xPadding, Mathf.Max(height, boxCollider.size.y), boxCollider.size.z + zPadding); 
+                    obstacle.size = new Vector3(boxCollider.size.x + xPadding, boxCollider.size.y + yPadding, boxCollider.size.z + zPadding); 
                 }
                 else
                 {
                     var bounds = collider.bounds;  
                     obstacle.center = collider.transform.InverseTransformPoint(bounds.center);  
-                    obstacle.size = new Vector3(bounds.size.x + xPadding, Mathf.Max(height, bounds.size.y), bounds.size.z + zPadding); 
+                    obstacle.size = new Vector3(bounds.size.x + xPadding, bounds.size.y + yPadding, bounds.size.z + zPadding); 
                 }
                 _obstacles.Add(collider, obstacle);
             }
