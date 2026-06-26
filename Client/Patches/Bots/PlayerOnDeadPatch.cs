@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(Player __instance, EDamageType damageType)
         {
-            if (!McsMgr.IsHost)
+            if (!Tools.IsHost)
             {
                 return;
             }

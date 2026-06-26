@@ -32,6 +32,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void OnMgrDestroy()
         {
             EventMgr.UnsubscribeAll(this); 
+            OnRaidEnded();
         }
 
         protected virtual void OnGameWorldStarted(GameWorldStartedEvent @event)  

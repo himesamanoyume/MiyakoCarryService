@@ -45,7 +45,8 @@ namespace MiyakoCarryService.Client.Patches.Events
             {
                 var healthController = ___Player.ActiveHealthController;
                 var currentHealth = healthController.GetBodyPartHealth(bodyPart, false);
-                damage = Math.Max(0, currentHealth.Current - 1f);
+                var maxAllowedDamage = Math.Max(0f, currentHealth.Current - 1f);  
+                damage = Math.Min(damage, maxAllowedDamage);  
                 return;
             }
         }
@@ -59,7 +60,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
-            if (!McsMgr.IsHost)
+            if (!Tools.IsHost)
             {
                 return;
             }

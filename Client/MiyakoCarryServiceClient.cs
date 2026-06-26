@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Client
     [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
-        public const string BepInExClientVersion = "1.0.7.0";
+        public const string BepInExClientVersion = "1.0.8.0";
         public static Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
@@ -220,10 +220,17 @@ namespace MiyakoCarryService.Client
             _patches.Add(new OnBeenKilledByAggressorPatch());
             _patches.Add(new TriggerWithIdEnterPatch());
             _patches.Add(new TriggerWithIdExitPatch());
+            _patches.Add(new GetPartToShootPatch());
+            _patches.Add(new IsAllowedPlayerPatch());
+            _patches.Add(new DeactivateMinePatch());
 
             if (FikaInstalled)
             {
-                if (!IsLoadedByScriptEngine)
+                if (IsLoadedByScriptEngine)
+                {
+                    _patches.Add(new PlayerOnDeadPatch());
+                }
+                else
                 {
                     LoadMcsFika();
                 }

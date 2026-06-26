@@ -64,7 +64,6 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void OnMgrDestroy()
         {
             base.OnMgrDestroy();
-            OnRaidEnded();
             Clear();
             _mainCameraInitialized = false;
             _opticCameraInitialized = false;
@@ -203,11 +202,6 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                 }
             }
-        }
-
-        private void OnDestroy()
-        {
-            Clear();
         }
 
         private void Clear()

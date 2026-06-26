@@ -72,12 +72,6 @@ namespace MiyakoCarryService.Client.Mgrs
             _gamePlayerOwner = null;
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-        }
-
         void Update()
         {
             if (!_gameloop.IsVaildGameWorld)
@@ -98,7 +92,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 id =>
                 {
                     var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
                     {
                         mcsBotPlayer.Profile.Info.GroupId = "Fika";
                         mcsBotPlayer.Profile.Info.TeamId = "Fika";
@@ -112,7 +106,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         return oldPlayer;
                     }
                     var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost && mcsBotPlayer != null)
+                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
                     {
                         mcsBotPlayer.Profile.Info.GroupId = "Fika";
                         mcsBotPlayer.Profile.Info.TeamId = "Fika";
@@ -132,6 +126,19 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
                 action(mcsBotPlayer);
+            }
+        }
+
+        private void ForEachAliveBot(Action<Player, BodyPartType> action, BodyPartType bodyPartType)
+        {
+            foreach (var id in _mySquadMcsBotPlayerIds)
+            {
+                var mcsBotPlayer = TryGetMcsBotPlayer(id);
+                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                {
+                    continue;
+                }
+                action(mcsBotPlayer, bodyPartType);
             }
         }
 
@@ -238,6 +245,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction));
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction));
             actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamEscortCommandMenu, mcsBotPlayers, Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamAimingTypeCommandMenu, mcsBotPlayers, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME));
             actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction));
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -253,7 +261,8 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, BuildAimingTypeCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -266,6 +275,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamQuestEscortCommandMenu, mcsBotPlayers, Locales.TEAMQUESTESCORTCOMMAND_NAME, Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME));
             actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamTransitEscortCommandMenu, mcsBotPlayers, Locales.TEAMTRANSITESCORTCOMMAND_NAME, Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME));
             actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamExfilEscortCommandMenu, mcsBotPlayers, Locales.TEAMEXFILESCORTCOMMAND_NAME, Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME));
+            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamSwitchEscortCommandMenu, mcsBotPlayers, Locales.TEAMSWITCHESCORTCOMMAND_NAME, Locales.TEAMSWITCHESCORTCOMMAND_TARGETNAME));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -277,6 +287,57 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTESCORTCOMMAND_NAME, Locales.QUESTESCORTCOMMAND_TARGETNAME, BuildQuestEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.TRANSITESCORTCOMMAND_NAME, Locales.TRANSITESCORTCOMMAND_TARGETNAME, BuildTransitEscortCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.EXFILESCORTCOMMAND_NAME, Locales.EXFILESCORTCOMMAND_TARGETNAME, BuildExfilEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHESCORTCOMMAND_NAME, Locales.SWITCHESCORTCOMMAND_TARGETNAME, BuildSwitchEscortCommandMenu, mcsBotPlayer));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildTeamAimingTypeCommandMenu(List<Player> mcsBotPlayers)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(head, head, ChangeAimingBodyPartCommandAction, BodyPartType.head));
+
+            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(body, body, ChangeAimingBodyPartCommandAction, BodyPartType.body));
+
+            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(leftArm, leftArm, ChangeAimingBodyPartCommandAction, BodyPartType.leftArm));
+
+            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(rightArm, rightArm, ChangeAimingBodyPartCommandAction, BodyPartType.rightArm));
+
+            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(leftLeg, leftLeg, ChangeAimingBodyPartCommandAction, BodyPartType.leftLeg));
+
+            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeTeamCommand(rightLeg, rightLeg, ChangeAimingBodyPartCommandAction, BodyPartType.rightLeg));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildAimingTypeCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(head, head, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.head));
+
+            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(body, body, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.body));
+
+            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(leftArm, leftArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftArm));
+
+            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(rightArm, rightArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightArm));
+
+            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(leftLeg, leftLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftLeg));
+
+            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+            actionsReturnClass.Actions.Add(MakeMemberCommand(rightLeg, rightLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightLeg));
 
             PostBuildCommandMenu(actionsReturnClass);
         }
@@ -288,7 +349,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
-                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, transitData));
+                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, transitData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -301,7 +362,20 @@ namespace MiyakoCarryService.Client.Mgrs
             var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
-                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, exfilData));
+                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, exfilData));
+            }
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildTeamSwitchEscortCommandMenu(List<Player> mcsBotPlayers)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            foreach (var switchData in switchDatas)
+            {
+                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, switchData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -348,7 +422,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
-                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, transitData));
+                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, transitData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -361,7 +435,20 @@ namespace MiyakoCarryService.Client.Mgrs
             var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
-                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, exfilData));
+                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, exfilData));
+            }
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildSwitchEscortCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            foreach (var switchData in switchDatas)
+            {
+                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, switchData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -373,7 +460,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var questData in questDatas)
             {
-                actionsReturnClass.Actions.Add(TeamEscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayers, questData));
+                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, questData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -385,7 +472,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var questData in questDatas)
             {
-                actionsReturnClass.Actions.Add(EscortToTriggerPosCommand(EscortToTriggerPosCommandAction, mcsBotPlayer, questData));
+                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, questData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -408,6 +495,11 @@ namespace MiyakoCarryService.Client.Mgrs
             return MakeCommand(name, targetName, false, () => action(mcsBotPlayer));
         }
 
+        private ActionsTypesClass MakeMemberCommand(string name, string targetName, bool disabled, Action<Player, BodyPartType> action, Player mcsBotPlayer, BodyPartType bodyPartType)
+        {
+            return MakeCommand(name, targetName, disabled, () => action(mcsBotPlayer, bodyPartType));
+        }
+
         private ActionsTypesClass MakeMemberCommand(string name, string targetName, bool disabled, Action<Player> action, Player mcsBotPlayer)
         {
             return MakeCommand(name, targetName, disabled, () => action(mcsBotPlayer));
@@ -416,6 +508,11 @@ namespace MiyakoCarryService.Client.Mgrs
         private ActionsTypesClass MakeTeamCommand(string name, string targetName, Action<Player> action)
         {
             return MakeCommand(name, targetName, false, () => ForEachAliveBot(action));
+        }
+
+        private ActionsTypesClass MakeTeamCommand(string name, string targetName, Action<Player, BodyPartType> action, BodyPartType bodyPartType)
+        {
+            return MakeCommand(name, targetName, false, () => ForEachAliveBot(action, bodyPartType));
         }
 
         private ActionsTypesClass TeamCommandSubMenu(Action<List<Player>> action, List<Player> mcsBotPlayers)
@@ -433,13 +530,13 @@ namespace MiyakoCarryService.Client.Mgrs
             return MakeMemberCommand(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, !mcsBotPlayer.HealthController.IsAlive, action, mcsBotPlayer);
         }
 
-        private ActionsTypesClass TeamEscortToTriggerPosCommand(Action<Player, TriggerData> action, List<Player> mcsBotPlayers, TriggerData triggerData)
+        private ActionsTypesClass TeamEscortToWorldPosCommand(Action<Player, WorldData> action, List<Player> mcsBotPlayers, WorldData worldData)
         {
             return new ActionsTypesClass
             {
-                Name = triggerData.GetActionName(),
-                TargetName = triggerData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
-                Disabled = triggerData.IsDisabled(),
+                Name = worldData.GetActionName(),
+                TargetName = worldData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
+                Disabled = worldData.IsDisabled(),
                 Action = () =>
                 {
                     foreach (var mcsBotPlayer in mcsBotPlayers)
@@ -448,34 +545,34 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             continue;
                         }
-                        action(mcsBotPlayer, triggerData);
+                        action(mcsBotPlayer, worldData);
                     }
                 }
             };
         }
 
-        private ActionsTypesClass EscortToTriggerPosCommand(Action<Player, TriggerData> action, Player mcsBotPlayer, TriggerData triggerData)
+        private ActionsTypesClass EscortToWorldPosCommand(Action<Player, WorldData> action, Player mcsBotPlayer, WorldData worldData)
         {
             return new ActionsTypesClass
             {
-                Name = triggerData.GetActionName(),
-                TargetName = triggerData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
-                Disabled = triggerData.IsDisabled(),
-                Action = () => action(mcsBotPlayer, triggerData)
+                Name = worldData.GetActionName(),
+                TargetName = worldData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
+                Disabled = worldData.IsDisabled(),
+                Action = () => action(mcsBotPlayer, worldData)
             };
         }
 
         #region Action
 
-        private void EscortToTriggerPosCommandAction(Player mcsBotPlayer, TriggerData triggerData)
+        private void EscortToWorldPosCommandAction(Player mcsBotPlayer, WorldData worldData)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
                     CommandPacketType = ECommandPacketType.Escort,
-                    Position = triggerData.GetPos()
+                    Position = worldData.GetPos()
                 });
             }
             else
@@ -494,7 +591,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
-                    mcsBotPlayerData.EscortPos = triggerData.GetPos();
+                    mcsBotPlayerData.EscortPos = worldData.GetPos();
                     mcsBotPlayerData.IsLooting = false;
                 }
             }
@@ -503,7 +600,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -541,7 +638,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void OnYourOwnCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -570,7 +667,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void RegroupCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -599,7 +696,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void GoToPointCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
                 {
@@ -640,9 +737,37 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
+        private void ChangeAimingBodyPartCommandAction(Player mcsBotPlayer, BodyPartType aimingBodyPartType)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.AimingBodyPart,
+                    Position = null,
+                    AimingBodyPartType = aimingBodyPartType
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.AimingBodyPartType = aimingBodyPartType;
+                }
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger,
+                });
+            }
+            CloseCommandMenuAction();
+        }
+
         private void HoldPositionCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -672,7 +797,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void ForceTeleportCommandAction(Player mcsBotPlayer)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -749,7 +874,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
                 {

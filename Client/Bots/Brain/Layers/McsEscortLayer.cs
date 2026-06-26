@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData == null)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:Uninitialized");
                 }
 
                 if (McsBotPlayerData.EscortPos.HasValue)
@@ -72,6 +72,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
+
+#if DEBUG
+            if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+            {
+                return false;
+            }
+#endif
 
             if (McsBotPlayerData == null)
             {

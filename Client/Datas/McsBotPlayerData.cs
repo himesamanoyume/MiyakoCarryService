@@ -20,6 +20,7 @@ namespace MiyakoCarryService.Client.Datas
         public GamePlayerOwner LeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
+        public BodyPartType AimingBodyPartType = BodyPartType.head;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
         public Vector3? EscortPos = null;

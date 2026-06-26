@@ -103,7 +103,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled)
             {
-                if (McsMgr.IsHost)
+                if (Tools.IsHost)
                 {
                     var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                     if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
@@ -238,12 +238,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 _subTitles.Clear();
             }
-        }
-
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
         }
 
         public class Subtitles

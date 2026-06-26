@@ -10,6 +10,7 @@ namespace MiyakoCarryService.Fika.Packets
     {
         public ECommandPacketType CommandType;
         public Vector3? Position;
+        public BodyPartType AimingBodyPartType;
 
         public CommandPacket()
         {
@@ -21,6 +22,7 @@ namespace MiyakoCarryService.Fika.Packets
             base.Deserialize(reader);
             CommandType = reader.GetEnum<ECommandPacketType>();
             Position = reader.GetNullableUnmanaged<Vector3>();
+            AimingBodyPartType = reader.GetEnum<BodyPartType>();
         }
 
         public override void Serialize(NetDataWriter writer)
@@ -28,6 +30,7 @@ namespace MiyakoCarryService.Fika.Packets
             base.Serialize(writer);
             writer.PutEnum(CommandType);
             writer.PutNullableUnmanaged(Position);
+            writer.PutEnum(AimingBodyPartType);
         }
     }
 }

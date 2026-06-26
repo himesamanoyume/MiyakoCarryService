@@ -10,18 +10,14 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class QuestDataMgr : TriggerDataMgr<QuestDataMgr>
+    public sealed class QuestDataMgr : GameWorldDataMgr<QuestDataMgr>
     {
         private List<TriggerWithId> _triggersWithIds;
         // public HashSet<string> QuestNeedItemList { get; private set; } = new();
 
-        public sealed override void Start()
-        {
-            base.Start();
-        }
-
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadQuestData);
             StartCoroutine(ReloadDataLoop(10f, LoadQuestData));
         }
@@ -36,18 +32,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _triggersWithIds = null;
         }
 
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
-            // if (QuestNeedItemList != null)
-            // {
-            //     QuestNeedItemList.Clear();
-            // }
-            // QuestNeedItemList = null;
-        }
-
-        protected void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
+        private void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest)
         {
             if (_triggersWithIds == null)
             {
@@ -250,7 +235,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected void LoadQuestData()
+        private void LoadQuestData()
         {
             var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (myPlayer == null)

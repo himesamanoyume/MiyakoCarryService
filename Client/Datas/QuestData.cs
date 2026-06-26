@@ -1,5 +1,6 @@
 
 using System;
+using System.Linq;
 using EFT.Quests;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -21,11 +22,13 @@ namespace MiyakoCarryService.Client.Datas
             _conditionRef = new WeakReference<Condition>(condition);
             _questRef = new WeakReference<QuestDataClass>(quest);
             _transformRef = new WeakReference<Transform>(questTransform);
-            _collider = questTransform.GetComponent<Collider>();
+            _colliders = questTransform.GetComponentsInChildren<Collider>().ToList();
         }
 
         public override string GetActionName() => QuestCondition.id.ToString().McsLocalized();
+
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
+        
         public override bool IsDisabled() => false;
 
         public override void Dispose()

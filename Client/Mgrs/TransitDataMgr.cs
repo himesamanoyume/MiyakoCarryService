@@ -4,29 +4,23 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class TransitDataMgr : TriggerDataMgr<TransitDataMgr>
+    public sealed class TransitDataMgr : GameWorldDataMgr<TransitDataMgr>
     {
         protected sealed override void OnRaidStarted()
         {
+            base.OnRaidStarted();
             LoadData(LoadTransitPoints);
-        }
-
-        protected override void OnRaidEnded()
-        {
-            base.OnRaidEnded();
-        }
-
-        public override void OnMgrDestroy()
-        {
-            base.OnMgrDestroy();
-            OnRaidEnded();
         }
 
         private void LoadTransitPoints()
         {
             foreach (var transitPoint in LocationScene.GetAllObjects<TransitPoint>())
             {
-                _datas.Add(transitPoint.GetData());
+                var data = transitPoint.GetData();
+                if (data != null)
+                {
+                    _datas.Add(data);
+                }
             }
         }
     }

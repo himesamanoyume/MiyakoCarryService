@@ -134,6 +134,12 @@ namespace MiyakoCarryService.Client
             ExfilDataMgr.Enable();
             TransitDataMgr.Enable();
             QuestDataMgr.Enable();
+            SwitchDataMgr.Enable();
+            TripwireDataMgr.Enable();
+            BarbedWireDataMgr.Enable();
+            BorderZoneDataMgr.Enable();
+            DamageTriggerDataMgr.Enable();
+            RoomTrapDataMgr.Enable();
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
@@ -267,6 +273,10 @@ namespace MiyakoCarryService.Client
             HighlightShader = null;
             if (Mgrs != null)
             {
+                foreach (var mgr in Mgrs.Values)
+                {
+                    mgr.OnMgrDestroy();
+                }
                 Mgrs.Clear();
             }
             Mgrs = null;
@@ -661,7 +671,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Move.REACH_DIST_COVER = 2f;
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
 
-            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.99f;
+            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
             settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 10f;
             settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
@@ -701,6 +711,9 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
             settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
+            settings.FileSettings.Mind.IGNORE_TRAP = false;
+            settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
+            settings.FileSettings.Mind.CHACE_TO_DEACTIVATE = 100f;
 
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_SAVAGE = leadPlayer.Side == EPlayerSide.Savage;
             settings.FileSettings.Mind.CAN_RECEIVE_PLAYER_REQUESTS_BEAR = leadPlayer.Side == EPlayerSide.Bear;
@@ -739,7 +752,7 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Boss.SHALL_WARN = false;
             settings.FileSettings.Boss.BIG_PIPE_ARTILLERY_COUNT = 1;
-            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 40f;
+            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 30f;
 
             settings.FileSettings.Core.CanGrenade = true;
             settings.FileSettings.Core.CanRun = true;
@@ -852,7 +865,7 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
-            botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(settings.FileSettings.Core.DamageCoeff);
+            botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(1f);
 
             botOwner.LookSensor.ShootFromEyes = true;
             settings.FileSettings.Look.SHOOT_FROM_EYES = true;

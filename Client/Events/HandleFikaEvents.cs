@@ -18,6 +18,7 @@ namespace MiyakoCarryService.Client.Events
         public Player McsBotPlayer { get; set; }
         public ECommandPacketType CommandPacketType { get; set; }
         public Vector3? Position { get; set; }
+        public BodyPartType AimingBodyPartType { get; set; }
     }
 
     public sealed class ConfigEntrySettingChangedEvent : IMcsEvent

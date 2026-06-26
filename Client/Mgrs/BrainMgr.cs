@@ -24,16 +24,17 @@ namespace MiyakoCarryService.Client.Mgrs
 
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 65);
             BrainManager.AddCustomLayer(typeof(McsEscortLayer), Classification.AllBrainNames, 66);
+            BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), Classification.AllBrainNames, 67);
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 66);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 69);
 
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)], 186);
             }
             else
             {
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 86);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), Classification.AllBrainNames.Except([nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)]).ToList(), 89);
 
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), [nameof(EBrainName.BossZryachiy), nameof(EBrainName.SctPredvst)], 186);
             }
@@ -46,7 +47,8 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 BrainManager.AddCustomLayer(typeof(McsCommonLayer), _customBrainNames, 65);
                 BrainManager.AddCustomLayer(typeof(McsEscortLayer), _customBrainNames, 66);
-                BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 86);
+                BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), _customBrainNames, 67);
+                BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 89);
             }
         }
 
@@ -58,6 +60,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             BrainManager.RemoveLayer(nameof(McsCommonLayer), Classification.AllBrainNames);
             BrainManager.RemoveLayer(nameof(McsEscortLayer), Classification.AllBrainNames);
+            BrainManager.RemoveLayer(nameof(McsAvoidDangerLayer), Classification.AllBrainNames);
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
             {
@@ -77,6 +80,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 BrainManager.RemoveLayer(nameof(McsCommonLayer), _customBrainNames);
                 BrainManager.RemoveLayer(nameof(McsEscortLayer), _customBrainNames);
                 BrainManager.RemoveLayer(nameof(McsFightLayer), _customBrainNames);
+                BrainManager.RemoveLayer(nameof(McsAvoidDangerLayer), _customBrainNames);
             }
         }
     }

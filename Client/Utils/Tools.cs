@@ -15,6 +15,9 @@ namespace MiyakoCarryService.Client.Utils
     public static class Tools
     {
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+
+        public static bool IsHost => McsMgr.IsHost;
+        
         public static bool IsPlayerInventory(string stringTemplateId)
         {
             return stringTemplateId == CommonId.DefaultInventory;
@@ -59,6 +62,20 @@ namespace MiyakoCarryService.Client.Utils
                 EItemType.Special => blockItemType.HasFlag(EBlockItemType.Special),
                 EItemType.Weapon => blockItemType.HasFlag(EBlockItemType.Weapon),
                 _ => false
+            };
+        }
+
+        public static string GetBodyPartTypeLocales(BodyPartType bodyPartType)
+        {
+            return bodyPartType switch
+            {
+                BodyPartType.head => Locales.HEAD,
+                BodyPartType.body => Locales.BODY,
+                BodyPartType.leftArm => Locales.LEFTARM,
+                BodyPartType.leftLeg => Locales.LEFTLEG,
+                BodyPartType.rightArm => Locales.RIGHTARM,
+                BodyPartType.rightLeg => Locales.RIGHTLEG,
+                _ => ""
             };
         }
 

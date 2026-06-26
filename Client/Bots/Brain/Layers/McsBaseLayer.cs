@@ -151,6 +151,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(MeleeAttackLogic), EndMeleeAttack },
                 { typeof(RunToPointLogic), EndGoToPoint },
                 { typeof(EscortToPointByWayLogic), EndEscortToPointByWay },
+                { typeof(FlashedLogic), EndFlashed },
+                { typeof(DeactivateMineLogic), EndDeactivateMine },
+                { typeof(RunAwayGrenadeLogic), EndRunAwayGrenade },
+                { typeof(RunAwayArtilleryLogic), EndRunAwayArtillery },
+                { typeof(RunAwayBTRLogic), EndRunAwayBTR },
             };
         }
 
@@ -1556,6 +1561,101 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 accumulated += segLen;
             }
             return corners[corners.Length - 1];
+        }
+
+        protected virtual void CheckDanger(bool deavtivatingMines = true)
+        {
+            if (deavtivatingMines)
+            {
+                BotOwner.BewarePlantedMine.Update();
+            }
+
+            BotOwner.BotAvoidDangerPlaces.Update();
+        }
+
+        protected virtual bool EndDeactivateMine()
+        {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
+            if (!BotOwner.BewarePlantedMine.CanDeactivate())
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool EndRunAwayGrenade()
+        {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
+            if (!BotOwner.BewareGrenade.ShallRunAway())
+            {
+                return true;
+            }
+
+            if (BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool EndRunAwayArtillery()
+        {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
+            if (!BotOwner.ArtilleryDangerPlace.ShallRunAway())
+            {
+                return true;
+            }
+
+            if (BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool EndRunAwayBTR()
+        {
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
+            if (!BotOwner.BewareBTR.ShallRunAway())
+            {
+                return true;
+            }
+
+            if (BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool EndFlashed()
+        {
+            if (!BotOwner.FlashGrenade.IsFlashed)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
