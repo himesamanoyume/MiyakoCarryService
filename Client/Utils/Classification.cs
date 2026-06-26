@@ -123,8 +123,9 @@ namespace MiyakoCarryService.Client.Utils
             { ELabyrinthTrapType.Gun, new() {
                 "guntrap_trigger_1446364582",
                 "guntrap_trigger_1628276106",
-                "guntrap_trigger_2131128863",
-                "guntrap_trigger_2505672369"
+                // 后两个区域过于巨大且低效，不仅远远超出了触发霰弹陷阱的范围，还会影响到房间外的寻路
+                // "guntrap_trigger_2131128863",
+                // "guntrap_trigger_2505672369"
             }}
         };
 
