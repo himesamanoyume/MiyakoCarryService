@@ -226,7 +226,11 @@ namespace MiyakoCarryService.Client
 
             if (FikaInstalled)
             {
-                if (!IsLoadedByScriptEngine)
+                if (IsLoadedByScriptEngine)
+                {
+                    _patches.Add(new PlayerOnDeadPatch());
+                }
+                else
                 {
                     LoadMcsFika();
                 }

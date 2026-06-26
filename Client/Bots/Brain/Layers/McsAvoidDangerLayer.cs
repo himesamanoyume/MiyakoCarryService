@@ -59,7 +59,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
                 }
 
-                return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
+                return new Action(typeof(SimplePatrolLogic), "Mcs:NoDanger");
             }
             catch (Exception e)
             {
@@ -80,9 +80,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
+            CheckDanger(true);
+
             if (BotOwner.WeaponManager.Grenades.ThrowindNow)
             {
                 return false;
+            }
+
+            if (BotOwner.BewarePlantedMine.CanDeactivate())
+            {
+                return true;
             }
 
             if (BotOwner.FlashGrenade.IsFlashed)
@@ -116,6 +123,37 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
+        }
+
+        protected override bool EndGoToCoverPoint()  
+        {  
+            if (!BotOwner.ArtilleryDangerPlace.ShallRunAway() && !BotOwner.BewareGrenade.ShallRunAway())  
+            {  
+                if (BotOwner.Memory.IsInCover && BotOwner.SmokeGrenade.IsInSmoke && BotOwner.Memory.CurCustomCoverPoint != null)  
+                {  
+                    BotOwner.Memory.CurCustomCoverPoint.Spotted(10f);  
+                }  
+                return true;  
+            }  
+        
+            return true;  
+        }
+
+        protected override bool EndHoldPosition()
+        {
+            if (BotOwner.BewareGrenade.ShallRunAway() && BotOwner.Memory.IsInCover && BotOwner.BewareBTR.ShallRunAway() && BotOwner.Memory.HaveEnemy && BotOwner.Memory.GoalEnemy.CanShoot)
+            {
+                return true;
+            }
+            if (BotOwner.BewareGrenade.ShallRunAway() && BotOwner.Memory.IsInCover && BotOwner.Memory.CurCustomCoverPoint.CoverLevel == CoverLevel.Stay && BotOwner.Memory.CurCustomCoverPoint.IsGoodForGrenade(BotOwner.BewareGrenade.GrenadeDangerPoint, BotOwner) && !BotOwner.BewareBTR.ShallRunAway())
+            {
+                return false;
+            }
+            if (BotOwner.ArtilleryDangerPlace.IsActive)
+            {
+                return true;
+            }
+            return true;
         }
     }
 }

@@ -35,56 +35,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                     {
-                        if (BotOwner.Medecine.FirstAid.Damaged)
-                        {
-                            if (BotOwner.Medecine.FirstAid.HaveSmth2Use)
-                            {
-                                if (!BotOwner.Memory.IsInCover)
-                                {
-                                    return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForFirstAid");
-                                }
-                            }
-                        }
-
-                        if (BotOwner.Medecine.SurgicalKit.Damaged)
-                        {
-                            if (BotOwner.Medecine.SurgicalKit.HaveSmth2Use)
-                            {
-                                if (!BotOwner.Memory.IsInCover)
-                                {
-                                    return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgical");
-                                }
-                            }
-                        }
-
                         if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                         {
                             return new Action(typeof(HealLogic), "Mcs:Healing");
                         }
 
                         return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
-                    }
-                }
-
-                if (BotOwner.Medecine.FirstAid.Damaged)
-                {
-                    if (BotOwner.Medecine.FirstAid.HaveSmth2Use)
-                    {
-                        if (!BotOwner.Memory.IsInCover)
-                        {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForFirstAid");
-                        }
-                    }
-                }
-
-                if (BotOwner.Medecine.SurgicalKit.Damaged)
-                {
-                    if (BotOwner.Medecine.SurgicalKit.HaveSmth2Use)
-                    {
-                        if (!BotOwner.Memory.IsInCover)
-                        {
-                            return new Action(typeof(RunToCoverLogic), "Mcs:RunToCoverForSurgicalKit");
-                        }
                     }
                 }
 
@@ -95,19 +51,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                CheckDanger(true);
-
-                if (BotOwner.BewarePlantedMine.CanDeactivate())
-                {
-                    return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
-                }
-
                 if (McsBotPlayerData != null)
                 {
-                    // 检测周围是否有符合条件的战利品
                     if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
                     {
-                        // 尝试去拿战利品
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
                     }
                 }
@@ -115,7 +62,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (mcsLeadPlayerPos == null)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Basic:leadPosNull");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
                 if (_nextUpdatePosTime < Time.time)
