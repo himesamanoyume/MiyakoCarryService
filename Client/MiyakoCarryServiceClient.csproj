@@ -13,7 +13,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceClient</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>1.0.8.0</Version>
+    <Version>1.0.9.0</Version>
     <AssemblyTitle>MiyakoCarryServiceClient</AssemblyTitle>
     <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Client</RootNamespace>
