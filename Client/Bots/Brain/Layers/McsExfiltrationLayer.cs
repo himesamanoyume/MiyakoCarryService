@@ -8,7 +8,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
     public class McsExfiltrationLayer : McsBaseLayer<McsExfiltrationLayer>
     {
-        // 替换GClass75
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
 

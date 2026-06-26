@@ -3,7 +3,6 @@
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
-using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
