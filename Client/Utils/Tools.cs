@@ -97,7 +97,7 @@ namespace MiyakoCarryService.Client.Utils
             return result;
         }
 
-        public static List<ItemData> GetRangeOwnerItemData(Vector3 mcsBotPlayerPos, float distance)
+        public static List<ItemData> GetRangeOwnerItemData(Vector3 playerPos, float distance)
         {
             var result = new List<ItemData>();
             var itemOwners = Singleton<GameWorld>.Instance.ItemOwners;
@@ -111,7 +111,7 @@ namespace MiyakoCarryService.Client.Utils
                     continue;
                 }
 
-                if (itemData.RootTransform.position.McsSqrDistance(mcsBotPlayerPos) >= distance * distance)
+                if (itemData.RootTransform.position.McsSqrDistance(playerPos) >= distance * distance)
                 {
                     continue;
                 }

@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public class SwitchData : WorldData
+    public class SwitchData : InteractableObjectData
     {
         private WeakReference<Switch> _switchRef;
         public Switch Switch => _switchRef.TryGetTarget(out var @switch) ? @switch : null;
@@ -47,5 +47,9 @@ namespace MiyakoCarryService.Client.Datas
             }
             return center;
         }
+
+        public override string Id() => Switch.Id;
+
+        public override bool IsProxyActionDisabled() => Switch.DoorState is not EDoorState.Shut;
     }
 }

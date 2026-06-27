@@ -140,6 +140,7 @@ namespace MiyakoCarryService.Client
             BorderZoneDataMgr.Enable();
             DamageTriggerDataMgr.Enable();
             RoomTrapDataMgr.Enable();
+            DoorDataMgr.Enable();
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);

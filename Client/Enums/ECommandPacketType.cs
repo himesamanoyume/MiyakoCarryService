@@ -10,6 +10,9 @@ namespace MiyakoCarryService.Client.Enums
         OnYourOwn,
         Escort,
         GoToExfil,
-        AimingBodyPart
+        AimingBodyPart,
+        QuestProxyAction,
+        LootProxyAction,
+        InteractionProxyAction
     }
 }

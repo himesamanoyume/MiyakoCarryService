@@ -1,14 +1,11 @@
-
-using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 
-namespace MiyakoCarryService.Client.Datas
+namespace MiyakoCarryService.Client.Interfaces
 {
-    public abstract class WorldData : BaseData, IActor
+    public interface IActor
     {
         public abstract string GetActionName();
         public abstract string GetActionTargetName(Vector3 myPlayerPos);
         public abstract bool IsDisabled();
-        public abstract Vector3 GetPos();
     }
 }

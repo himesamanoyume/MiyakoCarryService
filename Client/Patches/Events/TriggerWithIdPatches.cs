@@ -32,10 +32,10 @@ namespace MiyakoCarryService.Client.Patches.Events
                     var experienceTriggerTraverse = Traverse.Create(experienceTrigger);
                     mcsLeadPlayer.SpecialPlaceVisited(experienceTrigger.Id, experienceTriggerTraverse.Field<int>("_experience").Value);
                 }
-                else if (__instance is PlaceItemTrigger placeItemTrigger)
-                {
-                    mcsLeadPlayer.OnPlaceItemTriggerChanged(placeItemTrigger);
-                }
+                // else if (__instance is PlaceItemTrigger placeItemTrigger)
+                // {
+                //     mcsLeadPlayer.OnPlaceItemTriggerChanged(placeItemTrigger);
+                // }
             }
         }
     }
@@ -58,10 +58,10 @@ namespace MiyakoCarryService.Client.Patches.Events
                 var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 mcsLeadPlayer.RemoveTriggerZone(__instance);
 
-                if (__instance is PlaceItemTrigger)
-                {
-                    mcsLeadPlayer.OnPlaceItemTriggerChanged(null);
-                }
+                // if (__instance is PlaceItemTrigger)
+                // {
+                //     mcsLeadPlayer.OnPlaceItemTriggerChanged(null);
+                // }
             }
         }
     }

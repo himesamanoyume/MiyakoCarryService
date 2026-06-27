@@ -170,5 +170,12 @@ namespace MiyakoCarryService.Client.Utils
         public const string RIGHTARM = "Mcs/RightArm";
         public const string LEFTLEG = "Mcs/LeftLeg";
         public const string RIGHTLEG = "Mcs/RightLeg";
+        public const string PROXYCOMMAND_NAME = "Mcs/ProxyCommand Name";
+        public const string PROXYCOMMAND_TARGETNAME = "Mcs/ProxyCommand TargetName";
+        public const string QUESTPROXYCOMMAND_NAME = "Mcs/QuestProxyCommand Name";
+        public const string QUESTPROXYCOMMAND_TARGETNAME = "Mcs/QuestProxyCommand TargetName";
+        public const string SWITCHPROXYCOMMAND_NAME = "Mcs/SwitchProxyCommand Name";
+        public const string SWITCHPROXYCOMMAND_TARGETNAME = "Mcs/SwitchProxyCommand TargetName";
+        public const string SUBQUESTPROXYCOMMAND_TARGETNAME = "Mcs/SubQuestProxyCommand TargetName";
     }
 }

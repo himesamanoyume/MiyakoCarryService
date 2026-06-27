@@ -11,6 +11,7 @@ using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
@@ -263,6 +264,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, BuildAimingTypeCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, BuildProxyCommandMenu, mcsBotPlayer));
             actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -478,6 +480,58 @@ namespace MiyakoCarryService.Client.Mgrs
             PostBuildCommandMenu(actionsReturnClass);
         }
 
+        private void BuildProxyCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, BuildQuestProxyCommandMenu, mcsBotPlayer));
+            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, BuildSwitchProxyCommandMenu, mcsBotPlayer));
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildQuestProxyCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
+            if (questDataMgr != null)
+            {
+                var questDataGroup = questDataMgr.GetQuestDataByGroup();
+                foreach ((var questDataClass, var questDatas) in questDataGroup)
+                {
+                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, false, () => BuildSubQuestProxyCommandMenu(questDatas, mcsBotPlayer)));
+                }
+            }
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildSwitchProxyCommandMenu(Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            foreach (var switchData in switchDatas)
+            {
+                actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(SwitchProxyActionCommandAction, mcsBotPlayer, switchData));
+            }
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        private void BuildSubQuestProxyCommandMenu(List<QuestData> questDatas, Player mcsBotPlayer)
+        {
+            PreBuildCommandMenu(out var actionsReturnClass);
+
+            foreach (var questData in questDatas)
+            {
+                actionsReturnClass.Actions.Add(ExcuteQuestProxyActionCommand(QuestProxyActionCommandAction, mcsBotPlayer, questData));
+            }
+
+            PostBuildCommandMenu(actionsReturnClass);
+        }
+
         #endregion
 
         private static ActionsTypesClass MakeCommand(string name, string targetName, bool disabled, Action action)
@@ -559,6 +613,28 @@ namespace MiyakoCarryService.Client.Mgrs
                 TargetName = worldData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
                 Disabled = worldData.IsDisabled(),
                 Action = () => action(mcsBotPlayer, worldData)
+            };
+        }
+
+        private ActionsTypesClass ExcuteQuestProxyActionCommand(Action<Player, QuestData> action, Player mcsBotPlayer, QuestData questData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = questData.GetActionName(),
+                TargetName = questData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
+                Disabled = questData.IsProxyActionDisabled(),
+                Action = () => action(mcsBotPlayer, questData)
+            };
+        }
+
+        private ActionsTypesClass ExcuteCommonProxyActionCommand(Action<Player, IProxyActor> action, Player mcsBotPlayer, IProxyActor interactiveObjectData)
+        {
+            return new ActionsTypesClass
+            {
+                Name = interactiveObjectData.GetActionName(),
+                TargetName = interactiveObjectData.GetActionTargetName(Singleton<GameWorld>.Instance.MainPlayer.Position),
+                Disabled = interactiveObjectData.IsProxyActionDisabled(),
+                Action = () => action(mcsBotPlayer, interactiveObjectData)
             };
         }
 
@@ -910,6 +986,78 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
                 }
             }
+        }
+
+        private void SwitchProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.InteractionProxyAction,
+                    TargetId = proxyAction.Id()
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (botOwner.Memory.HaveEnemy)
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                }
+                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.StopMove();
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
+                    mcsBotPlayerData.ProxyPos = null;
+                    mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
+                    mcsBotPlayerData.EscortPos = null;
+                    mcsBotPlayerData.IsLooting = false;
+                }
+            }
+            CloseCommandMenuAction();
+        }
+
+        private void QuestProxyActionCommandAction(Player mcsBotPlayer, QuestData questData)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.QuestProxyAction,
+                    Position = questData.GetPos()
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (botOwner.Memory.HaveEnemy)
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                }
+                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.StopMove();
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
+                    mcsBotPlayerData.ProxyPos = questData.GetPos();
+                    mcsBotPlayerData.ProxyTargetId = null;
+                    mcsBotPlayerData.EscortPos = null;
+                    mcsBotPlayerData.IsLooting = false;
+                }
+            }
+            CloseCommandMenuAction();
         }
 
         #endregion

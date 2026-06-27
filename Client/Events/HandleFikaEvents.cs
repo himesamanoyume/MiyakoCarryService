@@ -19,6 +19,7 @@ namespace MiyakoCarryService.Client.Events
         public ECommandPacketType CommandPacketType { get; set; }
         public Vector3? Position { get; set; }
         public BodyPartType AimingBodyPartType { get; set; }
+        public string TargetId { get; set; }
     }
 
     public sealed class ConfigEntrySettingChangedEvent : IMcsEvent

@@ -188,5 +188,12 @@
     "Mcs/LeftArm": "左臂",
     "Mcs/RightArm": "右臂",
     "Mcs/LeftLeg": "左腿",
-    "Mcs/RightLeg": "右腿"
+    "Mcs/RightLeg": "右腿",
+    "Mcs/ProxyCommand Name": "代理行动",
+    "Mcs/ProxyCommand TargetName" : "命令护航代理执行指令",
+    "Mcs/QuestProxyCommand Name": "代理执行任务",
+    "Mcs/QuestProxyCommand TargetName": "命令护航代理执行任务",
+    "Mcs/SwitchProxyCommand Name": "代理操作开关",
+    "Mcs/SwitchProxyCommand TargetName": "命令护航代理操作开关",
+    "Mcs/SubQuestProxyCommand TargetName": "选择一个任务进行代理"
 }

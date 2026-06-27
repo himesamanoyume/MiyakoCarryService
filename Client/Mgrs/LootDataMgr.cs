@@ -1,7 +1,8 @@
 
-
 using System.Collections.Generic;
+using System.Linq;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -49,10 +50,6 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            if (!Tools.IsHost)
-            {
-                return;
-            }
             StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>));
             StartCoroutine(UpdateItemData(1f));
             LockedLootingTarget.Clear();
@@ -71,6 +68,51 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnMgrDestroy();
             LockedLootingTarget.Clear();
             LockedLootingTargetRootTransform.Clear();
+        }
+
+        public LootData GetNearestLootData(Vector3 playerPos, string templateId)
+        {
+            var itemsInPlayerInventory = new List<ItemData>();
+            foreach (var itemData in Tools.GetAllOwnerItemData())
+            {
+                if (itemData is PlayerData playerData)
+                {
+                    itemsInPlayerInventory.AddRange(playerData.Item.GetAllDatas());
+                }
+            }
+            var worldItems = _datas.Except(itemsInPlayerInventory).OfType<LootData>().Where(i => i.Item.TemplateId == templateId).ToList();
+            if (worldItems.Count > 0)
+            {
+                worldItems.Sort((a, b) => b.RootTransform.position.McsSqrDistance(playerPos).CompareTo(a.RootTransform.position.McsSqrDistance(playerPos)));
+                var targetLootData = worldItems.FirstOrDefault();
+                return targetLootData;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public LootData FindLootData(string itemId)
+        {
+            var itemsInPlayerInventory = new List<ItemData>();
+            foreach (var itemData in Tools.GetAllOwnerItemData())
+            {
+                if (itemData is PlayerData playerData)
+                {
+                    itemsInPlayerInventory.AddRange(playerData.Item.GetAllDatas());
+                }
+            }
+            var worldItems = _datas.Except(itemsInPlayerInventory).OfType<LootData>().Where(i => i.Item.Id == itemId).ToList();
+            if (worldItems.Count > 0)
+            {
+                var targetLootData = worldItems.FirstOrDefault();
+                return targetLootData;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

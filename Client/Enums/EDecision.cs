@@ -10,6 +10,9 @@ namespace MiyakoCarryService.Client.Enums
         ShouldExfil = 1 << 1,
         ShouldGoToPoint = 1 << 2,
         ShouldHoldPosition = 1 << 3,
-        ShouldRegroup = 1 << 4
+        ShouldRegroup = 1 << 4,
+        ShouldQuestProxyAction = 1 << 5,
+        ShouldLootProxyAction = 1 << 6,
+        ShouldInteractionProxyAction = 1 << 7,
     }
 }
