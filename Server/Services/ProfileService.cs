@@ -308,6 +308,11 @@ namespace MiyakoCarryService.Server.Services
             return null;
         }
 
+        public void UpdateIfdianName()
+        {
+            _ifdianNames = _ifdian.Supporter;
+        }
+
         public List<PmcData> GetMcsBotPlayerProfileForInventoryMode(MongoId mcsLeadPlayerId)
         {
             if (_mcsInventoryModeIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))

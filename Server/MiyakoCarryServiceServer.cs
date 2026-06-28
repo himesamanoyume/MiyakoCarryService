@@ -120,6 +120,7 @@ namespace MiyakoCarryService.Server
                     var supporter = jsonUtil.Deserialize<List<string>>(data);
                     ifdian.Timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                     ifdian.Supporter = supporter;
+                    profileService.UpdateIfdianName();
                     await profileService.SaveIfdian();
                 }
                 catch
