@@ -1,5 +1,6 @@
 
 using MiyakoCarryService.Server.Controllers;
+using MiyakoCarryService.Server.Models.Eft.Match;
 using MiyakoCarryService.Server.Models.Eft.Ws;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -71,18 +72,18 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public WsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsBotPlayerProfile, bool isScav)
+        public McsWsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsBotPlayerProfile, bool isScav)
         {
             var data = isScav ? mcsBotPlayerProfile.CharacterData.ScavData : mcsBotPlayerProfile.CharacterData.PmcData;
-            return new WsGroupMatchRaidReady
+            return new McsWsGroupMatchRaidReady
             {
                 EventType = NotificationEventType.groupMatchRaidReady,
                 EventIdentifier = new(),
-                ExtendedProfile = new GroupCharacter
+                ExtendedProfile = new McsGroupCharacter
                 {
                     Id = data.Id.Value,
                     Aid = data.Aid,
-                    Info = new CharacterInfo
+                    Info = new McsCharacterInfo
                     {
                         Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
                         Side = data.Info.Side,
@@ -92,16 +93,18 @@ namespace MiyakoCarryService.Server.Helper
                         SavageLockTime = data.Info.SavageLockTime,
                         SavageNickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.Nickname,
                         HasCoopExtension = data.Info.HasCoopExtension,
+                        Health = data.Health
                     },
-                    VisualRepresentation = new PlayerVisualRepresentation
+                    VisualRepresentation = new McsPlayerVisualRepresentation
                     {
-                        Info = new VisualInfo
+                        Info = new McsVisualInfo
                         {
                             Nickname = data.Info.Nickname,
                             Side = data.Info.Side,
                             MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
                             Level = data.Info.Level,
                             GameVersion = data.Info.GameVersion,
+                            Health = data.Health
                         },
                         Customization = new Customization
                         {
