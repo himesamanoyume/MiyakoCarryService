@@ -13,6 +13,8 @@ namespace MiyakoCarryService.Client.Enums
         AimingBodyPart,
         QuestProxyAction,
         LootProxyAction,
-        InteractionProxyAction
+        InteractionProxyAction,
+        QuestProxyActionCallback,
+        EndProxyAction
     }
 }

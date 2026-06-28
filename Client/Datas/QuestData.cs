@@ -1,6 +1,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.Quests;
@@ -42,7 +43,7 @@ namespace MiyakoCarryService.Client.Datas
             _transformRef = null;
         }
 
-        public void ForceCompleteQuest()
+        public async Task ForceCompleteQuest()
         {
             if (QuestCondition is ConditionLeaveItemAtLocation conditionLeaveItemAtLocation)
             {
@@ -53,6 +54,10 @@ namespace MiyakoCarryService.Client.Datas
             {
                 // 等待 conditionPlaceBeacon.plantTime
                 Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionPlaceBeacon.target.FirstOrDefault(), conditionPlaceBeacon.zoneId);
+            }
+            else if (QuestCondition is ConditionVisitPlace conditionVisitPlace)
+            {
+                // 等待3秒
             }
         }
 

@@ -150,6 +150,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunAwayGrenadeLogic), EndRunAwayGrenade },
                 { typeof(RunAwayArtilleryLogic), EndRunAwayArtillery },
                 { typeof(RunAwayBTRLogic), EndRunAwayBTR },
+                { typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction },
             };
         }
 
@@ -1674,6 +1675,26 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
+            return false;
+        }
+
+        protected virtual bool EndGoToExcuteProxyAction()
+        {
+            if (McsBotPlayerData == null)
+            {
+                return true;
+            }
+
+            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            {
+                CheckStuck();
+            }
+
+            if (!McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
+            {
+                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COLDDOWN;
+                return true;
+            }
             return false;
         }
     }

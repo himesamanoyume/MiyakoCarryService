@@ -1020,11 +1020,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
-                    mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
-                    // SwitchDataMgr找到SwitchData并赋值位置
-
-                    mcsBotPlayerData.TargetPos = null;
-                    // end
+                    var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(proxyAction.Id());
+                    if (interactableObjectData != null && interactableObjectData is SwitchData switchData)
+                    {
+                        mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
+                        mcsBotPlayerData.TargetPos = switchData.GetPos();
+                    }
                     mcsBotPlayerData.IsLooting = false;
                 }
             }

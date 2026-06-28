@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData == null)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
                 if (McsBotPlayerData.TargetPos.HasValue)
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_currentMoveTarget.HasValue)
                     {
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(GoToPointLogic), "Mcs:GoToProxyActionPos");
+                        return new Action(typeof(GoToExcuteProxyActionLogic), "Mcs:GoToExcuteProxyAction");
                     }
 
                     return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortNearPath");

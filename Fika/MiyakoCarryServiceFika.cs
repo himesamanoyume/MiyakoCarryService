@@ -29,6 +29,7 @@ namespace MiyakoCarryService.Fika
         private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
+        private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
         private List<ModulePatch> _patches = new();
 
         public void InitMcsFika()
@@ -61,9 +62,9 @@ namespace MiyakoCarryService.Fika
                 { ECommandPacketType.Escort, HandleEscort },
                 { ECommandPacketType.GoToExfil, HandleGoToExfil },
                 { ECommandPacketType.AimingBodyPart, HandleAimingBodyPart },
-                { ECommandPacketType.QuestProxyAction, HandleQuestProxyAction },
-                { ECommandPacketType.LootProxyAction, HandleLootProxyAction },
-                { ECommandPacketType.InteractionProxyAction, HandleInteractionProxyAction },
+                { ECommandPacketType.QuestProxyAction, HandleProxyAction },
+                { ECommandPacketType.LootProxyAction, HandleProxyAction },
+                { ECommandPacketType.InteractionProxyAction, HandleProxyAction },
             };
         }
 
@@ -609,9 +610,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleQuestProxyAction(CommandPacket packet)
+        private void HandleProxyAction(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.QuestProxyAction)
+            if (packet.CommandType is not (ECommandPacketType.QuestProxyAction or ECommandPacketType.LootProxyAction or ECommandPacketType.InteractionProxyAction))
             {
                 return;
             }
@@ -641,9 +642,26 @@ namespace MiyakoCarryService.Fika
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
-                    mcsBotPlayerData.TargetPos = packet.Position;
-                    mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                    switch (packet.CommandType)
+                    {
+                        case ECommandPacketType.QuestProxyAction:
+                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
+                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                            mcsBotPlayerData.TargetPos = packet.Position;
+                            break;
+                        case ECommandPacketType.LootProxyAction:
+                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
+                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                            var lootData = LootDataMgr.FindLootData(packet.TargetId);
+                            mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
+                            break;
+                        case ECommandPacketType.InteractionProxyAction:
+                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
+                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                            var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
+                            mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
+                            break;
+                    }
                     mcsBotPlayerData.IsLooting = false;
                 }
                 botOwner.TalkMsg(new McsMsg
@@ -652,96 +670,6 @@ namespace MiyakoCarryService.Fika
                 });
             }
         }
-
-        private void HandleLootProxyAction(CommandPacket packet)
-        {
-            if (packet.CommandType != ECommandPacketType.LootProxyAction)
-            {
-                return;
-            }
-
-            if (!FikaBackendUtils.IsServer)
-            {
-                return;
-            }
-
-            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
-
-            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
-
-            if (mcsLeadPlayer == null)
-            {
-                return;
-            }
-
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
-            {
-                if (!mcsBotPlayer.HealthController.IsAlive)
-                {
-                    return;
-                }
-
-                var botOwner = mcsBotPlayer.AIData.BotOwner;
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
-                    mcsBotPlayerData.ProxyTargetId = packet.TargetId;
-                    var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
-                    mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
-                    mcsBotPlayerData.IsLooting = false;
-                }
-                botOwner.TalkMsg(new McsMsg
-                {
-                    PhraseTrigger = EPhraseTrigger.Roger,
-                });
-            }
-        }
-        private void HandleInteractionProxyAction(CommandPacket packet)
-        {
-            if (packet.CommandType != ECommandPacketType.InteractionProxyAction)
-            {
-                return;
-            }
-
-            if (!FikaBackendUtils.IsServer)
-            {
-                return;
-            }
-
-            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
-
-            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
-
-            if (mcsLeadPlayer == null)
-            {
-                return;
-            }
-
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
-            {
-                if (!mcsBotPlayer.HealthController.IsAlive)
-                {
-                    return;
-                }
-
-                var botOwner = mcsBotPlayer.AIData.BotOwner;
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
-                    mcsBotPlayerData.ProxyTargetId = packet.TargetId;
-                    var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
-                    mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
-                    mcsBotPlayerData.IsLooting = false;
-                }
-                botOwner.TalkMsg(new McsMsg
-                {
-                    PhraseTrigger = EPhraseTrigger.Roger,
-                });
-            }
-        }
-
         public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsClient)

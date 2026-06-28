@@ -101,25 +101,22 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled)
+            if (MiyakoCarryServicePlugin.FikaInstalled && Tools.IsHost)
             {
-                if (Tools.IsHost)
+                var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
                 {
-                    var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                    if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
+                    mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
+                    ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
+                }
+                else
+                {
+                    EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
                     {
-                        mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
-                        ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
-                    }
-                    else
-                    {
-                        EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
-                        {
-                            McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                            McsBotPlayerId = mcsBotPlayer.ProfileId,
-                            Msg = msg
-                        });
-                    }
+                        McsLeadPlayerId = mcsLeadPlayer.ProfileId,
+                        McsBotPlayerId = mcsBotPlayer.ProfileId,
+                        Msg = msg
+                    });
                 }
             }
             else
