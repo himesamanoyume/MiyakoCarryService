@@ -11,11 +11,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(MoveIntent data)
         {
-            if (data != null && !data.Used)
-            {
-                data.Used = true;
-                BotOwner_0.GoToSomePointData.SetPoint(data.Point);
-            }
             BotOwner_0.SetPose(1f);
             BotOwner_0.SetTargetMoveSpeed(1f);
             BotOwner_0.Sprint(true, true);

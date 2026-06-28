@@ -37,13 +37,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:leadPosNull");
                 }
 
-                if (McsBotPlayerData.ProxyPos.HasValue)
+                if (McsBotPlayerData.TargetPos.HasValue)
                 {
-                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
-                }
-                else if (!string.IsNullOrEmpty(McsBotPlayerData.ProxyTargetId))
-                {
-                    return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
+                    if (_nextUpdatePosTime < Time.time)
+                    {
+                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                        _nextUpdatePosTime = Time.time + nextTime;
+                    }
+
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(GoToPointLogic), "Mcs:GoToProxyActionPos");
+                    }
+
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortNearPath");
                 }
                 else
                 {
@@ -86,7 +94,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision([EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldInteractionProxyAction]) && (McsBotPlayerData.ProxyPos.HasValue || !string.IsNullOrEmpty(McsBotPlayerData.ProxyTargetId)))
+            if (McsBotPlayerData.HasDecision([EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldInteractionProxyAction]))
             {
                 return true;
             }

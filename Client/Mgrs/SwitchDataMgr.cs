@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public Switch FindSwitch(string switchId)
+        public SwitchData FindSwitch(string switchId)
         {
             if (string.IsNullOrEmpty(switchId))
             {
@@ -50,7 +50,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (switchData.Switch.Id == switchId)
                 {
-                    return switchData.Switch;
+                    return switchData;
                 }
             }
             return null;

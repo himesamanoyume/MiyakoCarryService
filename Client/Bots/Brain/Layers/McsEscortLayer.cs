@@ -38,11 +38,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Uninitialized");
                 }
 
-                if (McsBotPlayerData.EscortPos.HasValue)
+                if (McsBotPlayerData.TargetPos.HasValue)
                 {
                     if (_nextUpdatePosTime < Time.time)
                     {
-                        UpdateEscortMoveTarget(out float nextTime);
+                        UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
                         _nextUpdatePosTime = Time.time + nextTime;
                     }
 
@@ -95,7 +95,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort) && McsBotPlayerData.EscortPos.HasValue)
+            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
             {
                 return true;
             }

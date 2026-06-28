@@ -113,12 +113,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         return new Action(typeof(SimplePatrolLogic), "Mcs:Uninitialized");
                     }
 
-                    if (_nextUpdatePosTime < Time.time)
-                    {
-                        UpdateMoveTarget(out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
-                    }
-
                     var safeFire = false;
                     if (canShoot)
                     {
@@ -145,7 +139,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                                 {
-                                    return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                                    if (_nextUpdatePosTime < Time.time)
+                                    {
+                                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                                        _nextUpdatePosTime = Time.time + nextTime;
+                                    }
+
+                                    if (_currentMoveTarget.HasValue)
+                                    {
+                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                                    }
+                                    else
+                                    {
+                                        return new Action(typeof(SimplePatrolLogic), "Mcs:GoToPointCommandTargetPosNotFound");
+                                    }
                                 }
 
                                 if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
@@ -156,6 +164,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
                             var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
+
+                            if (_nextUpdatePosTime < Time.time)
+                            {
+                                UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                                _nextUpdatePosTime = Time.time + nextTime;
+                            }
+
                             if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
                             {
                                 if (_currentMoveTarget.HasValue)
@@ -171,38 +186,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 if (_nextPatrolTime + 4f < Time.time)
                                 {
                                     _nextPatrolTime = Time.time + 4f;
-
-                                    var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
-                                    if (validPosition.HasValue)
+                                    if (_currentMoveTarget.HasValue)
                                     {
-                                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
-                                        return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
+                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        return new Action(typeof(GoToPointLogic), "Partoling");
                                     }
 
                                     return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath2");
                                 }
                                 else
                                 {
-                                    if (BotOwner.Memory.GoalEnemy != null && Time.time - BotOwner.Mover.LastTimePosChanged > 8f)
-                                    {
-                                        var angle = UnityEngine.Random.Range(70, 110);
-                                        if (GClass856.RandomBool())
-                                        {
-                                            angle *= -1;
-                                        }
-
-                                        var directionToEnemy = BotOwner.Memory.GoalEnemy.Person.LookDirection.normalized;
-                                        var rotated = Quaternion.Euler(0, angle, 0) * directionToEnemy;
-                                        rotated.y = 0;
-                                        rotated *= 7f;
-                                        rotated += UnityEngine.Random.insideUnitSphere;
-                                        if (Tools.BetterDestination(3f, mcsLeadPlayerPos + rotated, out var targetPos))
-                                        {
-                                            BotOwner.GoToSomePointData.SetPoint(targetPos);
-                                            return new Action(typeof(GoToProtectLogic), "Mcs:Protect");
-                                        }
-                                    }
-
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
                             }
@@ -220,13 +213,33 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                                 {
-                                    return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                                    if (_nextUpdatePosTime < Time.time)
+                                    {
+                                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                                        _nextUpdatePosTime = Time.time + nextTime;
+                                    }
+
+                                    if (_currentMoveTarget.HasValue)
+                                    {
+                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                                    }
+                                    else
+                                    {
+                                        return new Action(typeof(SimplePatrolLogic), "Mcs:GoToLootTargetPosNotFound");
+                                    }
                                 }
 
                                 if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
                                 {
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
+                            }
+
+                            if (_nextUpdatePosTime < Time.time)
+                            {
+                                UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                                _nextUpdatePosTime = Time.time + nextTime;
                             }
 
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
@@ -246,38 +259,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 if (_nextPatrolTime + 4f < Time.time)
                                 {
                                     _nextPatrolTime = Time.time + 4f;
-
-                                    var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
-                                    if (validPosition.HasValue)
+                                    if (_currentMoveTarget.HasValue)
                                     {
-                                        BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
-                                        return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
+                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        return new Action(typeof(GoToPointLogic), "Partoling");
                                     }
 
                                     return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath4");
                                 }
                                 else
                                 {
-                                    if (BotOwner.Memory.GoalEnemy != null && Time.time - BotOwner.Mover.LastTimePosChanged > 8f)
-                                    {
-                                        var angle = UnityEngine.Random.Range(70, 110);
-                                        if (GClass856.RandomBool())
-                                        {
-                                            angle *= -1;
-                                        }
-
-                                        var directionToEnemy = BotOwner.Memory.GoalEnemy.Person.LookDirection.normalized;
-                                        var rotated = Quaternion.Euler(0, angle, 0) * directionToEnemy;
-                                        rotated.y = 0;
-                                        rotated *= 7f;
-                                        rotated += UnityEngine.Random.insideUnitSphere;
-                                        if (Tools.BetterDestination(3f, mcsLeadPlayerPos + rotated, out var targetPos))
-                                        {
-                                            BotOwner.GoToSomePointData.SetPoint(targetPos);
-                                            return new Action(typeof(GoToProtectLogic), "Mcs:Protect");
-                                        }
-                                    }
-
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
                             }

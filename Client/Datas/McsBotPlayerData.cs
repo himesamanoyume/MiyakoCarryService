@@ -23,8 +23,7 @@ namespace MiyakoCarryService.Client.Datas
         public BodyPartType AimingBodyPartType = BodyPartType.head;
         private LootData _lootingTarget = null;
         private bool _isLooting = false;
-        public Vector3? EscortPos = null;
-        public Vector3? ProxyPos = null;
+        public Vector3? TargetPos = null;
         public string ProxyTargetId = null;
         public LootData LootingTarget
         {
@@ -86,6 +85,22 @@ namespace MiyakoCarryService.Client.Datas
                 }
             }
             return true;
+        }
+
+        public void AddDecision(params EDecision[] decisions)  
+        {  
+            foreach (var decision in decisions)  
+            {  
+                _decision |= decision;  
+            }  
+        }  
+        
+        public void RemoveDecision(params EDecision[] decisions)  
+        {  
+            foreach (var decision in decisions)  
+            {  
+                _decision &= ~decision;  
+            }  
         }
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)

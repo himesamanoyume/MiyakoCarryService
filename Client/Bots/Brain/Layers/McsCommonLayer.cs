@@ -30,7 +30,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
                     {
-                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                        if (_nextUpdatePosTime < Time.time)
+                        {
+                            UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                            _nextUpdatePosTime = Time.time + nextTime;
+                        }
+
+                        if (_currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                        }
+                        else
+                        {
+                            return new Action(typeof(SimplePatrolLogic), "Mcs:GoToPointCommandTargetPosNotFound");
+                        }
                     }
 
                     if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
@@ -55,7 +69,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
                     {
-                        return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                        if (_nextUpdatePosTime < Time.time)
+                        {
+                            UpdateCommonMoveTarget(McsBotPlayerData.LootingTarget.RootTransform.position, out float nextTime);
+                            _nextUpdatePosTime = Time.time + nextTime;
+                        }
+
+                        if (_currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                        }
+                        else
+                        {
+                            McsBotPlayerData.IsLooting = false;
+                            return new Action(typeof(SimplePatrolLogic), "Mcs:GoToLootTargetPosNotFound");
+                        }
                     }
                 }
 
@@ -67,7 +96,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (_nextUpdatePosTime < Time.time)
                 {
-                    UpdateMoveTarget(out float nextTime);
+                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
                     _nextUpdatePosTime = Time.time + nextTime;
                 }
 
@@ -88,13 +117,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_nextPatrolTime < Time.time)
                     {
                         _nextPatrolTime = Time.time + 8f;
-                        var validPosition = Tools.GetPosNearTarget(mcsLeadPlayerPos);
-                        if (validPosition.HasValue)
+                        if (_currentMoveTarget.HasValue)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(validPosition.Value);
-                            return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(GoToPointLogic), "Partoling");
                         }
-
                         return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath2");
                     }
                     else

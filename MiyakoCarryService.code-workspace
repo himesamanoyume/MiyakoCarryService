@@ -174,7 +174,10 @@
                     "/Y",
                     "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
                     "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
-                ]
+                ],
+                "group": {
+                    "kind": "build"
+                }
             },
             {
                 "label": "client headless: move",
@@ -198,7 +201,10 @@
                     "/Y",
                     "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
                     "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
-                ]
+                ],
+                "group": {
+                    "kind": "build"
+                }
             },
             {
                 "label": "server: move",

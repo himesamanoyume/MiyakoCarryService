@@ -38,18 +38,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
         protected float _nextVaultCheckTime = 0f;
-        protected Vector3 _lastLeadPos = Vector3.zero;
         protected float _nextUpdatePosTime = 0f;
         protected Vector3? _currentMoveTarget = null;
-        public Vector3? CurrentMoveTarget
-        {
-            get => _currentMoveTarget;
-        }
-        private Vector3? _lastEscortPos = null;
-        private Vector3 _lastPathTargetPos = Vector3.zero;
+        private Vector3? _lastTargetPos = Vector3.zero;
         private Vector3[] _lastCalcCorners = null;
         private bool _lastCanRunResult = false;
-        private int _currentEscortRetries = 0;
+        private int _currentMoveRetries = 0;
         private const float LEAD_POS_CHANGE_THRESHOLD_SQR = 1f;
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
@@ -374,7 +368,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.GoToSomePointData.IsCome())
             {
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
                     McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
@@ -409,7 +403,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
-                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
                         McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
@@ -439,12 +433,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.EscortPos.HasValue)
+            if (!McsBotPlayerData.TargetPos.HasValue)
             {
                 return true;
             }
 
-            var sqrDistance = McsBotPlayerData.EscortPos.Value.McsSqrDistance(BotOwner.Position);
+            var sqrDistance = McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
                 if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
@@ -1397,34 +1391,39 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual void UpdateMoveTarget(out float nextUpdateTime)
+        protected virtual void UpdateLeadNearMoveTarget(Vector3? leadPos, out float nextUpdateTime)
         {
-            var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-            if (leadPos == null)
+            if (!leadPos.HasValue)
             {
                 nextUpdateTime = 1f;
                 return;
             }
 
-            if (_lastLeadPos.McsSqrDistance(leadPos) < LEAD_POSITION_CHANGE_THRESHOLD * LEAD_POSITION_CHANGE_THRESHOLD)
+            if (_lastTargetPos.Value.McsSqrDistance(leadPos.Value) < LEAD_POSITION_CHANGE_THRESHOLD * LEAD_POSITION_CHANGE_THRESHOLD)
             {
                 nextUpdateTime = 1f;
                 return;
             }
 
-            var movePosition = Tools.GetPosNearTarget(leadPos, BotOwner);
-            if (!movePosition.HasValue)
+            var nearPos = Tools.GetPosNearTarget(leadPos.Value, BotOwner);
+            if (!nearPos.HasValue)
             {
                 nextUpdateTime = 0.25f;
                 return;
             }
 
-            _lastLeadPos = leadPos;
-            _currentMoveTarget = movePosition.Value;
+            if (!CanGetPathToRun(BotOwner.Position, nearPos.Value, McsBotPlayerData, out Vector3[] corners))
+            {
+                nextUpdateTime = 0.25f;
+                return;
+            }
+
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
         }
 
-        protected virtual void UpdateEscortMoveTarget(out float nextUpdateTime)
+        protected virtual void UpdateEscortMoveTarget(Vector3? escortPos, out float nextUpdateTime)
         {
             if (McsBotPlayerData == null)
             {
@@ -1432,20 +1431,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (!McsBotPlayerData.EscortPos.HasValue)
+            if (!escortPos.HasValue)
             {
                 nextUpdateTime = 0.25f;
                 return;
             }
 
-            if (_lastEscortPos != McsBotPlayerData.EscortPos)
+            if (_lastTargetPos != escortPos)
             {
-                _lastEscortPos = McsBotPlayerData.EscortPos;
+                _lastTargetPos = escortPos;
                 _lastCalcCorners = null;
                 _lastCanRunResult = false;
-                _lastPathTargetPos = default;
-                _lastLeadPos = default;
-                _currentEscortRetries = 0;
+                _currentMoveRetries = 0;
+                _currentMoveTarget = escortPos;
             }
 
             var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
@@ -1467,34 +1465,58 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 predictedPos = leadPos;
             }
 
-            if (!CanGetPathToRun(predictedPos, McsBotPlayerData.EscortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            if (!CanGetPathToRun(predictedPos, escortPos.Value, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
             }
 
-            var targetPos = GetPointAlongPathAtDistance(corners, 15f);
-            _currentMoveTarget = targetPos;
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 0.2f;
         }
 
-        protected virtual bool CanGetPathToRun(Vector3 leadPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
+        protected virtual void UpdateCommonMoveTarget(Vector3? targetPos, out float nextUpdateTime)
         {
-            var targetUnchanged = _lastPathTargetPos.McsSqrDistance(targetPos) < 1f;
-            var leadUnchanged = _lastLeadPos.McsSqrDistance(leadPos) < LEAD_POS_CHANGE_THRESHOLD_SQR;
-
-            if (targetUnchanged && leadUnchanged && _lastCalcCorners != null)
+            if (McsBotPlayerData == null)
             {
-                _currentEscortRetries = 0;
-                corners = _lastCalcCorners;
-                return _lastCanRunResult;
+                nextUpdateTime = 1f;
+                return;
             }
 
+            if (!targetPos.HasValue)
+            {
+                nextUpdateTime = 0.25f;
+                return;
+            }
+
+            if (_lastTargetPos != targetPos)
+            {
+                _lastTargetPos = targetPos;
+                _lastCalcCorners = null;
+                _lastCanRunResult = false;
+                _currentMoveRetries = 0;
+                _currentMoveTarget = targetPos;
+            }
+
+            if (!CanGetPathToRun(BotOwner.Position, targetPos.Value, McsBotPlayerData, out Vector3[] corners))
+            {
+                nextUpdateTime = 0.25f;
+                return;
+            }
+
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            _currentMoveTarget = newMoveTarget;
+            nextUpdateTime = 0.2f;
+        }
+
+        protected virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
+        {
             var navMeshPath = new NavMeshPath();
-            NavMesh.CalculatePath(leadPos, targetPos, -1, navMeshPath);
+            NavMesh.CalculatePath(startPos, targetPos, -1, navMeshPath);
             var flag = false;
 
-            var sqrDistanceToTarget = leadPos.McsSqrDistance(targetPos);
+            var sqrDistanceToTarget = startPos.McsSqrDistance(targetPos);
             var sampleRadius = sqrDistanceToTarget > 50f * 50f ? 5f : 1f;
 
             if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
@@ -1509,7 +1531,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (!flag && Tools.BetterDestination(sampleRadius, targetPos, out var betterDest))
             {
                 navMeshPath = new NavMeshPath();
-                NavMesh.CalculatePath(leadPos, betterDest, -1, navMeshPath);
+                NavMesh.CalculatePath(startPos, betterDest, -1, navMeshPath);
                 if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
                 {
                     flag = true;
@@ -1518,13 +1540,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (!flag)
             {
-                _currentEscortRetries += 1;
-                if (_currentEscortRetries >= 5 || !_lastCanRunResult)
+                _currentMoveRetries += 1;
+                if (_currentMoveRetries >= 5 || !_lastCanRunResult)
                 {
-                    _currentEscortRetries = 0;
+                    _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.EscortPos = null;
+                    mcsBotPlayerData.TargetPos = null;
+                    mcsBotPlayerData.ProxyTargetId = null;
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Negative,
@@ -1532,15 +1555,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return _lastCanRunResult;
                 }
 
-                _lastPathTargetPos = targetPos;
-                _lastLeadPos = leadPos;
                 corners = _lastCalcCorners;
                 return _lastCanRunResult;
             }
 
-            _currentEscortRetries = 0;
-            _lastPathTargetPos = targetPos;
-            _lastLeadPos = leadPos;
+            _currentMoveRetries = 0;
             _lastCalcCorners = navMeshPath.corners;
             corners = _lastCalcCorners;
             _lastCanRunResult = true;

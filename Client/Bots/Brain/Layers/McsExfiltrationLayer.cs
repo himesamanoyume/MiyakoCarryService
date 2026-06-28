@@ -19,7 +19,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsLooting = false;
-                McsBotPlayerData.EscortPos = null;
+                McsBotPlayerData.TargetPos = null;
+                McsBotPlayerData.ProxyTargetId = null;
             }
         }
 

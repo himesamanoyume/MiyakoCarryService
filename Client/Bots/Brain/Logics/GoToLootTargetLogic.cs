@@ -99,8 +99,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - lootPos;
                 var distance = BotOwner.Position.McsSqrDistance(lootPos);
 
-                Tools.BetterDestination(3f, lootPos, out var targetPos);
-
 #if DEBUG
                 // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
 #endif
@@ -125,13 +123,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetTargetMoveSpeed(1f);
                     BotOwner.Steering.LookToMovingDirection();
                     BotOwner.Mover.Sprint(false);
-                }
-
-                var pathStatus = BotOwner.GoToPoint(targetPos, mustHaveWay: true);
-                if (pathStatus != NavMeshPathStatus.PathComplete)
-                {
-                    mcsBotPlayerData.IsLooting = false;
-                    return;
                 }
             }
         }

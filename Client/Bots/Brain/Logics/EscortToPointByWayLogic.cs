@@ -20,8 +20,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (mcsBotPlayerData != null)
             {
                 var botToLeaderSqrDistance = BotOwner.Position.McsSqrDistance(mcsBotPlayerData.LeadPlayer.Position);
-                var botToTargetSqrDistance = BotOwner.Position.McsSqrDistance(mcsBotPlayerData.EscortPos.Value);
-                var leaderToTargetSqrDistance = mcsBotPlayerData.LeadPlayer.Position.McsSqrDistance(mcsBotPlayerData.EscortPos.Value);
+                var botToTargetSqrDistance = BotOwner.Position.McsSqrDistance(mcsBotPlayerData.TargetPos.Value);
+                var leaderToTargetSqrDistance = mcsBotPlayerData.LeadPlayer.Position.McsSqrDistance(mcsBotPlayerData.TargetPos.Value);
                 BotOwner.Steering.LookToMovingDirection();
                 
                 if (leaderToTargetSqrDistance < botToTargetSqrDistance || botToLeaderSqrDistance <= 11f * 11f || botToLeaderSqrDistance >= 18f * 18f)
