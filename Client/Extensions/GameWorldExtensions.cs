@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
@@ -15,6 +14,10 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public InteractableObjectData FindInteractableObjectData(string id)
             {
+                if (string.IsNullOrEmpty(id))
+                {
+                    return null;
+                }
                 var door = gameWorld.FindDoor(id);
                 if (door != null && door is Door _door)
                 {

@@ -32,9 +32,10 @@ namespace MiyakoCarryService.Client.Events
         public MongoID McsLeadPlayerId { get; set; }
     }
 
-    public sealed class ProxyActionReadyToStartEvent : IMcsEvent
+    public sealed class QuestProxyActionReadyToStartEvent : IMcsEvent
     {
         public MongoID McsLeadPlayerId { get; set; }
         public MongoID McsBotPlayerId { get; set; }
+        public string TargetId { get; set; }
     }
 }

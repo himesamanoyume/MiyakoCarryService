@@ -30,6 +30,7 @@ namespace MiyakoCarryService.Fika
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
+        private QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
         private List<ModulePatch> _patches = new();
 
         public void InitMcsFika()
@@ -65,6 +66,8 @@ namespace MiyakoCarryService.Fika
                 { ECommandPacketType.QuestProxyAction, HandleProxyAction },
                 { ECommandPacketType.LootProxyAction, HandleProxyAction },
                 { ECommandPacketType.InteractionProxyAction, HandleProxyAction },
+                { ECommandPacketType.QuestProxyActionCallback, HandleQuestProxyActionCallback },
+                { ECommandPacketType.EndProxyAction, HandleEndProxyAction },
             };
         }
 
@@ -654,6 +657,20 @@ namespace MiyakoCarryService.Fika
                             mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                             var lootData = LootDataMgr.FindLootData(packet.TargetId);
                             mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
+                            if (!LootDataMgr.IsLockedLootingTarget(lootData) && LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                            {
+                                LootDataMgr.LockLootItemToTarget(lootData);
+                                LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
+                                mcsBotPlayerData.LootingTarget = lootData;
+                            }
+                            else
+                            {
+                                botOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.Negative,
+                                });
+                                return;
+                            }
                             break;
                         case ECommandPacketType.InteractionProxyAction:
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
@@ -663,16 +680,95 @@ namespace MiyakoCarryService.Fika
                             break;
                     }
                     mcsBotPlayerData.IsLooting = false;
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger,
+                    });
                 }
-                botOwner.TalkMsg(new McsMsg
-                {
-                    PhraseTrigger = EPhraseTrigger.Roger,
-                });
             }
         }
+
+        private void HandleQuestProxyActionCallback(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.QuestProxyActionCallback)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsClient)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
+                    if (questData != null)
+                    {
+                        TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayerData));
+                    }
+                }
+            }
+        }
+
+        private void HandleEndProxyAction(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.EndProxyAction)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.RemoveDecision([EDecision.ShouldQuestProxyAction, EDecision.ShouldHoldPosition]);
+                }
+            }
+        }
+
         public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
-            if (!FikaBackendUtils.IsClient)
+            if (@event.CommandPacketType is not ECommandPacketType.QuestProxyActionCallback && !FikaBackendUtils.IsClient)
             {
                 return;
             }

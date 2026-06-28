@@ -58,5 +58,7 @@ namespace MiyakoCarryService.Client.Datas
         public override string Id() => Door.Id;
 
         public override bool IsProxyActionDisabled() => true;
+
+        public override WorldInteractiveObject GetWorldInteractiveObject() => Door;
     }
 }

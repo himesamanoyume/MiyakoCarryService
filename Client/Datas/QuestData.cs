@@ -5,8 +5,11 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.Quests;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -43,22 +46,28 @@ namespace MiyakoCarryService.Client.Datas
             _transformRef = null;
         }
 
-        public async Task ForceCompleteQuest()
+        public async Task ForceCompleteQuest(McsBotPlayerData mcsBotPlayerData)
         {
             if (QuestCondition is ConditionLeaveItemAtLocation conditionLeaveItemAtLocation)
             {
-                // 等待 conditionLeaveItemAtLocation.plantTime
+                await Task.Delay(TimeSpan.FromSeconds(conditionLeaveItemAtLocation.plantTime));
                 Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionLeaveItemAtLocation.target.FirstOrDefault(), conditionLeaveItemAtLocation.zoneId);
             }
             else if (QuestCondition is ConditionPlaceBeacon conditionPlaceBeacon)
             {
-                // 等待 conditionPlaceBeacon.plantTime
+                await Task.Delay(TimeSpan.FromSeconds(conditionPlaceBeacon.plantTime));
                 Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionPlaceBeacon.target.FirstOrDefault(), conditionPlaceBeacon.zoneId);
             }
             else if (QuestCondition is ConditionVisitPlace conditionVisitPlace)
             {
-                // 等待3秒
+                await Task.Delay(TimeSpan.FromSeconds(3));
             }
+
+            EventMgr.Notify(new CommandMgrHandleFikaEvent
+            {
+                McsBotPlayer = mcsBotPlayerData.Player,
+                CommandPacketType = ECommandPacketType.EndProxyAction
+            });
         }
 
         public bool IsProxyActionDisabled()

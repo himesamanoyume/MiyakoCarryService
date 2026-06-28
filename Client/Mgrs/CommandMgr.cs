@@ -26,6 +26,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
+            EventMgr.Subscribe<QuestProxyActionReadyToStartEvent>(HandleQuestProxyActionReadyToStart, this);
         }
 
         private GamePlayerOwner _gamePlayerOwner
@@ -41,6 +42,8 @@ namespace MiyakoCarryService.Client.Mgrs
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
+        private QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
 
         private List<MongoID> _mySquadMcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mySquadMcsBotPlayers = new();
@@ -993,6 +996,54 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
+        private void HandleQuestProxyActionReadyToStart(QuestProxyActionReadyToStartEvent @event)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            {
+                var mcsBotPlayer = TryGetMcsBotPlayer(@event.McsBotPlayerId);
+                if (mcsBotPlayer == null)
+                {
+                    return;
+                }
+
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.QuestProxyActionCallback,
+                    TargetId = @event.TargetId
+                });
+            }
+            else
+            {
+                var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+                foreach (var botOwner in botOwners)
+                {
+                    if (botOwner == null)
+                    {
+                        continue;
+                    }
+
+                    if (botOwner.ProfileId != @event.McsBotPlayerId)
+                    {
+                        continue;
+                    }
+
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData == null)
+                    {
+                        continue;
+                    }
+                    
+                    var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
+                    if (questData != null)
+                    {
+                        TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayerData));
+                    }
+                    return;
+                }
+            }
+        }
+
         private void SwitchProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
@@ -1063,6 +1114,55 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.ProxyTargetId = questData.Id();
                     mcsBotPlayerData.TargetPos = questData.GetPos();
                     mcsBotPlayerData.IsLooting = false;
+                }
+            }
+            CloseCommandMenuAction();
+        }
+
+        private void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
+        {
+            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            {
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.LootProxyAction,
+                    Position = lootData.RootTransform.position,
+                    TargetId = lootData.Item.Id
+                });
+            }
+            else
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (botOwner.Memory.HaveEnemy)
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                }
+                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.StopMove();
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
+                    mcsBotPlayerData.IsLooting = false;
+                    mcsBotPlayerData.ProxyTargetId = lootData.Item.Id;
+                    mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
+                    if (!LootDataMgr.IsLockedLootingTarget(lootData) && LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                    {
+                        LootDataMgr.LockLootItemToTarget(lootData);
+                        LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
+                        mcsBotPlayerData.LootingTarget = lootData;
+                    }
+                    else
+                    {
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Negative,
+                        });
+                    }
                 }
             }
             CloseCommandMenuAction();

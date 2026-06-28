@@ -18,7 +18,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public sealed class GoToExcuteProxyActionLogic : McsBotBaseLogic
     {
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private GoToPointBaseLogic _baseLogic;
         private int _currentLootingRetries = 0;
         private float _lastTimeCheckDistance = 0f;
@@ -100,18 +99,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - lootPos;
                 var sqrDistance = BotOwner.Position.McsSqrDistance(lootPos);
 
-#if DEBUG
-                // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
-#endif
-
                 if (sqrDistance <= 4f && Math.Abs(offset.y) < 2f)
                 {
-                    // BotOwner.TalkMsg(new McsMsg
-                    // {
-                    //     PhraseTrigger = EPhraseTrigger.OnLoot,
-                    //     Key = mcsBotPlayerData.LootingTarget.Item.Name,
-                    //     Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
-                    // });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(lootPos);
@@ -123,29 +112,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
                         });
-                        // 广播Packet给发出指令的人
                         if (mcsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction))
                         {
-                            if (MiyakoCarryServicePlugin.FikaInstalled && Tools.IsHost)
+                            EventMgr.Notify(new QuestProxyActionReadyToStartEvent
                             {
-                                var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                                if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, BotOwner.ProfileId))
-                                {
-                                    // 根据TargetId查QuestData, 然后执行ForceCompleteQuest
-                                }
-                                else
-                                {
-                                    EventMgr.Notify(new ProxyActionReadyToStartEvent
-                                    {
-                                        McsLeadPlayerId = mcsBotPlayerData.LeadPlayer.ProfileId,
-                                        McsBotPlayerId = mcsBotPlayerData.Player.ProfileId,
-                                    });
-                                }
-                            }
-                            else
-                            {
-                                // 根据TargetId查QuestData, 然后执行ForceCompleteQuest
-                            }
+                                McsLeadPlayerId = mcsBotPlayerData.LeadPlayer.ProfileId,
+                                McsBotPlayerId = mcsBotPlayerData.Player.ProfileId,
+                                TargetId = mcsBotPlayerData.ProxyTargetId
+                            });
                         }
                         else if (mcsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction))
                         {
@@ -153,17 +127,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         }
                         else if (mcsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
                         {
-
+                            var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
+                            if (interactableObjectData != null)
+                            {
+                                var interactionResult = new InteractionResult(EInteractionType.Open);
+                                mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, null);
+                            }
                         }
-                        
-
-                        // end
                     }
-                    else
-                    {
-                        
-                    }
-                    
                     return;
                 }
 

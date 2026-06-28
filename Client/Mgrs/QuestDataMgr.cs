@@ -318,5 +318,21 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             return questDataGroup;
         }
+
+        public QuestData FindQuestData(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return null;
+            }
+            foreach (QuestData questData in _datas)
+            {
+                if (questData.Id() == id)
+                {
+                    return questData;
+                }
+            }
+            return null;
+        }
     }
 }
