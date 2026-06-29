@@ -24,6 +24,7 @@ using MiyakoCarryService.Client.Patches.SAIN;
 using System.IO;
 using System.Reflection;
 using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Patches.Interactive;
 
 namespace MiyakoCarryService.Client
 {
@@ -223,6 +224,8 @@ namespace MiyakoCarryService.Client
             _patches.Add(new GetPartToShootPatch());
             _patches.Add(new IsAllowedPlayerPatch());
             _patches.Add(new DeactivateMinePatch());
+            _patches.Add(new DoorGetActionsClassPatch());
+            _patches.Add(new LootItemGetActionsClassPatch());
 
             if (FikaInstalled)
             {

@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             base.Start();
             if (McsBotPlayerData != null)
             {
-                McsBotPlayerData.IsLooting = false;
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Going

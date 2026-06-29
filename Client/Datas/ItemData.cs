@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Client.Datas
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         public Transform RootTransform => GetRootTransfrom();
-        protected LootDataMgr LootDataMgr = MgrAccessor.Get<LootDataMgr>();
+        protected LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
 
         public ItemData(Item item)
         {

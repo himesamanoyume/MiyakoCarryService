@@ -654,10 +654,13 @@ namespace MiyakoCarryService.Fika
                             break;
                         case ECommandPacketType.LootProxyAction:
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
+                            mcsBotPlayerData.IsLooting = false;
                             mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                             var lootData = LootDataMgr.FindLootData(packet.TargetId);
                             mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
-                            if (!LootDataMgr.IsLockedLootingTarget(lootData) && LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                            LootDataMgr.UnlockLootingTarget(lootData);
+                            LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
+                            if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
                             {
                                 LootDataMgr.LockLootItemToTarget(lootData);
                                 LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
@@ -669,6 +672,9 @@ namespace MiyakoCarryService.Fika
                                 {
                                     PhraseTrigger = EPhraseTrigger.Negative,
                                 });
+                                mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
+                                mcsBotPlayerData.ProxyTargetId = null;
+                                mcsBotPlayerData.TargetPos = null;
                                 return;
                             }
                             break;

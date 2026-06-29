@@ -35,11 +35,6 @@ namespace MiyakoCarryService.Client.Datas
             get => _isLooting;
             set
             {
-                if (_isLooting == value)
-                {
-                    return;
-                }
-
                 _isLooting = value;
                 if (!_isLooting && _lootingTarget != null)
                 {
@@ -113,6 +108,11 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
+            if (HasDecision(EDecision.ShouldLootProxyAction))
+            {
+                return;
+            }
+
             var filtedLootDatas = new List<LootData>(itemDatas.Count);
             var usefulContainers = new List<LootData>();
             foreach (var itemData in itemDatas)

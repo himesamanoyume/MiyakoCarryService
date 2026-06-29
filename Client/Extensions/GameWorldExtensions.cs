@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class GameWorldExtensions
     {
-        private static SwitchDataMgr SwitchDataMgr = MgrAccessor.Get<SwitchDataMgr>();
+        private static SwitchDataMgr SwitchDataMgr => MgrAccessor.Get<SwitchDataMgr>();
 
         extension(GameWorld gameWorld)
         {

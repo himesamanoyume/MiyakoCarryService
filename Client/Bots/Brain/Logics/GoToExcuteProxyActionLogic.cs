@@ -33,21 +33,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.IsLooting = false;
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger
                 });
-            }
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
-            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData != null)
-            {
-                mcsBotPlayerData.IsLooting = false;
             }
         }
 
@@ -89,9 +78,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (sqrDistance <= 4f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
-                    BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(targetPos.Value);
-
                     TasksExtensions.HandleExceptions(StartExcuteProxyAction());
                     return;
                 }
@@ -123,11 +110,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 mcsBotPlayerData.IsTaskRunning = true;
                 if (mcsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction))
                 {
+                    BotOwner.SetPose(0f);
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     await QuestProxyActionReadyToStart();
                 }
                 else if (mcsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction))
                 {
+                    BotOwner.SetPose(0f);
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     await StartLooting();
                 }
@@ -135,10 +124,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
-                    if (interactableObjectData != null)
+                    if (interactableObjectData == null)
                     {
-                        var interactionResult = new InteractionResult(EInteractionType.Open);
-                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, () => InteractionCallback(mcsBotPlayerData));
+                        InteractionCallback(mcsBotPlayerData);
+                        return;
+                    }
+
+                    var interactionResult = new InteractionResult(EInteractionType.Open);
+                    if (interactableObjectData is DoorData doorData)
+                    {
+                        doorData.Door.DoorState = EDoorState.Shut;
+                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
+                    }
+                    else if (interactableObjectData is SwitchData switchData)
+                    {
+                        switchData.Switch.SetUser(mcsBotPlayerData.Player);
+                        switchData.Switch.Interact(interactionResult);
+                        await Task.Delay(1000);
+                        InteractionCallback(mcsBotPlayerData);
                     }
                 }
             }
@@ -315,6 +318,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.IsTaskRunning = false;
+                    InteractionCallback(mcsBotPlayerData);
                 }
             }
         }

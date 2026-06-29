@@ -994,7 +994,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        private void InteractionProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
+        public void InteractionProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
@@ -1069,7 +1069,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        private void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
+        public void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
@@ -1100,7 +1100,9 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.ProxyTargetId = lootData.Item.Id;
                     mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
-                    if (!LootDataMgr.IsLockedLootingTarget(lootData) && LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                    LootDataMgr.UnlockLootingTarget(lootData);
+                    LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
+                    if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
                     {
                         LootDataMgr.LockLootItemToTarget(lootData);
                         LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
@@ -1112,6 +1114,9 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             PhraseTrigger = EPhraseTrigger.Negative,
                         });
+                        mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
+                        mcsBotPlayerData.ProxyTargetId = null;
+                        mcsBotPlayerData.TargetPos = null;
                     }
                 }
             }
