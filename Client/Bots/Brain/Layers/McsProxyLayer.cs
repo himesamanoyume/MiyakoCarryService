@@ -56,11 +56,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         return new Action(typeof(GoToExcuteProxyActionLogic), "Mcs:GoToExcuteProxyAction");
                     }
 
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:NoProxyTargetPos");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindProxyPos");
                 }
                 else
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindProxyPos");
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:NoProxyTargetPos");
                 }
             }
             catch (Exception e)

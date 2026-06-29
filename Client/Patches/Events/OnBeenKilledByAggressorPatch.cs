@@ -29,13 +29,8 @@ namespace MiyakoCarryService.Client.Patches.Events
             }
         }
 
-        public static void HandleSharedExperience(Player __instance, IPlayer aggressor, bool sharedKillExp = true, bool sharedBossExp = true)
+        public static void HandleSharedExperience(Player __instance, IPlayer aggressor, bool fikaSharedKillExp = false, bool fikaSharedBossExp = false)
         {
-            if (!sharedKillExp && !sharedBossExp)
-            {
-                return;
-            }
-
             if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
             {
                 var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
@@ -59,16 +54,16 @@ namespace MiyakoCarryService.Client.Patches.Events
                     experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
                 }
 
-                if (sharedKillExp && !countAsBoss)
+                if (!countAsBoss)
                 {
                     sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-                    sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                    sessionCounters.AddInt(fikaSharedKillExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
                 }
 
-                if (sharedBossExp && countAsBoss)
+                if (countAsBoss)
                 {
                     sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-                    sessionCounters.AddInt(experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                    sessionCounters.AddInt(fikaSharedBossExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
                 }
             }
         }

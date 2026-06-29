@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPostfix]
         public static void Postfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            OnBeenKilledByAggressorPatch.HandleSharedExperience(__instance, aggressor, !FikaPlugin.Instance.Settings.SharedKillExperience.Value, !FikaPlugin.Instance.Settings.SharedBossExperience.Value);
+            OnBeenKilledByAggressorPatch.HandleSharedExperience(__instance, aggressor, FikaPlugin.Instance.Settings.SharedKillExperience.Value, FikaPlugin.Instance.Settings.SharedBossExperience.Value);
             OnBeenKilledByAggressorPatch.HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart, !FikaPlugin.Instance.Settings.EasyKillConditions.Value);
         }
     }
@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPostfix]
         public static void Postfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            OnBeenKilledByAggressorPatch.HandleSharedExperience(__instance, aggressor, !FikaPlugin.Instance.Settings.SharedKillExperience.Value, !FikaPlugin.Instance.Settings.SharedBossExperience.Value);
+            OnBeenKilledByAggressorPatch.HandleSharedExperience(__instance, aggressor, FikaPlugin.Instance.Settings.SharedKillExperience.Value, FikaPlugin.Instance.Settings.SharedBossExperience.Value);
             OnBeenKilledByAggressorPatch.HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart, !FikaPlugin.Instance.Settings.EasyKillConditions.Value);
         }
     }
