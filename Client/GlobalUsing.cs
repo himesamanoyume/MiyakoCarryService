@@ -12,6 +12,8 @@ global using ItemSubtractClass2 = EFT.Player.PlayerInventoryController.Class1214
 global using UnknownItemManipulationClass = GClass1566;
 global using ItemLockedClass = InteractionsHandlerClass.GClass1606;
 global using CannotMoveItemDuringRaidClass = InteractionsHandlerClass.GClass1600;
+global using HeavyBleedEffect = GInterface340;
+global using LightBleedEffect = GInterface339;
 
 // 意图
 global using BaseIntent = GClass26;

@@ -39,15 +39,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextLootingCheckTime = 0f;
         protected float _nextVaultCheckTime = 0f;
         protected float _nextUpdatePosTime = 0f;
+        protected float _nextHealCheckTime = 0f;
         protected Vector3? _currentMoveTarget = null;
         private Vector3? _lastTargetPos = Vector3.zero;
         private Vector3[] _lastCalcCorners = null;
         private bool _lastCanRunResult = false;
         private int _currentMoveRetries = 0;
-        private const float LEAD_POS_CHANGE_THRESHOLD_SQR = 1f;
+        private int _currentHealTimes = 0;
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
+        protected const float HEAL_CHECK_INTERVAL = 1f;
         protected const float VAULT_CHECK_INTERVAL = 2f;
         protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
         protected const float SPHERECAST_RADIUS = 0.1f;
@@ -156,8 +158,51 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndHeal()
         {
-            if (!BotOwner.Medecine.FirstAid.Have2Do)
+            if (BotOwner.Medecine.Using)
             {
+                return false;
+            }
+
+            if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
+            {
+                BotOwner.Medecine.FirstAid.CancelCurrent();
+                if (BotOwner.Medecine.SurgicalKit.Using)
+                {
+                    BotOwner.Medecine.SurgicalKit.CancelCurrent();
+                }
+                _currentHealTimes = 0;
+                return true;
+            }
+
+            var firstAidHasWork = BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use;
+            var surgicalHasWork = BotOwner.Medecine.SurgicalKit.HaveWork;
+            if (!firstAidHasWork && !surgicalHasWork)
+            {
+                _currentHealTimes = 0;
+                return true;
+            }
+
+            if (Time.time > _nextHealCheckTime)
+            {
+                _nextHealCheckTime = Time.time + HEAL_CHECK_INTERVAL;
+                _currentHealTimes += 1;
+            }
+
+            if (_currentHealTimes >= 15)
+            {
+                var player = BotOwner.GetPlayer;
+                if (!BotOwner.Medecine.Using
+                    && player.HandsController is Player.FirearmController firearmController
+                    && !firearmController.IsAiming
+                    && !firearmController.IsInReloadOperation()
+                    && !firearmController.IsInventoryOpen()
+                    && !firearmController.IsInInteractionStrictCheck()
+                    && !firearmController.IsInSpawnOperation()
+                    && !firearmController.IsHandsProcessing())
+                {
+                    CheckWeaponSwitch();
+                }
+                _currentHealTimes = 0;
                 return true;
             }
             return false;

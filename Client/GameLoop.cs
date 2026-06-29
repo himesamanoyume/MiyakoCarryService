@@ -672,7 +672,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Move.REACH_DIST_COVER = 2f;
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
 
-            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9f;
+            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 1f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
             settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 10f;
             settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
@@ -753,7 +753,7 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Boss.SHALL_WARN = false;
             settings.FileSettings.Boss.BIG_PIPE_ARTILLERY_COUNT = 1;
-            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 30f;
+            settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 10f;
 
             settings.FileSettings.Core.CanGrenade = true;
             settings.FileSettings.Core.CanRun = true;
