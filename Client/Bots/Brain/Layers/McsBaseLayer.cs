@@ -1500,7 +1500,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentMoveTarget = targetPos;
             }
 
-            if (!CanGetPathToRun(BotOwner.Position, targetPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var selfVelocity = BotOwner.Velocity;
+            var predictedPos = BotOwner.Position + selfVelocity * 2;
+
+            if (NavMesh.SamplePosition(predictedPos, out var hit, 1f, -1))
+            {
+                predictedPos = hit.position;
+            }
+            else
+            {
+                predictedPos = BotOwner.Position;
+            }
+
+            if (!CanGetPathToRun(predictedPos, targetPos.Value, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1508,7 +1520,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
             _currentMoveTarget = newMoveTarget;
-            nextUpdateTime = 0.2f;
+            nextUpdateTime = 1f;
         }
 
         protected virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)

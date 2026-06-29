@@ -51,21 +51,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
-        private DoorInteractionStatus HandleDoor()
-        {
-            return BotOwner.DoorOpener.UpdateDoorInteractionStatus();
-        }
-
         public override void Update(CustomLayer.ActionData data)
         {
+            _baseLogic.UpdateNodeByMain(data);
             BotOwner.SetTargetMoveSpeed(1f);
             BotOwner.Sprint(true, false);
             BotOwner.SetPose(1f);
             BotOwner.Steering.LookToMovingDirection();
-            HandleDoor();
-            _baseLogic.UpdateNodeByMain(data);
-            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData == null)
             {
                 return;
@@ -144,7 +138,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (interactableObjectData != null)
                     {
                         var interactionResult = new InteractionResult(EInteractionType.Open);
-                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, null);
+                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, () => InteractionCallback(mcsBotPlayerData));
                     }
                 }
             }
@@ -159,6 +153,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     mcsBotPlayerData.IsTaskRunning = false;
                 }
             }
+        }
+
+        private void InteractionCallback(McsBotPlayerData mcsBotPlayerData)
+        {
+            mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+            mcsBotPlayerData.TargetPos = null;
+            mcsBotPlayerData.ProxyTargetId = null;
         }
 
         private async Task QuestProxyActionReadyToStart()

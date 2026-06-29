@@ -13,14 +13,14 @@ namespace MiyakoCarryService.Client.Extensions
         
         extension(Condition condition)
         {
-            public QuestData GetData(QuestDataClass questDataClass, Transform transform)
+            public QuestData GetData(QuestDataClass questDataClass, Transform transform, Condition parentCondition = null)
             {
-                return _dataDict.TryGetValue(condition, out QuestData data) ? data : condition.InitData(questDataClass, transform);
+                return _dataDict.TryGetValue(condition, out QuestData data) ? data : condition.InitData(questDataClass, transform, parentCondition);
             }
 
-            public QuestData InitData(QuestDataClass questDataClass, Transform transform)
+            public QuestData InitData(QuestDataClass questDataClass, Transform transform, Condition parentCondition = null)
             {
-                var data = new QuestData(questDataClass, transform, condition);
+                var data = new QuestData(questDataClass, transform, condition, parentCondition);
                 _dataDict.Add(condition, data);
                 return data;
             }

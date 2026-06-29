@@ -21,18 +21,21 @@ namespace MiyakoCarryService.Client.Datas
         public QuestDataClass Quest => _questRef.TryGetTarget(out var quest) ? quest : null;
         private WeakReference<Condition> _conditionRef;
         public Condition QuestCondition => _conditionRef != null ? _conditionRef.TryGetTarget(out var condition) ? condition : null : null;
+        private WeakReference<Condition> _parentConditionRef;
+        public Condition QuestParentCondition => _parentConditionRef != null ? _parentConditionRef.TryGetTarget(out var parentCondition) ? parentCondition : null : null;
         private WeakReference<Transform> _transformRef;
         private Transform _questTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
 
-        public QuestData(QuestDataClass quest, Transform questTransform, Condition condition) : base()
+        public QuestData(QuestDataClass quest, Transform questTransform, Condition condition, Condition parentCondition = null) : base()
         {
             _conditionRef = new WeakReference<Condition>(condition);
+            _parentConditionRef = new WeakReference<Condition>(parentCondition);
             _questRef = new WeakReference<QuestDataClass>(quest);
             _transformRef = new WeakReference<Transform>(questTransform);
             _colliders = questTransform.GetComponentsInChildren<Collider>().ToList();
         }
 
-        public override string GetActionName() => QuestCondition.id.ToString().McsLocalized();
+        public override string GetActionName() => QuestParentCondition != null ? QuestParentCondition.id.ToString().McsLocalized() : QuestCondition.id.ToString().McsLocalized();
 
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
         
@@ -58,7 +61,7 @@ namespace MiyakoCarryService.Client.Datas
                 await Task.Delay(TimeSpan.FromSeconds(conditionPlaceBeacon.plantTime));
                 Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionPlaceBeacon.target.FirstOrDefault(), conditionPlaceBeacon.zoneId);
             }
-            else if (QuestCondition is ConditionVisitPlace conditionVisitPlace)
+            else if (QuestCondition is ConditionVisitPlace)
             {
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
