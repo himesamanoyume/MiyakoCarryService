@@ -18,6 +18,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             BotOwner.SetTargetMoveSpeed(1f);
             BotOwner.Sprint(true, false);
             BotOwner.SetPose(1f);
+            BotOwner.Steering.LookToMovingDirection();
             _baseLogic.UpdateNodeByMain(data);
         }
     }

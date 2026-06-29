@@ -1690,9 +1690,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 CheckStuck();
             }
 
-            if (!McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
+            if (!McsBotPlayerData.HasDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldQuestProxyAction]))
             {
-                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COLDDOWN;
                 return true;
             }
             return false;

@@ -24,7 +24,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             BrainManager.AddCustomLayer(typeof(McsCommonLayer), Classification.AllBrainNames, 65);
             BrainManager.AddCustomLayer(typeof(McsEscortLayer), Classification.AllBrainNames, 66);
-            BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), Classification.AllBrainNames, 67);
+            BrainManager.AddCustomLayer(typeof(McsProxyLayer), Classification.AllBrainNames, 67);
+            BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), Classification.AllBrainNames, 68);
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
             {
@@ -47,7 +48,8 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 BrainManager.AddCustomLayer(typeof(McsCommonLayer), _customBrainNames, 65);
                 BrainManager.AddCustomLayer(typeof(McsEscortLayer), _customBrainNames, 66);
-                BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), _customBrainNames, 67);
+                BrainManager.AddCustomLayer(typeof(McsProxyLayer), Classification.AllBrainNames, 67);
+                BrainManager.AddCustomLayer(typeof(McsAvoidDangerLayer), _customBrainNames, 68);
                 BrainManager.AddCustomLayer(typeof(McsFightLayer), _customBrainNames, 89);
             }
         }
@@ -60,6 +62,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             BrainManager.RemoveLayer(nameof(McsCommonLayer), Classification.AllBrainNames);
             BrainManager.RemoveLayer(nameof(McsEscortLayer), Classification.AllBrainNames);
+            BrainManager.RemoveLayer(nameof(McsProxyLayer), Classification.AllBrainNames);
             BrainManager.RemoveLayer(nameof(McsAvoidDangerLayer), Classification.AllBrainNames);
 
             if (MiyakoCarryServicePlugin.SAINInstalled)
@@ -80,6 +83,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 BrainManager.RemoveLayer(nameof(McsCommonLayer), _customBrainNames);
                 BrainManager.RemoveLayer(nameof(McsEscortLayer), _customBrainNames);
                 BrainManager.RemoveLayer(nameof(McsFightLayer), _customBrainNames);
+                BrainManager.RemoveLayer(nameof(McsProxyLayer), _customBrainNames);
                 BrainManager.RemoveLayer(nameof(McsAvoidDangerLayer), _customBrainNames);
             }
         }

@@ -26,7 +26,6 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
-            EventMgr.Subscribe<QuestProxyActionReadyToStartEvent>(HandleQuestProxyActionReadyToStart, this);
         }
 
         private GamePlayerOwner _gamePlayerOwner
@@ -43,7 +42,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
-        private QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
 
         private List<MongoID> _mySquadMcsBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, Player> _mySquadMcsBotPlayers = new();
@@ -517,7 +515,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
             foreach (var switchData in switchDatas)
             {
-                actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(SwitchProxyActionCommandAction, mcsBotPlayer, switchData));
+                actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(InteractionProxyActionCommandAction, mcsBotPlayer, switchData));
             }
 
             PostBuildCommandMenu(actionsReturnClass);
@@ -996,57 +994,9 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        private void HandleQuestProxyActionReadyToStart(QuestProxyActionReadyToStartEvent @event)
+        private void InteractionProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-            {
-                var mcsBotPlayer = TryGetMcsBotPlayer(@event.McsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    return;
-                }
-
-                EventMgr.Notify(new CommandMgrHandleFikaEvent
-                {
-                    McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.QuestProxyActionCallback,
-                    TargetId = @event.TargetId
-                });
-            }
-            else
-            {
-                var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
-                foreach (var botOwner in botOwners)
-                {
-                    if (botOwner == null)
-                    {
-                        continue;
-                    }
-
-                    if (botOwner.ProfileId != @event.McsBotPlayerId)
-                    {
-                        continue;
-                    }
-
-                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                    if (mcsBotPlayerData == null)
-                    {
-                        continue;
-                    }
-                    
-                    var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
-                    if (questData != null)
-                    {
-                        TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayerData));
-                    }
-                    return;
-                }
-            }
-        }
-
-        private void SwitchProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
-        {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -1072,10 +1022,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(proxyAction.Id());
-                    if (interactableObjectData != null && interactableObjectData is SwitchData switchData)
+                    if (interactableObjectData != null)
                     {
                         mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
-                        mcsBotPlayerData.TargetPos = switchData.GetPos();
+                        mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
                     }
                     mcsBotPlayerData.IsLooting = false;
                 }
@@ -1085,7 +1035,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void QuestProxyActionCommandAction(Player mcsBotPlayer, QuestData questData)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
@@ -1121,7 +1071,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !McsMgr.IsHost)
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {

@@ -54,6 +54,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            BotOwner.SetTargetMoveSpeed(1f);
+            BotOwner.Sprint(true, false);
+            BotOwner.SetPose(1f);
+            BotOwner.Steering.LookToMovingDirection();
             HandleDoor();
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
@@ -100,12 +104,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 if (sqrDistance <= 9f && Math.Abs(offset.y) < 2f)
                 {
-                    BotOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.OnLoot,
-                        Key = mcsBotPlayerData.LootingTarget.Item.Name,
-                        Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
-                    });
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(lootPos);
@@ -136,6 +134,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     return;
                 }
+
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.OnLoot,
+                    Key = mcsBotPlayerData.LootingTarget.Item.Name,
+                    Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
+                });
 
                 mcsBotPlayerData.IsTaskRunning = true;
                 await Task.Delay(1000);

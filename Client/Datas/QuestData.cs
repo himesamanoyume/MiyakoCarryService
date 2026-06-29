@@ -63,11 +63,20 @@ namespace MiyakoCarryService.Client.Datas
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
 
-            EventMgr.Notify(new CommandMgrHandleFikaEvent
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
-                McsBotPlayer = mcsBotPlayerData.Player,
-                CommandPacketType = ECommandPacketType.EndProxyAction
-            });
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayerData.Player,
+                    CommandPacketType = ECommandPacketType.EndProxyAction
+                });
+            }
+            else
+            {
+                mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+                mcsBotPlayerData.TargetPos = null;
+                mcsBotPlayerData.ProxyTargetId = null;
+            }
         }
 
         public bool IsProxyActionDisabled()

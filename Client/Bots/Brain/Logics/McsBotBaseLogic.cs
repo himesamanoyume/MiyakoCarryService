@@ -10,11 +10,17 @@ using MiyakoCarryService.Client.Datas;
 using Comfort.Common;
 using System;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public abstract class McsBotBaseLogic(BotOwner botOwner) : CustomLogic(botOwner)
     {
+        protected McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        protected QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
+        protected CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
+        
         protected async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;

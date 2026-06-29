@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (mcsBotPlayerData != null)
             {
-                // mcsBotPlayerData.IsLooting = true;
+                mcsBotPlayerData.IsLooting = false;
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                // mcsBotPlayerData.IsLooting = false;
+                mcsBotPlayerData.IsLooting = false;
             }
         }
 
@@ -58,16 +58,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            BotOwner.SetTargetMoveSpeed(1f);
+            BotOwner.Sprint(true, false);
+            BotOwner.SetPose(1f);
+            BotOwner.Steering.LookToMovingDirection();
             HandleDoor();
             _baseLogic.UpdateNodeByMain(data);
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
             if (mcsBotPlayerData == null)
-            {
-                return;
-            }
-
-            if (!mcsBotPlayerData.IsLooting)
             {
                 return;
             }
@@ -89,52 +88,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 _lastTimeCheckDistance = Time.time + 2f;
 
-                if (!mcsBotPlayerData.LootingTarget.IsLocked())
-                {
-                    mcsBotPlayerData.IsLooting = false;
-                    return;
-                }
-
-                var lootPos = mcsBotPlayerData.LootingTarget.RootTransform.position;
-                var offset = BotOwner.Position - lootPos;
-                var sqrDistance = BotOwner.Position.McsSqrDistance(lootPos);
+                var targetPos = mcsBotPlayerData.TargetPos;
+                var offset = BotOwner.Position - targetPos.Value;
+                var sqrDistance = BotOwner.Position.McsSqrDistance(targetPos.Value);
 
                 if (sqrDistance <= 4f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
-                    BotOwner.Steering.LookToPoint(lootPos);
+                    BotOwner.Steering.LookToPoint(targetPos.Value);
 
-                    if (mcsBotPlayerData.HasDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction]))
-                    {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup, EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction], EDecision.ShouldHoldPosition);
-                        BotOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.OnPosition
-                        });
-                        if (mcsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction))
-                        {
-                            EventMgr.Notify(new QuestProxyActionReadyToStartEvent
-                            {
-                                McsLeadPlayerId = mcsBotPlayerData.LeadPlayer.ProfileId,
-                                McsBotPlayerId = mcsBotPlayerData.Player.ProfileId,
-                                TargetId = mcsBotPlayerData.ProxyTargetId
-                            });
-                        }
-                        else if (mcsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction))
-                        {
-                            TasksExtensions.HandleExceptions(StartLooting());
-                        }
-                        else if (mcsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
-                        {
-                            var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
-                            if (interactableObjectData != null)
-                            {
-                                var interactionResult = new InteractionResult(EInteractionType.Open);
-                                mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, null);
-                            }
-                        }
-                    }
+                    TasksExtensions.HandleExceptions(StartExcuteProxyAction());
                     return;
                 }
 
@@ -143,6 +107,84 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetTargetMoveSpeed(1f);
                     BotOwner.Steering.LookToMovingDirection();
                     BotOwner.Mover.Sprint(false);
+                }
+            }
+        }
+
+        private async Task StartExcuteProxyAction()
+        {
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            try
+            {
+                if (mcsBotPlayerData == null)
+                {
+                    return;
+                }
+
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.OnPosition
+                });
+
+                mcsBotPlayerData.IsTaskRunning = true;
+                if (mcsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction))
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    await QuestProxyActionReadyToStart();
+                }
+                else if (mcsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction))
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    await StartLooting();
+                }
+                else if (mcsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
+                    if (interactableObjectData != null)
+                    {
+                        var interactionResult = new InteractionResult(EInteractionType.Open);
+                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(interactableObjectData.GetWorldInteractiveObject(), interactionResult, null);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+            }
+            finally
+            {
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.IsTaskRunning = false;
+                }
+            }
+        }
+
+        private async Task QuestProxyActionReadyToStart()
+        {
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            {
+                var mcsBotPlayer = mcsBotPlayerData.Player;
+                if (mcsBotPlayer == null)
+                {
+                    return;
+                }
+
+                EventMgr.Notify(new CommandMgrHandleFikaEvent
+                {
+                    McsBotPlayer = mcsBotPlayer,
+                    CommandPacketType = ECommandPacketType.QuestProxyActionCallback,
+                    TargetId = mcsBotPlayerData.ProxyTargetId
+                });
+            }
+            else
+            {
+                var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
+                if (questData != null)
+                {
+                    await questData.ForceCompleteQuest(mcsBotPlayerData);
                 }
             }
         }
@@ -161,6 +203,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     return;
                 }
+
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.OnLoot,
+                    Key = mcsBotPlayerData.LootingTarget.Item.Name,
+                    Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
+                });
 
                 mcsBotPlayerData.IsTaskRunning = true;
                 await Task.Delay(1000);
