@@ -5,7 +5,6 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
-using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -299,17 +298,30 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.Memory.HaveEnemy)
             {
+                var goalEnemy = BotOwner.Memory.GoalEnemy;
+                var enemyExist = goalEnemy != null && goalEnemy.Person != null;
                 // 使护航下的Zyriachy无视目标处于灯塔限定区域时才可视为敌人的限制
                 if (BotOwner.Profile.Info.Settings.Role is WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
                 {
-                    var goalEnemy = BotOwner.Memory.GoalEnemy;
-                    if (goalEnemy != null && goalEnemy.Person != null)
+                    if (enemyExist)
                     {
                         if (BotOwner.Boss.BossLogic is ZyriachyBossLogicClass zyriachyBossLogicClass)
                         {
                             zyriachyBossLogicClass.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
                         }
                     }
+                }
+
+                var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    return false;
+                }
+
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
+                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled && mcsLeadPlayerPos.McsSqrDistance(goalEnemy.CurrPosition) <= 35f * 35f)
+                {
+                    return false;
                 }
                 return true;
             }

@@ -39,6 +39,19 @@ namespace MiyakoCarryService.Client.Datas
                     return hit.position;
                 }
             }
+            for (int attempt = 0; attempt < 30; attempt++)
+            {
+                var samplePos = new Vector3(
+                    center.x + GClass856.Random(-1, 1),
+                    center.y + GClass856.Random(-1, 1),
+                    center.z + GClass856.Random(-1, 1)
+                );
+
+                if (NavMesh.SamplePosition(samplePos , out var hit, 1f, -1))
+                {
+                    return hit.position;
+                }
+            }
             return center;
         }
 

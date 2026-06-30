@@ -122,6 +122,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 }
                 else if (mcsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
                 {
+                    BotOwner.SetPose(1f);
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
                     if (interactableObjectData == null)

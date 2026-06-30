@@ -3,7 +3,6 @@ using System;
 using System.Reflection;
 using DrakiaXYZ.BigBrain.Brains;
 using HarmonyLib;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;

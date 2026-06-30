@@ -1742,11 +1742,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
-            {
-                CheckStuck();
-            }
-
             if (!McsBotPlayerData.HasDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldQuestProxyAction]))
             {
                 return true;
