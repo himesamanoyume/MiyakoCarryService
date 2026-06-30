@@ -86,7 +86,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 BuildMainCommandMenu();
             }
         }
-        
+
         public List<MongoID> GetMySquadMcsBotPlayerIds()
         {
             return _mySquadMcsBotPlayerIds;
@@ -1031,6 +1031,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
                         mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Roger,
+                        });
                     }
                     mcsBotPlayerData.IsLooting = false;
                 }
@@ -1069,6 +1073,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.ProxyTargetId = questData.Id();
                     mcsBotPlayerData.TargetPos = questData.GetPos();
                     mcsBotPlayerData.IsLooting = false;
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger,
+                    });
                 }
             }
             CloseCommandMenuAction();
@@ -1089,16 +1097,22 @@ namespace MiyakoCarryService.Client.Mgrs
             else
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (botOwner.Memory.HaveEnemy)
                 {
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Negative,
                     });
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.ProxyTargetId = null;
+                        mcsBotPlayerData.TargetPos = null;
+                    }
                 }
                 botOwner.Mover.LastTimePosChanged = Time.time;
                 botOwner.StopMove();
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
@@ -1112,6 +1126,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         LootDataMgr.LockLootItemToTarget(lootData);
                         LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                         mcsBotPlayerData.LootingTarget = lootData;
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Roger,
+                        });
                     }
                     else
                     {

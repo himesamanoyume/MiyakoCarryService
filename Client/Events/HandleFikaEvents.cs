@@ -13,6 +13,13 @@ namespace MiyakoCarryService.Client.Events
         public McsMsg Msg { get; set; }
     }
 
+    public sealed class QuestProxyCommandCallbackHandleFikaEvent : IMcsEvent
+    {
+        public MongoID McsLeadPlayerId { get; set; }
+        public MongoID McsBotPlayerId { get; set; }
+        public string TargetId { get; set; }
+    }
+
     public sealed class CommandMgrHandleFikaEvent : IMcsEvent
     {
         public Player McsBotPlayer { get; set; }

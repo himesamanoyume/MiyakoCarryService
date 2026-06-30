@@ -134,12 +134,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (interactableObjectData is DoorData doorData)
                     {
                         doorData.Door.DoorState = EDoorState.Shut;
-                        mcsBotPlayerData.Player.CurrentManagedState.StartDoorInteraction(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
+                        mcsBotPlayerData.Player.vmethod_0(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
                     }
                     else if (interactableObjectData is SwitchData switchData)
                     {
-                        switchData.Switch.SetUser(mcsBotPlayerData.Player);
-                        switchData.Switch.Interact(interactionResult);
+                        mcsBotPlayerData.Player.vmethod_1(switchData.Switch, interactionResult);
                         await Task.Delay(1000);
                         InteractionCallback(mcsBotPlayerData);
                     }
@@ -168,18 +167,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private async Task QuestProxyActionReadyToStart()
         {
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
-            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            if (mcsBotPlayerData == null)
             {
-                var mcsBotPlayer = mcsBotPlayerData.Player;
-                if (mcsBotPlayer == null)
-                {
-                    return;
-                }
+                return;
+            }
+            var isMySquadMember = CommandMgr.IsMcsMemberPlayer(mcsBotPlayerData.Player.ProfileId);
+            var mcsBotPlayer = mcsBotPlayerData.Player;
+            if (mcsBotPlayer == null)
+            {
+                return;
+            }
 
-                EventMgr.Notify(new CommandMgrHandleFikaEvent
+            if (MiyakoCarryServicePlugin.FikaInstalled && !isMySquadMember)
+            {
+                EventMgr.Notify(new QuestProxyCommandCallbackHandleFikaEvent
                 {
-                    McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.QuestProxyActionCallback,
+                    McsLeadPlayerId = mcsBotPlayerData.LeadPlayer.ProfileId,
+                    McsBotPlayerId = mcsBotPlayer.ProfileId,
                     TargetId = mcsBotPlayerData.ProxyTargetId
                 });
             }
@@ -188,7 +192,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
                 if (questData != null)
                 {
-                    await questData.ForceCompleteQuest(mcsBotPlayerData);
+                    await questData.ForceCompleteQuest(mcsBotPlayer);
                 }
             }
         }

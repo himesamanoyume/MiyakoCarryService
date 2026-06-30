@@ -49,6 +49,7 @@ namespace MiyakoCarryService.Fika
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
+            EventMgr.Subscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket, this);
             EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
 
@@ -66,7 +67,6 @@ namespace MiyakoCarryService.Fika
                 { ECommandPacketType.QuestProxyAction, HandleProxyAction },
                 { ECommandPacketType.LootProxyAction, HandleProxyAction },
                 { ECommandPacketType.InteractionProxyAction, HandleProxyAction },
-                { ECommandPacketType.QuestProxyActionCallback, HandleQuestProxyActionCallback },
                 { ECommandPacketType.EndProxyAction, HandleEndProxyAction },
             };
         }
@@ -93,6 +93,7 @@ namespace MiyakoCarryService.Fika
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
             fikaEvent.Manager.RegisterPacket<McsBotPlayerConfigPacket>(OnMcsBotPlayerConfigPacketReceived);
+            fikaEvent.Manager.RegisterPacket<QuestProxyCommandCallbackPacket>(OnQuestProxyCommandCallbackPacketReceived);
 
             // 用于主机同步护航信息至副机
             if (fikaEvent.Manager is FikaServer fikaServer && !FikaBackendUtils.IsHeadless)
@@ -182,6 +183,37 @@ namespace MiyakoCarryService.Fika
                     Key = packet.Key,
                     Key2 = packet.Key2
                 });
+            }
+        }
+
+        public void OnQuestProxyCommandCallbackPacketReceived(QuestProxyCommandCallbackPacket packet)
+        {
+            if (!FikaBackendUtils.IsClient)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null || !mcsLeadPlayer.IsYourPlayer)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var questData = QuestDataMgr.FindQuestData(packet.TargetId);
+                if (questData != null)
+                {
+                    TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayer));
+                }
             }
         }
 
@@ -651,6 +683,11 @@ namespace MiyakoCarryService.Fika
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
                             mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                             mcsBotPlayerData.TargetPos = packet.Position;
+                            mcsBotPlayerData.IsLooting = false;
+                            botOwner.TalkMsg(new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.Roger,
+                            });
                             break;
                         case ECommandPacketType.LootProxyAction:
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
@@ -665,6 +702,10 @@ namespace MiyakoCarryService.Fika
                                 LootDataMgr.LockLootItemToTarget(lootData);
                                 LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                                 mcsBotPlayerData.LootingTarget = lootData;
+                                botOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.Roger,
+                                });
                             }
                             else
                             {
@@ -675,61 +716,33 @@ namespace MiyakoCarryService.Fika
                                 mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
                                 mcsBotPlayerData.ProxyTargetId = null;
                                 mcsBotPlayerData.TargetPos = null;
-                                return;
                             }
                             break;
                         case ECommandPacketType.InteractionProxyAction:
                             mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
                             mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                             var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
-                            mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
+                            if (interactableObjectData != null)
+                            {
+                                mcsBotPlayerData.ProxyTargetId = interactableObjectData.Id();
+                                mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
+                                mcsBotPlayerData.IsLooting = false;
+                                botOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.Roger,
+                                });
+                            }
+                            else
+                            {
+                                botOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.Negative,
+                                });
+                                mcsBotPlayerData.RemoveDecision(EDecision.ShouldInteractionProxyAction);
+                                mcsBotPlayerData.ProxyTargetId = null;
+                                mcsBotPlayerData.TargetPos = null;
+                            }
                             break;
-                    }
-                    mcsBotPlayerData.IsLooting = false;
-                    botOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.Roger,
-                    });
-                }
-            }
-        }
-
-        private void HandleQuestProxyActionCallback(CommandPacket packet)
-        {
-            if (packet.CommandType != ECommandPacketType.QuestProxyActionCallback)
-            {
-                return;
-            }
-
-            if (!FikaBackendUtils.IsClient)
-            {
-                return;
-            }
-
-            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
-
-            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
-
-            if (mcsLeadPlayer == null)
-            {
-                return;
-            }
-
-            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
-            {
-                if (!mcsBotPlayer.HealthController.IsAlive)
-                {
-                    return;
-                }
-
-                var botOwner = mcsBotPlayer.AIData.BotOwner;
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
-                    if (questData != null)
-                    {
-                        TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayerData));
                     }
                 }
             }
@@ -776,7 +789,7 @@ namespace MiyakoCarryService.Fika
 
         public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
-            if (@event.CommandPacketType is not ECommandPacketType.QuestProxyActionCallback && !FikaBackendUtils.IsClient)
+            if (!FikaBackendUtils.IsClient)
             {
                 return;
             }
@@ -821,6 +834,34 @@ namespace MiyakoCarryService.Fika
                     Key2 = @event.Msg.Key2,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
+                };
+
+                // 为了适配老版本Fika无法获取NetPeer，使用流量损耗更大的广播方式
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            }
+        }
+
+        public void SendQuestProxyCommandCallbackPacket(QuestProxyCommandCallbackHandleFikaEvent @event)
+        {
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
+            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
+            if (mcsLeadPlayer == null || mcsBotPlayer == null)
+            {
+                return;
+            }
+
+            if (mcsLeadPlayer is FikaPlayer fikaMcsLeadPlayer && mcsBotPlayer is FikaPlayer fikaMcsBotPlayer)
+            {
+                var packet = new QuestProxyCommandCallbackPacket
+                {
+                    McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
+                    McsBotPlayerNetId = fikaMcsBotPlayer.NetId,
+                    TargetId = @event.TargetId
                 };
 
                 // 为了适配老版本Fika无法获取NetPeer，使用流量损耗更大的广播方式

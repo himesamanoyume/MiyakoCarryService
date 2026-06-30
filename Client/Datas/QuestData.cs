@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Client.Datas
             _transformRef = null;
         }
 
-        public async Task ForceCompleteQuest(McsBotPlayerData mcsBotPlayerData)
+        public async Task ForceCompleteQuest(Player mcsBotPlayer)
         {
             if (QuestCondition is ConditionLeaveItemAtLocation conditionLeaveItemAtLocation)
             {
@@ -70,15 +70,19 @@ namespace MiyakoCarryService.Client.Datas
             {
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
-                    McsBotPlayer = mcsBotPlayerData.Player,
+                    McsBotPlayer = mcsBotPlayer,
                     CommandPacketType = ECommandPacketType.EndProxyAction
                 });
             }
             else
             {
-                mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
-                mcsBotPlayerData.TargetPos = null;
-                mcsBotPlayerData.ProxyTargetId = null;
+                var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+                    mcsBotPlayerData.TargetPos = null;
+                    mcsBotPlayerData.ProxyTargetId = null;
+                }
             }
         }
 

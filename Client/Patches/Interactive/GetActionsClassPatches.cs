@@ -38,14 +38,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
                 var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                if (mcsBotPlayer == null)
                 {
                     continue;
                 }
 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME, mcsBotPlayer.Profile.Nickname),
+                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandMgr.InteractionProxyActionCommandAction(mcsBotPlayer, doorData),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
@@ -88,14 +88,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
                 var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                if (mcsBotPlayer == null)
                 {
                     continue;
                 }
                 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME, mcsBotPlayer.Profile.Nickname),
+                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandMgr.LootProxyActionCommandAction(mcsBotPlayer, lootData),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive

@@ -14,7 +14,6 @@ namespace MiyakoCarryService.Client.Enums
         QuestProxyAction,
         LootProxyAction,
         InteractionProxyAction,
-        QuestProxyActionCallback,
         EndProxyAction
     }
 }
