@@ -195,5 +195,9 @@
     "Mcs/QuestProxyCommand TargetName": "Command carry service player proxy to execute task",
     "Mcs/SwitchProxyCommand Name": "Proxy Operate Switch",
     "Mcs/SwitchProxyCommand TargetName": "Command carry service player proxy to operate switch",
-    "Mcs/SubQuestProxyCommand TargetName": "Select a quest for proxy"
+    "Mcs/SubQuestProxyCommand TargetName": "Select a quest for proxy",
+    "Mcs/DoorProxyCommand Name": "{0} Proxy Open",
+    "Mcs/DoorProxyCommand TargetName": "Command carry service player proxy to open the door",
+    "Mcs/LootProxyCommand Name": "{0} Proxy Take",
+    "Mcs/LootProxyCommand TargetName": "Command carry service player proxy to take the loot"
 }

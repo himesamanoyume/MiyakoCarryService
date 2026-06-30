@@ -187,7 +187,7 @@ namespace MiyakoCarryService.Client.Mgrs
             actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
         }
 
-        private void OnCurrentActionChanged()
+        public void OnCurrentActionChanged()
         {
             if (!Singleton<CommonUI>.Instantiated)
             {

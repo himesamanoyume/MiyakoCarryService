@@ -177,5 +177,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string SWITCHPROXYCOMMAND_NAME = "Mcs/SwitchProxyCommand Name";
         public const string SWITCHPROXYCOMMAND_TARGETNAME = "Mcs/SwitchProxyCommand TargetName";
         public const string SUBQUESTPROXYCOMMAND_TARGETNAME = "Mcs/SubQuestProxyCommand TargetName";
+        public const string DOORPROXYCOMMAND_NAME = "Mcs/DoorProxyCommand Name";
+        public const string DOORPROXYCOMMAND_TARGETNAME = "Mcs/DoorProxyCommand TargetName";
+        public const string LOOTPROXYCOMMAND_NAME = "Mcs/LootProxyCommand Name";
+        public const string LOOTPROXYCOMMAND_TARGETNAME = "Mcs/LootProxyCommand TargetName";
     }
 }

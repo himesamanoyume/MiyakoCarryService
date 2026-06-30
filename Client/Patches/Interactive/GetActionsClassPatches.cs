@@ -35,6 +35,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             }
 
             var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(owner.Player.ProfileId);
+            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
             foreach (var botOwner in botOwners)
             {
                 if (botOwner == null)
@@ -44,7 +45,8 @@ namespace MiyakoCarryService.Client.Patches.Interactive
 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = $"{botOwner.Profile.Nickname} 代理开门",
+                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME, botOwner.Profile.Nickname),
+                    TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandMgr.InteractionProxyActionCommandAction(botOwner.GetPlayer, doorData),
                     Disabled = !botOwner.HealthController.IsAlive
                 });
@@ -83,6 +85,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             }
 
             var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(owner.Player.ProfileId);
+            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
             foreach (var botOwner in botOwners)
             {
                 if (botOwner == null)
@@ -92,7 +95,8 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = $"{botOwner.Profile.Nickname} 代理拾取",
+                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME, botOwner.Profile.Nickname),
+                    TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandMgr.LootProxyActionCommandAction(botOwner.GetPlayer, lootData),
                     Disabled = !botOwner.HealthController.IsAlive
                 });

@@ -195,5 +195,9 @@
     "Mcs/QuestProxyCommand TargetName": "命令护航代理执行任务",
     "Mcs/SwitchProxyCommand Name": "代理操作开关",
     "Mcs/SwitchProxyCommand TargetName": "命令护航代理操作开关",
-    "Mcs/SubQuestProxyCommand TargetName": "选择一个任务进行代理"
+    "Mcs/SubQuestProxyCommand TargetName": "选择一个任务进行代理",
+    "Mcs/DoorProxyCommand Name": "{0} 代理开门",
+    "Mcs/DoorProxyCommand TargetName": "命令护航代理开门",
+    "Mcs/LootProxyCommand Name": "{0} 代理拾取",
+    "Mcs/LootProxyCommand TargetName": "命令护航代理拾取战利品"
 }
