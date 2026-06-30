@@ -2,8 +2,6 @@
 
 ## 低优先级
 
-- 尝试高度定制BigBrain，实现对单个Bot加载CustomLayer，删除Layer
-- - 以其实现护航单独删除某些不需要的Layer
 - 同步行动指令：玩家与护航同步扔雷、同步开火、同步姿态
 - - 与命令投掷手雷相同，前提都需要定制护航的战斗不随意扔雷
 - 您能加入一个类似于旧版“Friendly PMC”模组的命令系统吗？我希望我们能够向人工智能队友发出直接指令，比如命令他们投掷手雷、攻击敌人、在处于劣势时撤退，或者一旦受到伤害就自动自我治疗
@@ -28,7 +26,7 @@
 
 ## 已知问题
 
-- **开开启了平衡性设置之后，玩家实际上不再拥有从活着的护航身上获取已拾取的目标战利品的能力，需要寻找替代方案**
+- **开启了平衡性设置之后，玩家实际上不再拥有从活着的护航身上获取已拾取的目标战利品的能力，需要寻找替代方案**
 - *ABPS似乎仍可能导致护航刷不出来*（没复现过）
 - *当护航等级较低并进入过其护航库存模式后，跳蚤市场上架会受到护航等级影响没有复原而导致无法上架*（没复现过）
 - 当前的护航因为生成的口袋容器不同，会导致不同口袋的装备套装之间无法应用
@@ -38,7 +36,9 @@
 
 ## TODO
 
-- ~~联机测试~~、**SAIN + ORBIT测试**
+- ~~尝试高度定制BigBrain，实现对单个Bot加载CustomLayer，删除Layer~~
+- - ~~以其实现护航单独删除某些不需要的Layer~~
+- 重构McsMgr和CommandMgr，确保功能单一
 
 ## 更新日志
 
@@ -288,6 +288,136 @@
 - 修复Fika联机时，副机的真人玩家如果没有点护航就会被其他护航攻击的问题
 - 尝试修复Fika联机下副机护航在第一次撤离后第二次无法被邀请入队的问题（如果解决了记得发出来告知我）
 - 修复战局开始报错问题
+
+# LayerName
+
+## 固定名 Layer（可直接用字符串删除）
+
+| 类型名 | LayerName | 作用 |
+|---|---|---|
+| `GClass39` | `AssaultHaveEnemy` | 有敌人时通用战斗 |
+| `GClass40` | `MarksmanEnemy` | 狙击手有敌战斗（卧射/掩体）|
+| `GClass41` | `PushAndSup` | 推进与压制（hard 难度）|
+| `GClass42` | `Assault Building` | 突入建筑攻击室内敌人 |
+| `GClass43` | `Enemy Building` | 敌人在建筑内时的攻坚 |
+| `GClass44` | `Goal Building` | 目标在建筑内 |
+| `GClass45` | `AssaultEnemyFar` | 远距离敌人找掩体 |
+| `GClass46` | `Simple Target` | 处理 GoalTarget（搜索/治疗）|
+| `GClass48` | `AvoidDanger` | 躲避炮击/手雷/BTR/闪光/地雷 |
+| `GClass49` | `BoarGrenadeDanger` | Boar 跟随者躲手雷 |
+| `GClass52` | `BoarClPatrol` | Boar 近身跟随巡逻 |
+| `GClass53` | `BoarPatrol` | Boar 巡逻 |
+| `GClass54` | `BsBoarPatrol` | Boss Boar 巡逻 |
+| `GClass56` | `BossBoarFight` | Boss Boar 战斗 |
+| `GClass57` | `BoarSnEn` | Boar 狙击手有敌 |
+| `GClass58` | `FBoarFght` | Boar 跟随者战斗 |
+| `GClass59` | `Boar sn tg` | Boar 狙击手目标 |
+| `GClass60` | `Bully Layer` | Bully(报应) 战斗 |
+| `GClass61` | `HideHW` | 万圣节感染躲藏 |
+| `GClass62` | `Kill logic` | Killa 核心战斗 |
+| `GClass64` | `GluharKilla` | Gluhar 跟随者 Killa 式攻击 |
+| `GClass66` | `BossGlFight` | Boss Gluhar 战斗 |
+| `GClass67` | `GluhAssKilla` | Gluhar 突击跟随者 |
+| `GClass68` | `FlGlScout` | Gluhar 侦察跟随者 |
+| `GClass69` | `BaseBTR` | BTR 射手基础 |
+| `GClass70` | `SuppressBTR` | BTR 压制射击 |
+| `GClass71` | `Debug` | 调试层 |
+| `GClass72` | `Follow Player` | 信号弹召唤跟随玩家 |
+| `GClass73` | `Khorovod` | 圣诞绕圈事件 |
+| `GClass74` | `Obd Ptrl` | 嗑药 Scav 巡逻 |
+| `GClass75` | `Exfiltration` | 撤离 |
+| `GClass78` | `BirdHold` | BirdEye 控点 |
+| `GClass79` | `PtrlBirdEye` | BirdEye 巡逻 |
+| `GClass80` | `KnightFight` | Knight 战斗 |
+| `GClass81` | `StationaryWS` | 固定武器压制 |
+| `GClass82` | `BoarStationary` | Boar 固定武器 |
+| `GClass83` | `ExURequest` | ExUsec 指令(和平)|
+| `GClass86` | `PatrolFollower` | 跟随者巡逻 |
+| `GClass87` | `Help` | 响应队友召唤/支援 |
+| `GClass88` | `GroupForce` | 群体强制交战 |
+| `GClass89` | `Gifter` | 圣诞老人送礼 |
+| `GClass90` | `GlGoal` | Gluhar 跟随者目标 |
+| `GClass91` | `HoldNearBoss` | 在 Boss 附近保持 |
+| `GClass93` | `Peace Zrch Prtl` | 和平 Zryachiy 巡逻 |
+| `GClass94` | `RavangeZryachiy` | 复仇 Zryachiy（瞬移/近战）|
+| `GClass96` | `PrstSummon` | 教徒祭司召唤仪式 |
+| `GClass97` | `PriestPatrol` | 祭司巡逻 |
+| `GClass100` | `HoldOrCoverT` | 有目标时守/进掩体 |
+| `GClass101` | `HoldOrCoverF` | 有敌时守/进掩体 |
+| `GClass104` | `KojaniyB_Enemy` | Boss Kojaniy 有敌 |
+| `GClass105` | `FolKojEnemy` | Kojaniy 跟随者有敌 |
+| `GClass106` | `Kojaniy Target` | Kojaniy 目标 |
+| `GClass107` | `ksPartol` | Kolontay 安保巡逻 |
+| `GClass110` | `KolontayFight` | Kolontay 战斗 |
+| `GClass111` | `KlnSolo` | Kolontay 单独战斗 |
+| `GClass112` | `SecurityKln` | Kolontay 安保 |
+| `GClass113` | `KolontayAP` | Kolontay 护主 |
+| `GClass114` | `Kln_NIMH` | Kolontay 区域战斗 |
+| `GClass115` | `KlnForceAtk` | Kolontay 强攻 |
+| `GClass116` | `KlnTrg` | Kolontay 目标 |
+| `GClass117` | `LootPatrol` | 巡逻搜刮 loot |
+| `GClass118` | `Malfunction` | 武器卡壳修复 |
+| `GClass119` | `MarksmanTarget` | 狙击手目标 |
+| `GClass120` | `Panic` | 恐慌（坐地/躲）|
+| `GClass121` | `PrtBadTrg` | Partisan 坏目标布雷 |
+| `GClass123` | `PartisanMine` | Partisan 布雷 |
+| `GClass124` | `PartMineAll` | Partisan 全面布雷 |
+| `GClass126` | `PrtFight` | Partisan 战斗 |
+| `GClass127` | `PrtFMN` | Partisan 多敌战斗布雷 |
+| `GClass128` | `PrtZrSvg` | Partisan 对零号 Scav 近战 |
+| `GClass129` | `PrtPst` | Partisan 追击 |
+| `GClass130` | `PrtStalk` | Partisan 潜行布雷 |
+| `GClass131` | `PrtMany` | Partisan 多敌 |
+| `GClass132` | `Utility peace` | 搜尸/捡物等杂项 |
+| `GClass133` | `PatrolAssault` | 基础巡逻兜底 |
+| `GClass134` | `Full map patrol` | 全图巡逻 |
+| `GClass135` | `StayAtPos` | 守位 |
+| `GClass136` | `GeneratorDef` | 发电机事件防守 |
+| `GClass137` | `InfStayAtPos` | 感染者守位 |
+| `GClass138` | `StayAtPosOpt` | 优化守位 |
+| `GClass141` | `PmcBear` | PMC BEAR/跟随者核心战斗 |
+| `GClass142` | `Pmc` | PMC/Boss 跟随者保护战斗 |
+| `GClass143` | `Follower bully` | Bully 跟随者 |
+| `GClass144` | `SecurityGluhar` | Gluhar 安保 |
+| `GClass145` | `PmcUsec` | PMC USEC 核心战斗 |
+| `GClass147` | `BossSanitarFight` | Boss Sanitar 战斗 |
+| `GClass148` | `FlSanFight` | Sanitar 跟随者战斗 |
+| `GClass149` | `SanitarGoal` | Sanitar 目标(治疗/兴奋剂)|
+| `GClass151` | `GrenSuicide` | 自杀手雷 |
+| `GClass154` | `Run&Strike` | 教徒突进打击 |
+| `GClass156` | `KillaAgro` | Killa 激怒 |
+| `GClass158`/`GClass159` | `TagillaAgro` | Tagilla 激怒 |
+| `GClass160` | `TagillaAmbush` | Tagilla 埋伏 |
+| `GClass161` | `TagillaFollower` | Tagilla 跟随者 |
+| `GClass162` | `TagillaMain` | Tagilla 主战斗 |
+| `GClass163` | `ATag search` | 激怒 Tagilla 搜索 |
+| `GClass164`/`GClass165` | `TestLayer` | 测试层 |
+| `GClass166` | `Warn` | 警告玩家 |
+| `GClass169` | `CloseZrFight` | Zryachiy 近距战斗 |
+| `GClass170` | `ZryachiyFight` | Boss Zryachiy 战斗 |
+| `GClass171` | `FlZryachFight` | Zryachiy 跟随者战斗 |
+| `GClass172` | `LayingPatrol` | 卧射巡逻 |
+| `GClass173` | `CheckZryachiy` | Zryachiy 手势检查 |
+| `GClass174` | `StandBy` | 待机 |
+| `Class99` | `AdvAssaultTarget` | 高级突击目标 |
+| `Class100` | `ObdolbosFight` | 嗑药者战斗 |
+| `Class101` | `InfectedTarget` | 感染者目标 |
+| `Class102` | `InfectedWait` | 感染者等待 |
+| `Class103` | `Leave Map` | 离开地图 |
+| `Class104` | `PmcPveTarget` | PMC PVE 目标 |
+| `Class105` | `Pursuit` | 追击近战目标 |
+
+## 动态名 Layer（名字随运行时变化，**不能用固定字符串删除**）
+
+| 类型名 | LayerName（动态）| 说明 |
+|---|---|---|
+| `GClass77` | `BirdEyeFight` / `BirdEyeAgro` | 随小队是否见敌切换 |
+| `GClass84` | `FiReq:<请求类型>` / `FightReqNull` | 战斗类 Bot 指令，名字随请求变化 |
+| `GClass98` | `ZombieSlow` / `ZombieFast` / `ZombieShooting` | 随僵尸模式切换 |
+| `GClass139` | `PcReq:<请求类型>` / `PeacecReqNull` | 和平类 Bot 指令 |
+| `GClass152` | `R&H_IN` / `R&H_OUT` | 教徒躲藏，随室内外切换 |
+| `GClass153` | `MeleeS_IN` / `MeleeS_OUT` | 教徒近战，随室内外切换 |
+| `GClass155` | `SupShootSect_IN` / `SupShootSect_OUT` | 教徒支援射击，随室内外切换 |
 
 # WildSpawnType
 

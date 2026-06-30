@@ -21,6 +21,8 @@ using System.Threading;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using EFT.InventoryLogic;
+using MiyakoCarryService.Client.Bots.Brain.Layers;
+using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client
 {
@@ -604,6 +606,32 @@ namespace MiyakoCarryService.Client
                             botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                             botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
 
+                            void InjectLayers(BaseBrain baseBrain = null)
+                            {
+                                BigBrainUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsCommonLayer), 65);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsEscortLayer), 66);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsProxyLayer), 67);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsAvoidDangerLayer), 68);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsFightLayer), baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) || baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) ? 186 : 88);
+                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsExfiltrationLayer), 89);
+                            }
+
+                            if (botOwner.Brain.BaseBrain != null)
+                            {
+                                InjectLayers();
+                            }
+                            else
+                            {
+                                Action<BaseBrain> handler = null;
+                                handler = (BaseBrain b) =>
+                                {
+                                    botOwner.Brain.OnSetStrategy -= handler;
+                                    InjectLayers(b);
+                                };
+                                botOwner.Brain.OnSetStrategy += handler;
+                            }
+
                             if (!MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                             {
                                 return;
@@ -653,6 +681,8 @@ namespace MiyakoCarryService.Client
                 }
             }
         }
+
+
 
         private BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {
