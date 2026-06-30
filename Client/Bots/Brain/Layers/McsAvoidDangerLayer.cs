@@ -75,6 +75,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
+#if DEBUG
+            if (!MiyakoCarryServicePlugin.EnableMcsLayer.Value)
+            {
+                return false;
+            }
+#endif
+
             if (McsBotPlayerData == null)
             {
                 return false;
@@ -125,18 +132,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected override bool EndGoToCoverPoint()  
-        {  
-            if (!BotOwner.ArtilleryDangerPlace.ShallRunAway() && !BotOwner.BewareGrenade.ShallRunAway())  
-            {  
-                if (BotOwner.Memory.IsInCover && BotOwner.SmokeGrenade.IsInSmoke && BotOwner.Memory.CurCustomCoverPoint != null)  
-                {  
-                    BotOwner.Memory.CurCustomCoverPoint.Spotted(10f);  
-                }  
-                return true;  
-            }  
-        
-            return true;  
+        protected override bool EndGoToCoverPoint()
+        {
+            if (!BotOwner.ArtilleryDangerPlace.ShallRunAway() && !BotOwner.BewareGrenade.ShallRunAway())
+            {
+                if (BotOwner.Memory.IsInCover && BotOwner.SmokeGrenade.IsInSmoke && BotOwner.Memory.CurCustomCoverPoint != null)
+                {
+                    BotOwner.Memory.CurCustomCoverPoint.Spotted(10f);
+                }
+                return true;
+            }
+
+            return true;
         }
 
         protected override bool EndHoldPosition()

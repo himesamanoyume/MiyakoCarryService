@@ -788,6 +788,8 @@ namespace MiyakoCarryService.Fika
                 {
                     CommandType = @event.CommandPacketType,
                     Position = @event.Position,
+                    TargetId = @event.TargetId,
+                    AimingBodyPartType = @event.AimingBodyPartType,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

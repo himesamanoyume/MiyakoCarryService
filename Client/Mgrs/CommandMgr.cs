@@ -54,13 +54,13 @@ namespace MiyakoCarryService.Client.Mgrs
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            TasksExtensions.HandleExceptions(GetMySquadMcsBotPlayerIds());
+            TasksExtensions.HandleExceptions(RequestMySquadMcsBotPlayerIds());
             _gamePlayerOwner = null;
         }
 
-        private async Task GetMySquadMcsBotPlayerIds()
+        private async Task RequestMySquadMcsBotPlayerIds()
         {
-            _mySquadMcsBotPlayerIds = await McsRequestHandler.GetMySquadMcsBotPlayerIds(new()
+            _mySquadMcsBotPlayerIds = await McsRequestHandler.RequestMySquadMcsBotPlayerIds(new()
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
@@ -86,8 +86,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 BuildMainCommandMenu();
             }
         }
+        
+        public List<MongoID> GetMySquadMcsBotPlayerIds()
+        {
+            return _mySquadMcsBotPlayerIds;
+        }
 
-        private Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
+        public Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
         {
             return _mySquadMcsBotPlayers.AddOrUpdate(
                 mcsBotPlayerId,

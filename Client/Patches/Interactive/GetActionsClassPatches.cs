@@ -17,7 +17,6 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_14));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
@@ -34,21 +33,22 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 return;
             }
 
-            var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(owner.Player.ProfileId);
+            var mcsBotPlayerIds = CommandMgr.GetMySquadMcsBotPlayerIds();
             __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
-            foreach (var botOwner in botOwners)
+            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
-                if (botOwner == null)
+                var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
+                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
                 {
                     continue;
                 }
 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME, botOwner.Profile.Nickname),
+                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME, mcsBotPlayer.Profile.Nickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.InteractionProxyActionCommandAction(botOwner.GetPlayer, doorData),
-                    Disabled = !botOwner.HealthController.IsAlive
+                    Action = () => CommandMgr.InteractionProxyActionCommandAction(mcsBotPlayer, doorData),
+                    Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
         }
@@ -62,7 +62,6 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_8));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
@@ -84,21 +83,22 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 return;
             }
 
-            var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(owner.Player.ProfileId);
+            var mcsBotPlayerIds = CommandMgr.GetMySquadMcsBotPlayerIds();
             __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
-            foreach (var botOwner in botOwners)
+            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
-                if (botOwner == null)
+                var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
+                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
                 {
                     continue;
                 }
                 
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME, botOwner.Profile.Nickname),
+                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME, mcsBotPlayer.Profile.Nickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.LootProxyActionCommandAction(botOwner.GetPlayer, lootData),
-                    Disabled = !botOwner.HealthController.IsAlive
+                    Action = () => CommandMgr.LootProxyActionCommandAction(mcsBotPlayer, lootData),
+                    Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
         }
