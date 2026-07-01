@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -13,7 +11,6 @@ using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
-using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 using TMPro;
 using UnityEngine;
@@ -43,34 +40,15 @@ namespace MiyakoCarryService.Client.Mgrs
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
 
-        private List<MongoID> _mySquadMcsBotPlayerIds = new();
-        private ConcurrentDictionary<MongoID, Player> _mySquadMcsBotPlayers = new();
-
-        public bool IsMcsMemberPlayer(MongoID mcsBotPlayerId)
-        {
-            return _mySquadMcsBotPlayerIds.Contains(mcsBotPlayerId);
-        }
-
         protected sealed override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            TasksExtensions.HandleExceptions(RequestMySquadMcsBotPlayerIds());
             _gamePlayerOwner = null;
-        }
-
-        private async Task RequestMySquadMcsBotPlayerIds()
-        {
-            _mySquadMcsBotPlayerIds = await McsRequestHandler.RequestMySquadMcsBotPlayerIds(new()
-            {
-                Side = MatchmakerAcceptScreenShowPatch.CurrentType
-            });
         }
 
         protected sealed override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            _mySquadMcsBotPlayerIds.Clear();
-            _mySquadMcsBotPlayers.Clear();
             _gamePlayerOwner = null;
         }
 
@@ -87,64 +65,20 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public List<MongoID> GetMySquadMcsBotPlayerIds()
-        {
-            return _mySquadMcsBotPlayerIds;
-        }
-
-        public Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId)
-        {
-            return _mySquadMcsBotPlayers.AddOrUpdate(
-                mcsBotPlayerId,
-                id =>
-                {
-                    var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
-                    {
-                        mcsBotPlayer.Profile.Info.GroupId = "Fika";
-                        mcsBotPlayer.Profile.Info.TeamId = "Fika";
-                    }
-                    return mcsBotPlayer;
-                },
-                (id, oldPlayer) =>
-                {
-                    if (oldPlayer != null)
-                    {
-                        return oldPlayer;
-                    }
-                    var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(id);
-                    if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost && mcsBotPlayer != null)
-                    {
-                        mcsBotPlayer.Profile.Info.GroupId = "Fika";
-                        mcsBotPlayer.Profile.Info.TeamId = "Fika";
-                    }
-                    return mcsBotPlayer;
-                }
-            );
-        }
-
         private void ForEachAliveBot(Action<Player> action)
         {
-            foreach (var id in _mySquadMcsBotPlayerIds)
+            var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayer = TryGetMcsBotPlayer(id);
-                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
-                {
-                    continue;
-                }
                 action(mcsBotPlayer);
             }
         }
 
         private void ForEachAliveBot(Action<Player, BodyPartType> action, BodyPartType bodyPartType)
         {
-            foreach (var id in _mySquadMcsBotPlayerIds)
+            var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayer = TryGetMcsBotPlayer(id);
-                if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
-                {
-                    continue;
-                }
                 action(mcsBotPlayer, bodyPartType);
             }
         }
@@ -153,21 +87,16 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void BuildMainCommandMenu()
         {
-            if (_gamePlayerOwner == null || _mySquadMcsBotPlayerIds.Count == 0)
+            if (_gamePlayerOwner == null)
             {
                 return;
             }
 
-            var mcsBotPlayers = new List<Player>();
-            foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
-            {
-                var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    continue;
-                }
+            var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToList();
 
-                mcsBotPlayers.Add(mcsBotPlayer);
+            if (mcsBotPlayers.Count == 0)
+            {
+                return;
             }
 
             PreBuildCommandMenu(out var actionsReturnClass);
@@ -963,14 +892,9 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
-                foreach (var mcsBotPlayerId in _mySquadMcsBotPlayerIds)
+                var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+                foreach (var mcsBotPlayer in mcsBotPlayers)
                 {
-                    var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                    if (mcsBotPlayer == null)
-                    {
-                        continue;
-                    }
-
                     EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
                         McsBotPlayer = mcsBotPlayer,
@@ -981,15 +905,15 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                var botOwners = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
-                foreach (var botOwner in botOwners)
+                var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+                foreach (var mcsBotPlayer in mcsBotPlayers)
                 {
-                    if (botOwner == null)
+                    if (mcsBotPlayer == null)
                     {
                         continue;
                     }
 
-                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData == null)
                     {
                         continue;

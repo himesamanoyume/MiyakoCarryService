@@ -172,7 +172,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 return;
             }
-            var isMySquadMember = CommandMgr.IsMcsMemberPlayer(mcsBotPlayerData.Player.ProfileId);
+            var isMySquadMember = McsMgr.IsMcsMemberPlayer(mcsBotPlayerData.Player.ProfileId, out var mcsLeadPlayer);
             var mcsBotPlayer = mcsBotPlayerData.Player;
             if (mcsBotPlayer == null)
             {

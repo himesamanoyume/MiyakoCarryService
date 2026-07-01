@@ -453,7 +453,7 @@ namespace MiyakoCarryService.Client
                         }
 
                         var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
-                        if (mcsBotPlayer?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
+                        if (mcsBotPlayer?.AIData?.BotOwner?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
                         {
                             mcsAILeadPlayer.CalcGoalEnemy();
                         }
@@ -520,7 +520,7 @@ namespace MiyakoCarryService.Client
 
                         botOwner.Settings = settings;
 
-                        mcsMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, botOwner, mcsAILeadPlayer);
+                        mcsMgr.AddMcsSquadMember(leadPlayer.ProfileId, botOwner.ProfileId, mcsAILeadPlayer);
                         subtitlesMgr.CreateSubTitle(botOwner.Profile);
 
                         if (leadPlayer.BotsGroup != null)

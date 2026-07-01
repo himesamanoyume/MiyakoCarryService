@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsHighPriceItem = false;
         public bool IsKeywordItem = false;
         public bool IsBlockItem = false;
-        public List<BotOwner> McsSquadMembers
+        public List<Player> McsSquadMembers
         {
             get
             {
@@ -106,8 +106,9 @@ namespace MiyakoCarryService.Client.Datas
 
         public void CheckUsefulContainer()
         {
-            foreach (var botOwner in McsSquadMembers)
+            foreach (var mcsBotPlayer in McsSquadMembers)
             {
+                var botOwner = mcsBotPlayer.BotOwner;
                 if (botOwner == null)
                 {
                     Reset(botOwner);
@@ -120,7 +121,7 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                var inventoryController = botOwner.GetPlayer.InventoryController;
+                var inventoryController = mcsBotPlayer.GetPlayer.InventoryController;
                 var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) : 
                     LootData.ItemType == EItemType.Equipment ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 

@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
@@ -27,15 +28,15 @@ namespace MiyakoCarryService.Client.Patches.Events
             {
                 if (McsMgr.IsMcsLeadPlayer(playerId))
                 {
-                    foreach (var botOwner in McsMgr.GetAllMcsSquadMembersByMcsLeadId(playerId))
+                    foreach (var mcsBotPlayer in McsMgr.GetAllMcsSquadMembersByMcsLeadId(playerId))
                     {
-                        if (botOwner.HealthController.IsAlive)
+                        if (mcsBotPlayer.HealthController.IsAlive)
                         {
-                            McsMgr.AddMcsSquadMemberToTransit(playerId, botOwner);
+                            McsMgr.AddMcsSquadMemberToTransit(playerId, mcsBotPlayer.BotOwner);
                         }
                         else
                         {
-                            McsMgr.McsBotPlayerDead(botOwner.ProfileId);
+                            McsMgr.McsBotPlayerDead(mcsBotPlayer.ProfileId);
                         }
                     }
                 }

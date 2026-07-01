@@ -1,5 +1,4 @@
 using System.Reflection;
-using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
@@ -16,15 +15,14 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TriggerWithId), nameof(TriggerWithId.TriggerEnter));
 
-        private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TriggerWithId __instance, Player player)
         {
-            var isMcsMemberPlayer = CommandMgr.IsMcsMemberPlayer(player.ProfileId);
-            if (isMcsMemberPlayer)
+            var isMcsMemberPlayer = McsMgr.IsMcsMemberPlayer(player.ProfileId, out var mcsLeadPlayer);
+            if (isMcsMemberPlayer && mcsLeadPlayer != null)
             {
-                var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 mcsLeadPlayer.AddTriggerZone(__instance);
 
                 if (__instance is ExperienceTrigger experienceTrigger)
@@ -32,10 +30,6 @@ namespace MiyakoCarryService.Client.Patches.Events
                     var experienceTriggerTraverse = Traverse.Create(experienceTrigger);
                     mcsLeadPlayer.SpecialPlaceVisited(experienceTrigger.Id, experienceTriggerTraverse.Field<int>("_experience").Value);
                 }
-                // else if (__instance is PlaceItemTrigger placeItemTrigger)
-                // {
-                //     mcsLeadPlayer.OnPlaceItemTriggerChanged(placeItemTrigger);
-                // }
             }
         }
     }
@@ -47,21 +41,15 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TriggerWithId), nameof(TriggerWithId.TriggerExit));
 
-        private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TriggerWithId __instance, Player player)
         {
-            var isMcsMemberPlayer = CommandMgr.IsMcsMemberPlayer(player.ProfileId);
-            if (isMcsMemberPlayer)
+            var isMcsMemberPlayer = McsMgr.IsMcsMemberPlayer(player.ProfileId, out var mcsLeadPlayer);
+            if (isMcsMemberPlayer && mcsLeadPlayer != null)
             {
-                var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 mcsLeadPlayer.RemoveTriggerZone(__instance);
-
-                // if (__instance is PlaceItemTrigger)
-                // {
-                //     mcsLeadPlayer.OnPlaceItemTriggerChanged(null);
-                // }
             }
         }
     }

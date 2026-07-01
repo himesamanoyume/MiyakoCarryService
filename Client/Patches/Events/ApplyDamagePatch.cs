@@ -92,10 +92,10 @@ namespace MiyakoCarryService.Client.Patches.Events
                 if (isMcsBotInjuredPlayer)
                 {
                     var mcsLeadPlayer = ___Player.AIData.BotOwner.GetMcsBotPlayerData().LeadPlayer;
-                    var mcsBotPlayerBotOwner = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
-                    if (mcsBotPlayerBotOwner != null)
+                    var mcsBotPlayer = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId).FirstOrDefault();
+                    if (mcsBotPlayer != null)
                     {
-                        mcsBotPlayerBotOwner.TalkMsg(mcsLeadPlayer, mcsBotPlayerBotOwner.GetPlayer, new McsMsg
+                        mcsBotPlayer.BotOwner.TalkMsg(mcsLeadPlayer, mcsBotPlayer.BotOwner.GetPlayer, new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnFriendlyDown
                         });

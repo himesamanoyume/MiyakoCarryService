@@ -27,6 +27,8 @@ namespace MiyakoCarryService.Client.Extensions
                     return null;
                 }
             }
+
+            public BotOwner BotOwner => player?.AIData?.BotOwner;
         }
     }
 }

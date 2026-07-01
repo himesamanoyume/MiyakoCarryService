@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public class OnBeenKilledByAggressorPatch : ModulePatch
     {
-        private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.OnBeenKilledByAggressor));
 
@@ -31,9 +31,8 @@ namespace MiyakoCarryService.Client.Patches.Events
 
         public static void HandleSharedExperience(Player __instance, IPlayer aggressor, bool fikaSharedKillExp = false, bool fikaSharedBossExp = false)
         {
-            if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
+            if (McsMgr.IsMcsMemberPlayer(aggressor.ProfileId, out var mcsLeadPlayer))
             {
-                var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 if (mcsLeadPlayer == null)
                 {
                     return;
@@ -74,10 +73,9 @@ namespace MiyakoCarryService.Client.Patches.Events
             {
                 return;
             }
-
-            if (CommandMgr.IsMcsMemberPlayer(aggressor.ProfileId))
+            
+            if (McsMgr.IsMcsMemberPlayer(aggressor.ProfileId, out var mcsLeadPlayer))
             {
-                var mcsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 if (mcsLeadPlayer == null)
                 {
                     return;

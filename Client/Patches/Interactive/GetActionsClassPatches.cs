@@ -1,4 +1,5 @@
 using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
@@ -17,6 +18,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_14));
 
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
@@ -33,16 +35,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 return;
             }
 
-            var mcsBotPlayerIds = CommandMgr.GetMySquadMcsBotPlayerIds();
-            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
-            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
+            var mcsBotPlayers = McsMgr.GetAllMyMcsSquadMembers(out var mcsLeadPlayer);
+            if (mcsLeadPlayer == null)
             {
-                var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    continue;
-                }
-
+                return;
+            }
+            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
                 __result.Actions.Add(new ActionsTypesClass
                 {
                     Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
@@ -62,6 +62,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_8));
 
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
@@ -83,16 +84,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 return;
             }
 
-            var mcsBotPlayerIds = CommandMgr.GetMySquadMcsBotPlayerIds();
-            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
-            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
+            var mcsBotPlayers = McsMgr.GetAllMyMcsSquadMembers(out var mcsLeadPlayer);
+            if (mcsLeadPlayer == null)
             {
-                var mcsBotPlayer = CommandMgr.TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    continue;
-                }
-                
+                return;
+            }
+            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
                 __result.Actions.Add(new ActionsTypesClass
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),

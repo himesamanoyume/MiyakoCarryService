@@ -183,9 +183,9 @@ namespace MiyakoCarryService.Client
             _patches.Add(new ApplyDamagePatch());
             _patches.Add(new OnGameStartedPatch());
             _patches.Add(new RaidEndedPatch());
-            _patches.Add(new BotHearingSensorPatch());
-            _patches.Add(new PlayerSayPatch());
-            _patches.Add(new PlayHitEffectPatch());
+            // _patches.Add(new BotHearingSensorPatch());
+            // _patches.Add(new PlayerSayPatch());
+            // _patches.Add(new PlayHitEffectPatch());
             _patches.Add(new TransitPointPatch1());
             _patches.Add(new TransitPointPatch2());
             _patches.Add(new MatchmakerTimeHasComePatch());

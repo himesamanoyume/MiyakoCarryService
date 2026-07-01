@@ -47,9 +47,10 @@ namespace MiyakoCarryService.Client.Misc
         public void CalcGoalEnemy()
         {
             var list = new List<EnemyInfo>();
-            var mcsBotPlayerBotOwners = McsMgr.GetAllMcsSquadMembersByMcsLeadId(Player().ProfileId);
-            foreach (var botOwner in mcsBotPlayerBotOwners)
+            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(Player().ProfileId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
+                var botOwner = mcsBotPlayer.BotOwner;
                 foreach (var enemyInfo in botOwner.EnemiesController.EnemyInfos.Values)
                 {
                     if (!enemyInfo.Person.HealthController.IsAlive)
@@ -77,8 +78,9 @@ namespace MiyakoCarryService.Client.Misc
                 return;
             }
 
-            foreach (var botOwner in mcsBotPlayerBotOwners)
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
+                var botOwner = mcsBotPlayer.BotOwner;
                 McsLeadPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
                 McsLeadPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, botOwner);
                 closestEnemy.IsVisible = true;
