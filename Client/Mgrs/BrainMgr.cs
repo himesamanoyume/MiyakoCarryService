@@ -1,9 +1,13 @@
 
+using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Layers;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -14,14 +18,75 @@ namespace MiyakoCarryService.Client.Mgrs
         public sealed override void Start()
         {
             base.Start();
+            GameLoop.Instance.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
             GameLoop.Instance.CheckVaildGameWorld();
             if (MiyakoCarryServicePlugin.IsLoadedByScriptEngine && GameLoop.Instance.IsVaildGameWorld)
             {
-                GameLoop.Instance.IsGameStarted = true;
+                McsMgr.IsHost = true;
                 EventMgr.Notify(new GameWorldStartedEvent
                 {
                     GameWorld = Singleton<GameWorld>.Instance,
                 });
+                TasksExtensions.HandleExceptions(Reload());
+
+            }
+        }
+
+        private async Task Reload()
+        {
+            var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+            if (myPlayer == null)
+            {
+                return;
+            }
+
+            var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers(new()
+            {
+                Side = myPlayer.Side is EPlayerSide.Bear or EPlayerSide.Usec ? ESideType.Pmc : ESideType.Savage
+            });
+
+            if (mcsProfilesDict.Count == 0)
+            {
+                return;
+            }
+
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                McsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+            }
+            else
+            {
+                McsMgr.McsLeadPlayerConfigs = new();
+            }
+
+            var leadPlayers = mcsProfilesDict
+                .Where(kvp => kvp.Value.Length > 0)
+                .Select(kvp => Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(kvp.Key))
+                .Where(leadPlayer => leadPlayer != null);
+
+            foreach (var leadPlayer in leadPlayers)
+            {
+                var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer);
+                foreach (var mcsProfileItem in mcsProfilesDict)
+                {
+                    foreach (var mcsProfile in mcsProfileItem.Value)
+                    {
+                        McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, mcsProfile.ProfileId, mcsAILeadPlayer);
+                    }
+                }
+            }
+
+            var mcsBotPlayers = McsMgr.GetAllMcsBotPlayer();
+
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
+                var baseBrain = mcsBotPlayer?.BotOwner?.Brain?.BaseBrain;
+                if (baseBrain == null)
+                {
+                    continue;
+                }
+
+                InjectLayers(baseBrain);
             }
         }
 

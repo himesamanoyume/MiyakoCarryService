@@ -55,6 +55,9 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public static void Notify<T>(T @event) where T : IMcsEvent
         {
+#if DEBUG
+            MiyakoCarryServicePlugin.Logger.LogWarning($"触发 {typeof(T).Name}");
+#endif
             var eventType = typeof(T);
             if (_eventHandlers.TryGetValue(eventType, out var handlers))
             {

@@ -25,8 +25,6 @@ namespace MiyakoCarryService.Client.Mgrs
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
         public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
 
-        private BrainMgr BrainMgr => MgrAccessor.Get<BrainMgr>();
-
         public bool IsHost = false;
 
         public sealed override void Start()
@@ -386,23 +384,6 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
-
-            foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
-            {
-                var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
-                if (mcsBotPlayer == null)
-                {
-                    continue;
-                }
-
-                var baseBrain = mcsBotPlayer?.BotOwner?.Brain?.BaseBrain;
-                if (baseBrain == null)
-                {
-                    continue;
-                }
-
-                BrainMgr.InjectLayers(baseBrain);
-            }
         }
 
         protected override void OnRaidEnded()

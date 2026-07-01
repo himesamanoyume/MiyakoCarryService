@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _gameloop = GameLoop.Instance;
             _gameloop.Mgrs.Add(typeof(T), this);
-            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);  
+            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
@@ -31,19 +31,19 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void OnMgrDestroy()
         {
-            EventMgr.UnsubscribeAll(this); 
+            EventMgr.UnsubscribeAll(this);
             OnRaidEnded();
         }
 
-        protected virtual void OnGameWorldStarted(GameWorldStartedEvent @event)  
-        {  
-            OnRaidStarted();  
-        }  
-    
-        protected virtual void OnGameWorldEnded(GameWorldEndedEvent @event)  
-        {  
-            OnRaidEnded();  
-        } 
+        protected virtual void OnGameWorldStarted(GameWorldStartedEvent @event)
+        {
+            OnRaidStarted();
+        }
+
+        protected virtual void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            OnRaidEnded();
+        }
 
         protected virtual void OnRaidStarted()
         {

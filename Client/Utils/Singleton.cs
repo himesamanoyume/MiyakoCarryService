@@ -43,5 +43,10 @@ namespace MiyakoCarryService.Client.Utils
         {
             Destroy(gameObject);
         }
+
+        private void OnDestroy()
+        {
+            Destroy();
+        }
     }
 }

@@ -125,7 +125,6 @@ namespace MiyakoCarryService.Client
             LoadAssetBundle();
 
             McsMgr.Enable();
-            BrainMgr.Enable();
             PlayerDataMgr.Enable();
             LootDataMgr.Enable();
             SubtitlesMgr.Enable();
@@ -141,6 +140,10 @@ namespace MiyakoCarryService.Client
             DamageTriggerDataMgr.Enable();
             RoomTrapDataMgr.Enable();
             DoorDataMgr.Enable();
+
+            // BrainMgr必须在最后，用以脚本引擎重载
+            BrainMgr.Enable();
+            // end
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
@@ -274,6 +277,11 @@ namespace MiyakoCarryService.Client
             HighlightShader = null;
             if (Mgrs != null)
             {
+                // BrainMgr 先进行，否则当McsMgr释放后无法获取到McsBotPlayers
+                var brainMgr = MgrAccessor.Get<BrainMgr>();
+                brainMgr.OnMgrDestroy();
+                Mgrs.Remove(typeof(BrainMgr));
+                // end
                 foreach (var mgr in Mgrs.Values)
                 {
                     mgr.OnMgrDestroy();
@@ -669,8 +677,6 @@ namespace MiyakoCarryService.Client
                 }
             }
         }
-
-
 
         private BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {

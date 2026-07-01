@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -23,11 +24,11 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, Subtitles> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
+        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public sealed override void Start()
         {
             base.Start();
-            StartCoroutine(Init());
             _talkContents = new()
             {
                 {EPhraseTrigger.None, "未知的回应。应向Discord频道提出反馈。"},
@@ -61,21 +62,30 @@ namespace MiyakoCarryService.Client.Mgrs
                 {EPhraseTrigger.LootGeneric, HandleLootGeneric},
                 {EPhraseTrigger.PhraseNone, HandlePhraseNone},
             };
+
+            TasksExtensions.HandleExceptions(Init());
         }
 
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-
-        private IEnumerator Init()
+        public override void OnMgrDestroy()
         {
-            var publicTime = new WaitForSeconds(1f);
+            base.OnMgrDestroy();
+            if (_mcsDialogScreen != null)
+            {
+                Destroy(_mcsDialogScreen);
+            }
+            _subsContainer = null;
+        }
+
+        private async Task Init()
+        {
             while (true)
             {
-                yield return publicTime;
-                if (MonoBehaviourSingleton<CommonUI>.Instantiated)
+                await Task.Delay(1000);
+                if (Singleton<CommonUI>.Instantiated || Singleton<GameWorld>.Instantiated)
                 {
-                    var traderDialogScreen = MonoBehaviourSingleton<CommonUI>.Instance.TraderDialogScreen;
+                    var traderDialogScreen = Singleton<CommonUI>.Instance.TraderDialogScreen;
                     var oldTraderDialogScreenGameObject = traderDialogScreen.gameObject;
-                    _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject, MonoBehaviourSingleton<CommonUI>.Instance.transform.GetChild(0));
+                    _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject, Singleton<CommonUI>.Instance.transform.GetChild(0));
                     var _traderDialogScreen = _mcsDialogScreen.transform.GetComponentInChildren<TraderDialogScreen>();
                     Destroy(_traderDialogScreen);
                     _mcsDialogScreen.name = "Mcs Subtitles Screen";
@@ -214,6 +224,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void CreateSubTitle(Profile mcsBotPlayerProfile)
         {
+            if (_subtitlesViewTemplate == null)
+            {
+                MiyakoCarryServicePlugin.Logger.LogWarning("我为空");
+            }
             var cloneSubtitleViewGameObject = Instantiate(_subtitlesViewTemplate);
             var cloneSubtitleView = cloneSubtitleViewGameObject.GetComponentInChildren<SubtitlesView>();
 

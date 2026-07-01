@@ -84,8 +84,8 @@ namespace MiyakoCarryService.Client.Utils
                 }
 
                 var layer = dict[index];
-                baseBrain.method_3(index);   // 从激活列表移除并 Deactivate  
-                dict.Remove(index);          // method_3 不会删字典，需手动删  
+                baseBrain.method_3(index);
+                dict.Remove(index);
 
                 var excluded = _excludedLayers.TryGetValue(botOwner.ProfileId, out var em) ? em : (_excludedLayers[botOwner.ProfileId] = new());
                 excluded[layerName] = (index, layer);
