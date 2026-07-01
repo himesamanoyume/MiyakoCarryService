@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -23,6 +24,8 @@ namespace MiyakoCarryService.Client.Mgrs
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
         public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
+
+        private BrainMgr BrainMgr => MgrAccessor.Get<BrainMgr>();
 
         public bool IsHost = false;
 
@@ -383,6 +386,23 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 Side = MatchmakerAcceptScreenShowPatch.CurrentType
             });
+
+            foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
+            {
+                var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                if (mcsBotPlayer == null)
+                {
+                    continue;
+                }
+
+                var baseBrain = mcsBotPlayer?.BotOwner?.Brain?.BaseBrain;
+                if (baseBrain == null)
+                {
+                    continue;
+                }
+
+                BrainMgr.InjectLayers(baseBrain);
+            }
         }
 
         protected override void OnRaidEnded()

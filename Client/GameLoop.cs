@@ -21,8 +21,6 @@ using System.Threading;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using EFT.InventoryLogic;
-using MiyakoCarryService.Client.Bots.Brain.Layers;
-using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client
 {
@@ -606,20 +604,10 @@ namespace MiyakoCarryService.Client
                             botOwner.PatrollingData.SetMode(PatrolMode.follower, pointChooser);
                             botOwner.BotFollower.BossToFollow = mcsAILeadPlayer;
 
-                            void InjectLayers(BaseBrain baseBrain = null)
-                            {
-                                BigBrainUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsCommonLayer), 65);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsEscortLayer), 66);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsAvoidDangerLayer), 67);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsProxyLayer), 68);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsFightLayer), baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) || baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) ? 186 : 88);
-                                BigBrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsExfiltrationLayer), 89);
-                            }
-
+                            var brainMgr = MgrAccessor.Get<BrainMgr>();
                             if (botOwner.Brain.BaseBrain != null)
                             {
-                                InjectLayers();
+                                brainMgr.InjectLayers(botOwner.Brain.BaseBrain);
                             }
                             else
                             {
@@ -627,7 +615,7 @@ namespace MiyakoCarryService.Client
                                 handler = (BaseBrain b) =>
                                 {
                                     botOwner.Brain.OnSetStrategy -= handler;
-                                    InjectLayers(b);
+                                    brainMgr.InjectLayers(b);
                                 };
                                 botOwner.Brain.OnSetStrategy += handler;
                             }
