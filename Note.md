@@ -39,7 +39,6 @@
 - **继续优化BrainMgr：尝试实现可完美重载的AI逻辑**
 - - 重载时，若BrainMgr的Start检测到脚本加载且当前处于战局中，则直接请求小队成员Id并进行初始化和Layer添加
 - - McsLayer可以删除是否为McsBotPlayer的判断
-- **重构McsMgr和CommandMgr，确保功能单一**
 
 ## 更新日志
 

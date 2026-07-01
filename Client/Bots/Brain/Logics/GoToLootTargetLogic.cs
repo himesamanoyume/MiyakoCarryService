@@ -15,11 +15,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public sealed class GoToLootTargetLogic : McsBotBaseLogic
     {
+        private GoToPointBaseLogic _baseLogic;
         private int _currentLootingRetries = 0;
         private float _lastTimeCheckDistance = 0f;
         public GoToLootTargetLogic(BotOwner botOwner) : base(botOwner)
         {
-
+            _baseLogic = new(botOwner);
         }
 
         public override void Start()
@@ -54,6 +55,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            _baseLogic.UpdateNodeByMain(data);
             BotOwner.SetTargetMoveSpeed(1f);
             BotOwner.Sprint(true, false);
             BotOwner.SetPose(1f);
