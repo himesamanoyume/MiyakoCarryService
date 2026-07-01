@@ -36,14 +36,7 @@
 
 ## TODO
 
-- **继续优化BrainMgr：尝试实现可完美重载的AI逻辑**
-- - ~~重载时，若BrainMgr的Start检测到脚本加载且当前处于战局中，则直接请求小队成员Id并进行初始化和Layer添加~~
-- - ~~脚本重载似乎不会激活~~
-- - - ~~需要在McsMgr之前进行AddMcsSquadMember~~
-- - ~~因`_subtitlesViewTemplate`而无法`CreateSubTitle`~~
-- - ~~`Mcs Subtitles Screen`没有被正常清理~~
-- - ~~只有第一次重载能触发OnDestroy，之后就无效了~~
-- 应该只剩最后一个使Layer能正常运行即可完成
+- null
 
 ## 更新日志
 
