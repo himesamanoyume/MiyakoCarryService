@@ -129,6 +129,40 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 7. After ensuring the JSON format is correct and the data is filled in correctly, restart the server. At this time, use the help command in the MESSENGER interface with the Miyako trader, and all types will be displayed in the list of available types.
 8. If an exception occurs when generating the customized type, you will receive an error reminder in server log and it will change to generate the default pmc type `McsBotPlayer`. At this time, you need to check whether the customized type you filled in is incorrect.
 
+## Config
+
+- BalanceRestriction
+
+Balance restriction. Defaults to false. When enabled, the open `McsBotPlayer` inventory command becomes unavailable, and all items a `McsBotPlayer` brings into the raid are given the `Curse of Vanishing` enchantment — when the `McsBotPlayer` dies, the items they brought in will immediately vanish no matter where they are.
+
+- CheckUpdate
+
+Whether to check for version updates online. Defaults to true.
+
+- CheckIfdian
+
+Whether to check for sponsor list updates. Defaults to true.
+
+- TicketPricePerPercent
+
+Ticket price per percent. Used to price the fine paid when applying for a ticket to remove the price-increase punishment, in roubles per percent. Defaults to 300000 roubles per percent.
+
+- PunishmentMultiMax
+
+Maximum price-increase punishment. Expressed as a multiplier, defaults to 1 (i.e. 100%). For example, a value of 5 sets the maximum price-increase punishment to 500%.
+
+- OrderPendingPaymentTime
+
+Order pending payment time. The expiration time of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket. In seconds, defaults to 900 seconds (i.e. 15 minutes).
+
+- CompensationPrice
+
+Compensation price. Paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`. In roubles, defaults to 300000 roubles.
+
+- CarryServiceLevelPrice
+
+Carry service level base price. There are 5 levels in total, in roubles, with an upper and lower bound set for each level.
+
 ## Features
 
 ### Basic
@@ -187,9 +221,29 @@ Clear `McsBotPlayer`'s aggro and attempt to teleport them to current location.
 
 Remotely open `McsBotPlayer`'s inventory remotely, used to transfer loot they have picked up.
 
+- Change Aiming Body Part Type
+
+Command `McsBotPlayer` to change preferred combat aiming body part.
+
 - Escort
+- - Quest Escort
+- - Exfil Escort
+- - Transit Escort
+- - Switch Escort
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort to the designated location.
+
+- Proxy Action
+- - Quest Proxy Action
+- - Door Proxy Action
+- - Loot Proxy Action
+- - Switch Proxy Action
+
+If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to execute action.
+
+- Throw Target Loot
+
+If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
 
 #### TeamCommand
 
@@ -217,11 +271,21 @@ If there are `McsBotPlayers` in the team not currently in combat, command `McsBo
 
 Clear aggro for all team `McsBotPlayers` and attempt to teleport all of them to current location.
 
+- Team Change Aiming Body Part Type
+
+Command `McsBotPlayers` to change preferred combat aiming body part.
+
 - Team Escort
+- - Team Quest Escort
+- - Team Exfil Escort
+- - Team Transit Escort
+- - Team Switch Escort
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayer` to escort to the designated location.
 
-*When SAIN is installed, Force Teleport will be automatically disabled.*
+- Team Throw Target Loot
+
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
 
 *The command system also works normally during Fika multiplayer.*
 

@@ -980,8 +980,47 @@
     </p>
     <ol>
         <li>
-            <p>自带提供中/英两种本地化语言。 <span style="color: rgb(192, 0, 0);">但需要确保您已正确安装MiyakoCarryServiceServer，否则无法加载本地化。</span></p>
+            <p>官方提供中/英/俄三种本地化语言，其他语言皆显示英文。 <span style="color: rgb(192, 0, 0);">但需要确保您已正确安装MiyakoCarryServiceServer，否则无法加载本地化。</span></p>
         </li>
+        <li>
+            <p>服务端配置项（需要先安装Mcs后启动一次服务端生成配置文件）</p>
+        </li>
+        <table style="margin: 15px; width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>BalanceRestriction</td>
+                    <td>平衡性调整。默认为false。当开启后将无法使用打开护航背包指令，且所有护航的带入战局物品都将附加<span style="color: rgb(192, 0, 0);">消失诅咒</span>附魔，当护航死亡时其带入的物品无论处于何处，都会立即消失</td>
+                </tr>
+                <tr>
+                    <td>CheckUpdate</td>
+                    <td>是否检查版本更新。默认为true。</td>
+                </tr>
+                <tr>
+                    <td>CheckIfdian</td>
+                    <td>是否检查赞助者名单更新。默认为true。</td>
+                </tr>
+                <tr>
+                    <td>TicketPricePerPercent</td>
+                    <td>罚单每百分比价格。用于申请罚单上缴罚款来消除涨价惩罚时的定价，单位为卢布/百分比，默认为300000卢布每百分比。</td>
+                </tr>
+                <tr>
+                    <td>PunishmentMultiMax</td>
+                    <td>涨价惩罚上限。单位为倍率，默认为1，即100%。例如值为5，则涨价惩罚上限将为500%。</td>
+                </tr>
+                <tr>
+                    <td>OrderPendingPaymentTime</td>
+                    <td>订单待付款时间。下单护航、下发罚单时宫子商人提供的行动任务过期时间。单位为秒，默认为900秒，即15分钟。</td>
+                </tr>
+                <tr>
+                    <td>CompensationPrice</td>
+                    <td>赔偿价格。当护航误杀老板时会进行赔偿。单位为卢布，默认为300000卢布。</td>
+                </tr>
+                <tr>
+                    <td>CarryServiceLevelPrice</td>
+                    <td>护航等级基准价格。共5级，单位为卢布，每个等级分别设有上下限</td>
+                </tr>
+            </tbody>
+        </table>
     </ol>
     <p>
         <br />
@@ -1058,7 +1097,7 @@
                 </tr>
                 <tr>
                     <td>护送</td>
-                    <td>若护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点</td>
+                    <td>若护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点、开关</td>
                 </tr>
                 <tr>
                     <td>强制传送</td>
@@ -1067,6 +1106,18 @@
                 <tr>
                     <td>打开背包</td>
                     <td>远程打开护航背包，用于转移其拾取到的战利品</td>
+                </tr>
+                <tr>
+                    <td>改变瞄准部位</td>
+                    <td>命令护航改变战斗时优先瞄准的部位</td>
+                </tr>
+                <tr>
+                    <td>代理行动</td>
+                    <td>若护航此时不处于交战，命令护航独自前往指定地点进行代理行动。支持代理完成部分任务条件、代理打开开关、代理开启上锁的门、代理拾取战利品</td>
+                </tr>
+                <tr>
+                    <td>丢出目标战利品</td>
+                    <td>若护航此时不处于交战，命令护航丢出在战局中拾取的目标战利品</td>
                 </tr>
             </tbody>
         </table>
@@ -1101,6 +1152,14 @@
                 <tr>
                     <td>全队强制传送</td>
                     <td>清除全队护航仇恨、并尝试使其全部传送至当前位置</td>
+                </tr>
+                <tr>
+                    <td>全队改变瞄准部位</td>
+                    <td>让所有护航改变战斗时优先瞄准的部位</td>
+                </tr>
+                <tr>
+                    <td>全队丢出目标战利品</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航丢出在战局中拾取的目标战利品</td>
                 </tr>
             </tbody>
         </table>
