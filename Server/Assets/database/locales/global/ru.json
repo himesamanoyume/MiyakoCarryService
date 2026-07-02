@@ -200,8 +200,8 @@
     "Mcs/DoorProxyCommand TargetName": "Command carry service player proxy to open the door",
     "Mcs/LootProxyCommand Name": "{0} Proxy Take",
     "Mcs/LootProxyCommand TargetName": "Command carry service player proxy to take the loot",
-    "Mcs/ThrowTargetLootCommand Name": "Throw Target Loot",
-    "Mcs/ThrowTargetLootCommand TargetName": "Command carry service player to drop the target loot picked up during the raid",
-    "Mcs/TeamThrowTargetLootCommand Name": "Team Throw Target Loot",
-    "Mcs/TeamThrowTargetLootCommand TargetName": "Command all carry service players to drop the target loot picked up during the raid"
+    "Mcs/DropTargetLootCommand Name": "Throw Target Loot",
+    "Mcs/DropTargetLootCommand TargetName": "Command carry service player to drop the target loot picked up during the raid",
+    "Mcs/TeamDropTargetLootCommand Name": "Team Throw Target Loot",
+    "Mcs/TeamDropTargetLootCommand TargetName": "Command all carry service players to drop the target loot picked up during the raid"
 }

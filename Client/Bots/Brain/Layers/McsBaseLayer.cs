@@ -153,7 +153,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunAwayArtilleryLogic), EndRunAwayArtillery },
                 { typeof(RunAwayBTRLogic), EndRunAwayBTR },
                 { typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction },
-                { typeof(ThrowTargetLootLogic), EndThrowTargetLootLogic },
+                { typeof(DropTargetLootLogic), EndThrowTargetLootLogic },
             };
         }
 
