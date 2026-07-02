@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class ThrowTargetLootLogic : McsBotBaseLogic
+    public sealed class DropTargetLootLogic : McsBotBaseLogic
     {
         public GoToPointBaseLogic _baseLogic;
         public float _nextCheckTime = Time.time;
-        public ThrowTargetLootLogic(BotOwner botOwner) : base(botOwner)
+        public DropTargetLootLogic(BotOwner botOwner) : base(botOwner)
         {
             _baseLogic = new(botOwner);
         }

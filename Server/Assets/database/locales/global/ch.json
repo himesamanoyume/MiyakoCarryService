@@ -200,8 +200,8 @@
     "Mcs/DoorProxyCommand TargetName": "命令护航代理开门",
     "Mcs/LootProxyCommand Name": "{0} 代理拾取",
     "Mcs/LootProxyCommand TargetName": "命令护航代理拾取战利品",
-    "Mcs/ThrowTargetLootCommand Name": "丢出目标战利品",
-    "Mcs/ThrowTargetLootCommand TargetName": "命令护航丢出在战局中拾取的目标战利品",
-    "Mcs/TeamThrowTargetLootCommand Name": "全队丢出目标战利品",
-    "Mcs/TeamThrowTargetLootCommand TargetName": "全队丢出在战局中拾取的目标战利品"
+    "Mcs/DropTargetLootCommand Name": "丢出目标战利品",
+    "Mcs/DropTargetLootCommand TargetName": "命令护航丢出在战局中拾取的目标战利品",
+    "Mcs/TeamDropTargetLootCommand Name": "全队丢出目标战利品",
+    "Mcs/TeamDropTargetLootCommand TargetName": "全队丢出在战局中拾取的目标战利品"
 }

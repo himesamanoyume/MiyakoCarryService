@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_currentMoveTarget.HasValue)
                     {
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(ThrowTargetLootLogic), "Mcs:ThrowTargetLootCommand");
+                        return new Action(typeof(DropTargetLootLogic), "Mcs:DropTargetLootCommand");
                     }
                     else
                     {
