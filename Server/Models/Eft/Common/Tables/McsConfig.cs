@@ -20,16 +20,60 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         public bool CheckIfdian { get; set; } = true;
 
         [JsonPropertyName("TicketPricePerPercent")]
-        public int TicketPricePerPercent { get; set; } = 300000;
+        public int TicketPricePerPercent 
+        { 
+            get;
+            set
+            {
+                if (value < 0)
+                {
+                    field = 0;
+                }
+                field = value;
+            }
+        } = 300000;
 
         [JsonPropertyName("PunishmentMultiMax")]
-        public double PunishmentMultiMax { get; set; } = 1d;
+        public double PunishmentMultiMax
+        { 
+            get;
+            set
+            {
+                if (value < 0)
+                {
+                    field = 0;
+                }
+                field = value;
+            }
+        } = 1d;
 
         [JsonPropertyName("OrderPendingPaymentTime")]
-        public long OrderPendingPaymentTime { get; set; } = 900;
+        public long OrderPendingPaymentTime 
+        { 
+            get;
+            set
+            {
+                if (value < 0)
+                {
+                    field = 0;
+                }
+                field = value;
+            }
+        } = 900;
 
         [JsonPropertyName("CompensationPrice")]
-        public double CompensationPrice { get; set; } = 300000d;
+        public double CompensationPrice 
+        { 
+            get;
+            set
+            {
+                if (value < 0)
+                {
+                    field = 0;
+                }
+                field = value;
+            }
+        } = 300000d;
 
         [JsonPropertyName("CarryServiceLevelPrice")]
         public Dictionary<int, MinMax<int>> CarryServiceLevelPrice { get; set; } = new()
