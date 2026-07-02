@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 method_0();
                 BotOwner_0.SetTargetMoveSpeed(1f);
-                BotOwner_0.Sprint(false, true);
+                BotOwner_0.Sprint(false, false);
                 BotOwner_0.SetPose(1f);
 
                 var goalEnemy = BotOwner_0.Memory.GoalEnemy;

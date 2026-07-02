@@ -95,22 +95,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
                     {
-                        if (_nextUpdatePosTime < Time.time)
-                        {
-                            UpdateCommonMoveTarget(McsBotPlayerData.LootingTarget.RootTransform.position, out float nextTime);
-                            _nextUpdatePosTime = Time.time + nextTime;
-                        }
-
-                        if (_currentMoveTarget.HasValue)
-                        {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                            return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
-                        }
-                        else
-                        {
-                            McsBotPlayerData.IsLooting = false;
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:GoToLootTargetPosNotFound");
-                        }
+                        _currentMoveTarget = McsBotPlayerData.LootingTarget.RootTransform.position;
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
                     }
                 }
 

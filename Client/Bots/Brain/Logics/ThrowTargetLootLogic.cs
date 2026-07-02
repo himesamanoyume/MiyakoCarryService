@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.InventoryLogic;
@@ -18,6 +19,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            _baseLogic.UpdateNodeByMain(data);
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData == null)
             {
@@ -26,31 +28,30 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-            if (sqrDistance <= 9f)
+
+            if (sqrDistance > 9f)
             {
-                BotOwner.StopMove();
-                BotOwner.Steering.LookToPoint(mcsBotPlayerData.LeadPlayer.MainParts[BodyPartType.head].Position);
-            }
-            else
-            {
-                _baseLogic.UpdateNodeByMain(data);
                 BotOwner.SetTargetMoveSpeed(1f);
                 BotOwner.Sprint(true, false);
                 BotOwner.SetPose(1f);
                 BotOwner.Steering.LookToMovingDirection();
                 return;
             }
-
-            if (BotOwner.ExternalItemsController.PickUpedItems.Count == 0)
+            else
             {
-                return;
+                BotOwner.StopMove();
+                BotOwner.Steering.LookToPoint(mcsBotPlayerData.LeadPlayer.MainParts[BodyPartType.head].Position);
+                if (Time.time > _nextCheckTime)
+                {
+                    _nextCheckTime = Time.time + 1f;
+                    TasksExtensions.HandleExceptions(ThrowTargetLoot(mcsBotPlayerData));
+                }
             }
+        }
 
-            if (Time.time >= _nextCheckTime)
-            {
-                _nextCheckTime = Time.time + 1f;
-            }
-
+        public async Task ThrowTargetLoot(McsBotPlayerData mcsBotPlayerData)
+        {
+            await Task.Delay(500);
             var wantDropItemId = BotOwner.ExternalItemsController.GetRandomItemToDrop();
             var wantDropItem = mcsBotPlayerData.Player.InventoryController.FindItem<Item>(wantDropItemId);
             if (wantDropItem == null)
@@ -66,6 +67,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             
             BotOwner.ExternalItemsController.PickUpedItems.Remove(wantDropLootData.Item.Id);
             mcsBotPlayerData.Player.InventoryController.ThrowItem(wantDropLootData.Item);
+            await Task.Delay(500);
         }
     }
 }

@@ -95,10 +95,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var sqrDistance = BotOwner.Position.McsSqrDistance(lootPos);
 
 #if DEBUG
-                // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 坐标: {targetPos}, Sqr距离: {distance}, 高度差: {Math.Abs(offset.y)}");
+                // MiyakoCarryServicePlugin.Logger.LogWarning($"{mcsBotPlayerData.Player.Profile.Nickname}, 目标: {mcsBotPlayerData.LootingTarget.Item.Name.McsLocalized()}, 价值: {mcsBotPlayerData.LootingTarget.Offer.Price}, 战利品坐标: {lootPos}, 自身坐标: {BotOwner.Position}, Sqr距离: {sqrDistance}, 高度差: {Math.Abs(offset.y)}");
 #endif
 
-                if (sqrDistance <= 9f && Math.Abs(offset.y) < 2f)
+                if (sqrDistance <= 4f && Math.Abs(offset.y) < 2f)
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
@@ -107,10 +107,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     return;
                 }
 
-                if (sqrDistance <= 5f)
+                if (sqrDistance <= 100f)
                 {
                     BotOwner.SetTargetMoveSpeed(1f);
                     BotOwner.Steering.LookToMovingDirection();
+                    BotOwner.SetPose(1f);
                     BotOwner.Mover.Sprint(false);
                 }
             }

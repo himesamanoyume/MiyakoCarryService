@@ -90,7 +90,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 }
 
                 var shouldSprint = distance > meleeData.Single_1;
-                BotOwner_0.Sprint(shouldSprint, true);
+                BotOwner_0.Sprint(shouldSprint, false);
 
                 if (meleeData.NextTryHitTime < Time.time)
                 {

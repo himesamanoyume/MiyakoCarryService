@@ -1752,7 +1752,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         protected virtual bool EndThrowTargetLootLogic()
         {
-            return !BotOwner.ExternalItemsController.HaveItemsToDrop();
+            if (McsBotPlayerData == null)
+            {
+                return true;
+            }
+
+            var haveItemsToDrop = BotOwner.ExternalItemsController.HaveItemsToDrop();
+            if (!haveItemsToDrop)
+            {
+                McsBotPlayerData.RemoveDecision([EDecision.ShouldThrowTargetLoot]);
+                _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN * 2;
+                return true;
+            }
+
+            var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
+            var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
+            if (sqrDistance > 9f)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

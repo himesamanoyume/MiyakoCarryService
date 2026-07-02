@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             else
             {
-                BotOwner_0.Sprint(true, true);
+                BotOwner_0.Sprint(true, false);
                 Gclass25_0.Update();
                 Vector3_0 = BotOwner_0.Position + BotOwner.STAY_HEIGHT;
             }

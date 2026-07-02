@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(TimedFireIntent data)
         {
-            BotOwner_0.Sprint(false, true);
+            BotOwner_0.Sprint(false, false);
             BotOwner_0.StopMove();
             if (data != null && data.FinishTime < Time.time)
             {

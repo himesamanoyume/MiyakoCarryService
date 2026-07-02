@@ -450,7 +450,7 @@ namespace MiyakoCarryService.Client
             EnableLooting = Register(
                 EConfigType.BASIC,
                 Locales.ENABLELOOTING_KEY,
-                true,
+                false,
                 Locales.ENABLELOOTING_DESCRIPTION
             );
 

@@ -11,18 +11,18 @@ namespace MiyakoCarryService.Client.Models
         public MongoID McsLeadPlayerId;
 
         [DataMember(Name = "EnableLooting")]
-        public bool EnableLooting;
+        public bool EnableLooting = false;
 
         [DataMember(Name = "PriceThreshold")]
-        public int PriceThreshold;
+        public int PriceThreshold = 50000;
 
         [DataMember(Name = "KeywordItemText")]
-        public string KeywordItemText;
+        public string KeywordItemText = "";
 
         [DataMember(Name = "LootingKeywordItem")]
-        public bool LootingKeywordItem;
+        public bool LootingKeywordItem = false;
 
         [DataMember(Name = "BlockItemType")]
-        public int BlockItemType;
+        public int BlockItemType = 0;
     }
 }
