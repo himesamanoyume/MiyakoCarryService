@@ -1446,6 +1446,30 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
+            var sqrDistanceToLead = BotOwner.Position.McsSqrDistance(leadPos.Value);
+            if (sqrDistanceToLead <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE)
+            {
+                var awayDir = BotOwner.Position - leadPos.Value;
+                awayDir.y = 0f;
+                if (awayDir.sqrMagnitude < 0.0001f)
+                {
+                    awayDir = BotOwner.Transform.forward;
+                    awayDir.y = 0f;
+                }
+                awayDir.Normalize();
+
+                var retreatTarget = leadPos.Value + awayDir * (TOO_CLOSE_FROM_LEAD_DISTANCE + 1f);
+                if (Tools.BetterDestination(3f, retreatTarget, out var betterDestination))
+                {
+                    retreatTarget = betterDestination;
+                }
+
+                _lastTargetPos = leadPos;
+                _currentMoveTarget = retreatTarget;
+                nextUpdateTime = 0.2f;
+                return;
+            }
+
             if (_lastTargetPos.Value.McsSqrDistance(leadPos.Value) < LEAD_POSITION_CHANGE_THRESHOLD * LEAD_POSITION_CHANGE_THRESHOLD)
             {
                 nextUpdateTime = 1f;
