@@ -6,7 +6,7 @@ using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    public sealed class Classification
+    public class Classification
     {
         public static HashSet<WildSpawnType> BossTypes = new()
         {

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class ThrowTargetLootLogic : McsBotBaseLogic
+    public class ThrowTargetLootLogic : McsBotBaseLogic
     {
         public GoToPointBaseLogic _baseLogic;
         public float _nextCheckTime = Time.time;

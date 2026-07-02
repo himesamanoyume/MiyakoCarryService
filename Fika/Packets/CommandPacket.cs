@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public sealed class CommandPacket : BasePacket
+    public class CommandPacket : BasePacket
     {
         public ECommandPacketType CommandType;
         public Vector3? Position;

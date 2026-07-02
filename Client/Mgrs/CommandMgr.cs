@@ -17,9 +17,9 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class CommandMgr : BaseMgr<CommandMgr>
+    public class CommandMgr : BaseMgr<CommandMgr>
     {
-        public sealed override void Start()
+        public override void Start()
         {
             base.Start();
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
@@ -40,13 +40,13 @@ namespace MiyakoCarryService.Client.Mgrs
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
 
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             _gamePlayerOwner = null;
         }
 
-        protected sealed override void OnRaidEnded()
+        protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
             _gamePlayerOwner = null;

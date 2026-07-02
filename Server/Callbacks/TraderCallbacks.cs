@@ -10,7 +10,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class TraderCallbacks(
+    public class TraderCallbacks(
         HttpResponseUtil httpResponseUtil,
         TraderController traderController
     )

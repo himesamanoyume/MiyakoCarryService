@@ -4,7 +4,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class GoToProtectLogic : McsBotBaseLogic
+    public class GoToProtectLogic : McsBotBaseLogic
     {
         private GoToPointBaseLogic _baseLogic;
 

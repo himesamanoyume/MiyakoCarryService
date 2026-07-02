@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class EscortToPointByWayLogic : McsBotBaseLogic
+    public class EscortToPointByWayLogic : McsBotBaseLogic
     {
         private GoToPointBaseLogic _baseLogic;
 

@@ -132,7 +132,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected override bool EndGoToCoverPoint()
+        public override bool EndGoToCoverPoint()
         {
             if (!BotOwner.ArtilleryDangerPlace.ShallRunAway() && !BotOwner.BewareGrenade.ShallRunAway())
             {
@@ -146,7 +146,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected override bool EndHoldPosition()
+        public override bool EndHoldPosition()
         {
             if (BotOwner.BewareGrenade.ShallRunAway() && BotOwner.Memory.IsInCover && BotOwner.BewareBTR.ShallRunAway() && BotOwner.Memory.HaveEnemy && BotOwner.Memory.GoalEnemy.CanShoot)
             {

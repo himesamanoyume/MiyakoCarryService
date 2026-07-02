@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class ConfigCallbacks(
+    public class ConfigCallbacks(
         HttpResponseUtil httpResponseUtil,
         ConfigController configController
     )

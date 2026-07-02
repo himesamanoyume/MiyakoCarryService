@@ -12,7 +12,6 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
-
     /// <summary>
     /// 使实例化新的TraderControllerClass时第一时间更新其Data数据
     /// </summary>

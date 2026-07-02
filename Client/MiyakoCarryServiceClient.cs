@@ -183,9 +183,6 @@ namespace MiyakoCarryService.Client
             _patches.Add(new ApplyDamagePatch());
             _patches.Add(new OnGameStartedPatch());
             _patches.Add(new RaidEndedPatch());
-            // _patches.Add(new BotHearingSensorPatch());
-            // _patches.Add(new PlayerSayPatch());
-            // _patches.Add(new PlayHitEffectPatch());
             _patches.Add(new TransitPointPatch1());
             _patches.Add(new TransitPointPatch2());
             _patches.Add(new MatchmakerTimeHasComePatch());
@@ -304,7 +301,7 @@ namespace MiyakoCarryService.Client
         private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
         public static readonly List<string> HideList = new();
 
-        private class ConfigSection
+        public class ConfigSection
         {
             private int _currentOrder;
 
@@ -319,7 +316,7 @@ namespace MiyakoCarryService.Client
             public int GetNextOrder() => _currentOrder--;
         }
 
-        private ConfigEntry<T> Register<T>(
+        public ConfigEntry<T> Register<T>(
             EConfigType type,
             string key,
             T defaultValue,
@@ -421,7 +418,7 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private static string GetSection(EConfigType configType)
+        public static string GetSection(EConfigType configType)
         {
             return configType switch
             {
@@ -432,7 +429,7 @@ namespace MiyakoCarryService.Client
             };
         }
 
-        private static int GetOrder(EConfigType configType)
+        public static int GetOrder(EConfigType configType)
         {
             return configType switch
             {

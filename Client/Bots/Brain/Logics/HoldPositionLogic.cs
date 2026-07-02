@@ -4,7 +4,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class HoldPositionLogic : McsBotBaseLogic
+    public class HoldPositionLogic : McsBotBaseLogic
     {
         private HoldPositionOverrideLogic _baseLogic;
 

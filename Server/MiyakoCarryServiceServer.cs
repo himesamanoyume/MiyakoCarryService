@@ -18,10 +18,10 @@ using MiyakoCarryService.Server.Utils;
 
 namespace MiyakoCarryService.Server
 {
-    public sealed class MiyakoCarryServiceServer
+    public class MiyakoCarryServiceServer
     {
         [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
-        public sealed class MiyakoCarryServiceServerPreLoad(
+        public class MiyakoCarryServiceServerPreLoad(
             ConfigService configService
         ) : IOnLoad
         {
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Server
         }
 
         [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
-        public sealed class MiyakoCarryServiceServerPostLoad(
+        public class MiyakoCarryServiceServerPostLoad(
             Services.LocaleService localeService,
             QuestService questService,
             TraderService traderService,

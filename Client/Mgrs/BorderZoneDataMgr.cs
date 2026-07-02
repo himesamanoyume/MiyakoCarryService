@@ -6,9 +6,9 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class BorderZoneDataMgr : DataMgr<BorderZoneDataMgr>
+    public class BorderZoneDataMgr : DataMgr<BorderZoneDataMgr>
     {
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)

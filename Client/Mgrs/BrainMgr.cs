@@ -12,10 +12,10 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class BrainMgr : BaseMgr<BrainMgr>
+    public class BrainMgr : BaseMgr<BrainMgr>
     {
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        public sealed override void Start()
+        public override void Start()
         {
             base.Start();
             GameLoop.Instance.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;

@@ -13,7 +13,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class BuildsService(
+    public class BuildsService(
         ConfigService configService,
         JsonUtil jsonUtil,
         FileUtil fileUtil

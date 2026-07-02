@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public class BarbedWireDataMgr : LabyrinthDataMgr<BarbedWireDataMgr>
     {
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)

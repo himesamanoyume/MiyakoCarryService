@@ -10,9 +10,9 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class TripwireDataMgr : DataMgr<TripwireDataMgr>
+    public class TripwireDataMgr : DataMgr<TripwireDataMgr>
     {
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)

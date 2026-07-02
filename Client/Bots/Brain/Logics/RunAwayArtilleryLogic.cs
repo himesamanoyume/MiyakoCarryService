@@ -3,7 +3,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class RunAwayArtilleryLogic : McsBotBaseLogic
+    public class RunAwayArtilleryLogic : McsBotBaseLogic
     {
         private RunAwayArtilleryBaseLogic _baseLogic;
 

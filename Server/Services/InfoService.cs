@@ -21,7 +21,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class InfoService(
+    public class InfoService(
         ConfigService configService,
         NotificationSendHelper notificationSendHelper,
         ISptLogger<InfoService> logger,

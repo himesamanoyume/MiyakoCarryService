@@ -5,7 +5,7 @@ using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public sealed class McsBotPlayerConfigPacket : BasePacket
+    public class McsBotPlayerConfigPacket : BasePacket
     {
         public string KeywordItemText;
         public SMcsBotPlayerConfig McsBotPlayerConfig;

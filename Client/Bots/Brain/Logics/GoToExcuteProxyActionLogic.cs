@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class GoToExcuteProxyActionLogic : McsBotBaseLogic
+    public class GoToExcuteProxyActionLogic : McsBotBaseLogic
     {
         private GoToPointBaseLogic _baseLogic;
         private int _currentLootingRetries = 0;

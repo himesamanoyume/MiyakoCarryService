@@ -2,7 +2,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class RunToPointOverrideLogic : GoToPointBaseLogic
+    public class RunToPointOverrideLogic : GoToPointBaseLogic
     {
         public RunToPointOverrideLogic(BotOwner bot) : base(bot)
         {

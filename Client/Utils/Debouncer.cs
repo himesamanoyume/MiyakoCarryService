@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    internal sealed class Debouncer<TKey, TValue> where TKey : notnull
+    public class Debouncer<TKey, TValue> where TKey : notnull
     {
         private readonly Dictionary<TKey, TValue> _pendingUpdates = new();
         private readonly float _delaySeconds;

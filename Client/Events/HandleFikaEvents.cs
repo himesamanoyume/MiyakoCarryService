@@ -6,21 +6,21 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Events
 {
-    public sealed class SubtitlesMgrHandleFikaEvent : IMcsEvent
+    public class SubtitlesMgrHandleFikaEvent : IMcsEvent
     {
         public MongoID McsLeadPlayerId { get; set; }
         public MongoID McsBotPlayerId { get; set; }
         public McsMsg Msg { get; set; }
     }
 
-    public sealed class QuestProxyCommandCallbackHandleFikaEvent : IMcsEvent
+    public class QuestProxyCommandCallbackHandleFikaEvent : IMcsEvent
     {
         public MongoID McsLeadPlayerId { get; set; }
         public MongoID McsBotPlayerId { get; set; }
         public string TargetId { get; set; }
     }
 
-    public sealed class CommandMgrHandleFikaEvent : IMcsEvent
+    public class CommandMgrHandleFikaEvent : IMcsEvent
     {
         public Player McsBotPlayer { get; set; }
         public ECommandPacketType CommandPacketType { get; set; }
@@ -29,12 +29,12 @@ namespace MiyakoCarryService.Client.Events
         public string TargetId { get; set; }
     }
 
-    public sealed class ConfigEntrySettingChangedEvent : IMcsEvent
+    public class ConfigEntrySettingChangedEvent : IMcsEvent
     {
         public McsBotPlayerConfig McsBotPlayerConfig { get; set; }
     }
 
-    public sealed class McsLeadPlayerExtractedEvent : IMcsEvent
+    public class McsLeadPlayerExtractedEvent : IMcsEvent
     {
         public MongoID McsLeadPlayerId { get; set; }
     }

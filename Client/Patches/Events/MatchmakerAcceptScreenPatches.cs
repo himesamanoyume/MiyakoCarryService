@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
-	public sealed class MatchmakerAcceptScreenShowPatch : ModulePatch
+	public class MatchmakerAcceptScreenShowPatch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)]);
 
@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// <summary>
 	/// 使匹配界面的准备按钮在进行了RaidSettingsLocalPatch后仍可以点击
 	/// </summary>
-	public sealed class MatchMakerAcceptScreenReadyPatch : ModulePatch
+	public class MatchMakerAcceptScreenReadyPatch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_16));
 
@@ -55,7 +55,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// <summary>
 	/// 如果不Patch该函数，似乎就会导致护航准备完成后立即回退到战局设置界面
 	/// </summary>
-	public sealed class MatchMakerAcceptScreenCallbackPatch : ModulePatch
+	public class MatchMakerAcceptScreenCallbackPatch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_10));
 

@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class SubtitlesMgr : BaseMgr<SubtitlesMgr>
+    public class SubtitlesMgr : BaseMgr<SubtitlesMgr>
     {
         private GameObject _mcsDialogScreen;
         private Transform _subsContainer;
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        public sealed override void Start()
+        public override void Start()
         {
             base.Start();
             _talkContents = new()

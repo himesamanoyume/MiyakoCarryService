@@ -6,7 +6,7 @@ using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class HealLogic : McsBotBaseLogic
+    public class HealLogic : McsBotBaseLogic
     {
         private HealBaseLogic _baseLogic;
 

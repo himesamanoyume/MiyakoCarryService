@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class LogCallbacks(
+    public class LogCallbacks(
         HttpResponseUtil httpResponseUtil,
         ISptLogger<LogCallbacks> logger
     )

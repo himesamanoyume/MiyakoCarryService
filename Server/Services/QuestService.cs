@@ -22,7 +22,7 @@ using SPTarkov.Server.Core.Utils.Logger;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class QuestService(
+    public class QuestService(
         ConfigService configService,
         SptLogger<QuestService> logger,
         QuestGenerator questGenerator,

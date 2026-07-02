@@ -10,11 +10,11 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class QuestDataMgr : GameWorldDataMgr<QuestDataMgr>
+    public class QuestDataMgr : GameWorldDataMgr<QuestDataMgr>
     {
         private List<TriggerWithId> _triggersWithIds;
 
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadQuestData);

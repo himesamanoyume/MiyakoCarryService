@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Server.Services
 {
 
     [Injectable(InjectionType.Singleton)]
-    public sealed class LocaleService(
+    public class LocaleService(
         FileUtil fileUtil,
         ConfigService configService,
         ServerLocalisationService serverLocalisationService,

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public sealed class TalkMsgPacket : BasePacket
+    public class TalkMsgPacket : BasePacket
     {
         public EPhraseTrigger PhraseTrigger;
         public Vector3? Position;

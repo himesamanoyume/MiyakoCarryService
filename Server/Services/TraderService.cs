@@ -27,7 +27,7 @@ using SPTarkov.Server.Core.Utils.Cloners;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class TraderService(
+    public class TraderService(
         ICloner cloner,
         ImageRouter imageRouter,
         ConfigServer configServer,

@@ -4,7 +4,7 @@ using Fika.Core.Networking.LiteNetLib.Utils;
 
 namespace MiyakoCarryService.Fika.Packets
 {
-    public sealed class QuestProxyCommandCallbackPacket : BasePacket
+    public class QuestProxyCommandCallbackPacket : BasePacket
     {
         public string TargetId;
 

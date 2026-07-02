@@ -19,7 +19,7 @@ using SPTarkov.Server.Core.Servers.Ws;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class RaidService(
+    public class RaidService(
         NotificationHelper notificationHelper,
         NotificationSendHelper notificationSendHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,

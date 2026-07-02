@@ -19,7 +19,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Services;
 
 [Injectable(InjectionType.Singleton)]
-public sealed class ConfigService(
+public class ConfigService(
     ModHelper modHelper,
     ISptLogger<ConfigService> logger,
     JsonUtil jsonUtil,

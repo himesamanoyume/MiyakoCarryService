@@ -10,7 +10,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Callbacks
 {
     [Injectable]
-    public sealed class ProfileCallbacks(
+    public class ProfileCallbacks(
         HttpResponseUtil httpResponseUtil,
         ProfileController profileController
     )

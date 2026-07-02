@@ -6,9 +6,9 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class DamageTriggerDataMgr : LabyrinthDataMgr<DamageTriggerDataMgr>
+    public class DamageTriggerDataMgr : LabyrinthDataMgr<DamageTriggerDataMgr>
     {
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)

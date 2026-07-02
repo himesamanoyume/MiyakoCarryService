@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class HoldPositionOverrideLogic : HoldPositionBaseLogic
+    public class HoldPositionOverrideLogic : HoldPositionBaseLogic
     {
         public HoldPositionOverrideLogic(BotOwner bot) : base(bot)
         {

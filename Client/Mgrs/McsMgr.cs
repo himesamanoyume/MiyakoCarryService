@@ -14,7 +14,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public sealed class McsMgr : BaseMgr<McsMgr>
+    public class McsMgr : BaseMgr<McsMgr>
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, Player>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
@@ -27,7 +27,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public bool IsHost = false;
 
-        public sealed override void Start()
+        public override void Start()
         {
             base.Start();
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);

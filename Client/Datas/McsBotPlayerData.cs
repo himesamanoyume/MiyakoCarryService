@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
-    public sealed class McsBotPlayerData : PlayerData
+    public class McsBotPlayerData : PlayerData
     {
         private WeakReference<BotOwner> _botOwnerRef;
         public BotOwner BotOwner => _botOwnerRef.TryGetTarget(out var botOwner) ? botOwner : null;

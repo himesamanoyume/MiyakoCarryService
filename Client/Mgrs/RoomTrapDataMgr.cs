@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Mgrs
     {
         public ConcurrentDictionary<ELabyrinthTrapType, HashSet<TriggerZoneData>> TrapDatas;
 
-        protected sealed override void OnRaidStarted()
+        protected override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)
@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(ReloadDataLoop(2f, RefreshTrapState));
         }
 
-        protected sealed override void OnRaidEnded()
+        protected override void OnRaidEnded()
         {
             base.OnRaidEnded();
             if (TrapDatas != null)

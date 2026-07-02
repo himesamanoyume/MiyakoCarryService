@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Server.Services
 {
 
     [Injectable(InjectionType.Singleton)]
-    public sealed class InventoryService(
+    public class InventoryService(
         ConfigService configService,
         JsonUtil jsonUtil,
         FileUtil fileUtil

@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class GoToLootTargetLogic : McsBotBaseLogic
+    public class GoToLootTargetLogic : McsBotBaseLogic
     {
         private GoToPointBaseLogic _baseLogic;
         private int _currentLootingRetries = 0;

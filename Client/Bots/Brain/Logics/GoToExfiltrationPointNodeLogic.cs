@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class GoToExfiltrationPointNodeLogic : McsBotBaseLogic
+    public class GoToExfiltrationPointNodeLogic : McsBotBaseLogic
     {
         private GoToExfiltrationPointOverrideLogic _baseLogic;
 

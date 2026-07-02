@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Routers.Static
 {
     [Injectable]
-    public sealed class TraderStaticRouter(
+    public class TraderStaticRouter(
         JsonUtil jsonUtil,
         TraderCallbacks traderCallbacks
     ) : StaticRouter(

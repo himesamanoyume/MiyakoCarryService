@@ -35,7 +35,7 @@ using SPTarkov.Server.Core.Utils.Logger;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class ProfileService(
+    public class ProfileService(
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,

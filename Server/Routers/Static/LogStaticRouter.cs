@@ -8,7 +8,7 @@ using SPTarkov.Server.Core.Utils;
 namespace MiyakoCarryService.Server.Routers.Static
 {
     [Injectable]
-    public sealed class LogStaticRouter(
+    public class LogStaticRouter(
         JsonUtil jsonUtil,
         LogCallbacks logCallbacks
     ) : StaticRouter(

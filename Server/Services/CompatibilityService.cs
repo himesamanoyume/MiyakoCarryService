@@ -11,7 +11,7 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 namespace MiyakoCarryService.Server.Services
 {
     [Injectable(InjectionType.Singleton)]
-    public sealed class CompatibilityService(
+    public class CompatibilityService(
         IReadOnlyList<SptMod> loadedMods
     )
     {

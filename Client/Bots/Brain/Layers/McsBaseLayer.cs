@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
     public abstract class McsBaseLayer<T> : CustomLayer where T : McsBaseLayer<T>
     {
-        protected McsBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
+        public McsBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
             InitActionMap();
         }
@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
 
-        protected virtual void InitActionMap()
+        public virtual void InitActionMap()
         {
             _endActionMap = new()
             {
@@ -157,7 +157,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             };
         }
 
-        protected virtual bool EndHeal()
+        public virtual bool EndHeal()
         {
             if (BotOwner.Medecine.Using)
             {
@@ -209,7 +209,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndRunToCover()
+        public virtual bool EndRunToCover()
         {
             var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
@@ -250,7 +250,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual void TryFindCover(Vector3 mcsLeadPlayerPos)
+        public virtual void TryFindCover(Vector3 mcsLeadPlayerPos)
         {
             if (_goToCoverTime < Time.time)
             {
@@ -269,7 +269,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual void UpdateCoverToShoot()
+        public virtual void UpdateCoverToShoot()
         {
             if (McsBotPlayerData?.LeadPlayer == null)
             {
@@ -329,17 +329,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool WasHitRecently(float timeframe)
+        public virtual bool WasHitRecently(float timeframe)
         {
             return (Time.time - BotOwner.Memory.LastTimeHit) < timeframe;
         }
 
-        protected virtual bool EndEatDrink()
+        public virtual bool EndEatDrink()
         {
             return true;
         }
 
-        protected virtual bool EndGoToCoverPoint()
+        public virtual bool EndGoToCoverPoint()
         {
             if (McsBotPlayerData == null)
             {
@@ -376,7 +376,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndSimplePatrol()
+        public virtual bool EndSimplePatrol()
         {
             if (McsBotPlayerData == null)
             {
@@ -406,7 +406,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndGoToPoint()
+        public virtual bool EndGoToPoint()
         {
             if (McsBotPlayerData == null)
             {
@@ -473,7 +473,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool EndEscortToPointByWay()
+        public virtual bool EndEscortToPointByWay()
         {
             if (McsBotPlayerData == null)
             {
@@ -535,7 +535,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool EndGoToProtect()
+        public virtual bool EndGoToProtect()
         {
             if (McsBotPlayerData == null)
             {
@@ -581,7 +581,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool EndAttackMoving()
+        public virtual bool EndAttackMoving()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -628,7 +628,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected virtual void TrySolveStuck()
+        public virtual void TrySolveStuck()
         {
             if (_nextVaultCheckTime < Time.time)
             {
@@ -643,7 +643,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool EndHoldPosition()
+        public virtual bool EndHoldPosition()
         {
             if (McsBotPlayerData == null)
             {
@@ -688,23 +688,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool CanSearchEnemy()
+        public virtual bool CanSearchEnemy()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             return goalEnemy == null || !WasHitRecently(10f) && !goalEnemy.IsVisible && !goalEnemy.CanShoot && goalEnemy.CanISearch && BotOwner.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack) && BotOwner.Memory.LastEnemyVisionOld(LocalBotSettingsProviderClass.Core.COVER_SECONDS_AFTER_LOSE_VISION);
         }
 
-        protected virtual bool ProtectCareKill()
+        public virtual bool ProtectCareKill()
         {
             return (Time.time - GetEnemyLastSeenTime()) < 10f;
         }
 
-        protected virtual bool ProtectWantKill()
+        public virtual bool ProtectWantKill()
         {
             return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
         }
 
-        protected virtual float GetEnemyLastSeenTime()
+        public virtual float GetEnemyLastSeenTime()
         {
             if (BotOwner.Settings.FileSettings.Mind.PROTECT_TIME_REAL)
             {
@@ -713,7 +713,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.BotsGroup.EnemyLastSeenTimeSence;
         }
 
-        protected virtual CustomNavigationPoint FollowerCheckData()
+        public virtual CustomNavigationPoint FollowerCheckData()
         {
             Vector3 leadPos;
             if (McsBotPlayerData?.LeadPlayer != null && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
@@ -738,7 +738,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
         }
 
-        protected virtual bool ShouldEndPatrol()
+        public virtual bool ShouldEndPatrol()
         {
             if (BotOwner.PeaceLook.HaveActions())
             {
@@ -748,12 +748,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool IsDogFighting()
+        public virtual bool IsDogFighting()
         {
             return BotOwner.DogFight.DogFightState > BotDogFightStatus.none;
         }
 
-        protected virtual bool EndGoToLootTarget()
+        public virtual bool EndGoToLootTarget()
         {
             if (McsBotPlayerData == null)
             {
@@ -773,7 +773,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool ShouldShootImmediately()
+        public virtual bool ShouldShootImmediately()
         {
             try
             {
@@ -789,7 +789,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool IsShootFromCoverConditionAllFine()
+        public virtual bool IsShootFromCoverConditionAllFine()
         {
             if (!BotOwner.Memory.IsInCover)
             {
@@ -811,7 +811,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected virtual bool GetCrossPoint(EnemyInfo enemy)
+        public virtual bool GetCrossPoint(EnemyInfo enemy)
         {
             var nearestDoor = BotOwner.NearDoorData.GetNearestDoor();
             if (nearestDoor == null)
@@ -827,7 +827,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return GClass369.GetCrossPoint(gclass.a, gclass.b, vector2, vector3) != null;
         }
 
-        protected virtual bool CannotSeeEnemy(EnemyInfo info)
+        public virtual bool CannotSeeEnemy(EnemyInfo info)
         {
             if (info == null)
             {
@@ -837,18 +837,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return !Physics.Linecast(BotOwner.WeaponRoot.position, vector, out var raycastHit, LayerMaskClass.HighPolyWithTerrainMask);
         }
 
-        protected virtual bool CanShootNow()
+        public virtual bool CanShootNow()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             return goalEnemy != null && goalEnemy.CanShoot && goalEnemy.IsVisible;
         }
 
-        protected virtual bool ShootNow()
+        public virtual bool ShootNow()
         {
             return BotOwner.Memory.GoalEnemy.CanShoot && BotOwner.Memory.GoalEnemy.IsVisible;
         }
 
-        protected virtual bool EndShootFromPlace()
+        public virtual bool EndShootFromPlace()
         {
             if (BotOwner.DogFight.ShallStartCauseHavePlace())
             {
@@ -873,7 +873,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndShootFromCover()
+        public virtual bool EndShootFromCover()
         {
             if (!BotOwner.Memory.IsInCover)
             {
@@ -895,7 +895,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndGoToEnemy()
+        public virtual bool EndGoToEnemy()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -917,7 +917,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected virtual bool IsEnemyPosLost()
+        public virtual bool IsEnemyPosLost()
         {
             if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 20f)
             {
@@ -927,7 +927,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndShootToSmoke()
+        public virtual bool EndShootToSmoke()
         {
             if (!BotOwner.SmokeGrenade.ShallShoot())
             {
@@ -936,7 +936,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndRunToEnemy()
+        public virtual bool EndRunToEnemy()
         {
             if (McsBotPlayerData == null)
             {
@@ -975,7 +975,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected virtual bool EndShootFromStationary()
+        public virtual bool EndShootFromStationary()
         {
             if (BotOwner.Medecine.FirstAid.Have2Do)
             {
@@ -1005,7 +1005,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndGoToExfiltrationPoint()
+        public virtual bool EndGoToExfiltrationPoint()
         {
             if (McsBotPlayerData == null)
             {
@@ -1034,7 +1034,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool IsWannaLeave()
+        public virtual bool IsWannaLeave()
         {
             if (BotOwner.Boss.IamBoss || BotOwner.BotFollower == null || BotOwner.BotFollower.BossToFollow == null)
             {
@@ -1048,7 +1048,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return BotOwner.Exfiltration.WannaLeave();
         }
 
-        protected virtual bool EndMeleeAttack()
+        public virtual bool EndMeleeAttack()
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null)
@@ -1102,7 +1102,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual EquipmentSlot CheckWeaponSwitch()
+        public virtual EquipmentSlot CheckWeaponSwitch()
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null || weaponManager.Selector == null)
@@ -1126,7 +1126,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return targetSlot;
         }
 
-        protected virtual void TryChangeWeaponSlot(EquipmentSlot slot)
+        public virtual void TryChangeWeaponSlot(EquipmentSlot slot)
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager?.Selector == null)
@@ -1154,7 +1154,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected virtual bool HasAmmoOrBackupAmmo(EquipmentSlot slot)
+        public virtual bool HasAmmoOrBackupAmmo(EquipmentSlot slot)
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
 
@@ -1186,7 +1186,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return HasBackupAmmo(weapon);
         }
 
-        protected virtual bool HasBackupAmmo(Weapon weapon)
+        public virtual bool HasBackupAmmo(Weapon weapon)
         {
             var player = BotOwner.GetPlayer;
             var inventoryController = player.InventoryController;
@@ -1235,7 +1235,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool HasLooseAmmoForWeapon(Weapon weapon)
+        public virtual bool HasLooseAmmoForWeapon(Weapon weapon)
         {
             var player = BotOwner.GetPlayer;
             var inventoryController = player.InventoryController;
@@ -1272,7 +1272,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
+        public virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
         {
             var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
 
@@ -1308,7 +1308,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return weaponManager.Selector.EquipmentSlot;
         }
 
-        protected virtual bool HasWeaponInSlot(InventoryEquipment equipment, EquipmentSlot slot)
+        public virtual bool HasWeaponInSlot(InventoryEquipment equipment, EquipmentSlot slot)
         {
             if (equipment == null)
             {
@@ -1319,7 +1319,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return item is Weapon;
         }
 
-        protected virtual bool HasKnifeInSlot(InventoryEquipment equipment, EquipmentSlot slot)
+        public virtual bool HasKnifeInSlot(InventoryEquipment equipment, EquipmentSlot slot)
         {
             if (equipment == null)
             {
@@ -1330,7 +1330,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return item is KnifeItemClass;
         }
 
-        protected virtual bool ShouldUseMeleeAttack()
+        public virtual bool ShouldUseMeleeAttack()
         {
             if (_nextMeleeCheckTime > Time.time)
             {
@@ -1370,7 +1370,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// 参考SAIN
         /// </summary>
         /// <returns></returns>
-        protected virtual bool ShouldTryVault()
+        public virtual bool ShouldTryVault()
         {
             if (BotOwner.GetPlayer == null || BotOwner.GetPlayer.VaultingComponent == null || BotOwner.GetPlayer.VaultingGameplayRestrictions == null)
             {
@@ -1402,7 +1402,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        protected virtual bool TryVault()
+        public virtual bool TryVault()
         {
             if (CheckForVaultableObstacle())
             {
@@ -1415,7 +1415,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool CheckForVaultableObstacle()
+        public virtual bool CheckForVaultableObstacle()
         {
             var startPosition = BotOwner.GetPlayer.WeaponRoot.position;
             var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
@@ -1438,7 +1438,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual void UpdateLeadNearMoveTarget(Vector3? leadPos, out float nextUpdateTime)
+        public virtual void UpdateLeadNearMoveTarget(Vector3? leadPos, out float nextUpdateTime)
         {
             if (!leadPos.HasValue)
             {
@@ -1494,7 +1494,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             nextUpdateTime = 1f;
         }
 
-        protected virtual void UpdateEscortMoveTarget(Vector3? escortPos, out float nextUpdateTime)
+        public virtual void UpdateEscortMoveTarget(Vector3? escortPos, out float nextUpdateTime)
         {
             if (McsBotPlayerData == null)
             {
@@ -1547,7 +1547,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             nextUpdateTime = 0.2f;
         }
 
-        protected virtual void UpdateCommonMoveTarget(Vector3? targetPos, out float nextUpdateTime)
+        public virtual void UpdateCommonMoveTarget(Vector3? targetPos, out float nextUpdateTime)
         {
             if (McsBotPlayerData == null)
             {
@@ -1593,7 +1593,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             nextUpdateTime = 1f;
         }
 
-        protected virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
+        public virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
         {
             var navMeshPath = new NavMeshPath();
             NavMesh.CalculatePath(startPos, targetPos, -1, navMeshPath);
@@ -1649,7 +1649,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return _lastCanRunResult;
         }
 
-        protected virtual Vector3 GetPointAlongPathAtDistance(Vector3[] corners, float distance)
+        public virtual Vector3 GetPointAlongPathAtDistance(Vector3[] corners, float distance)
         {
             var accumulated = 0f;
             for (int i = 0; i < corners.Length - 1; i++)
@@ -1665,7 +1665,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return corners[corners.Length - 1];
         }
 
-        protected virtual void CheckDanger(bool deavtivatingMines = true)
+        public virtual void CheckDanger(bool deavtivatingMines = true)
         {
             if (deavtivatingMines)
             {
@@ -1675,7 +1675,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             BotOwner.BotAvoidDangerPlaces.Update();
         }
 
-        protected virtual bool EndDeactivateMine()
+        public virtual bool EndDeactivateMine()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -1690,7 +1690,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndRunAwayGrenade()
+        public virtual bool EndRunAwayGrenade()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -1710,7 +1710,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndRunAwayArtillery()
+        public virtual bool EndRunAwayArtillery()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -1730,7 +1730,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndRunAwayBTR()
+        public virtual bool EndRunAwayBTR()
         {
             if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
             {
@@ -1750,7 +1750,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndFlashed()
+        public virtual bool EndFlashed()
         {
             if (!BotOwner.FlashGrenade.IsFlashed)
             {
@@ -1760,7 +1760,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndGoToExcuteProxyAction()
+        public virtual bool EndGoToExcuteProxyAction()
         {
             if (McsBotPlayerData == null)
             {
@@ -1774,7 +1774,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        protected virtual bool EndThrowTargetLootLogic()
+        public virtual bool EndThrowTargetLootLogic()
         {
             if (McsBotPlayerData == null)
             {
