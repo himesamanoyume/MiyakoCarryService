@@ -2,8 +2,8 @@ using System.Reflection;
 using Fika.Core.Main.Players;
 using HarmonyLib;
 using MiyakoCarryService.Client;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Patches.Bots;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -36,7 +36,13 @@ namespace MiyakoCarryService.Fika.Patches
                 return;
             }
 
-            PlayerOnDeadPatch.HandleBalanceRestriction(__instance);
+            var mcsBotPlayerData = __instance.AIData.BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return;
+            }
+
+            mcsBotPlayerData.HandleBalanceRestriction();
         }
     }
 }

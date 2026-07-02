@@ -226,7 +226,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (_subtitlesViewTemplate == null)
             {
-                MiyakoCarryServicePlugin.Logger.LogWarning("我为空");
+                return;
             }
             var cloneSubtitleViewGameObject = Instantiate(_subtitlesViewTemplate);
             var cloneSubtitleView = cloneSubtitleViewGameObject.GetComponentInChildren<SubtitlesView>();
@@ -245,6 +245,10 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 foreach (var subTitle in _subTitles.Values)
                 {
+                    if (subTitle?.SubtitlesView?.gameObject == null)
+                    {
+                        continue;
+                    }
                     Destroy(subTitle.SubtitlesView.gameObject);
                 }
                 _subTitles.Clear();

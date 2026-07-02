@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
@@ -46,6 +47,7 @@ namespace MiyakoCarryService.Client.Datas
         }
         public bool IsTaskRunning = false;
         private EDecision _decision = EDecision.None;
+        private HashSet<LootData> _vanishingCurseLootItems = new();
 
         public void SetDecision(EDecision[] exclude = null, params EDecision[] decisions)
         {
@@ -82,20 +84,20 @@ namespace MiyakoCarryService.Client.Datas
             return true;
         }
 
-        public void AddDecision(params EDecision[] decisions)  
-        {  
-            foreach (var decision in decisions)  
-            {  
-                _decision |= decision;  
-            }  
-        }  
-        
-        public void RemoveDecision(params EDecision[] decisions)  
-        {  
-            foreach (var decision in decisions)  
-            {  
-                _decision &= ~decision;  
-            }  
+        public void AddDecision(params EDecision[] decisions)
+        {
+            foreach (var decision in decisions)
+            {
+                _decision |= decision;
+            }
+        }
+
+        public void RemoveDecision(params EDecision[] decisions)
+        {
+            foreach (var decision in decisions)
+            {
+                _decision &= ~decision;
+            }
         }
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
@@ -104,6 +106,52 @@ namespace MiyakoCarryService.Client.Datas
             BotOwner.SetMcsBotPlayerData(this);
             _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
             _leadPlayeRef = new(bossPlayer);
+            CollectVanishingCurseLootItems();
+        }
+
+        public void CollectVanishingCurseLootItems()
+        {
+            if (_vanishingCurseLootItems == null)
+            {
+                _vanishingCurseLootItems = new();
+            }
+
+            var slots = InventoryEquipment.AllSlotNames
+                .Where(slotName => slotName is not EquipmentSlot.Dogtag)
+                .Select(BotOwner.Profile.Inventory.Equipment.GetSlot).ToArray();
+
+            foreach (var slot in slots)
+            {
+                if (slot.ContainedItem == null)
+                {
+                    continue;
+                }
+
+                var allItems = slot.ContainedItem.GetAllItems();
+                foreach (var item in allItems)
+                {
+                    var itemData = item.GetData();
+                    if (itemData == null)
+                    {
+                        continue;
+                    }
+
+                    if (itemData is not LootData lootData)
+                    {
+                        continue;
+                    }
+
+                    if (lootData.ItemType is EItemType.Backpack or EItemType.Equipment)
+                    {
+                        continue;
+                    }
+
+                    if (lootData.VanishingCurse)
+                    {
+                        _vanishingCurseLootItems.Add(lootData);
+                    }
+                }
+            }
         }
 
         public void SetLootingTarget(List<ItemData> itemDatas)
@@ -203,6 +251,45 @@ namespace MiyakoCarryService.Client.Datas
             _mcsAILeadPlayerRef = null;
             _isLooting = false;
             _lootingTarget = null;
+        }
+
+        public void HandleBalanceRestriction()
+        {
+            foreach (var lootData in _vanishingCurseLootItems)
+            {
+                var item = lootData.Item;
+                if (item?.CurrentAddress == null || !lootData.VanishingCurse)
+                {
+                    continue;
+                }
+
+                if (item.CurrentAddress.Container is Slot slot && slot.ContainedItem == item && Enum.TryParse<EquipmentSlot>(slot.ID, out var equipmentSlot))
+                {
+                    if (equipmentSlot is EquipmentSlot.Backpack or EquipmentSlot.TacticalVest or EquipmentSlot.Pockets)
+                    {
+                        continue;
+                    }
+
+                    var parentItem = item.Parent.GetRootItem();
+                    var itemData = parentItem.GetData();
+                    if (itemData is PlayerData playerData && !playerData.Player.IsAI)
+                    {
+                        if ((equipmentSlot is EquipmentSlot.FirstPrimaryWeapon && playerData.Player.HandsController.Item == item)  
+                        || (equipmentSlot is EquipmentSlot.SecondPrimaryWeapon && playerData.Player.HandsController.Item == item)
+                        || (equipmentSlot is EquipmentSlot.Holster && playerData.Player.HandsController.Item == item) 
+                        || (equipmentSlot is EquipmentSlot.Scabbard && playerData.Player.HandsController.Item == item))
+                        {
+                            continue;
+                        }
+                    }
+
+                    slot.RemoveItemWithoutRestrictions();
+                }
+                else
+                {
+                    item.McsRemoveItem();
+                }
+            }
         }
     }
 }
