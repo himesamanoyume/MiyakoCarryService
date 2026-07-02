@@ -314,6 +314,22 @@ namespace MiyakoCarryService.Client
             }
 
             public int GetNextOrder() => _currentOrder--;
+
+            public string GetSection(EConfigType configType)
+            {
+                return configType switch
+                {
+                    EConfigType.BASIC => Locales.BASIC,
+                    EConfigType.COMMAND => Locales.COMMAND,
+                    EConfigType.PLAYER => Locales.PLAYER,
+                    EConfigType.DEBUG or _ => Locales.DEBUG
+                };
+            }
+
+            public int GetOrder(EConfigType configType)
+            {
+                return (int)configType;
+            }
         }
 
         public ConfigEntry<T> Register<T>(
@@ -322,9 +338,7 @@ namespace MiyakoCarryService.Client
             T defaultValue,
             string description = "",
             AcceptableValueBase acceptableValues = null,
-            ConfigurationManagerAttributes customAttributes = null,
-            bool needNotify = true,
-            bool isHide = false
+            ConfigurationManagerAttributes customAttributes = null
         )
         {
             if (!_sections.TryGetValue(type, out var section))
@@ -333,12 +347,13 @@ namespace MiyakoCarryService.Client
                 _sections[type] = section;
             }
 
-            if (isHide)
+            var attributes = customAttributes ?? new ConfigurationManagerAttributes();
+
+            if (attributes.Hide.Value)
             {
                 HideList.Add(key);
             }
 
-            var attributes = customAttributes ?? new ConfigurationManagerAttributes();
             attributes.Order = section.GetNextOrder();
 
             var configDescription = new ConfigDescription(
@@ -354,7 +369,7 @@ namespace MiyakoCarryService.Client
                 configDescription
             );
 
-            if (typeof(T) == typeof(bool) && needNotify)
+            if (typeof(T) == typeof(bool) && attributes.NeedNotify.Value)
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {
@@ -394,7 +409,7 @@ namespace MiyakoCarryService.Client
             return configEntry;
         }
 
-        private static void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
+        public void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
         {
             var value = (T)entry.BoxedValue;
             var values = Enum.GetValues(typeof(T));
@@ -416,28 +431,6 @@ namespace MiyakoCarryService.Client
             {
                 entry.BoxedValue = values.GetValue(newIndex);
             }
-        }
-
-        public static string GetSection(EConfigType configType)
-        {
-            return configType switch
-            {
-                EConfigType.BASIC => Locales.BASIC,
-                EConfigType.COMMAND => Locales.COMMAND,
-                EConfigType.PLAYER => Locales.PLAYER,
-                EConfigType.DEBUG or _ => Locales.DEBUG
-            };
-        }
-
-        public static int GetOrder(EConfigType configType)
-        {
-            return configType switch
-            {
-                EConfigType.BASIC => 100,
-                EConfigType.COMMAND => 200,
-                EConfigType.PLAYER => 300,
-                EConfigType.DEBUG or _ => 2000
-            };
         }
 
         private void SetupConfig()
