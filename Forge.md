@@ -241,7 +241,7 @@ If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort t
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to execute action.
 
-- Throw Target Loot
+- Drop Target Loot
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
 
@@ -283,7 +283,7 @@ Command `McsBotPlayers` to change preferred combat aiming body part.
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayer` to escort to the designated location.
 
-- Team Throw Target Loot
+- Team Drop Target Loot
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
 
