@@ -68,6 +68,7 @@ namespace MiyakoCarryService.Fika
                 { ECommandPacketType.LootProxyAction, HandleProxyAction },
                 { ECommandPacketType.InteractionProxyAction, HandleProxyAction },
                 { ECommandPacketType.EndProxyAction, HandleEndProxyAction },
+                { ECommandPacketType.ThrowTargetLoot, HandleThrowTargetLoot },
             };
         }
 
@@ -507,6 +508,57 @@ namespace MiyakoCarryService.Fika
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.HoldPosition,
+                    });
+                }
+            }
+        }
+
+        private void HandleThrowTargetLoot(CommandPacket packet)
+        {
+            if (packet.CommandType != ECommandPacketType.ThrowTargetLoot)
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                if (!botOwner.ExternalItemsController.HaveItemsToDrop())
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Negative,
+                    });
+                    return;
+                }
+                
+                botOwner.StopMove();
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldThrowTargetLoot);
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger,
                     });
                 }
             }

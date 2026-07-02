@@ -181,5 +181,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string DOORPROXYCOMMAND_TARGETNAME = "Mcs/DoorProxyCommand TargetName";
         public const string LOOTPROXYCOMMAND_NAME = "Mcs/LootProxyCommand Name";
         public const string LOOTPROXYCOMMAND_TARGETNAME = "Mcs/LootProxyCommand TargetName";
+        public const string THROWTARGETLOOTCOMMAND_NAME = "Mcs/ThrowTargetLootCommand Name";
+        public const string THROWTARGETLOOTCOMMAND_TARGETNAME = "Mcs/ThrowTargetLootCommand TargetName";
+        public const string TEAMTHROWTARGETLOOTCOMMAND_NAME = "Mcs/TeamThrowTargetLootCommand Name";
+        public const string TEAMTHROWTARGETLOOTCOMMAND_TARGETNAME = "Mcs/TeamThrowTargetLootCommand TargetName";
     }
 }

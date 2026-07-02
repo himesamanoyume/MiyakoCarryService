@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         protected McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         protected QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
         protected CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
-        
         protected async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;
@@ -29,12 +28,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (result.Succeed)
                 {
                     mcsBotPlayer.UpdateInteractionCast();
-
-                    // // 可选触发OnItemTaken事件 
-                    // if (BotOwner.ItemTaker != null)
-                    // {
-                    //     // 当前无需要触发的事件
-                    // }
+                    mcsBotPlayer.AIData.BotOwner.ExternalItemsController.PickUpedItems.Add(targetLootData.Item.Id);
                 }
 
                 mcsBotPlayer.CurrentManagedState.Pickup(false, null);

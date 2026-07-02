@@ -25,36 +25,63 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
-                if (McsBotPlayerData != null)
+                if (McsBotPlayerData == null)
                 {
-                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
-                    {
-                        if (_nextUpdatePosTime < Time.time)
-                        {
-                            UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                            _nextUpdatePosTime = Time.time + nextTime;
-                        }
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:DataNull");
+                }
 
-                        if (_currentMoveTarget.HasValue)
-                        {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                            return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
-                        }
-                        else
-                        {
-                            return new Action(typeof(SimplePatrolLogic), "Mcs:GoToPointCommandTargetPosNotFound");
-                        }
+                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
+                if (mcsLeadPlayerPos == null)
+                {
+                    return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
+                }
+
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldThrowTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
+                {
+                    if (_nextUpdatePosTime < Time.time)
+                    {
+                        UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                        _nextUpdatePosTime = Time.time + nextTime;
                     }
 
-                    if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                    if (_currentMoveTarget.HasValue)
                     {
-                        if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
-                        {
-                            return new Action(typeof(HealLogic), "Mcs:Healing");
-                        }
-
-                        return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(ThrowTargetLootLogic), "Mcs:ThrowTargetLootCommand");
                     }
+                    else
+                    {
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:GoToPointCommandTargetPosNotFound");
+                    }
+                }
+
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                {
+                    if (_nextUpdatePosTime < Time.time)
+                    {
+                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                        _nextUpdatePosTime = Time.time + nextTime;
+                    }
+
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
+                    }
+                    else
+                    {
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:GoToPointCommandTargetPosNotFound");
+                    }
+                }
+
+                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                {
+                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                    {
+                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                    }
+
+                    return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                 }
 
                 if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
@@ -85,12 +112,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             return new Action(typeof(SimplePatrolLogic), "Mcs:GoToLootTargetPosNotFound");
                         }
                     }
-                }
-
-                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                if (mcsLeadPlayerPos == null)
-                {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
                 if (_nextUpdatePosTime < Time.time)

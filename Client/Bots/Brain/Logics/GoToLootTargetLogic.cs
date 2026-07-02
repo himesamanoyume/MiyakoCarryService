@@ -48,11 +48,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
         }
 
-        private DoorInteractionStatus HandleDoor()
-        {
-            return BotOwner.DoorOpener.UpdateDoorInteractionStatus();
-        }
-
         public override void Update(CustomLayer.ActionData data)
         {
             _baseLogic.UpdateNodeByMain(data);
@@ -60,7 +55,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             BotOwner.Sprint(true, false);
             BotOwner.SetPose(1f);
             BotOwner.Steering.LookToMovingDirection();
-            HandleDoor();
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
             if (mcsBotPlayerData == null)

@@ -14,5 +14,6 @@ namespace MiyakoCarryService.Client.Enums
         ShouldQuestProxyAction = 1 << 5,
         ShouldLootProxyAction = 1 << 6,
         ShouldInteractionProxyAction = 1 << 7,
+        ShouldThrowTargetLoot = 1 << 8,
     }
 }

@@ -1,0 +1,71 @@
+using DrakiaXYZ.BigBrain.Brains;
+using EFT;
+using EFT.InventoryLogic;
+using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
+using UnityEngine;
+
+namespace MiyakoCarryService.Client.Bots.Brain.Logics
+{
+    public sealed class ThrowTargetLootLogic : McsBotBaseLogic
+    {
+        public GoToPointBaseLogic _baseLogic;
+        public float _nextCheckTime = Time.time;
+        public ThrowTargetLootLogic(BotOwner botOwner) : base(botOwner)
+        {
+            _baseLogic = new(botOwner);
+        }
+
+        public override void Update(CustomLayer.ActionData data)
+        {
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return;
+            }
+
+            var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
+            var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
+            if (sqrDistance <= 9f)
+            {
+                BotOwner.StopMove();
+                BotOwner.Steering.LookToPoint(mcsBotPlayerData.LeadPlayer.MainParts[BodyPartType.head].Position);
+            }
+            else
+            {
+                _baseLogic.UpdateNodeByMain(data);
+                BotOwner.SetTargetMoveSpeed(1f);
+                BotOwner.Sprint(true, false);
+                BotOwner.SetPose(1f);
+                BotOwner.Steering.LookToMovingDirection();
+                return;
+            }
+
+            if (BotOwner.ExternalItemsController.PickUpedItems.Count == 0)
+            {
+                return;
+            }
+
+            if (Time.time >= _nextCheckTime)
+            {
+                _nextCheckTime = Time.time + 1f;
+            }
+
+            var wantDropItemId = BotOwner.ExternalItemsController.GetRandomItemToDrop();
+            var wantDropItem = mcsBotPlayerData.Player.InventoryController.FindItem<Item>(wantDropItemId);
+            if (wantDropItem == null)
+            {
+                return;
+            }
+
+            var wantDropItemData = wantDropItem.GetData();
+            if (wantDropItemData is not LootData wantDropLootData)
+            {
+                return;
+            }
+            
+            BotOwner.ExternalItemsController.PickUpedItems.Remove(wantDropLootData.Item.Id);
+            mcsBotPlayerData.Player.InventoryController.ThrowItem(wantDropLootData.Item);
+        }
+    }
+}

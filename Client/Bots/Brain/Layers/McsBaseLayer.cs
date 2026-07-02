@@ -153,6 +153,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 { typeof(RunAwayArtilleryLogic), EndRunAwayArtillery },
                 { typeof(RunAwayBTRLogic), EndRunAwayBTR },
                 { typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction },
+                { typeof(ThrowTargetLootLogic), EndThrowTargetLootLogic },
             };
         }
 
@@ -1747,6 +1748,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
             return false;
+        }
+
+        protected virtual bool EndThrowTargetLootLogic()
+        {
+            return !BotOwner.ExternalItemsController.HaveItemsToDrop();
         }
     }
 }
