@@ -96,9 +96,9 @@ namespace MiyakoCarryService.Client.Datas
         {
             var currency = Item.StringTemplateId switch
             {
-                CommonId.Euros => ECurrencyType.EUR,
-                CommonId.Dollars => ECurrencyType.USD,
-                CommonId.GPCoins => ECurrencyType.GP,
+                ItemTpl.Euros => ECurrencyType.EUR,
+                ItemTpl.Dollars => ECurrencyType.USD,
+                ItemTpl.GPCoins => ECurrencyType.GP,
                 _ => ECurrencyType.RUB
             };
             Offer.Price = Item.StackObjectsCount;

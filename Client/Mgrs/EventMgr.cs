@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Interfaces;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public static class EventMgr
+    internal static class EventMgr
     {
         private static Dictionary<Type, List<Delegate>> _eventHandlers = new();
         private static Dictionary<object, List<Type>> _subscriberEventTypes = new();

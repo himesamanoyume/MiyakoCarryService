@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    public sealed class LogBuffer
+    internal sealed class LogBuffer
     {
         private readonly LinkedList<LogEntry> _entries = new();
         private int _currentCharCount = 0;

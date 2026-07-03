@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public abstract class ItemDataMgr<T> : DataMgr<T> where T : MonoBehaviour
+    public abstract class ItemDataMgr : DataMgr
     {
-        protected void LoadItemData<K>() where K : BaseData
+        public virtual void LoadItemData<K>() where K : BaseData
         {
             var datas = new HashSet<K>();
             foreach (var item in Tools.GetAllOwnerItemData())
@@ -33,11 +33,11 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected IEnumerator UpdateItemData(float time)
+        public virtual IEnumerator UpdateItemData(float time)
         {
             yield return new WaitForSeconds(time);
             var publicTime = new WaitForSeconds(.1f);
-            if (_gameloop.IsVaildGameWorld)
+            if (Gameloop.IsVaildGameWorld)
             {
                 var datasList = new List<BaseData>();
                 if (_datas != null)

@@ -9,7 +9,7 @@ using UnityEngine.Rendering;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class HighlightMgr : BaseMgr<HighlightMgr>
+    public class HighlightMgr : BaseMgr
     {
         private Dictionary<Renderer, Material> _cache = new();
         private CommandBuffer _commandBuffer;
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             MiyakoCarryServicePlugin.TeammateHighlight.SettingChanged += (object sender, EventArgs e) =>
             {
-                if (!_gameloop.IsVaildGameWorld)
+                if (!Gameloop.IsVaildGameWorld)
                 {
                     return;
                 }
@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
-        protected override void OnGameWorldStarted(GameWorldStartedEvent @event)
+        public override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             base.OnGameWorldStarted(@event);
             Clear();
@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Client.Mgrs
             _opticCameraInitialized = false;
         }
 
-        protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             base.OnGameWorldEnded(@event);
             Clear();
@@ -79,25 +79,25 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
 
-            if (_gameloop.IsVaildGameWorld)
+            if (Gameloop.IsVaildGameWorld)
             {
                 if (MiyakoCarryServicePlugin.TeammateHighlight.Value)
                 {
                     SwitchShaders();
                 }
 
-                if (_gameloop.MainCamera != null && !_mainCameraInitialized)
+                if (Gameloop.MainCamera != null && !_mainCameraInitialized)
                 {
                     _mainCameraInitialized = true;
-                    _gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
-                    _gameloop.MainCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    Gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    Gameloop.MainCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
                 }
 
-                if (_gameloop.OpticCamera != null && !_opticCameraInitialized)
+                if (Gameloop.OpticCamera != null && !_opticCameraInitialized)
                 {
                     _opticCameraInitialized = true;
-                    _gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
-                    _gameloop.OpticCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    Gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                    Gameloop.OpticCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
                 }
             }
 
@@ -105,7 +105,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         void SwitchShaders()
         {
-            if (!_gameloop.IsVaildGameWorld)
+            if (!Gameloop.IsVaildGameWorld)
             {
                 return;
             }
@@ -116,7 +116,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 batches.Clear();
             }
 
-            foreach (var playerData in _gameloop.GetDatas<PlayerData, PlayerDataMgr>())
+            foreach (var playerData in Gameloop.GetDatas<PlayerData, PlayerDataMgr>())
             {
                 if (playerData.Player.IsYourPlayer)
                 {
@@ -130,7 +130,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                BatchRenderers(playerData.Player, _gameloop.HighlightShader, MiyakoCarryServicePlugin.TeammateHighlightColor.Value.linear);
+                BatchRenderers(playerData.Player, Gameloop.HighlightShader, MiyakoCarryServicePlugin.TeammateHighlightColor.Value.linear);
             }
 
             ExecuteBatchRendering();
@@ -222,14 +222,14 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             _cache.Clear();
             _materialBatches.Clear();
-            if (_gameloop.MainCamera != null && _commandBuffer != null)
+            if (Gameloop.MainCamera != null && _commandBuffer != null)
             {
-                _gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                Gameloop.MainCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
             }
 
-            if (_gameloop.OpticCamera != null && _commandBuffer != null)
+            if (Gameloop.OpticCamera != null && _commandBuffer != null)
             {
-                _gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
+                Gameloop.OpticCamera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
             }
         }
     }

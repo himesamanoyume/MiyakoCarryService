@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/trading/api/friendlyFirePenalty
         /// </summary>
-        public async ValueTask<string> FriendlyFirePenalty(string url, FriendlyFirePenaltyRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> FriendlyFirePenalty(string url, FriendlyFirePenaltyRequestData info, MongoId mcsLeadPlayerId)
         {
             traderController.FriendlyFirePenalty(mcsLeadPlayerId, info);
             return httpResponseUtil.NullResponse();
@@ -27,7 +27,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/trading/api/compensation
         /// </summary>
-        public async ValueTask<string> Compensation(string url, CompensationRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> Compensation(string url, CompensationRequestData info, MongoId mcsLeadPlayerId)
         {
             traderController.Compensation(info);
             return httpResponseUtil.NullResponse();
@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/trading/api/updateProfile
         /// </summary>
-        public async ValueTask<string> UpdateProfile(string url, EmptyRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> UpdateProfile(string url, EmptyRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(await traderController.UpdateProfile(mcsLeadPlayerId));
         }

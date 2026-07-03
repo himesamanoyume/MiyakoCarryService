@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class LootDataMgr : ItemDataMgr<LootDataMgr>
+    public class LootDataMgr : ItemDataMgr
     {
         public HashSet<LootData> LockedLootingTarget = new();
         public HashSet<Transform> LockedLootingTargetRootTransform = new();
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Mgrs
             LockedLootingTargetRootTransform.Remove(transform);
         }
 
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>));
@@ -56,7 +56,7 @@ namespace MiyakoCarryService.Client.Mgrs
             LockedLootingTargetRootTransform.Clear();
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             LockedLootingTarget.Clear();

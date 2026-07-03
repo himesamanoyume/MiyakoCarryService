@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Client.Extensions
                 return lootData;
             }
 
-            public bool IsPlayerInventory => item.StringTemplateId == CommonId.DefaultInventory;
+            public bool IsPlayerInventory => item.StringTemplateId == ItemTpl.DefaultInventory;
 
             public TraderOffer ContainsBestPrice()
             {

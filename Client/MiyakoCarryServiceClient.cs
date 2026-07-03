@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client
     [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
-        public const string BepInExClientVersion = "1.0.9.0";
+        public const string BepInExClientVersion = "1.1.0.0";
         public static Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Client
         public static bool IsFikaHeadless { get; private set; } = false;
         public static bool SAINInstalled { get; private set; } = false;
         private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
-        public static LogBuffer LogBuffer = new LogBuffer();
+        internal static LogBuffer LogBuffer = new LogBuffer();
         private Debouncer<string, McsBotPlayerConfig> _configDebouncer;
 
         #region BASIC
@@ -298,53 +298,24 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private static readonly Dictionary<EConfigType, ConfigSection> _sections = new();
+        private static readonly Dictionary<string, ConfigSection> _sections = new();
         public static readonly List<string> HideList = new();
 
-        public class ConfigSection
-        {
-            private int _currentOrder;
-
-            public string Name { get; }
-
-            public ConfigSection(EConfigType type)
-            {
-                Name = GetSection(type);
-                _currentOrder = GetOrder(type);
-            }
-
-            public int GetNextOrder() => _currentOrder--;
-
-            public string GetSection(EConfigType configType)
-            {
-                return configType switch
-                {
-                    EConfigType.BASIC => Locales.BASIC,
-                    EConfigType.COMMAND => Locales.COMMAND,
-                    EConfigType.PLAYER => Locales.PLAYER,
-                    EConfigType.DEBUG or _ => Locales.DEBUG
-                };
-            }
-
-            public int GetOrder(EConfigType configType)
-            {
-                return (int)configType;
-            }
-        }
-
-        public ConfigEntry<T> Register<T>(
-            EConfigType type,
+        internal ConfigEntry<T> Register<T>(
+            string sectionName,
+            int order,
             string key,
             T defaultValue,
             string description = "",
             AcceptableValueBase acceptableValues = null,
-            ConfigurationManagerAttributes customAttributes = null
+            ConfigurationManagerAttributes customAttributes = null,
+            McsBotPlayerConfig mcsBotPlayerConfig = null
         )
         {
-            if (!_sections.TryGetValue(type, out var section))
+            if (!_sections.TryGetValue(sectionName, out var section))
             {
-                section = new ConfigSection(type);
-                _sections[type] = section;
+                section = new ConfigSection(sectionName, order);
+                _sections[sectionName] = section;
             }
 
             var attributes = customAttributes ?? new ConfigurationManagerAttributes();
@@ -385,7 +356,7 @@ namespace MiyakoCarryService.Client
                 };
             }
 
-            if (type == EConfigType.BASIC)
+            if (sectionName == EConfigType.BASIC.ToString())
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {
@@ -394,43 +365,24 @@ namespace MiyakoCarryService.Client
                         return;
                     }
 
-                    DebouncedConfigSync(new McsBotPlayerConfig
-                    {
-                        McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
-                        EnableLooting = EnableLooting.Value,
-                        PriceThreshold = PriceThreshold.Value,
-                        KeywordItemText = KeywordItemText.Value,
-                        LootingKeywordItem = LootingKeywordItem.Value,
-                        BlockItemType = (int)BlockItemType.Value
-                    });
+                    DebouncedConfigSync(mcsBotPlayerConfig ?? new McsBotPlayerConfig());
                 };
             }
 
             return configEntry;
         }
 
-        public void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
+        internal ConfigEntry<T> Register<T>(
+            EConfigType type,
+            string key,
+            T defaultValue,
+            string description = "",
+            AcceptableValueBase acceptableValues = null,
+            ConfigurationManagerAttributes customAttributes = null,
+            McsBotPlayerConfig mcsBotPlayerConfig = null
+        )
         {
-            var value = (T)entry.BoxedValue;
-            var values = Enum.GetValues(typeof(T));
-            var options = new string[values.Length];
-            var selectedIndex = 0;
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                var enumValue = (T)values.GetValue(i);
-                options[i] = dict.ContainsKey(enumValue) ? dict[enumValue] : enumValue.ToString();
-                if (enumValue.Equals(value))
-                {
-                    selectedIndex = i;
-                }
-            }
-
-            var newIndex = GUILayout.SelectionGrid(selectedIndex, options, xCount);
-            if (newIndex != selectedIndex)
-            {
-                entry.BoxedValue = values.GetValue(newIndex);
-            }
+            return Register(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, mcsBotPlayerConfig);
         }
 
         private void SetupConfig()

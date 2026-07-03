@@ -2,7 +2,11 @@
 
 ## 低优先级
 
-- 设计公共API（省省吧，你还远远没火到需要干这种事情的地步）
+- Fika扩展能否适配脚本引擎
+- 设计公共API
+- - Mgr的加载方式需要调整
+- - 增加Debouncer防抖器Mgr
+- - Fika部分的ActionMap也进行调整
 - 同步行动指令：玩家与护航同步扔雷、同步开火、同步姿态
 - - 与命令投掷手雷相同，前提都需要定制护航的战斗不随意扔雷
 - 您能加入一个类似于旧版“Friendly PMC”模组的命令系统吗？我希望我们能够向人工智能队友发出直接指令，比如命令他们投掷手雷、攻击敌人、在处于劣势时撤退，或者一旦受到伤害就自动自我治疗
@@ -40,7 +44,16 @@
 
 ## 更新日志
 
+#### 1.1.0.0
+
+- null
+
 #### 1.0.9.0
+
+Download URL : https://github.com/Himesamanoyume/MiyakoCarryService/releases/download/v1.0.9.0/MiyakoCarryService-1.0.9.0.zip
+VT Report    : https://www.virustotal.com/gui/file/e8b383df1660a336d30b86b42bc0463a5295bdd8f002cbf97c9724b616bda8b1
+Draft Page   : https://github.com/himesamanoyume/MiyakoCarryService/releases/tag/untagged-f7cb83a4314d8f0137d5
+Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service
 
 - 新增指令：丢出目标战利品
 - 新增指令：代理行动

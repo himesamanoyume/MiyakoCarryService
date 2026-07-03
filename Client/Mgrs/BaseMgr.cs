@@ -1,26 +1,27 @@
+using System;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Interfaces;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public abstract class BaseMgr<T> : MonoBehaviour, IMgr where T : MonoBehaviour
+    public abstract class BaseMgr : MonoBehaviour, IMgr
     {
-        protected GameLoop _gameloop;
+        public GameLoop Gameloop;
 
         public virtual void Start()
         {
-            _gameloop = GameLoop.Instance;
-            _gameloop.Mgrs.Add(typeof(T), this);
+            Gameloop = GameLoop.Instance;
+            Gameloop.Mgrs.Add(GetType(), this);
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
-        public static void Enable()
+        public static void Enable(Type type)
         {
-            if (GameLoop.Instance.gameObject.GetComponent<T>() == null)
+            if (GameLoop.Instance.gameObject.GetComponent(type) == null)
             {
-                GameLoop.Instance.gameObject.AddComponent<T>();
+                GameLoop.Instance.gameObject.AddComponent(type);
             }
         }
 
@@ -35,22 +36,22 @@ namespace MiyakoCarryService.Client.Mgrs
             OnRaidEnded();
         }
 
-        protected virtual void OnGameWorldStarted(GameWorldStartedEvent @event)
+        public virtual void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             OnRaidStarted();
         }
 
-        protected virtual void OnGameWorldEnded(GameWorldEndedEvent @event)
+        public virtual void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             OnRaidEnded();
         }
 
-        protected virtual void OnRaidStarted()
+        public virtual void OnRaidStarted()
         {
             StopAllCoroutines();
         }
 
-        protected virtual void OnRaidEnded()
+        public virtual void OnRaidEnded()
         {
             StopAllCoroutines();
         }

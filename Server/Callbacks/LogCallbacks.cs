@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/log
         /// </summary>
-        public async ValueTask<string> PrintLog(string url, DebugRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> PrintLog(string url, DebugRequestData info, MongoId mcsLeadPlayerId)
         {
             logger.Warning("[Mcs-Debug] " + info.Info);
             return httpResponseUtil.NullResponse();

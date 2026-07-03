@@ -11,7 +11,6 @@ namespace MiyakoCarryService.Client.Datas
     {
         private WeakReference<ExfiltrationPoint> _exfilRef;
         public ExfiltrationPoint ExfiltrationPoint => _exfilRef.TryGetTarget(out var exfil) ? exfil : null;
-        public bool HasUnmetRequirements = false;
 
         public ExfilData(ExfiltrationPoint exfiltrationPoint) : base()
         {

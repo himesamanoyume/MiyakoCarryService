@@ -17,10 +17,10 @@ namespace MiyakoCarryService.Client.Utils
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public static bool IsHost => McsMgr.IsHost;
-        
+
         public static bool IsPlayerInventory(string stringTemplateId)
         {
-            return stringTemplateId == CommonId.DefaultInventory;
+            return stringTemplateId == ItemTpl.DefaultInventory;
         }
 
         public static bool IsBlockItem(EBlockItemType blockItemType, LootData lootData)
@@ -200,6 +200,108 @@ namespace MiyakoCarryService.Client.Utils
                 return result;
             }
             return targetPos;
+        }
+
+        public static void HandleSharedExperience(Player killedPlayer, IPlayer aggressor, bool fikaSharedKillExp = false, bool fikaSharedBossExp = false)
+        {
+            if (McsMgr.IsMcsMemberPlayer(aggressor.ProfileId, out var mcsLeadPlayer))
+            {
+                if (mcsLeadPlayer == null)
+                {
+                    return;
+                }
+
+                if (!mcsLeadPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var settings = killedPlayer.Profile.Info.Settings;
+                var countAsBoss = settings.Role.CountAsBossForStatistics() && !(settings.Role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
+                var experience = settings.Experience;
+                var sessionCounters = mcsLeadPlayer.Profile.EftStats.SessionCounters;
+
+                if (experience <= 0)
+                {
+                    experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
+                }
+
+                if (!countAsBoss)
+                {
+                    sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
+                    sessionCounters.AddInt(fikaSharedKillExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                }
+
+                if (countAsBoss)
+                {
+                    sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
+                    sessionCounters.AddInt(fikaSharedBossExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                }
+            }
+        }
+
+        public static void HandleSharedQuestCondition(Player killedPlayer, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, bool easyKillConditions = true)
+        {
+            if (!easyKillConditions)
+            {
+                return;
+            }
+
+            if (McsMgr.IsMcsMemberPlayer(aggressor.ProfileId, out var mcsLeadPlayer))
+            {
+                if (mcsLeadPlayer == null)
+                {
+                    return;
+                }
+
+                if (!mcsLeadPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                var settings = killedPlayer.Profile.Info.Settings;
+                var playerSide = killedPlayer.Side;
+
+                if (settings.Role != WildSpawnType.pmcBEAR)
+                {
+                    if (settings.Role == WildSpawnType.pmcUSEC)
+                    {
+                        playerSide = EPlayerSide.Usec;
+                    }
+                }
+                else
+                {
+                    playerSide = EPlayerSide.Bear;
+                }
+
+                List<string> list = ["Any"];
+                switch (playerSide)
+                {
+                    case EPlayerSide.Usec:
+                        list.Add("Usec");
+                        list.Add("AnyPmc");
+                        list.Add("Enemy");
+                        break;
+                    case EPlayerSide.Bear:
+                        list.Add("Bear");
+                        list.Add("AnyPmc");
+                        list.Add("Enemy");
+                        break;
+                    case EPlayerSide.Savage:
+                        list.Add("Savage");
+                        list.Add("Bot");
+                        break;
+                }
+
+                foreach (var target in list)
+                {
+                    mcsLeadPlayer.AbstractQuestControllerClass.CheckKillConditionCounter(target, killedPlayer.ProfileId,
+                        killedPlayer.Inventory.EquippedInSlotsTemplateIds, damageInfo.Weapon, bodyPart, mcsLeadPlayer.Location,
+                        Vector3.Distance(aggressor.Position, killedPlayer.Position), settings.Role.ToStringNoBox(),
+                        mcsLeadPlayer.CurrentHour, killedPlayer.HealthController.BodyPartEffects,
+                        aggressor.HealthController.BodyPartEffects, killedPlayer.TriggerZones, aggressor.HealthController.ActiveBuffsNames());
+                }
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class PlayerDataMgr : ItemDataMgr<PlayerDataMgr>
+    public class PlayerDataMgr : ItemDataMgr
     {
         public List<McsBotPlayerData> GetMcsBotPlayerDatas()
         {
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
         }
 
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f, LoadItemData<PlayerData>));
@@ -51,7 +51,7 @@ namespace MiyakoCarryService.Client.Mgrs
             while (true)
             {
                 yield return waitTime;
-                if (_gameloop.IsVaildGameWorld)
+                if (Gameloop.IsVaildGameWorld)
                 {
                     var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
                     var closeRootItemDataDict = new Dictionary<McsBotPlayerData, List<ItemData>>();
@@ -138,7 +138,7 @@ namespace MiyakoCarryService.Client.Mgrs
             while (true)
             {
                 yield return waitTime;
-                if (_gameloop.IsVaildGameWorld)
+                if (Gameloop.IsVaildGameWorld)
                 {
                     var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                     foreach (var mcsAILeadPlayer in mcsAILeadPlayers)

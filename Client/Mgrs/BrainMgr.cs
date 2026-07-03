@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Layers;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
@@ -12,12 +11,14 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class BrainMgr : BaseMgr<BrainMgr>
+    internal class BrainMgr : BaseMgr
     {
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        
         public override void Start()
         {
             base.Start();
+            InitCustomLayerMaps();
             GameLoop.Instance.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
             GameLoop.Instance.CheckVaildGameWorld();
             if (MiyakoCarryServicePlugin.IsLoadedByScriptEngine && GameLoop.Instance.IsVaildGameWorld)
@@ -28,11 +29,20 @@ namespace MiyakoCarryService.Client.Mgrs
                     GameWorld = Singleton<GameWorld>.Instance,
                 });
                 TasksExtensions.HandleExceptions(Reload());
-
             }
         }
 
-        private async Task Reload()
+        private void InitCustomLayerMaps()
+        {
+            BrainUtils.RegisterCustomLayer(typeof(McsCommonLayer), 65);
+            BrainUtils.RegisterCustomLayer(typeof(McsEscortLayer), 66);
+            BrainUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 67);
+            BrainUtils.RegisterCustomLayer(typeof(McsProxyLayer), 68);
+            BrainUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 89);
+            BrainUtils.RegisterCustomLayer(typeof(McsFightLayer), 186);
+        }
+
+        public async Task Reload()
         {
             var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (myPlayer == null)
@@ -50,14 +60,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                McsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
-            }
-            else
-            {
-                McsMgr.McsLeadPlayerConfigs = new();
-            }
+            await GameLoop.Instance.InitMcsLeadPlayerConfigs();
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
@@ -103,24 +106,24 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
 
                 BrainUtils.McsRestoreLayers(mcsBotPlayer.AIData.BotOwner, Classification.RemoveLayerNames);
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsCommonLayer));
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsEscortLayer));
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsAvoidDangerLayer));
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsProxyLayer));
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsFightLayer));
-                BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, nameof(McsExfiltrationLayer));
+
+                var customLayerMaps = BrainUtils.GetCustomLayerMaps();
+                foreach ((var customLayerType, var priority) in customLayerMaps)
+                {
+                    BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, customLayerType.Name);
+                }
             }
         }
 
         public void InjectLayers(BaseBrain baseBrain)
         {
             BrainUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsCommonLayer), 65);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsEscortLayer), 66);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsAvoidDangerLayer), 67);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsProxyLayer), 68);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsFightLayer), baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) || baseBrain.ShortName() == nameof(EBrainName.BossZryachiy) ? 186 : 88);
-            BrainUtils.McsAddCustomLayer(baseBrain.Owner, typeof(McsExfiltrationLayer), 89);
+
+            var customLayerMaps = BrainUtils.GetCustomLayerMaps();
+            foreach ((var customLayerType, var priority) in customLayerMaps)
+            {
+                BrainUtils.McsAddCustomLayer(baseBrain.Owner, customLayerType, priority);
+            }
         }
     }
 }

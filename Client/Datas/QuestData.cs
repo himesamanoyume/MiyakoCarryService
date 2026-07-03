@@ -2,7 +2,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Comfort.Common;
 using EFT;
 using EFT.Quests;
 using MiyakoCarryService.Client.Enums;
@@ -25,6 +24,7 @@ namespace MiyakoCarryService.Client.Datas
         public Condition QuestParentCondition => _parentConditionRef != null ? _parentConditionRef.TryGetTarget(out var parentCondition) ? parentCondition : null : null;
         private WeakReference<Transform> _transformRef;
         private Transform _questTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
+        private QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
 
         public QuestData(QuestDataClass quest, Transform questTransform, Condition condition, Condition parentCondition = null) : base()
         {
@@ -49,22 +49,9 @@ namespace MiyakoCarryService.Client.Datas
             _transformRef = null;
         }
 
-        public async Task ForceCompleteQuest(Player mcsBotPlayer)
+        public virtual async Task ForceCompleteQuest(Player mcsBotPlayer)
         {
-            if (QuestCondition is ConditionLeaveItemAtLocation conditionLeaveItemAtLocation)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(conditionLeaveItemAtLocation.plantTime));
-                Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionLeaveItemAtLocation.target.FirstOrDefault(), conditionLeaveItemAtLocation.zoneId);
-            }
-            else if (QuestCondition is ConditionPlaceBeacon conditionPlaceBeacon)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(conditionPlaceBeacon.plantTime));
-                Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionPlaceBeacon.target.FirstOrDefault(), conditionPlaceBeacon.zoneId);
-            }
-            else if (QuestCondition is ConditionVisitPlace)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(3));
-            }
+            await QuestDataMgr.ForceCompleteCondition(QuestCondition.GetType(), mcsBotPlayer, QuestCondition);
 
             if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
             {
@@ -86,7 +73,7 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        public bool IsProxyActionDisabled()
+        public virtual bool IsProxyActionDisabled()
         {
             return QuestCondition switch
             {
@@ -97,7 +84,7 @@ namespace MiyakoCarryService.Client.Datas
             };
         }
 
-        public string Id()
+        public virtual string Id()
         {
             return QuestCondition switch
             {

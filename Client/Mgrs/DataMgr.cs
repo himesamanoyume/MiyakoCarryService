@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public abstract class DataMgr<T> : BaseMgr<T> where T : MonoBehaviour
+    public abstract class DataMgr : BaseMgr
     {
         protected HashSet<BaseData> _datas;
         protected McsMgr McsMgr { get; private set; }
@@ -34,18 +34,18 @@ namespace MiyakoCarryService.Client.Mgrs
             return result;
         }
 
-        protected override void OnGameWorldStarted(GameWorldStartedEvent @event)
+        public override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             base.OnGameWorldStarted(@event);
         }
 
-        protected override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             base.OnGameWorldEnded(@event);
             DataClear();
         }
 
-        protected IEnumerator ReloadDataLoop(float time, Action action)
+        public IEnumerator ReloadDataLoop(float time, Action action)
         {
             var waitTime = new WaitForSeconds(time);
             while (true)
@@ -55,9 +55,9 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected void LoadData(Action action)
+        public void LoadData(Action action)
         {
-            if (_gameloop.IsVaildGameWorld)
+            if (Gameloop.IsVaildGameWorld)
             {
                 try
                 {
@@ -70,7 +70,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected void DataClear()
+        public void DataClear()
         {
             foreach (var data in _datas)
             {

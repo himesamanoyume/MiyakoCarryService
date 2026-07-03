@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/bot/generate
         /// </summary>
-        public async ValueTask<string> SpawnMcsBotPlayer(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> SpawnMcsBotPlayer(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(await raidController.SpawnMcsBotPlayer(mcsLeadPlayerId, info.Side));
         }
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/singleplayer/settings/bot/get
         /// </summary>
-        public async ValueTask<string> GetMcsBotPlayerConfigs(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> GetMcsBotPlayerConfigs(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(await raidController.GetMcsBotPlayerConfigs(mcsLeadPlayerId));
         }
@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/singleplayer/settings/bot/upload
         /// </summary>
-        public async ValueTask<string> CollectMcsBotPlayerConfig(string url, McsBotPlayerConfigRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> CollectMcsBotPlayerConfig(string url, McsBotPlayerConfigRequestData info, MongoId mcsLeadPlayerId)
         {
             await raidController.CollectMcsBotPlayerConfig(info);
             return httpResponseUtil.NullResponse();
@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/singleplayer/info/bot/get
         /// </summary>
-        public async ValueTask<string> GetMcsBotPlayerIds(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> GetMcsBotPlayerIds(string url, McsBotPlayerTypeRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(raidController.GetMySquadMcsBotPlayerIds(mcsLeadPlayerId, info.Side));
         }

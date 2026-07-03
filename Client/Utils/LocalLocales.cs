@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace MiyakoCarryService.Client.Utils
 {
+    /// <summary>
+    /// 机翻写死的本地化
+    /// </summary>
     public static class LocalLocales
     {
         public static Dictionary<string, Dictionary<string, string>> LoadingLocales = new()

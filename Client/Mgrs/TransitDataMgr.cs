@@ -4,9 +4,9 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class TransitDataMgr : GameWorldDataMgr<TransitDataMgr>
+    public class TransitDataMgr : GameWorldDataMgr
     {
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadTransitPoints);

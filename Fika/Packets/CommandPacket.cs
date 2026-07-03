@@ -1,14 +1,13 @@
 
 
 using Fika.Core.Networking.LiteNetLib.Utils;
-using MiyakoCarryService.Client.Enums;
 using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Packets
 {
     public class CommandPacket : BasePacket
     {
-        public ECommandPacketType CommandType;
+        public string CommandType;
         public Vector3? Position;
         public BodyPartType AimingBodyPartType;
         public string TargetId;
@@ -21,7 +20,7 @@ namespace MiyakoCarryService.Fika.Packets
         public override void Deserialize(NetDataReader reader)
         {
             base.Deserialize(reader);
-            CommandType = reader.GetEnum<ECommandPacketType>();
+            CommandType = reader.GetString();
             Position = reader.GetNullableUnmanaged<Vector3>();
             AimingBodyPartType = reader.GetEnum<BodyPartType>();
             TargetId = reader.GetString();
@@ -30,7 +29,7 @@ namespace MiyakoCarryService.Fika.Packets
         public override void Serialize(NetDataWriter writer)
         {
             base.Serialize(writer);
-            writer.PutEnum(CommandType);
+            writer.Put(CommandType, 0);
             writer.PutNullableUnmanaged(Position);
             writer.PutEnum(AimingBodyPartType);
             writer.Put(TargetId, 0);

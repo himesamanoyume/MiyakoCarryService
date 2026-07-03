@@ -3,9 +3,9 @@ using EFT.Interactive;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using HarmonyLib;
+using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
@@ -17,12 +17,12 @@ namespace MiyakoCarryService.Fika.Patches
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(CoopGame), nameof(CoopGame.Extract));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
 
         [PatchPrefix]
         public static void Prefix(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
         {
-            EventMgr.Notify(new McsLeadPlayerExtractedEvent
+            McsEventApi.Notify(new McsLeadPlayerExtractedEvent
             {
                 McsLeadPlayerId = player.ProfileId
             });

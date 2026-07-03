@@ -22,26 +22,20 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         public BodyPartType AimingBodyPartType = BodyPartType.head;
-        private LootData _lootingTarget = null;
-        private bool _isLooting = false;
         public Vector3? TargetPos = null;
         public string ProxyTargetId = null;
-        public LootData LootingTarget
-        {
-            get => _lootingTarget;
-            set => _lootingTarget = value;
-        }
+        public LootData LootingTarget = null;
         public bool IsLooting
         {
-            get => _isLooting;
+            get => field;
             set
             {
-                _isLooting = value;
-                if (!_isLooting && _lootingTarget != null)
+                field = value;
+                if (!field && LootingTarget != null)
                 {
-                    LootDataMgr.UnlockLootingTarget(_lootingTarget);
-                    LootDataMgr.UnlockLootingTargetRootTransform(_lootingTarget.RootTransform);
-                    _lootingTarget = null;
+                    LootDataMgr.UnlockLootingTarget(LootingTarget);
+                    LootDataMgr.UnlockLootingTargetRootTransform(LootingTarget.RootTransform);
+                    LootingTarget = null;
                 }
             }
         }
@@ -249,8 +243,8 @@ namespace MiyakoCarryService.Client.Datas
             _botOwnerRef = null;
             _leadPlayeRef = null;
             _mcsAILeadPlayerRef = null;
-            _isLooting = false;
-            _lootingTarget = null;
+            IsLooting = false;
+            LootingTarget = null;
         }
 
         public void HandleBalanceRestriction()

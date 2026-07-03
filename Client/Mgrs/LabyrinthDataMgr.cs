@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public abstract class LabyrinthDataMgr<T> : DataMgr<T> where T : MonoBehaviour
+    public abstract class LabyrinthDataMgr : DataMgr
     {
         protected bool _shouldInit => Singleton<GameWorld>.Instance.LocationId == "Labyrinth";
     }

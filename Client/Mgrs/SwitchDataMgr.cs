@@ -9,9 +9,9 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class SwitchDataMgr : GameWorldDataMgr<SwitchDataMgr>
+    public class SwitchDataMgr : GameWorldDataMgr
     {
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadSwitches);

@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Datas
 {
     public abstract class ItemData : BaseData
     {
-        protected WeakReference<Item> _itemRef;
+        private WeakReference<Item> _itemRef;
         public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;

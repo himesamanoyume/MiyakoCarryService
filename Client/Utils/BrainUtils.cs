@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using DrakiaXYZ.BigBrain.Brains;
@@ -9,7 +10,7 @@ namespace MiyakoCarryService.Client.Utils
     /// <summary>  
     /// 运行时按单个 BotOwner 实时增删/激活/恢复 BigBrain 自定义 Layer，绕过 BrainManager 的全局 brainNames 匹配，直接操作目标 Bot 的大脑。 
     /// </summary>  
-    public static class BrainUtils
+    internal static class BrainUtils
     {
         private static int _currentLayerId = 15156;
 
@@ -18,6 +19,8 @@ namespace MiyakoCarryService.Client.Utils
 
         private static readonly Dictionary<string, Dictionary<string, int>> _injectedLayers = new();
         private static readonly Dictionary<string, Dictionary<string, (int Index, AICoreLayerClass<BotLogicDecision> Layer)>> _excludedLayers = new();
+
+        private static ConcurrentDictionary<Type, int> _customLayerMaps;
 
         private static void EnsureInit()
         {
@@ -28,6 +31,27 @@ namespace MiyakoCarryService.Client.Utils
 
             _customLayerWrapperType = typeof(BrainManager).Assembly.GetType("DrakiaXYZ.BigBrain.Internal.CustomLayerWrapper");
             _initialized = true;
+        }
+
+        public static void RegisterCustomLayer(Type customLayerType, int priority)
+        {
+            if (_customLayerMaps == null)
+            {
+                _customLayerMaps = new();
+            }
+
+            _customLayerMaps.AddOrUpdate(customLayerType, priority, 
+                (customLayerType, oldPriority) =>
+                {
+                    oldPriority = priority;
+                    return oldPriority;
+                }
+            );
+        }
+
+        public static ConcurrentDictionary<Type, int> GetCustomLayerMaps()
+        {
+            return _customLayerMaps;
         }
 
         public static bool McsAddCustomLayer(BotOwner botOwner, Type customLayerType, int priority)

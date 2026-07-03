@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Events;
-using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -14,7 +13,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class McsMgr : BaseMgr<McsMgr>
+    public class McsMgr : BaseMgr
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, Player>> _mcsSquadDict = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
@@ -316,7 +315,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void SendPunishRequests(Dictionary<MongoID, FriendlyFirePenalty> penalties)
         {
-            if (!_gameloop.IsVaildGameWorld || !IsHost)
+            if (!Gameloop.IsVaildGameWorld || !IsHost)
             {
                 return;
             }
@@ -330,7 +329,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             _friendlyFireDebouncer = new Debouncer<MongoID, FriendlyFirePenalty>(
@@ -386,7 +385,7 @@ namespace MiyakoCarryService.Client.Mgrs
             });
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             if (_friendlyFireDebouncer != null)

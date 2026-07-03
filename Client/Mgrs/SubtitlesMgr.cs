@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class SubtitlesMgr : BaseMgr<SubtitlesMgr>
+    public class SubtitlesMgr : BaseMgr
     {
         private GameObject _mcsDialogScreen;
         private Transform _subsContainer;
@@ -233,12 +233,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
             cloneSubtitleViewGameObject.transform.SetParent(_subsContainer);
 
-            var cloneSubTitle = new Subtitles(_gameloop, cloneSubtitleView, mcsBotPlayerProfile);
+            var cloneSubTitle = new Subtitles(Gameloop, cloneSubtitleView, mcsBotPlayerProfile);
             cloneSubTitle.Hide(0f);
             _subTitles[mcsBotPlayerProfile.Id] = cloneSubTitle;
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             if (_subTitles != null)

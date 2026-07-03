@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Client.Events
     public class CommandMgrHandleFikaEvent : IMcsEvent
     {
         public Player McsBotPlayer { get; set; }
-        public ECommandPacketType CommandPacketType { get; set; }
+        public string CommandPacketType { get; set; }
         public Vector3? Position { get; set; }
         public BodyPartType AimingBodyPartType { get; set; }
         public string TargetId { get; set; }

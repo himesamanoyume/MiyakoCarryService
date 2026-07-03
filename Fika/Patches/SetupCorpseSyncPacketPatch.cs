@@ -2,6 +2,7 @@ using System.Reflection;
 using Fika.Core.Main.Players;
 using HarmonyLib;
 using MiyakoCarryService.Client;
+using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -16,7 +17,7 @@ namespace MiyakoCarryService.Fika.Patches
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(FikaPlayer), nameof(FikaPlayer.SetupCorpseSyncPacket));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
 
         [PatchPrefix]
         public static void Prefix(FikaPlayer __instance, NetworkHealthSyncPacketStruct packet)

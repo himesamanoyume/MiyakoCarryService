@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Enums;
@@ -69,20 +68,20 @@ namespace MiyakoCarryService.Client.Utils
 
         public static HashSet<string> LabyrinthSolvePuzzleItems = new()
         {
-            CommonId.BBQS43_GasTorch,
-            CommonId.ValveHandwheel,
-            CommonId.LabyrinthKey01,
-            CommonId.LabyrinthKey02,
-            CommonId.LabyrinthKey03,
-            CommonId.LabyrinthKey04
+            ItemTpl.BBQS43_GasTorch,
+            ItemTpl.ValveHandwheel,
+            ItemTpl.LabyrinthKey01,
+            ItemTpl.LabyrinthKey02,
+            ItemTpl.LabyrinthKey03,
+            ItemTpl.LabyrinthKey04
         };
 
         public static HashSet<string> MoneyItems = new()
         {
-            CommonId.Roubles,
-            CommonId.Dollars,
-            CommonId.Euros,
-            CommonId.GPCoins
+            ItemTpl.Roubles,
+            ItemTpl.Dollars,
+            ItemTpl.Euros,
+            ItemTpl.GPCoins
         };
 
         public static HashSet<WildSpawnType> FriendlyTypes = new()

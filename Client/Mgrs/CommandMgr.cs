@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class CommandMgr : BaseMgr<CommandMgr>
+    public class CommandMgr : BaseMgr
     {
         public override void Start()
         {
@@ -40,13 +40,13 @@ namespace MiyakoCarryService.Client.Mgrs
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
 
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             _gamePlayerOwner = null;
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             _gamePlayerOwner = null;
@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         void Update()
         {
-            if (!_gameloop.IsVaildGameWorld)
+            if (!Gameloop.IsVaildGameWorld)
             {
                 return;
             }
@@ -285,7 +285,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
+            var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
                 actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, transitData));
@@ -298,7 +298,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+            var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
                 actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, exfilData));
@@ -311,7 +311,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
             foreach (var switchData in switchDatas)
             {
                 actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, switchData));
@@ -358,7 +358,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var transitDatas = _gameloop.GetDatas<TransitData, TransitDataMgr>();
+            var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
             foreach (var transitData in transitDatas)
             {
                 actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, transitData));
@@ -371,7 +371,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var exfilDatas = _gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+            var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
             foreach (var exfilData in exfilDatas)
             {
                 actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, exfilData));
@@ -384,7 +384,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
             foreach (var switchData in switchDatas)
             {
                 actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, switchData));
@@ -448,7 +448,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             PreBuildCommandMenu(out var actionsReturnClass);
 
-            var switchDatas = _gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
             foreach (var switchData in switchDatas)
             {
                 actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(InteractionProxyActionCommandAction, mcsBotPlayer, switchData));
@@ -584,7 +584,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.Escort,
+                    CommandPacketType = ECommandPacketType.Escort.ToString(),
                     Position = worldData.GetPos()
                 });
             }
@@ -618,7 +618,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.ReportAboutEnemy
+                    CommandPacketType = ECommandPacketType.ReportAboutEnemy.ToString()
                 });
             }
             else
@@ -657,7 +657,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.OnYourOwn,
+                    CommandPacketType = ECommandPacketType.OnYourOwn.ToString(),
                     Position = null
                 });
             }
@@ -687,7 +687,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.Regroup,
+                    CommandPacketType = ECommandPacketType.Regroup.ToString(),
                     Position = null
                 });
             }
@@ -719,7 +719,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
                         McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandPacketType.GoToPoint,
+                        CommandPacketType = ECommandPacketType.GoToPoint.ToString(),
                         Position = raycastHit.point
                     });
                 }
@@ -760,7 +760,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.AimingBodyPart,
+                    CommandPacketType = ECommandPacketType.AimingBodyPart.ToString(),
                     Position = null,
                     AimingBodyPartType = aimingBodyPartType
                 });
@@ -788,7 +788,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.HoldPosition,
+                    CommandPacketType = ECommandPacketType.HoldPosition.ToString(),
                     Position = null
                 });
             }
@@ -819,7 +819,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.ThrowTargetLoot
+                    CommandPacketType = ECommandPacketType.ThrowTargetLoot.ToString()
                 });
             }
             else
@@ -859,7 +859,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.Teleport,
+                    CommandPacketType = ECommandPacketType.Teleport.ToString(),
                     Position = null
                 });
             }
@@ -940,7 +940,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
                         McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandPacketType.GoToExfil,
+                        CommandPacketType = ECommandPacketType.GoToExfil.ToString(),
                         Position = null
                     });
                 }
@@ -972,7 +972,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.InteractionProxyAction,
+                    CommandPacketType = ECommandPacketType.InteractionProxyAction.ToString(),
                     TargetId = proxyAction.Id()
                 });
             }
@@ -1015,7 +1015,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.QuestProxyAction,
+                    CommandPacketType = ECommandPacketType.QuestProxyAction.ToString(),
                     Position = questData.GetPos(),
                     TargetId = questData.Id()
                 });
@@ -1055,7 +1055,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.LootProxyAction,
+                    CommandPacketType = ECommandPacketType.LootProxyAction.ToString(),
                     Position = lootData.RootTransform.position,
                     TargetId = lootData.Item.Id
                 });

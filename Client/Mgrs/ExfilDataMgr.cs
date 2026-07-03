@@ -5,9 +5,9 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class ExfilDataMgr : GameWorldDataMgr<ExfilDataMgr>
+    public class ExfilDataMgr : GameWorldDataMgr
     {
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadExfiltrationPoints);

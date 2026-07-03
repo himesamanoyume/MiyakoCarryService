@@ -21,16 +21,17 @@ using MiyakoCarryService.Fika.Patches;
 using MiyakoCarryService.Client.Patches.Events;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Api;
 
 namespace MiyakoCarryService.Fika
 {
     public class MiyakoCarryServiceFika
     {
-        private Dictionary<ECommandPacketType, Action<CommandPacket>> _handleActionsMap;
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        private SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
-        private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
-        private QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
+        private Dictionary<string, Action<CommandPacket>> _handleActionsMap;
+        private McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
+        private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
+        private LootDataMgr LootDataMgr => McsMgrApi.GetMgr<LootDataMgr>();
+        private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
         private List<ModulePatch> _patches = new();
 
         public void InitMcsFika()
@@ -48,27 +49,27 @@ namespace MiyakoCarryService.Fika
             }
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
-            EventMgr.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
-            EventMgr.Subscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket, this);
-            EventMgr.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
-            EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
+            McsEventApi.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
+            McsEventApi.Subscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket, this);
+            McsEventApi.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
+            McsEventApi.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
 
             _handleActionsMap = new()
             {
-                { ECommandPacketType.Teleport, HandleTeleport },
-                { ECommandPacketType.GoToPoint, HandleGoToPoint },
-                { ECommandPacketType.HoldPosition, HandleHoldPosition },
-                { ECommandPacketType.Regroup, HandleRegroup },
-                { ECommandPacketType.ReportAboutEnemy, HandleReportAboutEnemy },
-                { ECommandPacketType.OnYourOwn, HandleOnYourOwn },
-                { ECommandPacketType.Escort, HandleEscort },
-                { ECommandPacketType.GoToExfil, HandleGoToExfil },
-                { ECommandPacketType.AimingBodyPart, HandleAimingBodyPart },
-                { ECommandPacketType.QuestProxyAction, HandleProxyAction },
-                { ECommandPacketType.LootProxyAction, HandleProxyAction },
-                { ECommandPacketType.InteractionProxyAction, HandleProxyAction },
-                { ECommandPacketType.EndProxyAction, HandleEndProxyAction },
-                { ECommandPacketType.ThrowTargetLoot, HandleThrowTargetLoot },
+                { ECommandPacketType.Teleport.ToString(), HandleTeleport },
+                { ECommandPacketType.GoToPoint.ToString(), HandleGoToPoint },
+                { ECommandPacketType.HoldPosition.ToString(), HandleHoldPosition },
+                { ECommandPacketType.Regroup.ToString(), HandleRegroup },
+                { ECommandPacketType.ReportAboutEnemy.ToString(), HandleReportAboutEnemy },
+                { ECommandPacketType.OnYourOwn.ToString(), HandleOnYourOwn },
+                { ECommandPacketType.Escort.ToString(), HandleEscort },
+                { ECommandPacketType.GoToExfil.ToString(), HandleGoToExfil },
+                { ECommandPacketType.AimingBodyPart.ToString(), HandleAimingBodyPart },
+                { ECommandPacketType.QuestProxyAction.ToString(), HandleProxyAction },
+                { ECommandPacketType.LootProxyAction.ToString(), HandleProxyAction },
+                { ECommandPacketType.InteractionProxyAction.ToString(), HandleProxyAction },
+                { ECommandPacketType.EndProxyAction.ToString(), HandleEndProxyAction },
+                { ECommandPacketType.ThrowTargetLoot.ToString(), HandleThrowTargetLoot },
             };
         }
 
@@ -84,9 +85,10 @@ namespace MiyakoCarryService.Fika
             }
             _handleActionsMap = null;
             FikaEventDispatcher.UnsubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
-            EventMgr.Unsubscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket);
-            EventMgr.Unsubscribe<CommandMgrHandleFikaEvent>(SendCommandPacket);
-            EventMgr.Unsubscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket);
+            McsEventApi.Unsubscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket);
+            McsEventApi.Unsubscribe<CommandMgrHandleFikaEvent>(SendCommandPacket);
+            McsEventApi.Unsubscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket);
+            McsEventApi.Unsubscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket);
         }
 
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
@@ -244,9 +246,9 @@ namespace MiyakoCarryService.Fika
             });
         }
 
-        private void HandleTeleport(CommandPacket packet)
+        public virtual void HandleTeleport(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.Teleport)
+            if (packet.CommandType != ECommandPacketType.Teleport.ToString())
             {
                 return;
             }
@@ -290,9 +292,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleGoToPoint(CommandPacket packet)
+        public virtual void HandleGoToPoint(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.GoToPoint)
+            if (packet.CommandType != ECommandPacketType.GoToPoint.ToString())
             {
                 return;
             }
@@ -340,9 +342,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleEscort(CommandPacket packet)
+        public virtual void HandleEscort(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.Escort)
+            if (packet.CommandType != ECommandPacketType.Escort.ToString())
             {
                 return;
             }
@@ -391,9 +393,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleAimingBodyPart(CommandPacket packet)
+        public virtual void HandleAimingBodyPart(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.AimingBodyPart)
+            if (packet.CommandType != ECommandPacketType.AimingBodyPart.ToString())
             {
                 return;
             }
@@ -432,9 +434,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleGoToExfil(CommandPacket packet)
+        public virtual void HandleGoToExfil(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.GoToExfil)
+            if (packet.CommandType != ECommandPacketType.GoToExfil.ToString())
             {
                 return;
             }
@@ -471,9 +473,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleHoldPosition(CommandPacket packet)
+        public virtual void HandleHoldPosition(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.HoldPosition)
+            if (packet.CommandType != ECommandPacketType.HoldPosition.ToString())
             {
                 return;
             }
@@ -513,9 +515,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleThrowTargetLoot(CommandPacket packet)
+        public virtual void HandleThrowTargetLoot(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.ThrowTargetLoot)
+            if (packet.CommandType != ECommandPacketType.ThrowTargetLoot.ToString())
             {
                 return;
             }
@@ -550,7 +552,7 @@ namespace MiyakoCarryService.Fika
                     });
                     return;
                 }
-                
+
                 botOwner.StopMove();
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
@@ -564,9 +566,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleRegroup(CommandPacket packet)
+        public virtual void HandleRegroup(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.Regroup)
+            if (packet.CommandType != ECommandPacketType.Regroup.ToString())
             {
                 return;
             }
@@ -607,9 +609,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleReportAboutEnemy(CommandPacket packet)
+        public virtual void HandleReportAboutEnemy(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.ReportAboutEnemy)
+            if (packet.CommandType != ECommandPacketType.ReportAboutEnemy.ToString())
             {
                 return;
             }
@@ -654,9 +656,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleOnYourOwn(CommandPacket packet)
+        public virtual void HandleOnYourOwn(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.OnYourOwn)
+            if (packet.CommandType != ECommandPacketType.OnYourOwn.ToString())
             {
                 return;
             }
@@ -697,9 +699,9 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        private void HandleProxyAction(CommandPacket packet)
+        public virtual void HandleProxyAction(CommandPacket packet)
         {
-            if (packet.CommandType is not (ECommandPacketType.QuestProxyAction or ECommandPacketType.LootProxyAction or ECommandPacketType.InteractionProxyAction))
+            if (packet.CommandType != ECommandPacketType.QuestProxyAction.ToString() || packet.CommandType != ECommandPacketType.LootProxyAction.ToString() || packet.CommandType != ECommandPacketType.InteractionProxyAction.ToString())
             {
                 return;
             }
@@ -729,80 +731,80 @@ namespace MiyakoCarryService.Fika
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    switch (packet.CommandType)
+                    if (packet.CommandType == ECommandPacketType.QuestProxyAction.ToString())
                     {
-                        case ECommandPacketType.QuestProxyAction:
-                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
-                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
-                            mcsBotPlayerData.TargetPos = packet.Position;
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
+                        mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                        mcsBotPlayerData.TargetPos = packet.Position;
+                        mcsBotPlayerData.IsLooting = false;
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Roger,
+                        });
+                    }
+                    else if (packet.CommandType == ECommandPacketType.LootProxyAction.ToString())
+                    {
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
+                        mcsBotPlayerData.IsLooting = false;
+                        mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                        var lootData = LootDataMgr.FindLootData(packet.TargetId);
+                        mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
+                        LootDataMgr.UnlockLootingTarget(lootData);
+                        LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
+                        if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                        {
+                            LootDataMgr.LockLootItemToTarget(lootData);
+                            LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
+                            mcsBotPlayerData.LootingTarget = lootData;
+                            botOwner.TalkMsg(new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.Roger,
+                            });
+                        }
+                        else
+                        {
+                            botOwner.TalkMsg(new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.Negative,
+                            });
+                            mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
+                            mcsBotPlayerData.ProxyTargetId = null;
+                            mcsBotPlayerData.TargetPos = null;
+                        }
+                    }
+                    else if (packet.CommandType == ECommandPacketType.InteractionProxyAction.ToString())
+                    {
+                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
+                        mcsBotPlayerData.ProxyTargetId = packet.TargetId;
+                        var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
+                        if (interactableObjectData != null)
+                        {
+                            mcsBotPlayerData.ProxyTargetId = interactableObjectData.Id();
+                            mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
                             mcsBotPlayerData.IsLooting = false;
                             botOwner.TalkMsg(new McsMsg
                             {
                                 PhraseTrigger = EPhraseTrigger.Roger,
                             });
-                            break;
-                        case ECommandPacketType.LootProxyAction:
-                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
-                            mcsBotPlayerData.IsLooting = false;
-                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
-                            var lootData = LootDataMgr.FindLootData(packet.TargetId);
-                            mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
-                            LootDataMgr.UnlockLootingTarget(lootData);
-                            LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
-                            if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                        }
+                        else
+                        {
+                            botOwner.TalkMsg(new McsMsg
                             {
-                                LootDataMgr.LockLootItemToTarget(lootData);
-                                LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
-                                mcsBotPlayerData.LootingTarget = lootData;
-                                botOwner.TalkMsg(new McsMsg
-                                {
-                                    PhraseTrigger = EPhraseTrigger.Roger,
-                                });
-                            }
-                            else
-                            {
-                                botOwner.TalkMsg(new McsMsg
-                                {
-                                    PhraseTrigger = EPhraseTrigger.Negative,
-                                });
-                                mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
-                                mcsBotPlayerData.ProxyTargetId = null;
-                                mcsBotPlayerData.TargetPos = null;
-                            }
-                            break;
-                        case ECommandPacketType.InteractionProxyAction:
-                            mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
-                            mcsBotPlayerData.ProxyTargetId = packet.TargetId;
-                            var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
-                            if (interactableObjectData != null)
-                            {
-                                mcsBotPlayerData.ProxyTargetId = interactableObjectData.Id();
-                                mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
-                                mcsBotPlayerData.IsLooting = false;
-                                botOwner.TalkMsg(new McsMsg
-                                {
-                                    PhraseTrigger = EPhraseTrigger.Roger,
-                                });
-                            }
-                            else
-                            {
-                                botOwner.TalkMsg(new McsMsg
-                                {
-                                    PhraseTrigger = EPhraseTrigger.Negative,
-                                });
-                                mcsBotPlayerData.RemoveDecision(EDecision.ShouldInteractionProxyAction);
-                                mcsBotPlayerData.ProxyTargetId = null;
-                                mcsBotPlayerData.TargetPos = null;
-                            }
-                            break;
+                                PhraseTrigger = EPhraseTrigger.Negative,
+                            });
+                            mcsBotPlayerData.RemoveDecision(EDecision.ShouldInteractionProxyAction);
+                            mcsBotPlayerData.ProxyTargetId = null;
+                            mcsBotPlayerData.TargetPos = null;
+                        }
                     }
                 }
             }
         }
 
-        private void HandleEndProxyAction(CommandPacket packet)
+        public virtual void HandleEndProxyAction(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.EndProxyAction)
+            if (packet.CommandType != ECommandPacketType.EndProxyAction.ToString())
             {
                 return;
             }
@@ -839,7 +841,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
+        public virtual void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsClient)
             {
@@ -862,7 +864,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
+        public virtual void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsServer)
             {
@@ -893,7 +895,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendQuestProxyCommandCallbackPacket(QuestProxyCommandCallbackHandleFikaEvent @event)
+        public virtual void SendQuestProxyCommandCallbackPacket(QuestProxyCommandCallbackHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsServer)
             {
@@ -921,7 +923,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
+        public virtual void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
         {
             if (!FikaBackendUtils.IsClient)
             {

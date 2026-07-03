@@ -7,21 +7,92 @@ using Comfort.Common;
 using EFT;
 using System.Linq;
 using MiyakoCarryService.Client.Utils;
+using System.Collections.Concurrent;
+using System;
+using System.Threading.Tasks;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class QuestDataMgr : GameWorldDataMgr<QuestDataMgr>
+    public class QuestDataMgr : GameWorldDataMgr
     {
         private List<TriggerWithId> _triggersWithIds;
+        private ConcurrentDictionary<Type, Func<Player, Condition, Task>> _forceCompleteFuncMap = null;
 
-        protected override void OnRaidStarted()
+        public override void Start()
+        {
+            base.Start();
+
+        }
+
+        public virtual void InitFuncMap()
+        {
+            if (_forceCompleteFuncMap == null)
+            {
+                _forceCompleteFuncMap = new();
+            }
+
+            RegisterFuncMap(typeof(ConditionLeaveItemAtLocation), ForceCompleteConditionLeaveItemAtLocation);
+            RegisterFuncMap(typeof(ConditionPlaceBeacon), ForceCompleteConditionPlaceBeacon);
+            RegisterFuncMap(typeof(ConditionVisitPlace), ForceCompleteConditionVisitPlace);
+        }
+
+        public void RegisterFuncMap(Type conditionType, Func<Player, Condition, Task> func)
+        {
+            if (_forceCompleteFuncMap == null)
+            {
+                _forceCompleteFuncMap = new();
+            }
+            _forceCompleteFuncMap.AddOrUpdate(conditionType, _condition => func,
+                (_condition, oldFunc) =>
+                {
+                    oldFunc = func;
+                    return oldFunc;
+                }
+            );
+        }
+
+        public async Task ForceCompleteCondition(Type type, Player player, Condition condition)
+        {
+            if (_forceCompleteFuncMap.TryGetValue(type, out var func))
+            {
+                await func.Invoke(player, condition);
+            }
+        }
+
+        public virtual async Task ForceCompleteConditionLeaveItemAtLocation(Player player, Condition condition)
+        {
+            if (condition is ConditionLeaveItemAtLocation conditionLeaveItemAtLocation)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(conditionLeaveItemAtLocation.plantTime));
+                Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionLeaveItemAtLocation.target.FirstOrDefault(), conditionLeaveItemAtLocation.zoneId);
+            }
+        }
+
+        public virtual async Task ForceCompleteConditionPlaceBeacon(Player player, Condition condition)
+        {
+            if (condition is ConditionPlaceBeacon conditionPlaceBeacon)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(conditionPlaceBeacon.plantTime));
+                Singleton<GameWorld>.Instance.MainPlayer.Profile.ItemDroppedAtPlace(conditionPlaceBeacon.target.FirstOrDefault(), conditionPlaceBeacon.zoneId);
+            }
+        }
+
+        public virtual async Task ForceCompleteConditionVisitPlace(Player player, Condition condition)
+        {
+            if (condition is ConditionVisitPlace conditionVisitPlace)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+            }
+        }
+
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadQuestData);
             StartCoroutine(ReloadDataLoop(10f, LoadQuestData));
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             if (_triggersWithIds != null)
@@ -31,6 +102,9 @@ namespace MiyakoCarryService.Client.Mgrs
             _triggersWithIds = null;
         }
 
+        /// <summary>
+        /// 需要开放
+        /// </summary>
         private void LoadQuest(HashSet<QuestData> datas, Condition condition, QuestDataClass quest, Condition parentCondition = null)
         {
             if (_triggersWithIds == null)

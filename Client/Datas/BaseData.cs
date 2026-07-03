@@ -5,16 +5,16 @@ namespace MiyakoCarryService.Client.Datas
 {
     public abstract class BaseData : IDisposable
     {
-        protected GameLoop _gameloop;
+        public GameLoop Gameloop;
 
         public BaseData()
         {
-            _gameloop = GameLoop.Instance;
+            Gameloop = GameLoop.Instance;
         }
 
         public virtual void Dispose()
         {
-            _gameloop = null;
+            Gameloop = null;
         }
     }
 }

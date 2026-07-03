@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/profile/list
         /// </summary>
-        public async ValueTask<string> GetMcsBotPlayerProfileForInventoryMode(string url, EmptyRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> GetMcsBotPlayerProfileForInventoryMode(string url, EmptyRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(profileController.GetMcsBotPlayerProfileForInventoryMode(mcsLeadPlayerId));
         }
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/aid/verify
         /// </summary>
-        public async ValueTask<string> VerifyMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> VerifyMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
         {
             return httpResponseUtil.NoBody(await profileController.VerifyMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));
         }
@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Callbacks
         /// <summary>
         /// 处理 /mcs/client/game/aid/remove
         /// </summary>
-        public async ValueTask<string> RemoveMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
+        public virtual async ValueTask<string> RemoveMcsBotPlayerAid(string url, McsBotPlayerAidRequestData info, MongoId mcsLeadPlayerId)
         {
             await profileController.SaveAllMcsBotPlayerProfile(mcsLeadPlayerId);
             return httpResponseUtil.NoBody(await profileController.RemoveMcsBotPlayerAid(mcsLeadPlayerId, info.Aid));

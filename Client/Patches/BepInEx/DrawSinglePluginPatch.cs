@@ -22,7 +22,9 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
 
             var pluginInfo = pluginTraverse.Field<BepInPlugin>("Info").Value;
             if (pluginInfo == null)
+            {
                 return true;
+            }
 
             var guid = pluginInfo.GUID;
             if (guid == MiyakoCarryServicePlugin.McsGUID)
@@ -42,9 +44,9 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
             {
                 _instanceTraverse = Traverse.Create(__instance);
             }
+            
             var cachedHeight = pluginTraverse.Field<int>("Height").Value;
-
-            Rect startRect = new Rect();
+            var startRect = new Rect();
             if (Event.current.type == EventType.Repaint)
             {
                 startRect = GUILayoutUtility.GetLastRect();

@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Interfaces;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    public static class MgrAccessor
+    internal static class MgrAccessor
     {
         private static readonly Dictionary<Type, object> _cache = new();
 

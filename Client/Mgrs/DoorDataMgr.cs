@@ -6,9 +6,9 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class DoorDataMgr : GameWorldDataMgr<DoorDataMgr>
+    public class DoorDataMgr : GameWorldDataMgr
     {
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             LoadData(LoadDoors);
         }

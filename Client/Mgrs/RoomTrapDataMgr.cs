@@ -11,11 +11,11 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public class RoomTrapDataMgr : LabyrinthDataMgr<RoomTrapDataMgr>
+    public class RoomTrapDataMgr : LabyrinthDataMgr
     {
         public ConcurrentDictionary<ELabyrinthTrapType, HashSet<TriggerZoneData>> TrapDatas;
 
-        protected override void OnRaidStarted()
+        public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             if (!Tools.IsHost)
@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(ReloadDataLoop(2f, RefreshTrapState));
         }
 
-        protected override void OnRaidEnded()
+        public override void OnRaidEnded()
         {
             base.OnRaidEnded();
             if (TrapDatas != null)

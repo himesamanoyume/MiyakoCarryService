@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DrakiaXYZ.BigBrain.Brains;
@@ -24,41 +25,40 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
-        private bool? _isMcsBotPlayer = null;
-
+        public bool? _isMcsBotPlayer = null;
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
-        protected Dictionary<Type, Func<bool>> _endActionMap;
-        protected bool _haveCoverToShoot = false;
-        protected float _nextHoldPositionTime = 0f;
-        protected float _goToCoverTime = 0f;
-        protected CustomNavigationPoint _currentNavigationPoint = null;
-        protected float _nextPatrolTime = 0f;
-        protected float _nextShootTime = 0f;
-        protected float _nextWeaponSwitchTime = 0f;
-        protected float _nextMeleeCheckTime = 0f;
-        protected float _nextLootingCheckTime = 0f;
-        protected float _nextVaultCheckTime = 0f;
-        protected float _nextUpdatePosTime = 0f;
-        protected float _nextHealCheckTime = 0f;
-        protected Vector3? _currentMoveTarget = null;
-        private Vector3? _lastTargetPos = Vector3.zero;
-        private Vector3[] _lastCalcCorners = null;
-        private bool _lastCanRunResult = false;
-        private int _currentMoveRetries = 0;
-        private int _currentHealTimes = 0;
-        protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
-        protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
-        protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
-        protected const float HEAL_CHECK_INTERVAL = 1f;
-        protected const float VAULT_CHECK_INTERVAL = 2f;
-        protected const float VAULT_HEIGHT_THRESHOLD = 1.5f;
-        protected const float SPHERECAST_RADIUS = 0.1f;
-        protected const float SPHERECAST_DISTANCE = 2f;
-        protected const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
-        protected const float ENTER_COMMON_LOOTING_COLDDOWN = 10f;
-        protected const float LOOTING_FINNISHED_COLDDOWN = 5f;
-        protected const float WEAPON_SWITCH_COOLDOWN = 1f;
-        protected const float MELEE_CHECK_INTERVAL = 0.5f;
+        protected ConcurrentDictionary<Type, Func<bool>> _endActionMap;
+        public bool _haveCoverToShoot = false;
+        public float _nextHoldPositionTime = 0f;
+        public float _goToCoverTime = 0f;
+        public CustomNavigationPoint _currentNavigationPoint = null;
+        public float _nextPatrolTime = 0f;
+        public float _nextShootTime = 0f;
+        public float _nextWeaponSwitchTime = 0f;
+        public float _nextMeleeCheckTime = 0f;
+        public float _nextLootingCheckTime = 0f;
+        public float _nextVaultCheckTime = 0f;
+        public float _nextUpdatePosTime = 0f;
+        public float _nextHealCheckTime = 0f;
+        public Vector3? _currentMoveTarget = null;
+        public Vector3? _lastTargetPos = Vector3.zero;
+        public Vector3[] _lastCalcCorners = null;
+        public bool _lastCanRunResult = false;
+        public int _currentMoveRetries = 0;
+        public int _currentHealTimes = 0;
+        public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
+        public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
+        public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
+        public const float HEAL_CHECK_INTERVAL = 1f;
+        public const float VAULT_CHECK_INTERVAL = 2f;
+        public const float VAULT_HEIGHT_THRESHOLD = 1.5f;
+        public const float SPHERECAST_RADIUS = 0.1f;
+        public const float SPHERECAST_DISTANCE = 2f;
+        public const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
+        public const float ENTER_COMMON_LOOTING_COLDDOWN = 10f;
+        public const float LOOTING_FINNISHED_COLDDOWN = 5f;
+        public const float WEAPON_SWITCH_COOLDOWN = 1f;
+        public const float MELEE_CHECK_INTERVAL = 0.5f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -68,7 +68,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        private string Name
+        public string Name
         {
             get
             {
@@ -124,37 +124,55 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
 
+        public void RegisterAction(Type logicType, Func<bool> func)
+        {
+            if (_endActionMap == null)
+            {
+                _endActionMap = new();
+            }
+            
+            _endActionMap.AddOrUpdate(logicType, _logicType => func, 
+                (_logicType, oldFunc) =>
+                {
+                    oldFunc = func;
+                    return oldFunc;
+                }
+            );
+        }
+
         public virtual void InitActionMap()
         {
-            _endActionMap = new()
+            if (_endActionMap == null)
             {
-                { typeof(GoToCoverPointLogic), EndGoToCoverPoint },
-                { typeof(HealLogic), EndHeal },
-                { typeof(RunToCoverLogic), EndRunToCover },
-                { typeof(SimplePatrolLogic), EndSimplePatrol },
-                { typeof(HoldPositionLogic), EndHoldPosition },
-                { typeof(GoToPointLogic), EndGoToPoint },
-                { typeof(GoToProtectLogic), EndGoToProtect },
-                { typeof(GoToEnemyLogic), EndGoToEnemy },
-                { typeof(AttackMovingLogic), EndAttackMoving },
-                { typeof(GoToLootTargetLogic), EndGoToLootTarget },
-                { typeof(ShootFromPlaceLogic), EndShootFromPlace },
-                { typeof(ShootFromCoverLogic), EndShootFromCover },
-                { typeof(ShootToSmokeLogic), EndShootToSmoke },
-                { typeof(ShootFromStationaryLogic), EndShootFromStationary },
-                { typeof(RunToEnemyLogic), EndRunToEnemy },
-                { typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint },
-                { typeof(MeleeAttackLogic), EndMeleeAttack },
-                { typeof(RunToPointLogic), EndGoToPoint },
-                { typeof(EscortToPointByWayLogic), EndEscortToPointByWay },
-                { typeof(FlashedLogic), EndFlashed },
-                { typeof(DeactivateMineLogic), EndDeactivateMine },
-                { typeof(RunAwayGrenadeLogic), EndRunAwayGrenade },
-                { typeof(RunAwayArtilleryLogic), EndRunAwayArtillery },
-                { typeof(RunAwayBTRLogic), EndRunAwayBTR },
-                { typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction },
-                { typeof(DropTargetLootLogic), EndThrowTargetLootLogic },
-            };
+                _endActionMap = new();
+            }
+
+            RegisterAction(typeof(GoToCoverPointLogic), EndGoToCoverPoint);
+            RegisterAction(typeof(HealLogic), EndHeal);
+            RegisterAction(typeof(RunToCoverLogic), EndRunToCover);
+            RegisterAction(typeof(SimplePatrolLogic), EndSimplePatrol);
+            RegisterAction(typeof(HoldPositionLogic), EndHoldPosition);
+            RegisterAction(typeof(GoToPointLogic), EndGoToPoint);
+            RegisterAction(typeof(GoToProtectLogic), EndGoToProtect);
+            RegisterAction(typeof(GoToEnemyLogic), EndGoToEnemy);
+            RegisterAction(typeof(AttackMovingLogic), EndAttackMoving);
+            RegisterAction(typeof(GoToLootTargetLogic), EndGoToLootTarget);
+            RegisterAction(typeof(ShootFromPlaceLogic), EndShootFromPlace);
+            RegisterAction(typeof(ShootFromCoverLogic), EndShootFromCover);
+            RegisterAction(typeof(ShootToSmokeLogic), EndShootToSmoke);
+            RegisterAction(typeof(ShootFromStationaryLogic), EndShootFromStationary);
+            RegisterAction(typeof(RunToEnemyLogic), EndRunToEnemy);
+            RegisterAction(typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint);
+            RegisterAction(typeof(MeleeAttackLogic), EndMeleeAttack);
+            RegisterAction(typeof(RunToPointLogic), EndGoToPoint);
+            RegisterAction(typeof(EscortToPointByWayLogic), EndEscortToPointByWay);
+            RegisterAction(typeof(FlashedLogic), EndFlashed);
+            RegisterAction(typeof(DeactivateMineLogic), EndDeactivateMine);
+            RegisterAction(typeof(RunAwayGrenadeLogic), EndRunAwayGrenade);
+            RegisterAction(typeof(RunAwayArtilleryLogic), EndRunAwayArtillery);
+            RegisterAction(typeof(RunAwayBTRLogic), EndRunAwayBTR);
+            RegisterAction(typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction);
+            RegisterAction(typeof(DropTargetLootLogic), EndThrowTargetLootLogic);
         }
 
         public virtual bool EndHeal()
@@ -464,7 +482,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        private async Task DelaySetDecisions(float delaySeconds, EDecision[] exclude = null, params EDecision[] decisions)
+        public async Task DelaySetDecisions(float delaySeconds, EDecision[] exclude = null, params EDecision[] decisions)
         {
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
             if (McsBotPlayerData != null)

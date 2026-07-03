@@ -29,10 +29,10 @@ namespace MiyakoCarryService.Client.Datas
                 return field ??= McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId).ToList();
             }
         }
-        private readonly ConcurrentDictionary<BotOwner, bool> _isShouldTakeContainers = new();
-        private readonly ConcurrentDictionary<BotOwner, bool> _isShouldSwapContainers = new();
-        private readonly ConcurrentDictionary<BotOwner, bool> _isShouldEquipContainers = new();
-        private readonly ConcurrentDictionary<BotOwner, ENestType> _isShouldNestContainers = new();
+        public readonly ConcurrentDictionary<BotOwner, bool> _isShouldTakeContainers = new();
+        public readonly ConcurrentDictionary<BotOwner, bool> _isShouldSwapContainers = new();
+        public readonly ConcurrentDictionary<BotOwner, bool> _isShouldEquipContainers = new();
+        public readonly ConcurrentDictionary<BotOwner, ENestType> _isShouldNestContainers = new();
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public LootProp(LootData lootData, TraderOffer offer, McsAILeadPlayer mcsAILeadPlayer)

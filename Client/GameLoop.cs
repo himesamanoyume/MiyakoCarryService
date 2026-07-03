@@ -124,25 +124,25 @@ namespace MiyakoCarryService.Client
         {
             LoadAssetBundle();
 
-            McsMgr.Enable();
-            PlayerDataMgr.Enable();
-            LootDataMgr.Enable();
-            SubtitlesMgr.Enable();
-            CommandMgr.Enable();
-            HighlightMgr.Enable();
-            ExfilDataMgr.Enable();
-            TransitDataMgr.Enable();
-            QuestDataMgr.Enable();
-            SwitchDataMgr.Enable();
-            TripwireDataMgr.Enable();
-            BarbedWireDataMgr.Enable();
-            BorderZoneDataMgr.Enable();
-            DamageTriggerDataMgr.Enable();
-            RoomTrapDataMgr.Enable();
-            DoorDataMgr.Enable();
+            BaseMgr.Enable(typeof(McsMgr));
+            BaseMgr.Enable(typeof(PlayerDataMgr));
+            BaseMgr.Enable(typeof(LootDataMgr));
+            BaseMgr.Enable(typeof(SubtitlesMgr));
+            BaseMgr.Enable(typeof(CommandMgr));
+            BaseMgr.Enable(typeof(HighlightMgr));
+            BaseMgr.Enable(typeof(ExfilDataMgr));
+            BaseMgr.Enable(typeof(TransitDataMgr));
+            BaseMgr.Enable(typeof(QuestDataMgr));
+            BaseMgr.Enable(typeof(SwitchDataMgr));
+            BaseMgr.Enable(typeof(TripwireDataMgr));
+            BaseMgr.Enable(typeof(BarbedWireDataMgr));
+            BaseMgr.Enable(typeof(BorderZoneDataMgr));
+            BaseMgr.Enable(typeof(DamageTriggerDataMgr));
+            BaseMgr.Enable(typeof(RoomTrapDataMgr));
+            BaseMgr.Enable(typeof(DoorDataMgr));
 
             // BrainMgr必须在最后，用以脚本引擎重载
-            BrainMgr.Enable();
+            BaseMgr.Enable(typeof(BrainMgr));
             // end
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
@@ -167,7 +167,7 @@ namespace MiyakoCarryService.Client
             TasksExtensions.HandleExceptions(UpdateMiyakoTraderAssortmentEvent());
         }
 
-        private async Task UpdateDailyQuests()
+        public async Task UpdateDailyQuests()
         {
             for (int i = 0; i < 5; i++)
             {
@@ -198,7 +198,7 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private async Task UpdateMiyakoTraderAssortmentEvent()
+        public async Task UpdateMiyakoTraderAssortmentEvent()
         {
             foreach (var trader in Session.Traders)
             {
@@ -210,7 +210,7 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private async Task UpdateProfile()
+        public async Task UpdateProfile()
         {
             var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
             if (Session is SessionBackendClass sessionBackendClass)
@@ -233,12 +233,12 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private void OnGameWorldStarted(GameWorldStartedEvent @event)
+        public void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             Reset();
         }
 
-        private void OnGameWorldEnded(GameWorldEndedEvent @event)
+        public void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             Reset();
             if (_updateDebouncer != null)
@@ -253,7 +253,7 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private void Reset()
+        public void Reset()
         {
             MainCamera = null;
             OpticCamera = null;
@@ -297,12 +297,12 @@ namespace MiyakoCarryService.Client
             base.Destroy();
         }
 
-        public T GetMgr<T>() where T : IMgr
+        internal T GetMgr<T>() where T : IMgr
         {
             return (T)Mgrs[typeof(T)];
         }
 
-        public HashSet<T> GetDatas<T, K>() where T : BaseData where K : DataMgr<K>
+        internal HashSet<T> GetDatas<T, K>() where T : BaseData where K : DataMgr
         {
             var mgr = GetMgr<K>();
             return mgr.GetDatas<T>();
@@ -362,6 +362,19 @@ namespace MiyakoCarryService.Client
             }
         }
 
+        public async Task InitMcsLeadPlayerConfigs()
+        {
+            var mcsMgr = MgrAccessor.Get<McsMgr>();
+            if (MiyakoCarryServicePlugin.FikaInstalled)
+            {
+                mcsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
+            }
+            else
+            {
+                mcsMgr.McsLeadPlayerConfigs = new();
+            }
+        }
+
         public async Task SpawnMcsBotPlayer()
         {
             var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
@@ -378,14 +391,7 @@ namespace MiyakoCarryService.Client
             var mcsMgr = MgrAccessor.Get<McsMgr>();
             var subtitlesMgr = MgrAccessor.Get<SubtitlesMgr>();
 
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                mcsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
-            }
-            else
-            {
-                mcsMgr.McsLeadPlayerConfigs = new();
-            }
+            await InitMcsLeadPlayerConfigs();
 
             foreach (var mcsProfileItem in mcsProfilesDict)
             {
