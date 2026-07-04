@@ -433,9 +433,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.GoToSomePointData.IsCome())
             {
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
-                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -468,9 +468,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
                 {
-                    if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
+                    if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
-                        McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                        McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
@@ -482,7 +482,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        public async Task DelaySetDecisions(float delaySeconds, EDecision[] exclude = null, params EDecision[] decisions)
+        public async Task DelaySetDecisions(float delaySeconds, string[] exclude = null, params string[] decisions)
         {
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
             if (McsBotPlayerData != null)
@@ -506,14 +506,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var sqrDistance = McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort))
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort))
                 {
-                    McsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
                     });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [EDecision.ShouldRegroup, EDecision.ShouldGoToPoint, EDecision.ShouldEscort, EDecision.ShouldGoToPoint]));
+                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldGoToPoint]));
                 }
                 return true;
             }
@@ -961,7 +961,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
             {
                 return true;
             }
@@ -1785,7 +1785,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.HasDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldQuestProxyAction]))
+            if (!McsBotPlayerData.HasDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldQuestProxyAction]))
             {
                 return true;
             }
@@ -1802,7 +1802,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var haveItemsToDrop = BotOwner.ExternalItemsController.HaveItemsToDrop();
             if (!haveItemsToDrop)
             {
-                McsBotPlayerData.RemoveDecision([EDecision.ShouldThrowTargetLoot]);
+                McsBotPlayerData.RemoveDecision([Decisions.ShouldThrowTargetLoot]);
                 _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN * 2;
                 return true;
             }

@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Utils
 {
     public class Classification
     {
-        public static HashSet<WildSpawnType> BossTypes = new()
+        public static readonly HashSet<WildSpawnType> BossTypes = new()
         {
             WildSpawnType.bossBoar,
             WildSpawnType.bossBully,
@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.infectedTagilla
         };
 
-        public static HashSet<WildSpawnType> FollowerTypes = new()
+        public static readonly HashSet<WildSpawnType> FollowerTypes = new()
         {
             WildSpawnType.followerGluharAssault,
             WildSpawnType.followerGluharSecurity,
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.followerSanitar
         };
 
-        public static List<string> SAINNotAdjusted = new()
+        public static readonly HashSet<string> SAINNotAdjusted = new()
         {
             nameof(EBrainName.BossZryachiy),
             nameof(EBrainName.Fl_Zraychiy),
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Client.Utils
             nameof(EBrainName.Oni)
         };
 
-        public static HashSet<string> LabyrinthSolvePuzzleItems = new()
+        public static readonly HashSet<string> LabyrinthSolvePuzzleItems = new()
         {
             ItemTpl.BBQS43_GasTorch,
             ItemTpl.ValveHandwheel,
@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Utils
             ItemTpl.LabyrinthKey04
         };
 
-        public static HashSet<string> MoneyItems = new()
+        public static readonly HashSet<string> MoneyItems = new()
         {
             ItemTpl.Roubles,
             ItemTpl.Dollars,
@@ -84,7 +84,7 @@ namespace MiyakoCarryService.Client.Utils
             ItemTpl.GPCoins
         };
 
-        public static HashSet<WildSpawnType> FriendlyTypes = new()
+        public static readonly HashSet<WildSpawnType> FriendlyTypes = new()
         {
             WildSpawnType.shooterBTR,
             WildSpawnType.gifter,
@@ -93,7 +93,7 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.followerZryachiy
         };
 
-        public static HashSet<EBotEnemyCause> InitialBotEnemyCauses = new()
+        public static readonly HashSet<EBotEnemyCause> InitialBotEnemyCauses = new()
         {
             EBotEnemyCause.initial,
             EBotEnemyCause.AddNewMember,
@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Client.Utils
             EBotEnemyCause.addBotNoGroup
         };
 
-        public static Dictionary<ELabyrinthTrapType, HashSet<string>> LabyrinthTrapIds = new()
+        public static readonly Dictionary<ELabyrinthTrapType, HashSet<string>> LabyrinthTrapIds = new()
         {
             { ELabyrinthTrapType.Flame, new() {
                 "flame_enter_zone_493925125",
@@ -128,9 +128,9 @@ namespace MiyakoCarryService.Client.Utils
             }}
         };
 
-        public static List<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
+        public static readonly HashSet<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
 
-        public static Dictionary<string, string> ImportantSwitchIdsInfo = new()
+        public static readonly Dictionary<string, string> ImportantSwitchIdsInfo = new()
         {
             { "autoId_000632_EXFIL", Locales.POWERSWITCH },
             { "autoId_00000_D2_LEVER", Locales.HERMETICSWITCH },
@@ -168,7 +168,7 @@ namespace MiyakoCarryService.Client.Utils
             { "Shopping_Mall_DesignStuff_00064", Locales.FLUSHURINAL }
         };
 
-        public static List<string> RemoveLayerNames = new()
+        public static readonly HashSet<string> RemoveLayerNames = new()
         {
             "AssaultHaveEnemy",
             "MarksmanEnemy",

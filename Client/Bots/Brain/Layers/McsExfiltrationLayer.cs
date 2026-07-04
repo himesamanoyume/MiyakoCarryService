@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldExfil))
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldExfil))
                 {
                     return true;
                 }

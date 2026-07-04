@@ -5,6 +5,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -136,7 +137,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (McsBotPlayerData != null)
                             {
-                                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                                 {
                                     if (_nextUpdatePosTime < Time.time)
                                     {
@@ -155,7 +156,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     }
                                 }
 
-                                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
@@ -202,7 +203,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f))
+                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
@@ -210,7 +211,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (McsBotPlayerData != null)
                             {
-                                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                                 {
                                     if (_nextUpdatePosTime < Time.time)
                                     {
@@ -229,7 +230,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     }
                                 }
 
-                                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }

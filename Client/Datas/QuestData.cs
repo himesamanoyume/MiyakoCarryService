@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Client.Datas
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.EndProxyAction
+                    CommandPacketType = ECommandPacketType.EndProxyAction.ToString()
                 });
             }
             else
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Client.Datas
                 var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData == null)
                 {
-                    mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+                    mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                 }

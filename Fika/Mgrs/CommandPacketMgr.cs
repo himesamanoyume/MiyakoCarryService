@@ -125,7 +125,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
                     {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldGoToPoint);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldGoToPoint);
                         mcsBotPlayerData.IsLooting = false;
                         mcsBotPlayerData.TargetPos = pos.Value;
                         mcsBotPlayerData.ProxyTargetId = null;
@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
                     {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldEscort);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldEscort);
                         mcsBotPlayerData.TargetPos = packet.Position.Value;
                         mcsBotPlayerData.IsLooting = false;
                     }
@@ -262,7 +262,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 {
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.IsLooting = false;
-                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldExfil);
+                    mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.HoldPosition,
@@ -351,7 +351,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldThrowTargetLoot);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldThrowTargetLoot);
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Roger,
@@ -392,7 +392,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision(null, EDecision.ShouldRegroup);
+                    mcsBotPlayerData.SetDecision(null, Decisions.ShouldRegroup);
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.TargetPos = null;
                 }
@@ -527,7 +527,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 {
                     if (packet.CommandType == ECommandPacketType.QuestProxyAction.ToString())
                     {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldQuestProxyAction);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldQuestProxyAction);
                         mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                         mcsBotPlayerData.TargetPos = packet.Position;
                         mcsBotPlayerData.IsLooting = false;
@@ -538,7 +538,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                     }
                     else if (packet.CommandType == ECommandPacketType.LootProxyAction.ToString())
                     {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldLootProxyAction);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldLootProxyAction);
                         mcsBotPlayerData.IsLooting = false;
                         mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                         var lootData = LootDataMgr.FindLootData(packet.TargetId);
@@ -561,14 +561,14 @@ namespace MiyakoCarryService.Fika.Mgrs
                             {
                                 PhraseTrigger = EPhraseTrigger.Negative,
                             });
-                            mcsBotPlayerData.RemoveDecision(EDecision.ShouldLootProxyAction);
+                            mcsBotPlayerData.RemoveDecision(Decisions.ShouldLootProxyAction);
                             mcsBotPlayerData.ProxyTargetId = null;
                             mcsBotPlayerData.TargetPos = null;
                         }
                     }
                     else if (packet.CommandType == ECommandPacketType.InteractionProxyAction.ToString())
                     {
-                        mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldInteractionProxyAction);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldInteractionProxyAction);
                         mcsBotPlayerData.ProxyTargetId = packet.TargetId;
                         var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(packet.TargetId);
                         if (interactableObjectData != null)
@@ -587,7 +587,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                             {
                                 PhraseTrigger = EPhraseTrigger.Negative,
                             });
-                            mcsBotPlayerData.RemoveDecision(EDecision.ShouldInteractionProxyAction);
+                            mcsBotPlayerData.RemoveDecision(Decisions.ShouldInteractionProxyAction);
                             mcsBotPlayerData.ProxyTargetId = null;
                             mcsBotPlayerData.TargetPos = null;
                         }
@@ -628,7 +628,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+                    mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                 }

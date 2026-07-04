@@ -4,6 +4,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -36,7 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                 }
@@ -98,7 +99,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction) || McsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction) || McsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
             {
                 return true;
             }

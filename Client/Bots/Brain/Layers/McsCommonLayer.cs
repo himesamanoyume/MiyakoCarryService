@@ -4,6 +4,7 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -36,7 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldThrowTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldThrowTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
                     if (_nextUpdatePosTime < Time.time)
                     {
@@ -55,7 +56,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldGoToPoint))
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                 {
                     if (_nextUpdatePosTime < Time.time)
                     {
@@ -74,7 +75,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (McsBotPlayerData.HasDecision(EDecision.ShouldHoldPosition))
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                     {
@@ -93,7 +94,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData != null)
                 {
-                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(EDecision.ShouldRegroup))
+                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
                     {
                         _currentMoveTarget = McsBotPlayerData.LootingTarget.RootTransform.position;
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);

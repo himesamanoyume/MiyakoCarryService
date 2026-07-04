@@ -8,6 +8,7 @@ using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
@@ -40,37 +41,73 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         public bool IsTaskRunning = false;
-        private EDecision _decision = EDecision.None;
+        private readonly HashSet<string> _decisions = new();
         private HashSet<LootData> _vanishingCurseLootItems = new();
 
-        public void SetDecision(EDecision[] exclude = null, params EDecision[] decisions)
+        public void SetDecision(string[] exclude = null, params string[] decisions)
         {
-            var preserved = EDecision.None;
+            List<string> preserved = null;
             if (exclude != null)
             {
+                preserved = new List<string>();
                 foreach (var e in exclude)
                 {
-                    if (_decision.HasFlag(e))
+                    if (_decisions.Contains(e))
                     {
-                        preserved |= e;
+                        preserved.Add(e);
                     }
                 }
             }
 
-            _decision = EDecision.None;
+            _decisions.Clear();
+
             foreach (var decision in decisions)
             {
-                _decision |= decision;
+                _decisions.Add(decision);
             }
 
-            _decision |= preserved;
+            if (preserved != null)
+            {
+                foreach (var p in preserved)
+                {
+                    _decisions.Add(p);
+                }
+            }
         }
 
-        public bool HasDecision(params EDecision[] decisions)
+        // public bool HasDecision(params EDecision[] decisions)
+        // {
+        //     foreach (var decision in decisions)
+        //     {
+        //         if (!_decision.HasFlag(decision))
+        //         {
+        //             return false;
+        //         }
+        //     }
+        //     return true;
+        // }
+
+        // public void AddDecision(params EDecision[] decisions)
+        // {
+        //     foreach (var decision in decisions)
+        //     {
+        //         _decision |= decision;
+        //     }
+        // }
+
+        // public void RemoveDecision(params EDecision[] decisions)
+        // {
+        //     foreach (var decision in decisions)
+        //     {
+        //         _decision &= ~decision;
+        //     }
+        // }
+
+        public bool HasDecision(params string[] decisions)
         {
             foreach (var decision in decisions)
             {
-                if (!_decision.HasFlag(decision))
+                if (!_decisions.Contains(decision))
                 {
                     return false;
                 }
@@ -78,19 +115,19 @@ namespace MiyakoCarryService.Client.Datas
             return true;
         }
 
-        public void AddDecision(params EDecision[] decisions)
+        public void AddDecision(params string[] decisions)
         {
             foreach (var decision in decisions)
             {
-                _decision |= decision;
+                _decisions.Add(decision);
             }
         }
 
-        public void RemoveDecision(params EDecision[] decisions)
+        public void RemoveDecision(params string[] decisions)
         {
             foreach (var decision in decisions)
             {
-                _decision &= ~decision;
+                _decisions.Remove(decision);
             }
         }
 
@@ -150,7 +187,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
-            if (HasDecision(EDecision.ShouldLootProxyAction))
+            if (HasDecision(Decisions.ShouldLootProxyAction))
             {
                 return;
             }
@@ -268,9 +305,9 @@ namespace MiyakoCarryService.Client.Datas
                     var itemData = parentItem.GetData();
                     if (itemData is PlayerData playerData && !playerData.Player.IsAI)
                     {
-                        if ((equipmentSlot is EquipmentSlot.FirstPrimaryWeapon && playerData.Player.HandsController.Item == item)  
+                        if ((equipmentSlot is EquipmentSlot.FirstPrimaryWeapon && playerData.Player.HandsController.Item == item)
                         || (equipmentSlot is EquipmentSlot.SecondPrimaryWeapon && playerData.Player.HandsController.Item == item)
-                        || (equipmentSlot is EquipmentSlot.Holster && playerData.Player.HandsController.Item == item) 
+                        || (equipmentSlot is EquipmentSlot.Holster && playerData.Player.HandsController.Item == item)
                         || (equipmentSlot is EquipmentSlot.Scabbard && playerData.Player.HandsController.Item == item))
                         {
                             continue;

@@ -5,6 +5,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
@@ -95,7 +96,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(EDecision.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
             {
                 return true;
             }

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using MiyakoCarryService.Client.Enums;
-using System;
 using MiyakoCarryService.Fika.Packets;
 using MiyakoCarryService.Client.Mgrs;
 using Fika.Core.Modding.Events;

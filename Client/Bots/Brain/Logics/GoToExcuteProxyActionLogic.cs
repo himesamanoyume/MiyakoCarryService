@@ -108,22 +108,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 });
 
                 mcsBotPlayerData.IsTaskRunning = true;
-                if (mcsBotPlayerData.HasDecision(EDecision.ShouldQuestProxyAction))
+                if (mcsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     await QuestProxyActionReadyToStart();
                 }
-                else if (mcsBotPlayerData.HasDecision(EDecision.ShouldLootProxyAction))
+                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     await StartLooting();
                 }
-                else if (mcsBotPlayerData.HasDecision(EDecision.ShouldInteractionProxyAction))
+                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
                 {
                     BotOwner.SetPose(1f);
-                    mcsBotPlayerData.SetDecision([EDecision.ShouldRegroup], EDecision.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
                     if (interactableObjectData == null)
                     {
@@ -160,7 +160,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private void InteractionCallback(McsBotPlayerData mcsBotPlayerData)
         {
-            mcsBotPlayerData.RemoveDecision([EDecision.ShouldInteractionProxyAction, EDecision.ShouldQuestProxyAction, EDecision.ShouldLootProxyAction, EDecision.ShouldHoldPosition]);
+            mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition]);
             mcsBotPlayerData.TargetPos = null;
             mcsBotPlayerData.ProxyTargetId = null;
         }
