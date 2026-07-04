@@ -1802,7 +1802,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var haveItemsToDrop = BotOwner.ExternalItemsController.HaveItemsToDrop();
             if (!haveItemsToDrop)
             {
-                McsBotPlayerData.RemoveDecision([Decisions.ShouldThrowTargetLoot]);
+                McsBotPlayerData.RemoveDecision([Decisions.ShouldDropTargetLoot]);
                 _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN * 2;
                 return true;
             }

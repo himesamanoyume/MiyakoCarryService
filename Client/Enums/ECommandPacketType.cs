@@ -15,6 +15,6 @@ namespace MiyakoCarryService.Client.Enums
         LootProxyAction,
         InteractionProxyAction,
         EndProxyAction,
-        ThrowTargetLoot
+        DropTargetLoot
     }
 }

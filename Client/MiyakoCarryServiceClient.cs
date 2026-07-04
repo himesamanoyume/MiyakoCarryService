@@ -29,7 +29,7 @@ using MiyakoCarryService.Client.Patches.Interactive;
 namespace MiyakoCarryService.Client
 {
     [BepInPlugin(McsGUID, McsPluginName, BepInExClientVersion)]
-    [BepInProcess("EscapeFromTarkov.exe")]
+    [BepInProcess(EFTexe)]
     [BepInDependency(BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
@@ -37,6 +37,7 @@ namespace MiyakoCarryService.Client
     {
         public const string BepInExClientVersion = "1.1.0.0";
         public static Version ClientVersion { get; } = new(BepInExClientVersion);
+        public const string EFTexe = "EscapeFromTarkov.exe";
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
         public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";

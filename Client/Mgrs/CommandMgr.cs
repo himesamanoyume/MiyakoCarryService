@@ -656,7 +656,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void EscortToWorldPosCommandAction(Player mcsBotPlayer, WorldData worldData)
         {
-            DispatchCommand(mcsBotPlayer, ECommandPacketType.Regroup.ToString(), p =>
+            DispatchCommand(mcsBotPlayer, ECommandPacketType.Escort.ToString(), p =>
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 if (botOwner.Memory.HaveEnemy)
@@ -820,7 +820,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void DropTargetLootCommandAction(Player mcsBotPlayer)
         {
-            DispatchCommand(mcsBotPlayer, ECommandPacketType.ThrowTargetLoot.ToString(), p =>
+            DispatchCommand(mcsBotPlayer, ECommandPacketType.DropTargetLoot.ToString(), p =>
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
                 if (botOwner.ExternalItemsController.HaveItemsToDrop())
@@ -829,7 +829,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
                     {
-                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldThrowTargetLoot);
+                        mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldDropTargetLoot);
                         mcsBotPlayerData.IsLooting = false;
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
@@ -927,8 +927,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     EventMgr.Notify(new CommandMgrHandleFikaEvent
                     {
                         McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandPacketType.GoToExfil.ToString(),
-                        Position = null
+                        CommandPacketType = ECommandPacketType.GoToExfil.ToString()
                     });
                 }
             }

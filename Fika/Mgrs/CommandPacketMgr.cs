@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Fika.Mgrs
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.LootProxyAction.ToString(), HandleProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.InteractionProxyAction.ToString(), HandleProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.EndProxyAction.ToString(), HandleEndProxyAction);
-            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.ThrowTargetLoot.ToString(), HandleThrowTargetLoot);
+            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.DropTargetLoot.ToString(), HandleThrowTargetLoot);
         }
 
         public virtual void HandleTeleport(CommandPacket packet)
@@ -311,7 +311,7 @@ namespace MiyakoCarryService.Fika.Mgrs
 
         public virtual void HandleThrowTargetLoot(CommandPacket packet)
         {
-            if (packet.CommandType != ECommandPacketType.ThrowTargetLoot.ToString())
+            if (packet.CommandType != ECommandPacketType.DropTargetLoot.ToString())
             {
                 return;
             }
@@ -351,7 +351,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldThrowTargetLoot);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldDropTargetLoot);
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Roger,

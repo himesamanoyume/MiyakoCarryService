@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
                 }
 
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldThrowTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
                     if (_nextUpdatePosTime < Time.time)
                     {
