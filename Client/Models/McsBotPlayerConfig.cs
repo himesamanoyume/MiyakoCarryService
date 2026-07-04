@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Models
     public class McsBotPlayerConfig
     {
         [DataMember(Name = "McsLeadPlayerId")]
-        public MongoID McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id;
+        public MongoID McsLeadPlayerId;
 
         [DataMember(Name = "EnableLooting")]
         public bool EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value;

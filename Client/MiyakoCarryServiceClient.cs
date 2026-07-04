@@ -357,7 +357,7 @@ namespace MiyakoCarryService.Client
                 };
             }
 
-            if (sectionName == EConfigType.BASIC.ToString())
+            if (sectionName == Locales.BASIC)
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {

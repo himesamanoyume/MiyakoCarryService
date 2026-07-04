@@ -172,42 +172,6 @@ namespace MiyakoCarryService.Client.Mgrs
             GamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
         }
 
-        // public virtual void BuildTeamCommandMenu(List<Player> mcsBotPlayers)
-        // {
-        //     PreBuildCommandMenu(out var actionsReturnClass);
-
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, RegroupCommandAction));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, DropTargetLootCommandAction));
-        //     actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamEscortCommandMenu, mcsBotPlayers, Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME));
-        //     actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamAimingTypeCommandMenu, mcsBotPlayers, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME));
-        //     actionsReturnClass.Actions.Add(MakeTeamCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction));
-
-        //     PostBuildCommandMenu(actionsReturnClass);
-        // }
-
-        // public virtual void BuildMemberCommandMenu(Player mcsBotPlayer)
-        // {
-        //     PreBuildCommandMenu(out var actionsReturnClass);
-
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.REPORTABOUTENEMYCOMMAND_NAME, Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.REGROUPCOMMAND_NAME, Locales.REGROUPCOMMAND_TARGETNAME, RegroupCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, HoldPositionCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.DROPTARGETLOOTCOMMAND_NAME, Locales.DROPTARGETLOOTCOMMAND_TARGETNAME, DropTargetLootCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction, OpenInventoryCommandAction, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, BuildAimingTypeCommandMenu, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, BuildEscortCommandMenu, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, BuildProxyCommandMenu, mcsBotPlayer));
-        //     actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayer));
-
-        //     PostBuildCommandMenu(actionsReturnClass);
-        // }
-
         private void RegisterBuiltinCommands()
         {
             void Leaf(ECommandScope scope, string nameKey, string targetKey, Action<Player> execute, Func<Player, bool> disabled = null)
