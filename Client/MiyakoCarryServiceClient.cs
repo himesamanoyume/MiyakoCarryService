@@ -373,7 +373,8 @@ namespace MiyakoCarryService.Client
                         PriceThreshold = PriceThreshold.Value,
                         KeywordItemText = KeywordItemText.Value,
                         LootingKeywordItem = LootingKeywordItem.Value,
-                        BlockItemType = (int)BlockItemType.Value
+                        BlockItemType = (int)BlockItemType.Value,
+                        Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
             }

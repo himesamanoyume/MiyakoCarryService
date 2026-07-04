@@ -328,7 +328,8 @@ namespace MiyakoCarryService.Fika
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
-                    }
+                    },
+                    Extensions = McsConfigApi.GetConfigSnapshot()
                 };
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }

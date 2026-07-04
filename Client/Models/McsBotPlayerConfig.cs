@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using EFT;
 
@@ -24,5 +25,8 @@ namespace MiyakoCarryService.Client.Models
 
         [DataMember(Name = "BlockItemType")]
         public int BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value;
+
+        [DataMember(Name = "Extensions")]  
+        public Dictionary<string, McsConfigValue> Extensions = new();
     }
 }
