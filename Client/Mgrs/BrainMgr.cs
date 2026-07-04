@@ -34,12 +34,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void InitCustomLayerMaps()
         {
-            BrainUtils.RegisterCustomLayer(typeof(McsCommonLayer), 65);
-            BrainUtils.RegisterCustomLayer(typeof(McsEscortLayer), 66);
-            BrainUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 67);
-            BrainUtils.RegisterCustomLayer(typeof(McsProxyLayer), 68);
-            BrainUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 89);
-            BrainUtils.RegisterCustomLayer(typeof(McsFightLayer), 186);
+            LayerUtils.RegisterCustomLayer(typeof(McsCommonLayer), 65);
+            LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 66);
+            LayerUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 67);
+            LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 68);
+            LayerUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 89);
+            LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 186);
         }
 
         public async Task Reload()
@@ -105,24 +105,24 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                BrainUtils.McsRestoreLayers(mcsBotPlayer.AIData.BotOwner, Classification.RemoveLayerNames);
+                LayerUtils.McsRestoreLayers(mcsBotPlayer.AIData.BotOwner, Classification.RemoveLayerNames);
 
-                var customLayerMaps = BrainUtils.GetCustomLayerMaps();
+                var customLayerMaps = LayerUtils.GetCustomLayerMaps();
                 foreach ((var customLayerType, var priority) in customLayerMaps)
                 {
-                    BrainUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, customLayerType.Name);
+                    LayerUtils.McsRemoveLayer(mcsBotPlayer.AIData.BotOwner, customLayerType.Name);
                 }
             }
         }
 
         public void InjectLayers(BaseBrain baseBrain)
         {
-            BrainUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
+            LayerUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
 
-            var customLayerMaps = BrainUtils.GetCustomLayerMaps();
+            var customLayerMaps = LayerUtils.GetCustomLayerMaps();
             foreach ((var customLayerType, var priority) in customLayerMaps)
             {
-                BrainUtils.McsAddCustomLayer(baseBrain.Owner, customLayerType, priority);
+                LayerUtils.McsAddCustomLayer(baseBrain.Owner, customLayerType, priority);
             }
         }
     }

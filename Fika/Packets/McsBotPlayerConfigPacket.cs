@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Fika.Packets
         {
             base.Serialize(writer);
             writer.Put(KeywordItemText, 0);
-            writer.PutUnmanaged(McsBotPlayerConfig);   // 结构体不变  
+            writer.PutUnmanaged(McsBotPlayerConfig);
             writer.Put(Extensions.Count);
             foreach (var kv in Extensions)
             {
@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Fika.Packets
             base.Deserialize(reader);
             KeywordItemText = reader.GetString();
             McsBotPlayerConfig = reader.GetUnmanaged<SMcsBotPlayerConfig>();
-            int count = reader.GetInt();
+            var count = reader.GetInt();
             Extensions = new();
             for (int i = 0; i < count; i++)
             {

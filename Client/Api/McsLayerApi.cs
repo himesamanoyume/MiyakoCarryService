@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="priority"></param>
         public static void RegisterCustomLayer(Type layerType, int priority)
         {
-            BrainUtils.RegisterCustomLayer(layerType, priority);
+            LayerUtils.RegisterCustomLayer(layerType, priority);
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="priority"></param>
         public static void McsAddCustomLayer(BotOwner botOwner, Type layerType, int priority)
         {
-            BrainUtils.McsAddCustomLayer(botOwner, layerType, priority);
+            LayerUtils.McsAddCustomLayer(botOwner, layerType, priority);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Api
         /// <returns></returns>
         public static bool McsHasLayer(BotOwner botOwner, string layerName)
         {
-            return BrainUtils.McsHasLayer(botOwner, layerName);
+            return LayerUtils.McsHasLayer(botOwner, layerName);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="layerName"></param>
         public static void McsRemoveLayer(BotOwner botOwner, string layerName)
         {
-            BrainUtils.McsRemoveLayer(botOwner, layerName);
+            LayerUtils.McsRemoveLayer(botOwner, layerName);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="layerNames"></param>
         public static void McsRemoveLayers(BotOwner botOwner, IEnumerable<string> layerNames)
         {
-            BrainUtils.McsRemoveLayers(botOwner, layerNames);
+            LayerUtils.McsRemoveLayers(botOwner, layerNames);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="layerName"></param>
         public static void McsRestoreLayer(BotOwner botOwner, string layerName)
         {
-            BrainUtils.McsRestoreLayer(botOwner, layerName);
+            LayerUtils.McsRestoreLayer(botOwner, layerName);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="layerNames"></param>
         public static void McsRestoreLayers(BotOwner botOwner, IEnumerable<string> layerNames)
         {
-            BrainUtils.McsRestoreLayers(botOwner, layerNames);
+            LayerUtils.McsRestoreLayers(botOwner, layerNames);
         }
     }
 }

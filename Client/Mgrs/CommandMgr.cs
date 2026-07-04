@@ -690,40 +690,6 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        // public virtual void EscortToWorldPosCommandAction(Player mcsBotPlayer, WorldData worldData)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.Escort.ToString(),
-        //             Position = worldData.GetPos()
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         if (botOwner.Memory.HaveEnemy)
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Negative,
-        //             });
-        //         }
-        //         botOwner.Mover.LastTimePosChanged = Time.time;
-        //         botOwner.StopMove();
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldEscort);
-        //             mcsBotPlayerData.TargetPos = worldData.GetPos();
-        //             mcsBotPlayerData.IsLooting = false;
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void EscortToWorldPosCommandAction(Player mcsBotPlayer, WorldData worldData)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.Regroup.ToString(), p =>
@@ -747,45 +713,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }, worldData.GetPos());
         }
-
-        // public virtual void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.ReportAboutEnemy.ToString()
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.TargetPos = null;
-        //             mcsBotPlayerData.ProxyTargetId = null;
-        //         }
-        //         if (botOwner.Memory.HaveEnemy)
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.OnFirstContact,
-        //                 Position = botOwner.Memory.GoalEnemy.EnemyLastPosition
-        //             });
-        //         }
-        //         else
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Clear,
-        //             });
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void ReportAboutEnemyCommandAction(Player mcsBotPlayer)
         {
@@ -817,36 +744,6 @@ namespace MiyakoCarryService.Client.Mgrs
             });
         }
 
-        // public virtual void OnYourOwnCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.OnYourOwn.ToString(),
-        //             Position = null
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision();
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.TargetPos = null;
-        //             mcsBotPlayerData.ProxyTargetId = null;
-        //         }
-        //         botOwner.TalkMsg(new McsMsg
-        //         {
-        //             PhraseTrigger = EPhraseTrigger.Roger,
-        //         });
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void OnYourOwnCommandAction(Player mcsBotPlayer)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.OnYourOwn.ToString(), p =>
@@ -867,36 +764,6 @@ namespace MiyakoCarryService.Client.Mgrs
             });
         }
 
-        // public virtual void RegroupCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.Regroup.ToString(),
-        //             Position = null
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision(null, Decisions.ShouldRegroup);
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.TargetPos = null;
-        //             mcsBotPlayerData.ProxyTargetId = null;
-        //         }
-        //         botOwner.TalkMsg(new McsMsg
-        //         {
-        //             PhraseTrigger = EPhraseTrigger.Regroup,
-        //         });
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void RegroupCommandAction(Player mcsBotPlayer)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.Regroup.ToString(), p =>
@@ -916,49 +783,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 });
             });
         }
-
-        // public virtual void GoToPointCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
-        //         {
-        //             EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //             {
-        //                 McsBotPlayer = mcsBotPlayer,
-        //                 CommandPacketType = ECommandPacketType.GoToPoint.ToString(),
-        //                 Position = raycastHit.point
-        //             });
-        //         }
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
-        //         {
-        //             var pos = Tools.GetPosNearTarget(raycastHit.point, botOwner);
-        //             if (pos.HasValue)
-        //             {
-        //                 botOwner.TalkMsg(new McsMsg
-        //                 {
-        //                     PhraseTrigger = EPhraseTrigger.Going,
-        //                 });
-
-        //                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //                 if (mcsBotPlayerData != null)
-        //                 {
-        //                     mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldGoToPoint);
-        //                     mcsBotPlayerData.IsLooting = false;
-        //                     mcsBotPlayerData.TargetPos = pos.Value;
-        //                     mcsBotPlayerData.ProxyTargetId = null;
-        //                 }
-        //                 botOwner.Mover.LastTimePosChanged = Time.time;
-        //                 botOwner.StopMove();
-        //             }
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void GoToPointCommandAction(Player mcsBotPlayer)
         {
@@ -992,34 +816,6 @@ namespace MiyakoCarryService.Client.Mgrs
             CloseCommandMenuAction();
         }
 
-        // public virtual void ChangeAimingBodyPartCommandAction(Player mcsBotPlayer, BodyPartType aimingBodyPartType)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.AimingBodyPart.ToString(),
-        //             Position = null,
-        //             AimingBodyPartType = aimingBodyPartType
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.AimingBodyPartType = aimingBodyPartType;
-        //         }
-        //         botOwner.TalkMsg(new McsMsg
-        //         {
-        //             PhraseTrigger = EPhraseTrigger.Roger,
-        //         });
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void ChangeAimingBodyPartCommandAction(Player mcsBotPlayer, BodyPartType aimingBodyPartType)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.AimingBodyPart.ToString(), p =>
@@ -1036,37 +832,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 });
             }, null, aimingBodyPartType);
         }
-
-        // public virtual void HoldPositionCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.HoldPosition.ToString(),
-        //             Position = null
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         botOwner.StopMove();
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.TargetPos = null;
-        //             mcsBotPlayerData.ProxyTargetId = null;
-        //         }
-        //         botOwner.TalkMsg(new McsMsg
-        //         {
-        //             PhraseTrigger = EPhraseTrigger.HoldPosition,
-        //         });
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void HoldPositionCommandAction(Player mcsBotPlayer)
         {
@@ -1088,46 +853,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 });
             });
         }
-
-        // public virtual void DropTargetLootCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.ThrowTargetLoot.ToString()
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         if (botOwner.ExternalItemsController.HaveItemsToDrop())
-        //         {
-        //             botOwner.StopMove();
-        //             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //             if (mcsBotPlayerData != null)
-        //             {
-        //                 mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldThrowTargetLoot);
-        //                 mcsBotPlayerData.IsLooting = false;
-        //                 mcsBotPlayerData.TargetPos = null;
-        //                 mcsBotPlayerData.ProxyTargetId = null;
-        //             }
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Roger,
-        //             });
-        //         }
-        //         else
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Negative,
-        //             });
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void DropTargetLootCommandAction(Player mcsBotPlayer)
         {
@@ -1159,52 +884,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             });
         }
-
-        // public virtual void ForceTeleportCommandAction(Player mcsBotPlayer)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.Teleport.ToString(),
-        //             Position = null
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         botOwner.StopMove();
-        //         botOwner.Mover.AllowTeleport();
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision();
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.TargetPos = null;
-        //             mcsBotPlayerData.ProxyTargetId = null;
-        //             mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
-        //         }
-        //         var playerPosition = mcsBotPlayer.Position;
-        //         botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-        //         botOwner.Mover.LastGoodCastPointTime = Time.time;
-        //         botOwner.Mover.PrevPosLinkedTime_1 = 0f;
-        //         botOwner.Mover.SetPlayerToNavMesh(playerPosition);
-        //         botOwner.Mover.RecalcWay();
-        //         botOwner.Mover.Pause = true;
-        //         botOwner.TalkMsg(new McsMsg
-        //         {
-        //             PhraseTrigger = EPhraseTrigger.Roger,
-        //         });
-
-        //         if (!MiyakoCarryServicePlugin.SAINInstalled)
-        //         {
-        //             botOwner.Memory.GoalTarget.Clear();
-        //             botOwner.Memory.GoalEnemy = null;
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void ForceTeleportCommandAction(Player mcsBotPlayer)
         {
@@ -1309,49 +988,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        // public virtual void InteractionProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.InteractionProxyAction.ToString(),
-        //             TargetId = proxyAction.Id()
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         if (botOwner.Memory.HaveEnemy)
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Negative,
-        //             });
-        //         }
-        //         botOwner.Mover.LastTimePosChanged = Time.time;
-        //         botOwner.StopMove();
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldInteractionProxyAction);
-        //             var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(proxyAction.Id());
-        //             if (interactableObjectData != null)
-        //             {
-        //                 mcsBotPlayerData.ProxyTargetId = proxyAction.Id();
-        //                 mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
-        //                 botOwner.TalkMsg(new McsMsg
-        //                 {
-        //                     PhraseTrigger = EPhraseTrigger.Roger,
-        //                 });
-        //             }
-        //             mcsBotPlayerData.IsLooting = false;
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void InteractionProxyActionCommandAction(Player mcsBotPlayer, IProxyActor proxyAction)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.InteractionProxyAction.ToString(), p =>
@@ -1385,46 +1021,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }, targetId: proxyAction.Id());
         }
 
-        // public virtual void QuestProxyActionCommandAction(Player mcsBotPlayer, QuestData questData)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.QuestProxyAction.ToString(),
-        //             Position = questData.GetPos(),
-        //             TargetId = questData.Id()
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         if (botOwner.Memory.HaveEnemy)
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Negative,
-        //             });
-        //         }
-        //         botOwner.Mover.LastTimePosChanged = Time.time;
-        //         botOwner.StopMove();
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldQuestProxyAction);
-        //             mcsBotPlayerData.ProxyTargetId = questData.Id();
-        //             mcsBotPlayerData.TargetPos = questData.GetPos();
-        //             mcsBotPlayerData.IsLooting = false;
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Roger,
-        //             });
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
-
         public virtual void QuestProxyActionCommandAction(Player mcsBotPlayer, QuestData questData)
         {
             DispatchCommand(mcsBotPlayer, ECommandPacketType.QuestProxyAction.ToString(), p =>
@@ -1453,70 +1049,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }, position: questData.GetPos(), targetId: questData.Id());
         }
-
-        // public virtual void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
-        // {
-        //     if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-        //     {
-        //         EventMgr.Notify(new CommandMgrHandleFikaEvent
-        //         {
-        //             McsBotPlayer = mcsBotPlayer,
-        //             CommandPacketType = ECommandPacketType.LootProxyAction.ToString(),
-        //             Position = lootData.RootTransform.position,
-        //             TargetId = lootData.Item.Id
-        //         });
-        //     }
-        //     else
-        //     {
-        //         var botOwner = mcsBotPlayer.AIData.BotOwner;
-        //         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-        //         if (botOwner.Memory.HaveEnemy)
-        //         {
-        //             botOwner.TalkMsg(new McsMsg
-        //             {
-        //                 PhraseTrigger = EPhraseTrigger.Negative,
-        //             });
-        //             if (mcsBotPlayerData != null)
-        //             {
-        //                 mcsBotPlayerData.ProxyTargetId = null;
-        //                 mcsBotPlayerData.TargetPos = null;
-        //             }
-        //         }
-        //         botOwner.Mover.LastTimePosChanged = Time.time;
-        //         botOwner.StopMove();
-
-        //         if (mcsBotPlayerData != null)
-        //         {
-        //             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldLootProxyAction);
-        //             mcsBotPlayerData.IsLooting = false;
-        //             mcsBotPlayerData.ProxyTargetId = lootData.Item.Id;
-        //             mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
-        //             LootDataMgr.UnlockLootingTarget(lootData);
-        //             LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
-        //             if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
-        //             {
-        //                 LootDataMgr.LockLootItemToTarget(lootData);
-        //                 LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
-        //                 mcsBotPlayerData.LootingTarget = lootData;
-        //                 botOwner.TalkMsg(new McsMsg
-        //                 {
-        //                     PhraseTrigger = EPhraseTrigger.Roger,
-        //                 });
-        //             }
-        //             else
-        //             {
-        //                 botOwner.TalkMsg(new McsMsg
-        //                 {
-        //                     PhraseTrigger = EPhraseTrigger.Negative,
-        //                 });
-        //                 mcsBotPlayerData.RemoveDecision(Decisions.ShouldLootProxyAction);
-        //                 mcsBotPlayerData.ProxyTargetId = null;
-        //                 mcsBotPlayerData.TargetPos = null;
-        //             }
-        //         }
-        //     }
-        //     CloseCommandMenuAction();
-        // }
 
         public virtual void LootProxyActionCommandAction(Player mcsBotPlayer, LootData lootData)
         {

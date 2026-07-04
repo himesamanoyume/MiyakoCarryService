@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Utils
     /// <summary>  
     /// 运行时按单个 BotOwner 实时增删/激活/恢复 BigBrain 自定义 Layer，绕过 BrainManager 的全局 brainNames 匹配，直接操作目标 Bot 的大脑。 
     /// </summary>  
-    internal static class BrainUtils
+    internal static class LayerUtils
     {
         private static int _currentLayerId = 15156;
 
