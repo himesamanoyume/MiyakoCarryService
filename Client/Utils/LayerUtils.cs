@@ -49,6 +49,12 @@ namespace MiyakoCarryService.Client.Utils
             );
         }
 
+        public static void OnRaidEnded()
+        {
+            _injectedLayers.Clear();
+            _excludedLayers.Clear();
+        }
+
         public static ConcurrentDictionary<Type, int> GetCustomLayerMaps()
         {
             return _customLayerMaps;

@@ -42,7 +42,13 @@ namespace MiyakoCarryService.Client.Mgrs
             LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 186);
         }
 
-        public async Task Reload()
+        public override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
+            LayerUtils.OnRaidEnded();
+        }
+
+        private async Task Reload()
         {
             var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
             if (myPlayer == null)
