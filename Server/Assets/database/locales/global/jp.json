@@ -203,5 +203,7 @@
     "Mcs/DropTargetLootCommand Name": "Drop Target Loot",
     "Mcs/DropTargetLootCommand TargetName": "Command carry service player to drop the target loot picked up during the raid",
     "Mcs/TeamDropTargetLootCommand Name": "Team Drop Target Loot",
-    "Mcs/TeamDropTargetLootCommand TargetName": "Command all carry service players to drop the target loot picked up during the raid"
+    "Mcs/TeamDropTargetLootCommand TargetName": "Command all carry service players to drop the target loot picked up during the raid",
+    "Mcs/BackCommand Name": "Back",
+    "Mcs/BackCommand TargetName": "Return to previous command menu"
 }

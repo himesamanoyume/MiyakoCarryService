@@ -203,5 +203,7 @@
     "Mcs/DropTargetLootCommand Name": "丢出目标战利品",
     "Mcs/DropTargetLootCommand TargetName": "命令护航丢出在战局中拾取的目标战利品",
     "Mcs/TeamDropTargetLootCommand Name": "全队丢出目标战利品",
-    "Mcs/TeamDropTargetLootCommand TargetName": "全队丢出在战局中拾取的目标战利品"
+    "Mcs/TeamDropTargetLootCommand TargetName": "全队丢出在战局中拾取的目标战利品",
+    "Mcs/BackCommand Name": "返回",
+    "Mcs/BackCommand TargetName": "返回上一级指令菜单"
 }
