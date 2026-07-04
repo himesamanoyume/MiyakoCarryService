@@ -32,6 +32,12 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
+        protected override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
+            BrainUtils.OnRaidEnded();
+        }
+
         private async Task Reload()
         {
             var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;

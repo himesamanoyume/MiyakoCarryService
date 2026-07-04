@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Server
 {
     public record ModMetadata : AbstractModMetadata, IModWebMetadata
     {
-        private const string CurrentVersion = "1.0.9.0";
+        private const string CurrentVersion = "1.0.9.1";
 #if DEBUG
         public override string Name { get; init; } = "MiyakoCarryServiceServer DebugBuild";
 #else

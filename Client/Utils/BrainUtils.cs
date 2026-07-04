@@ -30,6 +30,12 @@ namespace MiyakoCarryService.Client.Utils
             _initialized = true;
         }
 
+        public static void OnRaidEnded()
+        {
+            _injectedLayers.Clear();
+            _excludedLayers.Clear();
+        }
+
         public static bool McsAddCustomLayer(BotOwner botOwner, Type customLayerType, int priority)
         {
             if (botOwner == null || botOwner.IsDead || botOwner.Brain?.BaseBrain == null)
