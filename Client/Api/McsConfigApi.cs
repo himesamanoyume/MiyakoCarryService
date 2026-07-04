@@ -19,7 +19,6 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="description"></param>
         /// <param name="acceptableValues"></param>
         /// <param name="customAttributes"></param>
-        /// <param name="mcsBotPlayerConfig"></param>
         /// <returns></returns>
         public static ConfigEntry<T> Register<T>(
             EConfigType type,
@@ -28,10 +27,11 @@ namespace MiyakoCarryService.Client.Api
             string description = "",
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
-            McsBotPlayerConfig mcsBotPlayerConfig = null
+            bool needNotify = true,
+            bool isHide = false
         )
         {
-            return MiyakoCarryServicePlugin.Instance.Register(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, mcsBotPlayerConfig);
+            return MiyakoCarryServicePlugin.Instance.Register(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
         }
 
         /// <summary>
@@ -45,7 +45,6 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="description"></param>
         /// <param name="acceptableValues"></param>
         /// <param name="customAttributes"></param>
-        /// <param name="mcsBotPlayerConfig"></param>
         /// <returns></returns>
         public static ConfigEntry<T> Register<T>(
             string sectionName,
@@ -55,10 +54,11 @@ namespace MiyakoCarryService.Client.Api
             string description = "",
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
-            McsBotPlayerConfig mcsBotPlayerConfig = null
+            bool needNotify = true,
+            bool isHide = false
         )
         {
-            return MiyakoCarryServicePlugin.Instance.Register(sectionName, order, key, defaultValue, description, acceptableValues, customAttributes, mcsBotPlayerConfig);
+            return MiyakoCarryServicePlugin.Instance.Register(sectionName, order, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
         }
         
         /// <summary>
@@ -70,26 +70,7 @@ namespace MiyakoCarryService.Client.Api
         /// <param name="xCount"></param>
         public static void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
         {
-            var value = (T)entry.BoxedValue;
-            var values = Enum.GetValues(typeof(T));
-            var options = new string[values.Length];
-            var selectedIndex = 0;
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                var enumValue = (T)values.GetValue(i);
-                options[i] = dict.ContainsKey(enumValue) ? dict[enumValue] : enumValue.ToString();
-                if (enumValue.Equals(value))
-                {
-                    selectedIndex = i;
-                }
-            }
-
-            var newIndex = GUILayout.SelectionGrid(selectedIndex, options, xCount);
-            if (newIndex != selectedIndex)
-            {
-                entry.BoxedValue = values.GetValue(newIndex);
-            }
+            MiyakoCarryServicePlugin.Instance.CustomDrawer(entry, dict, xCount);
         }
     }
 }

@@ -309,7 +309,8 @@ namespace MiyakoCarryService.Client
             string description = "",
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
-            McsBotPlayerConfig mcsBotPlayerConfig = null
+            bool needNotify = true,
+            bool isHide = false
         )
         {
             if (!_sections.TryGetValue(sectionName, out var section))
@@ -320,7 +321,7 @@ namespace MiyakoCarryService.Client
 
             var attributes = customAttributes ?? new ConfigurationManagerAttributes();
 
-            if (attributes.Hide.Value)
+            if (isHide)
             {
                 HideList.Add(key);
             }
@@ -340,7 +341,7 @@ namespace MiyakoCarryService.Client
                 configDescription
             );
 
-            if (typeof(T) == typeof(bool) && attributes.NeedNotify.Value)
+            if (typeof(T) == typeof(bool) && needNotify)
             {
                 configEntry.SettingChanged += (object sender, EventArgs e) =>
                 {
@@ -365,7 +366,15 @@ namespace MiyakoCarryService.Client
                         return;
                     }
 
-                    DebouncedConfigSync(mcsBotPlayerConfig ?? new McsBotPlayerConfig());
+                    DebouncedConfigSync(new McsBotPlayerConfig
+                    {
+                        McsLeadPlayerId = GameLoop.Instance.Session.Profile.Id,
+                        EnableLooting = EnableLooting.Value,
+                        PriceThreshold = PriceThreshold.Value,
+                        KeywordItemText = KeywordItemText.Value,
+                        LootingKeywordItem = LootingKeywordItem.Value,
+                        BlockItemType = (int)BlockItemType.Value
+                    });
                 };
             }
 
@@ -379,10 +388,42 @@ namespace MiyakoCarryService.Client
             string description = "",
             AcceptableValueBase acceptableValues = null,
             ConfigurationManagerAttributes customAttributes = null,
-            McsBotPlayerConfig mcsBotPlayerConfig = null
+            bool needNotify = true,
+            bool isHide = false
         )
         {
-            return Register(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, mcsBotPlayerConfig);
+            var configTypeText = type switch
+            {
+                EConfigType.BASIC => Locales.BASIC,
+                EConfigType.COMMAND => Locales.COMMAND,
+                EConfigType.PLAYER => Locales.PLAYER,
+                EConfigType.DEBUG or _ => Locales.DEBUG
+            };
+            return Register(configTypeText, (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
+        }
+
+        internal void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
+        {
+            var value = (T)entry.BoxedValue;
+            var values = Enum.GetValues(typeof(T));
+            var options = new string[values.Length];
+            var selectedIndex = 0;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                var enumValue = (T)values.GetValue(i);
+                options[i] = dict.ContainsKey(enumValue) ? dict[enumValue] : enumValue.ToString();
+                if (enumValue.Equals(value))
+                {
+                    selectedIndex = i;
+                }
+            }
+
+            var newIndex = GUILayout.SelectionGrid(selectedIndex, options, xCount);
+            if (newIndex != selectedIndex)
+            {
+                entry.BoxedValue = values.GetValue(newIndex);
+            }
         }
 
         private void SetupConfig()

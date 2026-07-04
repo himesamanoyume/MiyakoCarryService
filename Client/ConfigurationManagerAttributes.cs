@@ -120,14 +120,4 @@ public sealed class ConfigurationManagerAttributes
     /// Custom converter from string to setting type for the built-in editor textboxes.
     /// </summary>
     public System.Func<string, object> StrToObj;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool? NeedNotify = true;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool? Hide;
 }
