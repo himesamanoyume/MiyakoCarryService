@@ -52,6 +52,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string FORCETELEPORTCOMMAND_TARGETNAME = "Mcs/ForceTeleportCommand TargetName";
         public const string OPENINVENTORYCOMMAND_NAME = "Mcs/OpenInventoryCommand Name";
         public const string OPENINVENTORYCOMMAND_TARGETNAME = "Mcs/OpenInventoryCommand TargetName";
+        public const string BACKCOMMAND_NAME = "Mcs/BackCommand Name";
+        public const string BACKCOMMAND_TARGETNAME = "Mcs/BackCommand TargetName";
         public const string CANCELCOMMAND_NAME = "Mcs/CancelCommand Name";
         public const string CANCELCOMMAND_TARGETNAME = "Mcs/CancelCommand TargetName";
         public const string REPORTABOUTENEMYCOMMAND_NAME = "Mcs/ReportAboutEnemyCommand Name";

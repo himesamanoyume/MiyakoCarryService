@@ -19,10 +19,12 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public class CommandMgr : BaseMgr
     {
+        private readonly Stack<Action> _menuStack = new();
+
         public override void Start()
         {
             base.Start();
-            RegisterBuiltinCommands();
+            RegisterCommands();
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
         }
 
@@ -86,6 +88,29 @@ namespace MiyakoCarryService.Client.Mgrs
 
         #region Menu
 
+        private void OpenMenu(Action buildMenu)
+        {
+            _menuStack.Push(buildMenu);
+            buildMenu.Invoke();
+        }
+
+        private void BackCommandAction()
+        {
+            if (_menuStack.Count > 0)
+            {
+                _menuStack.Pop();
+            }
+
+            if (_menuStack.Count > 0)
+            {
+                _menuStack.Peek().Invoke();
+            }
+            else
+            {
+                CloseCommandMenuAction();
+            }
+        }
+
         public virtual void BuildMainCommandMenu()
         {
             if (GamePlayerOwner == null)
@@ -100,16 +125,18 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamCommandMenu, mcsBotPlayers));
-
-            foreach (var mcsBotPlayer in mcsBotPlayers)
+            _menuStack.Clear();
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(MakeMemberCommand(BuildMemberCommandMenu, mcsBotPlayer));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
+                actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamCommandMenu, mcsBotPlayers));
+                foreach (var mcsBotPlayer in mcsBotPlayers)
+                {
+                    actionsReturnClass.Actions.Add(MakeMemberCommand(BuildMemberCommandMenu, mcsBotPlayer));
+                }
+                PostBuildCommandMenu(actionsReturnClass);
+            });
 
-            PostBuildCommandMenu(actionsReturnClass);
         }
 
         public virtual void PreBuildCommandMenu(out ActionsReturnClass actionsReturnClass)
@@ -155,6 +182,10 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (actionsReturnClass != null)
             {
+                if (_menuStack.Count > 1)
+                {
+                    actionsReturnClass.Actions.Insert(0, MakeCommand(Locales.BACKCOMMAND_NAME, Locales.BACKCOMMAND_TARGETNAME, false, BackCommandAction));
+                }
                 actionsReturnClass.Actions.Add(MakeCommand(Locales.CANCELCOMMAND_NAME, Locales.CANCELCOMMAND_TARGETNAME, false, CloseCommandMenuAction));
                 actionsReturnClass.InitSelected();
             }
@@ -172,17 +203,17 @@ namespace MiyakoCarryService.Client.Mgrs
             GamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
         }
 
-        private void RegisterBuiltinCommands()
+        void Leaf(ECommandScope scope, string nameKey, string targetKey, Action<Player> execute, Func<Player, bool> disabled = null)
+            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, scope, isSubMenu: false, disabled, execute));
+
+        void MemberSubMenu(string nameKey, string targetKey, Action<Player> openMenu)
+            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Member, isSubMenu: true, disabled: null, execute: (player) => OpenMenu(() => openMenu(player))));
+
+        void TeamSubMenu(string nameKey, string targetKey, Action<List<Player>> openMenu)
+            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Team, isSubMenu: true, disabled: null, execute: null, executeTeam: (players) => OpenMenu(() => openMenu(players))));
+
+        private void RegisterCommands()
         {
-            void Leaf(ECommandScope scope, string nameKey, string targetKey, Action<Player> execute, Func<Player, bool> disabled = null)
-                => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, scope, isSubMenu: false, disabled, execute));
-
-            void MemberSubMenu(string nameKey, string targetKey, Action<Player> openMenu)
-                => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Member, isSubMenu: true, disabled: null, execute: openMenu));
-
-            void TeamSubMenu(string nameKey, string targetKey, Action<List<Player>> openMenu)
-                => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Team, isSubMenu: true, disabled: null, execute: null, executeTeam: openMenu));
-
             // ---------------- Member ----------------  
             Leaf(ECommandScope.Member, Locales.REPORTABOUTENEMYCOMMAND_NAME, Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction);
             Leaf(ECommandScope.Member, Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction);
@@ -564,7 +595,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual ActionsTypesClass TeamCommandSubMenu(Action<List<Player>> action, List<Player> mcsBotPlayers, string name, string targetName)
         {
-            return MakeCommand(name, targetName, mcsBotPlayers.All(p => !p.HealthController.IsAlive), action, mcsBotPlayers);
+            return MakeCommand(name, targetName, mcsBotPlayers.All(p => !p.HealthController.IsAlive), (mcsBotPlayers) => OpenMenu(() => action(mcsBotPlayers)), mcsBotPlayers);
         }
 
         public virtual ActionsTypesClass MakeMemberCommand(Action<Player> action, Player mcsBotPlayer)
