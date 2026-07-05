@@ -8,7 +8,6 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -109,6 +108,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     botActivationTraverse.Property("ActiveLayer").SetValue(0); // ESAINLayer.None = 0  
                     botActivationTraverse.Method("ManualUpdate").GetValue();
                 }
+            }
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.IsMcsLayerActive = true;
+            }
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.IsMcsLayerActive = false;
             }
         }
 
