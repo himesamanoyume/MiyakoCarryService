@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsTaskRunning = false;
         private EDecision _decision = EDecision.None;
         private HashSet<LootData> _vanishingCurseLootItems = new();
+        public bool IsMcsLayerActive = false;
 
         public void SetDecision(EDecision[] exclude = null, params EDecision[] decisions)
         {

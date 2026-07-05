@@ -110,6 +110,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     botActivationTraverse.Method("ManualUpdate").GetValue();
                 }
             }
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.IsMcsLayerActive = true;
+            }
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            if (McsBotPlayerData != null)
+            {
+                McsBotPlayerData.IsMcsLayerActive = false;
+            }
         }
 
         protected SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();

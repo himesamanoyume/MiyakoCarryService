@@ -32,6 +32,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
+            if (!mcsBotPlayerData.IsMcsLayerActive)
+            {
+                return true;
+            }
+
             var visibleType = __instance.VisibleType;
             if (visibleType - EEnemyPartVisibleType.GreenSence <= 1)
             {
