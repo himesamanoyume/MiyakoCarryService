@@ -96,19 +96,13 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void BackCommandAction()
         {
-            if (_menuStack.Count > 0)
+            if (_menuStack.Count <= 1)
             {
-                _menuStack.Pop();
+                return;
             }
 
-            if (_menuStack.Count > 0)
-            {
-                _menuStack.Peek().Invoke();
-            }
-            else
-            {
-                CloseCommandMenuAction();
-            }
+            _menuStack.Pop();
+            _menuStack.Peek().Invoke();
         }
 
         public virtual void BuildMainCommandMenu()
@@ -200,6 +194,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void CloseCommandMenuAction()
         {
+            _menuStack.Clear();
             GamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
         }
 
@@ -207,10 +202,10 @@ namespace MiyakoCarryService.Client.Mgrs
             => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, scope, isSubMenu: false, disabled, execute));
 
         void MemberSubMenu(string nameKey, string targetKey, Action<Player> openMenu)
-            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Member, isSubMenu: true, disabled: null, execute: (player) => OpenMenu(() => openMenu(player))));
+            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Member, isSubMenu: true, disabled: null, execute: openMenu));
 
         void TeamSubMenu(string nameKey, string targetKey, Action<List<Player>> openMenu)
-            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Team, isSubMenu: true, disabled: null, execute: null, executeTeam: (players) => OpenMenu(() => openMenu(players))));
+            => CommandUtils.RegisterCommand(new DelegateCommand(nameKey, targetKey, ECommandScope.Team, isSubMenu: true, disabled: null, execute: null, executeTeam: openMenu));
 
         private void RegisterCommands()
         {
@@ -241,314 +236,362 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void BuildMemberCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var commands = CommandUtils.GetCommands();
-            foreach (var cmd in commands.Where(c => c.Scope == ECommandScope.Member))
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(new ActionsTypesClass
+                PreBuildCommandMenu(out var actionsReturnClass);
+                var commands = CommandUtils.GetCommands();
+                foreach (var cmd in commands.Where(c => c.Scope == ECommandScope.Member))
                 {
-                    Name = cmd.NameKey,
-                    TargetName = cmd.TargetNameKey,
-                    Disabled = cmd.IsDisabled(mcsBotPlayer),
-                    Action = () => cmd.Execute(mcsBotPlayer)
-                });
-            }
-
-            PostBuildCommandMenu(actionsReturnClass);
+                    actionsReturnClass.Actions.Add(new ActionsTypesClass
+                    {
+                        Name = cmd.NameKey,
+                        TargetName = cmd.TargetNameKey,
+                        Disabled = cmd.IsDisabled(mcsBotPlayer),
+                        Action = () => cmd.Execute(mcsBotPlayer)
+                    });
+                }
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         private void BuildTeamCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-            var commands = CommandUtils.GetCommands();
-            foreach (var cmd in commands.Where(c => c.Scope == ECommandScope.Team))
+            OpenMenu(() =>
             {
-                if (cmd.IsSubMenu)
+                PreBuildCommandMenu(out var actionsReturnClass);
+                var commands = CommandUtils.GetCommands();
+                foreach (var cmd in commands.Where(c => c.Scope == ECommandScope.Team))
                 {
-                    actionsReturnClass.Actions.Add(new ActionsTypesClass
+                    if (cmd.IsSubMenu)
                     {
-                        Name = cmd.NameKey,
-                        TargetName = cmd.TargetNameKey,
-                        Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
-                        Action = () => cmd.ExecuteTeam(mcsBotPlayers)
-                    });
-                }
-                else
-                {
-                    actionsReturnClass.Actions.Add(new ActionsTypesClass
+                        actionsReturnClass.Actions.Add(new ActionsTypesClass
+                        {
+                            Name = cmd.NameKey,
+                            TargetName = cmd.TargetNameKey,
+                            Disabled = mcsBotPlayers.All(p => !p.HealthController.IsAlive),
+                            Action = () => cmd.ExecuteTeam(mcsBotPlayers)
+                        });
+                    }
+                    else
                     {
-                        Name = cmd.NameKey,
-                        TargetName = cmd.TargetNameKey,
-                        Disabled = false,
-                        Action = () => ForEachAliveBot(cmd.Execute)
-                    });
+                        actionsReturnClass.Actions.Add(new ActionsTypesClass
+                        {
+                            Name = cmd.NameKey,
+                            TargetName = cmd.TargetNameKey,
+                            Disabled = false,
+                            Action = () => ForEachAliveBot(cmd.Execute)
+                        });
+                    }
                 }
-            }
-
-            PostBuildCommandMenu(actionsReturnClass);
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamEscortCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamQuestEscortCommandMenu, mcsBotPlayers, Locales.TEAMQUESTESCORTCOMMAND_NAME, Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME));
-            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamTransitEscortCommandMenu, mcsBotPlayers, Locales.TEAMTRANSITESCORTCOMMAND_NAME, Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME));
-            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamExfilEscortCommandMenu, mcsBotPlayers, Locales.TEAMEXFILESCORTCOMMAND_NAME, Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME));
-            actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamSwitchEscortCommandMenu, mcsBotPlayers, Locales.TEAMSWITCHESCORTCOMMAND_NAME, Locales.TEAMSWITCHESCORTCOMMAND_TARGETNAME));
-
-            PostBuildCommandMenu(actionsReturnClass);
+            OpenMenu(() =>
+            {
+                PreBuildCommandMenu(out var actionsReturnClass);
+                actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamQuestEscortCommandMenu, mcsBotPlayers, Locales.TEAMQUESTESCORTCOMMAND_NAME, Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME));
+                actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamTransitEscortCommandMenu, mcsBotPlayers, Locales.TEAMTRANSITESCORTCOMMAND_NAME, Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME));
+                actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamExfilEscortCommandMenu, mcsBotPlayers, Locales.TEAMEXFILESCORTCOMMAND_NAME, Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME));
+                actionsReturnClass.Actions.Add(TeamCommandSubMenu(BuildTeamSwitchEscortCommandMenu, mcsBotPlayers, Locales.TEAMSWITCHESCORTCOMMAND_NAME, Locales.TEAMSWITCHESCORTCOMMAND_TARGETNAME));
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildEscortCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTESCORTCOMMAND_NAME, Locales.QUESTESCORTCOMMAND_TARGETNAME, BuildQuestEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.TRANSITESCORTCOMMAND_NAME, Locales.TRANSITESCORTCOMMAND_TARGETNAME, BuildTransitEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.EXFILESCORTCOMMAND_NAME, Locales.EXFILESCORTCOMMAND_TARGETNAME, BuildExfilEscortCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHESCORTCOMMAND_NAME, Locales.SWITCHESCORTCOMMAND_TARGETNAME, BuildSwitchEscortCommandMenu, mcsBotPlayer));
-
-            PostBuildCommandMenu(actionsReturnClass);
+            OpenMenu(() =>
+            {
+                PreBuildCommandMenu(out var actionsReturnClass);
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTESCORTCOMMAND_NAME, Locales.QUESTESCORTCOMMAND_TARGETNAME, BuildQuestEscortCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.TRANSITESCORTCOMMAND_NAME, Locales.TRANSITESCORTCOMMAND_TARGETNAME, BuildTransitEscortCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.EXFILESCORTCOMMAND_NAME, Locales.EXFILESCORTCOMMAND_TARGETNAME, BuildExfilEscortCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHESCORTCOMMAND_NAME, Locales.SWITCHESCORTCOMMAND_TARGETNAME, BuildSwitchEscortCommandMenu, mcsBotPlayer));
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamAimingTypeCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
+            OpenMenu(() =>
+            {
+                PreBuildCommandMenu(out var actionsReturnClass);
+                var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(head, head, ChangeAimingBodyPartCommandAction, BodyPartType.head));
 
-            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(head, head, ChangeAimingBodyPartCommandAction, BodyPartType.head));
+                var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(body, body, ChangeAimingBodyPartCommandAction, BodyPartType.body));
 
-            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(body, body, ChangeAimingBodyPartCommandAction, BodyPartType.body));
+                var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(leftArm, leftArm, ChangeAimingBodyPartCommandAction, BodyPartType.leftArm));
 
-            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(leftArm, leftArm, ChangeAimingBodyPartCommandAction, BodyPartType.leftArm));
+                var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(rightArm, rightArm, ChangeAimingBodyPartCommandAction, BodyPartType.rightArm));
 
-            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(rightArm, rightArm, ChangeAimingBodyPartCommandAction, BodyPartType.rightArm));
+                var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(leftLeg, leftLeg, ChangeAimingBodyPartCommandAction, BodyPartType.leftLeg));
 
-            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(leftLeg, leftLeg, ChangeAimingBodyPartCommandAction, BodyPartType.leftLeg));
-
-            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeTeamCommand(rightLeg, rightLeg, ChangeAimingBodyPartCommandAction, BodyPartType.rightLeg));
-
-            PostBuildCommandMenu(actionsReturnClass);
+                var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeTeamCommand(rightLeg, rightLeg, ChangeAimingBodyPartCommandAction, BodyPartType.rightLeg));
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildAimingTypeCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
+            OpenMenu(() =>
+            {
+                PreBuildCommandMenu(out var actionsReturnClass);
+                var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(head, head, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.head));
 
-            var head = Tools.GetBodyPartTypeLocales(BodyPartType.head).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(head, head, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.head));
+                var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(body, body, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.body));
 
-            var body = Tools.GetBodyPartTypeLocales(BodyPartType.body).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(body, body, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.body));
+                var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(leftArm, leftArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftArm));
 
-            var leftArm = Tools.GetBodyPartTypeLocales(BodyPartType.leftArm).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(leftArm, leftArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftArm));
+                var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(rightArm, rightArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightArm));
 
-            var rightArm = Tools.GetBodyPartTypeLocales(BodyPartType.rightArm).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(rightArm, rightArm, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightArm));
+                var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(leftLeg, leftLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftLeg));
 
-            var leftLeg = Tools.GetBodyPartTypeLocales(BodyPartType.leftLeg).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(leftLeg, leftLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.leftLeg));
-
-            var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
-            actionsReturnClass.Actions.Add(MakeMemberCommand(rightLeg, rightLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightLeg));
-
-            PostBuildCommandMenu(actionsReturnClass);
+                var rightLeg = Tools.GetBodyPartTypeLocales(BodyPartType.rightLeg).McsLocalized();
+                actionsReturnClass.Actions.Add(MakeMemberCommand(rightLeg, rightLeg, false, ChangeAimingBodyPartCommandAction, mcsBotPlayer, BodyPartType.rightLeg));
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamTransitEscortCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
-            foreach (var transitData in transitDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, transitData));
-            }
-
-            PostBuildCommandMenu(actionsReturnClass);
+                PreBuildCommandMenu(out var actionsReturnClass);
+                var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
+                foreach (var transitData in transitDatas)
+                {
+                    actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, transitData));
+                }
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamExfilEscortCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
-            foreach (var exfilData in exfilDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, exfilData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+                foreach (var exfilData in exfilDatas)
+                {
+                    actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, exfilData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamSwitchEscortCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
-            foreach (var switchData in switchDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, switchData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+                foreach (var switchData in switchDatas)
+                {
+                    actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, switchData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTeamQuestEscortCommandMenu(List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
-            if (questDataMgr != null)
+            OpenMenu(() =>
             {
-                var questDataGroup = questDataMgr.GetQuestDataByGroup();
-                foreach ((var questDataClass, var questDatas) in questDataGroup)
-                {
-                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildTeamSubQuestEscortCommandMenu(questDatas, mcsBotPlayers)));
-                }
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
+                if (questDataMgr != null)
+                {
+                    var questDataGroup = questDataMgr.GetQuestDataByGroup();
+                    foreach ((var questDataClass, var questDatas) in questDataGroup)
+                    {
+                        actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildTeamSubQuestEscortCommandMenu(questDatas, mcsBotPlayers)));
+                    }
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildQuestEscortCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
-            if (questDataMgr != null)
+            OpenMenu(() =>
             {
-                var questDataGroup = questDataMgr.GetQuestDataByGroup();
-                foreach ((var questDataClass, var questDatas) in questDataGroup)
-                {
-                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildSubQuestEscortCommandMenu(questDatas, mcsBotPlayer)));
-                }
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
+                if (questDataMgr != null)
+                {
+                    var questDataGroup = questDataMgr.GetQuestDataByGroup();
+                    foreach ((var questDataClass, var questDatas) in questDataGroup)
+                    {
+                        actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, false, () => BuildSubQuestEscortCommandMenu(questDatas, mcsBotPlayer)));
+                    }
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildTransitEscortCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
-            foreach (var transitData in transitDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, transitData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var transitDatas = Gameloop.GetDatas<TransitData, TransitDataMgr>();
+                foreach (var transitData in transitDatas)
+                {
+                    actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, transitData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildExfilEscortCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
-            foreach (var exfilData in exfilDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, exfilData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var exfilDatas = Gameloop.GetDatas<ExfilData, ExfilDataMgr>();
+                foreach (var exfilData in exfilDatas)
+                {
+                    actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, exfilData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildSwitchEscortCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
-            foreach (var switchData in switchDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, switchData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+                foreach (var switchData in switchDatas)
+                {
+                    actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, switchData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
+            
         }
 
         public virtual void BuildTeamSubQuestEscortCommandMenu(List<QuestData> questDatas, List<Player> mcsBotPlayers)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            foreach (var questData in questDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, questData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                foreach (var questData in questDatas)
+                {
+                    actionsReturnClass.Actions.Add(TeamEscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayers, questData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildSubQuestEscortCommandMenu(List<QuestData> questDatas, Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            foreach (var questData in questDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, questData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                foreach (var questData in questDatas)
+                {
+                    actionsReturnClass.Actions.Add(EscortToWorldPosCommand(EscortToWorldPosCommandAction, mcsBotPlayer, questData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildProxyCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
+            OpenMenu(() =>
+            {
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, BuildQuestProxyCommandMenu, mcsBotPlayer));
-            actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, BuildSwitchProxyCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, BuildQuestProxyCommandMenu, mcsBotPlayer));
+                actionsReturnClass.Actions.Add(MakeMemberCommand(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, BuildSwitchProxyCommandMenu, mcsBotPlayer));
 
-            PostBuildCommandMenu(actionsReturnClass);
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildQuestProxyCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
-            if (questDataMgr != null)
+            OpenMenu(() =>
             {
-                var questDataGroup = questDataMgr.GetQuestDataByGroup();
-                foreach ((var questDataClass, var questDatas) in questDataGroup)
-                {
-                    actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, false, () => BuildSubQuestProxyCommandMenu(questDatas, mcsBotPlayer)));
-                }
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
+                if (questDataMgr != null)
+                {
+                    var questDataGroup = questDataMgr.GetQuestDataByGroup();
+                    foreach ((var questDataClass, var questDatas) in questDataGroup)
+                    {
+                        actionsReturnClass.Actions.Add(MakeCommand(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, false, () => BuildSubQuestProxyCommandMenu(questDatas, mcsBotPlayer)));
+                    }
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildSwitchProxyCommandMenu(Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
-            foreach (var switchData in switchDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(InteractionProxyActionCommandAction, mcsBotPlayer, switchData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                var switchDatas = Gameloop.GetDatas<SwitchData, SwitchDataMgr>();
+                foreach (var switchData in switchDatas)
+                {
+                    actionsReturnClass.Actions.Add(ExcuteCommonProxyActionCommand(InteractionProxyActionCommandAction, mcsBotPlayer, switchData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         public virtual void BuildSubQuestProxyCommandMenu(List<QuestData> questDatas, Player mcsBotPlayer)
         {
-            PreBuildCommandMenu(out var actionsReturnClass);
-
-            foreach (var questData in questDatas)
+            OpenMenu(() =>
             {
-                actionsReturnClass.Actions.Add(ExcuteQuestProxyActionCommand(QuestProxyActionCommandAction, mcsBotPlayer, questData));
-            }
+                PreBuildCommandMenu(out var actionsReturnClass);
 
-            PostBuildCommandMenu(actionsReturnClass);
+                foreach (var questData in questDatas)
+                {
+                    actionsReturnClass.Actions.Add(ExcuteQuestProxyActionCommand(QuestProxyActionCommandAction, mcsBotPlayer, questData));
+                }
+
+                PostBuildCommandMenu(actionsReturnClass);
+            });
         }
 
         #endregion

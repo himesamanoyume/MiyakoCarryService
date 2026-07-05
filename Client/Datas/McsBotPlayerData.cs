@@ -76,34 +76,6 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        // public bool HasDecision(params EDecision[] decisions)
-        // {
-        //     foreach (var decision in decisions)
-        //     {
-        //         if (!_decision.HasFlag(decision))
-        //         {
-        //             return false;
-        //         }
-        //     }
-        //     return true;
-        // }
-
-        // public void AddDecision(params EDecision[] decisions)
-        // {
-        //     foreach (var decision in decisions)
-        //     {
-        //         _decision |= decision;
-        //     }
-        // }
-
-        // public void RemoveDecision(params EDecision[] decisions)
-        // {
-        //     foreach (var decision in decisions)
-        //     {
-        //         _decision &= ~decision;
-        //     }
-        // }
-
         public bool HasDecision(params string[] decisions)
         {
             foreach (var decision in decisions)
