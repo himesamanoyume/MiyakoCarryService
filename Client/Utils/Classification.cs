@@ -101,6 +101,16 @@ namespace MiyakoCarryService.Client.Utils
             EBotEnemyCause.addBotNoGroup
         };
 
+        public static readonly HashSet<BodyPartType> AimingBodyPartTypes = new()
+        {
+            BodyPartType.head,
+            BodyPartType.body,
+            BodyPartType.leftArm,
+            BodyPartType.rightArm,
+            BodyPartType.leftLeg,
+            BodyPartType.rightLeg
+        };
+
         public static readonly Dictionary<ELabyrinthTrapType, HashSet<string>> LabyrinthTrapIds = new()
         {
             { ELabyrinthTrapType.Flame, new() {

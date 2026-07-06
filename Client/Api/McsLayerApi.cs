@@ -11,8 +11,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="layerType"></param>
-        /// <param name="priority"></param>
         public static void RegisterCustomLayer(Type layerType, int priority)
         {
             LayerUtils.RegisterCustomLayer(layerType, priority);
@@ -21,9 +19,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerType"></param>
-        /// <param name="priority"></param>
         public static void McsAddCustomLayer(BotOwner botOwner, Type layerType, int priority)
         {
             LayerUtils.McsAddCustomLayer(botOwner, layerType, priority);
@@ -32,9 +27,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerName"></param>
-        /// <returns></returns>
         public static bool McsHasLayer(BotOwner botOwner, string layerName)
         {
             return LayerUtils.McsHasLayer(botOwner, layerName);
@@ -43,8 +35,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerName"></param>
         public static void McsRemoveLayer(BotOwner botOwner, string layerName)
         {
             LayerUtils.McsRemoveLayer(botOwner, layerName);
@@ -53,8 +43,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerNames"></param>
         public static void McsRemoveLayers(BotOwner botOwner, IEnumerable<string> layerNames)
         {
             LayerUtils.McsRemoveLayers(botOwner, layerNames);
@@ -63,8 +51,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerName"></param>
         public static void McsRestoreLayer(BotOwner botOwner, string layerName)
         {
             LayerUtils.McsRestoreLayer(botOwner, layerName);
@@ -73,8 +59,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="botOwner"></param>
-        /// <param name="layerNames"></param>
         public static void McsRestoreLayers(BotOwner botOwner, IEnumerable<string> layerNames)
         {
             LayerUtils.McsRestoreLayers(botOwner, layerNames);

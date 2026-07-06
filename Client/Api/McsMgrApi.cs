@@ -6,6 +6,9 @@ namespace MiyakoCarryService.Client.Api
 {
     public static class McsMgrApi
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public static T GetMgr<T>() where T : IMgr
         {
             return MgrAccessor.Get<T>();

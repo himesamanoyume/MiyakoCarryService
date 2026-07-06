@@ -54,6 +54,9 @@ namespace MiyakoCarryService.Client.Api
             return MiyakoCarryServicePlugin.Instance.Register(sectionName, order, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static Dictionary<string, McsConfigValue> GetConfigSnapshot()
         {
             return McsBotPlayerConfigUtils.Snapshot();

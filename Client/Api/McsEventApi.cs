@@ -9,9 +9,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="callback"></param>
-        /// <param name="subscriber"></param>
         public static void Subscribe<T>(Action<T> callback, object subscriber = null) where T : IMcsEvent
         {
             EventMgr.Subscribe(callback, subscriber);
@@ -20,8 +17,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="callback"></param>
         public static void Unsubscribe<T>(Action<T> callback) where T : IMcsEvent
         {
             EventMgr.Subscribe(callback);
@@ -30,7 +25,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="subscriber"></param>
         public static void UnsubscribeAll(object subscriber)
         {
             EventMgr.UnsubscribeAll(subscriber);
@@ -39,8 +33,6 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="event"></param>
         public static void Notify<T>(T @event) where T : IMcsEvent
         {
             EventMgr.Notify(@event);

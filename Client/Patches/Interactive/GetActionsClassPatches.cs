@@ -1,5 +1,4 @@
 using System.Reflection;
-using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
@@ -40,14 +39,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 return;
             }
-            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
+            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 __result.Actions.Add(new ActionsTypesClass
                 {
                     Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.InteractionProxyActionCommandAction(mcsBotPlayer, doorData),
+                    Action = () => CommandMgr.InteractionProxyActionCommandAction([mcsBotPlayer], doorData),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
@@ -89,14 +88,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 return;
             }
-            __result.CurrentActionChanged.Bind(CommandMgr.OnCurrentActionChanged);
+            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 __result.Actions.Add(new ActionsTypesClass
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.LootProxyActionCommandAction(mcsBotPlayer, lootData),
+                    Action = () => CommandMgr.LootProxyActionCommandAction([mcsBotPlayer], lootData),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
