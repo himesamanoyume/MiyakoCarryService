@@ -8,11 +8,6 @@ namespace MiyakoCarryService.Fika.Packets
     {
         public string TargetId;
 
-        public QuestProxyCommandCallbackPacket()
-        {
-
-        }
-
         public override void Deserialize(NetDataReader reader)
         {
             base.Deserialize(reader);

@@ -19,8 +19,6 @@ using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Fika.Utils;
 using MiyakoCarryService.Fika.Mgrs;
-using MiyakoCarryService.Client.Enums;
-using System;
 
 namespace MiyakoCarryService.Fika
 {
@@ -29,6 +27,7 @@ namespace MiyakoCarryService.Fika
         private McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
         private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
+        private CommandPacketMgr CommandPacketMgr => McsMgrApi.GetMgr<CommandPacketMgr>();
         private List<ModulePatch> _patches = new();
 
         public void InitMcsFika()
@@ -52,36 +51,6 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Subscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket, this);
             McsEventApi.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             McsEventApi.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
-
-            McsCommandApi.Register(EMenuId.Team.ToString(), BuildTestSubMenu);
-            McsCommandApi.Register(EMenuId.Member.ToString(), BuildMemberSubMenu);
-        }
-
-        private void BuildTestSubMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
-        {
-            menu.RegisterSubMenu("测试子菜单1", "测试子菜单1说明", (m) => TestSubMenu(m, mcsBotPlayers));
-            menu.RegisterCommand("测试指令1", "测试指令1说明", TestCommandAction, mcsBotPlayers);
-        }
-
-        private void BuildMemberSubMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
-        {
-            menu.RegisterSubMenu("测试子菜单2", "测试子菜单2说明", (m) => MemberSubMenu(m, mcsBotPlayers));
-            menu.RegisterCommand("测试指令3", "测试指令3说明", TestCommandAction, mcsBotPlayers);
-        }
-
-        private void TestSubMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
-        {
-            menu.RegisterCommand("测试指令2", "测试指令2说明", TestCommandAction, mcsBotPlayers);
-        }
-
-        private void MemberSubMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
-        {
-            menu.RegisterCommand("测试指令4", "测试指令4说明", TestCommandAction, mcsBotPlayers);
-        }
-
-        private void TestCommandAction(Player[] mcsBotPlayers, params object[] args)
-        {
-            McsCommandApi.CloseCommandMenuAction();
         }
 
         public void CleanMcsFika()
@@ -157,11 +126,10 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            var handleActionsMap = CommandPacketUtils.GetHandleActionsMap();
-
-            if (handleActionsMap.TryGetValue(packet.CommandType, out var action))
+            var action = CommandPacketUtils.GetHandleAction(packet.CommandType);
+            if (action != null)
             {
-                action(packet);
+                CommandPacketMgr.HandleCommandPacket(packet, action);
             }
         }
 

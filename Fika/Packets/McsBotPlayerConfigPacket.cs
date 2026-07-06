@@ -13,11 +13,6 @@ namespace MiyakoCarryService.Fika.Packets
         public SMcsBotPlayerConfig McsBotPlayerConfig;
         public Dictionary<string, McsConfigValue> Extensions;
 
-        public McsBotPlayerConfigPacket()
-        {
-
-        }
-
         public override void Serialize(NetDataWriter writer)
         {
             base.Serialize(writer);

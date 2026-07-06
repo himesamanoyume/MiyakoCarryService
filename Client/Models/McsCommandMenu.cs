@@ -4,7 +4,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Models
 {
-    public delegate void McsCommandAction(Player[] players, params object[] args);
+    public delegate void McsCommandAction(Player[] mcsBotPlayers, params object[] args);
 
     public sealed class McsCommandMenu
     {
