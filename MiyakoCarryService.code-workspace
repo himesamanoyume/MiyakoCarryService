@@ -43,7 +43,16 @@
                 "command": "dotnet restore Server/MiyakoCarryServiceServer.sln --nologo",
             },
             {
-                "label": "package",
+                "label": "all: package",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "plugin: package",
+                    "fika: package"
+                ],
+                "group": "build"
+            },
+            {
+                "label": "plugin: package",
                 "type": "shell",
                 "command": "powershell",
                 "args": [
@@ -51,7 +60,19 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-Command",
-                    "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver.zip\" -Force"
+                    "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\Plugin\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryService-$ver.zip\" -Force"
+                ],
+            },
+            {
+                "label": "fika: package",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\Fika\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryServiceFika-$ver.zip\" -Force"
                 ],
             },
             {
@@ -242,7 +263,7 @@
                 "dependsOrder": "sequence",
                 "dependsOn": [
                     "all: build",
-                    "package"
+                    "all: package"
                 ],
                 "group": "build"
             },

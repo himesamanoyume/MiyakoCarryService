@@ -1,7 +1,8 @@
 param(
     [string]$WorkspaceFolder,
     [string]$RepoName = "Himesamanoyume/MiyakoCarryService",
-    [string]$VtReportFile = "vt_report_url.txt"
+    [string]$PluginVtReportFile = "plugin_vt_report_url.txt"
+    [string]$FikaVtReportFile = "fika_vt_report_url.txt"
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,9 +13,15 @@ if (-not $ver) {
     exit 1
 }
 
-$zipPath = Join-Path $WorkspaceFolder "MiyakoCarryService-$ver.zip"
-if (-not (Test-Path $zipPath)) {
-    Write-Host "Error: Release zip not found at $zipPath"
+$pluginZipPath = Join-Path $WorkspaceFolder "MiyakoCarryService-$ver.zip"
+if (-not (Test-Path $pluginZipPath)) {
+    Write-Host "Error: Release zip not found at $pluginZipPath"
+    exit 1
+}
+
+$fikaZipPath = Join-Path $WorkspaceFolder "MiyakoCarryServiceFika-$ver.zip"
+if (-not (Test-Path $fikaZipPath)) {
+    Write-Host "Error: Release zip not found at $fikaZipPath"
     exit 1
 }
 
@@ -24,19 +31,34 @@ if (-not $token) {
     exit 1
 }
 
-$vtUrl = ""
-$vtReportPath = Join-Path $WorkspaceFolder $VtReportFile
-if (Test-Path $vtReportPath) {
-    $vtUrl = Get-Content $vtReportPath | Select-Object -First 1
-    # Remove-Item $vtReportPath -Force
+$pluginVtUrl = ""
+$fikaVtUrl = ""
+
+$pluginVtReportPath = Join-Path $WorkspaceFolder $PluginVtReportFile
+if (Test-Path $pluginVtReportPath) {
+    $pluginVtUrl = Get-Content $pluginVtReportPath | Select-Object -First 1
+    # Remove-Item $pluginVtReportPath -Force
+    # Write-Host "VT report URL loaded and temp file cleaned up."
+} else {
+    Write-Host "Warning: VT report file not found, releasing without scan link."
+}
+
+$fikaVtReportPath = Join-Path $WorkspaceFolder $FikaVtReportFile
+if (Test-Path $fikaVtReportPath) {
+    $fikaVtUrl = Get-Content $fikaVtReportPath | Select-Object -First 1
+    # Remove-Item $fikaVtReportPath -Force
     # Write-Host "VT report URL loaded and temp file cleaned up."
 } else {
     Write-Host "Warning: VT report file not found, releasing without scan link."
 }
 
 $bodyText = ""
-if ($vtUrl) {
-    $bodyText += "`n`n$vtUrl"
+if ($pluginVtUrl) {
+    $bodyText += "`n`nPlugin VT: $pluginVtUrl"
+}
+
+if ($fikaVtUrl) {
+    $bodyText += "`n`nFika Addon VT: $fikaVtUrl"
 }
 
 try {
@@ -59,31 +81,51 @@ try {
     Write-Host "Draft release created: $($releaseRes.html_url)"
 
     $uploadUrl = $releaseRes.upload_url.Replace("{?name,label}", "")
-    $fileName = [System.IO.Path]::GetFileName($zipPath)
+
     $uploadHeaders = @{
         Authorization = "Bearer $token"
     }
 
-    Write-Host "Uploading $fileName to release..."
-    $fileBytes = [System.IO.File]::ReadAllBytes($zipPath)
+    $pluginFileName = [System.IO.Path]::GetFileName($pluginZipPath)
+    Write-Host "Uploading $pluginFileName to release..."
+    $pluginFileBytes = [System.IO.File]::ReadAllBytes($pluginZipPath)
     
-    $uploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$fileName" `
+    $pluginUploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$pluginFileName" `
         -Method Post `
         -Headers $uploadHeaders `
-        -Body $fileBytes `
+        -Body $pluginFileBytes `
         -ContentType "application/zip"
 
-    Write-Host "Asset uploaded successfully: $($uploadRes.browser_download_url)"
+    Write-Host "Asset uploaded successfully: $($pluginUploadRes.browser_download_url)"
+
+    $fikaFileName = [System.IO.Path]::GetFileName($fikaZipPath)
+    Write-Host "Uploading $fikaFileName to release..."
+    $fikaFileBytes = [System.IO.File]::ReadAllBytes($fikaZipPath)
+
+    $fikaUploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$fikaFileName" `
+        -Method Post `
+        -Headers $uploadHeaders `
+        -Body $fikaFileBytes `
+        -ContentType "application/zip"
+
+    Write-Host "Asset uploaded successfully: $($fikaUploadRes.browser_download_url)"
     Write-Host "`nAll done! Draft release is ready for review.`n"
 
-    $finalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$fileName"
+    $pluginFinalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$pluginFileName"
+    $fikaFinalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$fikaFileName"
 
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "Download URL : $finalDownloadUrl"
-    if ($vtUrl) {
-        Write-Host "VT Report    : $vtUrl"
+    Write-Host "Plugin Download URL : $pluginFinalDownloadUrl"
+    Write-Host "Fika Addon Download URL : $fikaFinalDownloadUrl"
+    if ($pluginVtUrl) {
+        Write-Host "Plugin VT Report    : $pluginVtUrl"
     } else {
-        Write-Host "VT Report    : (Not available)" -ForegroundColor Yellow
+        Write-Host "Plugin VT Report    : (Not available)" -ForegroundColor Yellow
+    }
+    if ($fikaVtUrl) {
+        Write-Host "Fika Addon VT Report    : $fikaVtUrl"
+    } else {
+        Write-Host "Fika Addon VT Report    : (Not available)" -ForegroundColor Yellow
     }
     Write-Host "Draft Page   : $($releaseRes.html_url)"
     Write-Host "Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service"

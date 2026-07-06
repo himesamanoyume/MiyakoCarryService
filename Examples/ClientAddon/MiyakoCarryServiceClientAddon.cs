@@ -8,15 +8,15 @@ using MiyakoCarryService.Client.Models;
 
 namespace MiyakoCarryService.Client.Addon
 {
-    [BepInPlugin(McsPluginAddonName, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
-    [BepInProcess(MiyakoCarryServicePlugin.EFTexe)]
+    [BepInPlugin(McsClientAddonGUID, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
+    [BepInProcess(MiyakoCarryServicePlugin.EFTapp)]
     [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServiceClientAddonPlugin : BaseUnityPlugin
     {
-        public const string McsPluginAddonName = "top.himesamanoyume.miyakocarryservice.clientaddon";
+        public const string McsClientAddonGUID = "top.himesamanoyume.miyakocarryservice.clientaddon";
 
         void Start()
         {

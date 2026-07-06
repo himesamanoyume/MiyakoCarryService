@@ -8,7 +8,7 @@
     <DevGamePluginsMcsPath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMcsPath>
     <DevGameScriptsMcsPath>$(DevGamePath)\BepInEx\scripts</DevGameScriptsMcsPath>
     <DevHeadlessGamePluginsMcsPath>$(DevHeadlessGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevHeadlessGamePluginsMcsPath>
-    <BuildMcsPath>$(ProjectDir)..\Build\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>  
+    <BuildMcsPath>$(ProjectDir)..\Build\Plugin\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>  
     <AssemblyName>Himesamanoyume.MiyakoCarryServiceClient</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceClient</AssemblyProduct>  

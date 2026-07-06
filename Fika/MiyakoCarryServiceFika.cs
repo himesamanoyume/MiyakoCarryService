@@ -19,10 +19,16 @@ using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Fika.Utils;
 using MiyakoCarryService.Fika.Mgrs;
+using BepInEx;
 
 namespace MiyakoCarryService.Fika
 {
-    public class MiyakoCarryServiceFika
+    [BepInPlugin(MiyakoCarryServicePlugin.McsFikaGUID, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
+    [BepInProcess(MiyakoCarryServicePlugin.EFTapp)]
+    [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency(MiyakoCarryServicePlugin.FikaGUID, BepInDependency.DependencyFlags.HardDependency)]
+    public sealed class MiyakoCarryServiceFika : BaseUnityPlugin
     {
         private McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
@@ -30,7 +36,7 @@ namespace MiyakoCarryService.Fika
         private CommandPacketMgr CommandPacketMgr => McsMgrApi.GetMgr<CommandPacketMgr>();
         private List<ModulePatch> _patches = new();
 
-        public void InitMcsFika()
+        void Start()
         {
             _patches.Add(new ExtractPatch());
             _patches.Add(new OnLoadingProfilePacketReceivedPatch());
@@ -53,7 +59,7 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
         }
 
-        public void CleanMcsFika()
+        public void OnDestroy()
         {
             foreach (var patch in _patches)
             {
@@ -222,7 +228,7 @@ namespace MiyakoCarryService.Fika
             });
         }
 
-        public virtual void SendCommandPacket(CommandMgrHandleFikaEvent @event)
+        public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsClient)
             {
@@ -245,7 +251,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public virtual void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
+        public void SendTalkMsgPacket(SubtitlesMgrHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsServer)
             {
@@ -276,7 +282,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public virtual void SendQuestProxyCommandCallbackPacket(QuestProxyCommandCallbackHandleFikaEvent @event)
+        public void SendQuestProxyCommandCallbackPacket(QuestProxyCommandCallbackHandleFikaEvent @event)
         {
             if (!FikaBackendUtils.IsServer)
             {
@@ -304,7 +310,7 @@ namespace MiyakoCarryService.Fika
             }
         }
 
-        public virtual void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
+        public void SendMcsBotPlayerConfigPacket(ConfigEntrySettingChangedEvent @event)
         {
             if (!FikaBackendUtils.IsClient)
             {

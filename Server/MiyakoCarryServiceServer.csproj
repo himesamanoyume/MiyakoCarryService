@@ -5,7 +5,7 @@
     <Nullable>disable</Nullable>
     <DevServerPath>D:\OtherGames\SPT4.0.X\Server-4.0.X</DevServerPath>
     <DevGamePluginsMiyakoCarryServicePath>$(DevServerPath)\SPT\user\mods\MiyakoCarryServiceServer</DevGamePluginsMiyakoCarryServicePath>
-    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\SPT\user\mods\MiyakoCarryServiceServer</BuildMiyakoCarryServicePath>  
+    <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\Plugin\SPT\user\mods\MiyakoCarryServiceServer</BuildMiyakoCarryServicePath>  
     <OutputType>Library</OutputType>
     <AssemblyName>Himesamanoyume.MiyakoCarryServiceServer</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>

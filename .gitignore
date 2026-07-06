@@ -371,4 +371,6 @@ FodyWeavers.xsd
 **/dist
 /Build
 MiyakoCarryService-*.zip
-vt_report_url.txt
+MiyakoCarryServiceFika-*.zip
+plugin_vt_report_url.txt
+fika_vt_report_url.txt
