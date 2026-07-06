@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client
     [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
-        public const string BepInExClientVersion = "1.1.0.0";
+        public const string BepInExClientVersion = "1.0.10.0";
         public static Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string EFTexe = "EscapeFromTarkov.exe";
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
