@@ -12,6 +12,9 @@ namespace MiyakoCarryService.Client.Utils
         private readonly LinkedList<LogEntry> _entries = new();
         private int _currentCharCount = 0;
         private int _newBigSurveyCount = 0;
+        private HashSet<string> _usedLayers = new();
+        private HashSet<string> _usedNodes = new();
+        private HashSet<string> _usedReasons = new();
 
         public LinkedList<LogEntry> GetEntries()
         {
@@ -26,6 +29,35 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
+        public void AddUsedLayer(string layerName)
+        {
+            _usedLayers.Add(layerName);
+        }
+
+        public void AddUsedNode(string node)
+        {
+            _usedNodes.Add(node);
+        }
+
+        public void AddUsedReason(string reason)
+        {
+            _usedReasons.Add(reason);
+        }
+
+        public HashSet<string> GetUsedLayers()
+        {
+            return _usedLayers;
+        }
+
+        public HashSet<string> GetUsedNodes()
+        {
+            return _usedNodes;
+        }
+
+        public HashSet<string> GetUsedReasons()
+        {
+            return _usedReasons;
+        }
 
         public void AddEntryIfNotFull(string condition, string stackTrace)
         {

@@ -34,6 +34,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.OnRaidStarted();
             StartCoroutine(ReloadDataLoop(1f, LoadItemData<PlayerData>));
+            StartCoroutine(RecordAgentInfo(1f));
             StartCoroutine(UpdateItemData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
@@ -41,6 +42,31 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 mcsBotPlayerData.Player.AIData.BotOwner.Memory.GoalTarget.Clear();
                 mcsBotPlayerData.Player.AIData.BotOwner.Memory.GoalEnemy = null;
+            }
+        }
+
+        public IEnumerator RecordAgentInfo(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                if (Gameloop.IsVaildGameWorld)
+                {
+                    var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                    foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                    {
+                        var brain = mcsBotPlayerData.BotOwner?.Brain;
+                        if (brain == null)
+                        {
+                            continue;
+                        }
+
+                        MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
+                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(brain.GetLastNode());
+                        MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+                    }
+                }
             }
         }
 
