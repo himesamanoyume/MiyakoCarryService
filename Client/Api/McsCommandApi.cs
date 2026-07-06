@@ -88,5 +88,10 @@ namespace MiyakoCarryService.Client.Api
         {
             CommandUtils.CloseCommandMenuAction();
         }
+
+        public static Player[] GetAliveMembers()
+        {
+            return CommandUtils.GetAliveMembers();
+        }
     }
 }

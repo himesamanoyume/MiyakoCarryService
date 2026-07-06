@@ -83,8 +83,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayerArray = new[] { mcsBotPlayer };
-                menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, mcsBotPlayerArray), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
+                menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
             CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);

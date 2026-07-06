@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using TMPro;
 
@@ -14,6 +16,7 @@ namespace MiyakoCarryService.Client.Utils
     {
         private static readonly Dictionary<string, List<Action<McsCommandMenu, Player[]>>> _extensions = new();
         private static readonly Stack<Action<McsCommandMenu>> _menuStack = new();
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public static void ClearGamePlayerOwner()
         {
@@ -32,21 +35,21 @@ namespace MiyakoCarryService.Client.Utils
                 return;
             }
 
-            if (!_extensions.TryGetValue(menuKey, out var list))
+            if (!_extensions.TryGetValue(menuKey, out var action))
             {
-                list = new List<Action<McsCommandMenu, Player[]>>();
-                _extensions[menuKey] = list;
+                action = new List<Action<McsCommandMenu, Player[]>>();
+                _extensions[menuKey] = action;
             }
-            list.Add(menu);
+            action.Add(menu);
         }
 
         public static void Apply(string menuKey, McsCommandMenu menu, Player[] mcsBotPlayers)
         {
-            if (_extensions.TryGetValue(menuKey, out var list))
+            if (_extensions.TryGetValue(menuKey, out var actions))
             {
-                foreach (var contribute in list)
+                foreach (var action in actions)
                 {
-                    contribute(menu, mcsBotPlayers);
+                    action(menu, mcsBotPlayers);
                 }
             }
         }
@@ -175,6 +178,11 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             PostBuildCommandMenu(actionsReturnClass);
+        }
+
+        public static Player[] GetAliveMembers()
+        {
+            return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
         }
     }
 }

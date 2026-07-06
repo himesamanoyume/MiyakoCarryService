@@ -2,9 +2,7 @@
 
 ## 低优先级
 
-- Fika扩展能否适配脚本引擎
 - 设计公共API
-- - **指令扩展**
 - - `CommandMgrHandleFikaEvent`应该也要扩展
 - 同步行动指令：玩家与护航同步扔雷、同步开火、同步姿态
 - - 与命令投掷手雷相同，前提都需要定制护航的战斗不随意扔雷
@@ -52,12 +50,11 @@
 
 - null
 
-#### 1.0.9.0
+#### 1.0.10.0
 
-Download URL : https://github.com/Himesamanoyume/MiyakoCarryService/releases/download/v1.0.9.0/MiyakoCarryService-1.0.9.0.zip
-VT Report    : https://www.virustotal.com/gui/file/e8b383df1660a336d30b86b42bc0463a5295bdd8f002cbf97c9724b616bda8b1
-Draft Page   : https://github.com/himesamanoyume/MiyakoCarryService/releases/tag/untagged-f7cb83a4314d8f0137d5
-Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service
+- null
+
+#### 1.0.9.0
 
 - 新增指令：丢出目标战利品
 - 新增指令：代理行动
