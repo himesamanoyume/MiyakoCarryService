@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Patches.Events;
@@ -248,6 +249,23 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void UpdateMcsBotPlayerConfig(MongoID mcsLeadPlayerId, McsBotPlayerConfig mcsBotPlayerConfig)
         {
+            if (!mcsBotPlayerConfig.EnableLooting)
+            {
+                var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
+                foreach (var mcsBotPlayer in mcsBotPlayers)
+                {
+                    var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+                    if (botOwner == null)
+                    {
+                        continue;
+                    }
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.IsLooting = false;
+                    }
+                }
+            }
             McsLeadPlayerConfigs.AddOrUpdate(
                 mcsLeadPlayerId,
                 id => mcsBotPlayerConfig,
