@@ -154,11 +154,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void InitActionMap()
         {
-            if (_endActionMap == null)
-            {
-                _endActionMap = new();
-            }
-
             RegisterAction(typeof(GoToCoverPointLogic), EndGoToCoverPoint);
             RegisterAction(typeof(HealLogic), EndHeal);
             RegisterAction(typeof(RunToCoverLogic), EndRunToCover);

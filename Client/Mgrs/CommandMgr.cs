@@ -52,9 +52,9 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public Player[] GetAliveMembers()
+        public Player[] GetMembers()
         {
-            return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
+            return McsMgr.GetAllMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
         }
 
         #region Menu  
@@ -66,18 +66,17 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            if (GetAliveMembers().Length == 0)
-            {
-                return;
-            }
-
             CommandUtils.ClearMenuStack();
             CommandUtils.OpenMenu(BuildMainMenu);
         }
 
         public virtual void BuildMainMenu(McsCommandMenu menu)
         {
-            var mcsBotPlayers = GetAliveMembers();
+            var mcsBotPlayers = GetMembers();
+            if (mcsBotPlayers.Length == 0)
+            {
+                return;
+            }
 
             menu.RegisterSubMenu(Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME, m => BuildTeamMenu(m, mcsBotPlayers), disabled: () => mcsBotPlayers.All(p => !p.HealthController.IsAlive));
 
@@ -86,7 +85,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
-            CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
+            // 不打算对根菜单进行扩展
+            // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
 
         public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
