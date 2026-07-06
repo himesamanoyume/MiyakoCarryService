@@ -221,6 +221,9 @@ namespace MiyakoCarryService.Client
             _patches.Add(new DoorGetActionsClassPatch());
             _patches.Add(new LootItemGetActionsClassPatch());
             _patches.Add(new RefreshMedsPatch());
+            _patches.Add(new BotHearingSensorPatch());
+            _patches.Add(new PlayerSayPatch());
+            _patches.Add(new PlayHitEffectPatch());
 
             if (FikaInstalled)
             {
