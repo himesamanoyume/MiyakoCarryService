@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// <summary>
     /// 使护航库存模式下点击套装列表时不会立即返回
     /// </summary>
-    public class EquipmentBuildsScreenShowPatch : ModulePatch
+    public sealed class EquipmentBuildsScreenShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.Show), [typeof(EquipmentBuildsScreen.GClass3870)]);
 

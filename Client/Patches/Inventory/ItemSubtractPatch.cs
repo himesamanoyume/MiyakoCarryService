@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// <summary>
     /// 允许玩家对活着的玩家背包内的物品进行合并或拆分
     /// </summary>
-    internal sealed class ItemSubtract1Patch : ModulePatch
+    public sealed class ItemSubtract1Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemSubtractClass1), nameof(ItemSubtractClass1.method_0));
 
@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         }
     }
 
-    internal sealed class ItemSubtract2Patch : ModulePatch
+    public sealed class ItemSubtract2Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemSubtractClass2), nameof(ItemSubtractClass2.method_0));
 

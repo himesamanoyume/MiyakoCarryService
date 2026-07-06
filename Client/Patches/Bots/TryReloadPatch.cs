@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 此函数也会在最后尝试切换其他武器，遂进行阻止
     /// </summary>
-    public class TryReloadPatch : ModulePatch
+    public sealed class TryReloadPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotReload), nameof(BotReload.TryReload));
 

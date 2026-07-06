@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 让护航使用更好的医疗品刷新算法
     /// </summary>
-    public class RefreshMedsPatch : ModulePatch
+    public sealed class RefreshMedsPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAidClass), nameof(BotFirstAidClass.RefreshMeds));
 

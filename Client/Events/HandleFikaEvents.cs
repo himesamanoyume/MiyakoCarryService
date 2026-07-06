@@ -1,5 +1,4 @@
 using EFT;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
 using UnityEngine;

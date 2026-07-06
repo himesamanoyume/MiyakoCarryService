@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
     /// <summary>
     /// 让SAIN的CombatSoloLayer层级激活时也执行特定的代码
     /// </summary>
-    public class CombatSoloLayerStartPatch : ModulePatch
+    public sealed class CombatSoloLayerStartPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(Type.GetType("SAIN.Layers.Combat.Solo.CombatSoloLayer, SAIN"), "Start");
 

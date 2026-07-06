@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 阻止此Layer的启用，时常发生在护航击杀敌人后，会使护航像傻逼一样从敌人面前跑开
     /// </summary>
-    public class AdvAssaultTargetPatch : ModulePatch
+    public sealed class AdvAssaultTargetPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Class99), nameof(Class99.ShallUseNow));
 

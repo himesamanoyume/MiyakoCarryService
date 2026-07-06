@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// <summary>
     /// 让活着的人在被打开背包时，其装备可见
     /// </summary>
-    public class TryFindChangedContainerPatch : ModulePatch
+    public sealed class TryFindChangedContainerPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SearchControllerClass), nameof(SearchControllerClass.TryFindChangedContainer));
 

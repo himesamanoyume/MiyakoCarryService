@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// <summary>
     /// 使打开护航背包指令打开护航背包时，允许移动护航背包里的物品
     /// </summary>
-    internal sealed class CanModifyItemPatch : ModulePatch
+    public sealed class CanModifyItemPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionsHandlerClass), nameof(InteractionsHandlerClass.CanModifyItem));
 

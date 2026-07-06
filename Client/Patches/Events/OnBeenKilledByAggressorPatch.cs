@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// <summary>
     /// 借鉴fika。实现护航的击杀经验共享给老板
     /// </summary>
-    public class OnBeenKilledByAggressorPatch : ModulePatch
+    public sealed class OnBeenKilledByAggressorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.OnBeenKilledByAggressor));
 

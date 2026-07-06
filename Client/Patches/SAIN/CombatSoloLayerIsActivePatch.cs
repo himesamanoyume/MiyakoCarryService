@@ -2,13 +2,12 @@ using System;
 using System.Reflection;
 using DrakiaXYZ.BigBrain.Brains;
 using HarmonyLib;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
-public class CombatSoloLayerIsActivePatch : ModulePatch
+public sealed class CombatSoloLayerIsActivePatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod() => AccessTools.Method(Type.GetType("SAIN.Layers.Combat.Solo.CombatSoloLayer, SAIN"), "IsActive");
 

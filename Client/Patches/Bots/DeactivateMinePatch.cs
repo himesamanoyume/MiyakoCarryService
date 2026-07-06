@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 优化原生的拆除绊雷位置寻路
     /// </summary>
-    public class DeactivateMinePatch : ModulePatch
+    public sealed class DeactivateMinePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DeactivateMineBaseLogic), nameof(DeactivateMineBaseLogic.method_7));
 

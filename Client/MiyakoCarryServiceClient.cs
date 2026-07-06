@@ -47,8 +47,6 @@ namespace MiyakoCarryService.Client
         public static MiyakoCarryServicePlugin Instance;
         public static McsPluginClientConfig McsPluginClientConfig = null;
         private List<ModulePatch> _patches = new();
-        // private object _mcsFika = null;
-        // private Type _mcsFikaType = null;
         public static bool IsLoadedByScriptEngine = false;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
@@ -231,10 +229,6 @@ namespace MiyakoCarryService.Client
                 {
                     _patches.Add(new PlayerOnDeadPatch());
                 }
-                // else
-                // {
-                //     LoadMcsFika();
-                // }
             }
             else
             {
@@ -263,40 +257,9 @@ namespace MiyakoCarryService.Client
             {
                 patch.Disable();
             }
-            // UnloadMcsFika();
             GameLoop.Instance.Destroy();
             Destroy(this);
         }
-
-        // private void LoadMcsFika()
-        // {
-        //     var pluginDir = IsLoadedByScriptEngine ? Path.Combine(BepInEx.Paths.PluginPath, "MiyakoCarryServiceClient") : Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        //     var assemblyPath = Path.Combine(pluginDir, "Himesamanoyume.MiyakoCarryServiceFika.dll");
-        //     if (!File.Exists(assemblyPath))
-        //     {
-        //         return;
-        //     }
-
-        //     var assembly = Assembly.LoadFrom(assemblyPath);
-        //     _mcsFikaType = assembly.GetType("MiyakoCarryService.Fika.MiyakoCarryServiceFika");
-
-        //     if (_mcsFikaType != null)
-        //     {
-        //         _mcsFika = Activator.CreateInstance(_mcsFikaType);
-        //         var initMethod = _mcsFikaType.GetMethod("InitMcsFika");
-        //         initMethod?.Invoke(_mcsFika, null);
-        //     }
-        // }
-
-        // // 我无法使用AppDomain和AssemblyLoadContext，因此只能不完全卸载
-        // private void UnloadMcsFika()
-        // {
-        //     if (_mcsFikaType != null)
-        //     {
-        //         var cleanMethod = _mcsFikaType.GetMethod("CleanMcsFika");
-        //         cleanMethod?.Invoke(_mcsFika, null);
-        //     }
-        // }
 
         private static readonly Dictionary<string, ConfigSection> _sections = new();
         public static readonly List<string> HideList = new();

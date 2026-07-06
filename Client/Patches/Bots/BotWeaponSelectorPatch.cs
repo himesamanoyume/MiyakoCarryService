@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 这个函数总是会自己切换至主武器，烦死了，遂进行阻止
     /// </summary>
-    public class BotWeaponSelectorPatch : ModulePatch
+    public sealed class BotWeaponSelectorPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotWeaponSelector), nameof(BotWeaponSelector.ManualUpdate));
 

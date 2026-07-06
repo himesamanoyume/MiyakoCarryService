@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 让Bot治疗部位没有最低百分比要求
     /// </summary>
-    public class BotFirstAidClassMinPercentPatch : ModulePatch
+    public sealed class BotFirstAidClassMinPercentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(BotFirstAidClass), nameof(BotFirstAidClass.min_percent));
 

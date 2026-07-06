@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 允许AI进行翻越
     /// </summary>
-    public class InitVaultComponentPatch : ModulePatch
+    public sealed class InitVaultComponentPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.InitVaultingComponent));
 
