@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(RunAwayArtilleryLogic), EndRunAwayArtillery);
             RegisterAction(typeof(RunAwayBTRLogic), EndRunAwayBTR);
             RegisterAction(typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction);
-            RegisterAction(typeof(DropTargetLootLogic), EndThrowTargetLootLogic);
+            RegisterAction(typeof(DropTargetLootLogic), EndDropTargetLootLogic);
         }
 
         public virtual bool EndHeal()
@@ -214,20 +214,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _currentHealTimes += 1;
             }
 
-            if (_currentHealTimes >= 15)
+            if (_currentHealTimes >= 15 && _currentHealTimes % 15 == 0)
             {
                 var player = BotOwner.GetPlayer;
                 if (!BotOwner.Medecine.Using
-                    && player.HandsController is Player.FirearmController firearmController
-                    && !firearmController.IsAiming
-                    && !firearmController.IsInReloadOperation()
-                    && !firearmController.IsInventoryOpen()
-                    && !firearmController.IsInInteractionStrictCheck()
-                    && !firearmController.IsInSpawnOperation()
-                    && !firearmController.IsHandsProcessing())
+                    && player.HandsController
+                    && !player.HandsController.IsAiming
+                    && !player.HandsController.IsInventoryOpen()
+                    && !player.HandsController.IsInInteractionStrictCheck()
+                    && !player.HandsController.IsHandsProcessing())
                 {
                     CheckWeaponSwitch();
+                    _currentHealTimes = 0;
+                    return true;
                 }
+            }
+
+            if (_currentHealTimes >= 60)
+            {
                 _currentHealTimes = 0;
                 return true;
             }
@@ -820,8 +824,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
-            bool flag;
-            if (!BotOwner.LookSensor.EnoughDistToShoot(out flag))
+            if (!BotOwner.LookSensor.EnoughDistToShoot(out var flag))
             {
                 return false;
             }
@@ -1799,7 +1802,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public virtual bool EndThrowTargetLootLogic()
+        public virtual bool EndDropTargetLootLogic()
         {
             if (McsBotPlayerData == null)
             {

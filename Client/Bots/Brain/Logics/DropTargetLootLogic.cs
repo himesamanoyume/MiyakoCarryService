@@ -44,12 +44,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (Time.time > _nextCheckTime)
                 {
                     _nextCheckTime = Time.time + 1f;
-                    TasksExtensions.HandleExceptions(ThrowTargetLoot(mcsBotPlayerData));
+                    TasksExtensions.HandleExceptions(DropTargetLoot(mcsBotPlayerData));
                 }
             }
         }
 
-        public async Task ThrowTargetLoot(McsBotPlayerData mcsBotPlayerData)
+        public async Task DropTargetLoot(McsBotPlayerData mcsBotPlayerData)
         {
             await Task.Delay(500);
             var wantDropItemId = BotOwner.ExternalItemsController.GetRandomItemToDrop();

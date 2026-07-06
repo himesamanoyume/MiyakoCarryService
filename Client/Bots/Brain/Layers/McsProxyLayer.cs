@@ -1,7 +1,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -32,6 +31,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var time = Time.time;
                 if (McsBotPlayerData == null)
                 {
                     return new Action(typeof(SimplePatrolLogic), "Mcs:LeadPosNull");
@@ -44,10 +44,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.TargetPos.HasValue)
                 {
-                    if (_nextUpdatePosTime < Time.time)
+                    if (_nextUpdatePosTime < time)
                     {
                         UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
+                        _nextUpdatePosTime = time + nextTime;
                     }
 
                     if (_currentMoveTarget.HasValue)

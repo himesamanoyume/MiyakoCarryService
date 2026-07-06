@@ -34,6 +34,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var time = Time.time;
                 if (McsBotPlayerData == null)
                 {
                     return new Action(typeof(SimplePatrolLogic), "Mcs:Uninitialized");
@@ -41,10 +42,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.TargetPos.HasValue)
                 {
-                    if (_nextUpdatePosTime < Time.time)
+                    if (_nextUpdatePosTime < time)
                     {
                         UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
+                        _nextUpdatePosTime = time + nextTime;
                     }
 
                     if (_currentMoveTarget.HasValue)

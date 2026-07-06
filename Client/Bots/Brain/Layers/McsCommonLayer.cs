@@ -2,7 +2,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -26,6 +25,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var time = Time.time;
                 if (McsBotPlayerData == null)
                 {
                     return new Action(typeof(SimplePatrolLogic), "Mcs:DataNull");
@@ -39,10 +39,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
-                    if (_nextUpdatePosTime < Time.time)
+                    if (_nextUpdatePosTime < time)
                     {
                         UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
+                        _nextUpdatePosTime = time + nextTime;
                     }
 
                     if (_currentMoveTarget.HasValue)
@@ -58,10 +58,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                 {
-                    if (_nextUpdatePosTime < Time.time)
+                    if (_nextUpdatePosTime < time)
                     {
                         UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = Time.time + nextTime;
+                        _nextUpdatePosTime = time + nextTime;
                     }
 
                     if (_currentMoveTarget.HasValue)
@@ -92,20 +92,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                if (McsBotPlayerData != null)
+                if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
                 {
-                    if (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && _nextLootingCheckTime < Time.time && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+                    if (_nextUpdatePosTime < time)
                     {
-                        _currentMoveTarget = McsBotPlayerData.LootingTarget.RootTransform.position;
+                        UpdateCommonMoveTarget(McsBotPlayerData.LootingTarget.RootTransform.position, out float nextTime);
+                        _nextUpdatePosTime = time + nextTime;
+                    }
+
+                    if (_currentMoveTarget.HasValue)
+                    {
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
                     }
+                    else
+                    {
+                        return new Action(typeof(SimplePatrolLogic), "Mcs:GoToLootTargetPosNotFound");
+                    }
                 }
 
-                if (_nextUpdatePosTime < Time.time)
+                if (_nextUpdatePosTime < time)
                 {
                     UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                    _nextUpdatePosTime = Time.time + nextTime;
+                    _nextUpdatePosTime = time + nextTime;
                 }
 
                 var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
@@ -122,9 +131,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else
                 {
-                    if (_nextPatrolTime < Time.time)
+                    if (_nextPatrolTime < time)
                     {
-                        _nextPatrolTime = Time.time + 8f;
+                        _nextPatrolTime = time + 8f;
                         if (_currentMoveTarget.HasValue)
                         {
                             BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);

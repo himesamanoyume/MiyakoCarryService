@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Fika.Mgrs
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.LootProxyAction.ToString(), HandleProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.InteractionProxyAction.ToString(), HandleProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.EndProxyAction.ToString(), HandleEndProxyAction);
-            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.DropTargetLoot.ToString(), HandleThrowTargetLoot);
+            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.DropTargetLoot.ToString(), HandleDropTargetLoot);
         }
 
         public void HandleCommandPacket(CommandPacket packet, Action<CommandPacket, FikaPlayer, FikaPlayer> action)
@@ -175,7 +175,7 @@ namespace MiyakoCarryService.Fika.Mgrs
             }
         }
 
-        public virtual void HandleThrowTargetLoot(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)
+        public virtual void HandleDropTargetLoot(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)
         {
             var botOwner = mcsBotPlayer.AIData.BotOwner;
             if (!botOwner.ExternalItemsController.HaveItemsToDrop())

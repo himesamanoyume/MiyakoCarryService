@@ -56,6 +56,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             try
             {
+                var time = Time.time;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
                 if (goalEnemy == null)
                 {
@@ -69,7 +70,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
                 }
 
-                if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < Time.time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= Time.time && GetCrossPoint(goalEnemy))
+                if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= time && GetCrossPoint(goalEnemy))
                 {
                     BotOwner.Memory.Spotted(false, null, null);
                 }
@@ -139,10 +140,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                                 {
-                                    if (_nextUpdatePosTime < Time.time)
+                                    if (_nextUpdatePosTime < time)
                                     {
                                         UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                                        _nextUpdatePosTime = Time.time + nextTime;
+                                        _nextUpdatePosTime = time + nextTime;
                                     }
 
                                     if (_currentMoveTarget.HasValue)
@@ -165,10 +166,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
                             var tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
 
-                            if (_nextUpdatePosTime < Time.time)
+                            if (_nextUpdatePosTime < time)
                             {
                                 UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                                _nextUpdatePosTime = Time.time + nextTime;
+                                _nextUpdatePosTime = time + nextTime;
                             }
 
                             if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
@@ -183,9 +184,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             }
                             else
                             {
-                                if (_nextPatrolTime + 4f < Time.time)
+                                if (_nextPatrolTime + 4f < time)
                                 {
-                                    _nextPatrolTime = Time.time + 4f;
+                                    _nextPatrolTime = time + 4f;
                                     if (_currentMoveTarget.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
@@ -213,10 +214,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
                                 {
-                                    if (_nextUpdatePosTime < Time.time)
+                                    if (_nextUpdatePosTime < time)
                                     {
                                         UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                                        _nextUpdatePosTime = Time.time + nextTime;
+                                        _nextUpdatePosTime = time + nextTime;
                                     }
 
                                     if (_currentMoveTarget.HasValue)
@@ -236,10 +237,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                             }
 
-                            if (_nextUpdatePosTime < Time.time)
+                            if (_nextUpdatePosTime < time)
                             {
                                 UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                                _nextUpdatePosTime = Time.time + nextTime;
+                                _nextUpdatePosTime = time + nextTime;
                             }
 
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
@@ -256,9 +257,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             }
                             else
                             {
-                                if (_nextPatrolTime + 4f < Time.time)
+                                if (_nextPatrolTime + 4f < time)
                                 {
-                                    _nextPatrolTime = Time.time + 4f;
+                                    _nextPatrolTime = time + 4f;
                                     if (_currentMoveTarget.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
