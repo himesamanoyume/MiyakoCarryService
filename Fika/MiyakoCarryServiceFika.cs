@@ -23,7 +23,7 @@ using BepInEx;
 
 namespace MiyakoCarryService.Fika
 {
-    [BepInPlugin(MiyakoCarryServicePlugin.McsFikaGUID, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
+    [BepInPlugin(McsFikaGUID, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
     [BepInProcess(MiyakoCarryServicePlugin.EFTapp)]
     [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
@@ -35,6 +35,7 @@ namespace MiyakoCarryService.Fika
         private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
         private CommandPacketMgr CommandPacketMgr => McsMgrApi.GetMgr<CommandPacketMgr>();
         private List<ModulePatch> _patches = new();
+        public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
 
         void Start()
         {

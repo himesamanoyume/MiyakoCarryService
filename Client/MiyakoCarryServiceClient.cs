@@ -21,7 +21,6 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Patches.Inventory;
 using MiyakoCarryService.Client.Patches.SAIN;
-using System.IO;
 using System.Reflection;
 using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Patches.Interactive;
@@ -31,8 +30,6 @@ namespace MiyakoCarryService.Client
     [BepInPlugin(McsGUID, McsPluginName, BepInExClientVersion)]
     [BepInProcess(EFTapp)]
     [BepInDependency(BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency(FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
         public const string BepInExClientVersion = "1.0.10.0";
@@ -40,7 +37,6 @@ namespace MiyakoCarryService.Client
         public const string EFTapp = "EscapeFromTarkov.exe";
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
-        public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
         public const string BigBrainGUID = "xyz.drakia.bigbrain";
 #if DEBUG
         public const string McsPluginName = "姫様の夢 MiyakoCarryService DebugBuild";

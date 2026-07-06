@@ -13,7 +13,6 @@ namespace MiyakoCarryService.Client.Addon
     [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.FikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(MiyakoCarryServicePlugin.McsFikaGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class MiyakoCarryServiceClientAddonPlugin : BaseUnityPlugin
     {
         public const string McsClientAddonGUID = "top.himesamanoyume.miyakocarryservice.clientaddon";

@@ -276,7 +276,7 @@ namespace MiyakoCarryService.Client.Datas
 
                     var parentItem = item.Parent.GetRootItem();
                     var itemData = parentItem.GetData();
-                    if (itemData is PlayerData playerData && !playerData.Player.IsAI)
+                    if (itemData is PlayerData playerData)
                     {
                         if ((equipmentSlot is EquipmentSlot.FirstPrimaryWeapon && playerData.Player.HandsController.Item == item)
                         || (equipmentSlot is EquipmentSlot.SecondPrimaryWeapon && playerData.Player.HandsController.Item == item)
