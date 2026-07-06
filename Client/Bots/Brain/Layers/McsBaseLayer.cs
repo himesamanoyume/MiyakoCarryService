@@ -45,6 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public bool _lastCanRunResult = false;
         public int _currentMoveRetries = 0;
         public int _currentHealTimes = 0;
+        public int _currentLootingRetries = 0;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -794,9 +795,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 CheckStuck();
             }
 
-            if (!McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
+            if (Time.time > _nextLootingCheckTime && !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
             {
                 _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COLDDOWN;
+                return true;
+            }
+
+            if (_currentLootingRetries >= 30)
+            {
+                _currentLootingRetries = 0;
+                McsBotPlayerData.IsLooting = false;
+                return true;
+            }
+
+            if (BotOwner.GoToSomePointData.IsCome())
+            {
                 return true;
             }
             return false;
