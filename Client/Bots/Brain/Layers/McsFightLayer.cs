@@ -2,7 +2,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -10,7 +9,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public class McsFightLayer : McsBaseLayer<McsFightLayer>
+    public class McsFightLayer : McsBaseLayer
     {
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

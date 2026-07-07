@@ -2,7 +2,6 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -10,7 +9,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public class McsEscortLayer : McsBaseLayer<McsEscortLayer>
+    public class McsEscortLayer : McsBaseLayer
     {
         public McsEscortLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

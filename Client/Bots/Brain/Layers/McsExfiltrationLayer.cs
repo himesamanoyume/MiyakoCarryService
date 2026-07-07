@@ -2,12 +2,11 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
-using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public class McsExfiltrationLayer : McsBaseLayer<McsExfiltrationLayer>
+    public class McsExfiltrationLayer : McsBaseLayer
     {
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public class McsProxyLayer : McsBaseLayer<McsProxyLayer>
+    public class McsProxyLayer : McsBaseLayer
     {
         public McsProxyLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

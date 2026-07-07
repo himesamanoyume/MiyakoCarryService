@@ -17,7 +17,7 @@ using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    public abstract class McsBaseLayer<T> : CustomLayer where T : McsBaseLayer<T>
+    public abstract class McsBaseLayer : CustomLayer
     {
         public McsBaseLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             get
             {
-                return field ??= typeof(T).Name;
+                return field ??= GetType().Name;
             }
         }
 
