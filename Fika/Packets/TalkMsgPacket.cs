@@ -22,6 +22,7 @@ namespace MiyakoCarryService.Fika.Packets
             base.Deserialize(reader);
             PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
             Position = reader.GetNullableUnmanaged<Vector3>();
+            Keys = new(5);
             var amount = reader.GetUShort();
             if (amount > 0)
             {

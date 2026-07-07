@@ -53,29 +53,36 @@ namespace MiyakoCarryService.Client.Mgrs
                 yield return waitTime;
                 if (Gameloop.IsVaildGameWorld)
                 {
-                    var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
-                    foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                    try
                     {
-                        var brain = mcsBotPlayerData.BotOwner?.Brain;
-                        if (brain == null)
+                        var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                        foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                         {
-                            continue;
-                        }
+                            var brain = mcsBotPlayerData.BotOwner?.Brain;
+                            if (brain == null)
+                            {
+                                continue;
+                            }
 
-                        MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
-                        MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
 
-                        if (brain.BaseBrain == null)
-                        {
-                            continue;
-                        }
-                        var curLayerInfo = brain.Agent.Gclass35_0;
-                        if (curLayerInfo == null)
-                        {
-                            continue;
-                        }
+                            if (brain.BaseBrain == null)
+                            {
+                                continue;
+                            }
+                            var curLayerInfo = brain.Agent.Gclass35_0;
+                            if (curLayerInfo == null)
+                            {
+                                continue;
+                            }
 
-                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(curLayerInfo.Name());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(curLayerInfo.Name());
+                        }
+                    }
+                    catch
+                    {
+                        
                     }
                 }
             }

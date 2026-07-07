@@ -242,13 +242,6 @@ namespace MiyakoCarryService.Fika.Mgrs
         public virtual void HandleReportAboutSelf(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)
         {
             var botOwner = mcsBotPlayer.AIData.BotOwner;
-            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData != null)
-            {
-                mcsBotPlayerData.IsLooting = false;
-                mcsBotPlayerData.TargetPos = null;
-                mcsBotPlayerData.ProxyTargetId = null;
-            }
             var health = botOwner.HealthController.GetBodyPartHealth(EBodyPart.Common);
             var key1 = $"{(int)health.Current}/{health.Maximum}";
             botOwner.CollectAmmoOrBackupAmmoCount(out var total);

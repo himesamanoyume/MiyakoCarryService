@@ -272,7 +272,7 @@ namespace MiyakoCarryService.Fika
                 {
                     PhraseTrigger = @event.Msg.PhraseTrigger,
                     Position = @event.Msg.Position,
-                    Keys = @event.Msg.Keys.ToList(),
+                    Keys = @event.Msg.Keys != null ? @event.Msg.Keys.ToList() : [],
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

@@ -13,36 +13,6 @@ namespace MiyakoCarryService.Fika.Packets
         public SMcsBotPlayerConfig McsBotPlayerConfig;
         public Dictionary<string, McsConfigValue> Extensions;
 
-        public override void Serialize(NetDataWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Put(KeywordItemText, 0);
-            writer.PutUnmanaged(McsBotPlayerConfig);
-            writer.Put(Extensions.Count);
-            foreach (var kv in Extensions)
-            {
-                writer.Put(kv.Key);
-                writer.Put((byte)kv.Value.Type);
-                switch (kv.Value.Type)
-                {
-                    case EMcsConfigValueType.Bool: 
-                        writer.Put(kv.Value.BoolValue); 
-                        break;
-                    case EMcsConfigValueType.Int:
-                    case EMcsConfigValueType.Long:
-                    case EMcsConfigValueType.Enum: 
-                        writer.Put(kv.Value.IntValue); 
-                        break;
-                    case EMcsConfigValueType.Float: 
-                        writer.Put(kv.Value.FloatValue); 
-                        break;
-                    case EMcsConfigValueType.String: 
-                        writer.Put(kv.Value.StringValue, 0); 
-                        break;
-                }
-            }
-        }
-
         public override void Deserialize(NetDataReader reader)
         {
             base.Deserialize(reader);
@@ -73,6 +43,36 @@ namespace MiyakoCarryService.Fika.Packets
                         break;
                 }
                 Extensions[key] = v;
+            }
+        }
+
+        public override void Serialize(NetDataWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Put(KeywordItemText, 0);
+            writer.PutUnmanaged(McsBotPlayerConfig);
+            writer.Put(Extensions.Count);
+            foreach (var kv in Extensions)
+            {
+                writer.Put(kv.Key, 0);
+                writer.Put((byte)kv.Value.Type);
+                switch (kv.Value.Type)
+                {
+                    case EMcsConfigValueType.Bool: 
+                        writer.Put(kv.Value.BoolValue); 
+                        break;
+                    case EMcsConfigValueType.Int:
+                    case EMcsConfigValueType.Long:
+                    case EMcsConfigValueType.Enum: 
+                        writer.Put(kv.Value.IntValue); 
+                        break;
+                    case EMcsConfigValueType.Float: 
+                        writer.Put(kv.Value.FloatValue); 
+                        break;
+                    case EMcsConfigValueType.String: 
+                        writer.Put(kv.Value.StringValue, 0); 
+                        break;
+                }
             }
         }
     }

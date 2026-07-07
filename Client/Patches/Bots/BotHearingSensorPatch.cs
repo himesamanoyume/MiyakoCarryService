@@ -24,6 +24,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             try
             {
+                if (!Tools.IsHost)
+                {
+                    return;
+                }
+
                 var thisBotOwner = __instance.BotOwner;
                 if (thisBotOwner == null)
                 {

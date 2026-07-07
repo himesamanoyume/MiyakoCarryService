@@ -20,6 +20,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(EffectsCommutator __instance, EftBulletClass info, ShotInfoClass playerHitInfo)
         {
+            if (!Tools.IsHost)
+            {
+                return;
+            }
+            
             var shooter = info.Player;
             if (shooter == null)
             {

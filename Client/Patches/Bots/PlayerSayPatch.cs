@@ -19,6 +19,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(Player __instance, EPhraseTrigger phrase, bool demand = false, float delay = 0f, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
         {
+            if (!Tools.IsHost)
+            {
+                return;
+            }
+            
             if (__instance.Profile.Info.GroupId is "Fika" or "Mcs" || McsMgr.IsMcsLeadPlayer(__instance.ProfileId) || McsMgr.IsMcsBotPlayer(__instance.ProfileId))
             {
                 return;
@@ -27,7 +32,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
             foreach (var mcsBotPlayer in McsMgr.GetAllAliveMcsBotPlayer())
             {
                 var botOwner = mcsBotPlayer.AIData.BotOwner;
-                if (botOwner.HearingSensor.method_6(__instance.Transform.position, 10f, out var dist))
+                var pos = __instance?.Transform?.position;
+                if (!pos.HasValue)
+                {
+                    continue;
+                }
+                if (botOwner.HearingSensor.method_6(pos.Value, 10f, out var dist))
                 {
                     botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Visible, botOwner);
                 }

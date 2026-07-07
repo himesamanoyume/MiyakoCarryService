@@ -276,6 +276,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
                     oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
+                    oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
                     return oldConfig;
                 }
             );
