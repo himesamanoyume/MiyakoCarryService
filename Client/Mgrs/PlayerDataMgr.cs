@@ -69,13 +69,13 @@ namespace MiyakoCarryService.Client.Mgrs
                         {
                             continue;
                         }
-                        var baseBrainStrategy = brain.Agent.Gclass309_0 as BaseBrain;
-                        if (baseBrainStrategy.CurLayerInfo == null)
+                        var curLayerInfo = brain.Agent.Gclass35_0;
+                        if (curLayerInfo == null)
                         {
                             continue;
                         }
 
-                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(baseBrainStrategy.CurLayerInfo.Name());
+                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(curLayerInfo.Name());
                     }
                 }
             }
