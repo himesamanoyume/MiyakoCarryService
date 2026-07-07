@@ -1,5 +1,7 @@
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
@@ -13,6 +15,7 @@ using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Fika.Packets;
 using MiyakoCarryService.Fika.Utils;
+using SPT.Common.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Fika.Mgrs
@@ -30,6 +33,7 @@ namespace MiyakoCarryService.Fika.Mgrs
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.HoldPosition.ToString(), HandleHoldPosition);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.Regroup.ToString(), HandleRegroup);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.ReportAboutEnemy.ToString(), HandleReportAboutEnemy);
+            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.ReportAboutSelf.ToString(), HandleReportAboutSelf);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.OnYourOwn.ToString(), HandleOnYourOwn);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.Escort.ToString(), HandleEscort);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.GoToExfil.ToString(), HandleGoToExfil);
@@ -233,6 +237,50 @@ namespace MiyakoCarryService.Fika.Mgrs
                     PhraseTrigger = EPhraseTrigger.Clear,
                 });
             }
+        }
+
+        public virtual void HandleReportAboutSelf(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)
+        {
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.IsLooting = false;
+                mcsBotPlayerData.TargetPos = null;
+                mcsBotPlayerData.ProxyTargetId = null;
+            }
+            var health = botOwner.HealthController.GetBodyPartHealth(EBodyPart.Common);
+            var key1 = $"{(int)health.Current}/{health.Maximum}";
+            botOwner.CollectAmmoOrBackupAmmoCount(out var total);
+            var key2 = total.ToString();
+            var allActiveEffects = botOwner.HealthController.GetAllActiveEffects();
+            var healthStates = new List<HealthState>();
+            foreach (var activeEffect in allActiveEffects)
+            {
+                
+                if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
+                {
+                    continue;
+                }
+
+                var effectType = GClass3058.EffectName(activeEffect);
+                if (string.IsNullOrEmpty(effectType))
+                {
+                    continue;
+                }
+
+                healthStates.Add(new HealthState
+                {
+                    BodyPart = activeEffect.BodyPart.ToString(),
+                    EffectType = effectType
+                });
+            }
+            var key3 = Json.Serialize(healthStates);
+            botOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.Mine,
+                Keys = [key1, key2, key3]
+            });
         }
 
         public virtual void HandleOnYourOwn(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)

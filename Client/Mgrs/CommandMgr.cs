@@ -11,6 +11,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
+using SPT.Common.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -440,10 +441,37 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
                     }
+                    var health = botOwner.HealthController.GetBodyPartHealth(EBodyPart.Common);
+                    var key1 = $"{(int)health.Current}/{health.Maximum}";
+                    botOwner.CollectAmmoOrBackupAmmoCount(out var total);
+                    var key2 = total.ToString();
+                    var allActiveEffects = botOwner.HealthController.GetAllActiveEffects();
+                    var healthStates = new List<HealthState>();
+                    foreach (var activeEffect in allActiveEffects)
+                    {
+
+                        if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
+                        {
+                            continue;
+                        }
+
+                        var effectType = GClass3058.EffectName(activeEffect);
+                        if (string.IsNullOrEmpty(effectType))
+                        {
+                            continue;
+                        }
+
+                        healthStates.Add(new HealthState
+                        {
+                            BodyPart = activeEffect.BodyPart.ToString(),
+                            EffectType = effectType
+                        });
+                    }
+                    var key3 = Json.Serialize(healthStates);
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Mine,
-                        Keys = []
+                        Keys = [key1, key2, key3]
                     });
                 }
             });

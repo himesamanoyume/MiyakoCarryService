@@ -209,5 +209,6 @@
     "Mcs/ReportAboutSelfCommand Name": "报告自身状态",
     "Mcs/ReportAboutSelfCommand TargetName": "命令护航报告自身的健康状态、物资储备情况",
     "Mcs/TeamReportAboutSelfCommand Name": "全队报告自身状态",
-    "Mcs/TeamReportAboutSelfCommand TargetName": "让所有护航报告自身的健康状态、物资储备情况"
+    "Mcs/TeamReportAboutSelfCommand TargetName": "让所有护航报告自身的健康状态、物资储备情况",
+    "Mcs/Mine": "当前血量: {0}, 剩余不少于 {1} 颗子弹。"
 }

@@ -138,6 +138,15 @@ namespace MiyakoCarryService.Client.Utils
             }}
         };
 
+        public static readonly HashSet<Type> EffectTypeFilter = new()
+        {
+            typeof(GInterface347),
+            typeof(GInterface364),
+            typeof(GInterface365),
+            typeof(GInterface368),
+            typeof(GInterface370)
+        };
+
         public static readonly HashSet<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
 
         public static readonly Dictionary<string, string> ImportantSwitchIdsInfo = new()

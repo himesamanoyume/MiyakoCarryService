@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -11,6 +13,7 @@ using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
+using SPT.Common.Utils;
 using TMPro;
 using UnityEngine;
 
@@ -31,36 +34,38 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
             _talkContents = new()
             {
-                {EPhraseTrigger.None, "未知的回应，应进行反馈。"},
-                {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
-                {EPhraseTrigger.Roger, Locales.ROGER},
-                {EPhraseTrigger.OnPosition, Locales.ONPOSITION},
-                {EPhraseTrigger.GoLoot, Locales.GOLOOT},
-                {EPhraseTrigger.OnLoot, Locales.ONLOOT},
-                {EPhraseTrigger.LootGeneric, Locales.LOOTGENERIC},
-                {EPhraseTrigger.Clear, Locales.CLEAR},
-                {EPhraseTrigger.LeftFlank, Locales.LEFTFLANK},
-                {EPhraseTrigger.RightFlank, Locales.RIGHTFLANK},
-                {EPhraseTrigger.InTheFront, Locales.INTHEFRONT},
-                {EPhraseTrigger.OnSix, Locales.ONSIX},
-                {EPhraseTrigger.EnemyDown, Locales.ENEMYDOWN},
-                {EPhraseTrigger.Going, Locales.GOING},
-                {EPhraseTrigger.HoldPosition, Locales.HOLDPOSITION},
-                {EPhraseTrigger.Regroup, Locales.REGROUP},
-                {EPhraseTrigger.StartHeal, Locales.STARTHEAL},
-                {EPhraseTrigger.OnFriendlyDown, Locales.ONFRIENDLYDOWN},
-                {EPhraseTrigger.FollowMe, Locales.FOLLOWME},
-                {EPhraseTrigger.Negative, Locales.NEGATIVE},
+                { EPhraseTrigger.None, "未知的回应，应进行反馈。" },
+                { EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT },
+                { EPhraseTrigger.Roger, Locales.ROGER },
+                { EPhraseTrigger.OnPosition, Locales.ONPOSITION },
+                { EPhraseTrigger.GoLoot, Locales.GOLOOT },
+                { EPhraseTrigger.OnLoot, Locales.ONLOOT },
+                { EPhraseTrigger.LootGeneric, Locales.LOOTGENERIC },
+                { EPhraseTrigger.Clear, Locales.CLEAR },
+                { EPhraseTrigger.LeftFlank, Locales.LEFTFLANK },
+                { EPhraseTrigger.RightFlank, Locales.RIGHTFLANK },
+                { EPhraseTrigger.InTheFront, Locales.INTHEFRONT },
+                { EPhraseTrigger.OnSix, Locales.ONSIX },
+                { EPhraseTrigger.EnemyDown, Locales.ENEMYDOWN },
+                { EPhraseTrigger.Going, Locales.GOING },
+                { EPhraseTrigger.HoldPosition, Locales.HOLDPOSITION },
+                { EPhraseTrigger.Regroup, Locales.REGROUP },
+                { EPhraseTrigger.StartHeal, Locales.STARTHEAL },
+                { EPhraseTrigger.OnFriendlyDown, Locales.ONFRIENDLYDOWN },
+                { EPhraseTrigger.FollowMe, Locales.FOLLOWME },
+                { EPhraseTrigger.Negative, Locales.NEGATIVE },
+                { EPhraseTrigger.Mine, Locales.MINE },
                 // 空短语、临时内容，用于传递任意Key实现任何对话内容
-                {EPhraseTrigger.PhraseNone, "PhraseNone"}
+                { EPhraseTrigger.PhraseNone, "PhraseNone" }
             };
 
             _phraseHandleMaps = new()
             {
-                {EPhraseTrigger.OnFirstContact, HandleOnFirstContact},
-                {EPhraseTrigger.OnLoot, HandleOnLoot},
-                {EPhraseTrigger.LootGeneric, HandleLootGeneric},
-                {EPhraseTrigger.PhraseNone, HandlePhraseNone},
+                { EPhraseTrigger.OnFirstContact, HandleOnFirstContact },
+                { EPhraseTrigger.OnLoot, HandleOnLoot },
+                { EPhraseTrigger.LootGeneric, HandleLootGeneric },
+                { EPhraseTrigger.PhraseNone, HandlePhraseNone },
+                { EPhraseTrigger.Mine, HandlePhraseMine },
             };
 
             TasksExtensions.HandleExceptions(Init());
@@ -172,19 +177,30 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Keys[0].McsLocalized(), msg.Keys[1].McsLocalized());
+            content = string.Format(content, msg.Keys[0].McsLocalized(), msg.Keys[1].McsLocalized());
             return content;
         }
 
         public string HandleLootGeneric(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content = string.Format(Locales.LOOTGENERIC.McsLocalized(), msg.Keys[0].McsLocalized());
+            content = string.Format(content, msg.Keys[0].McsLocalized());
             return content;
         }
 
         public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer)
         {
             return msg.Keys[0].McsLocalized();
+        }
+
+        public string HandlePhraseMine(string content, McsMsg msg, Player mcsLeadPlayer)
+        {
+            content = string.Format(content, msg.Keys[0], msg.Keys[1]);
+            var healthStates = Json.Deserialize<List<HealthState>>(msg.Keys[2]);
+            if (healthStates.Count > 0)
+            {
+                content += " " + string.Join(", ", healthStates.Select(h => $"{h.BodyPart.McsLocalized()} {h.EffectType.McsLocalized()}"));
+            }
+            return content;
         }
 
         public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)

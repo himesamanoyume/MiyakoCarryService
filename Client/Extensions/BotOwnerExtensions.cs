@@ -1,6 +1,8 @@
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EFT;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -79,6 +81,235 @@ namespace MiyakoCarryService.Client.Extensions
                         return new();
                     }
                     return botOwner.Position;
+                }
+            }
+
+            public void TryChangeWeaponSlot(EquipmentSlot slot)
+            {
+                var weaponManager = botOwner.WeaponManager;
+                if (weaponManager?.Selector == null)
+                {
+                    return;
+                }
+
+                switch (slot)
+                {
+                    case EquipmentSlot.FirstPrimaryWeapon:
+                        weaponManager.Selector.ChangeToMain();
+                        break;
+                    case EquipmentSlot.SecondPrimaryWeapon:
+                        weaponManager.Selector.ChangeToSecond();
+                        break;
+                    case EquipmentSlot.Holster:
+                        weaponManager.Selector.TryChangeToSlot(slot, false);
+                        break;
+                    case EquipmentSlot.Scabbard:
+                        if (weaponManager.Selector.CanChangeToMeleeWeapons)
+                        {
+                            weaponManager.Selector.ChangeToMelee();
+                        }
+                        break;
+                }
+            }
+
+            public bool HasBackupAmmo(Weapon weapon, out int total)
+            {
+                total = 0;
+                var player = botOwner.GetPlayer;
+                var inventoryController = player.InventoryController;
+
+                var currentMagazine = weapon.GetCurrentMagazine();
+                var magazineSlot = weapon.GetMagazineSlot();
+
+                if (magazineSlot != null)
+                {
+                    var preallocatedMagList = new List<MagazineItemClass>();
+                    inventoryController.GetReachableItemsOfTypeNonAlloc(preallocatedMagList, null);
+
+                    var hasUnusedMagazine = false;
+
+                    foreach (var mag in preallocatedMagList)
+                    {
+                        if (mag == currentMagazine)
+                        {
+                            continue;
+                        }
+
+                        if (magazineSlot.CanAccept(mag))
+                        {
+                            hasUnusedMagazine = true;
+                            if (mag.Count > 0)
+                            {
+                                total += mag.Count;
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (hasUnusedMagazine)
+                    {
+                        if (botOwner.HasLooseAmmoForWeapon(weapon, out var _total))
+                        {
+                            total += _total;
+                            return true;
+                        }
+                    }
+                }
+
+                if (currentMagazine == null)
+                {
+                    var flag = botOwner.HasLooseAmmoForWeapon(weapon, out var _total);
+                    total += _total;
+                    return flag;
+                }
+
+                return false;
+            }
+
+            public bool HasLooseAmmoForWeapon(Weapon weapon, out int total)
+            {
+                total = 0;
+                var player = botOwner.GetPlayer;
+                var inventoryController = player.InventoryController;
+
+                var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
+                var preallocatedAmmoList = new List<AmmoItemClass>();
+                inventoryController.GetAcceptableItemsNonAlloc(
+                    BotReload.AvailableEquipmentSlots,
+                    preallocatedAmmoList,
+                    null,
+                    null
+                );
+
+                foreach (var ammo in preallocatedAmmoList)
+                {
+                    if (ammo.StackObjectsCount > 0)
+                    {
+                        if (chamberSlot != null && chamberSlot.CanAccept(ammo))
+                        {
+                            total += ammo.StackObjectsCount;
+                            return true;
+                        }
+
+                        if (weapon.GetCurrentMagazine() != null)
+                        {
+                            var currentMag = weapon.GetCurrentMagazine();
+                            if (currentMag.Cartridges.Filters.CheckItemFilter(ammo))
+                            {
+                                total += ammo.StackObjectsCount;
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            public bool HasAmmoOrBackupAmmo(EquipmentSlot slot, out int total)
+            {
+                total = 0;
+                var equipment = botOwner.GetPlayer.InventoryController.Inventory.Equipment;
+
+                if (!equipment.HasWeaponInSlot(slot))
+                {
+                    return false;
+                }
+
+                var item = equipment.GetSlot(slot).ContainedItem;
+                if (item is not Weapon weapon)
+                {
+                    return false;
+                }
+
+                var magazineSlot = weapon.GetMagazineSlot();
+                if (magazineSlot?.ContainedItem is MagazineItemClass magazine)
+                {
+                    if (magazine.Count > 0)
+                    {
+                        total += magazine.Count;
+                        return true;
+                    }
+                }
+
+                if (weapon.ChamberAmmoCount > 0)
+                {
+                    total += weapon.ChamberAmmoCount;
+                    return true;
+                }
+
+                var has = botOwner.HasBackupAmmo(weapon, out var _total);
+                total += _total;
+                return has;
+            }
+
+            public EquipmentSlot DetermineWeaponSlotByAmmo(EquipmentSlot currentSlot, out int total)
+            {
+                total = 0;
+                var equipment = botOwner.GetPlayer.InventoryController.Inventory.Equipment;
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.FirstPrimaryWeapon))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.FirstPrimaryWeapon, out var _total))
+                    {
+                        total += _total;
+                        return EquipmentSlot.FirstPrimaryWeapon;
+                    }
+                }
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.SecondPrimaryWeapon))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.SecondPrimaryWeapon, out var _total))
+                    {
+                        total += _total;
+                        return EquipmentSlot.SecondPrimaryWeapon;
+                    }
+                }
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.Holster))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.Holster, out var _total))
+                    {
+                        total += _total;
+                        return EquipmentSlot.Holster;
+                    }
+                }
+
+                if (equipment.HasKnifeInSlot(EquipmentSlot.Scabbard))
+                {
+                    return EquipmentSlot.Scabbard;
+                }
+
+                return currentSlot;
+            }
+
+            public void CollectAmmoOrBackupAmmoCount(out int total)
+            {
+                total = 0;
+                var equipment = botOwner.GetPlayer.InventoryController.Inventory.Equipment;
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.FirstPrimaryWeapon))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.FirstPrimaryWeapon, out var _total))
+                    {
+                        total += _total;
+                    }
+                }
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.SecondPrimaryWeapon))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.SecondPrimaryWeapon, out var _total))
+                    {
+                        total += _total;
+                    }
+                }
+
+                if (equipment.HasWeaponInSlot(EquipmentSlot.Holster))
+                {
+                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.Holster, out var _total))
+                    {
+                        total += _total;
+                    }
                 }
             }
         }

@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (_currentMoveTarget.HasValue)
                     {
                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "TooFar");
+                        return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "Mcs:TooFar");
                     }
 
                     return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindPath1");

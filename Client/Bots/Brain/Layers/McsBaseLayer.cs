@@ -143,8 +143,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 _endActionMap = new();
             }
-            
-            _endActionMap.AddOrUpdate(logicType, _logicType => func, 
+
+            _endActionMap.AddOrUpdate(logicType, _logicType => func,
                 (_logicType, oldFunc) =>
                 {
                     oldFunc = func;
@@ -1151,224 +1151,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return EquipmentSlot.FirstPrimaryWeapon;
             }
 
+            var currentSlot = weaponManager.Selector.EquipmentSlot;
             if (_nextWeaponSwitchTime > Time.time)
             {
-                return weaponManager.Selector.EquipmentSlot;
+                return currentSlot;
             }
 
             weaponManager.Selector.UpdateWeaponsList();
-            var targetSlot = DetermineWeaponSlotByAmmo(weaponManager);
-            if (targetSlot != weaponManager.Selector.EquipmentSlot)
+            var targetSlot = BotOwner.DetermineWeaponSlotByAmmo(currentSlot, out var total);
+            if (targetSlot != currentSlot)
             {
-                TryChangeWeaponSlot(targetSlot);
+                BotOwner.TryChangeWeaponSlot(targetSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
 
             return targetSlot;
-        }
-
-        public virtual void TryChangeWeaponSlot(EquipmentSlot slot)
-        {
-            var weaponManager = BotOwner.WeaponManager;
-            if (weaponManager?.Selector == null)
-            {
-                return;
-            }
-
-            switch (slot)
-            {
-                case EquipmentSlot.FirstPrimaryWeapon:
-                    weaponManager.Selector.ChangeToMain();
-                    break;
-                case EquipmentSlot.SecondPrimaryWeapon:
-                    weaponManager.Selector.ChangeToSecond();
-                    break;
-                case EquipmentSlot.Holster:
-                    weaponManager.Selector.TryChangeToSlot(slot, false);
-                    break;
-                case EquipmentSlot.Scabbard:
-                    if (weaponManager.Selector.CanChangeToMeleeWeapons)
-                    {
-                        weaponManager.Selector.ChangeToMelee();
-                    }
-                    break;
-            }
-        }
-
-        public virtual bool HasAmmoOrBackupAmmo(EquipmentSlot slot)
-        {
-            var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
-
-            if (!HasWeaponInSlot(equipment, slot))
-            {
-                return false;
-            }
-
-            var item = equipment.GetSlot(slot).ContainedItem;
-            if (item is not Weapon weapon)
-            {
-                return false;
-            }
-
-            var magazineSlot = weapon.GetMagazineSlot();
-            if (magazineSlot?.ContainedItem is MagazineItemClass magazine)
-            {
-                if (magazine.Count > 0)
-                {
-                    return true;
-                }
-            }
-
-            if (weapon.ChamberAmmoCount > 0)
-            {
-                return true;
-            }
-
-            return HasBackupAmmo(weapon);
-        }
-
-        public virtual bool HasBackupAmmo(Weapon weapon)
-        {
-            var player = BotOwner.GetPlayer;
-            var inventoryController = player.InventoryController;
-
-            var currentMagazine = weapon.GetCurrentMagazine();
-            var magazineSlot = weapon.GetMagazineSlot();
-
-            if (magazineSlot != null)
-            {
-                var preallocatedMagList = new List<MagazineItemClass>();
-                inventoryController.GetReachableItemsOfTypeNonAlloc(preallocatedMagList, null);
-
-                var hasUnusedMagazine = false;
-
-                foreach (var mag in preallocatedMagList)
-                {
-                    if (mag == currentMagazine)
-                    {
-                        continue;
-                    }
-
-                    if (magazineSlot.CanAccept(mag))
-                    {
-                        hasUnusedMagazine = true;
-                        if (mag.Count > 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                if (hasUnusedMagazine)
-                {
-                    if (HasLooseAmmoForWeapon(weapon))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            if (currentMagazine == null)
-            {
-                return HasLooseAmmoForWeapon(weapon);
-            }
-
-            return false;
-        }
-
-        public virtual bool HasLooseAmmoForWeapon(Weapon weapon)
-        {
-            var player = BotOwner.GetPlayer;
-            var inventoryController = player.InventoryController;
-
-            var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
-            var preallocatedAmmoList = new List<AmmoItemClass>();
-            inventoryController.GetAcceptableItemsNonAlloc(
-                BotReload.AvailableEquipmentSlots,
-                preallocatedAmmoList,
-                null,
-                null
-            );
-
-            foreach (var ammo in preallocatedAmmoList)
-            {
-                if (ammo.StackObjectsCount > 0)
-                {
-                    if (chamberSlot != null && chamberSlot.CanAccept(ammo))
-                    {
-                        return true;
-                    }
-
-                    if (weapon.GetCurrentMagazine() != null)
-                    {
-                        var currentMag = weapon.GetCurrentMagazine();
-                        if (currentMag.Cartridges.Filters.CheckItemFilter(ammo))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public virtual EquipmentSlot DetermineWeaponSlotByAmmo(BotWeaponManager weaponManager)
-        {
-            var equipment = BotOwner.GetPlayer.InventoryController.Inventory.Equipment;
-
-            if (HasWeaponInSlot(equipment, EquipmentSlot.FirstPrimaryWeapon))
-            {
-                if (HasAmmoOrBackupAmmo(EquipmentSlot.FirstPrimaryWeapon))
-                {
-                    return EquipmentSlot.FirstPrimaryWeapon;
-                }
-            }
-
-            if (HasWeaponInSlot(equipment, EquipmentSlot.SecondPrimaryWeapon))
-            {
-                if (HasAmmoOrBackupAmmo(EquipmentSlot.SecondPrimaryWeapon))
-                {
-                    return EquipmentSlot.SecondPrimaryWeapon;
-                }
-            }
-
-            if (HasWeaponInSlot(equipment, EquipmentSlot.Holster))
-            {
-                if (HasAmmoOrBackupAmmo(EquipmentSlot.Holster))
-                {
-                    return EquipmentSlot.Holster;
-                }
-            }
-
-            if (HasKnifeInSlot(equipment, EquipmentSlot.Scabbard))
-            {
-                return EquipmentSlot.Scabbard;
-            }
-
-            return weaponManager.Selector.EquipmentSlot;
-        }
-
-        public virtual bool HasWeaponInSlot(InventoryEquipment equipment, EquipmentSlot slot)
-        {
-            if (equipment == null)
-            {
-                return false;
-            }
-
-            Item item = equipment.GetSlot(slot).ContainedItem;
-            return item is Weapon;
-        }
-
-        public virtual bool HasKnifeInSlot(InventoryEquipment equipment, EquipmentSlot slot)
-        {
-            if (equipment == null)
-            {
-                return false;
-            }
-
-            Item item = equipment.GetSlot(slot).ContainedItem;
-            return item is KnifeItemClass;
         }
 
         public virtual bool ShouldUseMeleeAttack()

@@ -63,8 +63,19 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
 
                         MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
-                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(brain.GetLastNode());
                         MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+
+                        if (brain.BaseBrain == null)
+                        {
+                            continue;
+                        }
+                        var baseBrainStrategy = brain.Agent.Gclass309_0 as BaseBrain;
+                        if (baseBrainStrategy.CurLayerInfo == null)
+                        {
+                            continue;
+                        }
+
+                        MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(baseBrainStrategy.CurLayerInfo.Name());
                     }
                 }
             }

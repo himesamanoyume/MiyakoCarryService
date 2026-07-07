@@ -191,5 +191,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string DROPTARGETLOOTCOMMAND_TARGETNAME = "Mcs/DropTargetLootCommand TargetName";
         public const string TEAMDROPTARGETLOOTCOMMAND_NAME = "Mcs/TeamDropTargetLootCommand Name";
         public const string TEAMDROPTARGETLOOTCOMMAND_TARGETNAME = "Mcs/TeamDropTargetLootCommand TargetName";
+        public const string MINE = "Mcs/Mine";
     }
 }
