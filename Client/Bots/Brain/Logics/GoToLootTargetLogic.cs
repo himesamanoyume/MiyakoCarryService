@@ -125,8 +125,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.OnLoot,
-                    Key = mcsBotPlayerData.LootingTarget.Item.Name,
-                    Key2 = $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"
+                    Keys = [mcsBotPlayerData.LootingTarget.Item.Name,  $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"]
                 });
 
                 mcsBotPlayerData.IsTaskRunning = true;
@@ -179,7 +178,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                             BotOwner.TalkMsg(new McsMsg
                             {
                                 PhraseTrigger = EPhraseTrigger.PhraseNone,
-                                Key = Locales.ONLOOTOPENCONTAINERFAILED
+                                Keys = [Locales.ONLOOTOPENCONTAINERFAILED]
                             });
                             return;
                         }
@@ -193,7 +192,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.PhraseNone,
-                        Key = Locales.ONLOOTQUESTITEM
+                        Keys = [Locales.ONLOOTQUESTITEM]
                     });
                     return;
                 }
@@ -203,7 +202,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.LootGeneric,
-                        Key = item.Name
+                        Keys = [item.Name]
                     });
                 }
                 else
@@ -211,7 +210,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.PhraseNone,
-                        Key = Locales.ONLOOTNOSPACE
+                        Keys = [Locales.ONLOOTNOSPACE]
                     });
                 }
 

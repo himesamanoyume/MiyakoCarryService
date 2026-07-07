@@ -92,6 +92,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
             menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction, mcsBotPlayers);
+            menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ReportAboutSelfCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, RegroupCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayers);
@@ -107,6 +108,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void BuildMemberMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
             menu.RegisterCommand(Locales.REPORTABOUTENEMYCOMMAND_NAME, Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME, ReportAboutEnemyCommandAction, mcsBotPlayers);
+            menu.RegisterCommand(Locales.REPORTABOUTSELFCOMMAND_NAME, Locales.REPORTABOUTSELFCOMMAND_TARGETNAME, ReportAboutSelfCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, OnYourOwnCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.REGROUPCOMMAND_NAME, Locales.REGROUPCOMMAND_TARGETNAME, RegroupCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, GoToPointCommandAction, mcsBotPlayers);
@@ -355,7 +357,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
                     if (botOwner.Memory.HaveEnemy)
                     {
-                        botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Negative });
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Negative
+                        });
                     }
                     botOwner.Mover.LastTimePosChanged = Time.time;
                     botOwner.StopMove();
@@ -403,8 +408,43 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                     else
                     {
-                        botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Clear });
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Clear
+                        });
                     }
+                }
+            });
+            CommandUtils.CloseCommandMenuAction();
+        }
+
+        public virtual void ReportAboutSelfCommandAction(Player[] mcsBotPlayers, params object[] args)
+        {
+            ForEachAlive(mcsBotPlayers, mcsBotPlayer =>
+            {
+                if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+                {
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
+                    {
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ECommandPacketType.ReportAboutSelf.ToString()
+                    });
+                }
+                else
+                {
+                    var botOwner = mcsBotPlayer.AIData.BotOwner;
+                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                    if (mcsBotPlayerData != null)
+                    {
+                        mcsBotPlayerData.IsLooting = false;
+                        mcsBotPlayerData.TargetPos = null;
+                        mcsBotPlayerData.ProxyTargetId = null;
+                    }
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Mine,
+                        Keys = []
+                    });
                 }
             });
             CommandUtils.CloseCommandMenuAction();
@@ -432,7 +472,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         mcsBotPlayerData.AimingBodyPartType = aimingBodyPartType;
                     }
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger
+                    });
                 }
             });
             CommandUtils.CloseCommandMenuAction();
@@ -461,7 +504,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
                     }
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger
+                    });
                 }
             });
             CommandUtils.CloseCommandMenuAction();
@@ -490,7 +536,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
                     }
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Regroup });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Regroup
+                    });
                 }
             });
             CommandUtils.CloseCommandMenuAction();
@@ -520,7 +569,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         var pos = Tools.GetPosNearTarget(raycastHit.point, botOwner);
                         if (pos.HasValue)
                         {
-                            botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Going });
+                            botOwner.TalkMsg(new McsMsg
+                            {
+                                PhraseTrigger = EPhraseTrigger.Going
+                            });
 
                             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                             if (mcsBotPlayerData != null)
@@ -563,7 +615,10 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
                     }
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.HoldPosition });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.HoldPosition
+                    });
                 }
             });
             CommandUtils.CloseCommandMenuAction();
@@ -595,11 +650,17 @@ namespace MiyakoCarryService.Client.Mgrs
                             mcsBotPlayerData.TargetPos = null;
                             mcsBotPlayerData.ProxyTargetId = null;
                         }
-                        botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Roger
+                        });
                     }
                     else
                     {
-                        botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Negative });
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Negative
+                        });
                     }
                 }
             });
@@ -639,7 +700,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     botOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     botOwner.Mover.RecalcWay();
                     botOwner.Mover.Pause = true;
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Roger
+                    });
 
                     if (!MiyakoCarryServicePlugin.SAINInstalled)
                     {

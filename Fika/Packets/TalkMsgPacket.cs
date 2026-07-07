@@ -1,5 +1,6 @@
 
 
+using System.Collections.Generic;
 using Fika.Core.Networking.LiteNetLib.Utils;
 using UnityEngine;
 
@@ -9,30 +10,38 @@ namespace MiyakoCarryService.Fika.Packets
     {
         public EPhraseTrigger PhraseTrigger;
         public Vector3? Position;
-        public string Key;
-        public string Key2;
+        public List<string> Keys = new(5);
 
         public TalkMsgPacket()
         {
-            
+
         }
-        
-        public override void Deserialize(NetDataReader reader)  
-        {  
+
+        public override void Deserialize(NetDataReader reader)
+        {
             base.Deserialize(reader);
             PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
             Position = reader.GetNullableUnmanaged<Vector3>();
-            Key = reader.GetString();
-            Key2 = reader.GetString();
-        }  
-    
-        public override void Serialize(NetDataWriter writer)  
-        {  
+            var amount = reader.GetUShort();
+            if (amount > 0)
+            {
+                for (var i = 0; i < amount; i++)
+                {
+                    Keys.Add(reader.GetString());
+                }
+            }
+        }
+
+        public override void Serialize(NetDataWriter writer)
+        {
             base.Serialize(writer);
             writer.PutEnum(PhraseTrigger);
             writer.PutNullableUnmanaged(Position);
-            writer.Put(Key, 0);
-            writer.Put(Key2, 0);
-        } 
+            writer.Put((ushort)Keys.Count);
+            foreach (var key in Keys)
+            {
+                writer.Put(key, 0);
+            }
+        }
     }
 }

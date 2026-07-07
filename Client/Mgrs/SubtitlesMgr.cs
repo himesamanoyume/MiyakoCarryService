@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.Start();
             _talkContents = new()
             {
-                {EPhraseTrigger.None, "未知的回应。应向Discord频道提出反馈。"},
+                {EPhraseTrigger.None, "未知的回应，应进行反馈。"},
                 {EPhraseTrigger.OnFirstContact, Locales.ONFIRSTCONTACT},
                 {EPhraseTrigger.Roger, Locales.ROGER},
                 {EPhraseTrigger.OnPosition, Locales.ONPOSITION},
@@ -172,19 +172,19 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Key.McsLocalized(), msg.Key2.McsLocalized());
+            content = string.Format(Locales.ONLOOT.McsLocalized(), msg.Keys[0].McsLocalized(), msg.Keys[1].McsLocalized());
             return content;
         }
 
         public string HandleLootGeneric(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            content = string.Format(Locales.LOOTGENERIC.McsLocalized(), msg.Key.McsLocalized());
+            content = string.Format(Locales.LOOTGENERIC.McsLocalized(), msg.Keys[0].McsLocalized());
             return content;
         }
 
         public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer)
         {
-            return msg.Key.McsLocalized();
+            return msg.Keys[0].McsLocalized();
         }
 
         public void ShowMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)

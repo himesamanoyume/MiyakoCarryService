@@ -20,6 +20,7 @@ using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Fika.Utils;
 using MiyakoCarryService.Fika.Mgrs;
 using BepInEx;
+using System.Linq;
 
 namespace MiyakoCarryService.Fika
 {
@@ -166,8 +167,7 @@ namespace MiyakoCarryService.Fika
                 {
                     PhraseTrigger = packet.PhraseTrigger,
                     Position = packet.Position,
-                    Key = packet.Key,
-                    Key2 = packet.Key2
+                    Keys = packet.Keys.ToArray()
                 });
             }
         }
@@ -272,8 +272,7 @@ namespace MiyakoCarryService.Fika
                 {
                     PhraseTrigger = @event.Msg.PhraseTrigger,
                     Position = @event.Msg.Position,
-                    Key = @event.Msg.Key,
-                    Key2 = @event.Msg.Key2,
+                    Keys = @event.Msg.Keys.ToList(),
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

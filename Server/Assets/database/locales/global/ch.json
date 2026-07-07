@@ -205,5 +205,9 @@
     "Mcs/TeamDropTargetLootCommand Name": "全队丢出目标战利品",
     "Mcs/TeamDropTargetLootCommand TargetName": "全队丢出在战局中拾取的目标战利品",
     "Mcs/BackCommand Name": "返回",
-    "Mcs/BackCommand TargetName": "返回上一级指令菜单"
+    "Mcs/BackCommand TargetName": "返回上一级指令菜单",
+    "Mcs/ReportAboutSelfCommand Name": "报告自身状态",
+    "Mcs/ReportAboutSelfCommand TargetName": "命令护航报告自身的健康状态、物资储备情况",
+    "Mcs/TeamReportAboutSelfCommand Name": "全队报告自身状态",
+    "Mcs/TeamReportAboutSelfCommand TargetName": "让所有护航报告自身的健康状态、物资储备情况"
 }
