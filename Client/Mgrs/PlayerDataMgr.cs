@@ -66,18 +66,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
                             MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
-
-                            if (brain.BaseBrain == null)
-                            {
-                                continue;
-                            }
-                            var curLayerInfo = brain.Agent.Gclass35_0;
-                            if (curLayerInfo == null)
-                            {
-                                continue;
-                            }
-
-                            MiyakoCarryServicePlugin.LogBuffer.AddUsedNode(curLayerInfo.Name());
                         }
                     }
                     catch

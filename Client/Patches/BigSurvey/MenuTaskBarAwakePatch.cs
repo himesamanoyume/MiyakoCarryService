@@ -117,9 +117,8 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
-                        .Append("Used Layer: ").Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers())).Append('\n')
-                        .Append("Used Node: ").Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedNodes())).Append('\n')
-                        .Append("Used Reason: ").Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons())).Append('\n')
+                        .Append("Used Layer: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
+                        .Append("Used Reason: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
                         .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     stringBuilder.Append("```log\n");

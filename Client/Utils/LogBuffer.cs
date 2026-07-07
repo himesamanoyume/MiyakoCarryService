@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
@@ -12,9 +13,8 @@ namespace MiyakoCarryService.Client.Utils
         private readonly LinkedList<LogEntry> _entries = new();
         private int _currentCharCount = 0;
         private int _newBigSurveyCount = 0;
-        private HashSet<string> _usedLayers = new();
-        private HashSet<string> _usedNodes = new();
-        private HashSet<string> _usedReasons = new();
+        private ConcurrentDictionary<string, int> _usedLayers = new();
+        private ConcurrentDictionary<string, int> _usedReasons = new();
 
         public LinkedList<LogEntry> GetEntries()
         {
@@ -31,30 +31,28 @@ namespace MiyakoCarryService.Client.Utils
 
         public void AddUsedLayer(string layerName)
         {
-            _usedLayers.Add(layerName);
-        }
-
-        public void AddUsedNode(string node)
-        {
-            _usedNodes.Add(node);
+            _usedLayers.AddOrUpdate(layerName, _ = 1, (layerName, times) =>
+            {
+                times += 1;
+                return times;
+            });
         }
 
         public void AddUsedReason(string reason)
         {
-            _usedReasons.Add(reason);
+            _usedReasons.AddOrUpdate(reason, _ = 1, (reason, times) =>
+            {
+                times += 1;
+                return times;
+            });
         }
 
-        public HashSet<string> GetUsedLayers()
+        public ConcurrentDictionary<string, int> GetUsedLayers()
         {
             return _usedLayers;
         }
 
-        public HashSet<string> GetUsedNodes()
-        {
-            return _usedNodes;
-        }
-
-        public HashSet<string> GetUsedReasons()
+        public ConcurrentDictionary<string, int> GetUsedReasons()
         {
             return _usedReasons;
         }
