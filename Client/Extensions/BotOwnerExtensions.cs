@@ -123,7 +123,7 @@ namespace MiyakoCarryService.Client.Extensions
 
                 if (magazineSlot != null)
                 {
-                    var preallocatedMagList = new List<MagazineItemClass>();
+                    var preallocatedMagList = new List<Magazine>();
                     inventoryController.GetReachableItemsOfTypeNonAlloc(preallocatedMagList, null);
 
                     var hasUnusedMagazine = false;
@@ -173,9 +173,9 @@ namespace MiyakoCarryService.Client.Extensions
                 var inventoryController = player.InventoryController;
 
                 var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
-                var preallocatedAmmoList = new List<AmmoItemClass>();
+                var preallocatedAmmoList = new List<Ammo>();
                 inventoryController.GetAcceptableItemsNonAlloc(
-                    BotReload.AvailableEquipmentSlots,
+                    BotReload._availableEquipmentSlots,
                     preallocatedAmmoList,
                     null,
                     null
@@ -223,7 +223,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var magazineSlot = weapon.GetMagazineSlot();
-                if (magazineSlot?.ContainedItem is MagazineItemClass magazine)
+                if (magazineSlot?.ContainedItem is Magazine magazine)
                 {
                     if (magazine.Count > 0)
                     {

@@ -1,4 +1,6 @@
 
+using EFT;
+
 namespace MiyakoCarryService.Client.Extensions
 {
     public static class StringExtensions
@@ -11,7 +13,7 @@ namespace MiyakoCarryService.Client.Extensions
                 {
                     if (!string.IsNullOrEmpty(id))
                     {
-                        return LocaleManagerClass.LocaleManagerClass.method_7(id, MiyakoCarryServicePlugin.DefaultLang);
+                        return LocalizationManager.Instance.LocalizedValue(id, MiyakoCarryServicePlugin.DefaultLang);
                     }
                     return id;
                 }

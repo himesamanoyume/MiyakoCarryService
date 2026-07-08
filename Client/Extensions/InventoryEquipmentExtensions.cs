@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var item = inventoryEquipment.GetSlot(slot).ContainedItem;
-                return item is KnifeItemClass;
+                return item is Knife;
             }
         }
     }

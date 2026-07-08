@@ -6,47 +6,47 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class BotFirstAidClassExtensions
     {
-        extension(BotFirstAidClass botFirstAidClass)
+        extension(BotFirstAid botFirstAid)
         {
             public void McsRefreshMeds()
             {
-                if (!botFirstAidClass.BotOwner_0.Settings.FileSettings.Mind.CAN_USE_MEDS)
+                if (!botFirstAid.botOwner_0.Settings.FileSettings.Mind.CAN_USE_MEDS)
                 {
                     return;
                 }
 
-                var healthController = botFirstAidClass.BotOwner_0.GetPlayer.HealthController;
-                botFirstAidClass.List_0.Clear();
-                botFirstAidClass.BotOwner_0.GetPlayer.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, botFirstAidClass.List_0, null, null);
+                var healthController = botFirstAid.botOwner_0.GetPlayer.HealthController;
+                botFirstAid.list_0.Clear();
+                botFirstAid.botOwner_0.GetPlayer.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, botFirstAid.list_0, null, null);
 
-                if (botFirstAidClass.List_0.Count == 0)
+                if (botFirstAid.list_0.Count == 0)
                 {
                     return;
                 }
 
                 if (healthController.FindExistingEffect<HeavyBleedEffect>(EBodyPart.Common) != null)
                 {
-                    var med = botFirstAidClass.FindMedForEffect(EDamageEffectType.HeavyBleeding);
+                    var med = botFirstAid.FindMedForEffect(EDamageEffectType.HeavyBleeding);
                     if (med != null)
                     {
-                        botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
-                        botFirstAidClass.CurUsingMeds = med;
+                        botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                        botFirstAid.CurUsingMeds = med;
                         return;
                     }
                 }
 
                 if (healthController.FindExistingEffect<LightBleedEffect>(EBodyPart.Common) != null)
                 {
-                    var med = botFirstAidClass.FindMedForEffect(EDamageEffectType.LightBleeding);
+                    var med = botFirstAid.FindMedForEffect(EDamageEffectType.LightBleeding);
                     if (med != null)
                     {
-                        botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
-                        botFirstAidClass.CurUsingMeds = med;
+                        botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                        botFirstAid.CurUsingMeds = med;
                         return;
                     }
                 }
 
-                var medKitItemClasses = botFirstAidClass.List_0.OfType<MedKitItemClass>().ToList();
+                var medKitItemClasses = botFirstAid.list_0.OfType<MedKit>().ToList();
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
                 {
@@ -58,17 +58,17 @@ namespace MiyakoCarryService.Client.Extensions
 
                 if (medKitItemClass != null)
                 {
-                    botFirstAidClass.CurUsingMeds = medKitItemClass;
+                    botFirstAid.CurUsingMeds = medKitItemClass;
                     return;
                 }
-                botFirstAidClass.CurUsingMeds = medKitItemClasses.FirstOrDefault();
+                botFirstAid.CurUsingMeds = medKitItemClasses.FirstOrDefault();
             }
 
-            private MedsItemClass FindMedForEffect(EDamageEffectType effect)
+            private Meds FindMedForEffect(EDamageEffectType effect)
             {
-                foreach (var med in botFirstAidClass.List_0)
+                foreach (var med in botFirstAid.list_0)
                 {
-                    if (botFirstAidClass.CanTreatEffect(med, effect))
+                    if (botFirstAid.CanTreatEffect(med, effect))
                     {
                         return med;
                     }
@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            private bool CanTreatEffect(MedsItemClass med, EDamageEffectType effect)
+            private bool CanTreatEffect(Meds med, EDamageEffectType effect)
             {
                 if (!med.TryGetItemComponent(out HealthEffectsComponent healthComponent))
                 {
