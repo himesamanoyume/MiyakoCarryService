@@ -39,6 +39,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public float _nextVaultCheckTime = 0f;
         public float _nextUpdatePosTime = 0f;
         public float _nextHealCheckTime = 0f;
+        public float _nextStimCheckTime = 0f;
         public Vector3? _currentMoveTarget = null;
         public Vector3? _lastTargetPos = Vector3.zero;
         public Vector3[] _lastCalcCorners = null;
@@ -181,6 +182,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(RunAwayBTRLogic), EndRunAwayBTR);
             RegisterAction(typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction);
             RegisterAction(typeof(DropTargetLootLogic), EndDropTargetLootLogic);
+            RegisterAction(typeof(HealStimulatorsLogic), EndHealStimulators);
         }
 
         public virtual bool EndHeal()
@@ -237,6 +239,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
             return false;
+        }
+
+        public virtual bool EndHealStimulators()
+        {
+            if (BotOwner.Medecine.Stimulators.Using)
+            {
+                return false;
+            }
+            return true;
         }
 
         public virtual bool EndRunToCover()

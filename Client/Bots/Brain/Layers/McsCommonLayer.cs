@@ -90,6 +90,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
 
+                if (BotOwner.Medecine.Stimulators.HaveSmt && Time.time > _nextStimCheckTime)
+                {
+                    _nextStimCheckTime = Time.time + 30f;
+                    return new Action(typeof(HealStimulatorsLogic), "Mcs:UseStim");
+                }
+
                 CheckWeaponSwitch();
 
                 if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))

@@ -118,9 +118,9 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
-                        .Append("- Used Brain: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedBrains().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
-                        .Append("- Used Layer: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
-                        .Append("- Used Reason: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
+                        .Append("- Used Brain: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedBrains().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
+                        .Append("- Used Layer: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
+                        .Append("- Used Reason: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
                         .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
                     stringBuilder.Append("\n");
