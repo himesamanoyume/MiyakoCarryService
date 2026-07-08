@@ -3,8 +3,8 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
-    <DevGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X</DevGamePath>
-    <DevHeadlessGamePath>D:\OtherGames\SPT4.0.X\Client-4.0.X-Headless</DevHeadlessGamePath>
+    <DevGamePath>D:\OtherGames\SPT4.1.X\SPT-4.1.X</DevGamePath>
+    <DevHeadlessGamePath>D:\OtherGames\SPT4.1.X\SPT-4.1.X-Headless</DevHeadlessGamePath>
     <DevGamePluginsMcsPath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMcsPath>
     <DevGameScriptsMcsPath>$(DevGamePath)\BepInEx\scripts</DevGameScriptsMcsPath>
     <DevHeadlessGamePluginsMcsPath>$(DevHeadlessGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevHeadlessGamePluginsMcsPath>
@@ -13,7 +13,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>1.0.10.0</Version>
+    <Version>1.1.0.0</Version>
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>

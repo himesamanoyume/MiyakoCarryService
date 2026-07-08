@@ -182,7 +182,7 @@
                     "/I",
                     "/Y",
                     "'${workspaceFolder}\\Build\\BepInEx\\'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\'"
                 ]
             },
             {
@@ -193,8 +193,8 @@
                     "/c",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
                 ],
                 "group": {
                     "kind": "build"
@@ -208,8 +208,8 @@
                     "/c",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
                 ],
                 "group": {
                     "kind": "build"
@@ -224,7 +224,7 @@
                     "/I",
                     "/Y",
                     "'${workspaceFolder}\\Build\\BepInEx\\'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\'"
                 ]
             },
             {
@@ -235,8 +235,8 @@
                     "/c",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
                 ],
                 "group": {
                     "kind": "build"
@@ -250,8 +250,8 @@
                     "/c",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Client-4.0.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
+                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
                 ],
                 "group": {
                     "kind": "build"
@@ -284,7 +284,7 @@
                     "/I",
                     "/Y",
                     "'${workspaceFolder}\\Build\\SPT\\user\\'",
-                    "'D:\\OtherGames\\SPT4.0.X\\Server-4.0.X\\SPT\\user'"
+                    "'D:\\OtherGames\\SPT4.1.X\\Server-4.1.X\\SPT\\user'"
                 ]
             },
             {
@@ -357,7 +357,7 @@
         ]
     },
     "settings": {
-        "window.title": "Himesamanoyume.MiyakoCarryService-4.0.X",
+        "window.title": "Himesamanoyume.MiyakoCarryService-4.1.X",
         "dotnet.preferCSharpExtension": true,
         "dotnet.defaultSolution": "MiyakoCarryService.slnx"
     },

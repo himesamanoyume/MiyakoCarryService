@@ -3,7 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
-    <DevServerPath>D:\OtherGames\SPT4.0.X\Server-4.0.X</DevServerPath>
+    <DevServerPath>D:\OtherGames\SPT4.1.X\SPT-4.1.X</DevServerPath>
     <DevGamePluginsMiyakoCarryServicePath>$(DevServerPath)\SPT\user\mods\MiyakoCarryServiceServer</DevGamePluginsMiyakoCarryServicePath>
     <BuildMiyakoCarryServicePath>$(ProjectDir)..\Build\Plugin\SPT\user\mods\MiyakoCarryServiceServer</BuildMiyakoCarryServicePath>  
     <OutputType>Library</OutputType>
@@ -12,7 +12,7 @@
     <AssemblyProduct>MiyakoCarryService</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
     <AssemblyTitle>MiyakoCarryServiceServer</AssemblyTitle>  
-    <Version>1.0.10.0</Version>
+    <Version>1.1.0.0</Version>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Server</RootNamespace>

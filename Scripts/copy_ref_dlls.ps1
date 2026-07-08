@@ -1,6 +1,6 @@
 param(
     [string]$WorkspaceFolder,
-    [string]$GameRoot = "D:\OtherGames\SPT4.0.X\Client-4.0.X"
+    [string]$GameRoot = "D:\OtherGames\SPT4.1.X\SPT-4.1.X"
 )
 
 $ErrorActionPreference = "Stop"

@@ -143,7 +143,7 @@ namespace MiyakoCarryService.Server
                     // 这是为了方便中国大陆网络环境无法访问github的妥协方式
                     var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
 
-                    var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.0.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
+                    var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.1.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
                     var match = versionPattern.Match(data);
                     if (match.Success)
                     {
