@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadDoors()
         {
-            var doors = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Door>();
+            var doors = Singleton<GameWorld>.Instance.World.WorldInteractiveObjects().OfType<Door>();
             foreach (var door in doors)
             {
                 _datas.Add(door.GetData());

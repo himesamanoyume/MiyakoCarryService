@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return false;
             }
             var triggerZoneDatas = TrapDatas.GetOrAdd(labyrinthTrapType, _ => new());
-            return !triggerZoneDatas.All(triggerZoneData => GClass3592.Instance.HashSet_0.Contains(triggerZoneData.Id));
+            return !triggerZoneDatas.All(triggerZoneData => TriggersEmitter.Instance.hashSet_0.Contains(triggerZoneData.Id));
         }
 
         private void RefreshTrapState()

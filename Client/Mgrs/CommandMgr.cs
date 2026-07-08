@@ -12,6 +12,8 @@ using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Common.Utils;
+using EFT.InventoryLogic;
+using EFT.HealthSystem;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -268,7 +270,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         continue;
                     }
 
-                    if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is TraderControllerClass traderControllerClass)
+                    if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is ItemController traderControllerClass)
                     {
                         var inventoryActionClass = new InventoryActionClass
                         {
@@ -308,7 +310,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             PhraseTrigger = EPhraseTrigger.Negative,
                         });
                     }
-                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.Mover._lastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
@@ -363,7 +365,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             PhraseTrigger = EPhraseTrigger.Negative
                         });
                     }
-                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.Mover._lastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
@@ -447,7 +449,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             continue;
                         }
 
-                        var effectType = GClass3058.EffectName(activeEffect);
+                        var effectType = HealthHelper.EffectName(activeEffect);
                         if (string.IsNullOrEmpty(effectType))
                         {
                             continue;
@@ -571,7 +573,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
                 {
-                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
+                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask))
                     {
                         EventMgr.Notify(new CommandMgrHandleFikaEvent
                         {
@@ -584,7 +586,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 else
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
-                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
+                    if (Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask))
                     {
                         var pos = Tools.GetPosNearTarget(raycastHit.point, botOwner);
                         if (pos.HasValue)
@@ -602,7 +604,7 @@ namespace MiyakoCarryService.Client.Mgrs
                                 mcsBotPlayerData.TargetPos = pos.Value;
                                 mcsBotPlayerData.ProxyTargetId = null;
                             }
-                            botOwner.Mover.LastTimePosChanged = Time.time;
+                            botOwner.Mover._lastTimePosChanged = Time.time;
                             botOwner.StopMove();
                         }
                     }
@@ -714,9 +716,9 @@ namespace MiyakoCarryService.Client.Mgrs
                         mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
                     }
                     var playerPosition = mcsBotPlayer.Position;
-                    botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-                    botOwner.Mover.LastGoodCastPointTime = Time.time;
-                    botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                    botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
+                    botOwner.Mover._lastGoodCastPointTime = Time.time;
+                    botOwner.Mover._prevPosLinkedTime = 0f;
                     botOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     botOwner.Mover.RecalcWay();
                     botOwner.Mover.Pause = true;
@@ -759,7 +761,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             PhraseTrigger = EPhraseTrigger.Negative,
                         });
                     }
-                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.Mover._lastTimePosChanged = Time.time;
                     botOwner.StopMove();
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
@@ -813,7 +815,7 @@ namespace MiyakoCarryService.Client.Mgrs
                             mcsBotPlayerData.TargetPos = null;
                         }
                     }
-                    botOwner.Mover.LastTimePosChanged = Time.time;
+                    botOwner.Mover._lastTimePosChanged = Time.time;
                     botOwner.StopMove();
 
                     if (mcsBotPlayerData != null)

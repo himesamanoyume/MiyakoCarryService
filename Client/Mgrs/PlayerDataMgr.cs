@@ -217,7 +217,7 @@ namespace MiyakoCarryService.Client.Mgrs
                                 leadPlayerPos,
                                 playerData.Player.Position + Vector3.up * 1.6f,
                                 out var raycastHit, 
-                                LayerMaskClass.HighPolyWithTerrainMask
+                                LayersMaskController.HighPolyWithTerrainMask
                             );
 
                             if (!blocked)

@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadSwitches()
         {
-            var switches = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Switch>();
+            var switches = Singleton<GameWorld>.Instance.World.WorldInteractiveObjects().OfType<Switch>();
             foreach (var @switch in switches)
             {
                 if (!@switch.Operatable || !@switch.HasAuthority)

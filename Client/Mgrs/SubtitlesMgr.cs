@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -307,7 +306,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     _gameLoop.StopCoroutine(_coroutine);
                 }
-                _textField.text = $"<b>{_mcsBotPlayerProfile.Nickname}</b>: " + msg;
+                _textField.text = $"<b>{_mcsBotPlayerProfile.Info.Nickname}</b>: " + msg;
                 if (SubtitlesView != null)
                 {
                     SubtitlesView.ShowGameObject();

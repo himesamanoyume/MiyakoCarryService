@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.UI.Matchmaker;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
@@ -21,7 +22,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private HashSet<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
         private ConcurrentDictionary<MongoID, McsAILeadPlayer> _mcsAILeadPlayers = new();
-        public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
+        public Dictionary<MongoID, Dictionary<MongoID, RaidPlayer>> McsTransitBotPlayers = new();
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
         public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
 
@@ -89,7 +90,7 @@ namespace MiyakoCarryService.Client.Mgrs
             if (!transitMembers.TryGetValue(botOwner.ProfileId, out var groupPlayerViewModelClass))
             {
                 var info = botOwner.Profile.Info;
-                groupPlayerViewModelClass = new GroupPlayerViewModelClass(new GroupPlayerDataClass
+                groupPlayerViewModelClass = new RaidPlayer(new GroupPlayer
                 {
                     AccountId = botOwner.AccountId,
                     Id = botOwner.ProfileId,

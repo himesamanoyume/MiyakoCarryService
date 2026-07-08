@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using EFT;
-using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {

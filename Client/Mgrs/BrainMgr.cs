@@ -123,12 +123,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void InjectLayers(BaseBrain baseBrain)
         {
-            LayerUtils.McsRemoveLayers(baseBrain.Owner, Classification.RemoveLayerNames);
+            LayerUtils.McsRemoveLayers(baseBrain._owner, Classification.RemoveLayerNames);
 
             var customLayerMaps = LayerUtils.GetCustomLayerMaps();
             foreach ((var customLayerType, var priority) in customLayerMaps)
             {
-                LayerUtils.McsAddCustomLayer(baseBrain.Owner, customLayerType, priority);
+                LayerUtils.McsAddCustomLayer(baseBrain._owner, customLayerType, priority);
             }
         }
     }
