@@ -53,7 +53,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             await Task.Delay(500);
             var wantDropItemId = BotOwner.ExternalItemsController.GetRandomItemToDrop();
-            var wantDropItem = mcsBotPlayerData.Player.InventoryController.FindItem<Item>(wantDropItemId);
+            Item wantDropItem;
+            try
+            {
+                wantDropItem = mcsBotPlayerData.Player.InventoryController.FindItem<Item>(wantDropItemId);
+            }
+            catch 
+            {
+                BotOwner.ExternalItemsController.PickUpedItems.Remove(wantDropItemId);
+                return;
+            }
+
             if (wantDropItem == null)
             {
                 return;
