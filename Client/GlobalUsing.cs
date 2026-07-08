@@ -1,139 +1,114 @@
-global using SessionBackendClass = Class308;
-global using CorpseTraderControllerClass = GClass3385;
-global using TraderUtilsClass = GClass3130;
-global using IOperationClass = GInterface438;
-global using ContainerClass = GClass3248;
-global using EFTVersionInfoClass = Class1123;
-global using SearchControllerClass = GClass2234;
-global using ContainerDataClass = GClass1802;
-global using InventoryActionClass = GetActionsClass.Class1748;
-global using ItemSubtractClass1 = EFT.Player.PlayerInventoryController.Class1213;
-global using ItemSubtractClass2 = EFT.Player.PlayerInventoryController.Class1214;
-global using UnknownItemManipulationClass = GClass1566;
-global using ItemLockedClass = InteractionsHandlerClass.GClass1606;
-global using CannotMoveItemDuringRaidClass = InteractionsHandlerClass.GClass1600;
-global using HeavyBleedEffect = GInterface340;
-global using LightBleedEffect = GInterface339;
+global using SessionBackendClass = EFT.EftClientBackendSession;
+global using CorpseTraderControllerClass = EFT.InventoryLogic.CorpseItemController;
+global using TraderUtilsClass = EFT.InventoryLogic.CurrencyUtil;
+global using IOperationClass = EFT.InventoryLogic.Operations.IInventoryOperation;
+global using ContainerClass = EFT.InventoryLogic.ContainerCollection;
+global using EFTVersionInfoClass = BuildInfo;
+global using SearchControllerClass = EFT.SearchController;
+global using ContainerDataClass = EFT.ItemInfo;
+global using InventoryActionClass = EFT.InteractionContextHelper.CG_GetAvailableInteractionState1;
+global using ItemSubtractClass1 = EFT.Player.PlayerInventoryController.CG_SubtractFromDiscardLimits;
+global using ItemSubtractClass2 = EFT.Player.PlayerInventoryController.CG_AddDiscardLimits;
+global using UnknownItemManipulationClass = EFT.InventoryLogic.UnknownItemError;
+global using ItemLockedClass = EFT.InventoryLogic.ItemManipulator.ItemManuallyLockedError;
+global using CannotMoveItemDuringRaidClass = EFT.InventoryLogic.ItemManipulator.CantRemoveFromEquipmentSlotDuringRaid;
+global using HeavyBleedEffect = EFT.HealthSystem.IHeavyBleeding;
+global using LightBleedEffect = EFT.HealthSystem.ILightBleeding;
 
 // 意图
-global using BaseIntent = GClass26;
-global using FireIntent = GClass27;
-global using TimedFireIntent = GClass28;
-global using FlankIntent = GClass29;
-global using MoveIntent = GClass30;
-global using CoverIntent = GClass31;
+global using BaseIntent = CoreActionResultParams;
+global using FireIntent = AimingResultParams;
+global using TimedFireIntent = ShootHoldResultParams;
+global using FlankIntent = CoreActionResultParamsFlankMove;
+global using MoveIntent = CoreActionResultGoToPoint;
+global using CoverIntent = MoveToCoverActionResultData;
 
 // 攻击与射击行为
-global using AttackMovingFlankBaseLogic = GClass209;
-global using AttackMovingBaseLogic = GClass205;
-global using AttackMovingWithSuppressBaseLogic = GClass206;
-global using DogFightBaseLogic = GClass203;
-global using ShootFromCoverBaseLogic = GClass277;
-global using ShootFromPlaceBaseLogic = GClass276;
-global using ShootFromStationaryBaseLogic = GClass280;
-global using ShootToSmokeBaseLogic = GClass185;
+global using AttackMovingFlankBaseLogic = AttackMovingFlank;
+global using AttackMovingBaseLogic = AttackMoving;
+global using AttackMovingWithSuppressBaseLogic = AttackMovingWithSuppress;
+global using DogFightBaseLogic = DogFightNode;
+global using ShootFromCoverBaseLogic = ShootFromCover;
+global using ShootFromPlaceBaseLogic = ShootFromPlace;
+global using ShootFromStationaryBaseLogic = ShootFromStationary;
+global using ShootToSmokeBaseLogic = AimingToSmoke;
 
 // 移动与路径行为
-global using CrawlBaseLogic = GClass207;
-global using GoToCoverPointBaseLogic = GClass212;
-global using GoToCoverPointTacticalBaseLogic = GClass238;
-global using GoToEnemyBaseLogic = GClass223;
-global using GoToEnemyZigZagBaseLogic = GClass225;
-global using GoToPointBaseLogic = GClass219;
-global using GoToPointTacticalBaseLogic = GClass239;
-global using MoveStealthyBaseLogic = GClass210;
-global using RunAndThrowGrenadeFromPlaceBaseLogic = GClass286;
-global using RunAwayArtilleryBaseLogic = GClass230;
-global using RunAwayBTRBaseLogic = GClass231;
-global using RunAwayGrenadeBaseLogic = GClass232;
-global using RunToCoverBaseLogic = GClass228;
-global using RunToCoverZigZagBaseLogic = GClass229;
-global using RunToEnemyBaseLogic = GClass227;
-global using RunToEnemyZigZagBaseLogic = GClass226;
-global using RunToStationaryBaseLogic = GClass234;
+global using CrawlBaseLogic = CrawlNode;
+global using GoToCoverPointBaseLogic = GoToCoverPoint;
+global using GoToCoverPointTacticalBaseLogic = GoToCoverTactical;
+global using GoToEnemyBaseLogic = GoToEnemy;
+global using GoToEnemyZigZagBaseLogic = GoToEnemyZigZag;
+global using GoToPointBaseLogic = GoToSomePoint;
+global using GoToPointTacticalBaseLogic = GoToPointTacticalNode;
+global using MoveStealthyBaseLogic = MoveStealthy;
+global using RunAndThrowGrenadeFromPlaceBaseLogic = GoToGrenadeRequestNode;
+global using RunAwayArtilleryBaseLogic = RunAwayArtillery;
+global using RunAwayBTRBaseLogic = RunAwayBTR;
+global using RunAwayGrenadeBaseLogic = RunAwayGrenade;
+global using RunToCoverBaseLogic = RunToCover;
+global using RunToCoverZigZagBaseLogic = RunToCoverZigZag;
+global using RunToEnemyBaseLogic = RunToEnemy;
+global using RunToEnemyZigZagBaseLogic = RunToEnemyZigZag;
+global using RunToStationaryBaseLogic = RunToStationary;
 
 // 投掷与特殊武器
-global using PlantMineBaseLogic = GClass272;
-global using DeactivateMineBaseLogic = GClass201;
-global using SuppressGrenadeBaseLogic = GClass195;
-global using ThrowGrenadeFromPlaceBaseLogic = GClass287;
+global using PlantMineBaseLogic = PlantMineNode;
+global using DeactivateMineBaseLogic = DeactivateMineNode;
+global using SuppressGrenadeBaseLogic = GrenadeSuppressNode;
+global using ThrowGrenadeFromPlaceBaseLogic = ThrowGrenadeFromPlaceNode;
 
 // 治疗与物品交互
-global using HealAnotherTargetBaseLogic = GClass196;
-global using HealBaseLogic = GClass197;
-global using HealStimulatorsBaseLogic = GClass283;
-global using BotDropItemBaseLogic = GClass264;
-global using BotTakeItemBaseLogic = GClass265;
+global using HealAnotherTargetBaseLogic = HealAnotherNode;
+global using HealBaseLogic = HealNode;
+global using HealStimulatorsBaseLogic = StimulatorsNode;
+global using BotDropItemBaseLogic = PatrolDropItemsNode;
+global using BotTakeItemBaseLogic = PatrolTakeItemsNode;
 
 // 姿态与状态
-global using LayBaseLogic = GClass198;
-global using PanicSittingBaseLogic = GClass260;
-global using StandByBaseLogic = GClass282;
-global using HoldPositionBaseLogic = GClass278;
+global using LayBaseLogic = LayNode;
+global using PanicSittingBaseLogic = PanicSitNode;
+global using StandByBaseLogic = StandByNode;
+global using HoldPositionBaseLogic = HoldPosition;
 
 // 巡逻与跟随
-global using AlternativePatrolBaseLogic = GClass247;
-global using FollowerPatrolBaseLogic = GClass248;
-global using FollowMeRequestBaseLogic = GClass215;
-global using FollowPlayerBaseLogic = GClass204;
-global using SimplePatrolBaseLogic = GClass250;
+global using AlternativePatrolBaseLogic = PatrollingAlternative;
+global using FollowerPatrolBaseLogic = PatrollingFollower;
+global using FollowMeRequestBaseLogic = FollowMeRequest;
+global using FollowPlayerBaseLogic = PatrollingFollowerPlayer;
+global using SimplePatrolBaseLogic = PatrolSimpleNode;
 
 // 和平/非战斗行为
-global using AxeTargetBaseLogic = GClass246;
-global using EatDrinkBaseLogic = GClass261;
-global using FriendlyTiltBaseLogic = GClass262;
-global using GestureBaseLogic = GClass263;
-global using PeacefulBaseLogic = GClass266;
-global using PeaceHardAimBaseLogic = GClass267;
-global using PeaceLookBaseLogic = GClass268;
-global using WatchSecondWeaponBaseLogic = GClass271;
+global using AxeTargetBaseLogic = PatrolAxeTarget;
+global using EatDrinkBaseLogic = EatDrinkNode;
+global using FriendlyTiltBaseLogic = FriendlyTiltNode;
+global using GestureBaseLogic = GestureNode;
+global using PeacefulBaseLogic = PeacefulNode;
+global using PeaceHardAimBaseLogic = PeaceHardAimNode;
+global using PeaceLookBaseLogic = PeaceLookNode;
+global using WatchSecondWeaponBaseLogic = WatchSecondWeaponNode;
 
 // 事件与特殊
-global using DeadBodyBaseLogic = GClass202;
-global using DoorOpenBaseLogic = GClass259;
-global using FlashedBaseLogic = GClass188;
-global using GrenadeSuicideBaseLogic = GClass194;
-global using LeaveMapBaseLogic = GClass243;
-global using MeleeAttackBaseLogic = GClass242;
-global using RepairMalfunctionBaseLogic = GClass273;
-global using SuppressFireBaseLogic = GClass281;
-global using SuppressStationaryBaseLogic = GClass284;
-global using TeleportToCoverBaseLogic = GClass258;
-global using TurnAwayLightBaseLogic = GClass288;
-global using WarnPlayerBaseLogic = GClass289;
+global using DeadBodyBaseLogic = DeadBodiesWorkNode;
+global using DoorOpenBaseLogic = OpenDoorRequestDecision;
+global using FlashedBaseLogic = FlashedNode;
+global using GrenadeSuicideBaseLogic = GrenadeSuicideNode;
+global using LeaveMapBaseLogic = GoLeaveNode;
+global using MeleeAttackBaseLogic = OneMeleeAttackNode;
+global using RepairMalfunctionBaseLogic = RepairMalfunctionNode;
+global using SuppressFireBaseLogic = ShootSuppressNode;
+global using SuppressStationaryBaseLogic = SuppressStationaryNode;
+global using TeleportToCoverBaseLogic = TeleportNode;
+global using TurnAwayLightBaseLogic = TurnAwayNode;
+global using WarnPlayerBaseLogic = WarnPlayerAttentionNode;
 
 // 圣诞节事件
-global using DoGiftChristmasEventBaseLogic = GClass192;
-global using KhorovodChristmasEventBaseLogic = GClass191;
+global using DoGiftChristmasEventBaseLogic = GiftNode;
+global using KhorovodChristmasEventBaseLogic = BotKhorovodNode;
 
 // 召唤
-global using SummonBaseLogic = GClass193;
-
-// 调试行为
-global using DebugDropBaseLogic = GClass291;
-global using DebugGestusBaseLogic = GClass263;        // 注意：与 GestureLogic 相同类
-global using DebugGrenadeBaseLogic = GClass296;
-global using DebugLayBaseLogic = GClass297;
-global using DebugMeleeChangeBaseLogic = GClass295;
-global using DebugMeleeBaseLogic = GClass299;
-global using DebugMedsBaseLogic = GClass298;
-global using DebugMoveBaseLogic = GClass252;
-global using DebugRotateHeadBaseLogic = GClass300;
-global using DebugRotateLayBaseLogic = GClass302;
-global using DebugRotateBaseLogic = GClass301;
-global using DebugRunBaseLogic = GClass255;
-global using DebugRunToPointBaseLogic = GClass256;
-global using DebugRunToCloseCoverBaseLogic = GClass254;
-global using DebugShootBaseLogic = GClass304;
-global using DebugStationaryInstantTakeBaseLogic = GClass306;
-global using DebugStationaryBaseLogic = GClass305;
-global using DebugTacticalShuttleBaseLogic = GClass240;
-global using DebugtacticalMoveBaseLogic = GClass241;
-global using DebugToggleLauncherBaseLogic = GClass308;
-global using DebugWeaponChangeBaseLogic = GClass307;
-global using DebugZigZagRunNodeBaseLogic = GClass257;
-global using DebugShuttleBaseLogic = GClass253;
+global using SummonBaseLogic = SummonNode;
 
 // 节点目标行为
-global using GoToExfiltrationPointNodeBaseLogic = GClass244;
-global using GoToLootPointNodeBaseLogic = GClass245;
+global using GoToExfiltrationPointNodeBaseLogic = GoToExfiltrationPointNode;
+global using GoToLootPointNodeBaseLogic = GoToLootPointNode;
