@@ -25,6 +25,8 @@ namespace MiyakoCarryService.Client.Mgrs
             return result;
         }
 
+        private BrainMgr BrainMgr => MgrAccessor.Get<BrainMgr>();
+
         public override void Start()
         {
             base.Start();
@@ -47,30 +49,45 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public IEnumerator RecordAgentInfo(float time)
         {
-            var waitTime = new WaitForSeconds(time);
-            while (true)
+            if (Tools.IsHost)
             {
-                yield return waitTime;
-                if (Gameloop.IsVaildGameWorld)
+                var waitTime = new WaitForSeconds(time);
+                while (true)
                 {
-                    try
+                    yield return waitTime;
+                    if (Gameloop.IsVaildGameWorld)
                     {
-                        var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
-                        foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                        try
                         {
-                            var brain = mcsBotPlayerData.BotOwner?.Brain;
-                            if (brain == null)
+                            var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                            foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                             {
-                                continue;
-                            }
+                                var brain = mcsBotPlayerData.BotOwner?.Brain;
+                                if (brain == null)
+                                {
+                                    continue;
+                                }
 
-                            MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
-                            MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+                                var baseBrain = brain?.BaseBrain;
+                                if (baseBrain == null)
+                                {
+                                    continue;
+                                }
+
+                                MiyakoCarryServicePlugin.LogBuffer.AddUsedBrain(baseBrain.ShortName());
+                                MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
+                                MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+
+                                if (!LayerUtils.IsMcsBotPlayerInjected(mcsBotPlayerData.Player.ProfileId))
+                                {
+                                    BrainMgr.InjectLayers(baseBrain);
+                                }
+                            }
                         }
-                    }
-                    catch
-                    {
-                        
+                        catch
+                        {
+                            
+                        }
                     }
                 }
             }

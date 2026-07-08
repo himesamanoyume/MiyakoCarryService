@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace MiyakoCarryService.Fika
 {
-    [BepInPlugin(McsFikaGUID, MiyakoCarryServicePlugin.McsPluginName, MiyakoCarryServicePlugin.BepInExClientVersion)]
+    [BepInPlugin(McsFikaGUID, McsFikaName, MiyakoCarryServicePlugin.BepInExClientVersion)]
     [BepInProcess(MiyakoCarryServicePlugin.EFTapp)]
     [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
@@ -37,6 +37,11 @@ namespace MiyakoCarryService.Fika
         private CommandPacketMgr CommandPacketMgr => McsMgrApi.GetMgr<CommandPacketMgr>();
         private List<ModulePatch> _patches = new();
         public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
+#if DEBUG
+        public const string McsFikaName = "姫様の夢 MiyakoCarryServiceFika DebugBuild";
+#else
+        public const string McsFikaName = "姫様の夢 MiyakoCarryServiceFika";
+#endif
 
         void Start()
         {

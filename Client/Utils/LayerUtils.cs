@@ -33,6 +33,23 @@ namespace MiyakoCarryService.Client.Utils
             _initialized = true;
         }
 
+        public static bool IsMcsBotPlayerInjected(string mcsBotPlayerId)
+        {
+            if (_injectedLayers.TryGetValue(mcsBotPlayerId, out var map))
+            {
+                var registerdLayerNames = _customLayerMaps.Keys.Select(l => l.Name);
+                foreach ((var layerName, var layerId) in map)
+                {
+                    if (!registerdLayerNames.Contains(layerName))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
         public static void RegisterCustomLayer(Type customLayerType, int priority)
         {
             if (_customLayerMaps == null)
@@ -70,7 +87,7 @@ namespace MiyakoCarryService.Client.Utils
             EnsureInit();
 
             var layerName = customLayerType.Name;
-            var map = _injectedLayers.TryGetValue(botOwner.ProfileId, out var m) ? m : (_injectedLayers[botOwner.ProfileId] = new());
+            var map = _injectedLayers.TryGetValue(botOwner.ProfileId, out var _map) ? _map : (_injectedLayers[botOwner.ProfileId] = new());
             if (map.ContainsKey(layerName))
             {
                 return false;

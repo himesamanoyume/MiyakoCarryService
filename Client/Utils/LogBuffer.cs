@@ -76,8 +76,8 @@ namespace MiyakoCarryService.Client.Utils
 
             ShowNewInformation();
 
-            _entries.AddOrUpdate(stackTrace, _ => new LogEntry(condition, stackTrace),
-                (stackTrace, oldLogEntry) =>
+            _entries.AddOrUpdate(condition + stackTrace, _ => new LogEntry(condition, stackTrace),
+                (key, oldLogEntry) =>
                 {
                     oldLogEntry.Total += 1;
                     return oldLogEntry;
