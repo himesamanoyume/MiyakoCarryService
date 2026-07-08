@@ -125,7 +125,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.OnLoot,
-                    Keys = [mcsBotPlayerData.LootingTarget.Item.Name,  $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"]
+                    Keys = [mcsBotPlayerData.LootingTarget.Item.Name, $"{mcsBotPlayerData.LootingTarget.Offer.Price} {mcsBotPlayerData.LootingTarget.Offer.CurrencySignal}"]
                 });
 
                 mcsBotPlayerData.IsTaskRunning = true;
@@ -229,6 +229,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 if (mcsBotPlayerData != null)
                 {
+                    var target = mcsBotPlayerData.LootingTarget;
+                    if (target != null && target.LootProps.TryGetValue(mcsBotPlayerData.McsAILeadPlayer, out var lootProp))
+                    {
+                        lootProp.SetLootCooldown(BotOwner);
+                    }
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.IsTaskRunning = false;
                 }

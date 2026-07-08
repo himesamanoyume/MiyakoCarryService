@@ -194,6 +194,11 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
+                if (lootProp.IsLootOnColdown(BotOwner))
+                {
+                    continue;
+                }
+
                 if (lootProp.IsShouldTakeContainer(BotOwner) || lootProp.IsShouldEquipContainer(BotOwner) || lootProp.IsShouldSwapContainer(BotOwner) || lootProp.IsShouldNestContainer(BotOwner) is ENestType.In or ENestType.Out)
                 {
                     usefulContainers.Add(lootData);

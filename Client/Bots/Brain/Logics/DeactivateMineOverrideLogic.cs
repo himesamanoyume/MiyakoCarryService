@@ -37,6 +37,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             else
             {
+                BotOwner_0.SetTargetMoveSpeed(1f);
+                BotOwner_0.Sprint(true, false);
+                BotOwner_0.SetPose(1f);
+                BotOwner_0.Steering.LookToMovingDirection();
                 BetterSetDeactivatingPlacePos(deactivatingPlace.Pos);
             }
             method_0(false);

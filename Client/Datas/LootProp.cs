@@ -11,6 +11,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Datas
 {
@@ -29,6 +30,7 @@ namespace MiyakoCarryService.Client.Datas
                 return field ??= McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsAILeadPlayer.McsLeadPlayer.ProfileId).ToList();
             }
         }
+        private readonly ConcurrentDictionary<BotOwner, float> _lootColdowns = new();
         public readonly ConcurrentDictionary<BotOwner, bool> _isShouldTakeContainers = new();
         public readonly ConcurrentDictionary<BotOwner, bool> _isShouldSwapContainers = new();
         public readonly ConcurrentDictionary<BotOwner, bool> _isShouldEquipContainers = new();
@@ -66,6 +68,11 @@ namespace MiyakoCarryService.Client.Datas
             IsBlockItem = Tools.IsBlockItem((EBlockItemType)McsAILeadPlayer.McsBotPlayerConfig.BlockItemType, LootData);
         }
 
+        public bool IsLootOnColdown(BotOwner botOwner)
+        {
+            return _lootColdowns.TryGetValue(botOwner, out var until) && Time.time < until;
+        }
+
         public bool IsShouldTakeContainer(BotOwner botOwner)
         {
             return _isShouldTakeContainers.TryGetValue(botOwner, out var isUsefulContainer) ? isUsefulContainer : false;
@@ -84,6 +91,15 @@ namespace MiyakoCarryService.Client.Datas
         public ENestType IsShouldNestContainer(BotOwner botOwner)
         {
             return _isShouldNestContainers.TryGetValue(botOwner, out var nestType) ? nestType : ENestType.None;
+        }
+
+        public void SetLootCooldown(BotOwner botOwner)
+        {
+            _lootColdowns.AddOrUpdate(
+                botOwner,
+                _ => Time.time + 30f,
+                (_, _) => Time.time + 30f
+            );
         }
 
         public void UpdateContainerProp(ConcurrentDictionary<BotOwner, bool> kvp, BotOwner botOwner, bool value)
@@ -122,7 +138,7 @@ namespace MiyakoCarryService.Client.Datas
                 }
 
                 var inventoryController = mcsBotPlayer.GetPlayer.InventoryController;
-                var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) : 
+                var currentSlot = LootData.ItemType == EItemType.Backpack ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
                     LootData.ItemType == EItemType.Equipment ? inventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
                 if (currentSlot == null)
