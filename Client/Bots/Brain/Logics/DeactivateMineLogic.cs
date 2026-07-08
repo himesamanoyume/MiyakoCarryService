@@ -5,7 +5,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class DeactivateMineLogic : McsBotBaseLogic
     {
-        private DeactivateMineBaseLogic _baseLogic;
+        private DeactivateMineOverrideLogic _baseLogic;
 
         public DeactivateMineLogic(BotOwner botOwner) : base(botOwner)
         {

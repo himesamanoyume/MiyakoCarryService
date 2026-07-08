@@ -215,7 +215,6 @@ namespace MiyakoCarryService.Client
             _patches.Add(new TriggerWithIdExitPatch());
             _patches.Add(new GetPartToShootPatch());
             _patches.Add(new IsAllowedPlayerPatch());
-            _patches.Add(new DeactivateMinePatch());
             _patches.Add(new DoorGetActionsClassPatch());
             _patches.Add(new LootItemGetActionsClassPatch());
             _patches.Add(new RefreshMedsPatch());

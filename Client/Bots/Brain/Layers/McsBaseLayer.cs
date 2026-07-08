@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
@@ -40,6 +39,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public float _nextUpdatePosTime = 0f;
         public float _nextHealCheckTime = 0f;
         public float _nextStimCheckTime = 0f;
+        public float _nextDeactivateCheckTime = 0f;
         public Vector3? _currentMoveTarget = null;
         public Vector3? _lastTargetPos = Vector3.zero;
         public Vector3[] _lastCalcCorners = null;
@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentMoveRetries = 0;
         public int _currentHealTimes = 0;
         public int _currentLootingRetries = 0;
+        public int _currentDeactivateRetries = 0;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -1536,6 +1537,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
+            if (Time.time > _nextDeactivateCheckTime)
+            {
+                _currentDeactivateRetries += 1;
+                _nextDeactivateCheckTime = Time.time + 1f;
+            }
+
+            if (_currentDeactivateRetries >= 15)
+            {
+                _currentDeactivateRetries = 0;
+                return true;
+            }
             return false;
         }
 
