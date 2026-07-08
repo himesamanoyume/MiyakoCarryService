@@ -28,16 +28,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             deactivatingPlace.SetDeactivate(BotOwner_0.Id);
             var sqrDistance = deactivatingPlace.Pos.McsSqrDistance(BotOwner_0.Position);
             BotOwner_0.Sprint(false, false);
-            if (sqrDistance <= 25f)
+            if (sqrDistance <= 5f)
             {
-                Gclass25_0.Update();
-                if (!Bool_0)
-                {
-                    method_6();
-                    BotOwner_0.SetPose(0.1f);
-                    BotOwner_0.StopMove();
-                    BotOwner_0.Steering.LookToPoint(deactivatingPlace.Pos);
-                }
+                method_6();
+                BotOwner_0.SetPose(0.1f);
+                BotOwner_0.StopMove();
+                BotOwner_0.Steering.LookToPoint(deactivatingPlace.Pos);
             }
             else
             {
