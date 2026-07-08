@@ -16,12 +16,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(BaseIntent data)
         {
-            method_0();
-            BotOwner_0.SetTargetMoveSpeed(1f);
-            BotOwner_0.Sprint(false, false);
-            BotOwner_0.SetPose(1f);
+            DoorOpen();
+            botOwner_0.SetTargetMoveSpeed(1f);
+            botOwner_0.Sprint(false, false);
+            botOwner_0.SetPose(1f);
 
-            var goalEnemy = BotOwner_0.Memory.GoalEnemy;
+            var goalEnemy = botOwner_0.Memory.GoalEnemy;
             if (goalEnemy == null)
             {
                 return;
@@ -37,29 +37,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 _lastPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;
 
-                var directionToEnemy = (goalEnemy.Person.Position - BotOwner_0.Position).normalized;
+                var directionToEnemy = (goalEnemy.Person.Position - botOwner_0.Position).normalized;
                 var targetPosition = goalEnemy.Person.Position - directionToEnemy * 3f;
 
-                BotOwner_0.GoToPoint(targetPosition, true, -1f, false, false, true, false, false);
+                botOwner_0.GoToPoint(targetPosition, true, -1f, false, false, true, false, false);
             }
 
-            BotOwner_0.Steering.LookToMovingDirection();
+            botOwner_0.Steering.LookToMovingDirection();
         }
 
         public override void AimingAndShoot(BaseIntent data)
         {
-            var goalEnemy = BotOwner_0.Memory.GoalEnemy;
+            var goalEnemy = botOwner_0.Memory.GoalEnemy;
             if (goalEnemy != null && goalEnemy.CanShoot && goalEnemy.IsVisible)
             {
-                if (BotOwner_0.WeaponManager.UnderbarrelLauncherController.CanSwitchInFight(BotOwner_0))
+                if (botOwner_0.WeaponManager.UnderbarrelLauncherController.CanSwitchInFight(botOwner_0))
                 {
-                    BotOwner_0.WeaponManager.UnderbarrelLauncherController.TryEnable(null);
+                    botOwner_0.WeaponManager.UnderbarrelLauncherController.TryEnable(null);
                 }
                 // 使用原版的瞄准逻辑  
                 base.AimingAndShoot(data);
                 return;
             }
-            BotOwner_0.LookData.SetLookPointByHearing(null);
+            botOwner_0.LookData.SetLookPointByHearing(null);
         }
     }
 }

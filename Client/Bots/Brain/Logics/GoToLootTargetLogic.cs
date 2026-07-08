@@ -5,6 +5,7 @@ using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;

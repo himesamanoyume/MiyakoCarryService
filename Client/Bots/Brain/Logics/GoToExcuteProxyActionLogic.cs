@@ -5,6 +5,7 @@ using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
@@ -134,11 +135,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (interactableObjectData is DoorData doorData)
                     {
                         doorData.Door.DoorState = EDoorState.Shut;
-                        mcsBotPlayerData.Player.vmethod_0(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
+                        mcsBotPlayerData.Player.StartInteraction(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
                     }
                     else if (interactableObjectData is SwitchData switchData)
                     {
-                        mcsBotPlayerData.Player.vmethod_1(switchData.Switch, interactionResult);
+                        mcsBotPlayerData.Player.ExecuteInteraction(switchData.Switch, interactionResult);
                         await Task.Delay(1000);
                         InteractionCallback(mcsBotPlayerData);
                     }

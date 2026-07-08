@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Stop()
         {
             base.Stop();
-            foreach (var member in BotOwner.BotsGroup.Members)
+            foreach (var member in BotOwner.BotsGroup._members)
             {
                 if (member.Memory.HaveEnemy)
                 {
@@ -306,9 +306,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (enemyExist)
                     {
-                        if (BotOwner.Boss.BossLogic is ZyriachyBossLogicClass zyriachyBossLogicClass)
+                        if (BotOwner.Boss.BossLogic is BossZryachiy bossZryachiy)
                         {
-                            zyriachyBossLogicClass.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
+                            bossZryachiy.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
                         }
                     }
                 }

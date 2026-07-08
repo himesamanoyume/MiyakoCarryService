@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         protected McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         protected QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
         protected CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
-        protected async Task Execute(McsBotPlayerData mcsBotPlayerData, GInterface424 action, LootData targetLootData)
+        protected async Task Execute(McsBotPlayerData mcsBotPlayerData, IItemOperationResult action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;
             var callback = new Callback((IResult result) =>
@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (result.Succeed)
                 {
                     mcsBotPlayer.UpdateInteractionCast();
-                    mcsBotPlayer.AIData.BotOwner.ExternalItemsController.PickUpedItems.Add(targetLootData.Item.Id);
+                    mcsBotPlayer.AIData.BotOwner.ExternalItemsController._pickUpedItems.Add(targetLootData.Item.Id);
                 }
 
                 mcsBotPlayer.CurrentManagedState.Pickup(false, null);
@@ -36,16 +36,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             mcsBotPlayer.CurrentManagedState.Pickup(true, new Action(() =>
             {
-                if (action is GClass3411 gClass3411)
+                if (action is MoveResult moveResult)
                 {
-                    if (targetLootData.Item is MagazineItemClass magazineItemClass && magazineItemClass != null)
+                    if (targetLootData.Item is Magazine magazineItemClass && magazineItemClass != null)
                     {
                         mcsBotPlayer.InventoryController.StrictCheckMagazine(magazineItemClass, false, 0, false, true);
                     }
 
                     if (targetLootData.Item is ContainerClass containerClass && containerClass != null)
                     {
-                        foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<MagazineItemClass>())
+                        foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<Magazine>())
                         {
                             mcsBotPlayer.InventoryController.StrictCheckMagazine(mag, false, 0, false, true);
                         }
@@ -161,7 +161,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (toAddress != null)
             {
-                var result = InteractionsHandlerClass.Move(
+                var result = ItemManipulator.Move(
                     targetLootData.Item,
                     toAddress,
                     mcsBotPlayerInventoryController,
@@ -297,11 +297,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 }
             }
 
-            var result = InteractionsHandlerClass.QuickFindAppropriatePlace(
+            var result = ItemManipulator.QuickFindAppropriatePlace(
                 fromLootData.Item,
                 mcsBotPlayerInventoryController,
                 targets,
-                InteractionsHandlerClass.EMoveItemOrder.PickUp,
+                ItemManipulator.EMoveItemOrder.PickUp,
                 true
             );
 
@@ -343,9 +343,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             foreach (var item in allContainers)
             {
-                if (item is SearchableItemItemClass searchableItemItemClass)
+                if (item is SearchableItem searchableItemItemClass)
                 {
-                    var sortResult = InteractionsHandlerClass.Sort(searchableItemItemClass, mcsBotPlayerInventoryController, true);
+                    var sortResult = ItemManipulator.Sort(searchableItemItemClass, mcsBotPlayerInventoryController, true);
                     if (sortResult.Succeeded)
                     {
                         await mcsBotPlayerInventoryController.TryRunNetworkTransaction(sortResult, null);

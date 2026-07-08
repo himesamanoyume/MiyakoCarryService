@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(BaseIntent data)
         {
-            var weaponManager = BotOwner_0.WeaponManager;
+            var weaponManager = botOwner_0.WeaponManager;
             var meleeData = weaponManager?.Melee;
 
             if (meleeData == null)
@@ -36,14 +36,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 weaponManager.Selector.ChangeToMelee();
             }
 
-            if (BotOwner_0.BotLay.IsLay)
+            if (botOwner_0.BotLay.IsLay)
             {
-                BotOwner_0.BotLay.GetUp(false);
+                botOwner_0.BotLay.GetUp(false);
             }
 
-            BotOwner_0.SetPose(1f);
+            botOwner_0.SetPose(1f);
 
-            var goalEnemy = BotOwner_0.Memory.GoalEnemy;
+            var goalEnemy = botOwner_0.Memory.GoalEnemy;
             if (goalEnemy == null)
             {
                 return;
@@ -54,24 +54,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (inAttackRange)
             {
-                BotOwner_0.Steering.LookToPoint(goalEnemy.AllParts[BodyPartType.head].Position);
+                botOwner_0.Steering.LookToPoint(goalEnemy._allParts[BodyPartType.head].Position);
                 if (goalEnemy.Person.AIData.Player.MovementContext.IsInPronePose)
                 {
-                    BotOwner_0.SetPose(0f);
+                    botOwner_0.SetPose(0f);
                 }
             }
             else
             {
-                BotOwner_0.Steering.LookToMovingDirection();
+                botOwner_0.Steering.LookToMovingDirection();
             }
 
-            var shouldSprint = distance > meleeData.Single_1;
-            BotOwner_0.Sprint(shouldSprint, false);
+            var shouldSprint = distance > meleeData.DIST_TO_STOP_SPRINT;
+            botOwner_0.Sprint(shouldSprint, false);
 
-            if (meleeData.NextTryHitTime < Time.time)
+            if (meleeData._nextTryHitTime < Time.time)
             {
-                var success = TryMeleeAttack(goalEnemy);
-                meleeData.method_0(meleeData.TRY_HIT_PERIOD_FALSE);
+                TryMeleeAttack(goalEnemy);
+                meleeData.ResetHitTime(meleeData.TRY_HIT_PERIOD_FALSE);
             }
 
             UpdateCustomMovement(goalEnemy, meleeData, distance, inAttackRange);
@@ -79,7 +79,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private bool TryMeleeAttack(EnemyInfo enemyInfo)
         {
-            var weaponManager = BotOwner_0.WeaponManager;
+            var weaponManager = botOwner_0.WeaponManager;
             var meleeData = weaponManager?.Melee;
 
             if (meleeData == null)
@@ -87,9 +87,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return false;
             }
 
-            if (meleeData.MeleeWeaponEquipped && Time.time - enemyInfo.PersonalLastSeenTime < 0.2f && meleeData.KnifeController != null)
+            if (meleeData.MeleeWeaponEquipped && Time.time - enemyInfo.PersonalPersuitDistance < 0.2f && meleeData.KnifeController != null)
             {
-                var result = (!BotOwner_0.Settings.FileSettings.Shoot.ALTERNATIVE_KNIFE_KICK) ? meleeData.KnifeController.MakeKnifeKick() : meleeData.KnifeController.MakeAlternativeKick();
+                var result = (!botOwner_0.Settings.FileSettings.Shoot.ALTERNATIVE_KNIFE_KICK) ? meleeData.KnifeController.MakeKnifeKick() : meleeData.KnifeController.MakeAlternativeKick();
                 return result;
             }
 
@@ -102,13 +102,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 if (inAttackRange)
                 {
-                    BotOwner_0.SetTargetMoveSpeed(MOVE_SPEED_WHILE_ATTACKING);
+                    botOwner_0.SetTargetMoveSpeed(MOVE_SPEED_WHILE_ATTACKING);
 
                     if (_lastPathUpdateTime < Time.time)
                     {
                         _lastPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;
                         var predictedPosition = PredictEnemyPosition(goalEnemy);
-                        BotOwner_0.GoToPoint(predictedPosition, true, -1f, false, false, true, false, false);
+                        botOwner_0.GoToPoint(predictedPosition, true, -1f, false, false, true, false, false);
                     }
                 }
             }
@@ -127,7 +127,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     {
                         if (path != null && path.Length > 0)
                         {
-                            BotOwner_0.GoToByWay(path, -1f);
+                            botOwner_0.GoToByWay(path, -1f);
                         }
                     }
                 }
@@ -136,7 +136,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private bool IsAlreadyMovingToTarget(Vector3 targetPosition)
         {
-            var pathController = BotOwner_0.Mover.ActualPathController;
+            var pathController = botOwner_0.Mover.ActualPathController;
             if (pathController == null || pathController.CurPath == null)
             {
                 return false;

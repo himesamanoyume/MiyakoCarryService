@@ -60,7 +60,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             catch 
             {
-                BotOwner.ExternalItemsController.PickUpedItems.Remove(wantDropItemId);
+                BotOwner.ExternalItemsController._pickUpedItems.Remove(wantDropItemId);
                 return;
             }
 
@@ -75,7 +75,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return;
             }
             
-            BotOwner.ExternalItemsController.PickUpedItems.Remove(wantDropLootData.Item.Id);
+            BotOwner.ExternalItemsController._pickUpedItems.Remove(wantDropLootData.Item.Id);
             mcsBotPlayerData.Player.InventoryController.ThrowItem(wantDropLootData.Item);
             await Task.Delay(500);
         }

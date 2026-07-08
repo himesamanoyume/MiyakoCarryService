@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.Trading;
 using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
@@ -40,12 +41,12 @@ namespace MiyakoCarryService.Client.Extensions
                 try
                 {
                     var iItemOwner = item.Parent.GetOwner();
-                    if (iItemOwner is not TraderControllerClass traderControllerClass)
+                    if (iItemOwner is not ItemController traderControllerClass)
                     {
                         return false;
                     }
 
-                    var result = InteractionsHandlerClass.Discard(item, traderControllerClass, false);
+                    var result = ItemManipulator.Discard(item, traderControllerClass, false);
                     if (result.Error != null)
                     {
                         return false;
@@ -185,7 +186,7 @@ namespace MiyakoCarryService.Client.Extensions
                 return offers;
             }
 
-            public TraderOffer GetTraderOffer(TraderClass trader)
+            public TraderOffer GetTraderOffer(Trader trader)
             {
                 try
                 {

@@ -12,53 +12,53 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             
         }
 
-        public override void UpdateNodeByBrain(GClass26 data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
-            if (!BotOwner_0.BewarePlantedMine.CanDeactivate())
+            if (!botOwner_0.BewarePlantedMine.CanDeactivate())
             {
                 return;
             }
 
-            var deactivatingPlace = BotOwner_0.BewarePlantedMine.DeactivatingPlace;
+            var deactivatingPlace = botOwner_0.BewarePlantedMine.DeactivatingPlace;
             if (deactivatingPlace == null)
             {
                 return;
             }
 
-            deactivatingPlace.SetDeactivate(BotOwner_0.Id);
-            var sqrDistance = deactivatingPlace.Pos.McsSqrDistance(BotOwner_0.Position);
-            BotOwner_0.Sprint(false, false);
+            deactivatingPlace.SetDeactivate(botOwner_0.Id);
+            var sqrDistance = deactivatingPlace.Pos.McsSqrDistance(botOwner_0.Position);
+            botOwner_0.Sprint(false, false);
             if (sqrDistance <= 5f)
             {
-                method_6();
-                BotOwner_0.SetPose(0.1f);
-                BotOwner_0.StopMove();
-                BotOwner_0.Steering.LookToPoint(deactivatingPlace.Pos);
+                DoDeactivateProcess();
+                botOwner_0.SetPose(0.1f);
+                botOwner_0.StopMove();
+                botOwner_0.Steering.LookToPoint(deactivatingPlace.Pos);
             }
             else
             {
-                BotOwner_0.SetTargetMoveSpeed(1f);
-                BotOwner_0.Sprint(true, false);
-                BotOwner_0.SetPose(1f);
-                BotOwner_0.Steering.LookToMovingDirection();
+                botOwner_0.SetTargetMoveSpeed(1f);
+                botOwner_0.Sprint(true, false);
+                botOwner_0.SetPose(1f);
+                botOwner_0.Steering.LookToMovingDirection();
                 BetterSetDeactivatingPlacePos(deactivatingPlace.Pos);
             }
-            method_0(false);
+            DoorOpen(false);
         }
 
         public virtual void BetterSetDeactivatingPlacePos(Vector3 pos)
         {
-            if (Float_0 < Time.time)
+            if (float_0 < Time.time)
             {
                 if (Tools.BetterDestination(1.5f, pos, out var betterDestination))
                 {
-                    BotOwner_0.Mover.GoToPoint(betterDestination, false, 0.5f);
+                    botOwner_0.Mover.GoToPoint(betterDestination, false, 0.5f);
                 }
                 else
                 {
-                    BotOwner_0.Mover.GoToPoint(pos, false, 0.5f);
+                    botOwner_0.Mover.GoToPoint(pos, false, 0.5f);
                 }
-                Float_0 = Time.time + 5f;
+                float_0 = Time.time + 5f;
             }
         }
     }
