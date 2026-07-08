@@ -102,6 +102,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                 {
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                     var stringBuilder = new StringBuilder();
+                    stringBuilder.Append("```log\n");
                     stringBuilder.Append("- DateTime: ").Append(DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")).Append("\n");
                     stringBuilder.Append("- Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
                     stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
@@ -117,14 +118,15 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
+                        .Append("Used Brain: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedBrains().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
                         .Append("Used Layer: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
                         .Append("Used Reason: ").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons().Select(kvp => $"{kvp.Key}({kvp.Value})"))).Append('\n')
                         .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
-                    stringBuilder.Append("```log\n");
-                    foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries())
+                    stringBuilder.Append("\n");
+                    foreach (var logEntry in MiyakoCarryServicePlugin.LogBuffer.GetEntries().Values)
                     {
-                        stringBuilder.Append(logEntry.Condition).Append("\n");
+                        stringBuilder.Append(logEntry.Condition).Append($" ({logEntry.Total})").Append("\n");
                         stringBuilder.Append(logEntry.StackTrace).Append("\n");
                     }
                     stringBuilder.Append("```");

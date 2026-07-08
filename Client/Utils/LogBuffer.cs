@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
 using HarmonyLib;
@@ -10,13 +9,13 @@ namespace MiyakoCarryService.Client.Utils
 {
     internal sealed class LogBuffer
     {
-        private readonly LinkedList<LogEntry> _entries = new();
-        private int _currentCharCount = 0;
+        private readonly ConcurrentDictionary<string, LogEntry> _entries = new();
         private int _newBigSurveyCount = 0;
-        private ConcurrentDictionary<string, int> _usedLayers = new();
-        private ConcurrentDictionary<string, int> _usedReasons = new();
+        private readonly ConcurrentDictionary<string, int> _usedBrains = new();
+        private readonly ConcurrentDictionary<string, int> _usedLayers = new();
+        private readonly ConcurrentDictionary<string, int> _usedReasons = new();
 
-        public LinkedList<LogEntry> GetEntries()
+        public ConcurrentDictionary<string, LogEntry> GetEntries()
         {
             return _entries;
         }
@@ -27,6 +26,15 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return _entries.Count;
             }
+        }
+
+        public void AddUsedBrain(string brainName)
+        {
+            _usedBrains.AddOrUpdate(brainName, _ = 1, (brainName, times) =>
+            {
+                times += 1;
+                return times;
+            });
         }
 
         public void AddUsedLayer(string layerName)
@@ -47,6 +55,11 @@ namespace MiyakoCarryService.Client.Utils
             });
         }
 
+        public ConcurrentDictionary<string, int> GetUsedBrains()
+        {
+            return _usedBrains;
+        }
+
         public ConcurrentDictionary<string, int> GetUsedLayers()
         {
             return _usedLayers;
@@ -63,11 +76,13 @@ namespace MiyakoCarryService.Client.Utils
 
             ShowNewInformation();
 
-            var logEntry = new LogEntry(condition, stackTrace);
-            var newTotal = _currentCharCount + logEntry.Length;
-
-            _entries.AddLast(logEntry);
-            _currentCharCount = newTotal;
+            _entries.AddOrUpdate(stackTrace, _ => new LogEntry(condition, stackTrace),
+                (stackTrace, oldLogEntry) =>
+                {
+                    oldLogEntry.Total += 1;
+                    return oldLogEntry;
+                }
+            );
         }
 
         public void ShowNewInformation()
@@ -90,36 +105,9 @@ namespace MiyakoCarryService.Client.Utils
 
     public sealed class LogEntry
     {
-        public string Condition
-        {
-            get
-            {
-                return field;
-            }
-        }
-        public string StackTrace
-        {
-            get
-            {
-                return field;
-            }
-        }
-        public int Length
-        {
-            get
-            {
-                int c = 0;
-                if (!string.IsNullOrEmpty(Condition))
-                {
-                    c += Condition.Length;
-                }
-                if (!string.IsNullOrEmpty(StackTrace))
-                {
-                    c += StackTrace.Length;
-                }
-                return c;
-            }
-        }
+        public string Condition;
+        public string StackTrace;
+        public int Total = 1;
 
         public LogEntry(string condition, string stackTrace)
         {
