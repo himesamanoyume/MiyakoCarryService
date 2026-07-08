@@ -23,13 +23,13 @@ namespace MiyakoCarryService.Client.Datas
         public int ContainerGridCount = 0;
         public int MaxSingleGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
-        public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && Item is not HeadphonesItemClass);
+        public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && Item is not Headphones);
         public bool VanishingCurse = false;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
             Offer = offer ?? new TraderOffer();
-            if (Item.IsContainer && Item is SearchableItemItemClass containerItem)
+            if (Item.IsContainer && Item is SearchableItem containerItem)
             {
                 foreach (var stashGridClass in containerItem.Grids)
                 {

@@ -157,8 +157,8 @@ namespace MiyakoCarryService.Client.Utils
         public static Vector3? GetPosNearTarget(Vector3 targetPos, BotOwner botOwner = null)
         {
             Vector3? result = null;
-            var xOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
-            var zOffset = GClass856.Random(1f, 4f) * GClass856.RandomSing();
+            var xOffset = MyExtensions.Random(1f, 4f) * MyExtensions.RandomSing();
+            var zOffset = MyExtensions.Random(1f, 4f) * MyExtensions.RandomSing();
             var newPos = targetPos + new Vector3(xOffset, 0f, zOffset);
 
             for (int attempt = 0; attempt < 30; attempt++)
