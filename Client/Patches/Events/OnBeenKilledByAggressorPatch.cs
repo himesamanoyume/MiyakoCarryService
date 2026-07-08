@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.OnBeenKilledByAggressor));
 
         [PatchPostfix]
-        public static void Postfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        public static void Postfix(Player __instance, IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
             if (!MiyakoCarryServicePlugin.FikaInstalled || MiyakoCarryServicePlugin.IsLoadedByScriptEngine)
             {

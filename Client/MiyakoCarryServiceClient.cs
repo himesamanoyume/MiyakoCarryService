@@ -24,6 +24,8 @@ using MiyakoCarryService.Client.Patches.SAIN;
 using System.Reflection;
 using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Patches.Interactive;
+using EFT;
+using EFT.Communications;
 
 namespace MiyakoCarryService.Client
 {
@@ -33,7 +35,7 @@ namespace MiyakoCarryService.Client
     public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
     {
         public const string BepInExClientVersion = "1.1.0.0";
-        public static Version ClientVersion { get; } = new(BepInExClientVersion);
+        public static System.Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string EFTapp = "EscapeFromTarkov.exe";
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
         public const string FikaGUID = "com.fika.core";
@@ -110,10 +112,10 @@ namespace MiyakoCarryService.Client
             SAINInstalled = !CheckPlugin(["me.sol.sain"]);
             SetupConfig();
             McsPluginClientConfig = McsRequestHandler.GetMcsPluginClientConfig();
-            DefaultLang = LocaleManagerClass.LocaleManagerClass.String_0;
+            DefaultLang = LocalizationManager.Instance.Culture;
             foreach (var kvp in LocalLocales.LoadingLocales)
             {
-                LocaleManagerClass.LocaleManagerClass.UpdateLocales(kvp.Key, kvp.Value);
+                LocalizationManager.Instance.UpdateLocales(kvp.Key, kvp.Value);
             }
             EnableAllPatches();
             GameLoop.Instance.Init();
@@ -310,11 +312,11 @@ namespace MiyakoCarryService.Client
                     var entry = (ConfigEntryBase)sender;
                     if ((bool)entry.BoxedValue)
                     {
-                        NotificationManagerClass.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#00ff00>{Locales.FUNCTIONENABLED.McsLocalized()}</color>");
+                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#00ff00>{Locales.FUNCTIONENABLED.McsLocalized()}</color>");
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#ff0000>{Locales.FUNCTIONDISABLED.McsLocalized()}</color>");
+                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#ff0000>{Locales.FUNCTIONDISABLED.McsLocalized()}</color>");
                     }
                 };
             }

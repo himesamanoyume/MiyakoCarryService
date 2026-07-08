@@ -240,7 +240,7 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        public static void HandleSharedQuestCondition(Player killedPlayer, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, bool easyKillConditions = true)
+        public static void HandleSharedQuestCondition(Player killedPlayer, IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, bool easyKillConditions = true)
         {
             if (!easyKillConditions)
             {

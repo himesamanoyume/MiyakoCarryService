@@ -193,7 +193,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
+            if (BaseLogicLayer.CheckMedsToStop(BotOwner))
             {
                 BotOwner.Medecine.FirstAid.CancelCurrent();
                 if (BotOwner.Medecine.SurgicalKit.Using)
@@ -223,7 +223,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var player = BotOwner.GetPlayer;
                 if (!BotOwner.Medecine.Using
                     && player.HandsController
-                    && !player.HandsController.IsAiming
+                    && !player.HandsController.IsAimingButtonPressing
                     && !player.HandsController.IsInventoryOpen()
                     && !player.HandsController.IsInInteractionStrictCheck()
                     && !player.HandsController.IsHandsProcessing())
@@ -254,7 +254,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public virtual bool EndRunToCover()
         {
             var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -297,7 +297,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (_goToCoverTime < Time.time)
             {
                 _goToCoverTime = Time.time + 1f;
-                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, TOO_FAR_FROM_LEAD_DISTANCE, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true, null, null, "Default");
+                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, TOO_FAR_FROM_LEAD_DISTANCE, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true, null, null, "Default");
                 _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
                 if (_currentNavigationPoint != null)
                 {
@@ -389,7 +389,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -470,27 +470,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             else
             {
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+                if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
                     var playerPosition = McsBotPlayerData.Player.Position;
-                    BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
-                    BotOwner.Mover.LastGoodCastPointTime = Time.time;
-                    BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                    BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                    BotOwner.Mover._lastGoodCastPointTime = Time.time;
+                    BotOwner.Mover._prevPosLinkedTime = 0f;
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
                     return true;
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged > 6f)
                 {
                     if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
@@ -548,27 +548,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             else
             {
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+                if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
                     var playerPosition = McsBotPlayerData.Player.Position;
-                    BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
-                    BotOwner.Mover.LastGoodCastPointTime = Time.time;
-                    BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                    BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                    BotOwner.Mover._lastGoodCastPointTime = Time.time;
+                    BotOwner.Mover._prevPosLinkedTime = 0f;
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
                     return true;
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged >= 2f)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged >= 2f)
                 {
                     return true;
                 }
@@ -591,20 +591,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             else
             {
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+                if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
                 {
                     CheckStuck();
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged > 30f && BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos) >= TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
                 {
                     BotOwner.StopMove();
                     BotOwner.Mover.AllowTeleport();
                     BotOwner.GetPlayer.Teleport(McsBotPlayerData.LeadPlayer.Position, true);
                     var playerPosition = McsBotPlayerData.Player.Position;
-                    BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
-                    BotOwner.Mover.LastGoodCastPointTime = Time.time;
-                    BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                    BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                    BotOwner.Mover._lastGoodCastPointTime = Time.time;
+                    BotOwner.Mover._prevPosLinkedTime = 0f;
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
@@ -615,7 +615,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return true;
                 }
 
-                if (Time.time - BotOwner.Mover.LastTimePosChanged > 6f)
+                if (Time.time - BotOwner.Mover._lastTimePosChanged > 6f)
                 {
                     return true;
                 }
@@ -625,7 +625,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndAttackMoving()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -657,10 +657,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected bool CheckStuck()
         {
             var pos = BotOwner.Position;
-            if (BotOwner.Mover.LastPos.McsSqrDistance(pos) > 2f * 2f)
+            if (BotOwner.Mover._lastPos.McsSqrDistance(pos) > 2f * 2f)
             {
-                BotOwner.Mover.LastPos = pos;
-                BotOwner.Mover.LastTimePosChanged = Time.time;
+                BotOwner.Mover._lastPos = pos;
+                BotOwner.Mover._lastTimePosChanged = Time.time;
                 return false;
             }
             else
@@ -733,7 +733,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public virtual bool CanSearchEnemy()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
-            return goalEnemy == null || !WasHitRecently(10f) && !goalEnemy.IsVisible && !goalEnemy.CanShoot && goalEnemy.CanISearch && BotOwner.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack) && BotOwner.Memory.LastEnemyVisionOld(LocalBotSettingsProviderClass.Core.COVER_SECONDS_AFTER_LOSE_VISION);
+            return goalEnemy == null || !WasHitRecently(10f) && !goalEnemy.IsVisible && !goalEnemy.CanShoot && goalEnemy.CanISearch && BotOwner.Tactic.IsCurTactic(BotsGroup.BotCurrentTactic.Attack) && BotOwner.Memory.LastEnemyVisionOld(BotInternalSettingsController.Core.COVER_SECONDS_AFTER_LOSE_VISION);
         }
 
         public virtual bool ProtectCareKill()
@@ -776,7 +776,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 coverShootType = CoverShootType.hide;
             }
-            var coverSearchData = new CoverSearchData(leadPos, BotOwner.CoverSearchInfo, coverShootType, LocalBotSettingsProviderClass.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(leadPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceDataClass(0f), PointsArrayType.byShootType, true);
+            var coverSearchData = new CoverSearchData(leadPos, BotOwner.CoverSearchInfo, coverShootType, BotInternalSettingsController.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(leadPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true);
             return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
         }
 
@@ -802,7 +802,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -874,11 +874,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             var position = BotOwner.Transform.position;
             var currPosition = enemy.CurrPosition;
-            var gclass = new GClass365(position, currPosition);
+            var gclass = new SegmentPoints(position, currPosition);
             var vector = nearestDoor.SegmentOpen.b - nearestDoor.SegmentOpen.a;
             var vector2 = nearestDoor.SegmentOpen.a - vector * 0.1f;
             var vector3 = nearestDoor.SegmentOpen.b + vector * 0.1f;
-            return GClass369.GetCrossPoint(gclass.a, gclass.b, vector2, vector3) != null;
+            return AIUtility.GetCrossPoint(gclass.a, gclass.b, vector2, vector3) != null;
         }
 
         public virtual bool CannotSeeEnemy(EnemyInfo info)
@@ -888,7 +888,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
             var vector = info.EnemyLastPositionReal + Vector3.up * 1.6f;
-            return !Physics.Linecast(BotOwner.WeaponRoot.position, vector, out var raycastHit, LayerMaskClass.HighPolyWithTerrainMask);
+            return !Physics.Linecast(BotOwner.WeaponRoot.position, vector, out var raycastHit, LayersMaskController.HighPolyWithTerrainMask);
         }
 
         public virtual bool CanShootNow()
@@ -951,7 +951,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToEnemy()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -1002,7 +1002,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -1066,20 +1066,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
 
-            if (Time.time - BotOwner.Mover.LastTimePosChanged > 30f)
+            if (Time.time - BotOwner.Mover._lastTimePosChanged > 30f)
             {
                 BotOwner.StopMove();
                 BotOwner.Mover.AllowTeleport();
                 BotOwner.GetPlayer.Teleport(BotOwner.PatrollingData.ExfiltrationData.CachedExfiltrationPoint.Position, true);
                 var playerPosition = McsBotPlayerData.Player.Position;
-                BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
-                BotOwner.Mover.LastGoodCastPointTime = Time.time;
-                BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                BotOwner.Mover._lastGoodCastPointTime = Time.time;
+                BotOwner.Mover._prevPosLinkedTime = 0f;
                 BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                 BotOwner.Mover.RecalcWay();
                 BotOwner.Mover.Pause = true;
@@ -1133,7 +1133,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if ((Time.time - goalEnemy.PersonalLastSeenTime) > 5f)
+            if ((Time.time - goalEnemy.PersonalPersuitDistance) > 5f)
             {
                 return true;
             }
@@ -1245,7 +1245,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (Time.time - BotOwner.Mover.LastTimePosChanged < 3f)
+            if (Time.time - BotOwner.Mover._lastTimePosChanged < 3f)
             {
                 return false;
             }
@@ -1275,7 +1275,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             startPosition.y += 0.33f;
             endPosition.y += 0.33f;
 
-            if (Physics.SphereCast(startPosition, SPHERECAST_RADIUS, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayerMaskClass.PlayerStaticCollisionsMask))
+            if (Physics.SphereCast(startPosition, SPHERECAST_RADIUS, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayersMaskController.PlayerStaticCollisionsMask))
             {
                 if (hit.collider != null)
                 {
@@ -1528,7 +1528,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndDeactivateMine()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -1554,7 +1554,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndRunAwayGrenade()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -1574,7 +1574,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndRunAwayArtillery()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }
@@ -1594,7 +1594,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndRunAwayBTR()
         {
-            if (BotOwner.Mover.LastTimePosChanged + 1f < Time.time)
+            if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
             }

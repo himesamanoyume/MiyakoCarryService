@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 
 #if DEBUG
         [PatchPrefix]
-        public static void Prefix(Player ___Player, EBodyPart bodyPart, ref float damage, DamageInfoStruct damageInfo)
+        public static void Prefix(Player ___Player, EBodyPart bodyPart, ref float damage, DamageInfo damageInfo)
         {
             if (___Player == null || ___Player.IsYourPlayer)
             {
@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 #endif
 
         [PatchPostfix]
-        public static void Postfix(ActiveHealthController __instance, Player ___Player, EBodyPart bodyPart, float damage, DamageInfoStruct damageInfo)
+        public static void Postfix(ActiveHealthController __instance, Player ___Player, EBodyPart bodyPart, float damage, DamageInfo damageInfo)
         {
             if (___Player == null)
             {

@@ -21,6 +21,8 @@ using System.Threading;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using EFT.InventoryLogic;
+using Diz.Jobs;
+using EFT.Ballistics;
 
 namespace MiyakoCarryService.Client
 {
@@ -35,7 +37,7 @@ namespace MiyakoCarryService.Client
         private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
         private HashSet<MongoID> _loadedMcsLeadPlayer = new();
 
-        public ISession Session
+        public IEftSession Session
         {
             get
             {
@@ -175,25 +177,25 @@ namespace MiyakoCarryService.Client
                 TarkovApplication.Exist(out var tarkovApplication);
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
 
-                var mainMenuControllerClass = tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+                var mainMenuShowOperation = tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
                 var array = await Session.GetDailyQuests();
                 if (!array.IsNullOrEmpty())
                 {
-                    if (mainMenuControllerClass == null)
+                    if (mainMenuShowOperation == null)
                     {
                         return;
                     }
 
-                    if (mainMenuControllerClass.LocalQuestControllerClass == null)
+                    if (mainMenuShowOperation._questControllerClientBackend == null)
                     {
                         return;
                     }
 
-                    if (mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass == null)
+                    if (mainMenuShowOperation._questControllerClientBackend._questBook == null)
                     {
                         return;
                     }
-                    mainMenuControllerClass.LocalQuestControllerClass.QuestBookClass.UpdateDailyQuests(array);
+                    mainMenuShowOperation._questControllerClientBackend._questBook.UpdateDailyQuests(array);
                 }
             }
         }
@@ -220,13 +222,13 @@ namespace MiyakoCarryService.Client
 
                 foreach (var (traderId, traderInfo) in profile.TradersInfo)
                 {
-                    if (traderInfo.ProfileInfo != correctInfo)
+                    if (traderInfo._profileInfo != correctInfo)
                     {
-                        traderInfo.ProfileInfo = correctInfo;
+                        traderInfo._profileInfo = correctInfo;
                     }
                 }
 
-                if (sessionBackendClass.Dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
+                if (sessionBackendClass.dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
                 {
                     profileUpdater.UpdateProfile(profileChangesPocoClass);
                 }
@@ -397,7 +399,7 @@ namespace MiyakoCarryService.Client
             {
                 foreach (var mcsProfile in mcsProfileItem.Value)
                 {
-                    await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.Immediate, new Progress<LoadingProgressStruct>(), default);
+                    await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Local, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobYieldPriority.Immediate, new Progress<InitLevelProgress>(), default);
                 }
             }
 
@@ -426,7 +428,7 @@ namespace MiyakoCarryService.Client
                 return;
             }
 
-            var botCreator = botSpawner.BotCreator;
+            var botCreator = botSpawner._botCreator;
             if (botCreator == null)
             {
                 return;
@@ -441,7 +443,7 @@ namespace MiyakoCarryService.Client
 
                 _loadedMcsLeadPlayer.Add(leadPlayer.ProfileId);
 
-                leadPlayer.BeingHitAction += (DamageInfoStruct damageInfo, EBodyPart bodyPart, float value) =>
+                leadPlayer.BeingHitAction += (DamageInfo damageInfo, EBodyPart bodyPart, float value) =>
                 {
                     if (damageInfo.Player?.AIData?.BotOwner == null)
                     {
@@ -512,9 +514,9 @@ namespace MiyakoCarryService.Client
                         ShallBeGroup = new ShallBeGroupParams(true, false, 5)
                     };
 
-                    var botProfileDataClass = new BotProfileDataClass(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
+                    var botProfileDataClass = new GetProfileDataParams(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
 
-                    var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
+                    var botCreationDataClass = await BotCreationData.Create(botProfileDataClass, botCreator, 0, botSpawner);
 
                     botCreationDataClass.AddProfile(mcsBotPlayerProfile);
 
@@ -564,9 +566,9 @@ namespace MiyakoCarryService.Client
                         botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
                         botOwner.Settings.GetWarnBotTypes().Clear();
 
-                        var enemies = botSpawner.method_5(botOwner);
+                        var enemies = botSpawner.GetBotEnemiesList(botOwner);
 
-                        var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, true);
+                        var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner._deadBodiesController, botSpawner._allPlayers, true);
 
                         var notScav = leadPlayer.Side != EPlayerSide.Savage;
                         if (notScav)
@@ -603,7 +605,7 @@ namespace MiyakoCarryService.Client
                             var stopWatch = new Stopwatch();
                             stopWatch.Start();
 
-                            botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
+                            botSpawner.ActivateBotCallback(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
 
                             botOwner.Memory.DeleteInfoAboutEnemy(leadPlayer);
 
@@ -675,18 +677,18 @@ namespace MiyakoCarryService.Client
                             }
                         });
 
-                        botSpawner.InSpawnProcess += 1;
+                        botSpawner._inSpawnProcess += 1;
 
                         var cancellationToken = new CancellationToken();
-                        await botCreator.ActivateBot(profile, new GClass682(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
+                        await botCreator.ActivateBot(profile, new PositionNote(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
                     });
                 }
             }
         }
 
-        private BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
+        private BotSettings SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {
-            var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
+            var settings = Singleton<BotSettingsController>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
 
             var notScav = leadPlayer.Side != EPlayerSide.Savage;
 
@@ -711,19 +713,19 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Mind.CAN_TALK = true;
             settings.FileSettings.Mind.TALK_WITH_QUERY = true;
-            botOwner.BotTalk.CanSay = true;
+            botOwner.BotTalk._canSay = true;
 
-            if (!botOwner.BotTalk.Priority.Any(x => x.Key == EPhraseTrigger.Ready))
+            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.Ready))
             {
-                botOwner.BotTalk.Priority.Add(EPhraseTrigger.Ready, 140f);
+                botOwner.BotTalk._priority.Add(EPhraseTrigger.Ready, 140f);
             }
-            if (!botOwner.BotTalk.Priority.Any(x => x.Key == EPhraseTrigger.Going))
+            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.Going))
             {
-                botOwner.BotTalk.Priority.Add(EPhraseTrigger.Going, 141f);
+                botOwner.BotTalk._priority.Add(EPhraseTrigger.Going, 141f);
             }
-            if (!botOwner.BotTalk.Priority.Any(x => x.Key == EPhraseTrigger.DontKnow))
+            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.DontKnow))
             {
-                botOwner.BotTalk.Priority.Add(EPhraseTrigger.DontKnow, 142f);
+                botOwner.BotTalk._priority.Add(EPhraseTrigger.DontKnow, 142f);
             }
 
             // 此项如果不为false，就会导致SAIN无法进入Combat Layer
