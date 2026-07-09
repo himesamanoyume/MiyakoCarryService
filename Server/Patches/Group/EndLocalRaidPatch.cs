@@ -19,6 +19,8 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchController), nameof(MatchController.EndLocalRaid));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+
         [PatchPrefix]
         public static void Prefix(MongoId sessionId, EndLocalRaidRequestData request)
         {
@@ -27,8 +29,7 @@ namespace MiyakoCarryService.Server.Patches.Group
             {
                 return;
             }
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            raidController.ClearGroupMember(sessionId);
+            RaidController.ClearGroupMember(sessionId);
         }
     }
 }

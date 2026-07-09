@@ -19,27 +19,22 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SptDialogueChatBot), nameof(SptDialogueChatBot.GetChatBot));
 
-        private static CoreConfig _coreConfig;
+        private static ConfigServer ConfigServer { get => field ??= ServiceLocator.ServiceProvider.GetService<ConfigServer>(); }
+        private static CoreConfig CoreConfig { get => field ??= ConfigServer.GetConfig<CoreConfig>(); }
 
         [PatchPostfix]
         public static void Postfix(ref UserDialogInfo __result)
         {
-            if (_coreConfig is null)
-            {
-                var configServer = ServiceLocator.ServiceProvider.GetService<ConfigServer>();
-                _coreConfig = configServer.GetConfig<CoreConfig>();
-            }
-
             __result = new UserDialogInfo
             {
-                Id = _coreConfig.Features.ChatbotFeatures.Ids["spt"],
+                Id = CoreConfig.Features.ChatbotFeatures.Ids["spt"],
                 Aid = 1234568,
                 Info = new UserDialogDetails
                 {
                     Level = 1.0,
                     MemberCategory = MemberCategory.Developer,
                     SelectedMemberCategory = MemberCategory.Developer,
-                    Nickname = _coreConfig.SptFriendNickname,
+                    Nickname = CoreConfig.SptFriendNickname,
                     Side = "Usec",
                 },
             };

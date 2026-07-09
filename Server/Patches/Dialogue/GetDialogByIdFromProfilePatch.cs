@@ -19,11 +19,12 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), "GetDialogByIdFromProfile");
 
+        private static Controllers.InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.InfoController>(); }
+
         [PatchPrefix]
         public static bool Prefix(SptProfile profile, GetMailDialogViewRequestData request, ref SPTarkov.Server.Core.Models.Eft.Profile.Dialogue __result)
         {
-            var infoController = ServiceLocator.ServiceProvider.GetService<Controllers.InfoController>();
-            if (infoController.CheckMcsBotPlayerExist(request.DialogId))
+            if (InfoController.CheckMcsBotPlayerExist(request.DialogId))
             {
                 if (profile.DialogueRecords is null || profile.DialogueRecords.ContainsKey(request.DialogId))
                 {

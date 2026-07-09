@@ -17,14 +17,14 @@ namespace MiyakoCarryService.Server.Patches.Profile
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SaveServer), nameof(SaveServer.GetProfile));
 
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+
         [PatchPrefix]  
         public static bool Prefix(MongoId sessionId, ref SptProfile __result)  
         {  
-            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-
-            if (profileController.IsMcsBotPlayerInventoryMode(sessionId))  
+            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))  
             {  
-                __result = profileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);  
+                __result = ProfileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);  
                 return false;
             }  
             return true;  

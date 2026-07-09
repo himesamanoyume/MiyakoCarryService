@@ -22,39 +22,39 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GenerateDialogueView));
 
+        private static MailSendService MailSendService { get => field ??= ServiceLocator.ServiceProvider.GetService<MailSendService>(); }
+        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
+        private static TraderService TraderService { get => field ??= ServiceLocator.ServiceProvider.GetService<TraderService>(); }
+        private static ConfigService ConfigService { get => field ??= ServiceLocator.ServiceProvider.GetService<ConfigService>(); }
+
         [PatchPrefix]
         public static void Prefix(ref GetMailDialogViewRequestData request, MongoId sessionId)
         {
             if (request.DialogId == TraderService.MiyakoTraderId)
             {
-                var mailSendService = ServiceLocator.ServiceProvider.GetService<MailSendService>();
-                var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
-                var traderService = ServiceLocator.ServiceProvider.GetService<TraderService>();
-                var configService = ServiceLocator.ServiceProvider.GetService<ConfigService>();
-
-                mailSendService.SendLocalisedNpcMessageToPlayer(
-                    sessionId, 
-                    TraderService.MiyakoTraderId, 
-                    MessageType.NpcTraderMessage, 
+                MailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
                     Locales.MIYAKOTRADERWELCOME,
                     null
                 );
 
-                mailSendService.SendDirectNpcMessageToPlayer(
+                MailSendService.SendDirectNpcMessageToPlayer(
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    string.Format(serverLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2)),
+                    string.Format(ServerLocalisationService.GetText(Locales.CURRENTPRICEINCREASE), Math.Round(TraderService.GetGlobalPunishmentMulti() * 100d, 2)),
                     null
                 );
 
-                if (configService.GetMcsPluginConfig().ServerConfig.CheckUpdate && configService.HaveUpdate)
+                if (ConfigService.GetMcsPluginConfig().ServerConfig.CheckUpdate && ConfigService.HaveUpdate)
                 {
-                    mailSendService.SendDirectNpcMessageToPlayer(
+                    MailSendService.SendDirectNpcMessageToPlayer(
                         sessionId,
                         TraderService.MiyakoTraderId,
                         MessageType.NpcTraderMessage,
-                        string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), configService.GetClientVersion(), configService.GetLatestVersion()),
+                        string.Format(ServerLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), ConfigService.GetClientVersion(), ConfigService.GetLatestVersion()),
                         null
                     );
                 }

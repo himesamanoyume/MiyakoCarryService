@@ -18,16 +18,17 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Callbacks.MatchCallbacks), nameof(SPTarkov.Server.Core.Callbacks.MatchCallbacks.SendGroupInvite));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupInviteSendRequest info, MongoId sessionID)
         {
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
             var isInt = int.TryParse(info.To, out var mcsAid);
             if (!isInt)
             {
                 return;
             }
-            raidController.AcceptGroupInvite(sessionID, mcsAid);
+            RaidController.AcceptGroupInvite(sessionID, mcsAid);
         }
     }
 
@@ -38,11 +39,12 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Callbacks.MatchCallbacks), nameof(SPTarkov.Server.Core.Callbacks.MatchCallbacks.LeaveGroup));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+
         [PatchPrefix]
         public static void Prefix(string url, EmptyRequestData _, MongoId sessionID)
         {
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            raidController.ClearGroupMember(sessionID);
+            RaidController.ClearGroupMember(sessionID);
         }
     }
 }

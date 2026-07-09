@@ -23,21 +23,22 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.GetClientRepeatableQuests));
         public static Dictionary<MongoId, Queue<RepeatableQuest>> QuestsQueueDict = new();
 
+        private static ConfigController ConfigController { get => field ??= ServiceLocator.ServiceProvider.GetService<ConfigController>(); }
+        private static Controllers.QuestController QuestController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<InfoController>(); }
+        private static ProfileHelper ProfileHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileHelper>(); }
+        private static TimeUtil TimeUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<TimeUtil>(); }
+
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
         {
-            var configController = ServiceLocator.ServiceProvider.GetService<ConfigController>();
-            var questController = ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>();
-            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-            var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
-            var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
-            var timeUtil = ServiceLocator.ServiceProvider.GetService<TimeUtil>();
-            var currentTime = timeUtil.GetTimeStamp();
-            var fullProfile = profileHelper.GetFullProfile(sessionID);
+            var currentTime = TimeUtil.GetTimeStamp();
+            var fullProfile = ProfileHelper.GetFullProfile(sessionID);
             var pmcData = fullProfile.CharacterData.PmcData;
-            var orderConfig = configController.GetOrderConfig().OrderQuests.FirstOrDefault();
-            var orderPendingPaymentTime = configController.GetMcsPluginConfig().ServerConfig.OrderPendingPaymentTime;
-            var generatedOrder = questController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
+            var orderConfig = ConfigController.GetOrderConfig().OrderQuests.FirstOrDefault();
+            var orderPendingPaymentTime = ConfigController.GetMcsPluginConfig().ServerConfig.OrderPendingPaymentTime;
+            var generatedOrder = QuestController.GetRepeatableQuestSubTypeFromProfile(orderConfig, pmcData);
 
             if (QuestsQueueDict.TryGetValue(sessionID, out var orderQuestsQueue))
             {
@@ -59,16 +60,16 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 QuestsQueueDict.Remove(sessionID);
             }
 
-            questController.ProcessExpiredQuests(generatedOrder, pmcData);
-            var mcsBotPlayerIds = infoController.GetExpiredMcsBotPlayerIds();
+            QuestController.ProcessExpiredQuests(generatedOrder, pmcData);
+            var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
             foreach (var kvp in mcsBotPlayerIds)
             {
-                if (profileController.IsMcsBotPlayerInventoryMode(kvp.Key))
+                if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
                 {
                     continue;
                 }
-                infoController.ProcessExpiredOrderInfo(kvp.Key);
-                profileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                InfoController.ProcessExpiredOrderInfo(kvp.Key);
+                ProfileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
             }
 
             if (currentTime < generatedOrder.EndTime - 1)

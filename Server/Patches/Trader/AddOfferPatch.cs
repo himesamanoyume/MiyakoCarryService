@@ -23,18 +23,18 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RagfairController), nameof(RagfairController.AddPlayerOffer));
 
+        private static EventOutputHolder EventOutputHolder { get => field ??= ServiceLocator.ServiceProvider.GetService<EventOutputHolder>(); }
+        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>(); }
+        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+
         [PatchPrefix]  
         public static bool Prefix(PmcData pmcData, AddOfferRequestData offerRequest, MongoId sessionID, ref ItemEventRouterResponse __result)  
         {  
-            var eventOutputHolder = ServiceLocator.ServiceProvider.GetService<EventOutputHolder>();
-            var httpResponseUtil = ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>();
-            var output = eventOutputHolder.GetOutput(sessionID);
-            var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
-
-            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-            if (profileController.IsMcsBotPlayerInventoryMode(sessionID))  
+            var output = EventOutputHolder.GetOutput(sessionID);
+            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionID))  
             {
-                __result = httpResponseUtil.AppendErrorToOutput(output, serverLocalisationService.GetText(Locales.MCSINVENTORYMODERAGFAIRREFUSE));
+                __result = HttpResponseUtil.AppendErrorToOutput(output, ServerLocalisationService.GetText(Locales.MCSINVENTORYMODERAGFAIRREFUSE));
                 return false;
             }  
             return true;
