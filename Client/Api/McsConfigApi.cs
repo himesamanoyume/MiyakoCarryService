@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static Dictionary<string, McsConfigValue> GetConfigSnapshot()
+        public static Dictionary<string, McsValue> GetConfigSnapshot()
         {
             return McsBotPlayerConfigUtils.Snapshot();
         }

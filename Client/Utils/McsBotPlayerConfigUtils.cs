@@ -9,8 +9,8 @@ namespace MiyakoCarryService.Client.Utils
     {
         private class Field
         {
-            public Func<McsConfigValue> GetLocal;
-            public Action<McsConfigValue> Apply;
+            public Func<McsValue> GetLocal;
+            public Action<McsValue> Apply;
         }
 
         private static readonly Dictionary<string, Field> _fields = new();
@@ -24,9 +24,9 @@ namespace MiyakoCarryService.Client.Utils
             };
         }
 
-        public static Dictionary<string, McsConfigValue> Snapshot()
+        public static Dictionary<string, McsValue> Snapshot()
         {
-            var dict = new Dictionary<string, McsConfigValue>();
+            var dict = new Dictionary<string, McsValue>();
             foreach (var kvp in _fields)
             {
                 dict[kvp.Key] = kvp.Value.GetLocal();
@@ -46,38 +46,38 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        public static McsConfigValue Encode<T>(T value)
+        public static McsValue Encode<T>(T value)
         {
             return value switch
             {
-                bool b => new McsConfigValue
+                bool b => new McsValue
                     {
-                        Type = EMcsConfigValueType.Bool,
+                        Type = EMcsValueType.Bool,
                         BoolValue = b
                     },
-                int i => new McsConfigValue
+                int i => new McsValue
                     {
-                        Type = EMcsConfigValueType.Int,
+                        Type = EMcsValueType.Int,
                         IntValue = i
                     },
-                long l => new McsConfigValue
+                long l => new McsValue
                     {
-                        Type = EMcsConfigValueType.Long,
+                        Type = EMcsValueType.Long,
                         IntValue = l
                     },
-                float f => new McsConfigValue
+                float f => new McsValue
                     {
-                        Type = EMcsConfigValueType.Float,
+                        Type = EMcsValueType.Float,
                         FloatValue = f
                     },
-                string s => new McsConfigValue
+                string s => new McsValue
                     {
-                        Type = EMcsConfigValueType.String,
+                        Type = EMcsValueType.String,
                         StringValue = s ?? ""
                     },
-                Enum e => new McsConfigValue
+                Enum e => new McsValue
                     {
-                        Type = EMcsConfigValueType.Enum,
+                        Type = EMcsValueType.Enum,
                         IntValue = Convert.ToInt64(e)
                     },
                 _ => throw new NotSupportedException()
@@ -85,7 +85,7 @@ namespace MiyakoCarryService.Client.Utils
             };
         }
 
-        public static T Decode<T>(McsConfigValue v)
+        public static T Decode<T>(McsValue v)
         {
             var t = typeof(T);
 

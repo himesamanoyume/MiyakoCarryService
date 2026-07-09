@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Client.Enums
 {
-    public enum EMcsConfigValueType : byte
+    public enum EMcsValueType : byte
     {
         Bool, 
         Int, 

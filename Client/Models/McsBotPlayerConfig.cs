@@ -27,6 +27,6 @@ namespace MiyakoCarryService.Client.Models
         public int BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value;
 
         [DataMember(Name = "Extensions")]  
-        public Dictionary<string, McsConfigValue> Extensions = new();
+        public Dictionary<string, McsValue> Extensions = new();
     }
 }
