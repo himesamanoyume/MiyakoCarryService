@@ -16,19 +16,19 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/ready",
-                async (url, info, sessionId, output) => await matchCallbacks.RaidReady(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await matchCallbacks.RaidReady(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/client/match/raid/not-ready",
-                async (url, info, sessionId, output) => await matchCallbacks.NotRaidReady(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await matchCallbacks.NotRaidReady(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/match/raid/abort",
-                async (url, info, sessionId, output) => await matchCallbacks.MatchingAbort(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await matchCallbacks.MatchingAbort(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/match/group/delete",
-                async (url, info, sessionId, output) => await matchCallbacks.DeleteGroup(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await matchCallbacks.DeleteGroup(url, info, sessionId)
             )
         ]
     )

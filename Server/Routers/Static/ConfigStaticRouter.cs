@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/config",
-                async (url, info, sessionId, output) => await configCallbacks.GetMcsPluginClientConfig(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await configCallbacks.GetMcsPluginClientConfig(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/brain/config",
-                async (url, info, sessionId, output) => await configCallbacks.GetAllCustomBrainName(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await configCallbacks.GetAllCustomBrainName(url, info, sessionId)
             )
         ]
     )

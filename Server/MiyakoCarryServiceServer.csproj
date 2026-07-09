@@ -24,23 +24,15 @@
       </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="SPTarkov.Common" HintPath="..\Ref\SPTarkov.Common.dll" Private="false" />
-    <Reference Include="SPTarkov.DI" HintPath="..\Ref\SPTarkov.DI.dll" Private="false" />
-    <Reference Include="SPTarkov.Reflection" HintPath="..\Ref\SPTarkov.Reflection.dll" Private="false" />
-    <Reference Include="SPTarkov.Server.Core" HintPath="..\Ref\SPTarkov.Server.Core.dll" Private="false" />
-    <Reference Include="SPTarkov.Server.Web" HintPath="..\Ref\SPTarkov.Server.Web.dll" Private="false" />
-    <Reference Include="0Harmony" HintPath="..\Ref\0Harmony.dll" Private="false" />
+    <PackageReference Include="SPTarkov.Common" Version="4.1.0-pre.202607050451" />
+    <PackageReference Include="SPTarkov.DI" Version="4.1.0-pre.202607050451" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.1.0-pre.202607050451" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.1.0-pre.202607050451" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.1.0-pre.202607050451" />
   </ItemGroup>
-  <!-- <ItemGroup>
-    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.Reflection" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
-    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.0" />
-  </ItemGroup> -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
     <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)')" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\$(TargetFileName)&quot;"/>  
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\$(TargetFileName)&quot;" />  
     <Exec Command="mkdir &quot;$(BuildMiyakoCarryServicePath)&quot;" Condition="!Exists('$(BuildMiyakoCarryServicePath)')" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMiyakoCarryServicePath)\$(TargetFileName)&quot;" />
     <Exec Command="if exist &quot;$(BuildMiyakoCarryServicePath)\Assets&quot; rd /s /q &quot;$(BuildMiyakoCarryServicePath)\Assets&quot;" />

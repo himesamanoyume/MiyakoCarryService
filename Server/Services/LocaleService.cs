@@ -5,7 +5,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using HarmonyLib;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
 
@@ -17,7 +18,7 @@ namespace MiyakoCarryService.Server.Services
         FileUtil fileUtil,
         ConfigService configService,
         ServerLocalisationService serverLocalisationService,
-        DatabaseService databaseService
+        LocaleTable localeTable
     )
     {
         private readonly string _globalLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "global");
@@ -35,7 +36,7 @@ namespace MiyakoCarryService.Server.Services
 
         private async Task UpdateGlobalLocales(Dictionary<string, Dictionary<string, string>> locales)
         {
-            foreach ((var locale, var lazyLoadedValue) in databaseService.GetLocales().Global)
+            foreach ((var locale, var lazyLoadedValue) in localeTable.Global)
             {
                 lazyLoadedValue.AddTransformer(localeData =>
                 {

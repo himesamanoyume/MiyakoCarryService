@@ -8,14 +8,14 @@ using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Enums;
 using MiyakoCarryService.Server.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers.Ws;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Services
@@ -336,7 +336,7 @@ namespace MiyakoCarryService.Server.Services
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept);
-                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                        await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification);
                     }
                 }
                 finally

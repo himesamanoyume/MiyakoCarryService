@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<DebugRequestData>(
                 "/mcs/client/log",
-                async (url, info, sessionId, output) => await logCallbacks.PrintLog(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await logCallbacks.PrintLog(url, info, sessionId)
             )
         ]
     )

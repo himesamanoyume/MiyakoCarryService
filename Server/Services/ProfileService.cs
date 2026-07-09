@@ -12,9 +12,14 @@ using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Mcs;
 using MiyakoCarryService.Server.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Generators.Bot;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Bot;
+using SPTarkov.Server.Core.Helpers.Profile;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -25,12 +30,15 @@ using SPTarkov.Server.Core.Models.Enums.Hideout;
 using SPTarkov.Server.Core.Models.Enums.RaidSettings;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Bot;
+using SPTarkov.Server.Core.Services.Commerce;
+using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
-using SPTarkov.Server.Core.Utils.Logger;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -39,12 +47,13 @@ namespace MiyakoCarryService.Server.Services
         JsonUtil jsonUtil,
         FileUtil fileUtil,
         NotificationSendHelper notificationSendHelper,
-        SptLogger<ProfileService> logger,
+        ISptLogger<ProfileService> logger,
         ConfigService configService,
         RandomUtil randomUtil,
         HashUtil hashUtil,
         ICloner cloner,
-        ConfigServer configServer,
+        GlobalTable globalTable,
+        BotConfig botConfig,
         BotHelper botHelper,
         ProfileHelper profileHelper,
         BuildsService buildsService,
@@ -60,7 +69,9 @@ namespace MiyakoCarryService.Server.Services
         BotNameService botNameService,
         MailSendService mailSendService,
         InfoService infoService,
-        DatabaseService databaseService,
+        TradersTable tradersTable,
+        HideoutTable hideoutTable,
+        PlayerScavConfig playerScavConfig,
         CompatibilityService compatibilityService
     )
     {
@@ -111,8 +122,8 @@ namespace MiyakoCarryService.Server.Services
                         {
                             var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
                             var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
-                            notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
-                            notificationSendHelper.SendMessage(mcsLeadPlayerId, notification2);
+                            await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification);
+                            await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification2);
                         }
                     }
                     finally
@@ -580,9 +591,8 @@ namespace MiyakoCarryService.Server.Services
             botBase.Aid = hashUtil.GenerateAccountId();
 
             var tradersInfo = new Dictionary<MongoId, TraderInfo>();
-            var traders = databaseService.GetTraders();
 
-            foreach (var (traderId, trader) in traders)
+            foreach (var (traderId, trader) in tradersTable)
             {
                 tradersInfo[traderId] = new TraderInfo
                 {
@@ -597,8 +607,7 @@ namespace MiyakoCarryService.Server.Services
 
             var areas = new List<BotHideoutArea>();
 
-            var dbHideout = databaseService.GetHideout();
-            var hideoutAreas = dbHideout.Areas;
+            var hideoutAreas = hideoutTable.Areas;
 
             foreach (HideoutAreas areaType in Enum.GetValues(typeof(HideoutAreas)))
             {
@@ -667,7 +676,7 @@ namespace MiyakoCarryService.Server.Services
                 ResetInterval = 86400,
             };
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
+            var expTable = globalTable.Configuration.Exp.Level.ExperienceTable;
             botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var pmcData = new PmcData
@@ -806,7 +815,7 @@ namespace MiyakoCarryService.Server.Services
             scavData.Info.Nickname = botNameService.GenerateUniqueBotNickname(
                 cloner.Clone(botHelper.GetBotTemplate("assault")),
                 botGenerationDetails,
-                configServer.GetConfig<BotConfig>().BotRolesThatMustHaveUniqueName
+                botConfig.BotRolesThatMustHaveUniqueName
             );
 
             return scavData;
@@ -815,8 +824,6 @@ namespace MiyakoCarryService.Server.Services
         private PmcData GenerateScavData(MongoId mcsLeadPlayerId, BotGenerationDetails botGenerationDetails, PmcData pmcData, OrderInfo orderInfo)
         {
             var scavKarmaLevel = Math.Clamp(orderInfo.CarryServiceLevel + 2, -7, 6);
-            var playerScavConfig = configServer.GetConfig<PlayerScavConfig>();
-
             if (!playerScavConfig.KarmaLevel.TryGetValue(scavKarmaLevel.ToString(CultureInfo.InvariantCulture), out var playerScavKarmaSettings))
             {
                 logger.Error(serverLocalisationService.GetText("scav-missing_karma_settings", scavKarmaLevel));
@@ -833,7 +840,7 @@ namespace MiyakoCarryService.Server.Services
 
             var botBase = compatibilityService.HasAPBS ? botGenerator.PrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails) : mcsBotGenerator.CustomPrepareAndGenerateBot(mcsLeadPlayerId, botGenerationDetails, orderInfo);
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
+            var expTable = globalTable.Configuration.Exp.Level.ExperienceTable;
             botBase.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
 
             var scavData = new PmcData

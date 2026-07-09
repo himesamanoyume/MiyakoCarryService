@@ -17,15 +17,15 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<FriendlyFirePenaltyRequestData>(
                 "/mcs/client/trading/api/friendlyFirePenalty",
-                async (url, info, sessionId, output) => await traderCallbacks.FriendlyFirePenalty(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await traderCallbacks.FriendlyFirePenalty(url, info, sessionId)
             ),
             new RouteAction<CompensationRequestData>(
                 "/mcs/client/trading/api/compensation",
-                async (url, info, sessionId, output) => await traderCallbacks.Compensation(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await traderCallbacks.Compensation(url, info, sessionId)
             ),
             new RouteAction<EmptyRequestData>(
                 "/mcs/client/trading/api/updateProfile",
-                async (url, info, sessionId, output) => await traderCallbacks.UpdateProfile(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await traderCallbacks.UpdateProfile(url, info, sessionId)
             ),
         ]
     )
