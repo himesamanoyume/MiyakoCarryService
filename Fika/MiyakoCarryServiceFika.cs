@@ -250,6 +250,7 @@ namespace MiyakoCarryService.Fika
                     Position = @event.Position,
                     TargetId = @event.TargetId,
                     AimingBodyPartType = @event.AimingBodyPartType,
+                    Extensions = @event.Extensions,
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };

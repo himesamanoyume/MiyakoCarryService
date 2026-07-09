@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Fika.Packets
     {
         public string KeywordItemText;
         public SMcsBotPlayerConfig McsBotPlayerConfig;
-        public Dictionary<string, McsConfigValue> Extensions;
+        public Dictionary<string, McsValue> Extensions;
 
         public override void Deserialize(NetDataReader reader)
         {
@@ -23,22 +23,22 @@ namespace MiyakoCarryService.Fika.Packets
             for (int i = 0; i < count; i++)
             {
                 var key = reader.GetString();
-                var type = (EMcsConfigValueType)reader.GetByte();
-                var v = new McsConfigValue { Type = type };
+                var type = (EMcsValueType)reader.GetByte();
+                var v = new McsValue { Type = type };
                 switch (type)
                 {
-                    case EMcsConfigValueType.Bool: 
+                    case EMcsValueType.Bool: 
                         v.BoolValue = reader.GetBool(); 
                         break;
-                    case EMcsConfigValueType.Int:
-                    case EMcsConfigValueType.Long:
-                    case EMcsConfigValueType.Enum: 
+                    case EMcsValueType.Int:
+                    case EMcsValueType.Long:
+                    case EMcsValueType.Enum: 
                         v.IntValue = reader.GetLong(); 
                         break;
-                    case EMcsConfigValueType.Float: 
+                    case EMcsValueType.Float: 
                         v.FloatValue = reader.GetFloat(); 
                         break;
-                    case EMcsConfigValueType.String: 
+                    case EMcsValueType.String: 
                         v.StringValue = reader.GetString(); 
                         break;
                 }
@@ -58,18 +58,18 @@ namespace MiyakoCarryService.Fika.Packets
                 writer.Put((byte)kv.Value.Type);
                 switch (kv.Value.Type)
                 {
-                    case EMcsConfigValueType.Bool: 
+                    case EMcsValueType.Bool: 
                         writer.Put(kv.Value.BoolValue); 
                         break;
-                    case EMcsConfigValueType.Int:
-                    case EMcsConfigValueType.Long:
-                    case EMcsConfigValueType.Enum: 
+                    case EMcsValueType.Int:
+                    case EMcsValueType.Long:
+                    case EMcsValueType.Enum: 
                         writer.Put(kv.Value.IntValue); 
                         break;
-                    case EMcsConfigValueType.Float: 
+                    case EMcsValueType.Float: 
                         writer.Put(kv.Value.FloatValue); 
                         break;
-                    case EMcsConfigValueType.String: 
+                    case EMcsValueType.String: 
                         writer.Put(kv.Value.StringValue, 0); 
                         break;
                 }

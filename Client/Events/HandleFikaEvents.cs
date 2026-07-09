@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Models;
@@ -26,6 +27,7 @@ namespace MiyakoCarryService.Client.Events
         public Vector3? Position { get; set; }
         public BodyPartType AimingBodyPartType { get; set; }
         public string TargetId { get; set; }
+        public Dictionary<string, McsValue> Extensions { get; set; }
     }
 
     public class ConfigEntrySettingChangedEvent : IMcsEvent
