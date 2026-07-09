@@ -187,7 +187,7 @@ Whether `McsBotPlayer` will attempt to loot keyword items
 
 Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`
 
-*When Fika is installed, adjusting settings in raid will automatically sync to the host*
+*When Fika is installed, adjusting settings in raid will automatically sync to the host, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
 ### Command
 
@@ -295,7 +295,7 @@ If there are `McsBotPlayers` in the team not currently in combat, command `McsBo
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
 
-*The command system also works normally during Fika multiplayer.*
+*The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
 ### Player
 
