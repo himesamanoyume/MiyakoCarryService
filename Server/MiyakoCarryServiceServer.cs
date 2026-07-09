@@ -15,17 +15,20 @@ using MiyakoCarryService.Server.Patches.Profile;
 using MiyakoCarryService.Server.Patches.Trader;
 using SPTarkov.Server.Core.Services;
 using MiyakoCarryService.Server.Utils;
+using System.Threading;
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server
 {
     public class MiyakoCarryServiceServer
     {
-        [Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
+        [Injectable(TypePriority = OnLoadOrder.Preload)]
         public class MiyakoCarryServiceServerPreLoad(
             ConfigService configService
         ) : IOnLoad
         {
-            public async Task OnLoad()
+            public async Task OnLoadAsync(CancellationToken cancellationToken)
             {
                 await configService.OnPreLoadAsync();
                 new GetClientRepeatableQuestsPatch().Enable();
@@ -56,7 +59,7 @@ namespace MiyakoCarryService.Server
             }
         }
 
-        [Injectable(TypePriority = OnLoadOrder.PostSptModLoader)]
+        [Injectable(TypePriority = OnLoadOrder.PostLoad)]
         public class MiyakoCarryServiceServerPostLoad(
             Services.LocaleService localeService,
             QuestService questService,
@@ -72,7 +75,7 @@ namespace MiyakoCarryService.Server
             JsonUtil jsonUtil
         ) : IOnLoad
         {
-            public async Task OnLoad()
+            public async Task OnLoadAsync(CancellationToken cancellationToken)
             {
                 await localeService.OnPostLoadAsync();
                 await traderService.OnPostLoadAsync();

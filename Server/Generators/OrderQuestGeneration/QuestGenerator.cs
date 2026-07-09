@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Json;
 using MiyakoCarryService.Server.Services;
+using SPTarkov.Server.Core.Models.Enums;
 
 namespace MiyakoCarryService.Server.Generators.OrderQuestGeneration
 {

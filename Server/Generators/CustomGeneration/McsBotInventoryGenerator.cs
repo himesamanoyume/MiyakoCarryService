@@ -1,16 +1,23 @@
 
 using System.Collections.Frozen;
 using MiyakoCarryService.Server.Services;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Generators.Bot;
+using SPTarkov.Server.Core.Generators.Loot;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Bot;
+using SPTarkov.Server.Core.Helpers.InRaid;
+using SPTarkov.Server.Core.Helpers.Items;
+using SPTarkov.Server.Core.Helpers.Profile;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Bots;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Services.Bot;
+using SPTarkov.Server.Core.Services.Locales;
+using SPTarkov.Server.Core.Services.Profile;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Generators.CustomGeneration
@@ -34,15 +41,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         BotEquipmentModPoolService botEquipmentModPoolService,
         BotEquipmentModGenerator botEquipmentModGenerator,
         BotInventoryContainerService botInventoryContainerService,
-        ConfigServer configServer,
+        BotConfig botConfig, 
+        PmcConfig pmcConfig,
         InventoryService inventoryService
-    ) : BotInventoryGenerator(
-        logger, randomUtil, profileActivityService, botWeaponGenerator,
-        botLootGenerator, botGeneratorHelper, profileHelper, botHelper,
-        weightedRandomHelper, itemHelper, weatherHelper,
-        serverLocalisationService, botEquipmentFilterService,
-        botEquipmentModPoolService, botEquipmentModGenerator,
-        botInventoryContainerService, configServer
+    ) : BotInventoryGenerator(logger, randomUtil, profileActivityService, botWeaponGenerator, botLootGenerator, 
+        botGeneratorHelper, profileHelper, botHelper, weightedRandomHelper, itemHelper, weatherHelper, 
+        serverLocalisationService, botEquipmentFilterService, botEquipmentModPoolService, 
+        botEquipmentModGenerator, botInventoryContainerService, botConfig, pmcConfig
     )
     {
         private static readonly FrozenSet<EquipmentSlots> _excludedEquipmentSlots =
@@ -152,7 +157,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         )
         {
             if (
-                !BotConfig.Equipment.TryGetValue(
+                !botConfig.Equipment.TryGetValue(
                     botGeneratorHelper.GetBotEquipmentRole(botGenerationDetails.RoleLowercase),
                     out var botEquipConfig
                 )

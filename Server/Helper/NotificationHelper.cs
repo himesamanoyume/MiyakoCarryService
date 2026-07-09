@@ -14,9 +14,9 @@ namespace MiyakoCarryService.Server.Helper
         ConfigController configController
     )
     {
-        public WsGroupMatchInviteDecline GenerateWsGroupMatchInviteDecline(SptProfile mcsBotPlayerProfile)
+        public McsWsGroupMatchInviteDecline GenerateWsGroupMatchInviteDecline(SptProfile mcsBotPlayerProfile)
         {
-            return new WsGroupMatchInviteDecline
+            return new McsWsGroupMatchInviteDecline
             {
                 EventType = NotificationEventType.groupMatchInviteDecline,
                 EventIdentifier = new(),
@@ -25,10 +25,10 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public WsGroupMatchInviteAccept GenerateWsGroupMatchInviteAccept(SptProfile mcsBotPlayerProfile)
+        public McsWsGroupMatchInviteAccept GenerateWsGroupMatchInviteAccept(SptProfile mcsBotPlayerProfile)
         {
             var data = mcsBotPlayerProfile.CharacterData.PmcData;
-            return new WsGroupMatchInviteAccept
+            return new McsWsGroupMatchInviteAccept
             {
                 EventType = NotificationEventType.groupMatchInviteAccept,
                 EventIdentifier = new(),

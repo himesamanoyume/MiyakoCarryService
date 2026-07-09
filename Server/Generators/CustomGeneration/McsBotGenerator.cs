@@ -2,16 +2,20 @@
 using System;
 using System.Linq;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Generators.Bot;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Bot;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Bots;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+using SPTarkov.Server.Core.Services.Bot;
+using SPTarkov.Server.Core.Services.Items;
+using SPTarkov.Server.Core.Services.Server;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 
@@ -20,10 +24,11 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
     [Injectable]
     public class McsBotGenerator(
         ISptLogger<BotGenerator> logger,
-        HashUtil hashUtil,
+        TemplateTable templateTable, 
+        GlobalTable globalTable, 
+        BotTable botTable,
         RandomUtil randomUtil,
         TimeUtil timeUtil,
-        DatabaseService databaseService,
         BotInventoryGenerator botInventoryGenerator,
         McsBotInventoryGenerator mcsBotInventoryGenerator,
         BotLevelGenerator botLevelGenerator,
@@ -33,13 +38,13 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         SeasonalEventService seasonalEventService,
         ItemFilterService itemFilterService,
         BotNameService botNameService,
-        ConfigServer configServer,
+        BotConfig botConfig,
+        PmcConfig pmcConfig,
         ICloner cloner
     ) : BotGenerator(
-        logger, hashUtil, randomUtil, databaseService, botInventoryGenerator,
-        botLevelGenerator, botEquipmentFilterService, weightedRandomHelper,
-        botHelper, seasonalEventService, itemFilterService, botNameService,
-        configServer, cloner
+        logger, templateTable, globalTable, botTable, randomUtil, botInventoryGenerator, botLevelGenerator, 
+        botEquipmentFilterService, weightedRandomHelper, botHelper, seasonalEventService, itemFilterService, 
+        botNameService, botConfig, pmcConfig, cloner
     )
     {
         public BotBase CustomPrepareAndGenerateBot(MongoId sessionId, BotGenerationDetails botGenerationDetails, OrderInfo orderInfo)
@@ -99,7 +104,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             bot.Info.Nickname = botNameService.GenerateUniqueBotNickname(
                 botJsonTemplate,
                 botGenerationDetails,
-                BotConfig.BotRolesThatMustHaveUniqueName
+                botConfig.BotRolesThatMustHaveUniqueName
             );
 
             bot.Info.LowerNickname = botGenerationDetails.IsPmc ? bot.Info.Nickname.ToLowerInvariant() : string.Empty;
@@ -125,7 +130,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 bot.Hideout = null;
             }
 
-            var expTable = databaseService.GetGlobals().Configuration.Exp.Level.ExperienceTable;
+            var expTable = globalTable.Configuration.Exp.Level.ExperienceTable;
             bot.Info.Experience = expTable.Take(botGenerationDetails.PlayerLevel.Value).Sum(entry => entry.Experience);
             bot.Info.Level = botGenerationDetails.PlayerLevel;
             bot.Info.Settings.Experience = GetExperienceRewardForKillByDifficulty(
@@ -180,7 +185,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
 
             bot.Inventory = mcsBotInventoryGenerator.CustomGenerateInventory(bot.Id.Value, sessionId, botJsonTemplate, botGenerationDetails);
 
-            if (BotConfig.BotRolesWithDogTags.Contains(botGenerationDetails.RoleLowercase))
+            if (botConfig.BotRolesWithDogTags.Contains(botGenerationDetails.RoleLowercase))
             {
                 AddDogtagToBot(bot);
             }
