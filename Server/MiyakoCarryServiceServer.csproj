@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
     <DevServerPath>D:\OtherGames\SPT4.0.X\Server-4.0.X</DevServerPath>
