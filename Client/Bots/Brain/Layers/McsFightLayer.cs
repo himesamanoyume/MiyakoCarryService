@@ -11,6 +11,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
     public class McsFightLayer : McsBaseLayer
     {
+        public float _contactTime = 0f;
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
 
@@ -31,6 +32,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     PhraseTrigger = EPhraseTrigger.OnFirstContact,
                     Position = BotOwner.Memory.GoalEnemy.EnemyLastPosition
                 });
+                _contactTime = Time.time;
             }
         }
 
@@ -45,10 +47,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            BotOwner.TalkMsg(new McsMsg
+            if (Time.time > _contactTime + 0.5f)
             {
-                PhraseTrigger = EPhraseTrigger.Clear,
-            });
+                BotOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Clear,
+                });
+            }
         }
 
         public override Action GetNextAction()
