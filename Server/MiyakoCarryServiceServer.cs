@@ -45,7 +45,6 @@ namespace MiyakoCarryService.Server
                 new SendLocalisedNpcMessageToPlayerPatch().Enable();
                 new GenerateDialogueViewPatch().Enable();
                 new GetDialogByIdFromProfilePatch().Enable();
-                new SptDialogueChatBotPatch().Enable();
                 new SaveProfileAsyncPatch().Enable();
                 new GetProfilePatch().Enable();
                 new ItemEventRouterHandleEventsPatch().Enable();
@@ -56,6 +55,8 @@ namespace MiyakoCarryService.Server
                 new RemovePlayerBuildPatch().Enable();
                 new SaveEquipmentBuildPatch().Enable();
                 new SaveWeaponBuildPatch().Enable();
+
+                await Task.CompletedTask;
             }
         }
 
@@ -100,6 +101,8 @@ namespace MiyakoCarryService.Server
                 });
                 _ = CheckForUpdate();
                 _ = CheckForIfdianUpdate();
+
+                await Task.CompletedTask;
             }
 
             private async Task CheckForIfdianUpdate()

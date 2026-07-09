@@ -29,6 +29,7 @@
     <Reference Include="SPTarkov.Reflection" HintPath="..\Ref\SPTarkov.Reflection.dll" Private="false" />
     <Reference Include="SPTarkov.Server.Core" HintPath="..\Ref\SPTarkov.Server.Core.dll" Private="false" />
     <Reference Include="SPTarkov.Server.Web" HintPath="..\Ref\SPTarkov.Server.Web.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="..\Ref\0Harmony.dll" Private="false" />
   </ItemGroup>
   <!-- <ItemGroup>
     <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
