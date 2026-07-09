@@ -20,6 +20,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), "GetDialogByIdFromProfile");
 
         private static Controllers.InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.InfoController>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
 
         [PatchPrefix]
         public static bool Prefix(SptProfile profile, GetMailDialogViewRequestData request, ref SPTarkov.Server.Core.Models.Eft.Profile.Dialogue __result)
@@ -51,8 +52,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                 var dialogue = profile.DialogueRecords[request.DialogId];
                 dialogue.Users = [];
 
-                var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-                var mcsBotPlayerProfile = profileController.GetMcsBotPlayerProfileByBotId(request.DialogId);
+                var mcsBotPlayerProfile = ProfileController.GetMcsBotPlayerProfileByBotId(request.DialogId);
 
                 if (mcsBotPlayerProfile is null)
                 {

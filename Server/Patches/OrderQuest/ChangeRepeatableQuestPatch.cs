@@ -29,6 +29,8 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
         private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>(); }
         private static ISptLogger<RepeatableQuestChangeRequest> Logger { get => field ??= ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>(); }
+        private static InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<InfoController>(); }
+        private static Controllers.QuestController QuestController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>(); }
 
         [PatchPrefix]
         public static bool Prefix(RepeatableQuestController __instance, PmcData pmcData, RepeatableQuestChangeRequest changeRequest, MongoId sessionID, ref ItemEventRouterResponse __result)
@@ -49,29 +51,27 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             
             if (repeatables.RepeatableType.Name == "Order")
             {
-                var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
-                var orderQuestController = ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>();
-                var orderInfos = infoController.GetAllOrderInfo();
+                var orderInfos = InfoController.GetAllOrderInfo();
                 foreach (var orderInfo in orderInfos)
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
-                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
-                        infoController.RemoveOrderInfo(orderInfo);
+                        QuestController.Refund(sessionID, questToReplace, pmcData);
+                        InfoController.RemoveOrderInfo(orderInfo);
                         break;
                     }
                 }
-                var ticketInfos = infoController.GetAllTicketInfo();
+                var ticketInfos = InfoController.GetAllTicketInfo();
                 foreach (var ticketInfo in ticketInfos)
                 {
                     if (ticketInfo.QuestId == questToReplace.Id)
                     {
-                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
-                        infoController.RemoveTicketInfo(ticketInfo);
+                        QuestController.Refund(sessionID, questToReplace, pmcData);
+                        InfoController.RemoveTicketInfo(ticketInfo);
                         break;
                     }
                 }
-                _ = infoController.SaveOrderAndTicketInfo();
+                _ = InfoController.SaveOrderAndTicketInfo();
                 __result = output;
                 return false;
             }
