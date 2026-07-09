@@ -1,5 +1,5 @@
 
-
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
@@ -19,7 +19,16 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadSwitches()
         {
-            var switches = Singleton<GameWorld>.Instance.World.WorldInteractiveObjects().OfType<Switch>();
+            var world = Singleton<GameWorld>.Instance.World_0;
+            List<Switch> switches;
+            if (world == null)
+            {
+                switches = FindObjectsOfType<Switch>().ToList();
+            }
+            else
+            {
+                switches = world.WorldInteractiveObjects().OfType<Switch>().ToList();
+            }
             foreach (var @switch in switches)
             {
                 if (!@switch.Operatable || !@switch.HasAuthority)

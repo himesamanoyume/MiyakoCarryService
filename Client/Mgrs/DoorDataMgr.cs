@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -15,11 +17,37 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadDoors()
         {
-            var doors = Singleton<GameWorld>.Instance.World.WorldInteractiveObjects().OfType<Door>();
+            var world = Singleton<GameWorld>.Instance.World_0;
+            List<Door> doors;
+            if (world == null)
+            {
+                doors = FindObjectsOfType<Door>().ToList();
+            }
+            else
+            {
+                doors = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Door>().ToList();
+            }
             foreach (var door in doors)
             {
                 _datas.Add(door.GetData());
             }
+        }
+
+        public DoorData FindDoor(string doorId)
+        {
+            if (string.IsNullOrEmpty(doorId))
+            {
+                return null;
+            }
+
+            foreach (DoorData doorData in _datas)
+            {
+                if (doorData.Door.Id == doorId)
+                {
+                    return doorData;
+                }
+            }
+            return null;
         }
     }
 }

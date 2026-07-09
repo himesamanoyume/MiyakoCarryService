@@ -1,5 +1,4 @@
 using EFT;
-using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -9,6 +8,7 @@ namespace MiyakoCarryService.Client.Extensions
     public static class GameWorldExtensions
     {
         private static SwitchDataMgr SwitchDataMgr => MgrAccessor.Get<SwitchDataMgr>();
+        private static DoorDataMgr DoorDataMgr => MgrAccessor.Get<DoorDataMgr>();
 
         extension(GameWorld gameWorld)
         {
@@ -18,10 +18,10 @@ namespace MiyakoCarryService.Client.Extensions
                 {
                     return null;
                 }
-                var door = gameWorld.FindDoor(id);
-                if (door != null && door is Door _door)
+                var doorData = DoorDataMgr.FindDoor(id);
+                if (doorData != null)
                 {
-                    return _door.GetData();
+                    return doorData;
                 }
 
                 var switchData = SwitchDataMgr.FindSwitch(id);
