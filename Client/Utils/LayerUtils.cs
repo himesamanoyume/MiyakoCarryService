@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Utils
         private static bool _initialized = false;
 
         private static readonly Dictionary<string, Dictionary<string, int>> _injectedLayers = new();
-        private static readonly Dictionary<string, Dictionary<string, (int Index, AICoreLayerClass<BotLogicDecision> Layer)>> _excludedLayers = new();
+        private static readonly Dictionary<string, Dictionary<string, (int Index, AICoreLayer<BotLogicDecision> Layer)>> _excludedLayers = new();
 
         private static ConcurrentDictionary<Type, int> _customLayerMaps;
 
@@ -95,10 +95,10 @@ namespace MiyakoCarryService.Client.Utils
 
             try
             {
-                var wrapper = (AICoreLayerClass<BotLogicDecision>)Activator.CreateInstance(_customLayerWrapperType, [customLayerType, botOwner, priority]);
+                var wrapper = (AICoreLayer<BotLogicDecision>)Activator.CreateInstance(_customLayerWrapperType, [customLayerType, botOwner, priority]);
 
                 var layerId = _currentLayerId++;
-                if (!botOwner.Brain.BaseBrain.method_0(layerId, wrapper, true))
+                if (!botOwner.Brain.BaseBrain.TryAddLayer(layerId, wrapper, true))
                 {
                     return false;
                 }
@@ -121,7 +121,7 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var baseBrain = botOwner.Brain.BaseBrain;
-            var dict = baseBrain.Dictionary_0;
+            var dict = baseBrain.dictionary_0;
 
             foreach (var index in dict.Keys.ToList())
             {
@@ -131,7 +131,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
 
                 var layer = dict[index];
-                baseBrain.method_3(index);
+                baseBrain.DeactivateLayer(index);
                 dict.Remove(index);
 
                 var excluded = _excludedLayers.TryGetValue(botOwner.ProfileId, out var em) ? em : (_excludedLayers[botOwner.ProfileId] = new());
@@ -172,12 +172,12 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var baseBrain = botOwner.Brain.BaseBrain;
-            if (baseBrain.Dictionary_0.ContainsKey(cached.Index))
+            if (baseBrain.dictionary_0.ContainsKey(cached.Index))
             {
                 return false;
             }
 
-            if (!baseBrain.method_0(cached.Index, cached.Layer, true))
+            if (!baseBrain.TryAddLayer(cached.Index, cached.Layer, true))
             {
                 return false;
             }

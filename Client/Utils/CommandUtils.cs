@@ -54,9 +54,9 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        public static void PreBuildCommandMenu(out ActionsReturnClass actionsReturnClass)
+        public static void PreBuildCommandMenu(out AvailableInteractionState actionsReturnClass)
         {
-            actionsReturnClass = new ActionsReturnClass
+            actionsReturnClass = new AvailableInteractionState
             {
                 Actions = new()
             };
@@ -93,7 +93,7 @@ namespace MiyakoCarryService.Client.Utils
             itemName.text = selectedAction.TargetName.McsLocalized().ToUpper();
         }
 
-        public static void PostBuildCommandMenu(ActionsReturnClass actionsReturnClass)
+        public static void PostBuildCommandMenu(AvailableInteractionState actionsReturnClass)
         {
             if (actionsReturnClass != null)
             {
@@ -112,12 +112,12 @@ namespace MiyakoCarryService.Client.Utils
         public static void CloseCommandMenuAction()
         {
             _menuStack.Clear();
-            GamePlayerOwner.AvailableInteractionState.Value = new ActionsReturnClass();
+            GamePlayerOwner.AvailableInteractionState.Value = new AvailableInteractionState();
         }
 
-        public static ActionsTypesClass MakeCommand(string name, string targetName, bool disabled, Action action)
+        public static InteractionAction MakeCommand(string name, string targetName, bool disabled, Action action)
         {
-            return new ActionsTypesClass { Name = name, TargetName = targetName, Disabled = disabled, Action = action };
+            return new InteractionAction { Name = name, TargetName = targetName, Disabled = disabled, Action = action };
         }
 
         public static GamePlayerOwner GamePlayerOwner

@@ -63,7 +63,7 @@ namespace MiyakoCarryService.Client.Utils
 
         public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<McsBotPlayerType, Dictionary<MongoID, CompleteProfileDescriptorClass[]>>("/mcs/client/game/bot/generate", mcsBotPlayerType);
+            var response = await PostJsonAsync<McsBotPlayerType, Dictionary<MongoID, ProfileDescriptor[]>>("/mcs/client/game/bot/generate", mcsBotPlayerType);
 
             if (response == null)
             {
@@ -76,9 +76,9 @@ namespace MiyakoCarryService.Client.Utils
             );
         }
 
-        public static async Task<CompleteProfileDescriptorClass[]> GetMcsBotPlayerProfiles()
+        public static async Task<ProfileDescriptor[]> GetMcsBotPlayerProfiles()
         {
-            var response = await GetJsonAsync<CompleteProfileDescriptorClass[]>("/mcs/client/game/profile/list");
+            var response = await GetJsonAsync<ProfileDescriptor[]>("/mcs/client/game/profile/list");
 
             if (response == null)
             {
@@ -134,9 +134,9 @@ namespace MiyakoCarryService.Client.Utils
             await PostJsonAsync("/mcs/client/trading/api/compensation", compensation);
         }
 
-        public static async Task<ProfileChangesPocoClass> UpdateProfile()
+        public static async Task<ProfileChanges> UpdateProfile()
         {
-            var response = await GetJsonAsync<ProfileChangesPocoClass>("/mcs/client/trading/api/updateProfile");
+            var response = await GetJsonAsync<ProfileChanges>("/mcs/client/trading/api/updateProfile");
 
             if (response == null)
             {

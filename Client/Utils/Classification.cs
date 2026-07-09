@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EFT;
+using EFT.HealthSystem;
 using MiyakoCarryService.Client.Enums;
 
 namespace MiyakoCarryService.Client.Utils
@@ -140,11 +141,11 @@ namespace MiyakoCarryService.Client.Utils
 
         public static readonly HashSet<Type> EffectTypeFilter = new()
         {
-            typeof(GInterface347),
-            typeof(GInterface364),
-            typeof(GInterface365),
-            typeof(GInterface368),
-            typeof(GInterface370)
+            typeof(ILethalIntoxication),
+            typeof(IEncumbered),
+            typeof(IOverEncumbered),
+            typeof(IHalloweenBuff),
+            typeof(IStaminaZeroEffect)
         };
 
         public static readonly HashSet<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
+using EFT.Counters;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
@@ -52,7 +54,7 @@ namespace MiyakoCarryService.Client.Utils
                 EItemType.Goggles => blockItemType.HasFlag(EBlockItemType.Goggles),
                 EItemType.Rig => blockItemType.HasFlag(EBlockItemType.Rig),
                 EItemType.Armor => blockItemType.HasFlag(EBlockItemType.Armor),
-                EItemType.Equipment => lootData.Item is HeadphonesItemClass ? blockItemType.HasFlag(EBlockItemType.Headphone) : blockItemType.HasFlag(EBlockItemType.TacticalVest),
+                EItemType.Equipment => lootData.Item is Headphones ? blockItemType.HasFlag(EBlockItemType.Headphone) : blockItemType.HasFlag(EBlockItemType.TacticalVest),
                 EItemType.Grenade => blockItemType.HasFlag(EBlockItemType.Grenade),
                 EItemType.Info => blockItemType.HasFlag(EBlockItemType.Info),
                 EItemType.Keys => blockItemType.HasFlag(EBlockItemType.Keys),
@@ -224,19 +226,19 @@ namespace MiyakoCarryService.Client.Utils
 
                 if (experience <= 0)
                 {
-                    experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
+                    experience = Singleton<GlobalConfiguration>.Instance.Experience.Kill.VictimBotLevelExp;
                 }
 
                 if (!countAsBoss)
                 {
-                    sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-                    sessionCounters.AddInt(fikaSharedKillExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                    sessionCounters.AddLong(1L, PredefinedCounters.Kills);
+                    sessionCounters.AddInt(fikaSharedKillExp ? experience - experience / 2 : experience, PredefinedCounters.ExpKillBase);
                 }
 
                 if (countAsBoss)
                 {
-                    sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-                    sessionCounters.AddInt(fikaSharedBossExp ? experience - experience / 2 : experience, SessionCounterTypesAbstractClass.ExpKillBase);
+                    sessionCounters.AddLong(1L, PredefinedCounters.Kills);
+                    sessionCounters.AddInt(fikaSharedBossExp ? experience - experience / 2 : experience, PredefinedCounters.ExpKillBase);
                 }
             }
         }
@@ -296,7 +298,7 @@ namespace MiyakoCarryService.Client.Utils
 
                 foreach (var target in list)
                 {
-                    mcsLeadPlayer.AbstractQuestControllerClass.CheckKillConditionCounter(target, killedPlayer.ProfileId,
+                    mcsLeadPlayer.QuestController.CheckKillConditionCounter(target, killedPlayer.ProfileId,
                         killedPlayer.Inventory.EquippedInSlotsTemplateIds, damageInfo.Weapon, bodyPart, mcsLeadPlayer.Location,
                         Vector3.Distance(aggressor.Position, killedPlayer.Position), settings.Role.ToStringNoBox(),
                         mcsLeadPlayer.CurrentHour, killedPlayer.HealthController.BodyPartEffects,
