@@ -70,11 +70,11 @@ namespace MiyakoCarryService.Server.Services
 
         private async Task UpdateServerLocales(Dictionary<string, Dictionary<string, string>> locales)
         {
-            var _loadedLocales = AccessTools.Field(typeof(ServerLocalisationService), "_loadedLocales").GetValue(serverLocalisationService) as Dictionary<string, LazyLoad<Dictionary<string, string>>>;
+            var loadedLocales = AccessTools.Property(typeof(ServerLocalisationService), "LoadedLocales").GetValue(serverLocalisationService) as Dictionary<string, LazyLoad<Dictionary<string, string>>>;
 
             foreach (var kvp in locales)
             {
-                if (_loadedLocales.TryGetValue(kvp.Key, out var lazyLoadedValue))
+                if (loadedLocales.TryGetValue(kvp.Key, out var lazyLoadedValue))
                 {
                     lazyLoadedValue.AddTransformer(localeData =>
                     {

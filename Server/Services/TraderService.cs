@@ -10,17 +10,17 @@ using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Models.Eft.Trader;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Items;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Commerce;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 
@@ -30,9 +30,12 @@ namespace MiyakoCarryService.Server.Services
     public class TraderService(
         ICloner cloner,
         ImageRouter imageRouter,
-        ConfigServer configServer,
+        TraderConfig traderConfig,
         TimeUtil timeUtil,
-        DatabaseService databaseService,
+        RagfairConfig ragfairConfig,
+        TradersTable tradersTable,
+        TemplateTable templateTable,
+        IServiceProvider serviceProvider,
         SaveServer saveServer,
         ProfileService profileService,
         JsonUtil jsonUtil,
@@ -186,8 +189,7 @@ namespace MiyakoCarryService.Server.Services
             var traderBase = await jsonUtil.DeserializeFromFileAsync<TraderBase>(traderBasePath);
             imageRouter.AddRoute(traderBase.Avatar.Replace(".jpg", ""), iconPath);
             AddTraderWithEmptyAssortToDb(traderBase);
-            SetTraderUpdateTime(configServer.GetConfig<TraderConfig>(), traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
-            var ragfairConfig = configServer.GetConfig<RagfairConfig>();
+            SetTraderUpdateTime(traderConfig, traderBase, timeUtil.GetHoursAsSeconds(1), timeUtil.GetHoursAsSeconds(2));
             if (!ragfairConfig.Traders.ContainsKey(MiyakoTraderId))
             {
                 ragfairConfig.Traders[MiyakoTraderId] = true;
@@ -244,7 +246,7 @@ namespace MiyakoCarryService.Server.Services
                 Dialogue = []
             };
 
-            if (databaseService.GetTables().Traders.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
+            if (tradersTable.TryAdd(traderDetailsToAdd.Id, traderDataToAdd))
             {
                 
             }
@@ -252,7 +254,7 @@ namespace MiyakoCarryService.Server.Services
 
         private Task GenerateMcsBotPlayerInventoryModeAssort()
         {
-            var items = databaseService.GetItems();
+            var items = templateTable.Items;
             
             foreach (var kvp in items) 
             {
@@ -374,7 +376,7 @@ namespace MiyakoCarryService.Server.Services
 
         private void OverwriteTraderAssort(string traderId, TraderAssort newAssorts)
         {
-            if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var traderToEdit))
+            if (!tradersTable.TryGetValue(traderId, out var traderToEdit))
             {
                 return;
             }
@@ -442,7 +444,7 @@ namespace MiyakoCarryService.Server.Services
                 if (info.PunishEveryone && compatibilityService.HasFikaServer)
                 {
                     var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
-                    var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                    var fikaMatchService = serviceProvider.GetService(fikaMatchServiceType);
                     var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [playerId]);
 
                     if (matchId is not null)

@@ -1,6 +1,7 @@
 
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +9,9 @@ using MiyakoCarryService.Server.Services;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.Models.Common;
+using SPTarkov.Server.Core.Models.Eft.HttpResponse;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
+using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Patches.Profile
 {
@@ -27,9 +30,12 @@ namespace MiyakoCarryService.Server.Patches.Profile
         private static IServiceProvider ServiceProvider;
 
         private static ProfileService ProfileService { get => field ??= ServiceProvider.GetService<ProfileService>(); }
+        private static JsonUtil JsonUtil { get => field ??= ServiceProvider.GetService<JsonUtil>(); }
+        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceProvider.GetService<HttpResponseUtil>(); }
 
         [PatchPostfix]
-        public static void Postfix(MongoId sessionID, ref ValueTask<ItemEventRouterResponse> __result)
+        public static void Postfix(string url, ItemEventRouterRequest info, MongoId sessionID,
+            CancellationToken cancellationToken, ref ValueTask<string> __result)
         {
             if (!ProfileService.IsMcsBotPlayerInventoryMode(sessionID)) 
             {
@@ -46,18 +52,20 @@ namespace MiyakoCarryService.Server.Patches.Profile
             __result = ReplaceProfileChangesKey(__result, sessionID, mcsBotProfileId.Value);
         }
 
-        private static async ValueTask<ItemEventRouterResponse> ReplaceProfileChangesKey(ValueTask<ItemEventRouterResponse> originalTask, MongoId originalKey, MongoId newKey)
+        private static async ValueTask<string> ReplaceProfileChangesKey(ValueTask<string> originalTask, MongoId originalKey, MongoId newKey)
         {
             var response = await originalTask;
+            var wrapper = JsonUtil.Deserialize<GetBodyResponseData<ItemEventRouterResponse>>(response);
+            var restored = wrapper?.Data ?? new ItemEventRouterResponse();
 
-            if (response.ProfileChanges != null && response.ProfileChanges.TryGetValue(originalKey, out var profileChange))
+            if (restored.ProfileChanges != null && restored.ProfileChanges.TryGetValue(originalKey, out var profileChange))
             {
-                response.ProfileChanges.Remove(originalKey);
+                restored.ProfileChanges.Remove(originalKey);
                 profileChange.Id = newKey;
-                response.ProfileChanges[newKey] = profileChange;
+                restored.ProfileChanges[newKey] = profileChange;
             }
 
-            return response;
+            return HttpResponseUtil.GetBody(restored);
         }
     }
 }

@@ -31,10 +31,10 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
 
         [PatchPostfix]
-        public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
+        public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)
         {
             var completedQuestId = request.QuestId;
-            var orderInfos = InfoController.GetOrderInfos(sessionID);
+            var orderInfos = InfoController.GetOrderInfos(sessionId);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                     break;
                 }
             }
-            var ticketInfos = InfoController.GetTicketInfos(sessionID);
+            var ticketInfos = InfoController.GetTicketInfos(sessionId);
             foreach (var ticketInfo in ticketInfos)
             {
                 if (completedQuestId == ticketInfo.QuestId)

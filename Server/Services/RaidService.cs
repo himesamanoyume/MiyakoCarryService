@@ -8,8 +8,8 @@ using HarmonyLib;
 using MiyakoCarryService.Server.Helper;
 using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Profile;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Server.Services
         NotificationSendHelper notificationSendHelper,
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         CompatibilityService compatibilityService,
+        IServiceProvider serviceProvider,
         ProfileHelper profileHelper,
         ProfileService profileService
     )
@@ -196,7 +197,7 @@ namespace MiyakoCarryService.Server.Services
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteDecline(mcsBotPlayerFullProfile);
-                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                        await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification);
                     }
                 }
                 finally
@@ -211,7 +212,7 @@ namespace MiyakoCarryService.Server.Services
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
                         var notification = notificationHelper.GenerateWsGroupMatchInviteAccept(mcsBotPlayerFullProfile);
-                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                        await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification);
                     }
                 }
                 finally
@@ -280,7 +281,7 @@ namespace MiyakoCarryService.Server.Services
             if (compatibilityService.HasFikaServer)
             {
                 var fikaMatchServiceType = compatibilityService.FikaMatchServiceType;
-                var fikaMatchService = ServiceLocator.ServiceProvider.GetService(fikaMatchServiceType);
+                var fikaMatchService = serviceProvider.GetService(fikaMatchServiceType);
                 var matchId = (MongoId?)AccessTools.Method(fikaMatchServiceType, "GetMatchIdByPlayer").Invoke(fikaMatchService, [mcsLeadPlayerId]);
 
                 if (matchId is not null)
