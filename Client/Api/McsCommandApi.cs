@@ -2,6 +2,7 @@
 
 using System;
 using EFT;
+using EFT.UI;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static void PreBuildCommandMenu(out ActionsReturnClass actionsReturnClass)
+        public static void PreBuildCommandMenu(out AvailableInteractionState actionsReturnClass)
         {
             CommandUtils.PreBuildCommandMenu(out actionsReturnClass);
         }
@@ -28,7 +29,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static void PostBuildCommandMenu(ActionsReturnClass actionsReturnClass)
+        public static void PostBuildCommandMenu(AvailableInteractionState actionsReturnClass)
         {
             CommandUtils.PostBuildCommandMenu(actionsReturnClass);
         }
@@ -36,7 +37,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static ActionsTypesClass MakeCommand(string name, string targetName, bool disabled, Action action)
+        public static InteractionAction MakeCommand(string name, string targetName, bool disabled, Action action)
         {
             return CommandUtils.MakeCommand(name, targetName, disabled, action);
         }
