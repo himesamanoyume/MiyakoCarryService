@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 var offset = BotOwner.Position - targetPos.Value;
                 var sqrDistance = BotOwner.Position.McsSqrDistance(targetPos.Value);
 
-                if (sqrDistance <= 4f && Math.Abs(offset.y) < 2f)
+                if (sqrDistance <= 9f && Math.Abs(offset.y) < 3f)
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.Steering.LookToPoint(targetPos.Value);
