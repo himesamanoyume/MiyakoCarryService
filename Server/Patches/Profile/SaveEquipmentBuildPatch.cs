@@ -1,4 +1,5 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Profile;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.PresetBuild;
 
@@ -19,9 +21,16 @@ namespace MiyakoCarryService.Server.Patches.Profile
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BuildController), nameof(BuildController.SaveEquipmentBuild));
 
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static BuildsController BuildsController { get => field ??= ServiceLocator.ServiceProvider.GetService<BuildsController>(); }
-        private static ProfileHelper ProfileHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileHelper>(); }
+        public SaveEquipmentBuildPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static BuildsController BuildsController { get => field ??= ServiceProvider.GetService<BuildsController>(); }
+        private static ProfileHelper ProfileHelper { get => field ??= ServiceProvider.GetService<ProfileHelper>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, PresetBuildActionRequestData request)

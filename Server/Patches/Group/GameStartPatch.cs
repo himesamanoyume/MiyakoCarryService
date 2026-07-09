@@ -1,11 +1,11 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Callbacks;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 
@@ -18,8 +18,15 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameCallbacks), nameof(GameCallbacks.GameStart));
 
-        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
-        private static ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileController>(); }
+        public GameStartPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
+        private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
 
         [PatchPrefix]
         public static void Prefix(string url, EmptyRequestData _, MongoId sessionID)

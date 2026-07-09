@@ -8,16 +8,15 @@ using MiyakoCarryService.Server.Patches.Friend;
 using MiyakoCarryService.Server.Patches.OrderQuest;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using System.Collections.Generic;
 using MiyakoCarryService.Server.Patches.Profile;
 using MiyakoCarryService.Server.Patches.Trader;
-using SPTarkov.Server.Core.Services;
 using MiyakoCarryService.Server.Utils;
 using System.Threading;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Services.Locales;
+using System;
 
 namespace MiyakoCarryService.Server
 {
@@ -25,36 +24,37 @@ namespace MiyakoCarryService.Server
     {
         [Injectable(TypePriority = OnLoadOrder.Preload)]
         public class MiyakoCarryServiceServerPreLoad(
+            IServiceProvider serviceProvider,
             ConfigService configService
         ) : IOnLoad
         {
             public async Task OnLoadAsync(CancellationToken cancellationToken)
             {
                 await configService.OnPreLoadAsync();
-                new GetClientRepeatableQuestsPatch().Enable();
-                new ChangeRepeatableQuestPatch().Enable();
-                new CompleteQuestPatch().Enable();
-                new GetOtherProfilePatch().Enable();
-                new GetFriendListPatch().Enable();
-                new GameStartPatch().Enable();
-                new SendGroupInvitePatch().Enable();
-                new LeaveGroupPatch().Enable();
-                new RemovePlayerFromGroupPatch().Enable();
-                new EndLocalRaidPatch().Enable();
-                new GetGroupStatusPatch().Enable();
+                new GetClientRepeatableQuestsPatch(serviceProvider).Enable();
+                new ChangeRepeatableQuestPatch(serviceProvider).Enable();
+                new CompleteQuestPatch(serviceProvider).Enable();
+                new GetOtherProfilePatch(serviceProvider).Enable();
+                new GetFriendListPatch(serviceProvider).Enable();
+                new GameStartPatch(serviceProvider).Enable();
+                new SendGroupInvitePatch(serviceProvider).Enable();
+                new LeaveGroupPatch(serviceProvider).Enable();
+                new RemovePlayerFromGroupPatch(serviceProvider).Enable();
+                new EndLocalRaidPatch(serviceProvider).Enable();
+                new GetGroupStatusPatch(serviceProvider).Enable();
                 new SendLocalisedNpcMessageToPlayerPatch().Enable();
-                new GenerateDialogueViewPatch().Enable();
-                new GetDialogByIdFromProfilePatch().Enable();
-                new SaveProfileAsyncPatch().Enable();
-                new GetProfilePatch().Enable();
-                new ItemEventRouterHandleEventsPatch().Enable();
-                new GenerateFleaOffersForTraderPatch().Enable();
-                new GetAssortPatch().Enable();
-                new GetTraderAssortsByTraderIdPatch().Enable();
-                new AddOfferPatch().Enable();
-                new RemovePlayerBuildPatch().Enable();
-                new SaveEquipmentBuildPatch().Enable();
-                new SaveWeaponBuildPatch().Enable();
+                new GenerateDialogueViewPatch(serviceProvider).Enable();
+                new GetDialogByIdFromProfilePatch(serviceProvider).Enable();
+                new SaveProfileAsyncPatch(serviceProvider).Enable();
+                new GetProfilePatch(serviceProvider).Enable();
+                new ItemEventRouterHandleEventsPatch(serviceProvider).Enable();
+                new GenerateFleaOffersForTraderPatch(serviceProvider).Enable();
+                new GetAssortPatch(serviceProvider).Enable();
+                new GetTraderAssortsByTraderIdPatch(serviceProvider).Enable();
+                new AddOfferPatch(serviceProvider).Enable();
+                new RemovePlayerBuildPatch(serviceProvider).Enable();
+                new SaveEquipmentBuildPatch(serviceProvider).Enable();
+                new SaveWeaponBuildPatch(serviceProvider).Enable();
 
                 await Task.CompletedTask;
             }

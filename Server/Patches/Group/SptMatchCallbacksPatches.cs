@@ -1,10 +1,10 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -18,7 +18,14 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Callbacks.MatchCallbacks), nameof(SPTarkov.Server.Core.Callbacks.MatchCallbacks.SendGroupInvite));
 
-        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+        public SendGroupInvitePatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
 
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupInviteSendRequest info, MongoId sessionID)
@@ -39,7 +46,14 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Callbacks.MatchCallbacks), nameof(SPTarkov.Server.Core.Callbacks.MatchCallbacks.LeaveGroup));
 
-        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+        public LeaveGroupPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
 
         [PatchPrefix]
         public static void Prefix(string url, EmptyRequestData _, MongoId sessionID)

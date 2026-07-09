@@ -1,13 +1,14 @@
 
+using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Helper;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Callbacks;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Match;
 
@@ -20,9 +21,16 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchCallbacks), nameof(MatchCallbacks.GetGroupStatus));
 
-        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
-        private static NotificationHelper NotificationHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<NotificationHelper>(); }
-        private static NotificationSendHelper NotificationSendHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<NotificationSendHelper>(); }
+        public GetGroupStatusPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
+        private static NotificationHelper NotificationHelper { get => field ??= ServiceProvider.GetService<NotificationHelper>(); }
+        private static NotificationSendHelper NotificationSendHelper { get => field ??= ServiceProvider.GetService<NotificationSendHelper>(); }
 
         [PatchPostfix]
         public static void Postfix(string url, MatchGroupStatusRequest info, MongoId sessionID)
@@ -33,7 +41,7 @@ namespace MiyakoCarryService.Server.Patches.Group
                 try
                 {
                     var notification = NotificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerProfile, info.IsSavage.Value);
-                    NotificationSendHelper.SendMessage(sessionID, notification);
+                    _ = NotificationSendHelper.SendMessageAsync(sessionID, notification);
                 }
                 finally
                 {

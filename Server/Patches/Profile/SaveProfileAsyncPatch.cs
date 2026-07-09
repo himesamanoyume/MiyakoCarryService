@@ -1,10 +1,10 @@
 
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Servers;
 
@@ -17,7 +17,14 @@ namespace MiyakoCarryService.Server.Patches.Profile
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SaveServer), nameof(SaveServer.SaveProfileAsync));
 
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+        public SaveProfileAsyncPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
 
         [PatchPrefix]  
         public static bool Prefix(MongoId sessionID, ref Task<long> __result)  

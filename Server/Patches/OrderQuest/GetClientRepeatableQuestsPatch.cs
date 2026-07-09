@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Profile;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
+using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Patches.OrderQuest
@@ -21,14 +21,21 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     public sealed class GetClientRepeatableQuestsPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.GetClientRepeatableQuests));
+
+        public GetClientRepeatableQuestsPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
         public static Dictionary<MongoId, Queue<RepeatableQuest>> QuestsQueueDict = new();
 
-        private static ConfigController ConfigController { get => field ??= ServiceLocator.ServiceProvider.GetService<ConfigController>(); }
-        private static Controllers.QuestController QuestController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>(); }
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<InfoController>(); }
-        private static ProfileHelper ProfileHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileHelper>(); }
-        private static TimeUtil TimeUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<TimeUtil>(); }
+        private static IServiceProvider ServiceProvider;
+        private static ConfigController ConfigController { get => field ??= ServiceProvider.GetService<ConfigController>(); }
+        private static Controllers.QuestController QuestController { get => field ??= ServiceProvider.GetService<Controllers.QuestController>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static InfoController InfoController { get => field ??= ServiceProvider.GetService<InfoController>(); }
+        private static ProfileHelper ProfileHelper { get => field ??= ServiceProvider.GetService<ProfileHelper>(); }
+        private static TimeUtil TimeUtil { get => field ??= ServiceProvider.GetService<TimeUtil>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, ref List<PmcDataRepeatableQuest> __result)
@@ -53,7 +60,8 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                         quest.Id,
                         new ChangeRequirement
                         {
-                            ChangeCost = quest.ChangeCost
+                            ChangeCost = quest.ChangeCost,
+                            ChangeStandingCost = (double)quest.ChangeStandingCost
                         }
                     );
                 }

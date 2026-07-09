@@ -1,10 +1,10 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Traders;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 
@@ -17,8 +17,15 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderAssortHelper), nameof(TraderAssortHelper.GetAssort));
 
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static Controllers.TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>(); }
+        public GetAssortPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static Controllers.TraderController TraderController { get => field ??= ServiceProvider.GetService<Controllers.TraderController>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, MongoId traderId, ref TraderAssort __result)

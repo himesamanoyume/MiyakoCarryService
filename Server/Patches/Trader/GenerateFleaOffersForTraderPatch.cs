@@ -1,12 +1,12 @@
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Generators;
+using SPTarkov.Server.Core.Generators.Ragfair;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 
 namespace MiyakoCarryService.Server.Patches.Trader
 {
@@ -17,8 +17,15 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RagfairOfferGenerator), nameof(RagfairOfferGenerator.GenerateFleaOffersForTrader));
 
-        private static DatabaseService DatabaseService { get => field ??= ServiceLocator.ServiceProvider.GetService<DatabaseService>(); }
-        private static Controllers.TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>(); }
+        public GenerateFleaOffersForTraderPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static TradersTable TradersTable { get => field ??= ServiceProvider.GetService<TradersTable>(); }
+        private static Controllers.TraderController TraderController { get => field ??= ServiceProvider.GetService<Controllers.TraderController>(); }
 
         [PatchPrefix]
         public static void Prefix(MongoId traderId)
@@ -28,7 +35,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!DatabaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
+            if (!TradersTable.TryGetValue(traderId, out var trader))
             {
                 return;
             }
@@ -44,7 +51,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!DatabaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
+            if (!TradersTable.TryGetValue(traderId, out var trader))
             {
                 return;
             }

@@ -1,14 +1,14 @@
 
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
-using SPTarkov.Server.Core.Routers;
 
 namespace MiyakoCarryService.Server.Patches.Profile
 {
@@ -17,9 +17,16 @@ namespace MiyakoCarryService.Server.Patches.Profile
     /// </summary>
     public sealed class ItemEventRouterHandleEventsPatch : AbstractPatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemEventRouter), nameof(ItemEventRouter.HandleEvents));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemEventCallbacks), nameof(ItemEventCallbacks.HandleEvents));
 
-        private static ProfileService ProfileService { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileService>(); }
+        public ItemEventRouterHandleEventsPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static ProfileService ProfileService { get => field ??= ServiceProvider.GetService<ProfileService>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, ref ValueTask<ItemEventRouterResponse> __result)

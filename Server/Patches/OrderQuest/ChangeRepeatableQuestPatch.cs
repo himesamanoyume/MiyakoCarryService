@@ -1,19 +1,19 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 using SPTarkov.Server.Core.Models.Eft.Quests;
 using SPTarkov.Server.Core.Models.Spt.Quests;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 
 namespace MiyakoCarryService.Server.Patches.OrderQuest
@@ -25,10 +25,19 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.ChangeRepeatableQuest));
 
-        private static EventOutputHolder EventOutputHolder { get => field ??= ServiceLocator.ServiceProvider.GetService<EventOutputHolder>(); }
-        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
-        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>(); }
-        private static ISptLogger<RepeatableQuestChangeRequest> Logger { get => field ??= ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>(); }
+        public ChangeRepeatableQuestPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static EventOutputHolder EventOutputHolder { get => field ??= ServiceProvider.GetService<EventOutputHolder>(); }
+        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceProvider.GetService<ServerLocalisationService>(); }
+        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceProvider.GetService<HttpResponseUtil>(); }
+        private static ISptLogger<RepeatableQuestChangeRequest> Logger { get => field ??= ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>(); }
+        private static InfoController InfoController { get => field ??= ServiceProvider.GetService<InfoController>(); }
+        private static Controllers.QuestController QuestController { get => field ??= ServiceProvider.GetService<Controllers.QuestController>(); }
 
         [PatchPrefix]
         public static bool Prefix(RepeatableQuestController __instance, PmcData pmcData, RepeatableQuestChangeRequest changeRequest, MongoId sessionID, ref ItemEventRouterResponse __result)
@@ -49,29 +58,27 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             
             if (repeatables.RepeatableType.Name == "Order")
             {
-                var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
-                var orderQuestController = ServiceLocator.ServiceProvider.GetService<Controllers.QuestController>();
-                var orderInfos = infoController.GetAllOrderInfo();
+                var orderInfos = InfoController.GetAllOrderInfo();
                 foreach (var orderInfo in orderInfos)
                 {
                     if (orderInfo.QuestId == questToReplace.Id)
                     {
-                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
-                        infoController.RemoveOrderInfo(orderInfo);
+                        QuestController.Refund(sessionID, questToReplace, pmcData);
+                        InfoController.RemoveOrderInfo(orderInfo);
                         break;
                     }
                 }
-                var ticketInfos = infoController.GetAllTicketInfo();
+                var ticketInfos = InfoController.GetAllTicketInfo();
                 foreach (var ticketInfo in ticketInfos)
                 {
                     if (ticketInfo.QuestId == questToReplace.Id)
                     {
-                        orderQuestController.Refund(sessionID, questToReplace, pmcData);
-                        infoController.RemoveTicketInfo(ticketInfo);
+                        QuestController.Refund(sessionID, questToReplace, pmcData);
+                        InfoController.RemoveTicketInfo(ticketInfo);
                         break;
                     }
                 }
-                _ = infoController.SaveOrderAndTicketInfo();
+                _ = InfoController.SaveOrderAndTicketInfo();
                 __result = output;
                 return false;
             }

@@ -1,4 +1,5 @@
 
+using System;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.ChatBot;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -20,9 +20,16 @@ namespace MiyakoCarryService.Server.Patches.Friend
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetFriendList));
 
-        private static MiyakoChatBot MiyakoChatBot { get => field ??= ServiceLocator.ServiceProvider.GetService<MiyakoChatBot>(); }
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static Controllers.ConfigController ConfigController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ConfigController>(); }
+        public GetFriendListPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static MiyakoChatBot MiyakoChatBot { get => field ??= ServiceProvider.GetService<MiyakoChatBot>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static Controllers.ConfigController ConfigController { get => field ??= ServiceProvider.GetService<Controllers.ConfigController>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, ref GetFriendListDataResponse __result)

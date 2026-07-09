@@ -1,11 +1,11 @@
 
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Quest;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Quests;
@@ -19,9 +19,16 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.CompleteQuest));
 
-        private static InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<InfoController>(); }
-        private static TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<TraderController>(); }
-        private static ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileController>(); }
+        public CompleteQuestPatch(IServiceProvider serviceProvider)
+        {
+            ServiceProvider = serviceProvider;
+        }
+
+        private static IServiceProvider ServiceProvider;
+
+        private static InfoController InfoController { get => field ??= ServiceProvider.GetService<InfoController>(); }
+        private static TraderController TraderController { get => field ??= ServiceProvider.GetService<TraderController>(); }
+        private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
 
         [PatchPostfix]
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
