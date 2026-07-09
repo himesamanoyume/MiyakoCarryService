@@ -1,6 +1,6 @@
 param(
     [string]$WorkspaceFolder,
-    [string]$PluginOutputFile = "plugin_vt_report_url.txt"
+    [string]$PluginOutputFile = "plugin_vt_report_url.txt",
     [string]$FikaOutputFile = "fika_vt_report_url.txt"
 )
 

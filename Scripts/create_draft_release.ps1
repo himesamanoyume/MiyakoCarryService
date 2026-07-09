@@ -1,7 +1,7 @@
 param(
     [string]$WorkspaceFolder,
     [string]$RepoName = "Himesamanoyume/MiyakoCarryService",
-    [string]$PluginVtReportFile = "plugin_vt_report_url.txt"
+    [string]$PluginVtReportFile = "plugin_vt_report_url.txt",
     [string]$FikaVtReportFile = "fika_vt_report_url.txt"
 )
 
