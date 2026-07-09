@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
+using EFT.HealthSystem;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -79,9 +80,9 @@ namespace MiyakoCarryService.Fika.Mgrs
             botOwner.Mover.AllowTeleport();
             mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
             var playerPosition = mcsBotPlayer.Position;
-            botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-            botOwner.Mover.LastGoodCastPointTime = Time.time;
-            botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+            botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
+            botOwner.Mover._lastGoodCastPointTime = Time.time;
+            botOwner.Mover._prevPosLinkedTime = 0f;
             botOwner.Mover.SetPlayerToNavMesh(playerPosition);
             botOwner.Mover.RecalcWay();
             botOwner.Mover.Pause = true;
@@ -109,7 +110,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                     mcsBotPlayerData.TargetPos = pos.Value;
                     mcsBotPlayerData.ProxyTargetId = null;
                 }
-                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.Mover._lastTimePosChanged = Time.time;
                 botOwner.StopMove();
             }
         }
@@ -126,7 +127,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                         PhraseTrigger = EPhraseTrigger.Negative,
                     });
                 }
-                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.Mover._lastTimePosChanged = Time.time;
                 botOwner.StopMove();
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
@@ -256,7 +257,7 @@ namespace MiyakoCarryService.Fika.Mgrs
                     continue;
                 }
 
-                var effectType = GClass3058.EffectName(activeEffect);
+                var effectType = HealthHelper.EffectName(activeEffect);
                 if (string.IsNullOrEmpty(effectType))
                 {
                     continue;

@@ -1,5 +1,6 @@
 using System.Reflection;
 using EFT;
+using EFT.Ballistics;
 using Fika.Core;
 using Fika.Core.Main.Players;
 using HarmonyLib;

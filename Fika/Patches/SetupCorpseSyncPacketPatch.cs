@@ -1,4 +1,5 @@
 using System.Reflection;
+using EFT.HealthSystem;
 using Fika.Core.Main.Players;
 using HarmonyLib;
 using MiyakoCarryService.Client;
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Fika.Patches
         private static McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
 
         [PatchPrefix]
-        public static void Prefix(FikaPlayer __instance, NetworkHealthSyncPacketStruct packet)
+        public static void Prefix(FikaPlayer __instance, SyncHealthPacket packet)
         {
             if (!Tools.IsHost)
             {

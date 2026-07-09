@@ -98,14 +98,14 @@ namespace MiyakoCarryService.Fika
                         continue;
                     }
 
-                    var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
+                    var completeProfileDescriptorClass = new ProfileDescriptor
                     {
                         AccountId = groupPlayerViewModelClass.AccountId,
                         Id = groupPlayerViewModelClass.Id,
-                        Info = new ProfileInfoClass()
+                        Info = new ProfileInfoDescriptor()
                         {
                             Level = groupPlayerViewModelClass.Info.Level,
-                            Experience = InfoClass.GetExperience(groupPlayerViewModelClass.Info.Level),
+                            Experience = ProfileInfo.GetExperience(groupPlayerViewModelClass.Info.Level),
                             PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
                             MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
                             SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
@@ -120,7 +120,7 @@ namespace MiyakoCarryService.Fika
                         InsuredItems = [],
                         Inventory = new()
                         {
-                            Equipment = EFTItemSerializerClass.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, GClass2240.Instance)
+                            Equipment = ItemBinarySerializer.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, FullySearchedSearchController.Instance)
                         },
                         TaskConditionCounters = [],
                         Encyclopedia = []
