@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class BotHearingSensorPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.method_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotHearingSensor), nameof(BotHearingSensor.OnSoundPlayed));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     return;
                 }
 
-                var thisBotOwner = __instance.BotOwner;
+                var thisBotOwner = __instance._botOwner;
                 if (thisBotOwner == null)
                 {
                     return;
@@ -42,12 +42,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         return;
                     }
 
-                    var shouldReact = __instance.method_6(position, power, out var distance);
+                    var shouldReact = __instance.IsSoundHeard(position, power, out var distance);
 
                     var enemy = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(player.ProfileId);
                     if (enemy != null && shouldReact)
                     {
-                        thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Visible, __instance.BotOwner);
+                        thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Visible, __instance._botOwner);
                     }
                 }
             }

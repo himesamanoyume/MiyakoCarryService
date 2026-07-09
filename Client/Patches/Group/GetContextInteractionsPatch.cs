@@ -6,6 +6,7 @@ using EFT;
 using EFT.Communications;
 using EFT.InventoryLogic;
 using EFT.UI;
+using EFT.UI.Matchmaker;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
@@ -22,14 +23,14 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// </summary>
     public sealed class GetContextInteractionsPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerPlayerControllerClass), nameof(MatchmakerPlayerControllerClass.GetContextInteractions));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerPlayersController), nameof(MatchmakerPlayersController.GetContextInteractions));
 
         private static Traverse _tarkovApplicationTraverse;
         public static bool IsMcsBotPlayerInventoryMode = false;
         public static string McsBotPlayerAid = "";
 
         [PatchPostfix]
-        public static void Postfix(GroupPlayerDataClass player, ContextInteractionsClass __result)
+        public static void Postfix(GroupPlayer player, RaidGroupContextInteractions __result)
         {
             __result.method_2(
                 id: "RefreshFriendList",
@@ -58,7 +59,7 @@ namespace MiyakoCarryService.Client.Patches.Group
         private static async void OnRefreshFriendList()
         {
             var session = GameLoop.Instance.Session;
-            session.SocialNetwork.FriendsList.Clear();
+            session.SocialNetwork.SteamOnlyFriendsList.Clear();
             session.GetFriendsList(result =>
             {
                 if (!result.Succeed)
@@ -66,7 +67,7 @@ namespace MiyakoCarryService.Client.Patches.Group
                     return;
                 }
 
-                session.SocialNetwork.method_13(result);  
+                session.SocialNetwork.CG_method_13(result);  
                 UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.method_0(); 
             });
         }
@@ -77,19 +78,19 @@ namespace MiyakoCarryService.Client.Patches.Group
 
             if (!HasWeaponInEquipmentSlots())
             {
-                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARNOWEAPON.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARNOWEAPON.McsLocalized(), iconType: ENotificationIconType.Alert);
                 return;
             }
 
             if (aid != McsBotPlayerAid)
             {
-                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
                 return;
             }
 
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
                 return;
             }
 
@@ -99,12 +100,12 @@ namespace MiyakoCarryService.Client.Patches.Group
                 _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
             }
 
-            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
 
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            TasksExtensions.HandleExceptions(mainMenuControllerClass.AfterErrorHandler());
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
             TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
@@ -166,7 +167,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized());
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized());
                 return;
             }
 
@@ -176,12 +177,12 @@ namespace MiyakoCarryService.Client.Patches.Group
                 _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
             }
 
-            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
 
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            TasksExtensions.HandleExceptions(mainMenuControllerClass.AfterErrorHandler());
             EventMgr.Notify(new UpdateProfileEvent());
             TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
@@ -193,7 +194,7 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// </summary>
     public sealed class ContextInteractionsClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ContextInteractionsClass), nameof(ContextInteractionsClass.IsActive));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RaidGroupContextInteractions), nameof(RaidGroupContextInteractions.IsActive));
 
         [PatchPrefix]
         public static bool Prefix(ref bool __result)

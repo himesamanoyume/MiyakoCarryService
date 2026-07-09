@@ -1,6 +1,7 @@
 using System.Reflection;
 using EFT;
 using EFT.Interactive;
+using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
@@ -15,13 +16,13 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     /// </summary>  
     public sealed class DoorGetActionsClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_14));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(Door)]);
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
-        public static void Postfix(GamePlayerOwner owner, Door door, ref ActionsReturnClass __result)
+        public static void Postfix(GamePlayerOwner owner, Door door, ref AvailableInteractionState __result)
         {
             if (door.DoorState != EDoorState.Locked)
             {
@@ -42,7 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                __result.Actions.Add(new ActionsTypesClass
+                __result.Actions.Add(new InteractionAction
                 {
                     Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
@@ -59,13 +60,13 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     /// </summary>
     public sealed class LootItemGetActionsClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_8));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(LootItem)]);
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
-        public static void Postfix(GamePlayerOwner owner, LootItem lootItem, ref ActionsReturnClass __result)
+        public static void Postfix(GamePlayerOwner owner, LootItem lootItem, ref AvailableInteractionState __result)
         {
             if (lootItem is Corpse)
             {
@@ -91,7 +92,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                __result.Actions.Add(new ActionsTypesClass
+                __result.Actions.Add(new InteractionAction
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,

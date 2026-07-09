@@ -13,12 +13,12 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// </summary>
 	public sealed class MatchmakerTimeHasComePatch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass)]);
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(IEftSession), typeof(RaidSettings), typeof(MatchmakerPlayersController)]);
 
 		private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
 		[PatchPrefix]
-		public static void Prefix(ISession session, RaidSettings raidSettings, MatchmakerPlayerControllerClass matchmaker)
+		public static void Prefix(IEftSession session, RaidSettings raidSettings, MatchmakerPlayersController matchmaker)
 		{
 			if (McsMgr.McsTransitBotPlayers.TryGetValue(MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id, out var groupPlayerViewModelClasses))
 			{

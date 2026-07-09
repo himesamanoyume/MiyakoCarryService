@@ -13,16 +13,16 @@ using MiyakoCarryService.Client.Utils;
 namespace MiyakoCarryService.Client.Patches.Events
 {
     /// <summary>
-    /// 使实例化新的TraderControllerClass时第一时间更新其Data数据
+    /// 使实例化新的ItemController时第一时间更新其Data数据
     /// </summary>
     public sealed class TraderControllerClassConstructorPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetConstructors()[0];
+        protected override MethodBase GetTargetMethod() => typeof(ItemController).GetConstructors()[0];
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(TraderControllerClass __instance)
+        public static void Postfix(ItemController __instance)
         {
             if (GameLoop.Instance.IsVaildGameWorld)
             {
@@ -60,12 +60,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassAddItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_0").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "action_0").FieldType, "Invoke");
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(object __instance, GEventArgs2 obj)
+        public static void Postfix(object __instance, AddItemEventArgs obj)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
@@ -109,12 +109,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassRemoveItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(TraderControllerClass), "action_1").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "action_1").FieldType, "Invoke");
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(object __instance, GEventArgs3 obj)
+        public static void Postfix(object __instance, RemoveItemEventArgs obj)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
@@ -158,12 +158,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassOutProcessPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
+        protected override MethodBase GetTargetMethod() => typeof(ItemController).GetMethods().FirstOrDefault(m => m.Name == nameof(ItemController.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress from, ItemAddress to, IOperationClass operation, Callback callback)
+        public static void Postfix(ItemController __instance, Item item, ItemAddress from, ItemAddress to, IOperationClass operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
@@ -233,12 +233,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassInProcessPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(TraderControllerClass).GetMethods().FirstOrDefault(m => m.Name == nameof(TraderControllerClass.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
+        protected override MethodBase GetTargetMethod() => typeof(ItemController).GetMethods().FirstOrDefault(m => m.Name == nameof(ItemController.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(TraderControllerClass __instance, Item item, ItemAddress to, bool succeed, IOperationClass operation, Callback callback)
+        public static void Postfix(ItemController __instance, Item item, ItemAddress to, bool succeed, IOperationClass operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)

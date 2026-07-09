@@ -13,10 +13,10 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
     /// </summary>
     public sealed class TraderScreensGroupShowPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderScreensGroup), nameof(TraderScreensGroup.Show), [typeof(TraderScreensGroup.GClass3888)]);
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderScreensGroup), nameof(TraderScreensGroup.Show), [typeof(TraderScreensGroup.TraderScreenController)]);
 
         [PatchPostfix]
-        public static void Postfix(TraderScreensGroup.GClass3888 controller)
+        public static void Postfix(TraderScreensGroup.TraderScreenController controller)
         {
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateDailyQuestsEvent());

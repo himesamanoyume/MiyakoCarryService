@@ -3,6 +3,7 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using EFT.Game.Spawning;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
@@ -49,7 +50,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TransitPointPatch2 : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.method_6));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.SeparateGroupPlayers));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 

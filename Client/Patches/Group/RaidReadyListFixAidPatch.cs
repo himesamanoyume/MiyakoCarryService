@@ -1,5 +1,6 @@
 
 using System.Reflection;
+using EFT;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -11,12 +12,12 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// </summary>
     public sealed class RaidReadyListFixAidPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RaidReadyList.Class3311), nameof(RaidReadyList.Class3311.method_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RaidReadyList.CG_Show), nameof(RaidReadyList.CG_Show.method_0));
 
         private static bool _hasAidAdded = false; 
 
         [PatchPrefix]
-        public static bool Prefix(RaidReadyList.Class3311 __instance, ref GroupPlayerViewModelClass player, RaidReadyPlayerPanel playerPanel)
+        public static bool Prefix(RaidReadyList.CG_Show __instance, ref GroupPlayer player, RaidReadyPlayerPanel playerPanel)
         {
             if (!_hasAidAdded)
             {

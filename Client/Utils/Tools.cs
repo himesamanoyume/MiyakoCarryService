@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;

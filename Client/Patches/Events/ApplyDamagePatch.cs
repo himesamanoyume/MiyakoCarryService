@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using EFT;
+using EFT.Ballistics;
 using EFT.HealthSystem;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;

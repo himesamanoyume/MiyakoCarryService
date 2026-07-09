@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using JsonType;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
 using SPT.Reflection.Patching;
@@ -16,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.LocalRaidEnded));
 
         [PatchPrefix]
-        public static void Prefix(LocalRaidSettings settings, RaidEndDescriptorClass results, FlatItemsDataClass[] lostInsuredItems, Dictionary<string, FlatItemsDataClass[]> transferItems)
+        public static void Prefix(LocalRaidSettings settings, SessionResult results, FlatItem[] lostInsuredItems, Dictionary<string, FlatItem[]> transferItems)
         {
             if (results.result != ExitStatus.Transit)
             {

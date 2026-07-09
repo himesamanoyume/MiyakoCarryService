@@ -1,4 +1,5 @@
 using System.Reflection;
+using EFT.Quests;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -9,15 +10,15 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class LocalQuestControllerClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LocalQuestControllerClass.Struct1295), nameof(LocalQuestControllerClass.Struct1295.MoveNext));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestControllerClientBackend.CG_HandoverItem), nameof(QuestControllerClientBackend.CG_HandoverItem.MoveNext));
 
         [PatchPostfix]
-        public static void Postfix(LocalQuestControllerClass.Struct1295 __instance)
+        public static void Postfix(QuestControllerClientBackend.CG_HandoverItem __instance)
         {
             var progressChecker = __instance.quest.ProgressCheckers[__instance.condition];
             if (progressChecker.Test())
             {
-                var taskConditionCounter = __instance.LocalQuestControllerClass.Profile.GetTaskConditionCounter(__instance.quest, __instance.condition.id);
+                var taskConditionCounter = __instance.QuestControllerClientBackend.Profile.GetTaskConditionCounter(__instance.quest, __instance.condition.id);
                 taskConditionCounter.Value = (int)__instance.condition.value;
             }
         }

@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using Comfort.Common;
+using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
@@ -13,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
     /// </summary>
     public sealed class ChatSendMessagePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.ChatSendMessage));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ClientBackendSession), nameof(ClientBackendSession.ChatSendMessage));
 
         [PatchPostfix]
         public static void Postfix(string id, int type, string text, string replyTo, Callback<string> callback)

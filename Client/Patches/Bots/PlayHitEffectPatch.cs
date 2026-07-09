@@ -1,4 +1,6 @@
 using System.Reflection;
+using EFT;
+using EFT.Ballistics;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
@@ -18,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(EffectsCommutator __instance, EftBulletClass info, ShotInfoClass playerHitInfo)
+        public static void Postfix(EffectsCommutator __instance, Shot info, PlayerHitInfo playerHitInfo)
         {
             if (!Tools.IsHost)
             {

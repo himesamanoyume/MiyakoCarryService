@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using Comfort.Common;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -11,15 +12,15 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// </summary>
     public sealed class DisbandRaidGroupPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ProfileEndpointFactoryAbstractClass), nameof(ProfileEndpointFactoryAbstractClass.DisbandRaidGroup));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ClientBackendSession), nameof(ClientBackendSession.DisbandRaidGroup));
 
         [PatchPrefix]
-        public static bool Prefix(ProfileEndpointFactoryAbstractClass __instance, Callback callback)
+        public static bool Prefix(ClientBackendSession __instance, Callback callback)
         {
-            TasksExtensions.HandleExceptions(__instance.method_6(new LegacyParamsStruct
+            TasksExtensions.HandleExceptions(__instance.SendVoid(new SendRequest
             {
-                Url = __instance.Gclass1392_0.Main + "/mcs/client/match/group/delete",
-                Retries = LegacyParamsStruct.NoRetries
+                Url = __instance.BackendUrls.Main + "/mcs/client/match/group/delete",
+                Retries = SendRequest.NoRetries
             }, callback));
             return false;
         }

@@ -1,3 +1,4 @@
+using Diz.Binding;
 using EFT;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
@@ -10,16 +11,16 @@ namespace MiyakoCarryService.Client.Patches.Events
 {
 	public sealed class MatchmakerAcceptScreenShowPatch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)]);
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.Show), [typeof(IEftSession), typeof(RaidSettings), typeof(RaidSettings)]);
 
 		public static ESideType CurrentType = ESideType.Pmc;
-        public static GClass1628<GroupPlayerViewModelClass> GroupPlayers = new();
+        public static BindableList<RaidPlayer> GroupPlayers = new();
 
 		/// <summary>
 		/// 在准备开始匹配前发送配置文件
 		/// </summary>
 		[PatchPrefix]
-		public static void Prefix(MatchmakerPlayerControllerClass ___MatchmakerPlayersController, ISession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Prefix(MatchmakerPlayersController ___MatchmakerPlayersController, IEftSession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
 			if (MiyakoCarryServicePlugin.FikaInstalled)
 			{
@@ -43,7 +44,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// </summary>
 	public sealed class MatchMakerAcceptScreenReadyPatch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_16));
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.MatchingAvailabilityChanged));
 
 		[PatchPrefix]
 		public static void Prefix(ref EMatchingStatus matchingStatus)
@@ -57,10 +58,10 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// </summary>
 	public sealed class MatchMakerAcceptScreenCallbackPatch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.method_10));
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchMakerAcceptScreen), nameof(MatchMakerAcceptScreen.RaidReadyStatusChangedHandler));
 
 		[PatchPrefix]
-		public static bool Prefix(GroupPlayerViewModelClass player, bool status)
+		public static bool Prefix(RaidPlayer player, bool status)
 		{
 			return false;
 		}

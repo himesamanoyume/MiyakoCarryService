@@ -13,14 +13,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class RefreshMedsPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAidClass), nameof(BotFirstAidClass.RefreshMeds));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAid), nameof(BotFirstAid.RefreshMeds));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(BotFirstAidClass __instance)
+        public static bool Prefix(BotFirstAid __instance)
         {
-            if (McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+            if (McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
             {
                 __instance.McsRefreshMeds();
                 return false;

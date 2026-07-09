@@ -13,10 +13,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class CanModifyItemPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionsHandlerClass), nameof(InteractionsHandlerClass.CanModifyItem));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemManipulator), nameof(ItemManipulator.CanModifyItem));
 
         [PatchPrefix]
-        public static bool Prefix(Item item, ItemAddress from, TraderControllerClass controller, ref Error error, ref bool __result)
+        public static bool Prefix(Item item, ItemAddress from, ItemController controller, ref Error error, ref bool __result)
         {
             if (!GameLoop.Instance.IsVaildGameWorld)
             {

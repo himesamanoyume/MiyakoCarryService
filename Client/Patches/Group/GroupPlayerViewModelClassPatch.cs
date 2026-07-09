@@ -1,5 +1,7 @@
 
 using System.Reflection;
+using EFT;
+using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -10,10 +12,10 @@ namespace MiyakoCarryService.Client.Patches.Group
     /// </summary>
     public sealed class GroupPlayerViewModelClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GroupPlayerViewModelClass), nameof(GroupPlayerViewModelClass.UpdateFromAnotherItem), [typeof(GroupPlayerDataClass)]);
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RaidPlayer), nameof(RaidPlayer.UpdateFromAnotherItem), [typeof(GroupPlayer)]);
 
         [PatchPostfix]
-        public static void Postfix(GroupPlayerDataClass other)
+        public static void Postfix(GroupPlayer other)
         {
             other.Info.SelectedMemberCategory = other.Info.MemberCategory;
         }

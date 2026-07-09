@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(Player __instance, ref bool aiControlled)
         {
-            if (__instance.UsedSimplifiedSkeleton)
+            if (__instance.Sense)
             {
                 return;
             }

@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var visibleType = __instance.VisibleType;
             if (visibleType - EEnemyPartVisibleType.GreenSence <= 1)
             {
-                __result = __instance.method_7();
+                __result = __instance.GetPointBySence();
                 return false;
             }
             if (visibleType == EEnemyPartVisibleType.Visible)
@@ -66,14 +66,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             if (!enemyInfo.HaveSeenPersonal || Time.time - enemyInfo.FirstTimeSeen <= enemyInfo.Owner.Settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME)
             {
-                var enemyPart = enemyInfo.AllParts[mcsBotPlayerData.AimingBodyPartType];
-                if (enemyPart.CanShoot && enemyInfo.AllPartsVision[mcsBotPlayerData.AimingBodyPartType].Visible)
+                var enemyPart = enemyInfo._allParts[mcsBotPlayerData.AimingBodyPartType];
+                if (enemyPart.CanShoot && enemyInfo._allPartsVision[mcsBotPlayerData.AimingBodyPartType].Visible)
                 {
                     enemyInfo.LastPartToShoot = enemyPart;
                 }
                 else
                 {
-                    return enemyInfo.method_8();
+                    return enemyInfo.GetVisiblePartToShoot();
                 }
             }
             if (enemyInfo.LastPartToShoot == null)

@@ -19,6 +19,7 @@ using MiyakoCarryService.Client.Patches.Group;
 using UnityEngine.UI;
 using MiyakoCarryService.Client.Extensions;
 using System;
+using EFT.Communications;
 
 namespace MiyakoCarryService.Client.Patches.BigSurvey;
 
@@ -105,7 +106,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     stringBuilder.Append("```log\n");
                     stringBuilder.Append("- DateTime: ").Append(DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")).Append("\n");
                     stringBuilder.Append("- Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
-                    stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.String_0).Append("\n")
+                    stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.string_0).Append("\n")
                         .Append("- SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
                         .Append("- System: ").Append(SystemInfo.operatingSystem).Append("\n")
                         .Append("- CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("Core)\n")
@@ -132,7 +133,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     stringBuilder.Append("```");
 
                     GUIUtility.systemCopyBuffer = stringBuilder.ToString();
-                    NotificationManagerClass.DisplayMessageNotification(string.Format(Locales.BIGSURVEYNOTIFY.McsLocalized(), MiyakoCarryServicePlugin.LogBuffer.GetLogCount));
+                    NotificationManager.DisplayMessageNotification(string.Format(Locales.BIGSURVEYNOTIFY.McsLocalized(), MiyakoCarryServicePlugin.LogBuffer.GetLogCount));
                     NewBigSurveyCount = 0;
                     _animatedToggle.ToggleSilent(false);
                 });

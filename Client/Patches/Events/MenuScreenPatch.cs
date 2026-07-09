@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class MenuScreenPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MenuScreen), nameof(MenuScreen.method_6));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MenuScreen), nameof(MenuScreen.OnMatchingTypeUpdate));
 
         private static Traverse _menuScreenTraverse = null;
 

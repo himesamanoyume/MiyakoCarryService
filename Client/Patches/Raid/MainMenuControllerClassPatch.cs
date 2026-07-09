@@ -11,14 +11,14 @@ namespace MiyakoCarryService.Client.Patches.Raid
     /// </summary>
     public sealed class MainMenuControllerClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MainMenuControllerClass), nameof(MainMenuControllerClass.method_27));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MainMenuShowOperation), nameof(MainMenuShowOperation.method_27));
 
         [PatchPrefix]
-        public static void Prefix(MainMenuControllerClass __instance)
+        public static void Prefix(MainMenuShowOperation __instance)
         {
-            __instance.RaidSettings_0.RaidMode = ERaidMode.Local;
-            __instance.RaidSettings_1.Side = __instance.RaidSettings_0.Side;
-            __instance.RaidSettings_1.RaidMode = ERaidMode.Local;
+            __instance.raidSettings_0.RaidMode = ERaidMode.Local;
+            __instance.raidSettings_1.Side = __instance.raidSettings_0.Side;
+            __instance.raidSettings_1.RaidMode = ERaidMode.Local;
         }
     }
 }

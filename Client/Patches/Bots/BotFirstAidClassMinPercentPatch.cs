@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class BotFirstAidClassMinPercentPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(BotFirstAidClass), nameof(BotFirstAidClass.min_percent));
+        protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(BotFirstAid), nameof(BotFirstAid.min_percent));
 
         [PatchPrefix]
         public static bool Prefix(ref float __result)

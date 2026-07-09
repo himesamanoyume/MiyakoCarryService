@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (__instance.DefWildSpawnType is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
+            if (__instance._defWildSpawnType is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
             {
                 if (McsMgr.IsMcsBotPlayer(person.ProfileId))
                 {
@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 }
             }
 
-            foreach (var botOwner in __instance.Members)
+            foreach (var botOwner in __instance._members)
             {
                 if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
                 {
@@ -65,7 +65,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             string mcsLeadPlayerId = null;
-            foreach (var member in __instance.Members)
+            foreach (var member in __instance._members)
             {
                 if (McsMgr.IsMcsBotPlayer(member.ProfileId))
                 {
@@ -95,7 +95,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         continue;
                     }
 
-                    foreach (var enemy in person.AIData.BotOwner.BotsGroup.Members)
+                    foreach (var enemy in person.AIData.BotOwner.BotsGroup._members)
                     {
                         botGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
                     }

@@ -10,12 +10,12 @@ namespace MiyakoCarryService.Client.Patches.Raid
     /// </summary>
     public sealed class MatchMakerSideSelectionScreenPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(MatchMakerSideSelectionScreen), nameof(MatchMakerSideSelectionScreen.Boolean_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(MatchMakerSideSelectionScreen), nameof(MatchMakerSideSelectionScreen.ScavAvailable));
 
         [PatchPrefix]
-        public static bool Prefix(MatchmakerPlayerControllerClass ___MatchmakerPlayersController, ref bool __result)
+        public static bool Prefix(MatchmakerPlayersController ___MatchmakerPlayersController, ref bool __result)
         {
-            if (___MatchmakerPlayersController?.GroupPlayers?.Count > MatchmakerPlayerControllerClass.MAX_SCAV_COUNT)
+            if (___MatchmakerPlayersController?.GroupPlayers?.Count > MatchmakerPlayersController.MAX_SCAV_COUNT)
             {
                 __result = false;
                 return false;

@@ -12,14 +12,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class AdvAssaultTargetPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Class99), nameof(Class99.ShallUseNow));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(AdvAssaultTargetLayer), nameof(AdvAssaultTargetLayer.ShallUseNow));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(Class99 __instance, ref bool __result)
+        public static bool Prefix(AdvAssaultTargetLayer __instance, ref bool __result)
         {
-            if (McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+            if (McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
             {
                 __result = false;
                 return false;

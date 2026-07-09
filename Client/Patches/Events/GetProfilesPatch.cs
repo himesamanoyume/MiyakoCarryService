@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using EFT;
+using EFT.Communications;
 using HarmonyLib;
 using MiyakoCarryService.Client.Patches.Group;
 using MiyakoCarryService.Client.Utils;
@@ -34,7 +35,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         public static async void Postfix(SessionBackendClass __instance, Task __result)
         {
             await __result;
-            var profileStatuses = new List<ProfileStatusClass>();
+            var profileStatuses = new List<ProfileStatus>();
             foreach (var profile in __instance.AllProfiles)
             {
                 profileStatuses.Add(new()
@@ -53,7 +54,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             if (response == null || response.Length == 0)
             {
                 GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode = false;
-                NotificationManagerClass.DisplayMessageNotification("未获取到护航存档，无法加载");
+                NotificationManager.DisplayMessageNotification("未获取到护航存档，无法加载");
                 return;
             }
 

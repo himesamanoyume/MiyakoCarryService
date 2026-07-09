@@ -1,5 +1,6 @@
 using System.Reflection;
 using EFT;
+using EFT.Ballistics;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;

@@ -13,10 +13,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class EquipmentBuildsScreenShowPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.Show), [typeof(EquipmentBuildsScreen.GClass3870)]);
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.Show), [typeof(EquipmentBuildsScreen.EquipmentBuildsScreenController)]);
 
         [PatchPrefix]
-        public static void Prefix(EquipmentBuildsScreen.GClass3870 controller)
+        public static void Prefix(EquipmentBuildsScreen.EquipmentBuildsScreenController controller)
         {
             if (GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {

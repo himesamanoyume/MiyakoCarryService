@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotReload __instance)
         {
-            if (McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+            if (McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
             {
                 __instance.McsTryReload();
                 return false;
