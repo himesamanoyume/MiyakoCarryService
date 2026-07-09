@@ -25,25 +25,25 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RepeatableQuestController), nameof(RepeatableQuestController.ChangeRepeatableQuest));
 
+        private static EventOutputHolder EventOutputHolder { get => field ??= ServiceLocator.ServiceProvider.GetService<EventOutputHolder>(); }
+        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
+        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>(); }
+        private static ISptLogger<RepeatableQuestChangeRequest> Logger { get => field ??= ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>(); }
+
         [PatchPrefix]
         public static bool Prefix(RepeatableQuestController __instance, PmcData pmcData, RepeatableQuestChangeRequest changeRequest, MongoId sessionID, ref ItemEventRouterResponse __result)
         {
-            var eventOutputHolder = ServiceLocator.ServiceProvider.GetService<EventOutputHolder>();
-            var serverLocalisationService = ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>();
-            var httpResponseUtil = ServiceLocator.ServiceProvider.GetService<HttpResponseUtil>();
-            var logger = ServiceLocator.ServiceProvider.GetService<ISptLogger<RepeatableQuestChangeRequest>>();
-            
-            var output = eventOutputHolder.GetOutput(sessionID);
+            var output = EventOutputHolder.GetOutput(sessionID);
 
             var repeatableQuestControllerTraverse = Traverse.Create(__instance);
             var repeatables = repeatableQuestControllerTraverse.Method("GetRepeatableById", [changeRequest.QuestId, pmcData]).GetValue<GetRepeatableByIdResult?>();
             var questToReplace = repeatables.Quest;
             if (repeatables.RepeatableType is null || repeatables.Quest is null)
             {
-                var message = serverLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
-                logger.Error(message);
+                var message = ServerLocalisationService.GetText("quest-unable_to_find_repeatable_to_replace");
+                Logger.Error(message);
 
-                __result = httpResponseUtil.AppendErrorToOutput(output, message);
+                __result = HttpResponseUtil.AppendErrorToOutput(output, message);
                 return false;
             }
             

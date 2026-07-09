@@ -19,16 +19,17 @@ namespace MiyakoCarryService.Server.Patches.Profile
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemEventRouter), nameof(ItemEventRouter.HandleEvents));
 
+        private static ProfileService ProfileService { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileService>(); }
+
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, ref ValueTask<ItemEventRouterResponse> __result)
         {
-            var profileService = ServiceLocator.ServiceProvider.GetService<ProfileService>();
-            if (!profileService.IsMcsBotPlayerInventoryMode(sessionID)) 
+            if (!ProfileService.IsMcsBotPlayerInventoryMode(sessionID)) 
             {
                 return;
             }
 
-            var mcsBotProfiles = profileService.GetMcsBotPlayerProfileForInventoryMode(sessionID);
+            var mcsBotProfiles = ProfileService.GetMcsBotPlayerProfileForInventoryMode(sessionID);
             if (mcsBotProfiles is null || mcsBotProfiles.Count == 0) 
             {
                 return;

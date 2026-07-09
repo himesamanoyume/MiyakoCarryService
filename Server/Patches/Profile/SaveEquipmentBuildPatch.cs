@@ -19,18 +19,18 @@ namespace MiyakoCarryService.Server.Patches.Profile
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BuildController), nameof(BuildController.SaveEquipmentBuild));
 
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static BuildsController BuildsController { get => field ??= ServiceLocator.ServiceProvider.GetService<BuildsController>(); }
+        private static ProfileHelper ProfileHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileHelper>(); }
+
         [PatchPostfix]
         public static void Postfix(MongoId sessionID, PresetBuildActionRequestData request)
         {
-            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-
-            if (profileController.IsMcsBotPlayerInventoryMode(sessionID))
+            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionID))
             {
-                var buildsController = ServiceLocator.ServiceProvider.GetService<BuildsController>();
-                var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
-                var profile = profileHelper.GetFullProfile(sessionID);
-                _ = buildsController.SaveUserBuilds(sessionID, profile.UserBuildData);
-                var profiles = profileController.GetAllMcsBotPlayerProfileByBossId(sessionID);
+                var profile = ProfileHelper.GetFullProfile(sessionID);
+                _ = BuildsController.SaveUserBuilds(sessionID, profile.UserBuildData);
+                var profiles = ProfileController.GetAllMcsBotPlayerProfileByBossId(sessionID);
                 foreach (var _profile in profiles)
                 {
                     if (_profile.ProfileInfo.ProfileId == profile.ProfileInfo.ProfileId)
@@ -38,9 +38,9 @@ namespace MiyakoCarryService.Server.Patches.Profile
                         continue;
                     }
                     _profile.UserBuildData = profile.UserBuildData;
-                    buildsController.ExaminedUserBuildsItem(_profile, _profile.UserBuildData);
+                    BuildsController.ExaminedUserBuildsItem(_profile, _profile.UserBuildData);
                 }
-                _ = profileController.SaveAllMcsBotPlayerProfile(sessionID);
+                _ = ProfileController.SaveAllMcsBotPlayerProfile(sessionID);
             }
         }
     }

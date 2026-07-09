@@ -20,15 +20,15 @@ namespace MiyakoCarryService.Server.Patches.Friend
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetFriendList));
 
+        private static MiyakoChatBot MiyakoChatBot { get => field ??= ServiceLocator.ServiceProvider.GetService<MiyakoChatBot>(); }
+        private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static Controllers.ConfigController ConfigController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ConfigController>(); }
+
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, ref GetFriendListDataResponse __result)
         {
-            var miyakoChatBot = ServiceLocator.ServiceProvider.GetService<MiyakoChatBot>();
-            __result.Friends.Add(miyakoChatBot.GetChatBot());
-
-            var profileController = ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>();
-            var configController = ServiceLocator.ServiceProvider.GetService<Controllers.ConfigController>();
-            var mcsBotPlayerProfiles = profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
+            __result.Friends.Add(MiyakoChatBot.GetChatBot());
+            var mcsBotPlayerProfiles = ProfileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
 
             if (mcsBotPlayerProfiles is not null)
             {
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
                         Aid = mcsPmcData.Aid,
                         Info = new UserDialogDetails
                         {
-                            Nickname = mcsPmcData.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
+                            Nickname = mcsPmcData.Info.Nickname + $" [{ConfigController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
                             Side = mcsPmcData.Info.Side,
                             Level = mcsPmcData.Info.Level,
                             MemberCategory = mcsPmcData.Info.MemberCategory,

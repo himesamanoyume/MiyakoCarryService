@@ -17,6 +17,9 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RagfairOfferGenerator), nameof(RagfairOfferGenerator.GenerateFleaOffersForTrader));
 
+        private static DatabaseService DatabaseService { get => field ??= ServiceLocator.ServiceProvider.GetService<DatabaseService>(); }
+        private static Controllers.TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>(); }
+
         [PatchPrefix]
         public static void Prefix(MongoId traderId)
         {
@@ -25,15 +28,12 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            var databaseService = ServiceLocator.ServiceProvider.GetService<DatabaseService>();
-            var traderController = ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>();
-
-            if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
+            if (!DatabaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
             {
                 return;
             }
 
-            trader.Assort = traderController.GetMcsBotPlayerInventoryModeAssort();
+            trader.Assort = TraderController.GetMcsBotPlayerInventoryModeAssort();
         }
 
         [PatchPostfix]
@@ -44,9 +44,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            var databaseService = ServiceLocator.ServiceProvider.GetService<DatabaseService>();
-
-            if (!databaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
+            if (!DatabaseService.GetTables().Traders.TryGetValue(traderId, out var trader))
             {
                 return;
             }

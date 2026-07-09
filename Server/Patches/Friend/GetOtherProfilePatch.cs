@@ -24,18 +24,19 @@ namespace MiyakoCarryService.Server.Patches.Friend
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Controllers.ProfileController), nameof(SPTarkov.Server.Core.Controllers.ProfileController.GetOtherProfile));
 
+        private static ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileController>(); }
+        private static ProfileHelper ProfileHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileHelper>(); }
+
         [PatchPrefix]
         public static bool Prefix(MongoId sessionId, GetOtherProfileRequest request, ref GetOtherProfileResponse __result)
         {
-            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
-            var mcsFullProfileToView = profileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
+            var mcsFullProfileToView = ProfileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
             if (mcsFullProfileToView is null)
             {
                 return true;
             }
 
-            var profileHelper = ServiceLocator.ServiceProvider.GetService<ProfileHelper>();
-            var bossPmcProfile = profileHelper.GetPmcProfile(sessionId);
+            var bossPmcProfile = ProfileHelper.GetPmcProfile(sessionId);
             var mcsBotPlayerPmcProfile = mcsFullProfileToView.CharacterData.PmcData;
             var mcsBotPlayerScavProfile = mcsFullProfileToView.CharacterData.ScavData;
 
@@ -81,7 +82,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
                     Items = mcsBotPlayerPmcProfile.Inventory.Items 
                 },
                 Achievements = bossPmcProfile is not null ? bossPmcProfile.Achievements : mcsBotPlayerPmcProfile.Achievements,
-                FavoriteItems = profileHelper.GetOtherProfileFavorites(mcsBotPlayerPmcProfile),
+                FavoriteItems = ProfileHelper.GetOtherProfileFavorites(mcsBotPlayerPmcProfile),
                 PmcStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats

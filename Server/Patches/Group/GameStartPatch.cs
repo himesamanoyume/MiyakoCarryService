@@ -18,14 +18,14 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameCallbacks), nameof(GameCallbacks.GameStart));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+        private static ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileController>(); }
+
         [PatchPrefix]
         public static void Prefix(string url, EmptyRequestData _, MongoId sessionID)
         {
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            raidController.ClearGroupMember(sessionID);
-
-            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
-            profileController.RemoveMcsBotPlayerAid(sessionID);
+            RaidController.ClearGroupMember(sessionID);
+            ProfileController.RemoveMcsBotPlayerAid(sessionID);
         }
     }
 }

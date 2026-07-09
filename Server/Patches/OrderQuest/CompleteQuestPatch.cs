@@ -19,38 +19,39 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.CompleteQuest));
 
+        private static InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<InfoController>(); }
+        private static TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<TraderController>(); }
+        private static ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileController>(); }
+
         [PatchPostfix]
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
         {
-            var infoController = ServiceLocator.ServiceProvider.GetService<InfoController>();
-            var traderController = ServiceLocator.ServiceProvider.GetService<TraderController>();
-            var profileController = ServiceLocator.ServiceProvider.GetService<ProfileController>();
             var completedQuestId = request.QuestId;
-            var orderInfos = infoController.GetOrderInfos(sessionID);
+            var orderInfos = InfoController.GetOrderInfos(sessionID);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    infoController.SetBaseInfoStarted(orderInfo);
+                    InfoController.SetBaseInfoStarted(orderInfo);
                     foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                     {
-                        var mcsBotPlayerProfile = profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                        infoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
+                        InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
                     }
                     break;
                 }
             }
-            var ticketInfos = infoController.GetTicketInfos(sessionID);
+            var ticketInfos = InfoController.GetTicketInfos(sessionID);
             foreach (var ticketInfo in ticketInfos)
             {
                 if (completedQuestId == ticketInfo.QuestId)
                 {
-                    infoController.SetBaseInfoStarted(ticketInfo);
-                    traderController.ModifyPunishmentMulti(ticketInfo.Percent / 100d, false);
+                    InfoController.SetBaseInfoStarted(ticketInfo);
+                    TraderController.ModifyPunishmentMulti(ticketInfo.Percent / 100d, false);
                     break;
                 }
             }
-            _ = infoController.SaveOrderAndTicketInfo();
+            _ = InfoController.SaveOrderAndTicketInfo();
         }
     }
 }

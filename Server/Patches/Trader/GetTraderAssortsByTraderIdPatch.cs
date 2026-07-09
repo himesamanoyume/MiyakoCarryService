@@ -17,6 +17,8 @@ namespace MiyakoCarryService.Server.Patches.Trader
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderHelper), nameof(TraderHelper.GetTraderAssortsByTraderId));
 
+        private static Controllers.TraderController TraderController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>(); }
+
         [PatchPrefix]  
         public static bool Prefix(MongoId traderId, ref TraderAssort? __result)  
         {  
@@ -25,8 +27,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return true;
             }
 
-            var traderController = ServiceLocator.ServiceProvider.GetService<Controllers.TraderController>();
-            __result = traderController.GetMcsBotPlayerInventoryModeAssort();
+            __result = TraderController.GetMcsBotPlayerInventoryModeAssort();
             return false;
         }
     }

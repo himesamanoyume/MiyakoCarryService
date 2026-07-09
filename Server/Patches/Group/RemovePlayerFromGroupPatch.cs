@@ -18,16 +18,17 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchCallbacks), nameof(MatchCallbacks.RemovePlayerFromGroup));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+
         [PatchPrefix]
         public static void Prefix(string url, MatchGroupPlayerRemoveRequest info, MongoId sessionID)
         {
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
             var check = int.TryParse(info.AidToKick, out var mcsAid);
             if (!check)
             {
                 return;
             }
-            raidController.RemoveGroupMember(sessionID, mcsAid);
+            RaidController.RemoveGroupMember(sessionID, mcsAid);
         }
     }
 }

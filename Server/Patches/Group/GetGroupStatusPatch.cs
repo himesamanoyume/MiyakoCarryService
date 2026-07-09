@@ -20,19 +20,20 @@ namespace MiyakoCarryService.Server.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchCallbacks), nameof(MatchCallbacks.GetGroupStatus));
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+        private static NotificationHelper NotificationHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<NotificationHelper>(); }
+        private static NotificationSendHelper NotificationSendHelper { get => field ??= ServiceLocator.ServiceProvider.GetService<NotificationSendHelper>(); }
+
         [PatchPostfix]
         public static void Postfix(string url, MatchGroupStatusRequest info, MongoId sessionID)
         {
-            var raidController = ServiceLocator.ServiceProvider.GetService<RaidController>();
-            var notificationHelper = ServiceLocator.ServiceProvider.GetService<NotificationHelper>();
-            var notificationSendHelper = ServiceLocator.ServiceProvider.GetService<NotificationSendHelper>();
-            var mcsBotPlayerProfiles = raidController.GetAllGroupMemberProfiles(sessionID);
+            var mcsBotPlayerProfiles = RaidController.GetAllGroupMemberProfiles(sessionID);
             foreach (var mcsBotPlayerProfile in mcsBotPlayerProfiles)
             {
                 try
                 {
-                    var notification = notificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerProfile, info.IsSavage.Value);
-                    notificationSendHelper.SendMessage(sessionID, notification);
+                    var notification = NotificationHelper.GenerateWsGroupMatchRaidReady(mcsBotPlayerProfile, info.IsSavage.Value);
+                    NotificationSendHelper.SendMessage(sessionID, notification);
                 }
                 finally
                 {
