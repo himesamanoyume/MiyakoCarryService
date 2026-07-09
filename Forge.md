@@ -197,6 +197,10 @@ Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`
 
 If `McsBotPlayer` is currently in combat, command `McsBotPlayer` to report known enemy positions.
 
+- Report Self Status
+
+Command `McsBotPlayer` to report own health and supply status.
+
 - On Your Own
 
 Command `McsBotPlayer` to act independently.
@@ -250,6 +254,10 @@ If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the
 - Team Report Enemy Position
 
 If there are `McsBotPlayers` in the team currently in combat, command `McsBotPlayers` to report known enemy positions.
+
+- Team Report Self Status
+
+Command `McsBotPlayers` to report own health and supply status.
 
 - Team On Your Own
 
