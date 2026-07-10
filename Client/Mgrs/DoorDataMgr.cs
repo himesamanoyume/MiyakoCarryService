@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadDoors()
         {
-            var world = Singleton<GameWorld>.Instance.World_0;
+            var world = Singleton<GameWorld>.Instance.World;
             List<Door> doors;
             if (world == null)
             {
@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                doors = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Door>().ToList();
+                doors = world.WorldInteractiveObjects().OfType<Door>().ToList();
             }
             foreach (var door in doors)
             {

@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void LoadSwitches()
         {
-            var world = Singleton<GameWorld>.Instance.World_0;
+            var world = Singleton<GameWorld>.Instance.World;
             List<Switch> switches;
             if (world == null)
             {
