@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                doors = Singleton<GameWorld>.Instance.World_0.WorldInteractiveObjects().OfType<Door>().ToList();
+                doors = world.WorldInteractiveObjects().OfType<Door>().ToList();
             }
             foreach (var door in doors)
             {
