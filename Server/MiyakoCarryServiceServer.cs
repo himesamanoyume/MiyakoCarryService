@@ -120,18 +120,30 @@ namespace MiyakoCarryService.Server
                 }
 
                 using var httpClient = new HttpClient();
+                var proxyUrl = new List<string>(){"https://raw.githubusercontent.com/himesamanoyume/himesamanoyume/", "https://cdn.jsdelivr.net/gh/himesamanoyume/himesamanoyume@", "https://github.tsukiyukimiyako.top/https://raw.githubusercontent.com/himesamanoyume/himesamanoyume/"};
+                var ifdianUrl = "refs/heads/main/Ifdian.md";
                 try
                 {
-                    var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/afdian/raw/master/README.md");
-                    var supporter = jsonUtil.Deserialize<List<string>>(data);
-                    ifdian.Timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                    ifdian.Supporter = supporter;
+                    foreach (var url in proxyUrl)
+                    {
+                        try
+                        {
+                            var data = await httpClient.GetStringAsync(url + ifdianUrl);
+                            var supporter = jsonUtil.Deserialize<List<string>>(data);
+                            ifdian.Timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                            ifdian.Supporter = supporter;
+                            break;
+                        }
+                        catch
+                        {
+                            
+                        }
+                    }
+                }
+                finally
+                {
                     profileService.UpdateIfdianName();
                     await profileService.SaveIfdian();
-                }
-                catch
-                {
-                    
                 }
             }
 
@@ -144,24 +156,28 @@ namespace MiyakoCarryService.Server
 
                 var currentVersion = configService.GetClientVersion();
                 using var httpClient = new HttpClient();
+                var proxyUrl = new List<string>(){"https://raw.githubusercontent.com/himesamanoyume/himesamanoyume/", "https://cdn.jsdelivr.net/gh/himesamanoyume/himesamanoyume@", "https://github.tsukiyukimiyako.top/https://raw.githubusercontent.com/himesamanoyume/himesamanoyume/"};
+                var checkUpdateUrl = "refs/heads/main/MiyakoCarryService.md";
                 try
                 {
-                    // 这是为了方便中国大陆网络环境无法访问github的妥协方式
-                    var data = await httpClient.GetStringAsync("https://gitee.com/himesamanoyume/miyakocarryservice/raw/master/README.md");
-
-                    var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.1.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
-                    var match = versionPattern.Match(data);
-                    if (match.Success)
+                    foreach (var url in proxyUrl)
                     {
-                        var latestVersion = new System.Version(match.Groups[1].Value.Trim());
-                        if (latestVersion.CompareTo(currentVersion) > 0)
+                        var data = await httpClient.GetStringAsync(url + checkUpdateUrl);
+                        var versionPattern = new Regex(@"<p[^>]*id=""Mcs4.1.XLatestVersion""[^>]*>([\s\S]*?)<\/p>", RegexOptions.IgnoreCase);
+                        var match = versionPattern.Match(data);
+                        if (match.Success)
                         {
-                            configService.UpdateLatestVersion(latestVersion);
-                            logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
+                            var latestVersion = new System.Version(match.Groups[1].Value.Trim());
+                            if (latestVersion.CompareTo(currentVersion) > 0)
+                            {
+                                configService.UpdateLatestVersion(latestVersion);
+                                logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
+                            }
+                            break;
                         }
                     }
                 }
-                catch// (Exception e)
+                catch // (System.Exception e)
                 {
                     // logger.Info($"检查更新失败: {e.Message}");
                 }
