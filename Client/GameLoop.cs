@@ -706,8 +706,8 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.95f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
-            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 10f;
-            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
+            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 5f;
+            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 5f;
             settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = 100f;
             settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 50f;
 
@@ -743,7 +743,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
             settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
-            settings.FileSettings.Mind.REVENGE_TO_GROUP = true;
+            settings.FileSettings.Mind.REVENGE_TO_GROUP = false;
             settings.FileSettings.Mind.IGNORE_TRAP = false;
             settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
             settings.FileSettings.Mind.CHACE_TO_DEACTIVATE = 100f;

@@ -973,7 +973,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool IsEnemyPosLost()
         {
-            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 20f)
+            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
             {
                 BotOwner.Memory.GoalEnemy = null;
                 return true;

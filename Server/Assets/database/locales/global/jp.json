@@ -210,5 +210,9 @@
     "Mcs/ReportAboutSelfCommand TargetName": "Command carry service player to report own health and supply status",
     "Mcs/TeamReportAboutSelfCommand Name": "Team Report Self Status",
     "Mcs/TeamReportAboutSelfCommand TargetName": "Command all carry service players to report own health and supply status",
-    "Mcs/Mine": "Current health: {0}, at least {1} bullets remaining."
+    "Mcs/Mine": "Current health: {0}, at least {1} bullets remaining.",
+    "Mcs/ClearAreaCommand Name": "Clear Area",  
+    "Mcs/ClearAreaCommand TargetName": "Command carry service player to clear the surrounding area of a specified location",  
+    "Mcs/TeamClearAreaCommand Name": "Team Clear Area",  
+    "Mcs/TeamClearAreaCommand TargetName": "All carry service players clear the surrounding area of a specified location"
 }
