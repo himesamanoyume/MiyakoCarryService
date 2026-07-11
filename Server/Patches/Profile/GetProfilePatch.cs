@@ -7,6 +7,7 @@ using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Servers;
+using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace MiyakoCarryService.Server.Patches.Profile
 {
@@ -25,16 +26,19 @@ namespace MiyakoCarryService.Server.Patches.Profile
         private static IServiceProvider ServiceProvider;
 
         private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static ICloner Cloner { get => field ??= ServiceProvider.GetService<ICloner>(); }
 
-        [PatchPrefix]  
-        public static bool Prefix(MongoId sessionId, ref SptProfile __result)  
-        {  
-            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))  
-            {  
-                __result = ProfileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);  
+        [PatchPrefix]
+        public static bool Prefix(MongoId sessionId, ref SptProfile __result)
+        {
+            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))
+            {
+                var mcsBotPlayerFullProfile = ProfileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);
+                var mcsBotPlayerFullProfileClone = Cloner.Clone(mcsBotPlayerFullProfile);
+                __result = mcsBotPlayerFullProfileClone;
                 return false;
-            }  
-            return true;  
+            }
+            return true;
         }
     }
 }
