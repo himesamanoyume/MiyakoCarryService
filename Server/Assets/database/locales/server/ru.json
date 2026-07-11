@@ -6,7 +6,7 @@
     "Mcs/FailedLoadMcsPlayerProfile": "Не удалось загрузить профиль игрока Mcs.",
     "Mcs/AccountidIsInvaild": "Идентификатор аккаунта {0} недействителен",
     "Mcs/MiyakoTraderOrderDescription": "Информация о заказе:\nКоличество наёмников: {0}\nТип наёмника: {1}\nУровень обслуживания: {2}\nДлительность: {3} час(ов)\nПовышение цены: {4}%",
-    "Mcs/MiyakoTraderTicketDescription": "Ticket information:\nExemption: {0}%",
+    "Mcs/MiyakoTraderTicketDescription": "Информация билета:\nВычеты: {0}%",
     "Mcs/MiyakoTraderSubCommand": "Префикс перед командой {0}:\n{1}",
     "Mcs/MiyakoTraderAvailableCommandsPrefix": "Доступные команды для \"{0}\" ",
     "Mcs/SpawnTypeCommon": "ЧВК",
