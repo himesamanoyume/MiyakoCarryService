@@ -210,5 +210,9 @@
     "Mcs/ReportAboutSelfCommand TargetName": "Приказ наёмнику, чтобы тот сообщил о своем состоянии и запасах",
     "Mcs/TeamReportAboutSelfCommand Name": "Команда доложите статус",
     "Mcs/TeamReportAboutSelfCommand TargetName": "Прикажите всем наёмникам, сообщить о своем состоянии здоровья и наличии припасов",
-    "Mcs/Mine": "Здоровье: {0}, по крайней мере {1} оставшиеся патроны."
+    "Mcs/Mine": "Здоровье: {0}, по крайней мере {1} оставшиеся патроны.",
+    "Mcs/ClearAreaCommand Name": "Clear Area",  
+    "Mcs/ClearAreaCommand TargetName": "Command carry service player to clear the surrounding area of a specified location",  
+    "Mcs/TeamClearAreaCommand Name": "Team Clear Area",  
+    "Mcs/TeamClearAreaCommand TargetName": "All carry service players clear the surrounding area of a specified location"
 }

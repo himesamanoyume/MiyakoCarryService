@@ -26,6 +26,9 @@ namespace MiyakoCarryService.Client.Datas
         public Vector3? TargetPos = null;
         public string ProxyTargetId = null;
         public LootData LootingTarget = null;
+        public List<Vector3> ClearAreaPoints = null;  
+        public int ClearAreaIndex = 0;  
+        public float ClearAreaLookAroundUntil = 0f;
         public bool IsLooting
         {
             get => field;

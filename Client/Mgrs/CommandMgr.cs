@@ -101,6 +101,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, DropTargetLootCommandAction, mcsBotPlayers);
             menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, true));
             menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
+            menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ClearAreaCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayers);
 
             CommandUtils.Apply(EMenuId.Team.ToString(), menu, mcsBotPlayers);
@@ -119,6 +120,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterSubMenu(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
             menu.RegisterSubMenu(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, false));
             menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers));
+            menu.RegisterCommand(Locales.CLEARAREACOMMAND_NAME, Locales.CLEARAREACOMMAND_TARGETNAME, ClearAreaCommandAction, mcsBotPlayers);
             menu.RegisterCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ForceTeleportCommandAction, mcsBotPlayers);
 
             CommandUtils.Apply(EMenuId.Member.ToString(), menu, mcsBotPlayers);
@@ -882,6 +884,87 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
                 }
             }
+        }
+
+        public virtual void ClearAreaCommandAction(Player[] mcsBotPlayers, params object[] args)
+        {
+            if (!Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var raycastHit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask))
+            {
+                CommandUtils.CloseCommandMenuAction();
+                return;
+            }
+            var center = raycastHit.point;
+
+            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            {
+                foreach (var mcsBotPlayer in mcsBotPlayers)
+                {
+                    if (mcsBotPlayer == null || !mcsBotPlayer.HealthController.IsAlive)
+                    {
+                        continue;
+                    }
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
+                    {
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ECommandPacketType.ClearArea.ToString(),
+                        Position = center
+                    });
+                }
+                CommandUtils.CloseCommandMenuAction();
+                return;
+            }
+
+            var alive = mcsBotPlayers.Where(p => p != null && p.HealthController.IsAlive).ToList();
+            if (alive.Count == 0)
+            {
+                CommandUtils.CloseCommandMenuAction();
+                return;
+            }
+
+            var startFrom = alive[0].Position;
+            var fullRoute = Tools.GenerateClearAreaWaypoints(center, 30f, startFrom);
+            if (fullRoute.Count == 0)
+            {
+                CommandUtils.CloseCommandMenuAction();
+                return;
+            }
+
+            var segments = Tools.SplitRoute(fullRoute, alive.Count);
+
+            for (int i = 0; i < alive.Count; i++)
+            {
+                var botOwner = alive[i].AIData.BotOwner;
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData == null)
+                {
+                    continue;
+                }
+
+                var seg = segments[i];
+                if (seg.Count == 0)
+                {
+                    continue;
+                }
+
+                if ((seg[seg.Count - 1] - botOwner.Position).sqrMagnitude
+                    < (seg[0] - botOwner.Position).sqrMagnitude)
+                {
+                    seg.Reverse();
+                }
+
+                mcsBotPlayerData.ClearAreaPoints = seg;
+                mcsBotPlayerData.ClearAreaIndex = 0;
+                mcsBotPlayerData.ClearAreaLookAroundUntil = 0f;
+                mcsBotPlayerData.TargetPos = seg[0];
+                mcsBotPlayerData.IsLooting = false;
+                mcsBotPlayerData.ProxyTargetId = null;
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldClearArea);
+                botOwner.Mover.LastTimePosChanged = Time.time;
+                botOwner.StopMove();
+                botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Going });
+            }
+
+            CommandUtils.CloseCommandMenuAction();
         }
 
         #endregion

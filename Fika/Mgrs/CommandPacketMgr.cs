@@ -43,6 +43,7 @@ namespace MiyakoCarryService.Fika.Mgrs
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.InteractionProxyAction.ToString(), HandleProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.EndProxyAction.ToString(), HandleEndProxyAction);
             CommandPacketUtils.RegisterHandleAction(ECommandPacketType.DropTargetLoot.ToString(), HandleDropTargetLoot);
+            CommandPacketUtils.RegisterHandleAction(ECommandPacketType.ClearArea.ToString(), HandleClearArea);
         }
 
         public void HandleCommandPacket(CommandPacket packet, Action<CommandPacket, FikaPlayer, FikaPlayer> action)
@@ -250,7 +251,6 @@ namespace MiyakoCarryService.Fika.Mgrs
             var healthStates = new List<HealthState>();
             foreach (var activeEffect in allActiveEffects)
             {
-                
                 if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
                 {
                     continue;
@@ -378,6 +378,67 @@ namespace MiyakoCarryService.Fika.Mgrs
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
             }
+        }
+
+        public virtual void HandleClearArea(CommandPacket packet, FikaPlayer mcsLeadPlayer, FikaPlayer mcsBotPlayer)
+        {
+            if (!packet.Position.HasValue)
+            {
+                return;
+            }
+
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return;
+            }
+
+            var members = McsMgrApi.GetMgr<McsMgr>()
+                .GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayer.ProfileId)
+                .Where(p => p != null && p.HealthController.IsAlive)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            var total = members.Count;
+            var index = members.FindIndex(p => p.ProfileId == mcsBotPlayer.ProfileId);
+            if (total == 0 || index < 0)
+            {
+                return;
+            }
+
+            var startFrom = members[0].Position;
+            var fullRoute = Tools.GenerateClearAreaWaypoints(packet.Position.Value, 30f, startFrom);
+            if (fullRoute.Count == 0)
+            {
+                return;
+            }
+
+            var segments = Tools.SplitRoute(fullRoute, total);
+            var seg = segments[index];
+            if (seg.Count == 0)
+            {
+                return;
+            }
+
+            if (seg[seg.Count - 1].McsSqrDistance(botOwner.Position) < seg[0].McsSqrDistance(botOwner.Position))
+            {
+                seg.Reverse();
+            }
+
+            botOwner.TalkMsg(new McsMsg 
+            { 
+                PhraseTrigger = EPhraseTrigger.Going 
+            });
+            mcsBotPlayerData.ClearAreaPoints = seg;
+            mcsBotPlayerData.ClearAreaIndex = 0;
+            mcsBotPlayerData.ClearAreaLookAroundUntil = 0f;
+            mcsBotPlayerData.TargetPos = seg[0];
+            mcsBotPlayerData.IsLooting = false;
+            mcsBotPlayerData.ProxyTargetId = null;
+            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldClearArea);
+            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.StopMove();
         }
     }
 }
