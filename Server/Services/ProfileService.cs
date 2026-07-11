@@ -317,13 +317,13 @@ namespace MiyakoCarryService.Server.Services
         {
             if (_mcsInventoryModeIds.TryGetValue(mcsLeadPlayerId, out var intMcsAid))
             {
-                var mcsBotPlayerFullProfle = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
-                var mcsBotPlayerFullProfleClone = cloner.Clone(mcsBotPlayerFullProfle)!;
+                var mcsBotPlayerFullProfile = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
+                var mcsBotPlayerFullProfileClone = cloner.Clone(mcsBotPlayerFullProfile)!;
 
                 var output = new List<PmcData>
                 {
-                    mcsBotPlayerFullProfleClone.CharacterData!.PmcData!,
-                    mcsBotPlayerFullProfleClone.CharacterData!.ScavData!
+                    mcsBotPlayerFullProfileClone.CharacterData!.PmcData!,
+                    mcsBotPlayerFullProfileClone.CharacterData!.ScavData!
                 };
 
                 return output;
