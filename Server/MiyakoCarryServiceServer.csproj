@@ -24,11 +24,11 @@
       </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SPTarkov.Common" Version="4.1.0-pre.202607050451" />
-    <PackageReference Include="SPTarkov.DI" Version="4.1.0-pre.202607050451" />
-    <PackageReference Include="SPTarkov.Reflection" Version="4.1.0-pre.202607050451" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.1.0-pre.202607050451" />
-    <PackageReference Include="SPTarkov.Server.Web" Version="4.1.0-pre.202607050451" />
+    <PackageReference Include="SPTarkov.Common" Version="4.1.0-pre.202607101819" />
+    <PackageReference Include="SPTarkov.DI" Version="4.1.0-pre.202607101819" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.1.0-pre.202607101819" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.1.0-pre.202607101819" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.1.0-pre.202607101819" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
     <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)')" />
