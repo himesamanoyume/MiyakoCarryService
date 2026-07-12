@@ -17,8 +17,6 @@ using MiyakoCarryService.Client.Patches.Events;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
-using MiyakoCarryService.Fika.Utils;
-using MiyakoCarryService.Fika.Mgrs;
 using BepInEx;
 using System.Linq;
 
@@ -34,7 +32,6 @@ namespace MiyakoCarryService.Fika
         private McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
         private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
-        private CommandPacketMgr CommandPacketMgr => McsMgrApi.GetMgr<CommandPacketMgr>();
         private List<ModulePatch> _patches = new();
         public const string McsFikaGUID = "top.himesamanoyume.miyakocarryservice.fika";
 #if DEBUG
@@ -56,8 +53,6 @@ namespace MiyakoCarryService.Fika
             {
                 patch.Enable();
             }
-
-            BaseMgr.Enable(typeof(CommandPacketMgr));
 
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             McsEventApi.Subscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket, this);
@@ -139,10 +134,42 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            var action = CommandPacketUtils.GetHandleAction(packet.CommandType);
-            if (action != null)
+            HandleCommandPacket(packet);
+        }
+
+        public void HandleCommandPacket(CommandPacket packet)
+        {
+            if (!FikaBackendUtils.IsServer)
             {
-                CommandPacketMgr.HandleCommandPacket(packet, action);
+                return;
+            }
+
+            var fikaInstance = Singleton<IFikaNetworkManager>.Instance;
+
+            fikaInstance.CoopHandler.Players.TryGetValue(packet.McsLeadPlayerNetId, out FikaPlayer mcsLeadPlayer);
+
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+
+            if (fikaInstance.CoopHandler.Players.TryGetValue(packet.McsBotPlayerNetId, out FikaPlayer mcsBotPlayer))
+            {
+                if (!mcsBotPlayer.HealthController.IsAlive)
+                {
+                    return;
+                }
+
+                McsCommandApi.Execute(new McsCommandContext
+                {
+                    CommandType = packet.CommandType,
+                    Position = packet.Position,
+                    TargetId = packet.TargetId,
+                    AimingBodyPartType = packet.AimingBodyPartType,
+                    McsLeadPlayer = mcsLeadPlayer,
+                    McsBotPlayer = mcsBotPlayer,
+                    Extensions = packet.Extensions
+                });
             }
         }
 
