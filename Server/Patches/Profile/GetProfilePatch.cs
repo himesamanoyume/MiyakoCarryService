@@ -33,9 +33,7 @@ namespace MiyakoCarryService.Server.Patches.Profile
         {
             if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))
             {
-                var mcsBotPlayerFullProfile = ProfileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);
-                var mcsBotPlayerFullProfileClone = Cloner.Clone(mcsBotPlayerFullProfile);
-                __result = mcsBotPlayerFullProfileClone;
+                __result = ProfileController.GetMcsBotPlayerFullProfileForInventoryMode(sessionId);;
                 return false;
             }
             return true;
