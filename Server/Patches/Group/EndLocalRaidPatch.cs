@@ -28,6 +28,8 @@ namespace MiyakoCarryService.Server.Patches.Group
 
         private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
 
+        private static RaidController RaidController { get => field ??= ServiceLocator.ServiceProvider.GetService<RaidController>(); }
+
         [PatchPrefix]
         public static void Prefix(MongoId sessionId, EndLocalRaidRequestData request)
         {

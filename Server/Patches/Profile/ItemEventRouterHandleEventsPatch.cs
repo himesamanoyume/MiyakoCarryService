@@ -33,6 +33,8 @@ namespace MiyakoCarryService.Server.Patches.Profile
         private static JsonUtil JsonUtil { get => field ??= ServiceProvider.GetService<JsonUtil>(); }
         private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceProvider.GetService<HttpResponseUtil>(); }
 
+        private static ProfileService ProfileService { get => field ??= ServiceLocator.ServiceProvider.GetService<ProfileService>(); }
+
         [PatchPostfix]
         public static void Postfix(string url, ItemEventRouterRequest info, MongoId sessionID,
             CancellationToken cancellationToken, ref ValueTask<string> __result)
