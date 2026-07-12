@@ -60,6 +60,14 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
+        public static void RegisterCommandHandler(string commandTypeName, McsCommandHandler handler)
+        {
+            CommandUtils.RegisterCommandHandler(commandTypeName, handler);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public static void ClearGamePlayerOwner()
         {
             CommandUtils.ClearGamePlayerOwner();
