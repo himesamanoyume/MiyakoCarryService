@@ -17,23 +17,23 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotBewarePlantedMine __instance)
         {
-            if (!__instance.BotOwner_0.IsMcsBotPlayer)
+            if (!__instance.botOwner_0.IsMcsBotPlayer)
             {
                 return true;
             }
 
-            if (__instance.NextCheck > Time.time)
+            if (__instance._nextCheck > Time.time)
             {
                 return false;
             }
-            var nearestMines = __instance.BotOwner_0.VoxelesPersonalData.CurVoxel.GetNearestMines();
+            var nearestMines = __instance.botOwner_0.VoxelesPersonalData.CurVoxel.GetNearestMines();
             if (nearestMines.Count == 0)
             {
                 return false;
             }
-            if (!__instance.BotOwner_0.HasPathAndNotComplete)
+            if (!__instance.botOwner_0.HasPathAndNotComplete)
             {
-                __instance.NextCheck = Time.time + 0.5f;
+                __instance._nextCheck = Time.time + 0.5f;
                 return false;
             }
             var max = float.MaxValue;
@@ -49,8 +49,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     continue;
                 }
 
-                var vector = nearestMine.Pos - __instance.BotOwner_0.Position;
-                if (Vector3.Dot(vector, __instance.BotOwner_0.LookDirection) >= 0f && Mathf.Abs(vector.y) <= 1f)
+                var vector = nearestMine.Pos - __instance.botOwner_0.Position;
+                if (Vector3.Dot(vector, __instance.botOwner_0.LookDirection) >= 0f && Mathf.Abs(vector.y) <= 1f)
                 {
                     float sqrMagnitude = vector.sqrMagnitude;
                     if (sqrMagnitude < max)
@@ -71,17 +71,16 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return false;
             }
             var vector2 = (plantedMineAIInfo.Pos + plantedMineAIInfo2.Pos) * 0.5f;
-            BotCurrentPathAbstractClass botCurrentPathAbstractClass;
-            if (__instance.BotOwner_0.Mover.TryRelacePathAround(vector2, list, out botCurrentPathAbstractClass))
+            if (__instance.botOwner_0.Mover.TryRelacePathAround(vector2, list, out var botCurrentPathAbstractClass))
             {
-                __instance.NextCheck = Time.time + 4f;
+                __instance._nextCheck = Time.time + 4f;
                 return false;
             }
-            if (plantedMineAIInfo.CanTakeToDeactivate(__instance.BotOwner_0.Id) && __instance.BotOwner_0.Mover.IsPointOnCurrentWay(plantedMineAIInfo.Pos, 2.5f))
+            if (plantedMineAIInfo.CanTakeToDeactivate(__instance.botOwner_0.Id) && __instance.botOwner_0.Mover.IsPointOnCurrentWay(plantedMineAIInfo.Pos, 2.5f))
             {
-                __instance.BotOwner_0.BewarePlantedMine.SetMineToDeactivate(plantedMineAIInfo);
+                __instance.botOwner_0.BewarePlantedMine.SetMineToDeactivate(plantedMineAIInfo);
             }
-            __instance.NextCheck = Time.time + 2f;
+            __instance._nextCheck = Time.time + 2f;
             return false;
         }
     }

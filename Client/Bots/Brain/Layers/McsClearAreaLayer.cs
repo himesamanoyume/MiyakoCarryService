@@ -49,15 +49,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 McsBotPlayerData.TargetPos = targetPos;
 
                 var arrived = BotOwner.Position.McsSqrDistance(targetPos) <= ARRIVE_DIST * ARRIVE_DIST;
-                var stuck = BotOwner.Mover.LastTimePosChanged + STUCK_TIMEOUT < time;
+                var stuck = BotOwner.Mover._lastTimePosChanged + STUCK_TIMEOUT < time;
 
                 if (arrived || stuck)
                 {
                     if (arrived && LOOK_AROUND_TIME > 0f)
                     {
-                        if (McsBotPlayerData.ClearAreaLookAroundUntil <= 0f && GClass856.IsTrue100(30f))
+                        if (McsBotPlayerData.ClearAreaLookAroundUntil <= 0f && MyExtensions.IsTrue100(30f))
                         {
-                            _isTurnRight = GClass856.RandomSing();
+                            _isTurnRight = MyExtensions.RandomSing();
                             McsBotPlayerData.ClearAreaLookAroundUntil = time + LOOK_AROUND_TIME;
                             BotOwner.StopMove();
                         }
@@ -73,7 +73,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     McsBotPlayerData.ClearAreaLookAroundUntil = 0f;
                     McsBotPlayerData.ClearAreaIndex++;
-                    BotOwner.Mover.LastTimePosChanged = time;
+                    BotOwner.Mover._lastTimePosChanged = time;
 
                     if (McsBotPlayerData.ClearAreaIndex >= McsBotPlayerData.ClearAreaPoints.Count)
                     {

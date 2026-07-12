@@ -115,14 +115,14 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers);
             menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, true));
             menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
             menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
@@ -143,7 +143,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterSubMenu(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, false));
             menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers));
             menu.RegisterCommand(Locales.CLEARAREACOMMAND_NAME, Locales.CLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
@@ -301,7 +301,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is TraderControllerClass traderControllerClass)
+                if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is ItemController traderControllerClass)
                 {
                     var inventoryActionClass = new InventoryActionClass
                     {
@@ -325,7 +325,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     PhraseTrigger = EPhraseTrigger.Negative,
                 });
             }
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
@@ -352,7 +352,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     PhraseTrigger = EPhraseTrigger.Negative
                 });
             }
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
@@ -408,7 +408,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                var effectType = GClass3058.EffectName(activeEffect);
+                var effectType = HealthHelper.EffectName(activeEffect);
                 if (string.IsNullOrEmpty(effectType))
                 {
                     continue;
@@ -502,7 +502,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.TargetPos = pos.Value;
                 mcsBotPlayerData.ProxyTargetId = null;
             }
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
         }
 
@@ -570,9 +570,9 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayer.Teleport(mcsBotPlayerData.LeadPlayer.Position, true);
             }
             var playerPosition = mcsBotPlayer.Position;
-            botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-            botOwner.Mover.LastGoodCastPointTime = Time.time;
-            botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+            botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
+            botOwner.Mover._lastGoodCastPointTime = Time.time;
+            botOwner.Mover._prevPosLinkedTime = 0f;
             botOwner.Mover.SetPlayerToNavMesh(playerPosition);
             botOwner.Mover.RecalcWay();
             botOwner.Mover.Pause = true;
@@ -599,7 +599,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     PhraseTrigger = EPhraseTrigger.Negative,
                 });
             }
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
@@ -636,7 +636,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.TargetPos = null;
                 }
             }
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
 
             if (mcsBotPlayerData == null)
@@ -800,7 +800,7 @@ namespace MiyakoCarryService.Client.Mgrs
             mcsBotPlayerData.IsLooting = false;
             mcsBotPlayerData.ProxyTargetId = null;
             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldClearArea);
-            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
         }
 
