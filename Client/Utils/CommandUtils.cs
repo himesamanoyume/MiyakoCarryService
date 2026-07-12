@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -18,6 +20,38 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly Stack<Action<McsCommandMenu>> _menuStack = new();
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
+        public delegate void McsCommandHandler(McsCommandContext ctx);
+
+        private static ConcurrentDictionary<string, McsCommandHandler> _handlersMap;
+
+        public static void RegisterCommandHandler(string commandTypeName, McsCommandHandler handler)
+        {
+            if (_handlersMap == null)
+            {
+                _handlersMap = new();
+            }
+
+            _handlersMap.AddOrUpdate(commandTypeName, handler,
+                (_commandPacketTypeName, oldHandler) =>
+                {
+                    oldHandler = handler;
+                    return oldHandler;
+                }
+            );
+        }
+
+        public static void Execute(McsCommandContext ctx)
+        {
+            if (ctx?.CommandType == null)
+            {
+                return;
+            }
+            if (_handlersMap.TryGetValue(ctx.CommandType, out var handler))
+            {
+                handler(ctx);
+            }
+        }
+
         public static void ClearGamePlayerOwner()
         {
             GamePlayerOwner = null;
@@ -28,7 +62,7 @@ namespace MiyakoCarryService.Client.Utils
             _menuStack.Clear();
         }
 
-        public static void Register(string menuKey, Action<McsCommandMenu, Player[]> menu)
+        public static void RegisterCommandMenu(string menuKey, Action<McsCommandMenu, Player[]> menu)
         {
             if (string.IsNullOrEmpty(menuKey) || menu == null)
             {
@@ -173,7 +207,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 else
                 {
-                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => entry.Action?.Invoke(entry.McsBotPlayers, entry.Args)));
+                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver)));
                 }
             }
 
@@ -183,6 +217,60 @@ namespace MiyakoCarryService.Client.Utils
         public static Player[] GetAliveMembers()
         {
             return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
+        }
+
+        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver)
+        {
+            var data = resolver?.Invoke();
+            if (resolver != null && data == null)
+            {
+                CloseCommandMenuAction();
+                return;
+            }
+
+            ForEachAlive(mcsBotPlayers, mcsBotPlayer =>
+            {
+                var ctx = new McsCommandContext
+                {
+                    CommandType = commandType,
+                    Position = data?.Position,
+                    TargetId = data?.TargetId,
+                    AimingBodyPartType = data?.AimingBodyPartType ?? default,
+                    Extensions = data?.Extensions ?? new(),
+                    McsBotPlayer = mcsBotPlayer
+                };
+
+                if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+                {
+                    EventMgr.Notify(new CommandMgrHandleFikaEvent
+                    {
+                        McsBotPlayer = mcsBotPlayer,
+                        CommandPacketType = ctx.CommandType,
+                        Position = ctx.Position,
+                        TargetId = ctx.TargetId,
+                        AimingBodyPartType = ctx.AimingBodyPartType,
+                        Extensions = ctx.Extensions
+                    });
+                }
+                else
+                {
+                    ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                    Execute(ctx);
+                }
+            });
+            CloseCommandMenuAction();
+        }
+
+        public static void ForEachAlive(Player[] mcsBotPlayers, Action<Player> action)
+        {
+            foreach (var player in mcsBotPlayers)
+            {
+                if (player == null || !player.HealthController.IsAlive)
+                {
+                    continue;
+                }
+                action(player);
+            }
         }
     }
 }

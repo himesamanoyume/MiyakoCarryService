@@ -4,25 +4,25 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Models
 {
-    public delegate void McsCommandAction(Player[] mcsBotPlayers, params object[] args);
+    public delegate McsCommandContext McsCommandResolver();  
 
     public sealed class McsCommandMenu
     {
         public readonly List<McsCommandEntry> Entries = new();
 
         public McsCommandMenu RegisterCommand(
-            string name, string targetName,
-            McsCommandAction action, Player[] mcsBotPlayers,
-            Func<bool> disabled = null, params object[] args)
+            string name, string targetName, 
+            string commandType, Player[] mcsBotPlayers,
+            Func<bool> disabled = null, McsCommandResolver resolver = null)
         {
             Entries.Add(new McsCommandEntry
             {
                 Name = name,
                 TargetName = targetName,
                 DisabledPredicate = disabled,
-                Action = action,
+                CommandType = commandType,
                 McsBotPlayers = mcsBotPlayers,
-                Args = args ?? Array.Empty<object>()
+                Resolver = resolver,  
             });
             return this;
         }
@@ -48,9 +48,9 @@ namespace MiyakoCarryService.Client.Models
             public Func<bool> DisabledPredicate;
             public bool Disabled => DisabledPredicate?.Invoke() ?? false;
 
-            public McsCommandAction Action;
+            public string CommandType;
             public Player[] McsBotPlayers;
-            public object[] Args;
+            public McsCommandResolver Resolver;
 
             public Action<McsCommandMenu> BuildSubMenu;
 
