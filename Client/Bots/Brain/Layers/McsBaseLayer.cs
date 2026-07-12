@@ -1471,7 +1471,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var flag = false;
 
             var sqrDistanceToTarget = startPos.McsSqrDistance(targetPos);
-            var sampleRadius = sqrDistanceToTarget > 50f * 50f ? 5f : 1f;
+            var sampleRadius = sqrDistanceToTarget > 50f * 50f ? 5f : 1.5f;
 
             if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
             {
@@ -1500,6 +1500,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], null);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                     BotOwner.TalkMsg(new McsMsg
