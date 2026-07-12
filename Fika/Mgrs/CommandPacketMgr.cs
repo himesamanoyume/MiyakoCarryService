@@ -80,6 +80,11 @@ namespace MiyakoCarryService.Fika.Mgrs
             botOwner.StopMove();
             botOwner.Mover.AllowTeleport();
             mcsBotPlayer.Teleport(mcsLeadPlayer.Position, true);
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.SetDecision(null, Decisions.ShouldTeleport);
+            }
             var playerPosition = mcsBotPlayer.Position;
             botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
             botOwner.Mover._lastGoodCastPointTime = Time.time;

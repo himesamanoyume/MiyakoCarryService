@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (GClass856.IsTrue100(25f) && arrived)
                     {
-                        if (McsBotPlayerData.ClearAreaLookAroundUntil <= 0f)
+                        if (LOOK_AROUND_TIME > 0f && McsBotPlayerData.ClearAreaLookAroundUntil <= 0f)
                         {
                             McsBotPlayerData.ClearAreaLookAroundUntil = time + LOOK_AROUND_TIME;
                             BotOwner.StopMove();

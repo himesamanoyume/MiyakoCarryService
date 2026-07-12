@@ -3,6 +3,7 @@ namespace MiyakoCarryService.Client.Utils
 {
     public static class Decisions
     {
+        public const string ShouldTeleport = "Mcs.ShouldTeleport";
         public const string ShouldEscort = "Mcs.ShouldEscort";
         public const string ShouldExfil = "Mcs.ShouldExfil";
         public const string ShouldGoToPoint = "Mcs.ShouldGoToPoint";

@@ -184,6 +184,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
+            if (McsBotPlayerData != null && McsBotPlayerData.HasDecision(Decisions.ShouldTeleport))
+            {
+                McsBotPlayerData.RemoveDecision(Decisions.ShouldTeleport);
+                UpdateLeadNearMoveTarget(McsBotPlayerData.LeadPlayer.Position, out float nextTime);
+                if (_currentMoveTarget.HasValue)
+                {
+                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                }
+            }
+
             return true;
         }
     }

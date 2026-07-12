@@ -711,7 +711,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                     if (mcsBotPlayerData != null)
                     {
-                        mcsBotPlayerData.SetDecision();
+                        mcsBotPlayerData.SetDecision(null, Decisions.ShouldTeleport);
                         mcsBotPlayerData.IsLooting = false;
                         mcsBotPlayerData.TargetPos = null;
                         mcsBotPlayerData.ProxyTargetId = null;
