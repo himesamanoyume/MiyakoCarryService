@@ -11,8 +11,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     public class McsClearAreaLayer : McsBaseLayer
     {
         private const float ARRIVE_DIST = 2.5f;
-        private const float LOOK_AROUND_TIME = 1.5f;
+        private const float LOOK_AROUND_TIME = 2f;
         private const float STUCK_TIMEOUT = 8f;
+        public int _isTurnRight = 1;
 
         public McsClearAreaLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -52,17 +53,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (arrived || stuck)
                 {
-                    if (GClass856.IsTrue100(25f) && arrived)
+                    if (arrived && LOOK_AROUND_TIME > 0f)
                     {
-                        if (LOOK_AROUND_TIME > 0f && McsBotPlayerData.ClearAreaLookAroundUntil <= 0f)
+                        if (McsBotPlayerData.ClearAreaLookAroundUntil <= 0f && GClass856.IsTrue100(30f))
                         {
+                            _isTurnRight = GClass856.RandomSing();
                             McsBotPlayerData.ClearAreaLookAroundUntil = time + LOOK_AROUND_TIME;
                             BotOwner.StopMove();
                         }
 
                         if (time < McsBotPlayerData.ClearAreaLookAroundUntil)
                         {
-                            var yaw = time * 90f % 360f;
+                            var yaw = time * 90f % 360f * _isTurnRight;
                             var dir = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
                             BotOwner.Steering.LookToDirection(dir, 120f);
                             return new Action(typeof(HoldPositionLogic), "Mcs:ClearAreaLookAround");
