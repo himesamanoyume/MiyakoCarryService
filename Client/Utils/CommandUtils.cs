@@ -23,8 +23,6 @@ namespace MiyakoCarryService.Client.Utils
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static NavMeshTriangulation? _cachedTriangulation;
 
-        public delegate void McsCommandHandler(McsCommandContext ctx);
-
         private static ConcurrentDictionary<string, McsCommandHandler> _handlersMap;
 
         public static void RegisterCommandHandler(string commandTypeName, McsCommandHandler handler)

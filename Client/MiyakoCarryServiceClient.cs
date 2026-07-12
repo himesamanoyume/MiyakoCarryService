@@ -361,6 +361,7 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC => Locales.BASIC,
                 EConfigType.COMMAND => Locales.COMMAND,
                 EConfigType.PLAYER => Locales.PLAYER,
+                EConfigType.AI => Locales.AI,
                 EConfigType.DEBUG or _ => Locales.DEBUG
             };
             return Register(configTypeText, (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);

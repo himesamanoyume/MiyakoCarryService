@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Models
 {
+    public delegate void McsCommandHandler(McsCommandContext ctx);
+    
     public sealed class McsCommandContext
     {
         public Player McsLeadPlayer;
