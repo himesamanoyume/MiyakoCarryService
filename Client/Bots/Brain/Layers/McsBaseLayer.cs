@@ -1340,7 +1340,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 50f);
             _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
         }
@@ -1439,7 +1439,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 30f);
             _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
         }
