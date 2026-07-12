@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidStarted();
             CommandUtils.ClearGamePlayerOwner();
             CommandUtils.ClearMenuStack();
+            CommandUtils.NavMeshCache();
         }
 
         public override void OnRaidEnded()
@@ -54,6 +55,7 @@ namespace MiyakoCarryService.Client.Mgrs
             base.OnRaidEnded();
             CommandUtils.ClearGamePlayerOwner();
             CommandUtils.ClearMenuStack();
+            CommandUtils.ClearNavMeshCache();
         }
 
         void Update()
@@ -112,15 +114,15 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,  
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)  
+            menu.RegisterCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
+            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers);
             menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, true));
             menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
-            menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,  
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)  
+            menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
+            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
@@ -140,8 +142,8 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterSubMenu(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
             menu.RegisterSubMenu(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, false));
             menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers));
-            menu.RegisterCommand(Locales.CLEARAREACOMMAND_NAME, Locales.CLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,  
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)  
+            menu.RegisterCommand(Locales.CLEARAREACOMMAND_NAME, Locales.CLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
+            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
@@ -725,12 +727,50 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 return;
             }
+            var center = ctx.Position.Value;
+            var leadId = ctx.McsLeadPlayer.ProfileId;
+            var mcsAILeadPlayer = mcsBotPlayerData.McsAILeadPlayer;
+            if (mcsAILeadPlayer == null)
+            {
+                return;
+            }
 
-            var members = MgrAccessor.Get<McsMgr>()
-                .GetAllMcsSquadMembersByMcsLeadId(ctx.McsLeadPlayer.ProfileId)
-                .Where(p => p != null && p.HealthController.IsAlive)
-                .OrderBy(p => p.ProfileId)
-                .ToList();
+            List<Player> members;
+            List<List<Vector3>> segments;
+
+            if (mcsAILeadPlayer.ClearAreaCacheCenter == center
+                && Time.time - mcsAILeadPlayer.ClearAreaCacheTime < 1f
+                && mcsAILeadPlayer.ClearAreaCacheMembers != null
+                && mcsAILeadPlayer.ClearAreaCacheSegments != null)
+            {
+                members = mcsAILeadPlayer.ClearAreaCacheMembers;
+                segments = mcsAILeadPlayer.ClearAreaCacheSegments;
+            }
+            else
+            {
+                members = MgrAccessor.Get<McsMgr>()
+                    .GetAllAliveMcsSquadMembersByMcsLeadId(leadId)
+                    .Where(p => p != null).OrderBy(p => p.ProfileId).ToList();
+
+                if (members.Count == 0)
+                {
+                    return;
+                }
+
+                var startFrom = members[0].Position;
+                var fullRoute = CommandUtils.GenerateClearAreaWaypoints(center, 30f, startFrom);
+                if (fullRoute.Count == 0)
+                {
+                    return;
+                }
+
+                segments = CommandUtils.SplitRoute(fullRoute, members.Count);
+
+                mcsAILeadPlayer.ClearAreaCacheCenter = center;
+                mcsAILeadPlayer.ClearAreaCacheTime = Time.time;
+                mcsAILeadPlayer.ClearAreaCacheMembers = members;
+                mcsAILeadPlayer.ClearAreaCacheSegments = segments;
+            }
 
             var total = members.Count;
             var index = members.FindIndex(p => p.ProfileId == ctx.McsBotPlayer.ProfileId);
@@ -739,15 +779,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            var startFrom = members[0].Position;
-            var fullRoute = Tools.GenerateClearAreaWaypoints(ctx.Position.Value, 30f, startFrom);
-            if (fullRoute.Count == 0)
-            {
-                return;
-            }
-
-            var segments = Tools.SplitRoute(fullRoute, total);
-            var seg = segments[index];
+            var seg = new List<Vector3>(segments[index]);
             if (seg.Count == 0)
             {
                 return;

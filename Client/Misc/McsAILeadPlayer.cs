@@ -42,6 +42,11 @@ namespace MiyakoCarryService.Client.Misc
             McsLeadPlayer = player;
         }
 
+        public Vector3 ClearAreaCacheCenter;  
+        public float ClearAreaCacheTime;  
+        public List<Player> ClearAreaCacheMembers;  
+        public List<List<Vector3>> ClearAreaCacheSegments;
+
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public void CalcGoalEnemy()
