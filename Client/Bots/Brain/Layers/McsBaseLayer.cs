@@ -487,6 +487,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
+                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                    }
                     return true;
                 }
 
@@ -565,6 +570,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
+                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                    }
                     return true;
                 }
 
@@ -612,6 +622,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         PhraseTrigger = EPhraseTrigger.Regroup
                     });
+                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                    }
                     return true;
                 }
 
@@ -1083,6 +1098,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                 BotOwner.Mover.RecalcWay();
                 BotOwner.Mover.Pause = true;
+                UpdateCommonMoveTarget(BotOwner.PatrollingData.ExfiltrationData.CachedExfiltrationPoint.Position, out float nextTime);
+                if (_currentMoveTarget.HasValue)
+                {
+                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                }
                 return true;
             }
             return false;

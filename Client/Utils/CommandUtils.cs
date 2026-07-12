@@ -11,6 +11,8 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using TMPro;
+using UnityEngine;
+using UnityEngine.AI;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -19,6 +21,7 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly Dictionary<string, List<Action<McsCommandMenu, Player[]>>> _extensions = new();
         private static readonly Stack<Action<McsCommandMenu>> _menuStack = new();
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static NavMeshTriangulation? _cachedTriangulation;
 
         public delegate void McsCommandHandler(McsCommandContext ctx);
 
@@ -55,6 +58,16 @@ namespace MiyakoCarryService.Client.Utils
         public static void ClearGamePlayerOwner()
         {
             GamePlayerOwner = null;
+        }
+
+        public static void NavMeshCache()
+        {
+            _cachedTriangulation ??= NavMesh.CalculateTriangulation();
+        }
+
+        public static void ClearNavMeshCache()
+        {
+            _cachedTriangulation = null;
         }
 
         public static void ClearMenuStack()
@@ -271,6 +284,123 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 action(player);
             }
+        }
+
+        public static List<Vector3> GenerateClearAreaWaypoints(
+            Vector3 center, float radius, Vector3 startFrom,
+            float cellSize = 4f, float floorHeight = 3f, float verticalWeight = 8f)
+        {
+            var result = new List<Vector3>();
+
+            _cachedTriangulation ??= NavMesh.CalculateTriangulation();
+            var verts = _cachedTriangulation.Value.vertices;
+            if (verts == null || verts.Length == 0)
+            {
+                return result;
+            }
+
+            var sqrRadius = radius * radius;
+
+            var buckets = new Dictionary<(int, int, int), Vector3>();
+            foreach (var v in verts)
+            {
+                var dx = v.x - center.x;
+                var dz = v.z - center.z;
+                if (dx * dx + dz * dz > sqrRadius)
+                {
+                    continue;
+                }
+                var key = (
+                    Mathf.FloorToInt(v.x / cellSize),
+                    Mathf.FloorToInt(v.y / floorHeight),
+                    Mathf.FloorToInt(v.z / cellSize)
+                );
+                if (!buckets.ContainsKey(key))
+                {
+                    buckets[key] = v;
+                }
+            }
+            if (buckets.Count == 0)
+            {
+                return result;
+            }
+
+            var candidates = new List<Vector3>();
+            foreach (var p in buckets.Values)
+            {
+                if (NavMesh.SamplePosition(p, out var hit, 1.5f, NavMesh.AllAreas))
+                {
+                    var path = new NavMeshPath();
+                    if (NavMesh.CalculatePath(startFrom, hit.position, NavMesh.AllAreas, path) && path.status == NavMeshPathStatus.PathComplete)
+                    {
+                        candidates.Add(hit.position);
+                    }
+                }
+            }
+            if (candidates.Count == 0)
+            {
+                return result;
+            }
+
+            var remaining = new List<Vector3>(candidates);
+            var current = startFrom;
+            while (remaining.Count > 0)
+            {
+                int best = 0;
+                float bestCost = float.MaxValue;
+                for (int i = 0; i < remaining.Count; i++)
+                {
+                    var dx = remaining[i].x - current.x;
+                    var dy = remaining[i].y - current.y;
+                    var dz = remaining[i].z - current.z;
+                    var cost = dx * dx + dz * dz + verticalWeight * dy * dy;
+                    if (cost < bestCost)
+                    {
+                        bestCost = cost;
+                        best = i;
+                    }
+                }
+                current = remaining[best];
+                result.Add(current);
+                remaining.RemoveAt(best);
+            }
+
+            return result;
+        }
+
+        public static List<List<Vector3>> SplitRoute(List<Vector3> fullRoute, int count)
+        {
+            var segments = new List<List<Vector3>>();
+            if (count <= 0)
+            {
+                return segments;
+            }
+
+            for (var i = 0; i < count; i++)
+            {
+                segments.Add(new List<Vector3>());
+            }
+
+            if (fullRoute == null || fullRoute.Count == 0)
+            {
+                return segments;
+            }
+
+            var total = fullRoute.Count;
+            var baseSize = total / count;
+            var remainder = total % count;
+
+            var idx = 0;
+            for (int i = 0; i < count; i++)
+            {
+                var take = baseSize + (i < remainder ? 1 : 0);
+                for (var j = 0; j < take && idx < total; j++)
+                {
+                    segments[i].Add(fullRoute[idx++]);
+                }
+            }
+
+            return segments;
         }
     }
 }
