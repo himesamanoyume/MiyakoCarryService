@@ -1537,16 +1537,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return corners[corners.Length - 1];
         }
 
-        public virtual void CheckDanger(bool deavtivatingMines = true)
-        {
-            if (deavtivatingMines)
-            {
-                BotOwner.BewarePlantedMine.Update();
-            }
-
-            BotOwner.BotAvoidDangerPlaces.Update();
-        }
-
         public virtual bool EndDeactivateMine()
         {
             if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)

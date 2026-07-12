@@ -87,8 +87,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            CheckDanger(true);
-
             if (BotOwner.WeaponManager.Grenades.ThrowindNow)
             {
                 return false;
