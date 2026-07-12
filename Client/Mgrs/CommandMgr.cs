@@ -643,11 +643,8 @@ namespace MiyakoCarryService.Client.Mgrs
             }
 
             var lootData = LootDataMgr.FindLootData(ctx.TargetId);
-            mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
-            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldLootProxyAction);
             mcsBotPlayerData.IsLooting = false;
-            mcsBotPlayerData.ProxyTargetId = lootData.Item.Id;
-            mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
+            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldLootProxyAction);
             LootDataMgr.UnlockLootingTarget(lootData);
             LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
             if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
@@ -655,6 +652,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 LootDataMgr.LockLootItemToTarget(lootData);
                 LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                 mcsBotPlayerData.LootingTarget = lootData;
+                mcsBotPlayerData.ProxyTargetId = lootData.Item.Id;
+                mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Roger,

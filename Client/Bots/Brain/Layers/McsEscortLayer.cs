@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var time = Time.time;
                 if (McsBotPlayerData == null)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:Uninitialized");
+                    return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
                 }
 
                 if (McsBotPlayerData.TargetPos.HasValue)
@@ -53,17 +53,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
                     }
 
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortNearPath");
+                    return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
                 }
                 else
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:CannotFindEscortPos");
+                    return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortPos");
                 }
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
+                return new Action(typeof(HoldPositionLogic), "Mcs:Exception");
             }
         }
 

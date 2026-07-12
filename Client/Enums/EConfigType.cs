@@ -5,7 +5,6 @@ namespace MiyakoCarryService.Client.Enums
         BASIC = 100,
         COMMAND = 200,
         PLAYER = 300,
-        AI = 400,
         DEBUG = 2000
     }
 }

@@ -35,13 +35,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData == null || McsBotPlayerData.ClearAreaPoints == null || McsBotPlayerData.ClearAreaPoints.Count == 0)
                 {
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:ClearAreaNoPoints");
+                    return new Action(typeof(HoldPositionLogic), "Mcs:ClearAreaNoPoints");
                 }
 
                 if (McsBotPlayerData.ClearAreaIndex >= McsBotPlayerData.ClearAreaPoints.Count)
                 {
                     FinishClearArea();
-                    return new Action(typeof(SimplePatrolLogic), "Mcs:ClearAreaDone");
+                    return new Action(typeof(HoldPositionLogic), "Mcs:ClearAreaDone");
                 }
 
                 var targetPos = McsBotPlayerData.ClearAreaPoints[McsBotPlayerData.ClearAreaIndex];
@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     if (McsBotPlayerData.ClearAreaIndex >= McsBotPlayerData.ClearAreaPoints.Count)
                     {
                         FinishClearArea();
-                        return new Action(typeof(SimplePatrolLogic), "Mcs:ClearAreaDone");
+                        return new Action(typeof(HoldPositionLogic), "Mcs:ClearAreaDone");
                     }
 
                     targetPos = McsBotPlayerData.ClearAreaPoints[McsBotPlayerData.ClearAreaIndex];
@@ -95,12 +95,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(GoToPointLogic), "Mcs:ClearAreaGoToPoint");
                 }
 
-                return new Action(typeof(SimplePatrolLogic), "Mcs:ClearAreaCannotFindPath");
+                return new Action(typeof(HoldPositionLogic), "Mcs:ClearAreaCannotFindPath");
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
+                return new Action(typeof(HoldPositionLogic), "Mcs:Exception");
             }
         }
 

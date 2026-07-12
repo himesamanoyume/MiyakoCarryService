@@ -59,12 +59,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
                 }
 
-                return new Action(typeof(SimplePatrolLogic), "Mcs:NoDanger");
+                return new Action(typeof(HoldPositionLogic), "Mcs:NoDanger");
             }
             catch (Exception e)
             {
                 MiyakoCarryServicePlugin.Logger.LogError(e);
-                return new Action(typeof(SimplePatrolLogic), "Mcs:Exception");
+                return new Action(typeof(HoldPositionLogic), "Mcs:Exception");
             }
         }
 
