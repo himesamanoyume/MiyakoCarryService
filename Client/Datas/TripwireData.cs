@@ -1,6 +1,8 @@
 
 using System;
 using System.Collections.Generic;
+using Comfort.Common;
+using EFT;
 using EFT.SynchronizableObjects;
 using UnityEngine;
 
@@ -10,6 +12,7 @@ namespace MiyakoCarryService.Client.Datas
     {
         private WeakReference<TripwireSynchronizableObject> _tripwireRef;
         public TripwireSynchronizableObject Tripwire => _tripwireRef.TryGetTarget(out var tripwire) ? tripwire : null;
+        public bool IsPlantedByAI;
 
         public TripwireData(TripwireSynchronizableObject tripwire) : base()
         {
@@ -19,6 +22,11 @@ namespace MiyakoCarryService.Client.Datas
                 CreateBoxCollider(tripwire.FromPosition, tripwire.ToPosition)
             };
             InitObstacle();
+            var player = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(Tripwire.PlacerPlayerId);
+            if (player != null)
+            {
+                IsPlantedByAI = player.IsAI;
+            }
         }
 
         private BoxCollider CreateBoxCollider(Vector3 fromPosition, Vector3 toPosition)
