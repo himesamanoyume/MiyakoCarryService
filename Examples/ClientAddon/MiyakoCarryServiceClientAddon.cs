@@ -19,8 +19,8 @@ namespace MiyakoCarryService.Client.Addon
 
         void Start()
         {
-            McsCommandApi.Register(EMenuId.Team.ToString(), BuildTestSubMenu);
-            McsCommandApi.Register(EMenuId.Member.ToString(), BuildMemberSubMenu);
+            McsCommandApi.RegisterCommandMenu(EMenuId.Team.ToString(), BuildTestSubMenu);
+            McsCommandApi.RegisterCommandMenu(EMenuId.Member.ToString(), BuildMemberSubMenu);
         }
 
         private void BuildTestSubMenu(McsCommandMenu menu, Player[] mcsBotPlayers)

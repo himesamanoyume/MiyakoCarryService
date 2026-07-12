@@ -53,9 +53,9 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static void Register(string menuKey, Action<McsCommandMenu, Player[]> menu)
+        public static void RegisterCommandMenu(string menuKey, Action<McsCommandMenu, Player[]> menu)
         {
-            CommandUtils.Register(menuKey, menu);
+            CommandUtils.RegisterCommandMenu(menuKey, menu);
         }
 
         /// <summary>
@@ -93,6 +93,11 @@ namespace MiyakoCarryService.Client.Api
         public static Player[] GetAliveMembers()
         {
             return CommandUtils.GetAliveMembers();
+        }
+        
+        public static void Execute(McsCommandContext ctx)
+        {
+            CommandUtils.Execute(ctx);
         }
     }
 }

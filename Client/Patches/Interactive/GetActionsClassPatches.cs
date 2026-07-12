@@ -4,8 +4,10 @@ using EFT.Interactive;
 using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -47,7 +49,11 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 {
                     Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.InteractionProxyActionCommandAction([mcsBotPlayer], doorData),
+                    Action = () => CommandUtils.Dispatch(
+                        ECommandType.InteractionProxyAction.ToString(),
+                        [mcsBotPlayer],
+                        () => new McsCommandContext { TargetId = doorData.Id() }
+                    ),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
@@ -96,7 +102,11 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandMgr.LootProxyActionCommandAction([mcsBotPlayer], lootData),
+                    Action = () => CommandUtils.Dispatch(  
+                        ECommandType.LootProxyAction.ToString(),  
+                        [mcsBotPlayer],  
+                        () => new McsCommandContext { TargetId = lootData.Item.Id }
+                    ),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }

@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Client.Enums
 {
-    public enum ECommandPacketType
+    public enum ECommandType
     {
         Teleport,
         GoToPoint,
@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Enums
         Regroup,
         ReportAboutEnemy,
         OnYourOwn,
-        Escort,
+        EscortWorld,
         GoToExfil,
         AimingBodyPart,
         QuestProxyAction,
@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Client.Enums
         EndProxyAction,
         DropTargetLoot,
         ReportAboutSelf,
-        ClearArea
+        ClearArea,
+        OpenInventory
     }
 }

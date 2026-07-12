@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Client.Datas
                 EventMgr.Notify(new CommandMgrHandleFikaEvent
                 {
                     McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandPacketType.EndProxyAction.ToString()
+                    CommandPacketType = ECommandType.EndProxyAction.ToString()
                 });
             }
             else
