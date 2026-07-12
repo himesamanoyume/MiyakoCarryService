@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static ConfigEntry<T> Register<T>(
+        public static ConfigEntry<T> RegisterConfig<T>(
             EConfigType type,
             string key,
             T defaultValue,
@@ -25,13 +25,13 @@ namespace MiyakoCarryService.Client.Api
             Action<T> apply = null
         )
         {
-            return Register(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide, getLocal, apply);
+            return RegisterConfig(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide, getLocal, apply);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public static ConfigEntry<T> Register<T>(
+        public static ConfigEntry<T> RegisterConfig<T>(
             string sectionName,
             int order,
             string key,

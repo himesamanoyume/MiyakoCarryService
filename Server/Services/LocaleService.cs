@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Services
             await UpdateServerLocales(_serverLocales);
         }
 
-        private async Task UpdateGlobalLocales(Dictionary<string, Dictionary<string, string>> locales)
+        public async Task UpdateGlobalLocales(Dictionary<string, Dictionary<string, string>> locales)
         {
             foreach ((var locale, var lazyLoadedValue) in localeTable.Global)
             {
@@ -68,7 +68,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        private async Task UpdateServerLocales(Dictionary<string, Dictionary<string, string>> locales)
+        public async Task UpdateServerLocales(Dictionary<string, Dictionary<string, string>> locales)
         {
             var loadedLocales = AccessTools.Property(typeof(ServerLocalisationService), "LoadedLocales").GetValue(serverLocalisationService) as Dictionary<string, LazyLoad<Dictionary<string, string>>>;
 
@@ -108,7 +108,7 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
-        private async Task<Dictionary<string, Dictionary<string, string>>> RecursiveLoadFiles(string path)
+        public async Task<Dictionary<string, Dictionary<string, string>>> RecursiveLoadFiles(string path)
         {
             List<string> files = fileUtil.GetFiles(path);
 
