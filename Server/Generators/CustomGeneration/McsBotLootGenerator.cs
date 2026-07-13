@@ -67,6 +67,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             var foodItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Food.Weights);
             var drinkItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Drink.Weights);
             var stimItemCount = weightedRandomHelper.GetWeightedValue(itemCounts.Stims.Weights);
+            // var grenadeCount = weightedRandomHelper.GetWeightedValue(itemCounts.Grenades.Weights);
 
             if (botGenerationDetails.IsPmc && PMCConfig.ForceHealingItemsIntoSecure)
             {
@@ -165,6 +166,24 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 0,
                 botGenerationDetails.IsPmc
             );
+
+            // // Grenades
+            // AddLootFromPool(
+            //     botId,
+            //     botLootCacheService.GetLootFromCache(
+            //         botGenerationDetails.RoleLowercase,
+            //         botGenerationDetails.IsPmc,
+            //         LootCacheType.GrenadeItems,
+            //         botJsonTemplate
+            //     ),
+            //     [EquipmentSlots.Pockets, EquipmentSlots.TacticalVest],
+            //     grenadeCount,
+            //     botInventory,
+            //     botGenerationDetails.RoleLowercase,
+            //     null,
+            //     0,
+            //     botGenerationDetails.IsPmc
+            // );
 
             // Secure
             if (!botGenerationDetails.IsPmc || (botGenerationDetails.IsPmc && PMCConfig.AddSecureContainerLootFromBotConfig))

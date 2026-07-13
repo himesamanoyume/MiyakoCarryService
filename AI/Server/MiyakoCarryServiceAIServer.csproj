@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <DevServerPath>D:\OtherGames\SPT4.0.X\Server-4.0.X</DevServerPath>
+    <DevGamePluginsMiyakoCarryServicePath>$(DevServerPath)\SPT\user\mods\MiyakoCarryServiceServer</DevGamePluginsMiyakoCarryServicePath>
+    <BuildMiyakoCarryServicePath>$(ProjectDir)..\..\Build\AI\SPT\user\mods\MiyakoCarryServiceServer</BuildMiyakoCarryServicePath>  
+    <OutputType>Library</OutputType>
+    <AssemblyName>Himesamanoyume.MiyakoCarryServiceAIServer</AssemblyName>
+    <AssemblyCompany>Himesamanoyume</AssemblyCompany>
+    <AssemblyProduct>MiyakoCarryServiceAIServer</AssemblyProduct>  
+    <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
+    <AssemblyTitle>MiyakoCarryServiceAIServer</AssemblyTitle>  
+    <Version>1.0.11.0</Version>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
+    <RootNamespace>MiyakoCarryService.AI.Server</RootNamespace>
+    <NoWarn>CS0618;CS8632;CS9107</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+      <Content Include="Assets\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Server\MiyakoCarryServiceServer.csproj" />
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
+    <Exec Command="mkdir &quot;$(DevGamePluginsMiyakoCarryServicePath)&quot;" Condition="!Exists('$(DevGamePluginsMiyakoCarryServicePath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\$(TargetFileName)&quot;"/>  
+    <Exec Command="mkdir &quot;$(BuildMiyakoCarryServicePath)&quot;" Condition="!Exists('$(BuildMiyakoCarryServicePath)')" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMiyakoCarryServicePath)\$(TargetFileName)&quot;" />
+    <Exec Command="if exist &quot;$(BuildMiyakoCarryServicePath)\Assets&quot; rd /s /q &quot;$(BuildMiyakoCarryServicePath)\Assets&quot;" />
+    <Exec Command="xcopy &quot;$(TargetDir)Assets\*.*&quot; &quot;$(BuildMiyakoCarryServicePath)\Assets\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(TargetDir)Assets\*.*&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\Assets\&quot; /E /I /Y" />
+  </Target> 
+</Project>

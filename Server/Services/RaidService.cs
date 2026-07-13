@@ -29,6 +29,7 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
+        private readonly ConcurrentDictionary<MongoId, List<int>> _leadHelperMemberGroups = new();
         private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
         private SemaphoreSlim _saveLock = new(1, 1);
@@ -50,6 +51,13 @@ namespace MiyakoCarryService.Server.Services
             try
             {
                 if (_leadMemberGroups.TryGetValue(mcsLeadPlayerId, out var mcsAids))
+                {
+                    if (mcsAids.Contains(mcsAid))
+                    {
+                        return true;
+                    }
+                }
+                if (_leadHelperMemberGroups.TryGetValue(mcsLeadPlayerId, out mcsAids))
                 {
                     if (mcsAids.Contains(mcsAid))
                     {
