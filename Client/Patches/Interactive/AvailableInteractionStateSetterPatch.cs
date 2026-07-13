@@ -1,4 +1,6 @@
 using System.Reflection;
+using Comfort.Common;
+using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
@@ -10,19 +12,24 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     /// </summary>  
     public sealed class AvailableInteractionStateSetterPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BindableStateClass<ActionsReturnClass>), nameof(BindableStateClass<>.Value));
+        protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BindableStateClass<ActionsReturnClass>), nameof(BindableStateClass<ActionsReturnClass>.Value));
 
         [PatchPrefix]
         public static void Prefix(object __instance, ref ActionsReturnClass value)
         {
-            var owner = CommandUtils.GamePlayerOwner;
-
-            if (owner == null || !ReferenceEquals(__instance, owner.AvailableInteractionState))
+            if (!CommandUtils.IsCommandMenuOpen)
             {
                 return;
             }
 
-            if (!CommandUtils.IsCommandMenuOpen)
+            if (!Singleton<GameWorld>.Instantiated || Singleton<GameWorld>.Instance?.MainPlayer == null)
+            {
+                return;
+            }
+
+            var owner = CommandUtils.GamePlayerOwner;
+
+            if (owner == null || !ReferenceEquals(__instance, owner.AvailableInteractionState))
             {
                 return;
             }
@@ -35,10 +42,12 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 value = CommandUtils.CurrentMenu;
             }
 
-            var bindable = (BindableStateClass<ActionsReturnClass>)__instance;
-            if (ReferenceEquals(bindable.Gparam_0, value))
+            if (__instance is BindableStateClass<ActionsReturnClass> bindable)
             {
-                bindable.Gparam_0 = null;
+                if (ReferenceEquals(bindable.Gparam_0, value))
+                {
+                    bindable.Gparam_0 = null;
+                }
             }
         }
     }
