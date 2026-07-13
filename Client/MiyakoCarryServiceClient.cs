@@ -222,6 +222,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new PlayerSayPatch());
             _patches.Add(new PlayHitEffectPatch());
             _patches.Add(new BotBewarePlantedMineUpdatePatch());
+            _patches.Add(new AvailableInteractionStateSetterPatch());
 
             if (FikaInstalled)
             {
