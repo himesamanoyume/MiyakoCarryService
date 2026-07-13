@@ -8,10 +8,4 @@
   <Folder Name="/Server/">
     <Project Path="Server/MiyakoCarryServiceServer.csproj" />
   </Folder>
-  <Folder Name="/AI/Client/">
-    <Project Path="AI/Client/MiyakoCarryServiceAIClient.csproj" />
-  </Folder>
-  <Folder Name="/AI/Server/">
-    <Project Path="AI/Server/MiyakoCarryServiceAIServer.csproj" />
-  </Folder>
 </Solution>
