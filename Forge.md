@@ -111,19 +111,6 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
     // only this name will be displayed, not the WildSpawnType name.
 } 
     // The last `}` should not have `,`.
-
-// --------------------------------------------
-
-{
-    "WildSpawnType": "xxxWildSpawnType", 
-    "IsBoss": false, 
-    "DisplayName": "xxxDisplayName",
-    "BrainName": "xxxBrainName" 
-    // If this third-party mod's WildSpawnType does not use the EFT native brain, 
-    // you need to additionally fill in a BrainName. 
-    // As for what this BrainName is called, 
-    // you need to find it yourself from this mod.
-}
 ```
 
 7. After ensuring the JSON format is correct and the data is filled in correctly, restart the server. At this time, use the help command in the MESSENGER interface with the Miyako trader, and all types will be displayed in the list of available types.
@@ -169,7 +156,7 @@ Carry service level base price. There are 5 levels in total, in roubles, with an
 
 - Enable Looting
 
-Whether Mcs Player will attempt to loot items.
+If `McsBotPlayer` is not currently in combat, whether it will attempt to loot items.
 
 - Price Threshold
 
@@ -249,6 +236,10 @@ If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to ex
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
 
+- Clear Area
+
+If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to clear the surrounding area of a specified location.
+
 #### TeamCommand
 
 - Team Report Enemy Position
@@ -289,11 +280,15 @@ Command `McsBotPlayers` to change preferred combat aiming body part.
 - - Team Transit Escort
 - - Team Switch Escort
 
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayer` to escort to the designated location.
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to escort to the designated location.
 
 - Team Drop Target Loot
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
+
+- Team Clear Area
+
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to clear the surrounding area of a specified location.
 
 *The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 

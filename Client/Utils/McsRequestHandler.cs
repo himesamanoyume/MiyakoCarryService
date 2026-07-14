@@ -191,22 +191,6 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        /// <summary>
-        /// 获取非原生的BrainName。可能用不上了
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<List<string>> GetAllCustomBrainName()
-        {
-            var response = await GetJsonAsync<List<string>>("/mcs/client/brain/config");
-            
-            if (response == null)
-            {
-                return new();
-            }
-
-            return response;
-        }
-
         public static McsPluginClientConfig GetMcsPluginClientConfig()
         {
             try

@@ -30,10 +30,5 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return configService.GetSpawnTypeDisplayName(wildSpawnType);
         }
-
-        public List<string> GetAllCustomBrainName()
-        {
-            return configService.GetAllCustomBrainName();
-        }
     }
 }

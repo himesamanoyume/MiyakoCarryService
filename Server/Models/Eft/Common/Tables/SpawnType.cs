@@ -13,9 +13,5 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("DisplayName")]
         public required string DisplayName { get; set; }
-
-        [JsonPropertyName("BrainName")]
-        public string? BrainName { get; set; }
-        
     }
 }

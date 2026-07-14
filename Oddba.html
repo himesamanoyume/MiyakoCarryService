@@ -1123,6 +1123,10 @@
                     <td>丢出目标战利品</td>
                     <td>若护航此时不处于交战，命令护航丢出在战局中拾取的目标战利品</td>
                 </tr>
+                <tr>
+                    <td>清扫区域</td>
+                    <td>若护航此时不处于交战，命令护航清扫指定位置的周围区域</td>
+                </tr>
             </tbody>
         </table>
         <p>全队指令</p>
@@ -1155,7 +1159,7 @@
                 </tr>
                 <tr>
                     <td>全队护送</td>
-                    <td>若护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航护送至指定地点。支持护送至任务地点、撤离点、转移点</td>
                 </tr>
                 <tr>
                     <td>全队强制传送</td>
@@ -1168,6 +1172,10 @@
                 <tr>
                     <td>全队丢出目标战利品</td>
                     <td>若队伍中有护航此时不处于交战，命令护航丢出在战局中拾取的目标战利品</td>
+                </tr>
+                <tr>
+                    <td>全队清扫区域</td>
+                    <td>若队伍中有护航此时不处于交战，命令护航清扫指定位置的周围区域</td>
                 </tr>
             </tbody>
         </table>
@@ -1259,29 +1267,7 @@
 } <span style="color: #6a9955;">// 最后一个 `}` 不要带 `,`</span>
 </span>
 </div>
-<p><br/></p>
 <div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, Courier New, monospace; font-size: 14px; line-height: 6px; white-space: pre;">
-<span>
-{</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"xxxWildSpawnType"</span>,</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">false</span>,</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"xxxDisplayName"</span>,</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"BrainName"</span>: <span style="color: #ce9178;">"xxxBrainName"</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #6a9955;">// 如果这个第三方Mod的WildSpawnType使用的不是原版自带的Brain</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #6a9955;">// 那么你需要额外多填写一个BrainName</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #6a9955;">// 至于这个BrainName叫什么，需要你自己从这个Mod里去找</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #6a9955;">// 上面所提供的WildSpawnType全部都不需要填BrainName</span></span>
-<span>
-}
-</span>
 </div>
             <li>确保json格式正确，数据也填写正确后，重启服务端，此时与宫子商人聊天界面使用help指令，列出的可用类型中就会显示出所有的类型</li>
             <li>如果填写的自定义类型在生成时出现异常，会在服务端收到报错提醒，并改为生成默认的pmc类型护航，此时你需要检查是否填写的自定义类型有错误</li>
