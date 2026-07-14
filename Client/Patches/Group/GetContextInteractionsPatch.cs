@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized());
+                NotificationManagerClass.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
                 return;
             }
 
@@ -208,7 +208,6 @@ namespace MiyakoCarryService.Client.Patches.Group
                 return;
             }
             OnRefreshFriendList();
-            // EventMgr.Notify(new UpdateProfileEvent());
         }
 
         private static void OnRenewMcsOrder(string aid)
@@ -219,6 +218,7 @@ namespace MiyakoCarryService.Client.Patches.Group
                 return;
             }
             NotificationManagerClass.DisplayMessageNotification(Locales.MIYAKOTRADERORDERNEWQUEST.McsLocalized());
+            EventMgr.Notify(new UpdateDailyQuestsEvent());
         }
     }
 

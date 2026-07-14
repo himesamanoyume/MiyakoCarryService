@@ -93,7 +93,7 @@ namespace MiyakoCarryService.Server
                             continue;
                         }
                         infoService.ProcessExpiredTicketInfo(kvp.Key);
-                        profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                        infoService.MarkExpiredOrderInfos();
                     }
                 });
                 _ = CheckForUpdate();

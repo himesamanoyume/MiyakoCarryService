@@ -349,13 +349,25 @@ namespace MiyakoCarryService.Server.Services
             AddOrderInfo(orderInfo);
         }
 
-        // 新增：到期仅标记为 Expired（不删好友/存档/订单）  
         public void MarkExpiredOrderInfos()
         {
+            var orderInfos = GetAllOrderInfo();
             var currentTime = timeUtil.GetTimeStamp();
-            foreach (var orderInfo in GetAllOrderInfo())
+
+            foreach (var orderInfo in orderInfos)
             {
-                if (orderInfo.Status == EInfoStatus.Started && currentTime >= orderInfo.ExpirationTime - 1)
+                if (currentTime < orderInfo.ExpirationTime - 1)
+                {
+                    continue;
+                }
+
+                if (orderInfo.RenewTargetQuestId is not null)
+                {
+                    RemoveOrderInfo(orderInfo);
+                    continue;
+                }
+
+                if (orderInfo.Status == EInfoStatus.Started)
                 {
                     orderInfo.Status = EInfoStatus.Expired;
                 }
@@ -363,7 +375,6 @@ namespace MiyakoCarryService.Server.Services
             _ = SaveOrderAndTicketInfo();
         }
 
-        // 新增：仅罚单(Ticket)沿用原来的立即过期收集逻辑  
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredTicketMcsLeadPlayerIds()
         {
             var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
@@ -383,7 +394,6 @@ namespace MiyakoCarryService.Server.Services
             return mcsBotPlayerIds;
         }
 
-        // 新增：按护航 profileId 找所属订单  
         public OrderInfo? GetOrderInfoByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
         {
             foreach (var orderInfo in _orderInfos.Values)
@@ -414,14 +424,12 @@ namespace MiyakoCarryService.Server.Services
             return orderInfo;
         }
 
-        // 新增：判断某护航所属订单是否已过期（供邀请拒绝用）  
         public bool IsOrderExpiredByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
         {
             var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
             return orderInfo is not null && orderInfo.Status is EInfoStatus.Expired;
         }
 
-        // 新增：结单——仅 Expired 可结单，返回该单 PlayerIds 供删档删好友  
         public HashSet<MongoId>? SettleOrderByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
         {
             var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
@@ -435,22 +443,6 @@ namespace MiyakoCarryService.Server.Services
             return playerIds;
         }
 
-        // 新增：续订——返回原订单（供生成续订任务）；Started/Expired 均可  
-        public OrderInfo? GetRenewSourceOrderInfoByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
-        {
-            var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
-            if (orderInfo is null)
-            {
-                return null;
-            }
-            if (orderInfo.Status is not (EInfoStatus.Started or EInfoStatus.Expired))
-            {
-                return null;
-            }
-            return orderInfo;
-        }
-
-        // 新增：续订任务完成时延长原订单过期时间  
         public void ApplyRenew(MongoId targetQuestId, int duration)
         {
             if (!_orderInfos.TryGetValue(targetQuestId, out var originalOrder))
@@ -465,7 +457,7 @@ namespace MiyakoCarryService.Server.Services
             }
             else
             {
-                originalOrder.ExpirationTime += duration * 3600; // 未过期则叠加  
+                originalOrder.ExpirationTime += duration * 3600;
             }
             _ = SaveOrderAndTicketInfo();
         }

@@ -1,4 +1,5 @@
 
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,9 +35,23 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 {
                     if (orderInfo.RenewTargetQuestId is not null)
                     {
-                        // 续订单完成：延长原订单过期时间，不重建护航存档/好友  
-                        InfoController.ApplyRenew(orderInfo.RenewTargetQuestId.Value, orderInfo.Duration);
-                        InfoController.RemoveOrderInfo(orderInfo); // 删除临时续订单  
+                        var targetQuestId = orderInfo.RenewTargetQuestId.Value;
+                        var originalOrder = orderInfos.FirstOrDefault(o => o.QuestId == targetQuestId);
+                        if (originalOrder is not null)
+                        {
+                            InfoController.ApplyRenew(originalOrder.QuestId, originalOrder.Duration);
+                            foreach (var mcsBotPlayerId in originalOrder.PlayerIds)
+                            {
+                                var mcsBotPlayerProfile = ProfileController.GetMcsBotPlayerProfile(originalOrder.McsLeadPlayerId, mcsBotPlayerId);
+                                if (mcsBotPlayerProfile is null)
+                                {
+                                    continue;
+                                }
+                                InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, originalOrder.McsLeadPlayerId);
+                            }
+                        }
+
+                        InfoController.RemoveOrderInfo(orderInfo);
                     }
                     else
                     {
@@ -47,12 +62,6 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                             InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
                         }
                     }
-                    // InfoController.SetBaseInfoStarted(orderInfo);
-                    // foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
-                    // {
-                    //     var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                    //     InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
-                    // }
                     break;
                 }
             }

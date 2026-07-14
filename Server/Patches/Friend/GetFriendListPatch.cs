@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
 
                     var mcsPmcData = mcsBotPlayerProfile.CharacterData.PmcData;
 
-                    var displayName = InfoController.IsOrderExpiredByBotPlayerProfileId(mcsPmcData.Id.Value) ? ServerLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED) : mcsPmcData.Info.Nickname;
+                    var displayName = InfoController.IsOrderExpiredByBotPlayerProfileId(mcsPmcData.Id.Value) ? $"({ServerLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsPmcData.Info.Nickname}" : mcsPmcData.Info.Nickname;
 
                     var searchFriendResponse = new SearchFriendResponse
                     {
