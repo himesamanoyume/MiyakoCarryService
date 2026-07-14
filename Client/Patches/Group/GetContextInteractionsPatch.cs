@@ -1,6 +1,7 @@
 
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -42,7 +43,7 @@ namespace MiyakoCarryService.Client.Patches.Group
                 __result.method_2(
                     id: "BackMainChar",
                     key: Locales.RETURNTOMAINCHAR.McsLocalized(),
-                    callback: () => OnExitMcsBotPlayerInventoryMode(player.AccountId)
+                    callback: () => TasksExtensions.HandleExceptions(OnExitMcsBotPlayerInventoryMode(player.AccountId))
                 );
 
                 return;
@@ -51,7 +52,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             __result.method_2(
                 id: "OpenMcsBotPlayerInventoryMode",
                 key: Locales.OPENMCSBOTPLAYERINVENTORY.McsLocalized(),
-                callback: () => OnOpenMcsBotPlayerInventoryMode(player.AccountId)
+                callback: () => TasksExtensions.HandleExceptions(OnOpenMcsBotPlayerInventoryMode(player.AccountId))
             );
         }
 
@@ -71,7 +72,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             });
         }
 
-        public static async void OnExitMcsBotPlayerInventoryMode(string aid)
+        public static async Task OnExitMcsBotPlayerInventoryMode(string aid)
         {
             await GameLoop.Instance.Session.FlushOperationQueue();
 
@@ -104,10 +105,10 @@ namespace MiyakoCarryService.Client.Patches.Group
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            await mainMenuControllerClass.method_21();
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
-            TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
+            await GameLoop.Instance.Session.RequestBuilds();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
@@ -161,7 +162,7 @@ namespace MiyakoCarryService.Client.Patches.Group
             }
         }
 
-        private static async void OnOpenMcsBotPlayerInventoryMode(string aid)
+        private static async Task OnOpenMcsBotPlayerInventoryMode(string aid)
         {
             await GameLoop.Instance.Session.FlushOperationQueue();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
@@ -181,9 +182,9 @@ namespace MiyakoCarryService.Client.Patches.Group
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            TasksExtensions.HandleExceptions(mainMenuControllerClass.method_21());
+            await mainMenuControllerClass.method_21();
             EventMgr.Notify(new UpdateProfileEvent());
-            TasksExtensions.HandleExceptions(GameLoop.Instance.Session.RequestBuilds());
+            await GameLoop.Instance.Session.RequestBuilds();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }
     }
