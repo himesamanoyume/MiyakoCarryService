@@ -18,5 +18,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("Duration")]
         public required int Duration { get; set; }
+
+        [JsonPropertyName("RenewTargetQuestId")]  
+        public MongoId? RenewTargetQuestId { get; set; }
     }
 }

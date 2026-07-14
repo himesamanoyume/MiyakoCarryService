@@ -92,7 +92,7 @@ namespace MiyakoCarryService.Server
                         {
                             continue;
                         }
-                        infoService.ProcessExpiredOrderAndTicketInfo(kvp.Key);
+                        infoService.ProcessExpiredTicketInfo(kvp.Key);
                         profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
                     }
                 });

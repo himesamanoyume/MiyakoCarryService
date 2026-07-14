@@ -54,6 +54,18 @@ namespace MiyakoCarryService.Client.Patches.Group
                 key: Locales.OPENMCSBOTPLAYERINVENTORY.McsLocalized(),
                 callback: () => TasksExtensions.HandleExceptions(OnOpenMcsBotPlayerInventoryMode(player.AccountId))
             );
+
+            __result.method_2(
+                id: "SettleMcsOrder",
+                key: Locales.SETTLEMCSORDER.McsLocalized(),
+                callback: () => OnSettleMcsOrder(player.AccountId)
+            );
+
+            __result.method_2(
+                id: "RenewMcsOrder",
+                key: Locales.RENEWMCSORDER.McsLocalized(),
+                callback: () => OnRenewMcsOrder(player.AccountId)
+            );
         }
 
         private static async void OnRefreshFriendList()
@@ -67,8 +79,8 @@ namespace MiyakoCarryService.Client.Patches.Group
                     return;
                 }
 
-                session.SocialNetwork.method_13(result);  
-                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.method_0(); 
+                session.SocialNetwork.method_13(result);
+                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.method_0();
             });
         }
 
@@ -186,6 +198,27 @@ namespace MiyakoCarryService.Client.Patches.Group
             EventMgr.Notify(new UpdateProfileEvent());
             await GameLoop.Instance.Session.RequestBuilds();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
+        }
+
+        private static void OnSettleMcsOrder(string aid)
+        {
+            if (!McsRequestHandler.SettleMcsOrder(new() { Aid = aid }))
+            {
+                NotificationManagerClass.DisplayMessageNotification(Locales.SETTLEMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
+                return;
+            }
+            OnRefreshFriendList();
+            // EventMgr.Notify(new UpdateProfileEvent());
+        }
+
+        private static void OnRenewMcsOrder(string aid)
+        {
+            if (!McsRequestHandler.RenewMcsOrder(new() { Aid = aid }))
+            {
+                NotificationManagerClass.DisplayMessageNotification(Locales.RENEWMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
+                return;
+            }
+            NotificationManagerClass.DisplayMessageNotification(Locales.MIYAKOTRADERORDERNEWQUEST.McsLocalized());
         }
     }
 

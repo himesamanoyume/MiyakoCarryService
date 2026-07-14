@@ -38,5 +38,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             questService.Refund(sessionId, questToReplace, pmcData);
         }
+
+        public bool RenewOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            return questService.RenewOrder(mcsLeadPlayerId, aid);
+        }
     }
 }

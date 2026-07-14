@@ -61,16 +61,30 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             }
 
             QuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
-            foreach (var kvp in mcsBotPlayerIds)
+
+            // 订单：到期仅标记为 Expired，保留好友/存档/订单  
+            InfoController.MarkExpiredOrderInfos();
+
+            // 罚单：沿用原立即处理逻辑  
+            var expiredTicketLeads = InfoController.GetExpiredTicketMcsLeadPlayerIds();
+            foreach (var kvp in expiredTicketLeads)
             {
                 if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
                 {
                     continue;
                 }
-                InfoController.ProcessExpiredOrderInfo(kvp.Key);
-                ProfileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                InfoController.ProcessExpiredTicketInfo(kvp.Key); // 现有方法内含 ticket 移除  
             }
+            // var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
+            // foreach (var kvp in mcsBotPlayerIds)
+            // {
+            //     if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
+            //     {
+            //         continue;
+            //     }
+            //     InfoController.ProcessExpiredOrderInfo(kvp.Key);
+            //     ProfileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+            // }
 
             if (currentTime < generatedOrder.EndTime - 1)
             {

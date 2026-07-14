@@ -32,12 +32,27 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    InfoController.SetBaseInfoStarted(orderInfo);
-                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    if (orderInfo.RenewTargetQuestId is not null)
                     {
-                        var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                        InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        // 续订单完成：延长原订单过期时间，不重建护航存档/好友  
+                        InfoController.ApplyRenew(orderInfo.RenewTargetQuestId.Value, orderInfo.Duration);
+                        InfoController.RemoveOrderInfo(orderInfo); // 删除临时续订单  
                     }
+                    else
+                    {
+                        InfoController.SetBaseInfoStarted(orderInfo);
+                        foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                        {
+                            var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
+                            InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        }
+                    }
+                    // InfoController.SetBaseInfoStarted(orderInfo);
+                    // foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    // {
+                    //     var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
+                    //     InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                    // }
                     break;
                 }
             }

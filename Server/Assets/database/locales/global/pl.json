@@ -214,5 +214,9 @@
     "Mcs/ClearAreaCommand Name": "Clear Area",  
     "Mcs/ClearAreaCommand TargetName": "Command carry service player to clear the surrounding area of a specified location",  
     "Mcs/TeamClearAreaCommand Name": "Team Clear Area",  
-    "Mcs/TeamClearAreaCommand TargetName": "Command all carry service players to clear the surrounding area of a specified location"
+    "Mcs/TeamClearAreaCommand TargetName": "Command all carry service players to clear the surrounding area of a specified location",
+    "Mcs/SettleMcsOrder": "Settle Order",
+    "Mcs/SettleMcsOrderRefuse": "This order has not expired yet, unable to settle at the moment",
+    "Mcs/RenewMcsOrder": "Renew Order",
+    "Mcs/RenewMcsOrderRefuse": "Renewal failed"
 }

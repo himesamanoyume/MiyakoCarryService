@@ -89,5 +89,10 @@ namespace MiyakoCarryService.Server.Controllers
         {
             return profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId);
         }
+
+        public bool SettleOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            return profileService.SettleOrder(mcsLeadPlayerId, aid);  
+        }
     }
 }

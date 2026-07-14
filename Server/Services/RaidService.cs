@@ -25,6 +25,7 @@ namespace MiyakoCarryService.Server.Services
         SptWebSocketConnectionHandler sptWebSocketConnectionHandler,
         CompatibilityService compatibilityService,
         ProfileHelper profileHelper,
+        InfoService infoService,
         ProfileService profileService
     )
     {
@@ -197,7 +198,7 @@ namespace MiyakoCarryService.Server.Services
                 return;
             }
 
-            if (CheckMcsBotPlayerExist(mcsLeadPlayerId, mcsAid))
+            if (CheckMcsBotPlayerExist(mcsLeadPlayerId, mcsAid) || infoService.IsOrderExpiredByBotPlayerProfileId(mcsBotPlayerFullProfile.ProfileInfo.ProfileId.Value))
             {
                 try
                 {

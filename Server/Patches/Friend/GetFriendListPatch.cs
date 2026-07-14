@@ -4,12 +4,14 @@ using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.ChatBot;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Services;
 
 namespace MiyakoCarryService.Server.Patches.Friend
 {
@@ -23,6 +25,8 @@ namespace MiyakoCarryService.Server.Patches.Friend
         private static MiyakoChatBot MiyakoChatBot { get => field ??= ServiceLocator.ServiceProvider.GetService<MiyakoChatBot>(); }
         private static Controllers.ProfileController ProfileController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ProfileController>(); }
         private static Controllers.ConfigController ConfigController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.ConfigController>(); }
+        private static Controllers.InfoController InfoController { get => field ??= ServiceLocator.ServiceProvider.GetService<Controllers.InfoController>(); }
+        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceLocator.ServiceProvider.GetService<ServerLocalisationService>(); }
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, ref GetFriendListDataResponse __result)
@@ -40,13 +44,16 @@ namespace MiyakoCarryService.Server.Patches.Friend
                     }
 
                     var mcsPmcData = mcsBotPlayerProfile.CharacterData.PmcData;
+
+                    var displayName = InfoController.IsOrderExpiredByBotPlayerProfileId(mcsPmcData.Id.Value) ? ServerLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED) : mcsPmcData.Info.Nickname;
+
                     var searchFriendResponse = new SearchFriendResponse
                     {
                         Id = mcsPmcData.Id.Value,
                         Aid = mcsPmcData.Aid,
                         Info = new UserDialogDetails
                         {
-                            Nickname = mcsPmcData.Info.Nickname + $" [{ConfigController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
+                            Nickname = displayName + $" [{ConfigController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
                             Side = mcsPmcData.Info.Side,
                             Level = mcsPmcData.Info.Level,
                             MemberCategory = mcsPmcData.Info.MemberCategory,

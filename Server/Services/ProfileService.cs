@@ -137,11 +137,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void TeamKillPunish(MongoId mcsLeadPlayerId)
         {
-            var mcsBotPlayerIds = infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
-            foreach (var kvp in mcsBotPlayerIds)
-            {
-                ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
-            }
+            infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
         }
 
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
@@ -981,6 +977,28 @@ namespace MiyakoCarryService.Server.Services
                 FriendProfileIds = [],
                 CustomisationUnlocks = [],
             };
+        }
+
+        // 结单：aid -> profileId -> 仅 Expired 才删档删好友 + 删订单  
+        public bool SettleOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            if (IsMcsBotPlayerInventoryMode(mcsLeadPlayerId))
+            {
+                return false; // 库存模式期间不结单  
+            }
+            var profile = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, aid);
+            if (profile is null)
+            {
+                return false;
+            }
+            var botProfileId = profile.ProfileInfo.ProfileId.Value;
+            var playerIds = infoService.SettleOrderByBotPlayerProfileId(botProfileId);
+            if (playerIds is null)
+            {
+                return false; // 未到期，不可结单  
+            }
+            ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, playerIds);
+            return true;
         }
 
         public async Task OnPostLoadAsync()

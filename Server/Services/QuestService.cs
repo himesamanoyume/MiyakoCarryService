@@ -36,6 +36,7 @@ namespace MiyakoCarryService.Server.Services
         ItemHelper itemHelper,
         FileUtil fileUtil,
         JsonUtil jsonUtil,
+        ProfileService profileService,
         ProfileHelper profileHelper
     )
     {
@@ -120,7 +121,7 @@ namespace MiyakoCarryService.Server.Services
                         QId = "000000000000000000000000",
                         StartTime = 0,
                         Status = 0,
-                        StatusTimers = {}
+                        StatusTimers = { }
                     }
                 }, true));
             }
@@ -144,7 +145,7 @@ namespace MiyakoCarryService.Server.Services
                     Players = players,
                     SpawnType = spawnType,
                     CarryServiceLevel = carryServiceLevel,
-                    Duration = duration 
+                    Duration = duration
                 }
             ), punishmentMulti);
             if (GetClientRepeatableQuestsPatch.QuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var questsQueue))
@@ -366,7 +367,7 @@ namespace MiyakoCarryService.Server.Services
             {
                 questConditions.AddRange(questToReplace.Conditions.Fail);
             }
-            
+
             foreach (var questCondition in questConditions)
             {
                 if (questCondition.Target.List.Count == 1 && questCondition.Target.List.First() == ItemTpl.MONEY_ROUBLES)
@@ -385,12 +386,12 @@ namespace MiyakoCarryService.Server.Services
 
             if (total > 0)
             {
-                var roubles = new Item  
-                {  
-                    Id = new MongoId(),  
-                    Template = ItemTpl.MONEY_ROUBLES,  
-                    Upd = new Upd { StackObjectsCount = total },  
-                };  
+                var roubles = new Item
+                {
+                    Id = new MongoId(),
+                    Template = ItemTpl.MONEY_ROUBLES,
+                    Upd = new Upd { StackObjectsCount = total },
+                };
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionId,
@@ -401,6 +402,53 @@ namespace MiyakoCarryService.Server.Services
                     timeUtil.GetHoursAsSeconds(168)
                 );
             }
+        }
+
+        public bool RenewOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            var profile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, aid);
+            if (profile is null)
+            {
+                return false;
+            }
+            var botProfileId = profile.ProfileInfo.ProfileId.Value;
+            var originalOrder = infoService.GetRenewableOrderInfoByBotPlayerProfileId(botProfileId);
+            if (originalOrder is null)
+            {
+                return false;
+            }
+            CreateRenewOrderQuest(mcsLeadPlayerId, originalOrder);
+            return true;
+        }
+
+        private void CreateRenewOrderQuest(MongoId mcsLeadPlayerId, OrderInfo originalOrder)
+        {
+            var fullProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
+            var pmcData = fullProfile.CharacterData.PmcData;
+            var punishmentMulti = traderService.GetGlobalPunishmentMulti();
+            var players = originalOrder.PlayerIds.Count;
+            var orderQuest = questGenerator.GenerateOrderQuest(pmcData, players,
+                originalOrder.CarryServiceLevel, originalOrder.Duration, GenerateOrderTemplate(
+                RepeatableQuestType.Completion, TraderService.MiyakoTraderId, mcsLeadPlayerId,
+                new QuestDescription
+                {
+                    Players = players,
+                    SpawnType = originalOrder.SpawnType,
+                    CarryServiceLevel = originalOrder.CarryServiceLevel,
+                    Duration = originalOrder.Duration
+                }
+            ), punishmentMulti);
+            if (GetClientRepeatableQuestsPatch.QuestsQueueDict.TryGetValue(mcsLeadPlayerId, out var questsQueue))
+            {
+                questsQueue.Enqueue(orderQuest);
+            }
+            else
+            {
+                GetClientRepeatableQuestsPatch.QuestsQueueDict.Add(mcsLeadPlayerId, new([orderQuest]));
+            }
+            infoService.CreateRenewOrderInfo(mcsLeadPlayerId, originalOrder.PlayerIds,
+                originalOrder.SpawnType, originalOrder.CarryServiceLevel, originalOrder.Duration,
+                orderQuest.Id, originalOrder.QuestId);
         }
     }
 }
