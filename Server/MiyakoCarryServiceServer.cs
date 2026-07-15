@@ -85,6 +85,7 @@ namespace MiyakoCarryService.Server
                 await inventoryService.OnPostLoadAsync();
                 await Task.Run(() =>
                 {
+                    infoService.MarkExpiredOrderInfos();
                     var mcsBotPlayerIds = infoService.GetExpiredMcsBotPlayerIds();
                     foreach (var kvp in mcsBotPlayerIds)
                     {
@@ -93,7 +94,7 @@ namespace MiyakoCarryService.Server
                             continue;
                         }
                         infoService.ProcessExpiredTicketInfo(kvp.Key);
-                        infoService.MarkExpiredOrderInfos();
+                        profileService.ProcessExpiredMcsBotPlayerNotifies(kvp.Key, kvp.Value);
                     }
                 });
                 _ = CheckForUpdate();

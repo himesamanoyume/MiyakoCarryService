@@ -15,14 +15,14 @@ namespace MiyakoCarryService.Server.Controllers
         ProfileService profileService
     )
     {
-        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
+        public void ProcessExpiredMcsBotPlayerNotify(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
-            profileService.ProcessExpiredMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            profileService.ProcessExpiredMcsBotPlayerNotify(mcsLeadPlayerId, mcsBotPlayerId);
         }
 
-        public void ProcessExpiredMcsBotPlayerProfiles(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
+        public void ProcessExpiredMcsBotPlayerNotifies(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
         {
-            profileService.ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, mcsBotPlayerIds);
+            profileService.ProcessExpiredMcsBotPlayerNotifies(mcsLeadPlayerId, mcsBotPlayerIds);
         }
 
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)

@@ -2,15 +2,18 @@
 using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Models.Eft.Match;
 using MiyakoCarryService.Server.Models.Eft.Ws;
+using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
+using SPTarkov.Server.Core.Services;
 
 namespace MiyakoCarryService.Server.Helper
 {
     [Injectable]
     public class NotificationHelper(
+        ServerLocalisationService serverLocalisationService,
         ConfigController configController
     )
     {
@@ -132,7 +135,7 @@ namespace MiyakoCarryService.Server.Helper
             {
                 EventType = NotificationEventType.groupMatchUserLeave,
                 EventIdentifier = new(),
-                Nickname = mcsBotPlayerProfile.ProfileInfo.Username + $" [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
+                Nickname = $"({serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsBotPlayerProfile.ProfileInfo.Username}" + mcsBotPlayerProfile.ProfileInfo.Username + $" [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid.Value,
             };
         }

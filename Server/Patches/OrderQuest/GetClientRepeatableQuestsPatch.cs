@@ -74,6 +74,16 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                 InfoController.ProcessExpiredTicketInfo(kvp.Key);
             }
 
+            var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
+            foreach (var kvp in mcsBotPlayerIds)
+            {
+                if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
+                {
+                    continue;
+                }
+                ProfileController.ProcessExpiredMcsBotPlayerNotifies(kvp.Key, kvp.Value);
+            }
+
             if (currentTime < generatedOrder.EndTime - 1)
             {
                 __result.Add(generatedOrder);

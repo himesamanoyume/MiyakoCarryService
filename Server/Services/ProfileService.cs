@@ -97,7 +97,6 @@ namespace MiyakoCarryService.Server.Services
             {
                 var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
                 logger.Error(errorInfo);
-                // throw new NullReferenceException(errorInfo);
             }
 
             try
@@ -132,6 +131,42 @@ namespace MiyakoCarryService.Server.Services
             foreach (var mcsBotPlayerId in mcsBotPlayerIds)
             {
                 ProcessExpiredMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            }
+        }
+
+        public void ProcessExpiredMcsBotPlayerNotify(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
+        {
+            var mcsBotPlayerProfile = GetMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            if (mcsBotPlayerProfile is null)
+            {
+                var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
+                logger.Error(errorInfo);
+                return;
+            }
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1000);
+                try
+                {
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
+                    {
+                        var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
+                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                    }
+                }
+                finally
+                {
+
+                }
+            });
+        }
+
+        public void ProcessExpiredMcsBotPlayerNotifies(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
+        {
+            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
+            {
+                ProcessExpiredMcsBotPlayerNotify(mcsLeadPlayerId, mcsBotPlayerId);
             }
         }
 
@@ -979,12 +1014,11 @@ namespace MiyakoCarryService.Server.Services
             };
         }
 
-        // 结单：aid -> profileId -> 仅 Expired 才删档删好友 + 删订单  
         public bool SettleOrder(MongoId mcsLeadPlayerId, string aid)
         {
             if (IsMcsBotPlayerInventoryMode(mcsLeadPlayerId))
             {
-                return false; // 库存模式期间不结单  
+                return false;
             }
             var profile = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, aid);
             if (profile is null)
@@ -995,7 +1029,7 @@ namespace MiyakoCarryService.Server.Services
             var playerIds = infoService.SettleOrderByBotPlayerProfileId(botProfileId);
             if (playerIds is null)
             {
-                return false; // 未到期，不可结单  
+                return false;
             }
             ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, playerIds);
             return true;
