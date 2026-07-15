@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -75,10 +76,11 @@ namespace MiyakoCarryService.Server.Controllers
             return infoService.CheckMcsBotPlayerExist(mcsLeadPlayerId);
         }
 
-        public void MarkExpiredOrderInfos()
+        public void MarkExpiredOrderInfos(Action<MongoId, MongoId> callback)
         {
-            infoService.MarkExpiredOrderInfos();
+            infoService.MarkExpiredOrderInfos(callback);
         }
+
         public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredTicketMcsLeadPlayerIds()
         {
             return infoService.GetExpiredTicketMcsLeadPlayerIds();

@@ -349,7 +349,7 @@ namespace MiyakoCarryService.Server.Services
             AddOrderInfo(orderInfo);
         }
 
-        public void MarkExpiredOrderInfos()
+        public void MarkExpiredOrderInfos(Action<MongoId, MongoId> callback)
         {
             var orderInfos = GetAllOrderInfo();
             var currentTime = timeUtil.GetTimeStamp();
@@ -370,6 +370,10 @@ namespace MiyakoCarryService.Server.Services
                 if (orderInfo.Status == EInfoStatus.Started)
                 {
                     orderInfo.Status = EInfoStatus.Expired;
+                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    {
+                        callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
+                    }
                 }
             }
             _ = SaveOrderAndTicketInfo();
@@ -435,7 +439,7 @@ namespace MiyakoCarryService.Server.Services
             var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
             if (orderInfo is null || orderInfo.Status != EInfoStatus.Expired)
             {
-                return null; // 未到期不可结单  
+                return null;
             }
             var playerIds = new HashSet<MongoId>(orderInfo.PlayerIds);
             RemoveOrderInfo(orderInfo);

@@ -62,7 +62,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
 
             QuestController.ProcessExpiredQuests(generatedOrder, pmcData);
 
-            InfoController.MarkExpiredOrderInfos();
+            InfoController.MarkExpiredOrderInfos(ProfileController.ProcessExpiredMcsBotPlayerNotify);
 
             var expiredTicketLeads = InfoController.GetExpiredTicketMcsLeadPlayerIds();
             foreach (var kvp in expiredTicketLeads)
@@ -72,16 +72,6 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                     continue;
                 }
                 InfoController.ProcessExpiredTicketInfo(kvp.Key);
-            }
-
-            var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
-            foreach (var kvp in mcsBotPlayerIds)
-            {
-                if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
-                {
-                    continue;
-                }
-                ProfileController.ProcessExpiredMcsBotPlayerNotifies(kvp.Key, kvp.Value);
             }
 
             if (currentTime < generatedOrder.EndTime - 1)

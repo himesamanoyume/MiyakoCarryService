@@ -151,7 +151,7 @@ namespace MiyakoCarryService.Server.Services
                 {
                     if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                     {
-                        var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
+                        var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept, true);
                         notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
                     }
                 }

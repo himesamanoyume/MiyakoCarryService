@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public WsFriendsListAccept GenerateWsFriendsListAccept(SptProfile mcsBotPlayerProfile, NotificationEventType eventType)
+        public WsFriendsListAccept GenerateWsFriendsListAccept(SptProfile mcsBotPlayerProfile, NotificationEventType eventType, bool isExpired = false)
         {
             var data = mcsBotPlayerProfile.CharacterData.PmcData;
             return new WsFriendsListAccept
@@ -65,7 +65,7 @@ namespace MiyakoCarryService.Server.Helper
                     Aid = mcsBotPlayerProfile.ProfileInfo.Aid,
                     Info = new UserDialogDetails
                     {
-                        Nickname = data.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
+                        Nickname = isExpired ? $"({serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {data.Info.Nickname}" : data.Info.Nickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
                         Side = data.Info.Side,
                         Level = data.Info.Level,
                         MemberCategory = data.Info.MemberCategory,
@@ -135,7 +135,7 @@ namespace MiyakoCarryService.Server.Helper
             {
                 EventType = NotificationEventType.groupMatchUserLeave,
                 EventIdentifier = new(),
-                Nickname = $"({serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsBotPlayerProfile.ProfileInfo.Username}" + mcsBotPlayerProfile.ProfileInfo.Username + $" [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
+                Nickname = $"({serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsBotPlayerProfile.ProfileInfo.Username} [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
                 Aid = mcsBotPlayerProfile.ProfileInfo.Aid.Value,
             };
         }

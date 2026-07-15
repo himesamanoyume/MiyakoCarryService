@@ -20,11 +20,6 @@ namespace MiyakoCarryService.Server.Controllers
             profileService.ProcessExpiredMcsBotPlayerNotify(mcsLeadPlayerId, mcsBotPlayerId);
         }
 
-        public void ProcessExpiredMcsBotPlayerNotifies(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
-        {
-            profileService.ProcessExpiredMcsBotPlayerNotifies(mcsLeadPlayerId, mcsBotPlayerIds);
-        }
-
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
         {
             await profileService.SaveMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerProfile);
