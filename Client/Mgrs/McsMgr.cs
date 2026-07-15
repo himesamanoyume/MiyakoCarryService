@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             squadMembers.AddOrUpdate(
                 mcsBotPlayerId,
-                id => FetchMcsBotPlayer(id),
+                FetchMcsBotPlayer,
                 (id, oldMcsBotPlayer) => oldMcsBotPlayer ?? FetchMcsBotPlayer(id)
             );
 
@@ -236,7 +236,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayers = new List<Player>();
             foreach (var kvp in _mcsSquadDict.Values)
             {
-                mcsBotPlayers.AddRange(kvp.Values);
+                mcsBotPlayers.AddRange(kvp.Values.Where(p => p != null));
             }
             return mcsBotPlayers;
         }
@@ -251,6 +251,11 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 foreach (var mcsBotPlayer in kvp.Values)
                 {
+                    if (mcsBotPlayer == null)
+                    {
+                        continue;
+                    }
+                    
                     if (mcsBotPlayer.HealthController.IsAlive)
                     {
                         mcsBotPlayers.Add(mcsBotPlayer);
