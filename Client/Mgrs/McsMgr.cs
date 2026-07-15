@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public Dictionary<MongoID, Dictionary<MongoID, GroupPlayerViewModelClass>> McsTransitBotPlayers = new();
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
         public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
+        private bool _isTransiting = false;
 
         public bool IsHost = false;
 
@@ -31,6 +32,12 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
+        }
+
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            _isTransiting = @event.ExitStatus == ExitStatus.Transit;
+            base.OnGameWorldEnded(@event);
         }
 
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, McsAILeadPlayer mcsAILeadPlayer = null)
@@ -419,10 +426,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 _friendlyFireDebouncer.Clear();
             }
             _friendlyFireDebouncer = null;
-            if (_mcsDeadBotPlayerIds != null)
-            {
-                _mcsDeadBotPlayerIds.Clear();
-            }
             if (_mcsSquadDict != null)
             {
                 _mcsSquadDict.Clear();
@@ -443,14 +446,22 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 McsLeadPlayerConfigs.Clear();
             }
-            if (McsTransitBotPlayers != null)
+            if (!_isTransiting)
             {
-                foreach (var transitMembers in McsTransitBotPlayers.Values)
+                if (_mcsDeadBotPlayerIds != null)
                 {
-                    transitMembers.Clear();
+                    _mcsDeadBotPlayerIds.Clear();
+                }
+                if (McsTransitBotPlayers != null)
+                {
+                    foreach (var transitMembers in McsTransitBotPlayers.Values)
+                    {
+                        transitMembers.Clear();
+                    }
                 }
             }
             IsHost = false;
+            _isTransiting = false;
         }
 
         private void UpdateMcsBotPlayerConfig(ConfigEntrySettingChangedEvent @event)
