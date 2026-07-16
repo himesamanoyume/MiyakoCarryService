@@ -279,17 +279,33 @@ namespace MiyakoCarryService.Server.Services
             _ = SaveOrderAndTicketInfo();
         }
 
-        public void SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)
+        public void SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId, Action<MongoId, MongoId> callback)
         {
             var orderInfos = GetAllOrderInfo();
             var currentTime = timeUtil.GetTimeStamp();
 
             foreach (var orderInfo in orderInfos)
             {
-                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId && orderInfo.Status == EInfoStatus.Started)
+                if (orderInfo.McsLeadPlayerId != mcsLeadPlayerId)
                 {
-                    orderInfo.Status = EInfoStatus.Expired;
-                    orderInfo.ExpirationTime = currentTime;
+                    continue;
+                }
+
+                if (orderInfo.RenewTargetQuestId is not null)
+                {
+                    continue;
+                }
+
+                if (orderInfo.Status != EInfoStatus.Started)
+                {
+                    continue;
+                }
+
+                orderInfo.Status = EInfoStatus.Expired;
+                orderInfo.ExpirationTime = currentTime;
+                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                {
+                    callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
                 }
             }
             _ = SaveOrderAndTicketInfo();
@@ -367,13 +383,16 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
-                if (orderInfo.Status == EInfoStatus.Started)
+                if (orderInfo.Status != EInfoStatus.Started)
                 {
-                    orderInfo.Status = EInfoStatus.Expired;
-                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
-                    {
-                        callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
-                    }
+                    continue;
+                }
+
+                orderInfo.Status = EInfoStatus.Expired;
+                orderInfo.ExpirationTime = currentTime;
+                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                {
+                    callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
                 }
             }
             _ = SaveOrderAndTicketInfo();

@@ -172,7 +172,7 @@ namespace MiyakoCarryService.Server.Services
 
         public void TeamKillPunish(MongoId mcsLeadPlayerId)
         {
-            infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
+            infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId, ProcessExpiredMcsBotPlayerNotify);
         }
 
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
