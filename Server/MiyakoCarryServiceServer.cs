@@ -55,6 +55,7 @@ namespace MiyakoCarryService.Server
                 new RemovePlayerBuildPatch(serviceProvider).Enable();
                 new SaveEquipmentBuildPatch(serviceProvider).Enable();
                 new SaveWeaponBuildPatch(serviceProvider).Enable();
+                new WebSocketDisconnectPatch().Enable();
 
                 await Task.CompletedTask;
             }
@@ -88,6 +89,7 @@ namespace MiyakoCarryService.Server
                 await inventoryService.OnPostLoadAsync();
                 await Task.Run(() =>
                 {
+                    infoService.MarkExpiredOrderInfos(profileService.ProcessExpiredMcsBotPlayerNotify);
                     var mcsBotPlayerIds = infoService.GetExpiredMcsBotPlayerIds();
                     foreach (var kvp in mcsBotPlayerIds)
                     {
@@ -95,8 +97,7 @@ namespace MiyakoCarryService.Server
                         {
                             continue;
                         }
-                        infoService.ProcessExpiredOrderAndTicketInfo(kvp.Key);
-                        profileService.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                        infoService.ProcessExpiredTicketInfo(kvp.Key);
                     }
                 });
                 _ = CheckForUpdate();

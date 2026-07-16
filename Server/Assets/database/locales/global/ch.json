@@ -214,5 +214,9 @@
     "Mcs/ClearAreaCommand Name": "清扫区域",  
     "Mcs/ClearAreaCommand TargetName": "命令护航清扫指定位置的周围区域",  
     "Mcs/TeamClearAreaCommand Name": "全队清扫区域",  
-    "Mcs/TeamClearAreaCommand TargetName": "全队护航合作清扫指定位置的周围区域"
+    "Mcs/TeamClearAreaCommand TargetName": "全队护航合作清扫指定位置的周围区域",
+    "Mcs/SettleMcsOrder": "结单",
+    "Mcs/SettleMcsOrderRefuse": "此订单暂未过期，当前无法结单",
+    "Mcs/RenewMcsOrder": "续订",
+    "Mcs/RenewMcsOrderRefuse": "续订失败"
 }

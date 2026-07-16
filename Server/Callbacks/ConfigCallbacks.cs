@@ -21,13 +21,5 @@ namespace MiyakoCarryService.Server.Callbacks
         {
             return httpResponseUtil.NoBody(configController.GetMcsPluginClientConfig());
         }
-
-        /// <summary>
-        /// 处理 /mcs/client/brain/config
-        /// </summary>
-        public virtual async ValueTask<string> GetAllCustomBrainName(string url, EmptyRequestData _, MongoId mcsLeadPlayerId)
-        {
-            return httpResponseUtil.NoBody(configController.GetAllCustomBrainName());
-        }
     }
 }

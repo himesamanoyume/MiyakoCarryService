@@ -209,7 +209,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new MatchMakerSideSelectionScreenPatch());
             _patches.Add(new ActionPanelAnchorPatch());
             _patches.Add(new PartyInfoPanelScrollPatch());
-            _patches.Add(new EquipmentBuildsScreenShowPatch());
+            _patches.Add(new EquipmentBuildsScreenPatch());
             _patches.Add(new BotFirstAidClassMinPercentPatch());
             _patches.Add(new OnBeenKilledByAggressorPatch());
             _patches.Add(new TriggerWithIdEnterPatch());
@@ -223,6 +223,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new PlayerSayPatch());
             _patches.Add(new PlayHitEffectPatch());
             _patches.Add(new BotBewarePlantedMineUpdatePatch());
+            _patches.Add(new AvailableInteractionStateSetterPatch());
 
             if (FikaInstalled)
             {

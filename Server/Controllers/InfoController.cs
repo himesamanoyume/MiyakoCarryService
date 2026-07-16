@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,16 +21,16 @@ namespace MiyakoCarryService.Server.Controllers
             return infoService.GetExpiredMcsBotPlayerIds();
         }
 
-        public void ProcessExpiredOrderInfo(MongoId mcsLeadPlayerId)
+        public void ProcessExpiredTicketInfo(MongoId mcsLeadPlayerId)
         {
-            infoService.ProcessExpiredOrderAndTicketInfo(mcsLeadPlayerId);
+            infoService.ProcessExpiredTicketInfo(mcsLeadPlayerId);
         }
 
         public void RemoveOrderInfo(OrderInfo orderInfo)
         {
             infoService.RemoveOrderInfo(orderInfo);
         }
-        
+
         public void RemoveTicketInfo(TicketInfo ticketInfo)
         {
             infoService.RemoveTicketInfo(ticketInfo);
@@ -73,6 +74,28 @@ namespace MiyakoCarryService.Server.Controllers
         public bool CheckMcsBotPlayerExist(MongoId mcsLeadPlayerId)
         {
             return infoService.CheckMcsBotPlayerExist(mcsLeadPlayerId);
+        }
+
+        public void MarkExpiredOrderInfos(Action<MongoId, MongoId> callback)
+        {
+            infoService.MarkExpiredOrderInfos(callback);
+        }
+
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredTicketMcsLeadPlayerIds()
+        {
+            return infoService.GetExpiredTicketMcsLeadPlayerIds();
+        }
+        public bool IsOrderExpiredByBotPlayerProfileId(MongoId mcsBotPlayerId)
+        {
+            return infoService.IsOrderExpiredByBotPlayerProfileId(mcsBotPlayerId);
+        }
+        public void ApplyRenew(MongoId targetQuestId, int duration)
+        {
+            infoService.ApplyRenew(targetQuestId, duration);
+        }
+        public OrderInfo? GetOrderInfoByBotPlayerProfileId(MongoId mcsBotPlayerId)
+        {
+            return infoService.GetOrderInfoByBotPlayerProfileId(mcsBotPlayerId);
         }
     }
 }

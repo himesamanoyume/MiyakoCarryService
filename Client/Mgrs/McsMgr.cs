@@ -25,6 +25,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public Dictionary<MongoID, Dictionary<MongoID, RaidPlayer>> McsTransitBotPlayers = new();
         private Debouncer<MongoID, FriendlyFirePenalty> _friendlyFireDebouncer;
         public ConcurrentDictionary<MongoID, McsBotPlayerConfig> McsLeadPlayerConfigs = new();
+        private bool _isTransiting = false;
 
         public bool IsHost = false;
 
@@ -34,13 +35,19 @@ namespace MiyakoCarryService.Client.Mgrs
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
         }
 
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            _isTransiting = @event.ExitStatus == ExitStatus.Transit;
+            base.OnGameWorldEnded(@event);
+        }
+
         public void AddMcsSquadMember(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, McsAILeadPlayer mcsAILeadPlayer = null)
         {
             var squadMembers = _mcsSquadDict.GetOrAdd(mcsLeadPlayerId, _ => new());
 
             squadMembers.AddOrUpdate(
                 mcsBotPlayerId,
-                id => FetchMcsBotPlayer(id),
+                FetchMcsBotPlayer,
                 (id, oldMcsBotPlayer) => oldMcsBotPlayer ?? FetchMcsBotPlayer(id)
             );
 
@@ -230,7 +237,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayers = new List<Player>();
             foreach (var kvp in _mcsSquadDict.Values)
             {
-                mcsBotPlayers.AddRange(kvp.Values);
+                mcsBotPlayers.AddRange(kvp.Values.Where(p => p != null));
             }
             return mcsBotPlayers;
         }
@@ -245,6 +252,11 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 foreach (var mcsBotPlayer in kvp.Values)
                 {
+                    if (mcsBotPlayer == null)
+                    {
+                        continue;
+                    }
+                    
                     if (mcsBotPlayer.HealthController.IsAlive)
                     {
                         mcsBotPlayers.Add(mcsBotPlayer);
@@ -420,10 +432,6 @@ namespace MiyakoCarryService.Client.Mgrs
                 _friendlyFireDebouncer.Clear();
             }
             _friendlyFireDebouncer = null;
-            if (_mcsDeadBotPlayerIds != null)
-            {
-                _mcsDeadBotPlayerIds.Clear();
-            }
             if (_mcsSquadDict != null)
             {
                 _mcsSquadDict.Clear();
@@ -444,14 +452,22 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 McsLeadPlayerConfigs.Clear();
             }
-            if (McsTransitBotPlayers != null)
+            if (!_isTransiting)
             {
-                foreach (var transitMembers in McsTransitBotPlayers.Values)
+                if (_mcsDeadBotPlayerIds != null)
                 {
-                    transitMembers.Clear();
+                    _mcsDeadBotPlayerIds.Clear();
+                }
+                if (McsTransitBotPlayers != null)
+                {
+                    foreach (var transitMembers in McsTransitBotPlayers.Values)
+                    {
+                        transitMembers.Clear();
+                    }
                 }
             }
             IsHost = false;
+            _isTransiting = false;
         }
 
         private void UpdateMcsBotPlayerConfig(ConfigEntrySettingChangedEvent @event)

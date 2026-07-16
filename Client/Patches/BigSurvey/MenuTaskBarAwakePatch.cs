@@ -201,7 +201,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() =>
                 {
-                    GetContextInteractionsPatch.OnExitMcsBotPlayerInventoryMode(GetContextInteractionsPatch.McsBotPlayerAid);
+                    TasksExtensions.HandleExceptions(GetContextInteractionsPatch.OnExitMcsBotPlayerInventoryMode(GetContextInteractionsPatch.McsBotPlayerAid));
                 });
             }
         }

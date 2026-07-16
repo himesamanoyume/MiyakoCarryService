@@ -69,20 +69,21 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             }
 
             QuestController.ProcessExpiredQuests(generatedOrder, pmcData);
-            var mcsBotPlayerIds = InfoController.GetExpiredMcsBotPlayerIds();
-            foreach (var kvp in mcsBotPlayerIds)
+
+            InfoController.MarkExpiredOrderInfos(ProfileController.ProcessExpiredMcsBotPlayerNotify);
+
+            var expiredTicketLeads = InfoController.GetExpiredTicketMcsLeadPlayerIds();
+            foreach (var kvp in expiredTicketLeads)
             {
                 if (ProfileController.IsMcsBotPlayerInventoryMode(kvp.Key))
                 {
                     continue;
                 }
-                InfoController.ProcessExpiredOrderInfo(kvp.Key);
-                ProfileController.ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
+                InfoController.ProcessExpiredTicketInfo(kvp.Key);
             }
 
             if (currentTime < generatedOrder.EndTime - 1)
             {
-                // Console.WriteLine("旧任务数据仍合法");
                 __result.Add(generatedOrder);
                 return;
             }

@@ -18,5 +18,6 @@
     "Mcs/CurrentPriceIncrease": "Current permanent price increase: {0}%",
     "Mcs/GenerateProfileError": "Exception generating carry service profile for {0}, default profile has been created instead",
     "Mcs/McsInventoryModeRagfairRefuse": "In the Mcs Inventory Mode, it is unable to add offers on the flea market.",
-    "Mcs/NewVersionNotify": "MiyakoCarryService new version available: {0} ---> {1}"
+    "Mcs/NewVersionNotify": "MiyakoCarryService new version available: {0} ---> {1}",
+    "Mcs/McsBotPlayerExpired": "Expired"
 }

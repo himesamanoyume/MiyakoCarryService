@@ -104,7 +104,6 @@ namespace MiyakoCarryService.Server.Services
             {
                 var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
                 logger.Error(errorInfo);
-                // throw new NullReferenceException(errorInfo);
             }
 
             try
@@ -142,13 +141,45 @@ namespace MiyakoCarryService.Server.Services
             }
         }
 
+        public void ProcessExpiredMcsBotPlayerNotify(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
+        {
+            var mcsBotPlayerProfile = GetMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
+            if (mcsBotPlayerProfile is null)
+            {
+                var errorInfo = serverLocalisationService.GetText(Locales.FAILEDLOADMCSPLAYERPROFILE);
+                logger.Error(errorInfo);
+                return;
+            }
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1000);
+                try
+                {
+                    if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
+                    {
+                        var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.friendListRequestAccept, true);
+                        notificationSendHelper.SendMessage(mcsLeadPlayerId, notification);
+                    }
+                }
+                finally
+                {
+
+                }
+            });
+        }
+
+        public void ProcessExpiredMcsBotPlayerNotifies(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
+        {
+            foreach (var mcsBotPlayerId in mcsBotPlayerIds)
+            {
+                ProcessExpiredMcsBotPlayerNotify(mcsLeadPlayerId, mcsBotPlayerId);
+            }
+        }
+
         public void TeamKillPunish(MongoId mcsLeadPlayerId)
         {
-            var mcsBotPlayerIds = infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId);
-            foreach (var kvp in mcsBotPlayerIds)
-            {
-                ProcessExpiredMcsBotPlayerProfiles(kvp.Key, kvp.Value);
-            }
+            infoService.SetAllOrderInfosToExpire(mcsLeadPlayerId, ProcessExpiredMcsBotPlayerNotify);
         }
 
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
@@ -712,8 +743,8 @@ namespace MiyakoCarryService.Server.Services
             {
                 { Money.EUROS, 114514 },
                 { Money.DOLLARS, 1919810 },
-                { Money.ROUBLES, 151560107 },
-                { Money.GP, 1314 }
+                { Money.GP, 1314 },
+                { Money.ROUBLES, 151247016 },
             };
 
             var stashId = pmcData.Inventory.Stash.Value;
@@ -745,6 +776,68 @@ namespace MiyakoCarryService.Server.Services
                 }
 
                 pmcData.Inventory.Items.Add(item);
+            }
+
+            var mcsFont = new Dictionary<char, string[]>
+            {
+                ['M'] = ["10001", "11011", "10101", "10001", "10001"],
+                ['Y'] = ["10001", "01010", "00100", "00100", "00100"],
+                ['L'] = ["10000", "10000", "10000", "10000", "11111"],
+                ['O'] = ["01110", "10001", "10001", "10001", "01110"],
+                ['V'] = ["10001", "10001", "10001", "01010", "00100"],
+                ['E'] = ["11111", "10000", "11110", "10000", "11111"],
+                ['I'] = ["11111", "00100", "00100", "00100", "11111"],
+                ['A'] = ["01110", "10001", "11111", "10001", "10001"],
+                ['K'] = ["10001", "10010", "11100", "10010", "10001"],
+            };
+            var mcsAmounts = new[] { 143, 214, 520, 521, 5963, 4869, 236, 1, 2945, 10107, 15, 156 };
+
+            const string mcsText = "MYLOVEMIYAKO";
+            const int startX = 2;
+            const int letterGap = 1;
+            int cursorY = 1;
+
+            for (int i = 0; i < mcsText.Length; i++)
+            {
+                var ch = mcsText[i];
+                if (!mcsFont.TryGetValue(ch, out var glyph))
+                {
+                    continue;
+                }
+
+                var amount = mcsAmounts[i]; // 当前字母使用的卢布数量  
+
+                for (int row = 0; row < glyph.Length; row++)
+                {
+                    var line = glyph[row];
+                    for (int col = 0; col < line.Length; col++)
+                    {
+                        if (line[col] != '1')
+                        {
+                            continue;
+                        }
+
+                        int x = startX + col;
+                        int y = cursorY + row;
+                        if (x < 0 || x > 9 || y < 0 || y > 71)
+                        {
+                            continue; // 越界保护  
+                        }
+
+                        var pixel = new Item
+                        {
+                            Id = new(),
+                            Template = Money.ROUBLES,
+                            ParentId = stashId,
+                            SlotId = "hideout",
+                            Location = new ItemLocation { X = x, Y = y, R = ItemRotation.Horizontal },
+                            Upd = new Upd { StackObjectsCount = amount }
+                        };
+                        pmcData.Inventory.Items.Add(pixel);
+                    }
+                }
+
+                cursorY += glyph.Length + letterGap;
             }
 
             if (pmcData.Inventory.HideoutAreaStashes == null)
@@ -922,6 +1015,27 @@ namespace MiyakoCarryService.Server.Services
                 FriendProfileIds = [],
                 CustomisationUnlocks = [],
             };
+        }
+
+        public bool SettleOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            if (IsMcsBotPlayerInventoryMode(mcsLeadPlayerId))
+            {
+                return false;
+            }
+            var profile = GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, aid);
+            if (profile is null)
+            {
+                return false;
+            }
+            var botProfileId = profile.ProfileInfo.ProfileId.Value;
+            var playerIds = infoService.SettleOrderByBotPlayerProfileId(botProfileId);
+            if (playerIds is null)
+            {
+                return false;
+            }
+            ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, playerIds);
+            return true;
         }
 
         public async Task OnPostLoadAsync()

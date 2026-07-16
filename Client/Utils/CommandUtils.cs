@@ -20,6 +20,11 @@ namespace MiyakoCarryService.Client.Utils
     {
         private static readonly Dictionary<string, List<Action<McsCommandMenu, Player[]>>> _extensions = new();
         private static readonly Stack<Action<McsCommandMenu>> _menuStack = new();
+        private static AvailableInteractionState _currentMenu;
+        private static InteractionAction _cancelAction;
+        private static readonly List<InteractionAction> _injectedObjectActions = new();
+        public static bool IsCommandMenuOpen => _menuStack.Count > 0;
+        public static AvailableInteractionState CurrentMenu => _currentMenu;
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private static NavMeshTriangulation? _cachedTriangulation;
 
@@ -140,23 +145,40 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void PostBuildCommandMenu(AvailableInteractionState actionsReturnClass)
         {
-            if (actionsReturnClass != null)
-            {
-                actionsReturnClass.Actions.Add(MakeCommand(Locales.CANCELCOMMAND_NAME, Locales.CANCELCOMMAND_TARGETNAME, false, CloseCommandMenuAction));
-                actionsReturnClass.InitSelected();
-            }
-
             if (GamePlayerOwner == null)
             {
                 return;
             }
 
-            GamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
+            if (actionsReturnClass != null)
+            {
+                _cancelAction = MakeCommand(Locales.CANCELCOMMAND_NAME, Locales.CANCELCOMMAND_TARGETNAME, false, CloseCommandMenuAction);
+                actionsReturnClass.Actions.Add(_cancelAction);
+            }
+
+            var existing = GamePlayerOwner.AvailableInteractionState.Value;
+            var previousCommandMenu = _currentMenu;
+
+            _currentMenu = actionsReturnClass;
+            _injectedObjectActions.Clear();
+
+            if (existing != null && !ReferenceEquals(existing, previousCommandMenu) && existing.Actions != null && existing.Actions.Count > 0)
+            {
+                MergeIncomingIntoCommandMenu(existing);
+            }
+            else
+            {
+                _currentMenu?.InitSelected();
+            }
+            GamePlayerOwner.AvailableInteractionState.Value = _currentMenu;
         }
 
         public static void CloseCommandMenuAction()
         {
             _menuStack.Clear();
+            _currentMenu = null;
+            _cancelAction = null;
+            _injectedObjectActions.Clear();
             GamePlayerOwner.AvailableInteractionState.Value = new AvailableInteractionState();
         }
 
@@ -399,6 +421,41 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             return segments;
+        }
+
+        public static void MergeIncomingIntoCommandMenu(AvailableInteractionState incoming)
+        {
+            if (_currentMenu == null)
+            {
+                return;
+            }
+
+            foreach (var action in _injectedObjectActions)
+            {
+                _currentMenu.Actions.Remove(action);
+            }
+            _injectedObjectActions.Clear();
+
+            if (incoming != null && !ReferenceEquals(incoming, _currentMenu) && incoming.Actions != null && incoming.Actions.Count > 0)
+            {
+                var insertIndex = _cancelAction != null ? _currentMenu.Actions.IndexOf(_cancelAction) : -1;
+                if (insertIndex < 0)
+                {
+                    insertIndex = _currentMenu.Actions.Count;
+                }
+
+                foreach (var action in incoming.Actions)
+                {
+                    _currentMenu.Actions.Insert(insertIndex++, action);
+                    _injectedObjectActions.Add(action);
+                }
+            }
+
+            var prev = _currentMenu.SelectedAction;
+            if (prev == null || prev.Disabled || !_currentMenu.Actions.Contains(prev))
+            {
+                _currentMenu.InitSelected();
+            }
         }
     }
 }

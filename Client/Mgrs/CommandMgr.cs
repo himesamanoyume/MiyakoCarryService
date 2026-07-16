@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -37,6 +36,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.DropTargetLoot.ToString(), DropTargetLootCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.ClearArea.ToString(), ClearAreaCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.OpenInventory.ToString(), OpenInventoryCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.GoToExfil.ToString(), GoToExfilCommandAction);
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
@@ -675,36 +675,33 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
-                foreach (var mcsBotPlayer in mcsBotPlayers)
-                {
-                    EventMgr.Notify(new CommandMgrHandleFikaEvent
-                    {
-                        McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ECommandType.GoToExfil.ToString()
-                    });
-                }
+                CommandUtils.Dispatch(
+                    ECommandType.GoToExfil.ToString(),
+                    [mcsBotPlayer],
+                    null
+                );
             }
-            else
-            {
-                var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
-                foreach (var mcsBotPlayer in mcsBotPlayers)
-                {
-                    if (mcsBotPlayer == null)
-                    {
-                        continue;
-                    }
+        }
 
-                    var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
-                    if (mcsBotPlayerData == null)
-                    {
-                        continue;
-                    }
-                    mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
-                }
+        public virtual void GoToExfilCommandAction(McsCommandContext ctx)
+        {
+            var mcsBotPlayer = ctx.McsBotPlayer;
+            var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+            if (botOwner == null)
+            {
+                return;
             }
+
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return;
+            }
+
+            mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
         }
 
         public virtual void ClearAreaCommandAction(McsCommandContext ctx)

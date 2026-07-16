@@ -81,7 +81,7 @@ namespace MiyakoCarryService.Server.Services
         {
             foreach (var orderInfo in _orderInfos.Values)
             {
-                if (orderInfo.Status is not EInfoStatus.Started)
+                if (orderInfo.Status is not (EInfoStatus.Started or EInfoStatus.Expired))
                 {
                     continue;
                 }
@@ -265,17 +265,8 @@ namespace MiyakoCarryService.Server.Services
             return mcsBotPlayerIds;
         }
 
-        public void ProcessExpiredOrderAndTicketInfo(MongoId mcsLeadPlayerId)
+        public void ProcessExpiredTicketInfo(MongoId mcsLeadPlayerId)
         {
-            var orderInfos = GetAllOrderInfo();
-            foreach (var orderInfo in orderInfos)
-            {
-                var currentTime = timeUtil.GetTimeStamp();
-                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId && currentTime >= orderInfo.ExpirationTime - 1)
-                {
-                    RemoveOrderInfo(orderInfo);
-                }
-            }
             var ticketInfos = GetAllTicketInfo();
             foreach (var ticketInfo in ticketInfos)
             {
@@ -288,25 +279,36 @@ namespace MiyakoCarryService.Server.Services
             _ = SaveOrderAndTicketInfo();
         }
 
-        public ConcurrentDictionary<MongoId, HashSet<MongoId>> SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId)
+        public void SetAllOrderInfosToExpire(MongoId mcsLeadPlayerId, Action<MongoId, MongoId> callback)
         {
-            var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
             var orderInfos = GetAllOrderInfo();
+            var currentTime = timeUtil.GetTimeStamp();
 
             foreach (var orderInfo in orderInfos)
             {
-                if (orderInfo.McsLeadPlayerId == mcsLeadPlayerId)
+                if (orderInfo.McsLeadPlayerId != mcsLeadPlayerId)
                 {
-                    RemoveOrderInfo(orderInfo);
-                    mcsBotPlayerIds.GetOrAdd(orderInfo.McsLeadPlayerId, _ => new());
-                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
-                    {
-                        mcsBotPlayerIds[orderInfo.McsLeadPlayerId].Add(mcsBotPlayerId);
-                    }
+                    continue;
+                }
+
+                if (orderInfo.RenewTargetQuestId is not null)
+                {
+                    continue;
+                }
+
+                if (orderInfo.Status != EInfoStatus.Started)
+                {
+                    continue;
+                }
+
+                orderInfo.Status = EInfoStatus.Expired;
+                orderInfo.ExpirationTime = currentTime;
+                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                {
+                    callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
                 }
             }
             _ = SaveOrderAndTicketInfo();
-            return mcsBotPlayerIds;
         }
 
         public void SetBaseInfoStarted(BaseInfo baseInfo)
@@ -344,6 +346,143 @@ namespace MiyakoCarryService.Server.Services
 
                 }
             });
+        }
+
+        public void CreateRenewOrderInfo(MongoId mcsLeadPlayerId, HashSet<MongoId> existingPlayerIds, SpawnType spawnType, int carryServiceLevel, int duration, MongoId questId, MongoId renewTargetQuestId)
+        {
+            var orderInfo = new OrderInfo()
+            {
+                McsLeadPlayerId = mcsLeadPlayerId,
+                QuestId = questId,
+                PlayerIds = existingPlayerIds,
+                SpawnType = spawnType,
+                CarryServiceLevel = carryServiceLevel,
+                Duration = duration,
+                Status = EInfoStatus.AvailableForStart,
+                ExpirationTime = timeUtil.GetTimeStamp() + configService.GetOrderConfig().OrderQuests.First().ResetTime,
+                RenewTargetQuestId = renewTargetQuestId
+            };
+            AddOrderInfo(orderInfo);
+        }
+
+        public void MarkExpiredOrderInfos(Action<MongoId, MongoId> callback)
+        {
+            var orderInfos = GetAllOrderInfo();
+            var currentTime = timeUtil.GetTimeStamp();
+
+            foreach (var orderInfo in orderInfos)
+            {
+                if (currentTime < orderInfo.ExpirationTime - 1)
+                {
+                    continue;
+                }
+
+                if (orderInfo.RenewTargetQuestId is not null)
+                {
+                    RemoveOrderInfo(orderInfo);
+                    continue;
+                }
+
+                if (orderInfo.Status != EInfoStatus.Started)
+                {
+                    continue;
+                }
+
+                orderInfo.Status = EInfoStatus.Expired;
+                orderInfo.ExpirationTime = currentTime;
+                foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                {
+                    callback?.Invoke(orderInfo.McsLeadPlayerId, mcsBotPlayerId);
+                }
+            }
+            _ = SaveOrderAndTicketInfo();
+        }
+
+        public ConcurrentDictionary<MongoId, HashSet<MongoId>> GetExpiredTicketMcsLeadPlayerIds()
+        {
+            var mcsBotPlayerIds = new ConcurrentDictionary<MongoId, HashSet<MongoId>>();
+            var ticketInfos = GetAllTicketInfo();
+            foreach (var ticketInfo in ticketInfos)
+            {
+                var currentTime = timeUtil.GetTimeStamp();
+                if (currentTime >= ticketInfo.ExpirationTime - 1)
+                {
+                    if (ticketInfo.Status == EInfoStatus.AvailableForStart)
+                    {
+                        continue;
+                    }
+                    mcsBotPlayerIds.GetOrAdd(ticketInfo.McsLeadPlayerId, _ => new());
+                }
+            }
+            return mcsBotPlayerIds;
+        }
+
+        public OrderInfo? GetOrderInfoByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
+        {
+            foreach (var orderInfo in _orderInfos.Values)
+            {
+                if (orderInfo.RenewTargetQuestId is not null)
+                {
+                    continue;
+                }
+                if (orderInfo.PlayerIds.Contains(mcsBotPlayerProfileId))
+                {
+                    return orderInfo;
+                }
+            }
+            return null;
+        }
+
+        public OrderInfo? GetRenewableOrderInfoByBotPlayerProfileId(MongoId botProfileId)
+        {
+            var orderInfo = GetOrderInfoByBotPlayerProfileId(botProfileId);
+            if (orderInfo is null)
+            {
+                return null;
+            }
+            if (orderInfo.Status != EInfoStatus.Started && orderInfo.Status != EInfoStatus.Expired)
+            {
+                return null;
+            }
+            return orderInfo;
+        }
+
+        public bool IsOrderExpiredByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
+        {
+            var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
+            return orderInfo is not null && orderInfo.Status is EInfoStatus.Expired;
+        }
+
+        public HashSet<MongoId>? SettleOrderByBotPlayerProfileId(MongoId mcsBotPlayerProfileId)
+        {
+            var orderInfo = GetOrderInfoByBotPlayerProfileId(mcsBotPlayerProfileId);
+            if (orderInfo is null || orderInfo.Status != EInfoStatus.Expired)
+            {
+                return null;
+            }
+            var playerIds = new HashSet<MongoId>(orderInfo.PlayerIds);
+            RemoveOrderInfo(orderInfo);
+            _ = SaveOrderAndTicketInfo();
+            return playerIds;
+        }
+
+        public void ApplyRenew(MongoId targetQuestId, int duration)
+        {
+            if (!_orderInfos.TryGetValue(targetQuestId, out var originalOrder))
+            {
+                return;
+            }
+            var currentTime = timeUtil.GetTimeStamp();
+            if (originalOrder.Status == EInfoStatus.Expired)
+            {
+                originalOrder.Status = EInfoStatus.Started;
+                originalOrder.ExpirationTime = currentTime + duration * 3600;
+            }
+            else
+            {
+                originalOrder.ExpirationTime += duration * 3600;
+            }
+            _ = SaveOrderAndTicketInfo();
         }
 
         public async Task OnPostLoadAsync()

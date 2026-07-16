@@ -15,14 +15,9 @@ namespace MiyakoCarryService.Server.Controllers
         ProfileService profileService
     )
     {
-        public void ProcessExpiredMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
+        public void ProcessExpiredMcsBotPlayerNotify(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
-            profileService.ProcessExpiredMcsBotPlayerProfile(mcsLeadPlayerId, mcsBotPlayerId);
-        }
-
-        public void ProcessExpiredMcsBotPlayerProfiles(MongoId mcsLeadPlayerId, HashSet<MongoId> mcsBotPlayerIds)
-        {
-            profileService.ProcessExpiredMcsBotPlayerProfiles(mcsLeadPlayerId, mcsBotPlayerIds);
+            profileService.ProcessExpiredMcsBotPlayerNotify(mcsLeadPlayerId, mcsBotPlayerId);
         }
 
         public async Task SaveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, SptProfile mcsBotPlayerProfile)
@@ -88,6 +83,11 @@ namespace MiyakoCarryService.Server.Controllers
         public bool IsMcsBotPlayerInventoryMode(MongoId mcsLeadPlayerId)
         {
             return profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId);
+        }
+
+        public bool SettleOrder(MongoId mcsLeadPlayerId, string aid)
+        {
+            return profileService.SettleOrder(mcsLeadPlayerId, aid);  
         }
     }
 }

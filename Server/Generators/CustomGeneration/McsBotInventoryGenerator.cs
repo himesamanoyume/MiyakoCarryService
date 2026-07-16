@@ -61,6 +61,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             EquipmentSlots.FaceCover,
             EquipmentSlots.Headwear,
             EquipmentSlots.Earpiece,
+            EquipmentSlots.Eyewear
         ];
 
         public BotBaseInventory CustomGenerateInventory(
@@ -285,6 +286,27 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     BotId = botId,
                     RootEquipmentSlot = EquipmentSlots.Earpiece,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.Earpiece],
+                    ModPool = templateInventory.Mods,
+                    SpawnChances = wornItemChances,
+                    BotData = new BotData
+                    {
+                        Role = botGenerationDetails.RoleLowercase,
+                        Level = 90,
+                        EquipmentRole = botEquipmentRole,
+                    },
+                    Inventory = botInventory,
+                    BotEquipmentConfig = botEquipConfig,
+                    RandomisationDetails = randomistionDetails,
+                    GeneratingPlayerLevel = 90,
+                }
+            );
+
+            GenerateEquipment(
+                new GenerateEquipmentProperties
+                {
+                    BotId = botId,
+                    RootEquipmentSlot = EquipmentSlots.Eyewear,
+                    RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.Eyewear],
                     ModPool = templateInventory.Mods,
                     SpawnChances = wornItemChances,
                     BotData = new BotData

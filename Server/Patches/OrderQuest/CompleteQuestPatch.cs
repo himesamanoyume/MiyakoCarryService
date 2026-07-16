@@ -1,5 +1,6 @@
 
 using System;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,11 +40,34 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             {
                 if (completedQuestId == orderInfo.QuestId)
                 {
-                    InfoController.SetBaseInfoStarted(orderInfo);
-                    foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                    if (orderInfo.RenewTargetQuestId is not null)
                     {
-                        var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                        InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        var targetQuestId = orderInfo.RenewTargetQuestId.Value;
+                        var originalOrder = orderInfos.FirstOrDefault(o => o.QuestId == targetQuestId);
+                        if (originalOrder is not null)
+                        {
+                            InfoController.ApplyRenew(originalOrder.QuestId, originalOrder.Duration);
+                            foreach (var mcsBotPlayerId in originalOrder.PlayerIds)
+                            {
+                                var mcsBotPlayerProfile = ProfileController.GetMcsBotPlayerProfile(originalOrder.McsLeadPlayerId, mcsBotPlayerId);
+                                if (mcsBotPlayerProfile is null)
+                                {
+                                    continue;
+                                }
+                                InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, originalOrder.McsLeadPlayerId);
+                            }
+                        }
+
+                        InfoController.RemoveOrderInfo(orderInfo);
+                    }
+                    else
+                    {
+                        InfoController.SetBaseInfoStarted(orderInfo);
+                        foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
+                        {
+                            var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
+                            InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                        }
                     }
                     break;
                 }

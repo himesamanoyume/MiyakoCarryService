@@ -110,7 +110,7 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return new();
             }
-            
+
             return response;
         }
 
@@ -149,12 +149,12 @@ namespace MiyakoCarryService.Client.Utils
         public static async Task<List<MongoID>> RequestMySquadMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
         {
             var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);
-            
+
             if (response == null)
             {
                 return new();
             }
-            
+
             return response;
         }
 
@@ -191,22 +191,6 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        /// <summary>
-        /// 获取非原生的BrainName。可能用不上了
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<List<string>> GetAllCustomBrainName()
-        {
-            var response = await GetJsonAsync<List<string>>("/mcs/client/brain/config");
-            
-            if (response == null)
-            {
-                return new();
-            }
-
-            return response;
-        }
-
         public static McsPluginClientConfig GetMcsPluginClientConfig()
         {
             try
@@ -218,6 +202,20 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return new();
             }
+        }
+
+        public static bool SettleMcsOrder(McsBotPlayerAid mcsBotPlayerAid)
+        {
+            var response = PostJson<McsBotPlayerAid, bool>("/mcs/client/order/settle", mcsBotPlayerAid);
+
+            return response;
+        }
+
+        public static bool RenewMcsOrder(McsBotPlayerAid mcsBotPlayerAid)
+        {
+            var response = PostJson<McsBotPlayerAid, bool>("/mcs/client/order/renew", mcsBotPlayerAid);
+
+            return response;
         }
     }
 }

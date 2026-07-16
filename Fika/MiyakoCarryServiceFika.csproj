@@ -15,7 +15,7 @@
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
     <Version>1.1.0.0</Version>
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
-    <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
+    <Trademark>https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

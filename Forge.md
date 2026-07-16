@@ -69,13 +69,21 @@ _Currently Mcs does not provide indefinite service. When the service period you 
 
 _1. Mcs Inventory Mode modifies the `McsBotPlayer`'s equipment only in PMC mode. As is well known, PMC mode and SCAV mode are two different characters. According to game settings, you cannot control the SCAV character's equipment, so Mcs will also maintain this setting._
 
-_2. The `McsBotPlayer`'s friend slot has a time limit and will automatically delete the friend when it expires. If you don't want the carefully adjusted `McsBotPlayer` equipment to be deleted due to expiration, it is recommended to order a `McsBotPlayer` for a longer period of time._
+_2. The `McsBotPlayer`'s friend slot will become unavailable upon expiration. You may choose to settle or renew the order. Only upon successful settlement will all data of the expired `McsBotPlayer` be permanently deleted, whereas renewing will issue a new order of the same duration; once the renewal task is completed, the service expiration time will be extended._
+
+### How to Renew and Settle  
+  
+1. Likewise, open the `Invite to group` interface at the bottom-left of the bottom bar.
+2. Likewise, right-click on the `McsBotPlayer` to bring up the right-click menu, select `RENEW ORDER`.
+3. A new quest of the same duration will then be issued; completing it finishes the renewal.
+4. For an already-expired `McsBotPlayer`, selecting `SETTLE ORDER` will permanently delete all data of every `McsBotPlayer` under that order.
+5. The data of an expired `McsBotPlayer` is retained indefinitely until you settle it. You can renew any `McsBotPlayer` at any time to make an expired `McsBotPlayer` available again, or to extend the expiration time of a `McsBotPlayer` that has not yet expired.
 
 ---
 
 ### How to Get Loot Picked Up by `McsBotPlayers` in Raid
 
-When a `McsBotPlayer` picks up target loot, to get items from the `McsBotPlayer` besides looting the body after the `McsBotPlayer` dies, you can also use the `OPEN INVENTORY` command on a single `McsBotPlayer` through the Mcs command menu to remotely open the `McsBotPlayer`'s backpack while the `McsBotPlayer` is still alive.
+When a `McsBotPlayer` picks up target loot, to get items from the `McsBotPlayer` besides looting the body after the `McsBotPlayer` dies, you can also use the `OPEN INVENTORY` command on a single `McsBotPlayer` through the Mcs command menu to remotely open the `McsBotPlayer`'s backpack while the `McsBotPlayer` is still alive, or use the `DROP TARGET LOOT` command to have them drop the items they have currently picked up during the raid right in front of you.
 
 According to game settings, `McsBotPlayer` mimics a real player, so after they pick up loot, if you don't personally take it, everything will not belong to you after the raid ends.
 
@@ -111,19 +119,6 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
     // only this name will be displayed, not the WildSpawnType name.
 } 
     // The last `}` should not have `,`.
-
-// --------------------------------------------
-
-{
-    "WildSpawnType": "xxxWildSpawnType", 
-    "IsBoss": false, 
-    "DisplayName": "xxxDisplayName",
-    "BrainName": "xxxBrainName" 
-    // If this third-party mod's WildSpawnType does not use the EFT native brain, 
-    // you need to additionally fill in a BrainName. 
-    // As for what this BrainName is called, 
-    // you need to find it yourself from this mod.
-}
 ```
 
 7. After ensuring the JSON format is correct and the data is filled in correctly, restart the server. At this time, use the help command in the MESSENGER interface with the Miyako trader, and all types will be displayed in the list of available types.
@@ -169,7 +164,7 @@ Carry service level base price. There are 5 levels in total, in roubles, with an
 
 - Enable Looting
 
-Whether Mcs Player will attempt to loot items.
+If `McsBotPlayer` is not currently in combat, whether it will attempt to loot items.
 
 - Price Threshold
 
@@ -249,6 +244,10 @@ If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to ex
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
 
+- Clear Area
+
+If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to clear the surrounding area of a specified location.
+
 #### TeamCommand
 
 - Team Report Enemy Position
@@ -289,11 +288,15 @@ Command `McsBotPlayers` to change preferred combat aiming body part.
 - - Team Transit Escort
 - - Team Switch Escort
 
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayer` to escort to the designated location.
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to escort to the designated location.
 
 - Team Drop Target Loot
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
+
+- Team Clear Area
+
+If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to clear the surrounding area of a specified location.
 
 *The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
