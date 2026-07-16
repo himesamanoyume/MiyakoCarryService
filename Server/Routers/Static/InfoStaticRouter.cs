@@ -15,11 +15,11 @@ namespace MiyakoCarryService.Server.Routers.Static
         [
             new RouteAction<McsBotPlayerAidRequestData>(
                 "/mcs/client/order/settle",
-                async (url, info, sessionId, output) => await infoCallbacks.SettleOrder(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await infoCallbacks.SettleOrder(url, info, sessionId)
             ),
             new RouteAction<McsBotPlayerAidRequestData>(
                 "/mcs/client/order/renew",
-                async (url, info, sessionId, output) => await infoCallbacks.RenewOrder(url, info, sessionId)
+                async (url, info, sessionId, output, cancellationToken) => await infoCallbacks.RenewOrder(url, info, sessionId)
             )
         ]
     )

@@ -55,7 +55,7 @@ namespace MiyakoCarryService.Server
                 new RemovePlayerBuildPatch(serviceProvider).Enable();
                 new SaveEquipmentBuildPatch(serviceProvider).Enable();
                 new SaveWeaponBuildPatch(serviceProvider).Enable();
-                new WebSocketDisconnectPatch().Enable();
+                new WebSocketDisconnectPatch(serviceProvider).Enable();
 
                 await Task.CompletedTask;
             }

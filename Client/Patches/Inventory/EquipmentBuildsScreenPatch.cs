@@ -2,6 +2,7 @@
 using System.Reflection;
 using EFT.Builds;
 using EFT.UI;
+using EFT.UI.Builds;
 using HarmonyLib;
 using MiyakoCarryService.Client.Patches.Group;
 using SPT.Reflection.Patching;
@@ -13,26 +14,26 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>  
     public sealed class EquipmentBuildsScreenPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.method_5));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.UpdateBuildList));
 
         [PatchPrefix]
-        public static bool Prefix(EEquipmentBuildType ___eequipmentBuildType_0, EquipmentBuildsStorageClass ___equipmentBuildsStorageClass, Tab ____customBuildsTab, Tab ____standardBuildsTab, GClass3808 ___gclass3808_1)
+        public static bool Prefix(EEquipmentBuildType ___eequipmentBuildType_0, EquipmentBuildsStorage ___equipmentBuildsStorage, Tab ____customBuildsTab, Tab ____standardBuildsTab, TabGroup ___tabGroup_1)
         {
             if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
                 return true;
             }
 
-            if (___equipmentBuildsStorageClass == null || ____customBuildsTab == null || ____standardBuildsTab == null || ___gclass3808_1 == null)
+            if (___equipmentBuildsStorage == null || ____customBuildsTab == null || ____standardBuildsTab == null || ___tabGroup_1 == null)
             {
                 return true;
             }
 
-            if (___eequipmentBuildType_0 == EEquipmentBuildType.Custom && !___equipmentBuildsStorageClass.HasCustomBuilds)
+            if (___eequipmentBuildType_0 == EEquipmentBuildType.Custom && !___equipmentBuildsStorage.HasCustomBuilds)
             {
-                ____customBuildsTab.vmethod_0(false);
+                ____customBuildsTab.SetInteractable(false);
                 ____customBuildsTab.Deselect().HandleExceptions();
-                ___gclass3808_1.Show(____standardBuildsTab, true);
+                ___tabGroup_1.Show(____standardBuildsTab, true);
                 return false;
             }
             return true;

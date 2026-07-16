@@ -1,6 +1,8 @@
 using System.Reflection;
 using Comfort.Common;
+using Diz.Binding;
 using EFT;
+using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
@@ -12,10 +14,10 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     /// </summary>  
     public sealed class AvailableInteractionStateSetterPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BindableStateClass<ActionsReturnClass>), nameof(BindableStateClass<ActionsReturnClass>.Value));
+        protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BindableState<AvailableInteractionState>), nameof(BindableState<AvailableInteractionState>.Value));
 
         [PatchPrefix]
-        public static void Prefix(object __instance, ref ActionsReturnClass value)
+        public static void Prefix(object __instance, ref AvailableInteractionState value)
         {
             if (!CommandUtils.IsCommandMenuOpen)
             {
@@ -42,11 +44,11 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 value = CommandUtils.CurrentMenu;
             }
 
-            if (__instance is BindableStateClass<ActionsReturnClass> bindable)
+            if (__instance is BindableState<AvailableInteractionState> bindable)
             {
-                if (ReferenceEquals(bindable.Gparam_0, value))
+                if (ReferenceEquals(bindable.gparam_0, value))
                 {
-                    bindable.Gparam_0 = null;
+                    bindable.gparam_0 = null;
                 }
             }
         }

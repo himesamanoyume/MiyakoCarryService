@@ -7,7 +7,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Helper
 {
