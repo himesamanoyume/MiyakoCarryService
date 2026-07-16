@@ -673,19 +673,14 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void HandleMcsLeadPlayerExtracted(McsLeadPlayerExtractedEvent @event)
         {
-            if (Tools.IsHost)
-            {
-                return;
-            }
-
             var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(@event.McsLeadPlayerId);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                EventMgr.Notify(new CommandMgrHandleFikaEvent
-                {
-                    McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandType.GoToExfil.ToString()
-                });
+                CommandUtils.Dispatch(
+                    ECommandType.GoToExfil.ToString(),
+                    [mcsBotPlayer],
+                    null
+                );
             }
         }
 
