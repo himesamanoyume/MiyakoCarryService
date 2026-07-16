@@ -145,15 +145,15 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void PostBuildCommandMenu(ActionsReturnClass actionsReturnClass)
         {
+            if (GamePlayerOwner == null)
+            {
+                return;
+            }
+
             if (actionsReturnClass != null)
             {
                 _cancelAction = MakeCommand(Locales.CANCELCOMMAND_NAME, Locales.CANCELCOMMAND_TARGETNAME, false, CloseCommandMenuAction);
                 actionsReturnClass.Actions.Add(_cancelAction);
-            }
-
-            if (GamePlayerOwner == null)
-            {
-                return;
             }
 
             var existing = GamePlayerOwner.AvailableInteractionState.Value;
@@ -168,9 +168,9 @@ namespace MiyakoCarryService.Client.Utils
             }
             else
             {
-                actionsReturnClass?.InitSelected();
-                GamePlayerOwner.AvailableInteractionState.Value = actionsReturnClass;
+                _currentMenu?.InitSelected();
             }
+            GamePlayerOwner.AvailableInteractionState.Value = _currentMenu;
         }
 
         public static void CloseCommandMenuAction()
