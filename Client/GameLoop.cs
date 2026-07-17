@@ -467,7 +467,7 @@ namespace MiyakoCarryService.Client
                         var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
                         if (mcsBotPlayer?.AIData?.BotOwner?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
                         {
-                            mcsAILeadPlayer.CalcGoalEnemy();
+                            mcsAILeadPlayer.CalcGoalEnemy(enemyBotOwner.GetPlayer);
                         }
                     }
                 };
@@ -684,7 +684,7 @@ namespace MiyakoCarryService.Client
             }
         }
 
-        private BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
+        public BotDifficultySettingsClass SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {
             var settings = Singleton<GClass620>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
 
@@ -856,7 +856,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 5f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 100f + 20f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = true;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
@@ -866,13 +866,13 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
             settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 55f;
-            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 80f;
+            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 40f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
             settings.FileSettings.Look.LOOK_THROUGH_GRASS = false;
             settings.FileSettings.Look.DIST_REPEATED_SEEN = 50.0f;
-            settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 0.01f;
-            settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = 0.01f;
+            settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 3f;
+            settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = 3f;
             settings.FileSettings.Look.NO_GREEN_DIST = 20.0f;
             settings.FileSettings.Look.NO_GRASS_DIST = 20.0f;
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -39,6 +40,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(RecordAgentInfo(1f));
             StartCoroutine(UpdateItemData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
+            StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f));
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
             {
@@ -86,7 +88,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
                         catch
                         {
-                            
+
                         }
                     }
                 }
@@ -135,7 +137,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var itemBatches = new List<List<ItemData>>();
                     var batch = new List<ItemData>();
 
-                    for(int i = 0; i < totalRootItemCount; i += batchSize)
+                    for (int i = 0; i < totalRootItemCount; i += batchSize)
                     {
                         batch.Clear();
                         int endIndex = Math.Min(i + batchSize, totalRootItemCount);
@@ -197,17 +199,36 @@ namespace MiyakoCarryService.Client.Mgrs
                         var playerDatas = GetDatas<PlayerData>();
                         foreach (var playerData in playerDatas)
                         {
-                            if (playerData.Player.IsAI && !McsMgr.IsMcsBotPlayer(playerData.Player.ProfileId))
+                            var target = playerData.Player;
+
+                            if (target == null || !target.HealthController.IsAlive)
                             {
                                 continue;
                             }
 
-                            if (!playerData.Player.IsAI)
+                            if (!target.IsAI)
                             {
                                 continue;
                             }
 
-                            var angle = Vector3.Angle(leadPlayer.LookDirection, playerData.Player.Position);
+                            if (McsMgr.IsMcsBotPlayer(target.ProfileId))
+                            {
+                                continue;
+                            }
+
+                            if (!leadPlayer.BotsGroup.IsEnemy(target))
+                            {
+                                continue;
+                            }
+
+                            var sqrDistance = target.Position.McsSqrDistance(leadPlayer.Position);
+                            if (sqrDistance >= 150f * 150f)
+                            {
+                                continue;
+                            }
+
+                            var dirToTarget = target.Position - leadPlayer.Position;
+                            var angle = Vector3.Angle(leadPlayer.LookDirection, dirToTarget);
                             if (angle > 45f)
                             {
                                 continue;
@@ -215,14 +236,14 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             var blocked = Physics.Linecast(
                                 leadPlayerPos,
-                                playerData.Player.Position + Vector3.up * 1.6f,
-                                out var raycastHit, 
+                                target.Position + Vector3.up * 1.6f,
+                                out var raycastHit,
                                 LayerMaskClass.HighPolyWithTerrainMask
                             );
 
                             if (!blocked)
                             {
-                                mcsAILeadPlayer.CalcGoalEnemy();
+                                mcsAILeadPlayer.CalcGoalEnemy(target);
                                 break;
                             }
                         }

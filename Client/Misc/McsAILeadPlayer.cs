@@ -42,55 +42,40 @@ namespace MiyakoCarryService.Client.Misc
             McsLeadPlayer = player;
         }
 
-        public Vector3 ClearAreaCacheCenter;  
-        public float ClearAreaCacheTime;  
-        public List<Player> ClearAreaCacheMembers;  
+        public Vector3 ClearAreaCacheCenter;
+        public float ClearAreaCacheTime;
+        public List<Player> ClearAreaCacheMembers;
         public List<List<Vector3>> ClearAreaCacheSegments;
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
-        public void CalcGoalEnemy()
+        public void CalcGoalEnemy(Player seenEnemy)
         {
-            var list = new List<EnemyInfo>();
-            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(Player().ProfileId);
+            if (seenEnemy == null || seenEnemy.AIData?.BotOwner == null)
+            {
+                return;
+            }
+            if (!seenEnemy.HealthController.IsAlive)
+            {
+                return;
+            }
+
+            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsLeadPlayer.ProfileId);
+            var seenBotOwner = seenEnemy.AIData.BotOwner;
+
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 var botOwner = mcsBotPlayer.BotOwner;
-                foreach (var enemyInfo in botOwner.EnemiesController.EnemyInfos.Values)
+
+                McsLeadPlayer.BotsGroup.AddEnemy(seenBotOwner, EBotEnemyCause.byKill);
+                McsLeadPlayer.BotsGroup.ReportAboutEnemy(seenBotOwner, EEnemyPartVisibleType.Visible, botOwner);
+
+                if (botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {
-                    if (!enemyInfo.Person.HealthController.IsAlive)
-                    {
-                        continue;
-                    }
-
-                    if (!enemyInfo.IsVisible && enemyInfo.Distance >= 20)
-                    {
-                        continue;
-                    }
-
-                    list.Add(enemyInfo);
+                    enemyInfo.IsVisible = true;
+                    botOwner.Memory.GoalEnemy = enemyInfo;
+                    enemyInfo.PriorityIndex = 0;
                 }
-            }
-
-            if (list.Count == 0)
-            {
-                return;
-            }
-
-            var closestEnemy = GetClosestEnemy(list);
-            if (closestEnemy == null)
-            {
-                return;
-            }
-
-            foreach (var mcsBotPlayer in mcsBotPlayers)
-            {
-                var botOwner = mcsBotPlayer.BotOwner;
-                McsLeadPlayer.BotsGroup.AddEnemy(closestEnemy.Person.AIData.BotOwner, EBotEnemyCause.byKill);
-                McsLeadPlayer.BotsGroup.ReportAboutEnemy(closestEnemy.Person.AIData.BotOwner, EEnemyPartVisibleType.Visible, botOwner);
-                closestEnemy.IsVisible = true;
-                botOwner.Memory.GoalEnemy = closestEnemy;
-                closestEnemy.PriorityIndex = 0;
             }
         }
 
