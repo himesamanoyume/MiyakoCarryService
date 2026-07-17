@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
@@ -302,6 +303,81 @@ namespace MiyakoCarryService.Client.Utils
                         aggressor.HealthController.BodyPartEffects, killedPlayer.TriggerZones, aggressor.HealthController.ActiveBuffsNames());
                 }
             }
+        }
+
+        private static bool SimulateToHorizontalDistance(Vector3 firePort, Vector3 aimDir, float muzzleVelocity, AmmoTemplate ammo, float targetHorizDist, out float timeOfFlight, out float bulletY)
+        {
+            timeOfFlight = -1f;
+            bulletY = firePort.y;
+
+            var calc = new GClass3735();
+            try
+            {
+                calc.Initialize(firePort, aimDir.normalized * muzzleVelocity, ammo.BulletMassGram, ammo.BulletDiameterMilimeters, ammo.BallisticCoeficient, true);
+
+                var prev = calc.Current;
+                for (int i = 0; i < 800; i++)
+                {
+                    var cur = calc.method_0();
+                    var horiz = new Vector3(cur.position.x - firePort.x, 0f, cur.position.z - firePort.z).magnitude;
+                    if (horiz >= targetHorizDist)
+                    {
+                        var prevHoriz = new Vector3(prev.position.x - firePort.x, 0f, prev.position.z - firePort.z).magnitude;
+                        var t = (horiz - prevHoriz) < 1e-4f ? 0f : Mathf.InverseLerp(prevHoriz, horiz, targetHorizDist);
+                        timeOfFlight = Mathf.Lerp(prev.time, cur.time, t);
+                        bulletY = Mathf.Lerp(prev.position.y, cur.position.y, t);
+                        return true;
+                    }
+                    prev = cur;
+                }
+                timeOfFlight = prev.time;
+                bulletY = prev.position.y;
+                return false;
+            }
+            finally
+            {
+                calc.ClearClass();
+            }
+        }
+
+        public static Vector3 GetPredictedAimPoint(Vector3 firePort, Vector3 targetPos, Vector3 targetVelocity, AmmoTemplate ammo, float muzzleVelocity)
+        {
+            if (ammo == null || muzzleVelocity <= 0f)
+            {
+                return targetPos;
+            }
+
+            var predicted = targetPos;
+            for (int i = 0; i < 3; i++)
+            {
+                var dir = predicted - firePort;
+                var horiz = new Vector3(dir.x, 0f, dir.z).magnitude;
+                if (horiz < 0.01f)
+                {
+                    break;
+                }
+                if (!SimulateToHorizontalDistance(firePort, dir, muzzleVelocity, ammo, horiz, out var tof, out _) || tof <= 0f)
+                {
+                    return targetPos;
+                }
+                predicted = targetPos + targetVelocity * tof;
+            }
+
+            var lead = predicted - targetPos;
+            if (lead.magnitude > 8f)
+            {
+                predicted = targetPos + lead.normalized * 8f;
+            }
+
+            var pdir = predicted - firePort;
+            var phoriz = new Vector3(pdir.x, 0f, pdir.z).magnitude;
+            if (phoriz >= 0.01f && SimulateToHorizontalDistance(firePort, pdir, muzzleVelocity, ammo, phoriz, out _, out var bulletY))
+            {
+                var drop = predicted.y - bulletY; 
+                predicted += Vector3.up * drop;
+            }
+
+            return predicted;
         }
     }
 }
