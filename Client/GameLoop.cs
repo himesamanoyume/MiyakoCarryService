@@ -568,19 +568,6 @@ namespace MiyakoCarryService.Client
 
                         var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, true);
 
-                        var notScav = leadPlayer.Side != EPlayerSide.Savage;
-                        if (notScav)
-                        {
-                            botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
-                            {
-                                if (enemy.Profile.Info.GroupId is "Mcs" or "Fika" || mcsMgr.IsMcsLeadPlayer(enemy.ProfileId) || mcsMgr.IsMcsBotPlayer(enemy.ProfileId))
-                                {
-                                    return;
-                                }
-                                botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
-                            };
-                        }
-
                         foreach (var _leadPlayer in leadPlayers)
                         {
                             botsGroup.RemoveEnemy(_leadPlayer);
@@ -848,9 +835,9 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.NEXT_SHOT_MISS_Y_OFFSET = 1f;
             settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
             settings.FileSettings.Aiming.WEAPON_ROOT_OFFSET = 0.35f;
-            settings.FileSettings.Aiming.DANGER_UP_POINT = 3f;
+            settings.FileSettings.Aiming.DANGER_UP_POINT = 0.1f;
             settings.FileSettings.Aiming.OFFSET_RECAL_ANYWAY_TIME = 1f;
-            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 900f;
+            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 5f;
             settings.FileSettings.Aiming.ANYTIME_LIGHT_WHEN_AIM_100 = 100f;
             settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
@@ -861,12 +848,13 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
+            settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
             settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 360f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
             settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
-            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 55f;
-            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 40f;
+            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 360f;
+            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
             settings.FileSettings.Look.LOOK_THROUGH_GRASS = false;
@@ -877,6 +865,10 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.NO_GRASS_DIST = 20.0f;
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
+            settings.FileSettings.Look.FAR_DISTANCE = 300f;
+            settings.FileSettings.Look.MIDDLE_DIST = 200f;
+            settings.FileSettings.Look.MiddleDeltaTimeSec = 0.1f;
+            settings.FileSettings.Look.FarDeltaTimeSec = 0.1f;
 
             settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
             settings.FileSettings.Hearing.DISPERSION_COEF = 10f + 10f * botDifficultyInt;

@@ -97,7 +97,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                     foreach (var enemy in person.AIData.BotOwner.BotsGroup.Members)
                     {
-                        botGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
+                        botGroup.AddEnemy(enemy, EBotEnemyCause.callForHelp1);
                     }
                 }
             }
