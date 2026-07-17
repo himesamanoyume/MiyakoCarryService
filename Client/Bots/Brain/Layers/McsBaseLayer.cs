@@ -1500,7 +1500,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], null);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                     BotOwner.TalkMsg(new McsMsg
