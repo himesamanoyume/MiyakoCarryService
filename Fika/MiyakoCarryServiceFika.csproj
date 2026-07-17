@@ -13,7 +13,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>1.0.11.0</Version>
+    <Version>1.0.11.1</Version>
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
