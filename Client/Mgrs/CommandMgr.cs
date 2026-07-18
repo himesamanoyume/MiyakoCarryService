@@ -10,6 +10,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Common.Utils;
+using EFT.InventoryLogic;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -574,6 +575,7 @@ namespace MiyakoCarryService.Client.Mgrs
             botOwner.Mover.SetPlayerToNavMesh(playerPosition);
             botOwner.Mover.RecalcWay();
             botOwner.Mover.Pause = true;
+            botOwner.TryChangeWeaponSlot(EquipmentSlot.FirstPrimaryWeapon);
             botOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Roger

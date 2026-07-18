@@ -12,6 +12,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     public class McsFightLayer : McsBaseLayer
     {
         public float _contactTime = 0f;
+        public float _nextRecalcGoalTime = 0f;
+
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
 
@@ -62,6 +64,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 var time = Time.time;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
+                var goalDead = goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive);
+                if ((goalEnemy == null || goalDead) && !MiyakoCarryServicePlugin.SAINInstalled && time >= _nextRecalcGoalTime)
+                {
+                    _nextRecalcGoalTime = time + 0.2f;
+
+                    if (goalDead)
+                    {
+                        BotOwner.Memory.GoalEnemy = null;
+                    }
+                    BotOwner.BotsGroup.CalcGoalForBot(BotOwner);
+                    goalEnemy = BotOwner.Memory.GoalEnemy;
+                }
+
                 if (goalEnemy == null)
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
