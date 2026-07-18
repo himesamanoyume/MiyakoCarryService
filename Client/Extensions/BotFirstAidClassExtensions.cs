@@ -46,14 +46,17 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
-                if (healthController.FindExistingEffect<Fracture>(EBodyPart.Common) != null)
+                if (botFirstAidClass.McsIsFullHp())
                 {
-                    var med = botFirstAidClass.FindMedForEffect(EDamageEffectType.Fracture);
-                    if (med != null)
+                    if (healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common) != null)
                     {
-                        botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
-                        botFirstAidClass.CurUsingMeds = med;
-                        return;
+                        var med = botFirstAidClass.McsFindSplint();
+                        if (med != null)
+                        {
+                            botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                            botFirstAidClass.CurUsingMeds = med;
+                            return;
+                        }
                     }
                 }
 
@@ -73,6 +76,40 @@ namespace MiyakoCarryService.Client.Extensions
                     return;
                 }
                 botFirstAidClass.CurUsingMeds = medKitItemClasses.FirstOrDefault();
+            }
+
+            public bool McsIsFullHp()
+            {
+                var healthController = botFirstAidClass.BotOwner_0.GetPlayer.HealthController;
+                foreach (var part in botFirstAidClass.EbodyPart_0)
+                {
+                    var health = healthController.GetBodyPartHealth(part, false);
+                    if (health.Current < health.Maximum)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public MedsItemClass McsFindSplint()
+            {
+                foreach (var med in botFirstAidClass.List_0)
+                {
+                    if (!med.TryGetItemComponent(out HealthEffectsComponent healthEffectsComponent))
+                    {
+                        continue;
+                    }
+                    if (healthEffectsComponent.DamageEffects.ContainsKey(EDamageEffectType.DestroyedPart))
+                    {
+                        continue;
+                    }
+                    if (botFirstAidClass.CanTreatEffect(med, EDamageEffectType.Fracture))
+                    {
+                        return med;
+                    }
+                }
+                return null;
             }
 
             private MedsItemClass FindMedForEffect(EDamageEffectType effect)

@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             var healthController = __instance.BotOwner_0.GetPlayer.HealthController;
-            var fracture = healthController.FindExistingEffect<Fracture>(EBodyPart.Common);
+            var fracture = healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common);
             if (fracture != null)
             {
                 __instance.Nullable_0 = fracture.BodyPart;
