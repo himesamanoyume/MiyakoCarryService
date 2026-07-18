@@ -205,9 +205,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     -1,
                     botGenerationDetails.IsPmc
                 );
-
-                AddAluminiumSplintsToSecure(botId, botInventory, 3);
             }
+            
+            AddAluminiumSplintsToSecure(botId, botInventory, 3);
         }
 
         public void AddAluminiumSplintsToSecure(MongoId botId, BotBaseInventory botInventory, int count)
