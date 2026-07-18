@@ -39,6 +39,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
+                    RefreshStuckTimer();
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                 }
 

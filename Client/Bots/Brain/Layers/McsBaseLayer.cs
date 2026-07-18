@@ -1671,5 +1671,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             return false;
         }
+
+        public void RefreshStuckTimer()  
+        {  
+            BotOwner.Mover.LastPos = BotOwner.Position;  
+            BotOwner.Mover.LastTimePosChanged = Time.time;  
+        }
     }
 }
