@@ -49,8 +49,45 @@ namespace MiyakoCarryService.Client.Misc
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
+        public void CleanupDeadEnemies()
+        {
+            var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsLeadPlayer.ProfileId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
+                var botOwner = mcsBotPlayer?.BotOwner;
+                if (botOwner == null || botOwner.EnemiesController == null)
+                {
+                    continue;
+                }
+
+                var deadEnemies = new List<IPlayer>();
+                foreach (var kvp in botOwner.EnemiesController.EnemyInfos)
+                {
+                    if (kvp.Key == null || kvp.Value?.Person == null || kvp.Value.Person.HealthController == null || !kvp.Value.Person.HealthController.IsAlive)
+                    {
+                        deadEnemies.Add(kvp.Key);
+                    }
+                }
+
+                foreach (var deadEnemy in deadEnemies)
+                {
+                    if (botOwner.Memory.GoalEnemy?.Person == deadEnemy)
+                    {
+                        botOwner.Memory.GoalEnemy = null;
+                    }
+
+                    if (botOwner.EnemiesController.EnemyInfos.ContainsKey(deadEnemy))
+                    {
+                        botOwner.EnemiesController.Remove(deadEnemy);
+                    }
+                }
+            }
+        }
+
         public void CalcGoalEnemy(Player seenEnemy)
         {
+            CleanupDeadEnemies();
+
             if (seenEnemy == null || seenEnemy.AIData?.BotOwner == null)
             {
                 return;
@@ -68,7 +105,7 @@ namespace MiyakoCarryService.Client.Misc
                 var botOwner = mcsBotPlayer.BotOwner;
 
                 McsLeadPlayer.BotsGroup.AddEnemy(seenBotOwner, EBotEnemyCause.callForHelp2);
-                McsLeadPlayer.BotsGroup.ReportAboutEnemy(seenBotOwner, EEnemyPartVisibleType.Visible, botOwner);
+                // McsLeadPlayer.BotsGroup.ReportAboutEnemy(seenBotOwner, EEnemyPartVisibleType.Visible, botOwner);
 
                 if (botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {

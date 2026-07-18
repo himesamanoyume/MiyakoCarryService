@@ -39,7 +39,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 }
                 if (botOwner.HearingSensor.method_6(pos.Value, 10f, out var dist))
                 {
-                    botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Visible, botOwner);
+                    botOwner.BotsGroup.AddEnemy(__instance, EBotEnemyCause.callForHelp1);
+                    // botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Visible, botOwner);
                 }
             }
         }
