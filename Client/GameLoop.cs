@@ -692,8 +692,8 @@ namespace MiyakoCarryService.Client
 
             settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.95f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
-            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 15f;
-            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 5f;
+            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 30f;
+            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
             settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = 100f;
             settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 50f;
 
@@ -728,7 +728,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 360f;
+            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 120f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = false;
             settings.FileSettings.Mind.IGNORE_TRAP = false;
             settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
@@ -850,11 +850,11 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
-            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 360f;
+            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
             settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
-            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 360f;
+            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 120f;
             settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
