@@ -233,20 +233,30 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (!BotOwner.Medecine.Using && handsIdle)
                 {
-                    CheckWeaponSwitch();
-                    _currentHealTimes = 0;
-                    return true;
-                }
-
-                if (!BotOwner.Medecine.Using && !handsIdle)
-                {
-                    BotOwner.Medecine.FirstAid.CancelCurrent();
+                    if (BotOwner.Medecine.FirstAid.Using)
+                    {
+                        BotOwner.Medecine.FirstAid.CancelCurrent();
+                    }
                     if (BotOwner.Medecine.SurgicalKit.Using)
                     {
                         BotOwner.Medecine.SurgicalKit.CancelCurrent();
                     }
-                    CheckWeaponSwitch(true);
+                    if (BotOwner.Medecine.Stimulators.Using)
+                    {
+                        BotOwner.Medecine.Stimulators.CancelCurrent();
+                    }
+                    player.FastForwardCurrentOperations();
+                    player.SetInventoryOpened(false);
+                    player.TrySetLastEquippedWeapon(true, null);
+                    BotOwner.WeaponManager.Selector.TakePrevWeapon();
+                    if (BotOwner.WeaponManager.Selector.LastEquipmentSlot != EquipmentSlot.FirstPrimaryWeapon)
+                    {
+                        BotOwner.WeaponManager.Selector.TryChangeToMain();
+                    }
                     _currentHealTimes = 0;
+#if DEBUG
+                    MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制终止治疗");
+#endif
                     return true;
                 }
             }
@@ -1221,10 +1231,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.TryChangeWeaponSlot(targetSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
-            else if (forceRefresh)  
-            {  
-                BotOwner.TryChangeWeaponSlot(currentSlot);  
-                _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;  
+            else if (forceRefresh)
+            {
+                BotOwner.TryChangeWeaponSlot(currentSlot);
+                _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
 
             return targetSlot;
