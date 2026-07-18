@@ -64,16 +64,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 var time = Time.time;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
-                var goalDead = goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive);
-                if ((goalEnemy == null || goalDead) && !MiyakoCarryServicePlugin.SAINInstalled && time >= _nextRecalcGoalTime)
+                if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
-                    _nextRecalcGoalTime = time + 0.2f;
-
-                    if (goalDead)
+                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive))
                     {
                         BotOwner.Memory.GoalEnemy = null;
+                        _nextRecalcGoalTime = 0f;
                     }
-                    BotOwner.BotsGroup.CalcGoalForBot(BotOwner);
+
+                    if (time >= _nextRecalcGoalTime)
+                    {
+                        _nextRecalcGoalTime = time + 0.1f;
+                        BotOwner.CalcGoal();
+                    }
+
                     goalEnemy = BotOwner.Memory.GoalEnemy;
                 }
 
@@ -179,6 +183,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
                                     RefreshStuckTimer();
+                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    {
+                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                    }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
                             }
@@ -217,6 +225,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
+                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    {
+                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                    }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
                             }
@@ -254,6 +266,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
                                     RefreshStuckTimer();
+                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    {
+                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                    }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
                             }
@@ -291,6 +307,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
+                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    {
+                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                    }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
                             }

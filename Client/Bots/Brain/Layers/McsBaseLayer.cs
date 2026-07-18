@@ -753,12 +753,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool ProtectCareKill()
         {
-            return (Time.time - GetEnemyLastSeenTime()) < 10f;
+            // return (Time.time - GetEnemyLastSeenTime()) < 10f;
+            return true;
         }
 
         public virtual bool ProtectWantKill()
         {
-            return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+            // return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+            return true;
         }
 
         public virtual float GetEnemyLastSeenTime()
@@ -1360,7 +1362,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            var newMoveTarget = GetPointAlongPathAtDistance(corners, 50f);
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
             _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
         }
