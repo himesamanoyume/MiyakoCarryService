@@ -14,6 +14,7 @@ global using ItemLockedClass = InteractionsHandlerClass.GClass1606;
 global using CannotMoveItemDuringRaidClass = InteractionsHandlerClass.GClass1600;
 global using HeavyBleedEffect = GInterface340;
 global using LightBleedEffect = GInterface339;
+global using Fracture = GInterface342;
 
 // 意图
 global using BaseIntent = GClass26;

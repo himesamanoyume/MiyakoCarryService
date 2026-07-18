@@ -46,6 +46,17 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
+                if (healthController.FindExistingEffect<Fracture>(EBodyPart.Common) != null)
+                {
+                    var med = botFirstAidClass.FindMedForEffect(EDamageEffectType.Fracture);
+                    if (med != null)
+                    {
+                        botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                        botFirstAidClass.CurUsingMeds = med;
+                        return;
+                    }
+                }
+
                 var medKitItemClasses = botFirstAidClass.List_0.OfType<MedKitItemClass>().ToList();
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
