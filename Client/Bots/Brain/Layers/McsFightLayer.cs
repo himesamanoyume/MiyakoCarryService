@@ -107,6 +107,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     BotOwner.WeaponManager.Reload.McsTryReload();
                 }
+                else if (!goalEnemy.CanShoot && BotOwner.McsGetCurrentMagAmmoRatio() < 0.3f)
+                {
+                    BotOwner.WeaponManager.Reload.McsTryReload();
+                }
 
                 if (BotOwner.WeaponManager.UnderbarrelLauncherController.NeedToReload())
                 {

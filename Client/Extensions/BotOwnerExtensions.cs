@@ -312,6 +312,43 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
             }
+
+            public float McsGetCurrentMagAmmoRatio()
+            {
+                var selector = botOwner.WeaponManager?.Selector;
+                if (selector == null)
+                {
+                    return 1f;
+                }
+
+                var equipment = botOwner.GetPlayer.InventoryController.Inventory.Equipment;
+                var slot = selector.EquipmentSlot;
+
+                if (!equipment.HasWeaponInSlot(slot))
+                {
+                    return 1f;
+                }
+
+                if (equipment.GetSlot(slot).ContainedItem is not Weapon weapon)
+                {
+                    return 1f;
+                }
+
+                var magazine = weapon.GetCurrentMagazine();
+                if (magazine == null)
+                {
+                    return 1f;
+                }
+
+                var maxCount = magazine.MaxCount;
+                if (maxCount <= 0)
+                {
+                    return 1f;
+                }
+
+                var current = magazine.Count + weapon.ChamberAmmoCount;
+                return (float)current / (maxCount + weapon.ChamberAmmoCount);
+            }
         }
     }
 }
