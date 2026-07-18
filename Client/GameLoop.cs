@@ -872,14 +872,14 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.FarDeltaTimeSec = 0.1f;
 
             settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
-            settings.FileSettings.Hearing.DISPERSION_COEF = 10f + 10f * botDifficultyInt;
+            settings.FileSettings.Hearing.DISPERSION_COEF = 20f + 15f * botDifficultyInt;
             settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Hearing.CLOSE_DIST = settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 3f;
-            settings.FileSettings.Hearing.FAR_DIST += settings.FileSettings.Hearing.CLOSE_DIST + botDifficultyInt * 2f;
+            settings.FileSettings.Hearing.CLOSE_DIST = 30f + botDifficultyInt * 3f;
+            settings.FileSettings.Hearing.FAR_DIST += 60f + botDifficultyInt * 2f;
             settings.FileSettings.Hearing.SOUND_DIR_DEEFREE *= botDifficultyInt;
             settings.FileSettings.Hearing.LOOK_ONLY_DANGER = true;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.1f;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.1f;
+            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.01f;
+            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.01f;
             settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
 
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;

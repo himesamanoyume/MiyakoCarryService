@@ -221,21 +221,43 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (_currentHealTimes >= 15 && _currentHealTimes % 15 == 0)
             {
                 var player = BotOwner.GetPlayer;
-                if (!BotOwner.Medecine.Using
-                    && player.HandsController
-                    && !player.HandsController.IsAiming
+                if (player?.HandsController == null)
+                {
+                    return false;
+                }
+
+                var handsIdle = !player.HandsController.IsAiming
                     && !player.HandsController.IsInventoryOpen()
                     && !player.HandsController.IsInInteractionStrictCheck()
-                    && !player.HandsController.IsHandsProcessing())
+                    && !player.HandsController.IsHandsProcessing();
+
+                if (!BotOwner.Medecine.Using && handsIdle)
                 {
                     CheckWeaponSwitch();
                     _currentHealTimes = 0;
                     return true;
                 }
+
+                if (!BotOwner.Medecine.Using && !handsIdle)
+                {
+                    BotOwner.Medecine.FirstAid.CancelCurrent();
+                    if (BotOwner.Medecine.SurgicalKit.Using)
+                    {
+                        BotOwner.Medecine.SurgicalKit.CancelCurrent();
+                    }
+                    CheckWeaponSwitch(true);
+                    _currentHealTimes = 0;
+                    return true;
+                }
             }
 
-            if (_currentHealTimes >= 60)
+            if (_currentHealTimes >= 30)
             {
+                BotOwner.Medecine.FirstAid.CancelCurrent();
+                if (BotOwner.Medecine.SurgicalKit.Using)
+                {
+                    BotOwner.Medecine.SurgicalKit.CancelCurrent();
+                }
                 _currentHealTimes = 0;
                 return true;
             }
@@ -1178,7 +1200,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public virtual EquipmentSlot CheckWeaponSwitch()
+        public virtual EquipmentSlot CheckWeaponSwitch(bool forceRefresh = false)
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null || weaponManager.Selector == null)
@@ -1198,6 +1220,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 BotOwner.TryChangeWeaponSlot(targetSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
+            }
+            else if (forceRefresh)  
+            {  
+                BotOwner.TryChangeWeaponSlot(currentSlot);  
+                _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;  
             }
 
             return targetSlot;
@@ -1674,10 +1701,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public void RefreshStuckTimer()  
-        {  
-            BotOwner.Mover.LastPos = BotOwner.Position;  
-            BotOwner.Mover.LastTimePosChanged = Time.time;  
+        public void RefreshStuckTimer()
+        {
+            BotOwner.Mover.LastPos = BotOwner.Position;
+            BotOwner.Mover.LastTimePosChanged = Time.time;
         }
     }
 }
