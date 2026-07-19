@@ -349,6 +349,47 @@ namespace MiyakoCarryService.Client.Extensions
                 var current = magazine.Count + weapon.ChamberAmmoCount;
                 return (float)current / (maxCount + weapon.ChamberAmmoCount);
             }
+
+            public void TryResetHandsState()
+            {
+                var player = botOwner.GetPlayer;
+                if (player?.HandsController == null)
+                {
+                    return;
+                }
+
+                var handsIdle = !player.HandsController.IsAiming
+                        && !player.HandsController.IsInventoryOpen()
+                        && !player.HandsController.IsInInteractionStrictCheck()
+                        && !player.HandsController.IsHandsProcessing();
+
+                if (!botOwner.Medecine.Using && handsIdle)
+                {
+                    if (botOwner.Medecine.FirstAid.Using)
+                    {
+                        botOwner.Medecine.FirstAid.CancelCurrent();
+                    }
+                    if (botOwner.Medecine.SurgicalKit.Using)
+                    {
+                        botOwner.Medecine.SurgicalKit.CancelCurrent();
+                    }
+                    if (botOwner.Medecine.Stimulators.Using)
+                    {
+                        botOwner.Medecine.Stimulators.CancelCurrent();
+                    }
+                    player.FastForwardCurrentOperations();
+                    player.SetInventoryOpened(false);
+                    player.TrySetLastEquippedWeapon(true, null);
+                    botOwner.WeaponManager.Selector.TakePrevWeapon();
+                    if (botOwner.WeaponManager.Selector.LastEquipmentSlot != EquipmentSlot.FirstPrimaryWeapon)
+                    {
+                        botOwner.WeaponManager.Selector.TryChangeToMain();
+                    }
+                }
+#if DEBUG
+                MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制重置手部状态");
+#endif
+            }
         }
     }
 }

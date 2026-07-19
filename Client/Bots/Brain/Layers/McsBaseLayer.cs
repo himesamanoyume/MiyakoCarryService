@@ -48,6 +48,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentHealTimes = 0;
         public int _currentLootingRetries = 0;
         public int _currentDeactivateRetries = 0;
+        public float _currentHealTimeout = 10f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -188,87 +189,59 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHeal()
         {
-            if (BotOwner.Medecine.Using)
-            {
-                return false;
-            }
+            // var player = BotOwner.GetPlayer;
+            // var handsBusy = player?.HandsController != null && (player.HandsController.IsInInteractionStrictCheck() || player.HandsController.IsHandsProcessing());
+            // if (!BotOwner.Medecine.Using && !BotOwner.Medecine.Stimulators.Using && !BotOwner.Medecine.FirstAid.Using && !BotOwner.Medecine.SurgicalKit.Using && !handsBusy)
+            // {
+            //     BotOwner.TryResetHandsState();
+            //     _currentHealTimes = 0;
+            //     return true;
+            // }
 
             if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
             {
-                BotOwner.Medecine.FirstAid.CancelCurrent();
-                if (BotOwner.Medecine.SurgicalKit.Using)
-                {
-                    BotOwner.Medecine.SurgicalKit.CancelCurrent();
-                }
-                _currentHealTimes = 0;
-                return true;
-            }
-
-            var firstAidHasWork = BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use;
-            var surgicalHasWork = BotOwner.Medecine.SurgicalKit.HaveWork;
-            if (!firstAidHasWork && !surgicalHasWork)
-            {
+                BotOwner.TryResetHandsState();
                 _currentHealTimes = 0;
                 return true;
             }
 
             if (Time.time > _nextHealCheckTime)
             {
+                if (GetHealTimeout(out var timeout))
+                {
+                    MiyakoCarryServicePlugin.Logger.LogWarning(timeout);
+                    _currentHealTimeout = timeout;
+                }
                 _nextHealCheckTime = Time.time + HEAL_CHECK_INTERVAL;
                 _currentHealTimes += 1;
             }
 
-            if (_currentHealTimes >= 15 && _currentHealTimes % 15 == 0)
+            if (_currentHealTimes >= _currentHealTimeout)
             {
-                var player = BotOwner.GetPlayer;
-                if (player?.HandsController == null)
-                {
-                    return false;
-                }
-
-                var handsIdle = !player.HandsController.IsAiming
-                    && !player.HandsController.IsInventoryOpen()
-                    && !player.HandsController.IsInInteractionStrictCheck()
-                    && !player.HandsController.IsHandsProcessing();
-
-                if (!BotOwner.Medecine.Using && handsIdle)
-                {
-                    if (BotOwner.Medecine.FirstAid.Using)
-                    {
-                        BotOwner.Medecine.FirstAid.CancelCurrent();
-                    }
-                    if (BotOwner.Medecine.SurgicalKit.Using)
-                    {
-                        BotOwner.Medecine.SurgicalKit.CancelCurrent();
-                    }
-                    if (BotOwner.Medecine.Stimulators.Using)
-                    {
-                        BotOwner.Medecine.Stimulators.CancelCurrent();
-                    }
-                    player.FastForwardCurrentOperations();
-                    player.SetInventoryOpened(false);
-                    player.TrySetLastEquippedWeapon(true, null);
-                    BotOwner.WeaponManager.Selector.TakePrevWeapon();
-                    if (BotOwner.WeaponManager.Selector.LastEquipmentSlot != EquipmentSlot.FirstPrimaryWeapon)
-                    {
-                        BotOwner.WeaponManager.Selector.TryChangeToMain();
-                    }
-                    _currentHealTimes = 0;
-#if DEBUG
-                    MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制终止治疗");
-#endif
-                    return true;
-                }
+                BotOwner.TryResetHandsState();
+                _currentHealTimes = 0;
+                return true;
             }
 
-            if (_currentHealTimes >= 30)
+            return false;
+        }
+
+        public virtual bool GetHealTimeout(out float timeout)
+        {
+            timeout = 0f;
+            if (BotOwner.Medecine.Stimulators.Using)
             {
-                BotOwner.Medecine.FirstAid.CancelCurrent();
-                if (BotOwner.Medecine.SurgicalKit.Using)
-                {
-                    BotOwner.Medecine.SurgicalKit.CancelCurrent();
-                }
-                _currentHealTimes = 0;
+                timeout = 3f;
+                return true;
+            }
+            if (BotOwner.Medecine.FirstAid.Have2Do)
+            {
+                timeout = 10f;
+                return true;
+            }
+            if (BotOwner.Medecine.SurgicalKit.HaveWork)
+            {
+                timeout = 20f;
                 return true;
             }
             return false;
@@ -1022,7 +995,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool IsEnemyPosLost()
         {
-            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 1f)
+            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
             {
                 BotOwner.Memory.GoalEnemy = null;
                 return true;
