@@ -10,6 +10,7 @@ namespace MiyakoCarryService.Fika.Packets
     public class McsBotPlayerConfigPacket : BasePacket
     {
         public string KeywordItemText;
+        public string FormationMatrix;
         public SMcsBotPlayerConfig McsBotPlayerConfig;
         public Dictionary<string, McsValue> Extensions;
 
@@ -17,6 +18,7 @@ namespace MiyakoCarryService.Fika.Packets
         {
             base.Deserialize(reader);
             KeywordItemText = reader.GetString();
+            FormationMatrix = reader.GetString();
             McsBotPlayerConfig = reader.GetUnmanaged<SMcsBotPlayerConfig>();
             var count = reader.GetInt();
             Extensions = new();
@@ -27,19 +29,19 @@ namespace MiyakoCarryService.Fika.Packets
                 var v = new McsValue { Type = type };
                 switch (type)
                 {
-                    case EMcsValueType.Bool: 
-                        v.BoolValue = reader.GetBool(); 
+                    case EMcsValueType.Bool:
+                        v.BoolValue = reader.GetBool();
                         break;
                     case EMcsValueType.Int:
                     case EMcsValueType.Long:
-                    case EMcsValueType.Enum: 
-                        v.IntValue = reader.GetLong(); 
+                    case EMcsValueType.Enum:
+                        v.IntValue = reader.GetLong();
                         break;
-                    case EMcsValueType.Float: 
-                        v.FloatValue = reader.GetFloat(); 
+                    case EMcsValueType.Float:
+                        v.FloatValue = reader.GetFloat();
                         break;
-                    case EMcsValueType.String: 
-                        v.StringValue = reader.GetString(); 
+                    case EMcsValueType.String:
+                        v.StringValue = reader.GetString();
                         break;
                 }
                 Extensions[key] = v;
@@ -50,6 +52,7 @@ namespace MiyakoCarryService.Fika.Packets
         {
             base.Serialize(writer);
             writer.Put(KeywordItemText, 0);
+            writer.Put(FormationMatrix, 0);
             writer.PutUnmanaged(McsBotPlayerConfig);
             writer.Put(Extensions.Count);
             foreach (var kv in Extensions)
@@ -58,19 +61,19 @@ namespace MiyakoCarryService.Fika.Packets
                 writer.Put((byte)kv.Value.Type);
                 switch (kv.Value.Type)
                 {
-                    case EMcsValueType.Bool: 
-                        writer.Put(kv.Value.BoolValue); 
+                    case EMcsValueType.Bool:
+                        writer.Put(kv.Value.BoolValue);
                         break;
                     case EMcsValueType.Int:
                     case EMcsValueType.Long:
-                    case EMcsValueType.Enum: 
-                        writer.Put(kv.Value.IntValue); 
+                    case EMcsValueType.Enum:
+                        writer.Put(kv.Value.IntValue);
                         break;
-                    case EMcsValueType.Float: 
-                        writer.Put(kv.Value.FloatValue); 
+                    case EMcsValueType.Float:
+                        writer.Put(kv.Value.FloatValue);
                         break;
-                    case EMcsValueType.String: 
-                        writer.Put(kv.Value.StringValue, 0); 
+                    case EMcsValueType.String:
+                        writer.Put(kv.Value.StringValue, 0);
                         break;
                 }
             }

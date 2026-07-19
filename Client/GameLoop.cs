@@ -482,7 +482,10 @@ namespace MiyakoCarryService.Client
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                        FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
+                        KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value,
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value
                     };
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }

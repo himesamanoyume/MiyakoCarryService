@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client
         public static MiyakoCarryServicePlugin Instance;
         public static McsPluginClientConfig McsPluginClientConfig = null;
         private List<ModulePatch> _patches = new();
+        private static int _formationOpenCell = -1;
         public static bool IsLoadedByScriptEngine = false;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
@@ -64,6 +65,9 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
         public static ConfigEntry<EBlockItemType> BlockItemType;
+        public static ConfigEntry<bool> KeepFormation;
+        public static ConfigEntry<string> FormationMatrix;
+        public static ConfigEntry<float> FormationSpacing;
 
         #endregion
 
@@ -339,6 +343,9 @@ namespace MiyakoCarryService.Client
                         KeywordItemText = KeywordItemText.Value,
                         LootingKeywordItem = LootingKeywordItem.Value,
                         BlockItemType = (int)BlockItemType.Value,
+                        FormationMatrix = FormationMatrix.Value,
+                        KeepFormation = KeepFormation.Value,
+                        FormationSpacing = FormationSpacing.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -434,6 +441,79 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC,
                 Locales.BLOCKITEMTYPE_KEY,
                 (EBlockItemType)0
+            );
+
+            KeepFormation = Register(
+                EConfigType.BASIC,
+                "保持队形开关",
+                false
+            );
+
+            FormationMatrix = Register(
+                EConfigType.BASIC,
+                "队形配置",
+                McsFormationUtils.DefaultMatrix,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = static entry =>
+                    {
+                        var arr = McsFormationUtils.Parse((string)entry.BoxedValue);
+                        var options = new[] { "0", "1", "2", "3", "4" };
+                        var changed = false;
+
+                        GUILayout.BeginVertical();
+                        for (int row = 0; row < McsFormationUtils.MatrixSize; row++)
+                        {
+                            GUILayout.BeginHorizontal();
+                            for (int col = 0; col < McsFormationUtils.MatrixSize; col++)
+                            {
+                                var index = row * McsFormationUtils.MatrixSize + col;
+                                var isCenter = row == McsFormationUtils.Center && col == McsFormationUtils.Center;
+
+                                if (isCenter)
+                                {
+                                    GUILayout.Button("★", GUILayout.Width(25), GUILayout.Height(25));
+                                    continue;
+                                }
+
+                                if (GUILayout.Button(arr[index].ToString(), GUILayout.Width(25), GUILayout.Height(25)))
+                                {
+                                    _formationOpenCell = _formationOpenCell == index ? -1 : index;
+                                }
+                            }
+                            GUILayout.EndHorizontal();
+                        }
+
+                        if (_formationOpenCell >= 0)
+                        {
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25));
+                            var current = arr[_formationOpenCell];
+                            var newValue = GUILayout.SelectionGrid(current, options, options.Length);
+                            if (newValue != current)
+                            {
+                                McsFormationUtils.SetCell(arr, _formationOpenCell, newValue);
+                                _formationOpenCell = -1;
+                                changed = true;
+                            }
+                            GUILayout.EndHorizontal();
+                        }
+
+                        GUILayout.EndVertical();
+
+                        if (changed)
+                        {
+                            entry.BoxedValue = McsFormationUtils.Serialize(arr);
+                        }
+                    }
+                }
+            );
+
+            FormationSpacing = Register(
+                EConfigType.BASIC,
+                "队形间距",
+                2.5f,
+                acceptableValues: new AcceptableValueRange<float>(1f, 10f)
             );
 
             #endregion

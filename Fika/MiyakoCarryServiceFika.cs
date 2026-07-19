@@ -258,6 +258,9 @@ namespace MiyakoCarryService.Fika
                 KeywordItemText = packet.KeywordItemText,
                 LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,
                 BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
+                FormationMatrix = packet.FormationMatrix,  
+                KeepFormation = packet.McsBotPlayerConfig.KeepFormation,  
+                FormationSpacing = packet.McsBotPlayerConfig.FormationSpacing
             });
         }
 
@@ -361,12 +364,15 @@ namespace MiyakoCarryService.Fika
                 {
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+                    FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                     McsBotPlayerConfig = new SMcsBotPlayerConfig
                     {
                         EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
                         PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                        KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value,
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value
                     },
                     Extensions = McsConfigApi.GetConfigSnapshot()
                 };

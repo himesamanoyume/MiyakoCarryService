@@ -255,7 +255,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         continue;
                     }
-                    
+
                     if (mcsBotPlayer.HealthController.IsAlive)
                     {
                         mcsBotPlayers.Add(mcsBotPlayer);
@@ -294,6 +294,9 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
                     oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
+                    oldConfig.FormationMatrix = mcsBotPlayerConfig.FormationMatrix;
+                    oldConfig.KeepFormation = mcsBotPlayerConfig.KeepFormation;
+                    oldConfig.FormationSpacing = mcsBotPlayerConfig.FormationSpacing;
                     oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
                     return oldConfig;
                 }
