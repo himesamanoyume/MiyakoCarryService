@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static void Postfix(BotHearingSensor __instance, IPlayer player, Vector3 position, float power, AISoundType type)
+        public static void Prefix(BotHearingSensor __instance, IPlayer player, Vector3 position, float power, AISoundType type)
         {
             try
             {
@@ -48,7 +49,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     if (enemy != null && shouldReact)
                     {
                         thisBotOwner.BotsGroup.AddEnemy(enemy, EBotEnemyCause.callForHelp1);
-                        // thisBotOwner.BotsGroup.ReportAboutEnemy(enemy, EEnemyPartVisibleType.Visible, __instance.BotOwner);
+                        var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(thisBotOwner.ProfileId);
+                        var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
+                        mcsAILeadPlayer.CalcGoalEnemy(enemy);
                     }
                 }
             }
