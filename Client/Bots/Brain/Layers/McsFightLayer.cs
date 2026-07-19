@@ -98,6 +98,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Memory.Spotted(false, null, null);
                 }
 
+                BotOwner.WeaponManager.CheckWeaponReady();
+
                 if (ShouldUseMeleeAttack())
                 {
                     return new Action(typeof(MeleeAttackLogic), "Mcs:MeleeAttack");
@@ -107,7 +109,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     BotOwner.WeaponManager.Reload.McsTryReload();
                 }
-                else if (!goalEnemy.CanShoot && BotOwner.McsGetCurrentMagAmmoRatio() < 0.3f)
+                else if (!goalEnemy.CanShoot && BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                 {
                     BotOwner.WeaponManager.Reload.McsTryReload();
                 }

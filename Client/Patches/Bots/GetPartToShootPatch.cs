@@ -62,7 +62,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
             if (enemyInfo.LastPartToShoot == null)
             {
-                return enemyInfo.CurrPosition + Vector3.up * 0.8f;
+                return enemyInfo.CurrPosition + Vector3.up;
             }
 
             return ApplyLead(enemyInfo, enemyInfo.LastPartToShoot.GetPartPositionWithOffset());

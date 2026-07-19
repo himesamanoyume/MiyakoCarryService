@@ -348,7 +348,7 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var predicted = targetPos;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
                 var dir = predicted - firePort;
                 var horiz = new Vector3(dir.x, 0f, dir.z).magnitude;

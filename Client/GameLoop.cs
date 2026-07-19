@@ -801,9 +801,9 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.MAX_AIM_PRECICING = 60f;
             settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 1f * aimingDifficultyMultiplier;
             settings.FileSettings.Aiming.BOTTOM_COEF = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.MAX_AIM_TIME = 0.2f;
+            settings.FileSettings.Aiming.MAX_AIM_TIME = 0.05f;
             settings.FileSettings.Aiming.COEF_FROM_COVER = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.HARD_AIM = 0.2f;
+            settings.FileSettings.Aiming.HARD_AIM = 0.05f;
             settings.FileSettings.Aiming.HARD_AIM_CHANCE_100 = 100;
             settings.FileSettings.Aiming.PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
