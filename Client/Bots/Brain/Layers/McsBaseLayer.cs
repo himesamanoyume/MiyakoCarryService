@@ -1329,6 +1329,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
+            if (TryUpdateFormationMoveTarget(leadPos.Value, out nextUpdateTime))
+            {
+                return;
+            }
+
             var sqrDistanceToLead = BotOwner.Position.McsSqrDistance(leadPos.Value);
             if (sqrDistanceToLead <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE)
             {
@@ -1375,6 +1380,61 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
             _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
+        }
+
+        public virtual bool TryUpdateFormationMoveTarget(Vector3 leadPos, out float nextUpdateTime)
+        {
+            nextUpdateTime = 1f;
+
+            var mcsBotPlayerConfig = McsBotPlayerData?.McsAILeadPlayer?.McsBotPlayerConfig;
+            if (mcsBotPlayerConfig == null)
+            {
+                return false;
+            }
+
+            if (!mcsBotPlayerConfig.KeepFormation)
+            {
+                return false;
+            }
+
+            var leadPlayer = McsBotPlayerData?.LeadPlayer;
+            if (leadPlayer == null)
+            {
+                return false;
+            }
+
+            var botIndex = Tools.GetMcsBotIndex(leadPlayer.ProfileId, BotOwner.ProfileId, mcsBotPlayerConfig.SequentialFill);
+            if (botIndex < 1)
+            {
+                return false;
+            }
+
+            var predictedPos = leadPos + leadPlayer.Velocity * 2;
+            if (NavMesh.SamplePosition(predictedPos, out var hit, 3f, -1))
+            {
+                predictedPos = hit.position;
+            }
+            else
+            {
+                predictedPos = leadPos;
+            }
+
+            var target = Tools.ComputeTarget(leadPlayer, predictedPos, botIndex, Tools.ParseFormationMatrix(mcsBotPlayerConfig.FormationMatrix), mcsBotPlayerConfig.FormationSpacing);
+            if (!target.HasValue)
+            {
+                return false;
+            }
+
+            if (!CanGetPathToRun(BotOwner.Position, target.Value, McsBotPlayerData, out Vector3[] corners))
+            {
+                nextUpdateTime = 0.25f;
+                return true;
+            }
+
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            _currentMoveTarget = newMoveTarget;
+            nextUpdateTime = 0.2f;
+            return true;
         }
 
         public virtual void UpdateEscortMoveTarget(Vector3? escortPos, out float nextUpdateTime)

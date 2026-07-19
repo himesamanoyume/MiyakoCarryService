@@ -68,6 +68,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> KeepFormation;
         public static ConfigEntry<string> FormationMatrix;
         public static ConfigEntry<float> FormationSpacing;
+        public static ConfigEntry<bool> SequentialFill;
 
         #endregion
 
@@ -452,23 +453,23 @@ namespace MiyakoCarryService.Client
             FormationMatrix = Register(
                 EConfigType.BASIC,
                 "队形配置",
-                McsFormationUtils.DefaultMatrix,
+                Tools.ResetFormationMatrix(),
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry =>
                     {
-                        var arr = McsFormationUtils.Parse((string)entry.BoxedValue);
+                        var arr = Tools.ParseFormationMatrix((string)entry.BoxedValue);
                         var options = new[] { "0", "1", "2", "3", "4" };
                         var changed = false;
 
                         GUILayout.BeginVertical();
-                        for (int row = 0; row < McsFormationUtils.MatrixSize; row++)
+                        for (int row = 0; row < 7; row++)
                         {
                             GUILayout.BeginHorizontal();
-                            for (int col = 0; col < McsFormationUtils.MatrixSize; col++)
+                            for (int col = 0; col < 7; col++)
                             {
-                                var index = row * McsFormationUtils.MatrixSize + col;
-                                var isCenter = row == McsFormationUtils.Center && col == McsFormationUtils.Center;
+                                var index = row * 7 + col;
+                                var isCenter = row == 3 && col == 3;
 
                                 if (isCenter)
                                 {
@@ -487,12 +488,12 @@ namespace MiyakoCarryService.Client
                         if (_formationOpenCell >= 0)
                         {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25));
+                            GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
                             var current = arr[_formationOpenCell];
                             var newValue = GUILayout.SelectionGrid(current, options, options.Length);
                             if (newValue != current)
                             {
-                                McsFormationUtils.SetCell(arr, _formationOpenCell, newValue);
+                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, newValue);
                                 _formationOpenCell = -1;
                                 changed = true;
                             }
@@ -503,7 +504,7 @@ namespace MiyakoCarryService.Client
 
                         if (changed)
                         {
-                            entry.BoxedValue = McsFormationUtils.Serialize(arr);
+                            entry.BoxedValue = Tools.SerializeFormationMatrix(arr);
                         }
                     }
                 }
@@ -514,6 +515,12 @@ namespace MiyakoCarryService.Client
                 "队形间距",
                 2.5f,
                 acceptableValues: new AcceptableValueRange<float>(1f, 10f)
+            );
+
+            SequentialFill = Register(
+                EConfigType.BASIC,
+                "队形补位",
+                false
             );
 
             #endregion

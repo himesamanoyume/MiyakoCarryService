@@ -297,6 +297,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.FormationMatrix = mcsBotPlayerConfig.FormationMatrix;
                     oldConfig.KeepFormation = mcsBotPlayerConfig.KeepFormation;
                     oldConfig.FormationSpacing = mcsBotPlayerConfig.FormationSpacing;
+                    oldConfig.SequentialFill = mcsBotPlayerConfig.SequentialFill;
                     oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
                     return oldConfig;
                 }

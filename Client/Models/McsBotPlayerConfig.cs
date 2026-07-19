@@ -35,6 +35,9 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "FormationSpacing")]
         public float FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value;
 
+        [DataMember(Name = "SequentialFill")]
+        public bool SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value;
+
         [DataMember(Name = "Extensions")]
         public Dictionary<string, McsValue> Extensions = new();
     }

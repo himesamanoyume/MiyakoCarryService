@@ -368,7 +368,8 @@ namespace MiyakoCarryService.Server.Services
                             BlockItemType = 0,
                             FormationMatrix = "",
                             KeepFormation = false,
-                            FormationSpacing = 2.5f
+                            FormationSpacing = 2.5f,
+                            SequentialFill = false
                         };
                     }
                 });

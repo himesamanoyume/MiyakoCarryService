@@ -1,6 +1,7 @@
 
 
 using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -373,11 +374,124 @@ namespace MiyakoCarryService.Client.Utils
             var phoriz = new Vector3(pdir.x, 0f, pdir.z).magnitude;
             if (phoriz >= 0.01f && SimulateToHorizontalDistance(firePort, pdir, muzzleVelocity, ammo, phoriz, out _, out var bulletY))
             {
-                var drop = predicted.y - bulletY; 
+                var drop = predicted.y - bulletY;
                 predicted += Vector3.up * drop;
             }
 
             return predicted;
+        }
+
+        public static Vector3? ComputeTarget(Player mcsLeadPlayer, Vector3 basePos, int botIndex, int[] matrix, float spacing)
+        {
+            if (mcsLeadPlayer == null || botIndex < 1 || botIndex > 4 || matrix == null)
+            {
+                return null;
+            }
+
+            var cell = -1;
+            for (int i = 0; i < matrix.Length; i++)
+            {
+                if (matrix[i] == botIndex)
+                {
+                    cell = i;
+                    break;
+                }
+            }
+
+            if (cell < 0)
+            {
+                return null;
+            }
+
+            var row = cell / 7;
+            var col = cell % 7;
+            var dCol = col - 3;
+            var dRow = row - 3;
+
+            var forward = mcsLeadPlayer.LookDirection;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f)
+            {
+                forward = mcsLeadPlayer.Transform.forward;
+                forward.y = 0f;
+            }
+            forward.Normalize();
+
+            var rot = Quaternion.LookRotation(forward, Vector3.up);
+            var offset = rot * new Vector3(dCol * spacing, 0f, -dRow * spacing);
+            return basePos + offset;
+        }
+
+        public static int GetMcsBotIndex(string mcsLeadPlayerId, string mcsBotPlayerId, bool sequentialFill)
+        {
+            if (string.IsNullOrEmpty(mcsLeadPlayerId) || string.IsNullOrEmpty(mcsBotPlayerId))
+            {
+                return -1;
+            }
+
+            var members = (sequentialFill ? McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayerId) : McsMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId))
+                .Where(p => p != null)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            var idx = members.FindIndex(p => p.ProfileId == mcsBotPlayerId);
+            return idx < 0 ? -1 : idx + 1;
+        }
+
+        public static string ResetFormationMatrix()
+        {
+            var arr = new int[7 * 7];
+            arr[2 * 7 + 1] = 1;
+            arr[2 * 7 + 2] = 2;
+            arr[2 * 7 + 4] = 3;
+            arr[2 * 7 + 5] = 4;
+            return SerializeFormationMatrix(arr);
+        }
+
+        public static int[] ParseFormationMatrix(string raw)
+        {
+            var arr = new int[7 * 7];
+            if (string.IsNullOrEmpty(raw))
+            {
+                return arr;
+            }
+
+            var parts = raw.Split(',');
+            for (int i = 0; i < arr.Length && i < parts.Length; i++)
+            {
+                if (int.TryParse(parts[i], out var v) && v >= 0 && v <= 4)
+                {
+                    arr[i] = v;
+                }
+            }
+            return arr;
+        }
+
+        public static string SerializeFormationMatrix(int[] arr) => string.Join(",", arr);
+
+        public static void FormationMatrixSetCell(int[] arr, int index, int value)
+        {
+            if (index == 3 * 7 + 3)
+            {
+                return;
+            }
+
+            if (value < 0 || value > 4 || arr[index] == value)
+            {
+                return;
+            }
+
+            if (value != 0)
+            {
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (i != index && arr[i] == value)
+                    {
+                        arr[i] = 0;
+                    }
+                }
+            }
+            arr[index] = value;
         }
     }
 }

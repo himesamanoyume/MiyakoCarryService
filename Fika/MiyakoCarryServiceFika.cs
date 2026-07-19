@@ -260,7 +260,8 @@ namespace MiyakoCarryService.Fika
                 BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
                 FormationMatrix = packet.FormationMatrix,  
                 KeepFormation = packet.McsBotPlayerConfig.KeepFormation,  
-                FormationSpacing = packet.McsBotPlayerConfig.FormationSpacing
+                FormationSpacing = packet.McsBotPlayerConfig.FormationSpacing,
+                SequentialFill = packet.McsBotPlayerConfig.SequentialFill,
             });
         }
 
@@ -372,7 +373,8 @@ namespace MiyakoCarryService.Fika
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
                         KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value,
-                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+                        SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
                     },
                     Extensions = McsConfigApi.GetConfigSnapshot()
                 };

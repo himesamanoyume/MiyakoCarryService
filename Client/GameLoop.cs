@@ -485,7 +485,8 @@ namespace MiyakoCarryService.Client
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
                         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value,
-                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+                        SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
                     };
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }
