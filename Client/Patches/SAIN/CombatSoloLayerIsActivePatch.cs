@@ -32,7 +32,7 @@ public sealed class CombatSoloLayerIsActivePatch : ModulePatch
             }
 
             var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-            if (mcsBotPlayerData.HasDecision(Decisions.ShouldRegroup) || mcsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) || mcsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
+            if (mcsBotPlayerData.HasDecision(Decisions.ShouldRegroup) || mcsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) || mcsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition) || mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) >= 35f * 35f)
             {
                 __result = false;
                 return false;

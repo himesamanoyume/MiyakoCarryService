@@ -267,23 +267,32 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void UpdateMcsBotPlayerConfig(MongoID mcsLeadPlayerId, McsBotPlayerConfig mcsBotPlayerConfig)
         {
-            if (!mcsBotPlayerConfig.EnableLooting)
+            var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
-                foreach (var mcsBotPlayer in mcsBotPlayers)
+                var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+                if (botOwner == null)
                 {
-                    var botOwner = mcsBotPlayer?.AIData?.BotOwner;
-                    if (botOwner == null)
-                    {
-                        continue;
-                    }
-                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                    if (mcsBotPlayerData != null)
+                    continue;
+                }
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    if (!mcsBotPlayerConfig.EnableLooting)
                     {
                         mcsBotPlayerData.IsLooting = false;
                     }
+                    if (mcsBotPlayerConfig.EnableKeepFormation)
+                    {
+                        mcsBotPlayerData.AddDecision(Decisions.ShouldKeepFormation);
+                    }
+                    else
+                    {
+                        mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
+                    }
                 }
             }
+
             McsLeadPlayerConfigs.AddOrUpdate(
                 mcsLeadPlayerId,
                 id => mcsBotPlayerConfig,

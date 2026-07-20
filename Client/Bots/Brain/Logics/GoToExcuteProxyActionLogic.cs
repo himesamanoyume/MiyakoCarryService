@@ -110,19 +110,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (mcsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     await QuestProxyActionReadyToStart();
                 }
                 else if (mcsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     await StartLooting();
                 }
                 else if (mcsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
                 {
                     BotOwner.SetPose(1f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
                     if (interactableObjectData == null)
                     {
