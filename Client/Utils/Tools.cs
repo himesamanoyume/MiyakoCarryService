@@ -388,6 +388,15 @@ namespace MiyakoCarryService.Client.Utils
                 return null;
             }
 
+            var leadRow = 3;
+            var leadCol = 3;
+            var leadCell = System.Array.IndexOf(matrix, -1);
+            if (leadCell >= 0)
+            {
+                leadRow = leadCell / 7;
+                leadCol = leadCell % 7;
+            }
+
             var cell = -1;
             for (int i = 0; i < matrix.Length; i++)
             {
@@ -405,8 +414,8 @@ namespace MiyakoCarryService.Client.Utils
 
             var row = cell / 7;
             var col = cell % 7;
-            var dCol = col - 3;
-            var dRow = row - 3;
+            var dCol = col - leadCol;
+            var dRow = row - leadRow;
 
             var forward = mcsLeadPlayer.LookDirection;
             forward.y = 0f;
@@ -441,6 +450,7 @@ namespace MiyakoCarryService.Client.Utils
         public static string ResetFormationMatrix()
         {
             var arr = new int[7 * 7];
+            arr[3 * 7 + 3] = -1;
             arr[2 * 7 + 1] = 5;
             arr[2 * 7 + 2] = 6;
             arr[2 * 7 + 4] = 7;
@@ -459,7 +469,7 @@ namespace MiyakoCarryService.Client.Utils
             var parts = raw.Split(',');
             for (int i = 0; i < arr.Length && i < parts.Length; i++)
             {
-                if (int.TryParse(parts[i], out var v) && v >= 5 && v <= 8)
+                if (int.TryParse(parts[i], out var v) && (v == -1 || v == 0 || (v >= 5 && v <= 8)))
                 {
                     arr[i] = v;
                 }
@@ -471,12 +481,7 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void FormationMatrixSetCell(int[] arr, int index, int value)
         {
-            if (index == 3 * 7 + 3)
-            {
-                return;
-            }
-
-            if (value != 0 && (value < 5 || value > 8))
+            if (value != -1 && value != 0 && (value < 5 || value > 8))
             {
                 return;
             }

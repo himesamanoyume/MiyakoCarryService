@@ -478,15 +478,10 @@ namespace MiyakoCarryService.Client
                             for (int col = 0; col < 7; col++)
                             {
                                 var index = row * 7 + col;
+                                var label = arr[index] == -1 ? "★" : arr[index].ToString();
                                 var isCenter = row == 3 && col == 3;
 
-                                if (isCenter)
-                                {
-                                    GUILayout.Button("★", GUILayout.Width(25), GUILayout.Height(25));
-                                    continue;
-                                }
-
-                                if (GUILayout.Button(arr[index].ToString(), GUILayout.Width(25), GUILayout.Height(25)))
+                                if (GUILayout.Button(label, GUILayout.Width(25), GUILayout.Height(25)))
                                 {
                                     _formationOpenCell = _formationOpenCell == index ? -1 : index;
                                 }
@@ -499,9 +494,10 @@ namespace MiyakoCarryService.Client
                             GUILayout.BeginHorizontal();
                             GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
 
-                            var options = new[] { "0", "5", "6", "7", "8" };
+                            var options = new[] { "★", "0", "5", "6", "7", "8" };
+                            var optionValues = new[] { -1, 0, 5, 6, 7, 8 };
                             var current = arr[_formationOpenCell];
-                            var currentIndex = Array.IndexOf(options, current);
+                            var currentIndex = Array.IndexOf(optionValues, current);
                             if (currentIndex < 0)
                             {
                                 currentIndex = 0;
@@ -510,7 +506,8 @@ namespace MiyakoCarryService.Client
                             var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
                             if (newIndex != currentIndex)
                             {
-                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, options[newIndex].ParseToInt());
+                                Logger.LogWarning(optionValues[newIndex]);
+                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, optionValues[newIndex]);
                                 _formationOpenCell = -1;
                                 changed = true;
                             }
