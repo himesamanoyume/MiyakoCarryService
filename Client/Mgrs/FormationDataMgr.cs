@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Common.Utils;
@@ -27,7 +28,7 @@ namespace MiyakoCarryService.Client.Mgrs
             if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.SaveFormationPresetHotKey.Value))
             {
                 AddFormation("New Formation", MiyakoCarryServicePlugin.FormationMatrix.Value);
-                NotificationManagerClass.DisplayMessageNotification("已保存当前队形矩阵预设");
+                NotificationManagerClass.DisplayMessageNotification(Locales.SAVEFORMATIONPRESET.McsLocalized());
             }
         }
 

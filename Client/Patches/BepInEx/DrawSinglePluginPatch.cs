@@ -364,7 +364,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                 FormationDataMgr.SaveFormationPreset(formationData.Id, newName, newFormationMatrix);
                 _formationCollapseStates[newName] = false;
             }
-            if (GUILayout.Button("删除", GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button(Locales.DELETEFORMATION.McsLocalized(), GUILayout.ExpandWidth(false)))
             {
                 Tools.RemoveFormationOpenCell(formationData.Name);
                 _formationCollapseStates.Remove(formationData.Name);

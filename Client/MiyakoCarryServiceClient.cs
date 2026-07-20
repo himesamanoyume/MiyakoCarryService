@@ -451,7 +451,7 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC,
                 Locales.ENABLEKEEPFORMATION_KEY,
                 false,
-                Locales.ENABLEKEEPFORMATION_DESCIRPTION
+                Locales.ENABLEKEEPFORMATION_DESCRIPTION
             );
 
             EnableKeepFormationHotKey = Register(
@@ -464,7 +464,7 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC,
                 Locales.FORMATIONMATRIX_KEY,
                 Tools.ResetFormationMatrix(),
-                Locales.FORMATIONMATRIX_DESCIRPTION,
+                Locales.FORMATIONMATRIX_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry =>
@@ -490,12 +490,12 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC,
                 Locales.FORMATIONSEQUENTIALFILL_KEY,
                 false,
-                Locales.FORMATIONSEQUENTIALFILL_DESCIRPTION
+                Locales.FORMATIONSEQUENTIALFILL_DESCRIPTION
             );
 
             SaveFormationPresetHotKey = Register(
                 EConfigType.BASIC,
-                "保存队形预设快捷键",
+                Locales.SAVEFORMATIONPRESETHOTKEY_KEY,
                 new KeyboardShortcut()
             );
 

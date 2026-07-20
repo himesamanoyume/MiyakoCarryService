@@ -226,5 +226,8 @@
     "Mcs/FormationMatrix Description": "Used to configure the position of each carry service player. “★” represents your position. The top of “★” is your look direction",
     "Mcs/FormationSpacing Key": "Formation Spacing",
     "Mcs/FormationSequentialFill Key": "Formation Sequential Fill",
-    "Mcs/FormationSequentialFill Description": "When enabled, if a squad member dies in formation, the empty position is filled by the next squad member in brevity code order"
+    "Mcs/FormationSequentialFill Description": "When enabled, if a squad member dies in formation, the empty position is filled by the next squad member in brevity code order",
+    "Mcs/SaveFormationPresetHotKey Key": "Save Formation Preset HotKey",
+    "Mcs/SaveFormationPreset": "Saved formation matrix preset",
+    "Mcs/DeleteFormation": "Delete"
 }

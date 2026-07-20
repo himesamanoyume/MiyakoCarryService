@@ -226,5 +226,8 @@
     "Mcs/FormationMatrix Description": "用于配置每位护航的站位，“★”代表你的位置，“★”的正上方为你的视角朝向",
     "Mcs/FormationSpacing Key": "队形间距",
     "Mcs/FormationSequentialFill Key": "队形顺序补位",
-    "Mcs/FormationSequentialFill Description": "当开启时若队形中有护航死亡，则按照代号顺序补上空缺"
+    "Mcs/FormationSequentialFill Description": "当开启时若队形中有护航死亡，则按照代号顺序补上空缺",
+    "Mcs/SaveFormationPresetHotKey Key": "保存队形预设快捷键",
+    "Mcs/SaveFormationPreset": "已保存队形矩阵预设",
+    "Mcs/DeleteFormation": "删除"
 }
