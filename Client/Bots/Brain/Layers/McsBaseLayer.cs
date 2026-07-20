@@ -1371,7 +1371,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (!CanGetPathToRun(BotOwner.Position, nearPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var groundPos = TryProjectToGround(nearPos.Value);
+
+            if (!CanGetPathToRun(BotOwner.Position, groundPos, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1425,7 +1427,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (!CanGetPathToRun(BotOwner.Position, target.Value, McsBotPlayerData, out Vector3[] corners))
+            var groundPos = TryProjectToGround(target.Value);
+
+            if (!CanGetPathToRun(BotOwner.Position, groundPos, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return true;
@@ -1479,7 +1483,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 predictedPos = leadPos;
             }
 
-            if (!CanGetPathToRun(predictedPos, escortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var groundPos = TryProjectToGround(predictedPos);
+
+            if (!CanGetPathToRun(groundPos, escortPos.Value, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1525,7 +1531,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 predictedPos = BotOwner.Position;
             }
 
-            if (!CanGetPathToRun(predictedPos, targetPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var startGroundPos = TryProjectToGround(predictedPos);
+            var targetGroundPos = TryProjectToGround(targetPos.Value);
+
+            if (!CanGetPathToRun(startGroundPos, targetGroundPos, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1607,6 +1616,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 accumulated += segLen;
             }
             return corners[corners.Length - 1];
+        }
+
+        public virtual Vector3 TryProjectToGround(Vector3 pos)
+        {
+            if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var rayHit, 50f, LayerMaskClass.HighPolyWithTerrainMask))
+            {
+                if (NavMesh.SamplePosition(rayHit.point, out var navHit1, 1f, -1))
+                {
+                    return navHit1.position;
+                }
+                return rayHit.point;
+            }
+
+            if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))  
+            {  
+                return navHit2.position;  
+            } 
+            
+            return pos;
         }
 
         public virtual bool EndDeactivateMine()

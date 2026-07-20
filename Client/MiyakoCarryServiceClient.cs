@@ -506,7 +506,6 @@ namespace MiyakoCarryService.Client
                             var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
                             if (newIndex != currentIndex)
                             {
-                                Logger.LogWarning(optionValues[newIndex]);
                                 Tools.FormationMatrixSetCell(arr, _formationOpenCell, optionValues[newIndex]);
                                 _formationOpenCell = -1;
                                 changed = true;
