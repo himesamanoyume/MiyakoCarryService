@@ -29,8 +29,8 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "FormationMatrix")]
         public string FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value;
 
-        [DataMember(Name = "KeepFormation")]
-        public bool KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value;
+        [DataMember(Name = "EnableKeepFormation")]
+        public bool EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value;
 
         [DataMember(Name = "FormationSpacing")]
         public float FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value;

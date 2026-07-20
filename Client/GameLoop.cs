@@ -484,7 +484,7 @@ namespace MiyakoCarryService.Client
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
                         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
-                        KeepFormation = MiyakoCarryServicePlugin.KeepFormation.Value,
+                        EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
                         SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
                     };

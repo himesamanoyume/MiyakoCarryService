@@ -65,7 +65,8 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
         public static ConfigEntry<EBlockItemType> BlockItemType;
-        public static ConfigEntry<bool> KeepFormation;
+        public static ConfigEntry<bool> EnableKeepFormation;
+        public static ConfigEntry<KeyboardShortcut> EnableKeepFormationHotKey;
         public static ConfigEntry<string> FormationMatrix;
         public static ConfigEntry<float> FormationSpacing;
         public static ConfigEntry<bool> SequentialFill;
@@ -345,8 +346,9 @@ namespace MiyakoCarryService.Client
                         LootingKeywordItem = LootingKeywordItem.Value,
                         BlockItemType = (int)BlockItemType.Value,
                         FormationMatrix = FormationMatrix.Value,
-                        KeepFormation = KeepFormation.Value,
+                        EnableKeepFormation = EnableKeepFormation.Value,
                         FormationSpacing = FormationSpacing.Value,
+                        SequentialFill = SequentialFill.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -444,16 +446,18 @@ namespace MiyakoCarryService.Client
                 (EBlockItemType)0
             );
 
-            KeepFormation = Register(
+            EnableKeepFormation = Register(
                 EConfigType.BASIC,
-                "保持队形开关",
-                false
+                "开启保持队形",
+                false,
+                ""
             );
 
             FormationMatrix = Register(
                 EConfigType.BASIC,
-                "队形配置",
+                "队形矩阵",
                 Tools.ResetFormationMatrix(),
+                "",
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry =>
@@ -513,14 +517,15 @@ namespace MiyakoCarryService.Client
             FormationSpacing = Register(
                 EConfigType.BASIC,
                 "队形间距",
-                2.5f,
-                acceptableValues: new AcceptableValueRange<float>(1f, 10f)
+                3f,
+                acceptableValues: new AcceptableValueRange<float>(2f, 6f)
             );
 
             SequentialFill = Register(
                 EConfigType.BASIC,
                 "队形补位",
-                false
+                false,
+                ""
             );
 
             #endregion

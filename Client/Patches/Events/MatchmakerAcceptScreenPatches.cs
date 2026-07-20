@@ -30,7 +30,11 @@ namespace MiyakoCarryService.Client.Patches.Events
 					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
 					KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
 					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value
+					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                    EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
+                    FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
+                    FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+                    SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
 				}));
                 GroupPlayers = ___MatchmakerPlayersController.GroupPlayers;
 			}

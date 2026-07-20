@@ -1392,7 +1392,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (!mcsBotPlayerConfig.KeepFormation)
+            if (!mcsBotPlayerConfig.EnableKeepFormation)
             {
                 return false;
             }

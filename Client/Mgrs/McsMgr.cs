@@ -295,7 +295,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
                     oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
                     oldConfig.FormationMatrix = mcsBotPlayerConfig.FormationMatrix;
-                    oldConfig.KeepFormation = mcsBotPlayerConfig.KeepFormation;
+                    oldConfig.EnableKeepFormation = mcsBotPlayerConfig.EnableKeepFormation;
                     oldConfig.FormationSpacing = mcsBotPlayerConfig.FormationSpacing;
                     oldConfig.SequentialFill = mcsBotPlayerConfig.SequentialFill;
                     oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
