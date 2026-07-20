@@ -221,6 +221,7 @@
     "Mcs/RenewMcsOrderRefuse": "Renewal failed",
     "Mcs/EnableKeepFormation Key": "Enable Keep Formation",
     "Mcs/EnableKeepFormation Description": "Whether to determine carry service player positions based on formation matrix configuration",
+    "Mcs/EnableKeepFormationHotKey Key": "Enable Keep Formation HotKey",
     "Mcs/FormationMatrix Key": "Formation Matrix",
     "Mcs/FormationMatrix Description": "Used to configure the position of each carry service player. “★” represents the center of the formation matrix, which is your position. The top of “★” is your look direction",
     "Mcs/FormationSpacing Key": "Formation Spacing",

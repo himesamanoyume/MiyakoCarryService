@@ -203,6 +203,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string RENEWMCSORDERREFUSE = "Mcs/RenewMcsOrderRefuse";
         public const string ENABLEKEEPFORMATION_KEY = "Mcs/EnableKeepFormation Key";
         public const string ENABLEKEEPFORMATION_DESCIRPTION = "Mcs/EnableKeepFormation Description";
+        public const string ENABLEKEEPFORMATIONHOTKEY_KEY = "Mcs/EnableKeepFormationHotKey Key";
         public const string FORMATIONMATRIX_KEY = "Mcs/FormationMatrix Key";
         public const string FORMATIONMATRIX_DESCIRPTION = "Mcs/FormationMatrix Description";
         public const string FORMATIONSPACING_KEY = "Mcs/FormationSpacing Key";

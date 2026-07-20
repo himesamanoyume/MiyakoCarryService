@@ -453,6 +453,12 @@ namespace MiyakoCarryService.Client
                 Locales.ENABLEKEEPFORMATION_DESCIRPTION
             );
 
+            EnableKeepFormationHotKey = Register(
+                EConfigType.BASIC,
+                Locales.ENABLEKEEPFORMATIONHOTKEY_KEY,
+                new KeyboardShortcut()
+            );
+
             FormationMatrix = Register(
                 EConfigType.BASIC,
                 Locales.FORMATIONMATRIX_KEY,

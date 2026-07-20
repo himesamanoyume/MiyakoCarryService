@@ -56,6 +56,7 @@ namespace MiyakoCarryService.Client
             CheckVaildGameWorld();
 
             KeyInput.KeyDown(MiyakoCarryServicePlugin.EnableLootingHotKey.Value, MiyakoCarryServicePlugin.EnableLooting);
+            KeyInput.KeyDown(MiyakoCarryServicePlugin.EnableKeepFormationHotKey.Value, MiyakoCarryServicePlugin.EnableKeepFormation);
 
             if (!IsVaildGameWorld)
             {
