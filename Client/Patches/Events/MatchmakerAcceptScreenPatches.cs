@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
                     FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                     FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
-                    SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
+                    FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
 				}));
                 GroupPlayers = ___MatchmakerPlayersController.GroupPlayers;
 			}

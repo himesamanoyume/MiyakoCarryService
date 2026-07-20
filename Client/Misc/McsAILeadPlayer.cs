@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Misc
                         EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
                         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
-                        SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
+                        FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
                     };
                     McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                     return mcsBotPlayerConfig;

@@ -369,7 +369,7 @@ namespace MiyakoCarryService.Server.Services
                             EnableKeepFormation = false,
                             FormationMatrix = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
                             FormationSpacing = 3f,
-                            SequentialFill = false
+                            FormationSequentialFill = false
                         };
                     }
                 });

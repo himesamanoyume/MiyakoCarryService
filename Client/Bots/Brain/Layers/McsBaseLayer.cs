@@ -1403,7 +1403,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            var botIndex = Tools.GetMcsBotIndex(leadPlayer.ProfileId, BotOwner.ProfileId, mcsBotPlayerConfig.SequentialFill);
+            var botIndex = Tools.GetMcsBotIndex(leadPlayer.ProfileId, BotOwner.ProfileId, mcsBotPlayerConfig.FormationSequentialFill);
             if (botIndex < 1)
             {
                 return false;

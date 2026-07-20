@@ -483,10 +483,10 @@ namespace MiyakoCarryService.Client
                         KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
                         LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
                         BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
-                        FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
+                        FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
-                        SequentialFill = MiyakoCarryServicePlugin.SequentialFill.Value,
+                        FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
                     };
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }

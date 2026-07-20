@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("FormationSpacing")]
         public required float FormationSpacing { get; set; }
 
-        [JsonPropertyName("SequentialFill")]
-        public required bool SequentialFill { get; set; }
+        [JsonPropertyName("FormationSequentialFill")]
+        public required bool FormationSequentialFill { get; set; }
     }
 }

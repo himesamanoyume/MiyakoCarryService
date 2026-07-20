@@ -69,7 +69,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<KeyboardShortcut> EnableKeepFormationHotKey;
         public static ConfigEntry<string> FormationMatrix;
         public static ConfigEntry<float> FormationSpacing;
-        public static ConfigEntry<bool> SequentialFill;
+        public static ConfigEntry<bool> FormationSequentialFill;
 
         #endregion
 
@@ -348,7 +348,7 @@ namespace MiyakoCarryService.Client
                         FormationMatrix = FormationMatrix.Value,
                         EnableKeepFormation = EnableKeepFormation.Value,
                         FormationSpacing = FormationSpacing.Value,
-                        SequentialFill = SequentialFill.Value,
+                        FormationSequentialFill = FormationSequentialFill.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -448,16 +448,16 @@ namespace MiyakoCarryService.Client
 
             EnableKeepFormation = Register(
                 EConfigType.BASIC,
-                "开启保持队形",
+                Locales.ENABLEKEEPFORMATION_KEY,
                 false,
-                ""
+                Locales.ENABLEKEEPFORMATION_DESCIRPTION
             );
 
             FormationMatrix = Register(
                 EConfigType.BASIC,
-                "队形矩阵",
+                Locales.FORMATIONMATRIX_KEY,
                 Tools.ResetFormationMatrix(),
-                "",
+                Locales.FORMATIONMATRIX_DESCIRPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry =>
@@ -516,16 +516,16 @@ namespace MiyakoCarryService.Client
 
             FormationSpacing = Register(
                 EConfigType.BASIC,
-                "队形间距",
+                Locales.FORMATIONSPACING_KEY,
                 3f,
                 acceptableValues: new AcceptableValueRange<float>(2f, 6f)
             );
 
-            SequentialFill = Register(
+            FormationSequentialFill = Register(
                 EConfigType.BASIC,
-                "队形补位",
+                Locales.FORMATIONSEQUENTIALFILL_KEY,
                 false,
-                ""
+                Locales.FORMATIONSEQUENTIALFILL_DESCIRPTION
             );
 
             #endregion

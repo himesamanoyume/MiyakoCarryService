@@ -9,6 +9,6 @@ namespace MiyakoCarryService.Client.Models
         public int BlockItemType;
         public bool EnableKeepFormation;
         public float FormationSpacing;
-        public bool SequentialFill;
+        public bool FormationSequentialFill;
     }
 }
