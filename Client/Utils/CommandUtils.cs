@@ -240,7 +240,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 else
                 {
-                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver)));
+                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver, entry.IsLocal)));
                 }
             }
 
@@ -252,7 +252,7 @@ namespace MiyakoCarryService.Client.Utils
             return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
         }
 
-        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver)
+        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver, bool isLocal = false)
         {
             var data = resolver?.Invoke();
             if (resolver != null && data == null)
@@ -275,15 +275,23 @@ namespace MiyakoCarryService.Client.Utils
 
                 if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
                 {
-                    EventMgr.Notify(new CommandMgrHandleFikaEvent
+                    if (isLocal)
                     {
-                        McsBotPlayer = mcsBotPlayer,
-                        CommandPacketType = ctx.CommandType,
-                        Position = ctx.Position,
-                        TargetId = ctx.TargetId,
-                        AimingBodyPartType = ctx.AimingBodyPartType,
-                        Extensions = ctx.Extensions
-                    });
+                        ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                        Execute(ctx);
+                    }
+                    else
+                    {
+                        EventMgr.Notify(new CommandMgrHandleFikaEvent
+                        {
+                            McsBotPlayer = mcsBotPlayer,
+                            CommandPacketType = ctx.CommandType,
+                            Position = ctx.Position,
+                            TargetId = ctx.TargetId,
+                            AimingBodyPartType = ctx.AimingBodyPartType,
+                            Extensions = ctx.Extensions
+                        });
+                    }
                 }
                 else
                 {

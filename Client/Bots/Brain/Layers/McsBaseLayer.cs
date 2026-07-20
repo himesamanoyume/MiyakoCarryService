@@ -189,15 +189,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHeal()
         {
-            // var player = BotOwner.GetPlayer;
-            // var handsBusy = player?.HandsController != null && (player.HandsController.IsInInteractionStrictCheck() || player.HandsController.IsHandsProcessing());
-            // if (!BotOwner.Medecine.Using && !BotOwner.Medecine.Stimulators.Using && !BotOwner.Medecine.FirstAid.Using && !BotOwner.Medecine.SurgicalKit.Using && !handsBusy)
-            // {
-            //     BotOwner.TryResetHandsState();
-            //     _currentHealTimes = 0;
-            //     return true;
-            // }
-
             if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
             {
                 BotOwner.TryResetHandsState();
@@ -209,7 +200,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (GetHealTimeout(out var timeout))
                 {
-                    MiyakoCarryServicePlugin.Logger.LogWarning(timeout);
                     _currentHealTimeout = timeout;
                 }
                 _nextHealCheckTime = Time.time + HEAL_CHECK_INTERVAL;
