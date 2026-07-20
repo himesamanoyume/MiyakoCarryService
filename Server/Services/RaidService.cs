@@ -367,7 +367,7 @@ namespace MiyakoCarryService.Server.Services
                             LootingKeywordItem = true,
                             BlockItemType = 0,
                             EnableKeepFormation = false,
-                            FormationMatrix = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+                            FormationMatrix = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,6,0,7,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
                             FormationSpacing = 3f,
                             FormationSequentialFill = false
                         };

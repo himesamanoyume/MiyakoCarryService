@@ -383,7 +383,7 @@ namespace MiyakoCarryService.Client.Utils
 
         public static Vector3? ComputeTarget(Player mcsLeadPlayer, Vector3 basePos, int botIndex, int[] matrix, float spacing)
         {
-            if (mcsLeadPlayer == null || botIndex < 1 || botIndex > 4 || matrix == null)
+            if (mcsLeadPlayer == null || botIndex < 5 || botIndex > 8 || matrix == null)
             {
                 return null;
             }
@@ -435,16 +435,16 @@ namespace MiyakoCarryService.Client.Utils
                 .ToList();
 
             var idx = members.FindIndex(p => p.ProfileId == mcsBotPlayerId);
-            return idx < 0 ? -1 : idx + 1;
+            return idx < 0 ? -1 : idx + 5;
         }
 
         public static string ResetFormationMatrix()
         {
             var arr = new int[7 * 7];
-            arr[2 * 7 + 1] = 1;
-            arr[2 * 7 + 2] = 2;
-            arr[2 * 7 + 4] = 3;
-            arr[2 * 7 + 5] = 4;
+            arr[2 * 7 + 1] = 5;
+            arr[2 * 7 + 2] = 6;
+            arr[2 * 7 + 4] = 7;
+            arr[2 * 7 + 5] = 8;
             return SerializeFormationMatrix(arr);
         }
 
@@ -459,7 +459,7 @@ namespace MiyakoCarryService.Client.Utils
             var parts = raw.Split(',');
             for (int i = 0; i < arr.Length && i < parts.Length; i++)
             {
-                if (int.TryParse(parts[i], out var v) && v >= 0 && v <= 4)
+                if (int.TryParse(parts[i], out var v) && v >= 5 && v <= 8)
                 {
                     arr[i] = v;
                 }
@@ -476,7 +476,12 @@ namespace MiyakoCarryService.Client.Utils
                 return;
             }
 
-            if (value < 0 || value > 4 || arr[index] == value)
+            if (value != 0 && (value < 5 || value > 8))
+            {
+                return;
+            }
+
+            if (arr[index] == value)
             {
                 return;
             }

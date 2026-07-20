@@ -1404,7 +1404,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var botIndex = Tools.GetMcsBotIndex(leadPlayer.ProfileId, BotOwner.ProfileId, mcsBotPlayerConfig.FormationSequentialFill);
-            if (botIndex < 1)
+            if (botIndex < 5)
             {
                 return false;
             }

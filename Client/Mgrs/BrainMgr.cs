@@ -7,6 +7,7 @@ using MiyakoCarryService.Client.Bots.Brain.Layers;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -76,6 +77,23 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var leadPlayer in leadPlayers)
             {
+                if (leadPlayer.ProfileId == myPlayer.ProfileId)
+                {
+                    var mcsBotPlayerConfig = new McsBotPlayerConfig
+                    {
+                        McsLeadPlayerId = leadPlayer.ProfileId,
+                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
+                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                        KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+                        LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                        EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
+                        FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+                        FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
+                    };
+                    McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
+                }
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer);
                 foreach (var mcsProfileItem in mcsProfilesDict)
                 {

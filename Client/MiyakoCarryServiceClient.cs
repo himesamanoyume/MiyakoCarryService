@@ -469,7 +469,6 @@ namespace MiyakoCarryService.Client
                     CustomDrawer = static entry =>
                     {
                         var arr = Tools.ParseFormationMatrix((string)entry.BoxedValue);
-                        var options = new[] { "0", "1", "2", "3", "4" };
                         var changed = false;
 
                         GUILayout.BeginVertical();
@@ -499,11 +498,19 @@ namespace MiyakoCarryService.Client
                         {
                             GUILayout.BeginHorizontal();
                             GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
+
+                            var options = new[] { "0", "5", "6", "7", "8" };
                             var current = arr[_formationOpenCell];
-                            var newValue = GUILayout.SelectionGrid(current, options, options.Length);
-                            if (newValue != current)
+                            var currentIndex = Array.IndexOf(options, current);
+                            if (currentIndex < 0)
                             {
-                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, newValue);
+                                currentIndex = 0;
+                            }
+
+                            var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
+                            if (newIndex != currentIndex)
+                            {
+                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, options[newIndex].ParseToInt());
                                 _formationOpenCell = -1;
                                 changed = true;
                             }
