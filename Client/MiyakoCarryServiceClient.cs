@@ -470,10 +470,9 @@ namespace MiyakoCarryService.Client
                     CustomDrawer = static entry =>
                     {
                         var oldFormationMatrix = (string)entry.BoxedValue;
-                        var newFormationMatrix = Tools.DrawFormationMatrix(oldFormationMatrix);
+                        var newFormationMatrix = Tools.DrawFormationMatrix(entry.Definition.Key, oldFormationMatrix);
                         if (newFormationMatrix != oldFormationMatrix)
                         {
-                            Logger.LogWarning(newFormationMatrix);
                             entry.BoxedValue = newFormationMatrix;
                         }
                     }

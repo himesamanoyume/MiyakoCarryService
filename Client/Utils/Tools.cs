@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Client.Utils
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public static bool IsHost => McsMgr.IsHost;
-        private static int _formationOpenCell = -1;
+        private static ConcurrentDictionary<string, int> _formationOpenCells = new();
 
         public static bool IsPlayerInventory(string stringTemplateId)
         {
@@ -506,7 +507,12 @@ namespace MiyakoCarryService.Client.Utils
             arr[index] = value;
         }
 
-        public static string DrawFormationMatrix(string formationMatrix)
+        public static void RemoveFormationOpenCell(string key)
+        {
+            _formationOpenCells.Remove(key, out var index);
+        }
+
+        public static string DrawFormationMatrix(string key, string formationMatrix)
         {
             var arr = ParseFormationMatrix(formationMatrix);
             var changed = false;
@@ -522,22 +528,20 @@ namespace MiyakoCarryService.Client.Utils
 
                     if (GUILayout.Button(label, GUILayout.Width(25), GUILayout.Height(25)))
                     {
-                        _formationOpenCell = _formationOpenCell == index ? -1 : index;
+                        _formationOpenCells.AddOrUpdate(key, index, (key, oldIndex) => oldIndex == index ? -1 : index);
                     }
                 }
                 GUILayout.EndHorizontal();
             }
 
-            MiyakoCarryServicePlugin.Logger.LogWarning(1);
-
-            if (_formationOpenCell >= 0)
+            if (_formationOpenCells.GetOrAdd(key, -1) >= 0)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
+                GUILayout.Label($"#{_formationOpenCells.GetOrAdd(key, -1)}", GUILayout.Width(25), GUILayout.Height(25));
 
                 var options = new[] { "★", "0", "5", "6", "7", "8" };
                 var optionValues = new[] { -1, 0, 5, 6, 7, 8 };
-                var current = arr[_formationOpenCell];
+                var current = arr[_formationOpenCells.GetOrAdd(key, -1)];
                 var currentIndex = Array.IndexOf(optionValues, current);
                 if (currentIndex < 0)
                 {
@@ -545,13 +549,11 @@ namespace MiyakoCarryService.Client.Utils
                 }
 
                 var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
-                MiyakoCarryServicePlugin.Logger.LogWarning(newIndex);
                 if (newIndex != currentIndex)
                 {
-                    FormationMatrixSetCell(arr, _formationOpenCell, optionValues[newIndex]);
-                    _formationOpenCell = -1;
+                    FormationMatrixSetCell(arr, _formationOpenCells.GetOrAdd(key, -1), optionValues[newIndex]);
+                    _formationOpenCells.AddOrUpdate(key, -1, (key, oldIndex) => -1);
                     changed = true;
-                    MiyakoCarryServicePlugin.Logger.LogWarning("修改1");
                 }
                 GUILayout.EndHorizontal();
             }
@@ -560,7 +562,6 @@ namespace MiyakoCarryService.Client.Utils
 
             if (changed)
             {
-                MiyakoCarryServicePlugin.Logger.LogWarning("修改2");
                 return SerializeFormationMatrix(arr);
             }
             return formationMatrix;

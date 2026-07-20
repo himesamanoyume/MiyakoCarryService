@@ -210,14 +210,32 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                     }
 
                     // 只有在未折叠状态下才绘制设置项
-                    if (!isCategoryCollapsed)
+                    if (isCategoryCollapsed)
                     {
-                        if (categorySettings != null)
+                        return;
+                    }
+
+                    if (categorySettings == null)
+                    {
+                        return;
+                    }
+
+                    foreach (var setting in categorySettings)
+                    {
+                        CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
+                        GUILayout.Space(2);
+
+                        if (FormationDataMgr == null)
                         {
-                            foreach (var setting in categorySettings)
+                            continue;
+                        }
+
+                        if (setting.DispName == "保存队形预设快捷键")
+                        {
+                            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+                            foreach (var formationData in formationDatas)
                             {
-                                CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
-                                GUILayout.Space(2);
+                                CustomDrawFormationSingleSetting(formationData, leftColumnWidth);
                             }
                         }
                     }
@@ -225,22 +243,22 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                 else
                 {
                     // 如果不需要绘制头部，直接显示设置项
-                    if (categorySettings != null)
+                    if (categorySettings == null)
                     {
-                        foreach (var setting in categorySettings)
+                        return;
+                    }
+
+                    foreach (var setting in categorySettings)
+                    {
+                        CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
+                        GUILayout.Space(2);
+
+                        if (setting.DispName == "保存队形预设快捷键")
                         {
-                            CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
-                            GUILayout.Space(2);
-
-                            if (FormationDataMgr == null)
+                            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+                            foreach (var formationData in formationDatas)
                             {
-                                continue;
-                            }
-
-                            if (setting.DispName == "保存队形预设快捷键")
-                            {
-                                var formationDatas = FormationDataMgr.GetDatas<FormationData>();
-                                CustomDrawFormationSingleSetting(formationDatas, leftColumnWidth);
+                                CustomDrawFormationSingleSetting(formationData, leftColumnWidth);
                             }
                         }
                     }
@@ -317,42 +335,42 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
             GUI.color = origColor;
         }
 
-        private static void CustomDrawFormationSingleSetting(HashSet<FormationData> formationDatas, int leftColumnWidth)
+        private static void CustomDrawFormationSingleSetting(FormationData formationData, int leftColumnWidth)
         {
-            foreach (var formationData in formationDatas)
+            if (!_formationCollapseStates.ContainsKey(formationData.Name))
             {
-                var isCategoryCollapsed = _formationCollapseStates[formationData.Name];
-                
-                if (CustomDrawCategoryHeader(formationData.Name, isCategoryCollapsed))
-                {
-                    _formationCollapseStates[formationData.Name] = !isCategoryCollapsed;
-                    isCategoryCollapsed = _formationCollapseStates[formationData.Name];
-                }
-
-                if (isCategoryCollapsed)
-                {
-                    return;
-                }
-
-                GUILayout.BeginHorizontal();
-                var newName = GUILayout.TextField(formationData.Name, GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
-                GUILayout.FlexibleSpace();
-                var newFormationMatrix = Tools.DrawFormationMatrix(formationData.FormationMatrix);
-                if (newName != formationData.Name || newFormationMatrix != formationData.FormationMatrix)
-                {
-                    FormationDataMgr.SaveFormationPreset(formationData.Id, newName, newFormationMatrix);
-                }
-
-                if (GUILayout.Button("保存", GUILayout.ExpandWidth(false)))
-                {
-                    FormationDataMgr.SaveFormationPreset(formationData.Id, formationData.Name, newFormationMatrix);
-                }
-                if (GUILayout.Button("删除", GUILayout.ExpandWidth(false)))
-                {
-                    FormationDataMgr.DeleteFormation(formationData);
-                }
-                GUILayout.EndHorizontal();
+                _formationCollapseStates[formationData.Name] = true;
             }
+
+            var isFormationCollapsed = _formationCollapseStates[formationData.Name];
+
+            if (CustomDrawCategoryHeader(formationData.Name, isFormationCollapsed))
+            {
+                _formationCollapseStates[formationData.Name] = !isFormationCollapsed;
+                isFormationCollapsed = _formationCollapseStates[formationData.Name];
+            }
+
+            if (isFormationCollapsed)
+            {
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            var newName = GUILayout.TextField(formationData.Name, GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
+            var newFormationMatrix = Tools.DrawFormationMatrix(formationData.Name, formationData.FormationMatrix);
+            if (newName != formationData.Name || newFormationMatrix != formationData.FormationMatrix)
+            {
+                Tools.RemoveFormationOpenCell(formationData.Name);
+                FormationDataMgr.SaveFormationPreset(formationData.Id, newName, newFormationMatrix);
+                _formationCollapseStates[newName] = false;
+            }
+            if (GUILayout.Button("删除", GUILayout.ExpandWidth(false)))
+            {
+                Tools.RemoveFormationOpenCell(formationData.Name);
+                _formationCollapseStates.Remove(formationData.Name);
+                FormationDataMgr.DeleteFormation(formationData);
+            }
+            GUILayout.EndHorizontal();
         }
     }
 }

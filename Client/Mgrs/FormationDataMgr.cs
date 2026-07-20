@@ -33,8 +33,9 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void LoadFormationPreset()
         {
-            var formationDatas = Json.Deserialize<List<FormationDataDto>>(MiyakoCarryServicePlugin.FormationPresets.Value);
-            foreach (var formationDataDto in formationDatas)
+            var formationDataDtos = Json.Deserialize<List<FormationDataDto>>(MiyakoCarryServicePlugin.FormationPresets.Value);
+            DataClear();
+            foreach (var formationDataDto in formationDataDtos)
             {
                 _datas.Add(new FormationData(formationDataDto.Id, formationDataDto.Name, formationDataDto.FormationMatrix));
             }
