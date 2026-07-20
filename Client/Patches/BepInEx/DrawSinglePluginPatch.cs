@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                             continue;
                         }
 
-                        if (setting.DispName == "保存队形预设快捷键")
+                        if (setting.DispName == Locales.SAVEFORMATIONPRESETHOTKEY_KEY)
                         {
                             var formationDatas = FormationDataMgr.GetDatas<FormationData>();
                             foreach (var formationData in formationDatas)
@@ -253,7 +253,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                         CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
                         GUILayout.Space(2);
 
-                        if (setting.DispName == "保存队形预设快捷键")
+                        if (setting.DispName == Locales.SAVEFORMATIONPRESETHOTKEY_KEY)
                         {
                             var formationDatas = FormationDataMgr.GetDatas<FormationData>();
                             foreach (var formationData in formationDatas)

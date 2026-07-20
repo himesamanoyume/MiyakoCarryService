@@ -84,5 +84,27 @@ namespace MiyakoCarryService.Client.Mgrs
             _datas.Remove(formationData);
             SaveFormationPresets();
         }
+
+        public FormationData GetFormationData(MongoID id)
+        {
+            foreach (FormationData formationData in _datas)
+            {
+                if (formationData.Id == id)
+                {
+                    return formationData;
+                }
+            }
+            return null;
+        }
+
+        public void ApplyFormationData(MongoID id)
+        {
+            var formationData = GetFormationData(id);
+            if (formationData == null)
+            {
+                return;
+            }
+            MiyakoCarryServicePlugin.FormationMatrix.Value = formationData.FormationMatrix;
+        }
     }
 }

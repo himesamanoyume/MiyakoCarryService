@@ -212,5 +212,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string SAVEFORMATIONPRESETHOTKEY_KEY = "Mcs/SaveFormationPresetHotKey Key";
         public const string SAVEFORMATIONPRESET = "Mcs/SaveFormationPreset";
         public const string DELETEFORMATION = "Mcs/DeleteFormation";
+        public const string CHANGEFORMATIONCOMMAND_NAME = "Mcs/ChangeFormationCommand Name";
+        public const string CHANGEFORMATIONCOMMAND_TARGETNAME = "Mcs/ChangeFormationCommand TargetName";
     }
 }

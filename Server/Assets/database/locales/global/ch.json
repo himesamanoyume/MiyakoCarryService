@@ -229,5 +229,7 @@
     "Mcs/FormationSequentialFill Description": "当开启时若队形中有护航死亡，则按照代号顺序补上空缺",
     "Mcs/SaveFormationPresetHotKey Key": "保存队形预设快捷键",
     "Mcs/SaveFormationPreset": "已保存队形矩阵预设",
-    "Mcs/DeleteFormation": "删除"
+    "Mcs/DeleteFormation": "删除",
+    "Mcs/ChangeFormationCommand Name": "改变队形",
+    "Mcs/ChangeFormationCommand TargetName": "立即应用已保存的队形预设"
 }

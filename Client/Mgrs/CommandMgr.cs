@@ -35,10 +35,12 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.ClearArea.ToString(), ClearAreaCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.OpenInventory.ToString(), OpenInventoryCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.GoToExfil.ToString(), GoToExfilCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.ChangeFormation.ToString(), ChangeFormationCommandAction);
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
+        private FormationDataMgr FormationDataMgr => MgrAccessor.Get<FormationDataMgr>();
 
         public override void OnRaidStarted()
         {
@@ -102,6 +104,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
+            menu.RegisterSubMenu(Locales.CHANGEFORMATIONCOMMAND_NAME, Locales.CHANGEFORMATIONCOMMAND_TARGETNAME, m => BuildFormationMenu(m, [mcsBotPlayers.FirstOrDefault()]));
+
             // 不打算对根菜单进行扩展
             // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
@@ -146,6 +150,21 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
             CommandUtils.Apply(EMenuId.Member.ToString(), menu, mcsBotPlayers);
+        }
+
+        public virtual void BuildFormationMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        {
+            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+            foreach (var formationData in formationDatas)
+            {
+                menu.RegisterCommand(
+                    formationData.Name,
+                    formationData.Name,
+                    ECommandType.ChangeFormation.ToString(),
+                    mcsBotPlayers,
+                    resolver: () => new McsCommandContext() { TargetId = formationData.Id }
+                );
+            }
         }
 
         public virtual void BuildEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
@@ -279,6 +298,11 @@ namespace MiyakoCarryService.Client.Mgrs
         #endregion
 
         #region Action
+
+        public virtual void ChangeFormationCommandAction(McsCommandContext ctx)
+        {
+            FormationDataMgr.ApplyFormationData(ctx.TargetId);
+        }
 
         public virtual void OpenInventoryCommandAction(McsCommandContext ctx)
         {
