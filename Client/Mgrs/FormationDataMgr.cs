@@ -1,0 +1,86 @@
+
+using System.Collections.Generic;
+using EFT;
+using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
+using SPT.Common.Utils;
+
+namespace MiyakoCarryService.Client.Mgrs
+{
+    public class FormationDataMgr : DataMgr
+    {
+        public override void Start()
+        {
+            base.Start();
+            LoadFormationPreset();
+        }
+
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            OnRaidEnded();
+        }
+
+        void Update()
+        {
+            if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.SaveFormationPresetHotKey.Value))
+            {
+                AddFormation("New Formation", MiyakoCarryServicePlugin.FormationMatrix.Value);
+                NotificationManagerClass.DisplayMessageNotification("已保存当前队形矩阵预设");
+            }
+        }
+
+        public void LoadFormationPreset()
+        {
+            var formationDatas = Json.Deserialize<List<FormationDataDto>>(MiyakoCarryServicePlugin.FormationPresets.Value);
+            foreach (var formationDataDto in formationDatas)
+            {
+                _datas.Add(new FormationData(formationDataDto.Id, formationDataDto.Name, formationDataDto.FormationMatrix));
+            }
+        }
+
+        public void SaveFormationPresets()
+        {
+            List<FormationDataDto> formationDataDtos = new();
+            foreach (FormationData formationData in _datas)
+            {
+                var formationDataDto = new FormationDataDto
+                {
+                    Id = formationData.Id,
+                    Name = formationData.Name,
+                    FormationMatrix = formationData.FormationMatrix
+                };
+                formationDataDtos.Add(formationDataDto);
+            }
+            MiyakoCarryServicePlugin.FormationPresets.Value = Json.Serialize(formationDataDtos);
+            LoadFormationPreset();
+        }
+
+        public void SaveFormationPreset(MongoID id, string rename, string formationMatrix)
+        {
+            foreach (FormationData formationData in _datas)
+            {
+                if (formationData.Id == id)
+                {
+                    formationData.Name = rename;
+                    formationData.FormationMatrix = formationMatrix;
+                    break;
+                }
+            }
+            SaveFormationPresets();
+        }
+
+        public void AddFormation(string name, string formationMatrix)
+        {
+            _datas.Add(new FormationData(name, formationMatrix));
+            SaveFormationPresets();
+        }
+
+        public void DeleteFormation(FormationData formationData)
+        {
+            _datas.Remove(formationData);
+            SaveFormationPresets();
+        }
+    }
+}

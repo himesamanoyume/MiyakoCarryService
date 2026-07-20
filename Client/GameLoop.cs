@@ -141,6 +141,7 @@ namespace MiyakoCarryService.Client
             BaseMgr.Enable(typeof(DamageTriggerDataMgr));
             BaseMgr.Enable(typeof(RoomTrapDataMgr));
             BaseMgr.Enable(typeof(DoorDataMgr));
+            BaseMgr.Enable(typeof(FormationDataMgr));
 
             // BrainMgr必须在最后，用以脚本引擎重载
             BaseMgr.Enable(typeof(BrainMgr));

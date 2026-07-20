@@ -7,6 +7,8 @@ using BepInEx;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {
@@ -14,6 +16,14 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager), "DrawSinglePlugin");
         private static Dictionary<string, List<SettingEntryBase>> _allSettings = new();
+
+        private static FormationDataMgr FormationDataMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<FormationDataMgr>();
+            }
+        }
 
         [PatchPrefix]
         public static bool Prefix(ConfigurationManager.ConfigurationManager __instance, object plugin)
@@ -44,7 +54,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
             {
                 _instanceTraverse = Traverse.Create(__instance);
             }
-            
+
             var cachedHeight = pluginTraverse.Field<int>("Height").Value;
             var startRect = new Rect();
             if (Event.current.type == EventType.Repaint)
@@ -167,6 +177,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
 
         // 用于存储每个Category的折叠状态
         private static Dictionary<string, bool> _categoryCollapseStates = new Dictionary<string, bool>();
+        private static Dictionary<string, bool> _formationCollapseStates = new Dictionary<string, bool>();
 
         private static void CustomDrawCategory(string categoryName, bool shouldDrawHeader, List<SettingEntryBase> categorySettings, object hideSingleSectionValue, object fieldDrawer, Color advancedSettingColor, int leftColumnWidth)
         {
@@ -220,6 +231,17 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                         {
                             CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
                             GUILayout.Space(2);
+
+                            if (FormationDataMgr == null)
+                            {
+                                continue;
+                            }
+
+                            if (setting.DispName == "保存队形预设快捷键")
+                            {
+                                var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+                                CustomDrawFormationSingleSetting(formationDatas, leftColumnWidth);
+                            }
                         }
                     }
                 }
@@ -293,6 +315,44 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
 
             GUILayout.Label(new GUIContent(setting.DispName.TrimStart('!').McsLocalized(), null, setting.Description.McsLocalized()), GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
             GUI.color = origColor;
+        }
+
+        private static void CustomDrawFormationSingleSetting(HashSet<FormationData> formationDatas, int leftColumnWidth)
+        {
+            foreach (var formationData in formationDatas)
+            {
+                var isCategoryCollapsed = _formationCollapseStates[formationData.Name];
+                
+                if (CustomDrawCategoryHeader(formationData.Name, isCategoryCollapsed))
+                {
+                    _formationCollapseStates[formationData.Name] = !isCategoryCollapsed;
+                    isCategoryCollapsed = _formationCollapseStates[formationData.Name];
+                }
+
+                if (isCategoryCollapsed)
+                {
+                    return;
+                }
+
+                GUILayout.BeginHorizontal();
+                var newName = GUILayout.TextField(formationData.Name, GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
+                GUILayout.FlexibleSpace();
+                var newFormationMatrix = Tools.DrawFormationMatrix(formationData.FormationMatrix);
+                if (newName != formationData.Name || newFormationMatrix != formationData.FormationMatrix)
+                {
+                    FormationDataMgr.SaveFormationPreset(formationData.Id, newName, newFormationMatrix);
+                }
+
+                if (GUILayout.Button("保存", GUILayout.ExpandWidth(false)))
+                {
+                    FormationDataMgr.SaveFormationPreset(formationData.Id, formationData.Name, newFormationMatrix);
+                }
+                if (GUILayout.Button("删除", GUILayout.ExpandWidth(false)))
+                {
+                    FormationDataMgr.DeleteFormation(formationData);
+                }
+                GUILayout.EndHorizontal();
+            }
         }
     }
 }

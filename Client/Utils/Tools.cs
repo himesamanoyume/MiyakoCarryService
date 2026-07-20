@@ -1,5 +1,6 @@
 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -19,6 +20,7 @@ namespace MiyakoCarryService.Client.Utils
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public static bool IsHost => McsMgr.IsHost;
+        private static int _formationOpenCell = -1;
 
         public static bool IsPlayerInventory(string stringTemplateId)
         {
@@ -502,6 +504,66 @@ namespace MiyakoCarryService.Client.Utils
                 }
             }
             arr[index] = value;
+        }
+
+        public static string DrawFormationMatrix(string formationMatrix)
+        {
+            var arr = ParseFormationMatrix(formationMatrix);
+            var changed = false;
+
+            GUILayout.BeginVertical();
+            for (int row = 0; row < 7; row++)
+            {
+                GUILayout.BeginHorizontal();
+                for (int col = 0; col < 7; col++)
+                {
+                    var index = row * 7 + col;
+                    var label = arr[index] == -1 ? "★" : arr[index].ToString();
+
+                    if (GUILayout.Button(label, GUILayout.Width(25), GUILayout.Height(25)))
+                    {
+                        _formationOpenCell = _formationOpenCell == index ? -1 : index;
+                    }
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            MiyakoCarryServicePlugin.Logger.LogWarning(1);
+
+            if (_formationOpenCell >= 0)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
+
+                var options = new[] { "★", "0", "5", "6", "7", "8" };
+                var optionValues = new[] { -1, 0, 5, 6, 7, 8 };
+                var current = arr[_formationOpenCell];
+                var currentIndex = Array.IndexOf(optionValues, current);
+                if (currentIndex < 0)
+                {
+                    currentIndex = 0;
+                }
+
+                var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
+                MiyakoCarryServicePlugin.Logger.LogWarning(newIndex);
+                if (newIndex != currentIndex)
+                {
+                    FormationMatrixSetCell(arr, _formationOpenCell, optionValues[newIndex]);
+                    _formationOpenCell = -1;
+                    changed = true;
+                    MiyakoCarryServicePlugin.Logger.LogWarning("修改1");
+                }
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.EndVertical();
+
+            if (changed)
+            {
+                MiyakoCarryServicePlugin.Logger.LogWarning("修改2");
+                return SerializeFormationMatrix(arr);
+            }
+            return formationMatrix;
         }
     }
 }

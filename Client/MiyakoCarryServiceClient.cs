@@ -47,7 +47,6 @@ namespace MiyakoCarryService.Client
         public static MiyakoCarryServicePlugin Instance;
         public static McsPluginClientConfig McsPluginClientConfig = null;
         private List<ModulePatch> _patches = new();
-        private static int _formationOpenCell = -1;
         public static bool IsLoadedByScriptEngine = false;
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
@@ -70,6 +69,8 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<string> FormationMatrix;
         public static ConfigEntry<float> FormationSpacing;
         public static ConfigEntry<bool> FormationSequentialFill;
+        public static ConfigEntry<KeyboardShortcut> SaveFormationPresetHotKey;
+        public static ConfigEntry<string> FormationPresets;
 
         #endregion
 
@@ -468,56 +469,12 @@ namespace MiyakoCarryService.Client
                 {
                     CustomDrawer = static entry =>
                     {
-                        var arr = Tools.ParseFormationMatrix((string)entry.BoxedValue);
-                        var changed = false;
-
-                        GUILayout.BeginVertical();
-                        for (int row = 0; row < 7; row++)
+                        var oldFormationMatrix = (string)entry.BoxedValue;
+                        var newFormationMatrix = Tools.DrawFormationMatrix(oldFormationMatrix);
+                        if (newFormationMatrix != oldFormationMatrix)
                         {
-                            GUILayout.BeginHorizontal();
-                            for (int col = 0; col < 7; col++)
-                            {
-                                var index = row * 7 + col;
-                                var label = arr[index] == -1 ? "★" : arr[index].ToString();
-                                var isCenter = row == 3 && col == 3;
-
-                                if (GUILayout.Button(label, GUILayout.Width(25), GUILayout.Height(25)))
-                                {
-                                    _formationOpenCell = _formationOpenCell == index ? -1 : index;
-                                }
-                            }
-                            GUILayout.EndHorizontal();
-                        }
-
-                        if (_formationOpenCell >= 0)
-                        {
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label($"#{_formationOpenCell}", GUILayout.Width(25), GUILayout.Height(25));
-
-                            var options = new[] { "★", "0", "5", "6", "7", "8" };
-                            var optionValues = new[] { -1, 0, 5, 6, 7, 8 };
-                            var current = arr[_formationOpenCell];
-                            var currentIndex = Array.IndexOf(optionValues, current);
-                            if (currentIndex < 0)
-                            {
-                                currentIndex = 0;
-                            }
-
-                            var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
-                            if (newIndex != currentIndex)
-                            {
-                                Tools.FormationMatrixSetCell(arr, _formationOpenCell, optionValues[newIndex]);
-                                _formationOpenCell = -1;
-                                changed = true;
-                            }
-                            GUILayout.EndHorizontal();
-                        }
-
-                        GUILayout.EndVertical();
-
-                        if (changed)
-                        {
-                            entry.BoxedValue = Tools.SerializeFormationMatrix(arr);
+                            Logger.LogWarning(newFormationMatrix);
+                            entry.BoxedValue = newFormationMatrix;
                         }
                     }
                 }
@@ -535,6 +492,19 @@ namespace MiyakoCarryService.Client
                 Locales.FORMATIONSEQUENTIALFILL_KEY,
                 false,
                 Locales.FORMATIONSEQUENTIALFILL_DESCIRPTION
+            );
+
+            SaveFormationPresetHotKey = Register(
+                EConfigType.BASIC,
+                "保存队形预设快捷键",
+                new KeyboardShortcut()
+            );
+
+            FormationPresets = Register(
+                EConfigType.BASIC,
+                "FormationPresets",
+                "[]",
+                isHide: true
             );
 
             #endregion
