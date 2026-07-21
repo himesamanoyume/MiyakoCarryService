@@ -5,25 +5,25 @@ using SPTarkov.Server.Web;
 
 namespace MiyakoCarryService.Server
 {
-    public record ModMetadata : AbstractModMetadata, IModWebMetadata
+    public record ModMetadata : IModMetadata, IModBlazorMetadata
     {
         private const string CurrentVersion = "1.1.0.0";
 #if DEBUG
-        public override string Name { get; init; } = "MiyakoCarryServiceServer DebugBuild";
+        public string Name { get; init; } = "MiyakoCarryServiceServer DebugBuild";
 #else
-        public override string Name { get; init; } = "MiyakoCarryServiceServer";
+        public string Name { get; init; } = "MiyakoCarryServiceServer";
 #endif
-        public override string Author { get; init; } = "Himesamanoyume";
-        public override List<string> Contributors { get; init; }
-        public override SemanticVersioning.Version Version { get; init; } = new(string.Join('.', CurrentVersion.Split('.', System.StringSplitOptions.None).Take(3)));
-        public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
-        public override List<string> Incompatibilities { get; init; }
-        public override Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
-        public override string Url { get; init; } = "https://forge.sp-tarkov.com/mod/2709/miyako-carry-service";
-        public override string License { get; init; } = "CC BY-NC-SA 4.0";
-        public override string ModGuid { get; init; } = "top.himesamanoyume.miyakocarryservice";
+        public string Author { get; init; } = "Himesamanoyume";
+        public List<string> Contributors { get; init; }
+        public SemanticVersioning.Version Version { get; init; } = new(string.Join('.', CurrentVersion.Split('.', System.StringSplitOptions.None).Take(3)));
+        public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.0");
+        public List<string> Incompatibilities { get; init; }
+        public Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
+        public string Url { get; init; } = "https://forge.sp-tarkov.com/mod/2709/miyako-carry-service";
+        public string License { get; init; } = "CC BY-NC-SA 4.0";
+        public string ModGuid { get; init; } = "top.himesamanoyume.miyakocarryservice";
         public System.Version ClientVersion { get; init; } = new(CurrentVersion);
-        public override bool HasPrepatcher { get; init; }
+        public bool HasPrepatcher { get; init; }
         public string WWWRootUrl { get; init; }
         public string HomePage { get; init; }
         public string HomePageDescription { get; init; }
