@@ -253,7 +253,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && (!McsBotPlayerData.HasDecision(Decisions.ShouldRegroup) || !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation))) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f))
+                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }

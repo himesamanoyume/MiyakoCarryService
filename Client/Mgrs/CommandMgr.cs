@@ -474,7 +474,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision();
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation]);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -492,7 +492,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision(null, Decisions.ShouldRegroup);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldRegroup);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -587,7 +587,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision(null, Decisions.ShouldTeleport);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldTeleport);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -722,7 +722,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
+            mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldExfil);
         }
 
         public virtual void ClearAreaCommandAction(McsCommandContext ctx)
