@@ -14,6 +14,7 @@ global using ItemLockedClass = EFT.InventoryLogic.ItemManipulator.ItemManuallyLo
 global using CannotMoveItemDuringRaidClass = EFT.InventoryLogic.ItemManipulator.CantRemoveFromEquipmentSlotDuringRaid;
 global using HeavyBleedEffect = EFT.HealthSystem.IHeavyBleeding;
 global using LightBleedEffect = EFT.HealthSystem.ILightBleeding;
+global using FractureEffect = EFT.HealthSystem.IFracture;
 
 // 意图
 global using BaseIntent = CoreActionResultParams;

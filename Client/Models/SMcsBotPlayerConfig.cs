@@ -7,5 +7,8 @@ namespace MiyakoCarryService.Client.Models
         public int PriceThreshold;
         public bool LootingKeywordItem;
         public int BlockItemType;
+        public bool EnableKeepFormation;
+        public float FormationSpacing;
+        public bool FormationSequentialFill;
     }
 }

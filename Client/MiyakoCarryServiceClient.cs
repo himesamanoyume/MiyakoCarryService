@@ -66,6 +66,13 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<string> KeywordItemText;
         public static ConfigEntry<bool> LootingKeywordItem;
         public static ConfigEntry<EBlockItemType> BlockItemType;
+        public static ConfigEntry<bool> EnableKeepFormation;
+        public static ConfigEntry<KeyboardShortcut> EnableKeepFormationHotKey;
+        public static ConfigEntry<string> FormationMatrix;
+        public static ConfigEntry<float> FormationSpacing;
+        public static ConfigEntry<bool> FormationSequentialFill;
+        public static ConfigEntry<KeyboardShortcut> SaveFormationPresetHotKey;
+        public static ConfigEntry<string> FormationPresets;
 
         #endregion
 
@@ -81,6 +88,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<KeyboardShortcut> TeammateHighlightHotKey;
         public static ConfigEntry<Color> TeammateHighlightColor;
         public static ConfigEntry<bool> EnableSubtitles;
+        public static ConfigEntry<bool> ShowBrevityCode;
 
         #endregion
 
@@ -224,6 +232,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new PlayHitEffectPatch());
             _patches.Add(new BotBewarePlantedMineUpdatePatch());
             _patches.Add(new AvailableInteractionStateSetterPatch());
+            _patches.Add(new FindDamagedPartPatch());
 
             if (FikaInstalled)
             {
@@ -339,6 +348,10 @@ namespace MiyakoCarryService.Client
                         KeywordItemText = KeywordItemText.Value,
                         LootingKeywordItem = LootingKeywordItem.Value,
                         BlockItemType = (int)BlockItemType.Value,
+                        FormationMatrix = FormationMatrix.Value,
+                        EnableKeepFormation = EnableKeepFormation.Value,
+                        FormationSpacing = FormationSpacing.Value,
+                        FormationSequentialFill = FormationSequentialFill.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -436,6 +449,65 @@ namespace MiyakoCarryService.Client
                 (EBlockItemType)0
             );
 
+            EnableKeepFormation = Register(
+                EConfigType.BASIC,
+                Locales.ENABLEKEEPFORMATION_KEY,
+                false,
+                Locales.ENABLEKEEPFORMATION_DESCRIPTION
+            );
+
+            EnableKeepFormationHotKey = Register(
+                EConfigType.BASIC,
+                Locales.ENABLEKEEPFORMATIONHOTKEY_KEY,
+                new KeyboardShortcut()
+            );
+
+            FormationMatrix = Register(
+                EConfigType.BASIC,
+                Locales.FORMATIONMATRIX_KEY,
+                Tools.ResetFormationMatrix(),
+                Locales.FORMATIONMATRIX_DESCRIPTION,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = static entry =>
+                    {
+                        var oldFormationMatrix = (string)entry.BoxedValue;
+                        var newFormationMatrix = Tools.DrawFormationMatrix(entry.Definition.Key, oldFormationMatrix);
+                        if (newFormationMatrix != oldFormationMatrix)
+                        {
+                            entry.BoxedValue = newFormationMatrix;
+                        }
+                    }
+                }
+            );
+
+            FormationSpacing = Register(
+                EConfigType.BASIC,
+                Locales.FORMATIONSPACING_KEY,
+                3f,
+                acceptableValues: new AcceptableValueRange<float>(2f, 6f)
+            );
+
+            FormationSequentialFill = Register(
+                EConfigType.BASIC,
+                Locales.FORMATIONSEQUENTIALFILL_KEY,
+                false,
+                Locales.FORMATIONSEQUENTIALFILL_DESCRIPTION
+            );
+
+            SaveFormationPresetHotKey = Register(
+                EConfigType.BASIC,
+                Locales.SAVEFORMATIONPRESETHOTKEY_KEY,
+                new KeyboardShortcut()
+            );
+
+            FormationPresets = Register(
+                EConfigType.BASIC,
+                "FormationPresets",
+                "[]",
+                isHide: true
+            );
+
             #endregion
             #region COMMAND
 
@@ -470,6 +542,13 @@ namespace MiyakoCarryService.Client
                 EConfigType.PLAYER,
                 Locales.ENABLESUBTITLES_KEY,
                 true
+            );
+
+            ShowBrevityCode = Register(
+                EConfigType.PLAYER,
+                Locales.SHOWBREVITYCODE_KEY,
+                true,
+                Locales.SHOWBREVITYCODE_DESCRIPTION
             );
 
             #endregion

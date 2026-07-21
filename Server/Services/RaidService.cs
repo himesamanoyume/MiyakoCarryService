@@ -191,7 +191,7 @@ namespace MiyakoCarryService.Server.Services
         public async Task AcceptGroupInvite(MongoId mcsLeadPlayerId, int mcsAid)
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
-            
+
             var mcsBotPlayerFullProfile = profileService.GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, mcsAid);
 
             if (mcsBotPlayerFullProfile is null)
@@ -366,7 +366,11 @@ namespace MiyakoCarryService.Server.Services
                             PriceThreshold = 50000,
                             KeywordItemText = "",
                             LootingKeywordItem = true,
-                            BlockItemType = 0
+                            BlockItemType = 0,
+                            EnableKeepFormation = false,
+                            FormationMatrix = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,6,0,7,8,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+                            FormationSpacing = 3f,
+                            FormationSequentialFill = false
                         };
                     }
                 });

@@ -7,6 +7,8 @@ using BepInEx;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Datas;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {
@@ -14,6 +16,14 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ConfigurationManager.ConfigurationManager), "DrawSinglePlugin");
         private static Dictionary<string, List<SettingEntryBase>> _allSettings = new();
+
+        private static FormationDataMgr FormationDataMgr
+        {
+            get
+            {
+                return field ??= GameLoop.Instance.GetMgr<FormationDataMgr>();
+            }
+        }
 
         [PatchPrefix]
         public static bool Prefix(ConfigurationManager.ConfigurationManager __instance, object plugin)
@@ -44,7 +54,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
             {
                 _instanceTraverse = Traverse.Create(__instance);
             }
-            
+
             var cachedHeight = pluginTraverse.Field<int>("Height").Value;
             var startRect = new Rect();
             if (Event.current.type == EventType.Repaint)
@@ -167,6 +177,7 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
 
         // 用于存储每个Category的折叠状态
         private static Dictionary<string, bool> _categoryCollapseStates = new Dictionary<string, bool>();
+        private static Dictionary<string, bool> _formationCollapseStates = new Dictionary<string, bool>();
 
         private static void CustomDrawCategory(string categoryName, bool shouldDrawHeader, List<SettingEntryBase> categorySettings, object hideSingleSectionValue, object fieldDrawer, Color advancedSettingColor, int leftColumnWidth)
         {
@@ -199,14 +210,32 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                     }
 
                     // 只有在未折叠状态下才绘制设置项
-                    if (!isCategoryCollapsed)
+                    if (isCategoryCollapsed)
                     {
-                        if (categorySettings != null)
+                        return;
+                    }
+
+                    if (categorySettings == null)
+                    {
+                        return;
+                    }
+
+                    foreach (var setting in categorySettings)
+                    {
+                        CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
+                        GUILayout.Space(2);
+
+                        if (FormationDataMgr == null)
                         {
-                            foreach (var setting in categorySettings)
+                            continue;
+                        }
+
+                        if (setting.DispName == Locales.SAVEFORMATIONPRESETHOTKEY_KEY)
+                        {
+                            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+                            foreach (var formationData in formationDatas)
                             {
-                                CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
-                                GUILayout.Space(2);
+                                CustomDrawFormationSingleSetting(formationData, leftColumnWidth);
                             }
                         }
                     }
@@ -214,12 +243,23 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                 else
                 {
                     // 如果不需要绘制头部，直接显示设置项
-                    if (categorySettings != null)
+                    if (categorySettings == null)
                     {
-                        foreach (var setting in categorySettings)
+                        return;
+                    }
+
+                    foreach (var setting in categorySettings)
+                    {
+                        CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
+                        GUILayout.Space(2);
+
+                        if (setting.DispName == Locales.SAVEFORMATIONPRESETHOTKEY_KEY)
                         {
-                            CustomDrawSingleSetting(setting, fieldDrawer, advancedSettingColor, leftColumnWidth);
-                            GUILayout.Space(2);
+                            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+                            foreach (var formationData in formationDatas)
+                            {
+                                CustomDrawFormationSingleSetting(formationData, leftColumnWidth);
+                            }
                         }
                     }
                 }
@@ -293,6 +333,44 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
 
             GUILayout.Label(new GUIContent(setting.DispName.TrimStart('!').McsLocalized(), null, setting.Description.McsLocalized()), GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
             GUI.color = origColor;
+        }
+
+        private static void CustomDrawFormationSingleSetting(FormationData formationData, int leftColumnWidth)
+        {
+            if (!_formationCollapseStates.ContainsKey(formationData.Name))
+            {
+                _formationCollapseStates[formationData.Name] = true;
+            }
+
+            var isFormationCollapsed = _formationCollapseStates[formationData.Name];
+
+            if (CustomDrawCategoryHeader(formationData.Name, isFormationCollapsed))
+            {
+                _formationCollapseStates[formationData.Name] = !isFormationCollapsed;
+                isFormationCollapsed = _formationCollapseStates[formationData.Name];
+            }
+
+            if (isFormationCollapsed)
+            {
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            var newName = GUILayout.TextField(formationData.Name, GUILayout.Width(leftColumnWidth), GUILayout.MaxWidth(leftColumnWidth));
+            var newFormationMatrix = Tools.DrawFormationMatrix(formationData.Name, formationData.FormationMatrix);
+            if (newName != formationData.Name || newFormationMatrix != formationData.FormationMatrix)
+            {
+                Tools.RemoveFormationOpenCell(formationData.Name);
+                FormationDataMgr.SaveFormationPreset(formationData.Id, newName, newFormationMatrix);
+                _formationCollapseStates[newName] = false;
+            }
+            if (GUILayout.Button(Locales.DELETEFORMATION.McsLocalized(), GUILayout.ExpandWidth(false)))
+            {
+                Tools.RemoveFormationOpenCell(formationData.Name);
+                _formationCollapseStates.Remove(formationData.Name);
+                FormationDataMgr.DeleteFormation(formationData);
+            }
+            GUILayout.EndHorizontal();
         }
     }
 }

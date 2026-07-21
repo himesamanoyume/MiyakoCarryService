@@ -14,5 +14,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string ShouldInteractionProxyAction = "Mcs.ShouldInteractionProxyAction";
         public const string ShouldDropTargetLoot = "Mcs.ShouldDropTargetLoot";
         public const string ShouldClearArea = "Mcs.ShouldClearArea";
+        public const string ShouldKeepFormation = "Mcs.ShouldKeepFormation";
     }
 }

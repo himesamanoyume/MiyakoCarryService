@@ -18,6 +18,7 @@ namespace MiyakoCarryService.Client.Mgrs
     public class McsMgr : BaseMgr
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, Player>> _mcsSquadDict = new();
+        private ConcurrentDictionary<MongoID, int> _mcsBotPlayerIndexes = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
         private HashSet<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
@@ -51,6 +52,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 (id, oldMcsBotPlayer) => oldMcsBotPlayer ?? FetchMcsBotPlayer(id)
             );
 
+            foreach (var _mcsBotPlayerId in squadMembers.Keys)
+            {
+                FetchMcsBotPlayerIndex(mcsLeadPlayerId, _mcsBotPlayerId);
+            }
+
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
             _allMcsBotPlayerIdInRaid.Add(mcsBotPlayerId);
 
@@ -62,6 +68,84 @@ namespace MiyakoCarryService.Client.Mgrs
                     (_, _) => mcsAILeadPlayer
                 );
             }
+        }
+
+        public int GetMcsBotPlayerIndex(MongoID mcsBotPlayerId, bool sequentialFill = false)
+        {
+            if (sequentialFill)
+            {
+                if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
+                {
+                    var mcsLeadPlayer = IsHost ? GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayerId) : Singleton<GameWorld>.Instance.MainPlayer;
+                    var sequentialIndex = GetSequentialIndex(mcsLeadPlayer.ProfileId, mcsBotPlayerId, index);
+                    return sequentialIndex;
+                }
+                return -4;
+            }
+            else
+            {
+                if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
+                {
+                    return index;
+                }
+                return -5;
+            }
+        }
+
+        private int GetSequentialIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, int baseIndex)
+        {
+            if (baseIndex < 5 || baseIndex > 8)
+            {
+                return -3;
+            }
+
+            var sub = 0;
+            var members = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId)
+                .Where(p => p != null)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            foreach (var member in members)
+            {
+                if (member.ProfileId == mcsBotPlayerId)
+                {
+                    break;
+                }
+
+                if (!member.HealthController.IsAlive)
+                {
+                    sub++;
+                }
+            }
+
+            return baseIndex - sub;
+        }
+
+        private void FetchMcsBotPlayerIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
+        {
+            _mcsBotPlayerIndexes.AddOrUpdate(mcsBotPlayerId, CalcMcsBotIndex(mcsLeadPlayerId, mcsBotPlayerId),
+                (_mcsBotPlayerId, oldIndex) =>
+                {
+                    oldIndex = CalcMcsBotIndex(mcsLeadPlayerId, mcsBotPlayerId);
+                    return oldIndex;
+                }
+            );
+        }
+
+        public int CalcMcsBotIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
+        {
+            if (string.IsNullOrEmpty(mcsLeadPlayerId))
+            {
+                return -2;
+            }
+
+            var members = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId)
+                .Where(p => p != null)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            var idx = members.FindIndex(p => p.ProfileId == mcsBotPlayerId);
+            return idx < 0 ? -1 : idx + 5;
         }
 
         private Player FetchMcsBotPlayer(MongoID mcsBotPlayerId)
@@ -256,7 +340,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         continue;
                     }
-                    
+
                     if (mcsBotPlayer.HealthController.IsAlive)
                     {
                         mcsBotPlayers.Add(mcsBotPlayer);
@@ -268,23 +352,32 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void UpdateMcsBotPlayerConfig(MongoID mcsLeadPlayerId, McsBotPlayerConfig mcsBotPlayerConfig)
         {
-            if (!mcsBotPlayerConfig.EnableLooting)
+            var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
-                foreach (var mcsBotPlayer in mcsBotPlayers)
+                var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+                if (botOwner == null)
                 {
-                    var botOwner = mcsBotPlayer?.AIData?.BotOwner;
-                    if (botOwner == null)
-                    {
-                        continue;
-                    }
-                    var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                    if (mcsBotPlayerData != null)
+                    continue;
+                }
+                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    if (!mcsBotPlayerConfig.EnableLooting)
                     {
                         mcsBotPlayerData.IsLooting = false;
                     }
+                    if (mcsBotPlayerConfig.EnableKeepFormation)
+                    {
+                        mcsBotPlayerData.AddDecision(Decisions.ShouldKeepFormation);
+                    }
+                    else
+                    {
+                        mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
+                    }
                 }
             }
+
             McsLeadPlayerConfigs.AddOrUpdate(
                 mcsLeadPlayerId,
                 id => mcsBotPlayerConfig,
@@ -295,6 +388,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
                     oldConfig.LootingKeywordItem = mcsBotPlayerConfig.LootingKeywordItem;
                     oldConfig.BlockItemType = mcsBotPlayerConfig.BlockItemType;
+                    oldConfig.FormationMatrix = mcsBotPlayerConfig.FormationMatrix;
+                    oldConfig.EnableKeepFormation = mcsBotPlayerConfig.EnableKeepFormation;
+                    oldConfig.FormationSpacing = mcsBotPlayerConfig.FormationSpacing;
+                    oldConfig.FormationSequentialFill = mcsBotPlayerConfig.FormationSequentialFill;
                     oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
                     return oldConfig;
                 }
@@ -435,6 +532,10 @@ namespace MiyakoCarryService.Client.Mgrs
             if (_mcsSquadDict != null)
             {
                 _mcsSquadDict.Clear();
+            }
+            if (_mcsBotPlayerIndexes != null)
+            {
+                _mcsBotPlayerIndexes.Clear();
             }
             if (_mcsLeadPlayerIds != null)
             {

@@ -48,6 +48,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentHealTimes = 0;
         public int _currentLootingRetries = 0;
         public int _currentDeactivateRetries = 0;
+        public float _currentHealTimeout = 10f;
+        public float _nextAnimatorFixTime = 0f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -188,25 +190,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHeal()
         {
-            if (BotOwner.Medecine.Using)
+            if (!BotOwner.Medecine.Using)
             {
-                return false;
-            }
-
-            if (BaseLogicLayer.CheckMedsToStop(BotOwner))
-            {
-                BotOwner.Medecine.FirstAid.CancelCurrent();
-                if (BotOwner.Medecine.SurgicalKit.Using)
-                {
-                    BotOwner.Medecine.SurgicalKit.CancelCurrent();
-                }
-                _currentHealTimes = 0;
                 return true;
             }
 
-            var firstAidHasWork = BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use;
-            var surgicalHasWork = BotOwner.Medecine.SurgicalKit.HaveWork;
-            if (!firstAidHasWork && !surgicalHasWork)
+            if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
             {
                 _currentHealTimes = 0;
                 return true;
@@ -214,29 +203,45 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (Time.time > _nextHealCheckTime)
             {
+                if (GetHealTimeout(out var timeout))
+                {
+                    _currentHealTimeout = timeout;
+                }
                 _nextHealCheckTime = Time.time + HEAL_CHECK_INTERVAL;
                 _currentHealTimes += 1;
             }
 
-            if (_currentHealTimes >= 15 && _currentHealTimes % 15 == 0)
+            if (_currentHealTimes >= _currentHealTimeout)
             {
-                var player = BotOwner.GetPlayer;
-                if (!BotOwner.Medecine.Using
-                    && player.HandsController
-                    && !player.HandsController.IsAimingButtonPressing
-                    && !player.HandsController.IsInventoryOpen()
-                    && !player.HandsController.IsInInteractionStrictCheck()
-                    && !player.HandsController.IsHandsProcessing())
+                BotOwner.WeaponManager.CheckWeaponReady();
+                if (!CheckFirearmsAnimatorState())
                 {
-                    CheckWeaponSwitch();
-                    _currentHealTimes = 0;
-                    return true;
+                    BotOwner.WeaponManager.CheckWeaponReady();
                 }
+                BotOwner.TryResetHandsState();
+                _currentHealTimes = 0;
+                return true;
             }
 
-            if (_currentHealTimes >= 60)
+            return false;
+        }
+
+        public virtual bool GetHealTimeout(out float timeout)
+        {
+            timeout = 0f;
+            if (BotOwner.Medecine.Stimulators.Using)
             {
-                _currentHealTimes = 0;
+                timeout = 3f;
+                return true;
+            }
+            if (BotOwner.Medecine.FirstAid.Have2Do)
+            {
+                timeout = 10f;
+                return true;
+            }
+            if (BotOwner.Medecine.SurgicalKit.HaveWork)
+            {
+                timeout = 20f;
                 return true;
             }
             return false;
@@ -459,7 +464,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -499,7 +504,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
-                        McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                        McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
@@ -537,7 +542,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort))
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -753,12 +758,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool ProtectCareKill()
         {
-            return (Time.time - GetEnemyLastSeenTime()) < 10f;
+            // return (Time.time - GetEnemyLastSeenTime()) < 10f;
+            return true;
         }
 
         public virtual bool ProtectWantKill()
         {
-            return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+            // return (Time.time - BotOwner.BotsGroup.EnemyLastSeenTimeReal) < BotOwner.Settings.FileSettings.Mind.ATTACK_ENEMY_IF_PROTECT_DELTA_LAST_TIME_SEEN;
+            return true;
         }
 
         public virtual float GetEnemyLastSeenTime()
@@ -988,7 +995,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool IsEnemyPosLost()
         {
-            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
+            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 10f)
             {
                 BotOwner.Memory.GoalEnemy = null;
                 return true;
@@ -1176,7 +1183,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public virtual EquipmentSlot CheckWeaponSwitch()
+        public virtual EquipmentSlot CheckWeaponSwitch(bool forceRefresh = false)
         {
             var weaponManager = BotOwner.WeaponManager;
             if (weaponManager == null || weaponManager.Selector == null)
@@ -1195,6 +1202,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (targetSlot != currentSlot)
             {
                 BotOwner.TryChangeWeaponSlot(targetSlot);
+                _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
+            }
+            else if (forceRefresh)
+            {
+                BotOwner.TryChangeWeaponSlot(currentSlot);
                 _nextWeaponSwitchTime = Time.time + WEAPON_SWITCH_COOLDOWN;
             }
 
@@ -1317,6 +1329,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
+            if (TryUpdateFormationMoveTarget(leadPos.Value, out nextUpdateTime))
+            {
+                return;
+            }
+
             var sqrDistanceToLead = BotOwner.Position.McsSqrDistance(leadPos.Value);
             if (sqrDistanceToLead <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE)
             {
@@ -1354,15 +1371,74 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (!CanGetPathToRun(BotOwner.Position, nearPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var groundPos = TryProjectToGround(nearPos.Value);
+
+            if (!CanGetPathToRun(BotOwner.Position, groundPos, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
             }
 
-            var newMoveTarget = GetPointAlongPathAtDistance(corners, 50f);
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
             _currentMoveTarget = newMoveTarget;
             nextUpdateTime = 1f;
+        }
+
+        public virtual bool TryUpdateFormationMoveTarget(Vector3 leadPos, out float nextUpdateTime)
+        {
+            nextUpdateTime = 1f;
+
+            var mcsBotPlayerConfig = McsBotPlayerData?.McsAILeadPlayer?.McsBotPlayerConfig;
+            if (mcsBotPlayerConfig == null)
+            {
+                return false;
+            }
+
+            if (!mcsBotPlayerConfig.EnableKeepFormation)
+            {
+                return false;
+            }
+
+            var leadPlayer = McsBotPlayerData?.LeadPlayer;
+            if (leadPlayer == null)
+            {
+                return false;
+            }
+
+            var botIndex = Tools.GetMcsBotPlayerIndex(BotOwner.ProfileId, mcsBotPlayerConfig.FormationSequentialFill);
+            if (botIndex < 5)
+            {
+                return false;
+            }
+
+            var predictedPos = leadPos + leadPlayer.Velocity * 2;
+            if (NavMesh.SamplePosition(predictedPos, out var hit, 3f, -1))
+            {
+                predictedPos = hit.position;
+            }
+            else
+            {
+                predictedPos = leadPos;
+            }
+
+            var target = Tools.ComputeTarget(leadPlayer, predictedPos, botIndex, Tools.ParseFormationMatrix(mcsBotPlayerConfig.FormationMatrix), mcsBotPlayerConfig.FormationSpacing);
+            if (!target.HasValue)
+            {
+                return false;
+            }
+
+            var groundPos = TryProjectToGround(target.Value);
+
+            if (!CanGetPathToRun(BotOwner.Position, groundPos, McsBotPlayerData, out Vector3[] corners))
+            {
+                nextUpdateTime = 0.25f;
+                return true;
+            }
+
+            var newMoveTarget = GetPointAlongPathAtDistance(corners, 15f);
+            _currentMoveTarget = newMoveTarget;
+            nextUpdateTime = 0.2f;
+            return true;
         }
 
         public virtual void UpdateEscortMoveTarget(Vector3? escortPos, out float nextUpdateTime)
@@ -1407,7 +1483,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 predictedPos = leadPos;
             }
 
-            if (!CanGetPathToRun(predictedPos, escortPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var groundPos = TryProjectToGround(predictedPos);
+
+            if (!CanGetPathToRun(groundPos, escortPos.Value, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1453,7 +1531,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 predictedPos = BotOwner.Position;
             }
 
-            if (!CanGetPathToRun(predictedPos, targetPos.Value, McsBotPlayerData, out Vector3[] corners))
+            var startGroundPos = TryProjectToGround(predictedPos);
+            var targetGroundPos = TryProjectToGround(targetPos.Value);
+
+            if (!CanGetPathToRun(startGroundPos, targetGroundPos, McsBotPlayerData, out Vector3[] corners))
             {
                 nextUpdateTime = 0.25f;
                 return;
@@ -1500,13 +1581,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], null);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
-                    BotOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.Negative,
-                    });
+                    // 使用保持队形时在狭窄环境中容易连续触发大量对话，这在Fika联机下会造成大量数据包传输
+                    // BotOwner.TalkMsg(new McsMsg
+                    // {
+                    //     PhraseTrigger = EPhraseTrigger.Negative,
+                    // });
                     return _lastCanRunResult;
                 }
 
@@ -1535,6 +1617,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 accumulated += segLen;
             }
             return corners[corners.Length - 1];
+        }
+
+        public virtual Vector3 TryProjectToGround(Vector3 pos)
+        {
+            if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var rayHit, 50f, LayerMaskClass.HighPolyWithTerrainMask))
+            {
+                if (NavMesh.SamplePosition(rayHit.point, out var navHit1, 1f, -1))
+                {
+                    return navHit1.position;
+                }
+                return rayHit.point;
+            }
+
+            if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))
+            {
+                return navHit2.position;
+            }
+
+            return pos;
         }
 
         public virtual bool EndDeactivateMine()
@@ -1670,6 +1771,54 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
+        }
+
+        public void RefreshStuckTimer()
+        {
+            BotOwner.Mover.LastPos = BotOwner.Position;
+            BotOwner.Mover.LastTimePosChanged = Time.time;
+        }
+
+        public virtual bool CheckFirearmsAnimatorState()
+        {
+            BotOwner.WeaponManager.CheckWeaponReady();
+            var time = Time.time;
+            if (time < _nextAnimatorFixTime)
+            {
+                _nextAnimatorFixTime = time + 1;
+                return true;
+            }
+
+            var player = BotOwner.GetPlayer;
+            var firearmController = player?.HandsController as Player.FirearmController;
+            if (firearmController == null)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            if (firearmController?.FirearmsAnimator == null)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            var handsIdle = !player.HandsController.IsAiming
+                        && !player.HandsController.IsInventoryOpen()
+                        && !player.HandsController.IsInInteractionStrictCheck()
+                        && !player.HandsController.IsHandsProcessing();
+
+            if (!BotOwner.WeaponManager.Selector.IsWeaponReady && !handsIdle)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            _nextAnimatorFixTime = time + 1;
+            return true;
         }
     }
 }

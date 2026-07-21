@@ -1,5 +1,6 @@
 
 using SPTarkov.Common.Models.Logging;
+using System.Collections.Generic;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators.Bot;
 using SPTarkov.Server.Core.Generators.Loot;
@@ -209,6 +210,29 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     null,
                     -1,
                     botGenerationDetails.IsPmc
+                );
+            }
+            
+            AddAluminiumSplintsToSecure(botId, botInventory, 3);
+        }
+
+        public void AddAluminiumSplintsToSecure(MongoId botId, BotBaseInventory botInventory, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var splintId = new MongoId();
+                var itemsToAdd = new List<Item>
+                {
+                    new() { Id = splintId, Template = ItemTpl.MEDICAL_ALUMINUM_SPLINT }
+                };
+
+                botGeneratorHelper.AddItemWithChildrenToEquipmentSlot(
+                    botId,
+                    [EquipmentSlots.SecuredContainer],
+                    splintId,
+                    ItemTpl.MEDICAL_ALUMINUM_SPLINT,
+                    itemsToAdd,
+                    botInventory
                 );
             }
         }

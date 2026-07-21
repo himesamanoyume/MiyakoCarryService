@@ -18,6 +18,7 @@ namespace MiyakoCarryService.Client.Enums
         DropTargetLoot,
         ReportAboutSelf,
         ClearArea,
-        OpenInventory
+        OpenInventory,
+        ChangeFormation
     }
 }

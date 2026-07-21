@@ -79,15 +79,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                     {
-                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                        RefreshStuckTimer();
+                        return new Action(typeof(HealLogic), "Mcs:CommonHealing1");
                     }
 
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
-                }
-
-                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
-                {
-                    return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
 
                 if (BotOwner.Medecine.Stimulators.HaveSmt && Time.time > _nextStimCheckTime)
@@ -96,9 +92,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HealStimulatorsLogic), "Mcs:UseStim");
                 }
 
+                if (!CheckFirearmsAnimatorState())
+                {
+                    BotOwner.TryResetHandsState();
+                }
+
                 CheckWeaponSwitch();
 
-                if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+                if (_nextUpdatePosTime < time)
+                {
+                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
+                    _nextUpdatePosTime = time + nextTime;
+                }
+
+                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                {
+                    RefreshStuckTimer();
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                    }
+                    return new Action(typeof(HealLogic), "Mcs:CommonHealing2");
+                }
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
                 {
                     if (_nextUpdatePosTime < time)
                     {
@@ -115,12 +131,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         return new Action(typeof(HoldPositionLogic), "Mcs:GoToLootTargetPosNotFound");
                     }
-                }
-
-                if (_nextUpdatePosTime < time)
-                {
-                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                    _nextUpdatePosTime = time + nextTime;
                 }
 
                 var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);

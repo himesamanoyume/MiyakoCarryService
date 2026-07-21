@@ -36,24 +36,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 return true;
             }
-
-            var visibleType = __instance.VisibleType;
-            if (visibleType - EEnemyPartVisibleType.GreenSence <= 1)
-            {
-                __result = __instance.GetPointBySence();
-                return false;
-            }
-            if (visibleType == EEnemyPartVisibleType.Visible)
-            {
-                __result = GetPartToShootPos(__instance, mcsBotPlayerData);
-                return false;
-            }
-            if (!__instance.Owner.WeaponManager.UnderbarrelLauncherController.IsActive)
-            {
-                __result = __instance.GetBodyPartPosition();
-                return false;
-            }
-            __result = __instance.CurrPosition;
+            __result = GetPartToShootPos(__instance, mcsBotPlayerData);
             return false;
         }
 
@@ -73,14 +56,41 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 }
                 else
                 {
-                    return enemyInfo.GetVisiblePartToShoot();
+                    return ApplyLead(enemyInfo, enemyInfo.GetVisiblePartToShoot()); 
                 }
             }
+
             if (enemyInfo.LastPartToShoot == null)
             {
-                return Vector3.zero;
+                return enemyInfo.CurrPosition + Vector3.up;
             }
-            return enemyInfo.LastPartToShoot.GetPartPositionWithOffset();
+
+            return ApplyLead(enemyInfo, enemyInfo.LastPartToShoot.GetPartPositionWithOffset());
+        }
+
+        private static Vector3 ApplyLead(EnemyInfo enemyInfo, Vector3 basePos)
+        {
+            if (basePos == Vector3.zero)
+            {
+                return basePos;
+            }
+
+            var weapon = enemyInfo.Owner.WeaponManager?.CurrentWeapon;
+            if (weapon == null)
+            {
+                return basePos;
+            }
+
+            var muzzleVelocity = weapon.CurrentAmmoTemplate.InitialSpeed * weapon.SpeedFactor;
+            if (muzzleVelocity <= 0f)
+            {
+                return basePos;
+            }
+
+            var firePort = enemyInfo.Owner.WeaponRoot.position;
+            var targetVelocity = enemyInfo.Person.Velocity;
+
+            return Tools.GetPredictedAimPoint(firePort, basePos, targetVelocity, weapon.CurrentAmmoTemplate, muzzleVelocity);
         }
     }
 }

@@ -37,10 +37,12 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.ClearArea.ToString(), ClearAreaCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.OpenInventory.ToString(), OpenInventoryCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.GoToExfil.ToString(), GoToExfilCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.ChangeFormation.ToString(), ChangeFormationCommandAction);
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
         private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
+        private FormationDataMgr FormationDataMgr => MgrAccessor.Get<FormationDataMgr>();
 
         public override void OnRaidStarted()
         {
@@ -101,7 +103,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
+                menu.RegisterSubMenu(mcsBotPlayer.Profile.McsNickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
             // 不打算对根菜单进行扩展
@@ -124,6 +126,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
             out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterSubMenu(Locales.CHANGEFORMATIONCOMMAND_NAME, Locales.CHANGEFORMATIONCOMMAND_TARGETNAME, m => BuildFormationMenu(m, [mcsBotPlayers.FirstOrDefault()]));
             menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
             CommandUtils.Apply(EMenuId.Team.ToString(), menu, mcsBotPlayers);
@@ -135,10 +138,12 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.REPORTABOUTSELFCOMMAND_NAME, Locales.REPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.REGROUPCOMMAND_NAME, Locales.REGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers);
+            menu.RegisterCommand(Locales.GOTOPOINTCOMMAND_NAME, Locales.GOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
+            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.DROPTARGETLOOTCOMMAND_NAME, Locales.DROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, ECommandType.OpenInventory.ToString(), mcsBotPlayers, disabled: () => MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction);
+            menu.RegisterCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, ECommandType.OpenInventory.ToString(), mcsBotPlayers, isLocal: true, disabled: () => MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction);
             menu.RegisterSubMenu(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
             menu.RegisterSubMenu(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, false));
             menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers));
@@ -148,6 +153,22 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.FORCETELEPORTCOMMAND_NAME, Locales.FORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
 
             CommandUtils.Apply(EMenuId.Member.ToString(), menu, mcsBotPlayers);
+        }
+
+        public virtual void BuildFormationMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        {
+            var formationDatas = FormationDataMgr.GetDatas<FormationData>();
+            foreach (var formationData in formationDatas)
+            {
+                menu.RegisterCommand(
+                    formationData.Name,
+                    formationData.Name,
+                    ECommandType.ChangeFormation.ToString(),
+                    mcsBotPlayers,
+                    isLocal: true,
+                    resolver: () => new McsCommandContext() { TargetId = formationData.Id }
+                );
+            }
         }
 
         public virtual void BuildEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
@@ -282,6 +303,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         #region Action
 
+        public virtual void ChangeFormationCommandAction(McsCommandContext ctx)
+        {
+            FormationDataMgr.ApplyFormationData(ctx.TargetId);
+        }
+
         public virtual void OpenInventoryCommandAction(McsCommandContext ctx)
         {
             var mcsBotPlayer = ctx.McsBotPlayer;
@@ -330,7 +356,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldQuestProxyAction);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldQuestProxyAction);
                 mcsBotPlayerData.ProxyTargetId = ctx.TargetId;
                 mcsBotPlayerData.TargetPos = ctx.Position;
                 mcsBotPlayerData.IsLooting = false;
@@ -357,7 +383,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldEscort);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldEscort);
                 mcsBotPlayerData.TargetPos = ctx.Position;
                 mcsBotPlayerData.IsLooting = false;
             }
@@ -450,7 +476,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision();
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation]);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -468,7 +494,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision(null, Decisions.ShouldRegroup);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldRegroup);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -497,7 +523,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldGoToPoint);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldGoToPoint);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = pos.Value;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -514,7 +540,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldHoldPosition);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -535,7 +561,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldDropTargetLoot);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldDropTargetLoot);
                     mcsBotPlayerData.IsLooting = false;
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
@@ -563,7 +589,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision(null, Decisions.ShouldTeleport);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldTeleport);
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -571,11 +597,8 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             var playerPosition = mcsBotPlayer.Position;
             botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-            botOwner.Mover._lastGoodCastPointTime = Time.time;
-            botOwner.Mover._prevPosLinkedTime = 0f;
             botOwner.Mover.SetPlayerToNavMesh(playerPosition);
-            botOwner.Mover.RecalcWay();
-            botOwner.Mover.Pause = true;
+            botOwner.TryResetHandsState();
             botOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Roger
@@ -604,7 +627,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
-                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldInteractionProxyAction);
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldInteractionProxyAction);
                 var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(ctx.TargetId);
                 if (interactableObjectData != null)
                 {
@@ -646,7 +669,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             var lootData = LootDataMgr.FindLootData(ctx.TargetId);
             mcsBotPlayerData.IsLooting = false;
-            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldLootProxyAction);
+            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldLootProxyAction);
             LootDataMgr.UnlockLootingTarget(lootData);
             LootDataMgr.UnlockLootingTargetRootTransform(lootData.RootTransform);
             if (!LootDataMgr.IsLockedLootingTarget(lootData) && !LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
@@ -701,7 +724,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            mcsBotPlayerData.SetDecision(null, Decisions.ShouldExfil);
+            mcsBotPlayerData.SetDecision([Decisions.ShouldKeepFormation], Decisions.ShouldExfil);
         }
 
         public virtual void ClearAreaCommandAction(McsCommandContext ctx)
@@ -796,7 +819,7 @@ namespace MiyakoCarryService.Client.Mgrs
             mcsBotPlayerData.TargetPos = seg[0];
             mcsBotPlayerData.IsLooting = false;
             mcsBotPlayerData.ProxyTargetId = null;
-            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup], Decisions.ShouldClearArea);
+            mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldClearArea);
             botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
         }

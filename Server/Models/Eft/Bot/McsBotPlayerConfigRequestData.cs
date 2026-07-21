@@ -24,5 +24,17 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("BlockItemType")]
         public required int BlockItemType { get; set; }
+
+        [JsonPropertyName("FormationMatrix")]
+        public required string FormationMatrix { get; set; }
+
+        [JsonPropertyName("EnableKeepFormation")]
+        public required bool EnableKeepFormation { get; set; }
+
+        [JsonPropertyName("FormationSpacing")]
+        public required float FormationSpacing { get; set; }
+
+        [JsonPropertyName("FormationSequentialFill")]
+        public required bool FormationSequentialFill { get; set; }
     }
 }

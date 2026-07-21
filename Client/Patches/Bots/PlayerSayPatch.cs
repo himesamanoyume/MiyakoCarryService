@@ -2,6 +2,7 @@ using System.Reflection;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
@@ -23,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 return;
             }
-            
+
             if (__instance.Profile.Info.GroupId is "Fika" or "Mcs" || McsMgr.IsMcsLeadPlayer(__instance.ProfileId) || McsMgr.IsMcsBotPlayer(__instance.ProfileId))
             {
                 return;
@@ -37,9 +38,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 {
                     continue;
                 }
-                if (botOwner.HearingSensor.IsSoundHeard(pos.Value, 10f, out var dist))
+                if (botOwner.HearingSensor.IsSoundHeard(pos.Value, 50f, out var dist))
                 {
-                    botOwner.BotsGroup.ReportAboutEnemy(__instance, EEnemyPartVisibleType.Visible, botOwner);
+                    botOwner.BotsGroup.AddEnemy(__instance, EBotEnemyCause.callForHelp1);
+                    var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(botOwner.ProfileId);
+                    var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
+                    mcsAILeadPlayer.CalcGoalEnemy(__instance);
                 }
             }
         }

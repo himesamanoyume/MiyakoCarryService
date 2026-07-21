@@ -1,6 +1,7 @@
 using System.Reflection;
 using EFT;
 using EFT.Ballistics;
+using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
@@ -45,7 +46,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
                     if (mcsBotPlayer.Position.McsSqrDistance(info.HitPoint) <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                     {
-                        mcsBotPlayer.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
+                        mcsBotPlayer.BotsGroup.AddEnemy(shooter.iPlayer, EBotEnemyCause.callForHelp1);
+                        var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayer.ProfileId);
+                        var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
+                        if (shooter.iPlayer is Player shooterPlayer)
+                        {
+                            mcsAILeadPlayer.CalcGoalEnemy(shooterPlayer);
+                        }
+                        // mcsBotPlayer.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
                     }
                 }
             }

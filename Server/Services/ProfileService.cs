@@ -805,7 +805,7 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
-                var amount = mcsAmounts[i]; // 当前字母使用的卢布数量  
+                var amount = mcsAmounts[i];
 
                 for (int row = 0; row < glyph.Length; row++)
                 {
@@ -821,7 +821,7 @@ namespace MiyakoCarryService.Server.Services
                         int y = cursorY + row;
                         if (x < 0 || x > 9 || y < 0 || y > 71)
                         {
-                            continue; // 越界保护  
+                            continue;
                         }
 
                         var pixel = new Item

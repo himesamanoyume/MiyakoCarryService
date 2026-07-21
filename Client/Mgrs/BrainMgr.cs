@@ -7,6 +7,7 @@ using MiyakoCarryService.Client.Bots.Brain.Layers;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
@@ -19,9 +20,9 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             InitCustomLayerMaps();
-            GameLoop.Instance.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
-            GameLoop.Instance.CheckVaildGameWorld();
-            if (MiyakoCarryServicePlugin.IsLoadedByScriptEngine && GameLoop.Instance.IsVaildGameWorld)
+            Gameloop.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
+            Gameloop.CheckVaildGameWorld();
+            if (MiyakoCarryServicePlugin.IsLoadedByScriptEngine && Gameloop.IsVaildGameWorld)
             {
                 McsMgr.IsHost = true;
                 EventMgr.Notify(new GameWorldStartedEvent
@@ -67,7 +68,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            await GameLoop.Instance.InitMcsLeadPlayerConfigs();
+            await Gameloop.InitMcsLeadPlayerConfigs();
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
@@ -76,27 +77,43 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var leadPlayer in leadPlayers)
             {
+                if (leadPlayer.ProfileId == myPlayer.ProfileId)
+                {
+                    var mcsBotPlayerConfig = new McsBotPlayerConfig
+                    {
+                        McsLeadPlayerId = leadPlayer.ProfileId,
+                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
+                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+                        KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+                        LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+                        EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
+                        FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
+                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+                        FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
+                    };
+                    McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
+                }
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer);
                 foreach (var mcsProfileItem in mcsProfilesDict)
                 {
-                    foreach (var mcsProfile in mcsProfileItem.Value)
+                    foreach (var mcsBotPlayerProfile in mcsProfileItem.Value)
                     {
-                        McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, mcsProfile.ProfileId, mcsAILeadPlayer);
+                        var mcsBotPlayer = McsMgr.TryGetMcsBotPlayer(mcsBotPlayerProfile.ProfileId, leadPlayer.ProfileId);
+                        var baseBrain = mcsBotPlayer?.BotOwner?.Brain?.BaseBrain;
+                        if (baseBrain == null)
+                        {
+                            continue;
+                        }
+                        McsMgr.AddMcsSquadMember(leadPlayer.ProfileId, mcsBotPlayer.ProfileId, mcsAILeadPlayer);
+                        var botOwner = mcsBotPlayer.BotOwner;
+                        var wildSpawnType = mcsBotPlayer.Profile.Info.Settings.Role;
+                        var botDifficulty = mcsBotPlayer.Profile.Info.Settings.BotDifficulty;
+                        var settings = Gameloop.SetBotSettings(botDifficulty, wildSpawnType, botOwner, leadPlayer);
+                        botOwner.Settings = settings;
+                        InjectLayers(baseBrain);
                     }
                 }
-            }
-
-            var mcsBotPlayers = McsMgr.GetAllMcsBotPlayer();
-
-            foreach (var mcsBotPlayer in mcsBotPlayers)
-            {
-                var baseBrain = mcsBotPlayer?.BotOwner?.Brain?.BaseBrain;
-                if (baseBrain == null)
-                {
-                    continue;
-                }
-
-                InjectLayers(baseBrain);
             }
         }
 

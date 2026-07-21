@@ -218,5 +218,20 @@
     "Mcs/SettleMcsOrder": "Settle Order",
     "Mcs/SettleMcsOrderRefuse": "This order has not expired yet, unable to settle at the moment",
     "Mcs/RenewMcsOrder": "Renew Order",
-    "Mcs/RenewMcsOrderRefuse": "Renewal failed"
+    "Mcs/RenewMcsOrderRefuse": "Renewal failed",
+    "Mcs/EnableKeepFormation Key": "Enable Keep Formation",
+    "Mcs/EnableKeepFormation Description": "Whether to determine carry service player positions based on formation matrix configuration",
+    "Mcs/EnableKeepFormationHotKey Key": "Enable Keep Formation HotKey",
+    "Mcs/FormationMatrix Key": "Formation Matrix",
+    "Mcs/FormationMatrix Description": "Used to configure the position of each carry service player. “★” represents your position. The top of “★” is your look direction",
+    "Mcs/FormationSpacing Key": "Formation Spacing",
+    "Mcs/FormationSequentialFill Key": "Formation Sequential Fill",
+    "Mcs/FormationSequentialFill Description": "When enabled, if a squad member dies in formation, the empty position is filled by the next squad member in brevity code order",
+    "Mcs/SaveFormationPresetHotKey Key": "Save Formation Preset HotKey",
+    "Mcs/SaveFormationPreset": "Saved formation matrix preset",
+    "Mcs/DeleteFormation": "Delete",
+    "Mcs/ChangeFormationCommand Name": "Change Formation",
+    "Mcs/ChangeFormationCommand TargetName": "Apply saved formation preset immediately",
+    "Mcs/ShowBrevityCode Key": "Show Brevity Code",
+    "Mcs/ShowBrevityCode Description": "Use brevity codes to replace original nicknames for display"
 }

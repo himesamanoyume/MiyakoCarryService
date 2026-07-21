@@ -26,7 +26,19 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "BlockItemType")]
         public int BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value;
 
-        [DataMember(Name = "Extensions")]  
+        [DataMember(Name = "FormationMatrix")]
+        public string FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value;
+
+        [DataMember(Name = "EnableKeepFormation")]
+        public bool EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value;
+
+        [DataMember(Name = "FormationSpacing")]
+        public float FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value;
+
+        [DataMember(Name = "FormationSequentialFill")]
+        public bool FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value;
+
+        [DataMember(Name = "Extensions")]
         public Dictionary<string, McsValue> Extensions = new();
     }
 }

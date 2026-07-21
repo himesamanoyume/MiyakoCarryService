@@ -65,9 +65,12 @@ namespace MiyakoCarryService.Client.Datas
 
             _decisions.Clear();
 
-            foreach (var decision in decisions)
+            if (decisions != null)
             {
-                _decisions.Add(decision);
+                foreach (var decision in decisions)
+                {
+                    _decisions.Add(decision);
+                }
             }
 
             if (preserved != null)
