@@ -393,7 +393,7 @@ namespace MiyakoCarryService.Client.Utils
 
             var leadRow = 3;
             var leadCol = 3;
-            var leadCell = System.Array.IndexOf(matrix, -1);
+            var leadCell = Array.IndexOf(matrix, -1);
             if (leadCell >= 0)
             {
                 leadRow = leadCell / 7;
@@ -434,20 +434,9 @@ namespace MiyakoCarryService.Client.Utils
             return basePos + offset;
         }
 
-        public static int GetMcsBotIndex(string mcsLeadPlayerId, string mcsBotPlayerId, bool sequentialFill)
+        public static int GetMcsBotPlayerIndex(MongoID mcsBotPlayerId, bool sequentialFill = false)
         {
-            if (string.IsNullOrEmpty(mcsLeadPlayerId) || string.IsNullOrEmpty(mcsBotPlayerId))
-            {
-                return -1;
-            }
-
-            var members = (sequentialFill ? McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(mcsLeadPlayerId) : McsMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId))
-                .Where(p => p != null)
-                .OrderBy(p => p.ProfileId)
-                .ToList();
-
-            var idx = members.FindIndex(p => p.ProfileId == mcsBotPlayerId);
-            return idx < 0 ? -1 : idx + 5;
+            return McsMgr.GetMcsBotPlayerIndex(mcsBotPlayerId, sequentialFill);
         }
 
         public static string ResetFormationMatrix()

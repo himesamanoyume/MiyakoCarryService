@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                menu.RegisterSubMenu(mcsBotPlayer.Profile.Info.Nickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
+                menu.RegisterSubMenu(mcsBotPlayer.Profile.McsNickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
             // 不打算对根菜单进行扩展

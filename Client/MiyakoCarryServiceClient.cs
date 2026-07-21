@@ -86,6 +86,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<KeyboardShortcut> TeammateHighlightHotKey;
         public static ConfigEntry<Color> TeammateHighlightColor;
         public static ConfigEntry<bool> EnableSubtitles;
+        public static ConfigEntry<bool> ShowBrevityCode;
 
         #endregion
 
@@ -540,6 +541,13 @@ namespace MiyakoCarryService.Client
                 EConfigType.PLAYER,
                 Locales.ENABLESUBTITLES_KEY,
                 true
+            );
+
+            ShowBrevityCode = Register(
+                EConfigType.PLAYER,
+                Locales.SHOWBREVITYCODE_KEY,
+                true,
+                Locales.SHOWBREVITYCODE_DESCRIPTION
             );
 
             #endregion

@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Client.Mgrs
     public class McsMgr : BaseMgr
     {
         private ConcurrentDictionary<MongoID, ConcurrentDictionary<MongoID, Player>> _mcsSquadDict = new();
+        private ConcurrentDictionary<MongoID, int> _mcsBotPlayerIndexes = new();
         private HashSet<MongoID> _mcsLeadPlayerIds = new();
         private HashSet<MongoID> _allMcsBotPlayerIdInRaid = new();
         private HashSet<MongoID> _mcsDeadBotPlayerIds = new();
@@ -50,6 +51,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 (id, oldMcsBotPlayer) => oldMcsBotPlayer ?? FetchMcsBotPlayer(id)
             );
 
+            foreach (var _mcsBotPlayerId in squadMembers.Keys)
+            {
+                FetchMcsBotPlayerIndex(mcsLeadPlayerId, _mcsBotPlayerId);
+            }
+
             _mcsLeadPlayerIds.Add(mcsLeadPlayerId);
             _allMcsBotPlayerIdInRaid.Add(mcsBotPlayerId);
 
@@ -61,6 +67,84 @@ namespace MiyakoCarryService.Client.Mgrs
                     (_, _) => mcsAILeadPlayer
                 );
             }
+        }
+
+        public int GetMcsBotPlayerIndex(MongoID mcsBotPlayerId, bool sequentialFill = false)
+        {
+            if (sequentialFill)
+            {
+                if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
+                {
+                    var mcsLeadPlayer = IsHost ? GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayerId) : Singleton<GameWorld>.Instance.MainPlayer;
+                    var sequentialIndex = GetSequentialIndex(mcsLeadPlayer.ProfileId, mcsBotPlayerId, index);
+                    return sequentialIndex;
+                }
+                return -1;
+            }
+            else
+            {
+                if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
+                {
+                    return index;
+                }
+                return -1;
+            }
+        }
+
+        private int GetSequentialIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, int baseIndex)
+        {
+            if (baseIndex < 5 || baseIndex > 8)
+            {
+                return -1;
+            }
+
+            var sub = 0;
+            var members = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId)
+                .Where(p => p != null)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            foreach (var member in members)
+            {
+                if (member.ProfileId == mcsBotPlayerId)
+                {
+                    break;
+                }
+
+                if (!member.HealthController.IsAlive)
+                {
+                    sub++;
+                }
+            }
+
+            return baseIndex - sub;
+        }
+
+        private void FetchMcsBotPlayerIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
+        {
+            _mcsBotPlayerIndexes.AddOrUpdate(mcsBotPlayerId, CalcMcsBotIndex(mcsLeadPlayerId, mcsBotPlayerId),
+                (_mcsBotPlayerId, oldIndex) =>
+                {
+                    oldIndex = CalcMcsBotIndex(mcsLeadPlayerId, mcsBotPlayerId);
+                    return oldIndex;
+                }
+            );
+        }
+
+        public int CalcMcsBotIndex(string mcsLeadPlayerId, string mcsBotPlayerId)
+        {
+            if (string.IsNullOrEmpty(mcsLeadPlayerId) || string.IsNullOrEmpty(mcsBotPlayerId))
+            {
+                return -1;
+            }
+
+            var members = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId)
+                .Where(p => p != null)
+                .OrderBy(p => p.ProfileId)
+                .ToList();
+
+            var idx = members.FindIndex(p => p.ProfileId == mcsBotPlayerId);
+            return idx < 0 ? -1 : idx + 5;
         }
 
         private Player FetchMcsBotPlayer(MongoID mcsBotPlayerId)

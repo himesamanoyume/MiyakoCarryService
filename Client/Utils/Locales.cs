@@ -214,5 +214,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string DELETEFORMATION = "Mcs/DeleteFormation";
         public const string CHANGEFORMATIONCOMMAND_NAME = "Mcs/ChangeFormationCommand Name";
         public const string CHANGEFORMATIONCOMMAND_TARGETNAME = "Mcs/ChangeFormationCommand TargetName";
+        public const string SHOWBREVITYCODE_KEY = "Mcs/ShowBrevityCode Key";
+        public const string SHOWBREVITYCODE_DESCRIPTION = "Mcs/ShowBrevityCode Description";
     }
 }

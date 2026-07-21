@@ -231,5 +231,7 @@
     "Mcs/SaveFormationPreset": "已保存队形矩阵预设",
     "Mcs/DeleteFormation": "删除",
     "Mcs/ChangeFormationCommand Name": "改变队形",
-    "Mcs/ChangeFormationCommand TargetName": "立即应用已保存的队形预设"
+    "Mcs/ChangeFormationCommand TargetName": "立即应用已保存的队形预设",
+    "Mcs/ShowBrevityCode Key": "显示代号",
+    "Mcs/ShowBrevityCode Description": "用代号来代替原本的名称进行显示"
 }

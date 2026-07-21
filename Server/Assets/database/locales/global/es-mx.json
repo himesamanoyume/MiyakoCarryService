@@ -231,5 +231,7 @@
     "Mcs/SaveFormationPreset": "Saved formation matrix preset",
     "Mcs/DeleteFormation": "Delete",
     "Mcs/ChangeFormationCommand Name": "Change Formation",
-    "Mcs/ChangeFormationCommand TargetName": "Apply saved formation preset immediately"
+    "Mcs/ChangeFormationCommand TargetName": "Apply saved formation preset immediately",
+    "Mcs/ShowBrevityCode Key": "Show Brevity Code",
+    "Mcs/ShowBrevityCode Description": "Use brevity codes to replace original nicknames for display"
 }

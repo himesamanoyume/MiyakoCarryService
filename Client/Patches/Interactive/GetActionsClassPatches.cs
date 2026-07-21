@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
+                    Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.McsNickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandUtils.Dispatch(
                         ECommandType.InteractionProxyAction.ToString(),
@@ -99,7 +99,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 __result.Actions.Add(new ActionsTypesClass
                 {
-                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.Info.Nickname),
+                    Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.McsNickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandUtils.Dispatch(  
                         ECommandType.LootProxyAction.ToString(),  

@@ -307,7 +307,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     _gameLoop.StopCoroutine(_coroutine);
                 }
-                _textField.text = $"<b>{_mcsBotPlayerProfile.Nickname}</b>: " + msg;
+                _textField.text = $"<b>{_mcsBotPlayerProfile.McsNickname}</b>: " + msg;
                 if (SubtitlesView != null)
                 {
                     SubtitlesView.ShowGameObject();
