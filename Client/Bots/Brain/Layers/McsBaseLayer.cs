@@ -49,6 +49,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentLootingRetries = 0;
         public int _currentDeactivateRetries = 0;
         public float _currentHealTimeout = 10f;
+        public float _nextAnimatorFixTime = 0f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -189,9 +190,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHeal()
         {
+            if (!BotOwner.Medecine.Using)
+            {
+                return true;
+            }
+
             if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
             {
-                BotOwner.TryResetHandsState();
                 _currentHealTimes = 0;
                 return true;
             }
@@ -208,6 +213,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (_currentHealTimes >= _currentHealTimeout)
             {
+                BotOwner.WeaponManager.CheckWeaponReady();
+                if (!CheckFirearmsAnimatorState())
+                {
+                    BotOwner.WeaponManager.CheckWeaponReady();
+                }
                 BotOwner.TryResetHandsState();
                 _currentHealTimes = 0;
                 return true;
@@ -1619,11 +1629,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return rayHit.point;
             }
 
-            if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))  
-            {  
-                return navHit2.position;  
-            } 
-            
+            if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))
+            {
+                return navHit2.position;
+            }
+
             return pos;
         }
 
@@ -1766,6 +1776,48 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             BotOwner.Mover.LastPos = BotOwner.Position;
             BotOwner.Mover.LastTimePosChanged = Time.time;
+        }
+
+        public virtual bool CheckFirearmsAnimatorState()
+        {
+            BotOwner.WeaponManager.CheckWeaponReady();
+            var time = Time.time;
+            if (time < _nextAnimatorFixTime)
+            {
+                _nextAnimatorFixTime = time + 1;
+                return true;
+            }
+
+            var player = BotOwner.GetPlayer;
+            var firearmController = player?.HandsController as Player.FirearmController;
+            if (firearmController == null)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            if (firearmController?.FirearmsAnimator == null)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            var handsIdle = !player.HandsController.IsAiming
+                        && !player.HandsController.IsInventoryOpen()
+                        && !player.HandsController.IsInInteractionStrictCheck()
+                        && !player.HandsController.IsHandsProcessing();
+
+            if (!BotOwner.WeaponManager.Selector.IsWeaponReady && !handsIdle)
+            {
+                _nextAnimatorFixTime = time + 1;
+                BotOwner.WeaponManager.Selector.TryChangeToMain();
+                return false;
+            }
+
+            _nextAnimatorFixTime = time + 1;
+            return true;
         }
     }
 }

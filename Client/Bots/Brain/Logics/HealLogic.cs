@@ -27,7 +27,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Stop()
         {
             base.Stop();
-            BotOwner.TryResetHandsState();
         }
 
         public override void Update(CustomLayer.ActionData data)

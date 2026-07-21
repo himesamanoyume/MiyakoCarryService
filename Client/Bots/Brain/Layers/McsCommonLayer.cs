@@ -92,7 +92,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HealStimulatorsLogic), "Mcs:UseStim");
                 }
 
-                BotOwner.WeaponManager.CheckWeaponReady();
+                if (!CheckFirearmsAnimatorState())
+                {
+                    BotOwner.TryResetHandsState();
+                }
+
                 CheckWeaponSwitch();
 
                 if (_nextUpdatePosTime < time)

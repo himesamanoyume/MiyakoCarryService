@@ -363,6 +363,10 @@ namespace MiyakoCarryService.Client.Extensions
                         && !player.HandsController.IsInInteractionStrictCheck()
                         && !player.HandsController.IsHandsProcessing();
 
+                botOwner.Mover.AllowTeleport();
+                botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = botOwner.Position;
+                botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
+
                 if (!botOwner.Medecine.Using && handsIdle)
                 {
                     if (botOwner.Medecine.FirstAid.Using)
@@ -379,11 +383,13 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                     player.FastForwardCurrentOperations();
                     player.SetInventoryOpened(false);
-                    player.TrySetLastEquippedWeapon(true, null);
-                    botOwner.WeaponManager.Selector.TakePrevWeapon();
                     if (botOwner.WeaponManager.Selector.LastEquipmentSlot != EquipmentSlot.FirstPrimaryWeapon)
                     {
                         botOwner.WeaponManager.Selector.TryChangeToMain();
+                    }
+                    else
+                    {
+                        player.TrySetLastEquippedWeapon();
                     }
                 }
                 botOwner.Mover.LastGoodCastPointTime = Time.time;
@@ -391,7 +397,7 @@ namespace MiyakoCarryService.Client.Extensions
                 botOwner.Mover.RecalcWay();
                 botOwner.Mover.Pause = true;
 #if DEBUG
-                MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制重置手部状态");
+                MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制重置手部状态" + Time.time);
 #endif
             }
         }

@@ -98,7 +98,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Memory.Spotted(false, null, null);
                 }
 
-                BotOwner.WeaponManager.CheckWeaponReady();
+                if (!CheckFirearmsAnimatorState())
+                {
+                    BotOwner.TryResetHandsState();
+                }
 
                 if (ShouldUseMeleeAttack())
                 {
