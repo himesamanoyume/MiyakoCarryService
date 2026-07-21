@@ -191,7 +191,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
                                         RefreshStuckTimer();
-                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                        return new Action(typeof(HealLogic), "Mcs:FightHealing1");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
@@ -209,7 +209,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                             {
                                 RefreshStuckTimer();
-                                return new Action(typeof(HealLogic), "Mcs:Healing");
+                                if (_currentMoveTarget.HasValue)
+                                {
+                                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                }
+                                return new Action(typeof(HealLogic), "Mcs:FightHealing2");
                             }
 
                             if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
@@ -240,7 +244,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
                                         RefreshStuckTimer();
-                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                        return new Action(typeof(HealLogic), "Mcs:FightHealing3");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }
@@ -281,7 +285,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
                                         RefreshStuckTimer();
-                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                        return new Action(typeof(HealLogic), "Mcs:FightHealing4");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
@@ -296,7 +300,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                             {
                                 RefreshStuckTimer();
-                                return new Action(typeof(HealLogic), "Mcs:Healing");
+                                if (_currentMoveTarget.HasValue)
+                                {
+                                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                }
+                                return new Action(typeof(HealLogic), "Mcs:FightHealing5");
                             }
 
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
@@ -329,7 +337,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
                                         RefreshStuckTimer();
-                                        return new Action(typeof(HealLogic), "Mcs:Healing");
+                                        return new Action(typeof(HealLogic), "Mcs:FightHealing6");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                 }

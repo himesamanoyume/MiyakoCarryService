@@ -3,7 +3,7 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public sealed class HealStimulatorsLogic : McsBotBaseLogic
+    public class HealStimulatorsLogic : McsBotBaseLogic
     {
         private HealStimulatorsBaseLogic _baseLogic;
 

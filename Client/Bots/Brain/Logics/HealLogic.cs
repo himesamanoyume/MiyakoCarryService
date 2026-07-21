@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class HealLogic : McsBotBaseLogic
     {
-        private HealBaseLogic _baseLogic;
+        private HealOverrideLogic _baseLogic;
 
         public HealLogic(BotOwner botOwner) : base(botOwner)
         {
@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByBrain(data);
         }
     }
 }

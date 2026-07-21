@@ -595,11 +595,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             var playerPosition = mcsBotPlayer.Position;
             botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-            botOwner.Mover.LastGoodCastPointTime = Time.time;
-            botOwner.Mover.PrevPosLinkedTime_1 = 0f;
             botOwner.Mover.SetPlayerToNavMesh(playerPosition);
-            botOwner.Mover.RecalcWay();
-            botOwner.Mover.Pause = true;
             botOwner.TryResetHandsState();
             botOwner.TalkMsg(new McsMsg
             {

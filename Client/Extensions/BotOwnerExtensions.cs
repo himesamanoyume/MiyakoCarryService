@@ -386,6 +386,10 @@ namespace MiyakoCarryService.Client.Extensions
                         botOwner.WeaponManager.Selector.TryChangeToMain();
                     }
                 }
+                botOwner.Mover.LastGoodCastPointTime = Time.time;
+                botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                botOwner.Mover.RecalcWay();
+                botOwner.Mover.Pause = true;
 #if DEBUG
                 MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制重置手部状态");
 #endif
