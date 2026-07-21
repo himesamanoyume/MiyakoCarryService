@@ -358,13 +358,13 @@ namespace MiyakoCarryService.Client.Extensions
                     return;
                 }
 
-                var handsIdle = !player.HandsController.IsAiming
+                var handsIdle = !player.HandsController.IsAimingButtonPressing
                         && !player.HandsController.IsInventoryOpen()
                         && !player.HandsController.IsInInteractionStrictCheck()
                         && !player.HandsController.IsHandsProcessing();
 
                 botOwner.Mover.AllowTeleport();
-                botOwner.Mover.LastGoodCastPoint = botOwner.Mover.PrevSuccessLinkedFrom_1 = botOwner.Mover.PrevLinkPos = botOwner.Mover.PositionOnWayInner = botOwner.Position;
+                botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = botOwner.Position;
                 botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
 
                 if (!botOwner.Medecine.Using && handsIdle)
@@ -392,8 +392,8 @@ namespace MiyakoCarryService.Client.Extensions
                         player.TrySetLastEquippedWeapon();
                     }
                 }
-                botOwner.Mover.LastGoodCastPointTime = Time.time;
-                botOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                botOwner.Mover._lastGoodCastPointTime = Time.time;
+                botOwner.Mover._prevPosLinkedTime = 0f;
                 botOwner.Mover.RecalcWay();
                 botOwner.Mover.Pause = true;
 #if DEBUG

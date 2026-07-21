@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using EFT;
+using EFT.Communications;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
@@ -28,7 +29,7 @@ namespace MiyakoCarryService.Client.Mgrs
             if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.SaveFormationPresetHotKey.Value))
             {
                 AddFormation("New Formation", MiyakoCarryServicePlugin.FormationMatrix.Value);
-                NotificationManagerClass.DisplayMessageNotification(Locales.SAVEFORMATIONPRESET.McsLocalized());
+                NotificationManager.DisplayMessageNotification(Locales.SAVEFORMATIONPRESET.McsLocalized());
             }
         }
 

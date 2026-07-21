@@ -46,21 +46,21 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
-                if (botFirstAidClass.McsIsFullHp())
+                if (botFirstAid.McsIsFullHp())
                 {
                     if (healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common) != null)
                     {
-                        var med = botFirstAidClass.McsFindSplint();
+                        var med = botFirstAid.McsFindSplint();
                         if (med != null)
                         {
-                            botFirstAidClass.BotOwner_0.Medecine.FirstAid.CurUsingMeds = med;
-                            botFirstAidClass.CurUsingMeds = med;
+                            botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                            botFirstAid.CurUsingMeds = med;
                             return;
                         }
                     }
                 }
 
-                var medKitItemClasses = botFirstAidClass.List_0.OfType<MedKitItemClass>().ToList();
+                var medKitItemClasses = botFirstAid.list_0.OfType<MedKit>().ToList();
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
                 {
@@ -80,8 +80,8 @@ namespace MiyakoCarryService.Client.Extensions
 
             public bool McsIsFullHp()
             {
-                var healthController = botFirstAidClass.BotOwner_0.GetPlayer.HealthController;
-                foreach (var part in botFirstAidClass.EbodyPart_0)
+                var healthController = botFirstAid.botOwner_0.GetPlayer.HealthController;
+                foreach (var part in botFirstAid.ebodyPart_0)
                 {
                     var health = healthController.GetBodyPartHealth(part, false);
                     if (health.Current < health.Maximum)
@@ -92,9 +92,9 @@ namespace MiyakoCarryService.Client.Extensions
                 return true;
             }
 
-            public MedsItemClass McsFindSplint()
+            public Meds McsFindSplint()
             {
-                foreach (var med in botFirstAidClass.List_0)
+                foreach (var med in botFirstAid.list_0)
                 {
                     if (!med.TryGetItemComponent(out HealthEffectsComponent healthEffectsComponent))
                     {
@@ -104,7 +104,7 @@ namespace MiyakoCarryService.Client.Extensions
                     {
                         continue;
                     }
-                    if (botFirstAidClass.CanTreatEffect(med, EDamageEffectType.Fracture))
+                    if (botFirstAid.CanTreatEffect(med, EDamageEffectType.Fracture))
                     {
                         return med;
                     }
@@ -112,7 +112,7 @@ namespace MiyakoCarryService.Client.Extensions
                 return null;
             }
 
-            private MedsItemClass FindMedForEffect(EDamageEffectType effect)
+            private Meds FindMedForEffect(EDamageEffectType effect)
             {
                 foreach (var med in botFirstAid.list_0)
                 {

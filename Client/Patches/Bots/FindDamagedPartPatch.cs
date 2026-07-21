@@ -12,14 +12,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>  
     public sealed class FindDamagedPartPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAidClass), nameof(BotFirstAidClass.FindDamagedPart));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAid), nameof(BotFirstAid.FindDamagedPart));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(BotFirstAidClass __instance)
+        public static void Postfix(BotFirstAid __instance)
         {
-            if (!McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+            if (!McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
             {
                 return;
             }
@@ -29,16 +29,16 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (__instance.CurUsingMeds == null || !__instance.method_2(__instance.CurUsingMeds, EDamageEffectType.Fracture))
+            if (__instance.CurUsingMeds == null || !__instance.CanHealDamageEffectType(__instance.CurUsingMeds, EDamageEffectType.Fracture))
             {
                 return;
             }
 
-            var healthController = __instance.BotOwner_0.GetPlayer.HealthController;
+            var healthController = __instance.botOwner_0.GetPlayer.HealthController;
             var fracture = healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common);
             if (fracture != null)
             {
-                __instance.Nullable_0 = fracture.BodyPart;
+                __instance.nullable_0 = fracture.BodyPart;
                 __instance.Damaged = true;
             }
         }

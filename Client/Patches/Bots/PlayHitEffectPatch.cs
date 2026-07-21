@@ -1,7 +1,6 @@
 using System.Reflection;
 using EFT;
 using EFT.Ballistics;
-using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;

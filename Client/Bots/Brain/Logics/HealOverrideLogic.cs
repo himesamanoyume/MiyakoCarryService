@@ -14,37 +14,37 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(BaseIntent data)
         {
-            if (BotOwner_0.Medecine.Using)
+            if (botOwner_0.Medecine.Using)
             {
                 return;
             }
 
-            if (BotOwner_0.WeaponManager.Reload.Reloading)
+            if (botOwner_0.WeaponManager.Reload.Reloading)
             {
-                BotOwner_0.WeaponManager.Reload.TryStopReload();
+                botOwner_0.WeaponManager.Reload.TryStopReload();
             }
 
-            BotOwner_0.LookData.SetLookPointByHearing();
-            var shallStartUse = BotOwner_0.Medecine.FirstAid.ShallStartUse();
-            if (shallStartUse && BotOwner_0.Medecine.FirstAid.IsBleeding)
+            botOwner_0.LookData.SetLookPointByHearing();
+            var shallStartUse = botOwner_0.Medecine.FirstAid.ShallStartUse();
+            if (shallStartUse && botOwner_0.Medecine.FirstAid.IsBleeding)
             {
                 _baseLogic.UpdateNodeByMain(data);
-                BotOwner_0.SetPose(1f);
-                BotOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
+                botOwner_0.SetPose(1f);
+                botOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
             }
-            else if (BotOwner_0.Medecine.SurgicalKit.ShallStartUse())
+            else if (botOwner_0.Medecine.SurgicalKit.ShallStartUse())
             {
-                BotOwner_0.StopMove();
-                BotOwner_0.SetPose(0f);
-                BotOwner_0.Medecine.SurgicalKit.ApplyToCurrentPart();
+                botOwner_0.StopMove();
+                botOwner_0.SetPose(0f);
+                botOwner_0.Medecine.SurgicalKit.ApplyToCurrentPart();
             }
             else if (shallStartUse)
             {
                 _baseLogic.UpdateNodeByMain(data);
-                BotOwner_0.SetPose(1f);
-                BotOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
+                botOwner_0.SetPose(1f);
+                botOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
             }
-            BotOwner_0.Sprint(false);
+            botOwner_0.Sprint(false);
         }
     }
 }

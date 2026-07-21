@@ -195,7 +195,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BaseLogicLayerSimpleAbstractClass.CheckMedsToStop(BotOwner))
+            if (BaseLogicLayer.CheckMedsToStop(BotOwner))
             {
                 _currentHealTimes = 0;
                 return true;
@@ -1621,7 +1621,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual Vector3 TryProjectToGround(Vector3 pos)
         {
-            if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var rayHit, 50f, LayerMaskClass.HighPolyWithTerrainMask))
+            if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var rayHit, 50f, LayersMaskController.HighPolyWithTerrainMask))
             {
                 if (NavMesh.SamplePosition(rayHit.point, out var navHit1, 1f, -1))
                 {
@@ -1775,8 +1775,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public void RefreshStuckTimer()
         {
-            BotOwner.Mover.LastPos = BotOwner.Position;
-            BotOwner.Mover.LastTimePosChanged = Time.time;
+            BotOwner.Mover._lastPos = BotOwner.Position;
+            BotOwner.Mover._lastTimePosChanged = Time.time;
         }
 
         public virtual bool CheckFirearmsAnimatorState()
@@ -1805,7 +1805,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            var handsIdle = !player.HandsController.IsAiming
+            var handsIdle = !player.HandsController.IsAimingButtonPressing
                         && !player.HandsController.IsInventoryOpen()
                         && !player.HandsController.IsInInteractionStrictCheck()
                         && !player.HandsController.IsHandsProcessing();
