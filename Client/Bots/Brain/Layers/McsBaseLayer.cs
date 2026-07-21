@@ -1584,10 +1584,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
-                    BotOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.Negative,
-                    });
+                    // 使用保持队形时在狭窄环境中容易连续触发大量对话，这在Fika联机下会造成大量数据包传输
+                    // BotOwner.TalkMsg(new McsMsg
+                    // {
+                    //     PhraseTrigger = EPhraseTrigger.Negative,
+                    // });
                     return _lastCanRunResult;
                 }
 

@@ -79,7 +79,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var sequentialIndex = GetSequentialIndex(mcsLeadPlayer.ProfileId, mcsBotPlayerId, index);
                     return sequentialIndex;
                 }
-                return -1;
+                return -4;
             }
             else
             {
@@ -87,7 +87,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     return index;
                 }
-                return -1;
+                return -5;
             }
         }
 
@@ -95,7 +95,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             if (baseIndex < 5 || baseIndex > 8)
             {
-                return -1;
+                return -3;
             }
 
             var sub = 0;
@@ -131,11 +131,11 @@ namespace MiyakoCarryService.Client.Mgrs
             );
         }
 
-        public int CalcMcsBotIndex(string mcsLeadPlayerId, string mcsBotPlayerId)
+        public int CalcMcsBotIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId)
         {
-            if (string.IsNullOrEmpty(mcsLeadPlayerId) || string.IsNullOrEmpty(mcsBotPlayerId))
+            if (string.IsNullOrEmpty(mcsLeadPlayerId))
             {
-                return -1;
+                return -2;
             }
 
             var members = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId)
@@ -531,6 +531,10 @@ namespace MiyakoCarryService.Client.Mgrs
             if (_mcsSquadDict != null)
             {
                 _mcsSquadDict.Clear();
+            }
+            if (_mcsBotPlayerIndexes != null)
+            {
+                _mcsBotPlayerIndexes.Clear();
             }
             if (_mcsLeadPlayerIds != null)
             {
