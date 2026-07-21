@@ -77,9 +77,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
-                    RefreshStuckTimer();
                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                     {
+                        RefreshStuckTimer();
                         return new Action(typeof(HealLogic), "Mcs:Healing");
                     }
 
@@ -88,6 +88,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                 {
+                    RefreshStuckTimer();
                     return new Action(typeof(HealLogic), "Mcs:Healing");
                 }
 

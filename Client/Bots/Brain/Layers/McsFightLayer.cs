@@ -188,9 +188,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    RefreshStuckTimer();
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
+                                        RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:Healing");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
@@ -204,6 +204,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
                                 _nextUpdatePosTime = time + nextTime;
+                            }
+
+                            if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                            {
+                                RefreshStuckTimer();
+                                return new Action(typeof(HealLogic), "Mcs:Healing");
                             }
 
                             if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
@@ -233,6 +239,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
+                                        RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:Healing");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
@@ -271,9 +278,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    RefreshStuckTimer();
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
+                                        RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:Healing");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
@@ -284,6 +291,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
                                 _nextUpdatePosTime = time + nextTime;
+                            }
+
+                            if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                            {
+                                RefreshStuckTimer();
+                                return new Action(typeof(HealLogic), "Mcs:Healing");
                             }
 
                             var sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
@@ -315,6 +328,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
                                     {
+                                        RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:Healing");
                                     }
                                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
