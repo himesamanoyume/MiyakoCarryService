@@ -182,6 +182,22 @@ Whether `McsBotPlayer` will attempt to loot keyword items
 
 Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`
 
+- Enable Keep Formation
+
+Whether to determine `McsBotPlayer` positions based on formation matrix configuration
+
+- Formation Matrix
+
+Used to configure the position of each `McsBotPlayer`. “★” represents your position. The top of “★” is your look direction
+
+- Formation Spacing
+
+- Formation Sequential Fill
+
+When enabled, if a `McsBotPlayer` dies in formation, the empty position is filled by the next squad member in brevity code order
+
+- Save Formation Preset Hotkey
+
 *When Fika is installed, adjusting settings in raid will automatically sync to the host, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
 ### Command
@@ -298,6 +314,10 @@ If there are `McsBotPlayers` in the team not currently in combat, command `McsBo
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to clear the surrounding area of a specified location.
 
+- Change Formation
+
+Apply saved formation preset immediately.
+
 *The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
 ### Player
@@ -313,6 +333,10 @@ Whether to highlight all `McsBotPlayer` characters in raid.
 - Enable Mcs Subtitles
 
 Whether to use subtitles to display `McsBotPlayer` reports.
+
+- ShowBrevityCode
+
+Use brevity codes to replace original nicknames for display.
 
 ## Language
 

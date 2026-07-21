@@ -1056,6 +1056,26 @@
                     <td>屏蔽物品类型</td>
                     <td>支持全选、全不选：子弹、交换品、情报类、容器、食物、背包、护目镜、口袋、胸挂、背心、耳机、手雷、钥匙、近战武器、弹匣、医疗品、配件、特殊道具、枪械、其他</td>
                 </tr>
+                <tr>
+                    <td>开启保持队形</td>
+                    <td>是否根据队形矩阵的配置决定护航的站位</td>
+                </tr>
+                <tr>
+                    <td>队形矩阵</td>
+                    <td>用于配置每位护航的站位，“★”代表你的位置，“★”的正上方为你的视角朝向</td>
+                </tr>
+                <tr>
+                    <td>队形间距</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>队形顺序补位</td>
+                    <td>当开启时若队形中有护航死亡，则按照代号顺序补上空缺</td>
+                </tr>
+                <tr>
+                    <td>保存队形预设快捷键</td>
+                    <td>可保存当前的队形矩阵配置作为预设，并通过"改变队形"指令快速应用对应</td>
+                </tr>
             </tbody>
         </table>
     </details>
@@ -1072,8 +1092,7 @@
             </tbody>
         </table>
         <p>单人指令</p>
-        <table style="margin: 15px;
-            width: auto !important;">
+        <table style="margin: 15px; width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
                     <td>报告敌人方位</td>
@@ -1130,8 +1149,7 @@
             </tbody>
         </table>
         <p>全队指令</p>
-        <table style="margin: 15px;
-            width: auto !important;">
+        <table style="margin: 15px; width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
                     <td>全队报告敌人方位</td>
@@ -1177,6 +1195,10 @@
                     <td>全队清扫区域</td>
                     <td>若队伍中有护航此时不处于交战，命令护航清扫指定位置的周围区域</td>
                 </tr>
+                <tr>
+                    <td>改变队形</td>
+                    <td>立即应用已保存的队形预设</td>
+                </tr>
             </tbody>
         </table>
     </details>
@@ -1200,6 +1222,10 @@
                 <tr>
                     <td>开启护航字幕</td>
                     <td>是否使用字幕展示护航的汇报</td>
+                </tr>
+                <tr>
+                    <td>显示代号</td>
+                    <td>用代号来代替原本的名称进行显示</td>
                 </tr>
             </tbody>
         </table>
@@ -1389,7 +1415,7 @@
         <span style="font-size: 20px;">本模组建议安装的模组：DrakiaXYZ-Waypoints</span>
     </p>
     &nbsp;&nbsp;
-    <p>也可以来Discord，通常最新抢先测试版都会先发布至Discord进行测试，也方便反馈交流，Discord链接：<a href="https://discord.gg/UJy8pYbZHs" target="_blank">https://discord.gg/UJy8pYbZHs</a></p>
+    <p>也可以来Discord，通常最新抢先测试版都会先发布至Discord进行测试，也方便反馈交流，Discord链接：<a href="https://discord.gg/UJy8pYbZHs" target="_blank">https://discord.gg/UJy8pYbZHs</a> (现在频道内有SPT4.1的NotCheater和Mcs抢先测试)</p>
     &nbsp;&nbsp;
     <p>当前不再提供附件下载，只推荐去<a href="https://forge.sp-tarkov.com/mod/2709/miyako-carry-service" target="_blank">SPT Forge</a>上下载，每次更新都要两头跑太累了，去Forge上下载还能给我涨涨下载量</p>
     &nbsp;&nbsp;
