@@ -520,5 +520,25 @@ namespace MiyakoCarryService.Server.Services
                 )
             };
         }
+
+        public bool CheckProfileTraderInfo(MongoId mcsLeadPlayerId)
+        {
+            PmcData targetPmcData;
+
+            if (profileService.IsMcsBotPlayerInventoryMode(mcsLeadPlayerId))
+            {
+                return true;
+            }
+            else
+            {
+                targetPmcData = saveServer.GetProfile(mcsLeadPlayerId).CharacterData.PmcData;
+            }
+            return targetPmcData.TradersInfo.ContainsKey(MiyakoTraderId);
+        }
+
+        public bool CheckServerTraderTable()
+        {
+            return databaseService.GetTables().Traders.ContainsKey(MiyakoTraderId);
+        }
     }
 }

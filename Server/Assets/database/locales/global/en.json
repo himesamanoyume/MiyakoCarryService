@@ -233,5 +233,7 @@
     "Mcs/ChangeFormationCommand Name": "Change Formation",
     "Mcs/ChangeFormationCommand TargetName": "Apply saved formation preset immediately",
     "Mcs/ShowBrevityCode Key": "Show Brevity Code",
-    "Mcs/ShowBrevityCode Description": "Use brevity codes to replace original nicknames for display"
+    "Mcs/ShowBrevityCode Description": "Use brevity codes to replace original nicknames for display",
+    "Mcs/InvaildProfileTraderInfoWarning": "Warning: An abnormal situation has been detected: the Miyako trader data does not exist in your profile. If this issue remains unresolved, you may be unable to receive order quests or complete quests normally",
+    "Mcs/InvaildServerTraderTableWarning": "Warning: An abnormal situation has been detected: the Miyako trader data does not exist in the server's trader list. If this issue remains unresolved, you may be unable to receive order quests or complete quests normally"
 }

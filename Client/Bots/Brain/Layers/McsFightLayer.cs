@@ -237,7 +237,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if (_currentMoveTarget.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                                        return new Action(typeof(GoToPointLogic), "Partoling");
+                                        return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                     }
 
                                     return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath2");
@@ -330,7 +330,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     if (_currentMoveTarget.HasValue)
                                     {
                                         BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                                        return new Action(typeof(GoToPointLogic), "Partoling");
+                                        return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                     }
 
                                     return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath4");
