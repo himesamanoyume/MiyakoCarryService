@@ -696,7 +696,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
             settings.FileSettings.Move.DIST_SPRINT_GO_TO_SOME_POINT = 2f;
 
-            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.95f;
+            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9999f;
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
             settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 30f;
             settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;

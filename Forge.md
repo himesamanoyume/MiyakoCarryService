@@ -126,35 +126,35 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 ## Config
 
-- BalanceRestriction
+- **BalanceRestriction**
 
 Balance restriction. Defaults to false. When enabled, the open `McsBotPlayer` inventory command becomes unavailable, and all items a `McsBotPlayer` brings into the raid are given the `Curse of Vanishing` enchantment — when the `McsBotPlayer` dies, the items they brought in will immediately vanish no matter where they are.
 
-- CheckUpdate
+- **CheckUpdate**
 
 Whether to check for version updates online. Defaults to true.
 
-- CheckIfdian
+- **CheckIfdian**
 
 Whether to check for sponsor list updates. Defaults to true.
 
-- TicketPricePerPercent
+- **TicketPricePerPercent**
 
 Ticket price per percent. Used to price the fine paid when applying for a ticket to remove the price-increase punishment, in roubles per percent. Defaults to 300000 roubles per percent.
 
-- PunishmentMultiMax
+- **PunishmentMultiMax**
 
 Maximum price-increase punishment. Expressed as a multiplier, defaults to 1 (i.e. 100%). For example, a value of 5 sets the maximum price-increase punishment to 500%.
 
-- OrderPendingPaymentTime
+- **OrderPendingPaymentTime**
 
 Order pending payment time. The expiration time of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket. In seconds, defaults to 900 seconds (i.e. 15 minutes).
 
-- CompensationPrice
+- **CompensationPrice**
 
 Compensation price. Paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`. In roubles, defaults to 300000 roubles.
 
-- CarryServiceLevelPrice
+- **CarryServiceLevelPrice**
 
 Carry service level base price. There are 5 levels in total, in roubles, with an upper and lower bound set for each level.
 
@@ -162,41 +162,41 @@ Carry service level base price. There are 5 levels in total, in roubles, with an
 
 ### Basic
 
-- Enable Looting
+- **Enable Looting**
 
 If `McsBotPlayer` is not currently in combat, whether it will attempt to loot items.
 
-- Price Threshold
+- **Price Threshold**
 
 Loot below this price will be ignored.
 
-- Loot Name Keyword
+- **Loot Name Keyword**
 
 Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords can be separated using “||”, “,” or “，”.
 
-- Loot Keyword Items
+- **Loot Keyword Items**
 
 Whether `McsBotPlayer` will attempt to loot keyword items
 
-- Blocked Item Types
+- **Blocked Item Types**
 
 Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`
 
-- Enable Keep Formation
+- **Enable Keep Formation**
 
 Whether to determine `McsBotPlayer` positions based on formation matrix configuration
 
-- Formation Matrix
+- **Formation Matrix**
 
 Used to configure the position of each `McsBotPlayer`. “★” represents your position. The top of “★” is your look direction
 
-- Formation Spacing
+- **Formation Spacing**
 
-- Formation Sequential Fill
+- **Formation Sequential Fill**
 
 When enabled, if a `McsBotPlayer` dies in formation, the empty position is filled by the next squad member in brevity code order
 
-- Save Formation Preset Hotkey
+- **Save Formation Preset Hotkey**
 
 *When Fika is installed, adjusting settings in raid will automatically sync to the host, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
@@ -204,117 +204,117 @@ When enabled, if a `McsBotPlayer` dies in formation, the empty position is fille
 
 #### MemberCommand
 
-- Report Enemy Position
+- **Report Enemy Position**
 
 If `McsBotPlayer` is currently in combat, command `McsBotPlayer` to report known enemy positions.
 
-- Report Self Status
+- **Report Self Status**
 
 Command `McsBotPlayer` to report own health and supply status.
 
-- On Your Own
+- **On Your Own**
 
 Command `McsBotPlayer` to act independently.
 
-- Regroup
+- **Regroup**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to follow the `McsLeadPlayer`.
 
-- Go To
+- **Go To**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to go to a specified location.
 
-- Hold Position
+- **Hold Position**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to stay in place.
 
-- Force Teleport
+- **Force Teleport**
 
 Clear `McsBotPlayer`'s aggro and attempt to teleport them to current location.
 
-- Open Inventory
+- **Open Inventory**
 
 Remotely open `McsBotPlayer`'s inventory remotely, used to transfer loot they have picked up.
 
-- Change Aiming Body Part Type
+- **Change Aiming Body Part Type**
 
 Command `McsBotPlayer` to change preferred combat aiming body part.
 
-- Escort
-- - Quest Escort
-- - Exfil Escort
-- - Transit Escort
-- - Switch Escort
+- **Escort**
+- - **Quest Escort**
+- - **Exfil Escort**
+- - **Transit Escort**
+- - **Switch Escort**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort to the designated location.
 
-- Proxy Action
-- - Quest Proxy Action
-- - Door Proxy Action
-- - Loot Proxy Action
-- - Switch Proxy Action
+- **Proxy Action**
+- - **Quest Proxy Action**
+- - **Door Proxy Action**
+- - **Loot Proxy Action**
+- - **Switch Proxy Action**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to execute action.
 
-- Drop Target Loot
+- **Drop Target Loot**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
 
-- Clear Area
+- **Clear Area**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to clear the surrounding area of a specified location.
 
 #### TeamCommand
 
-- Team Report Enemy Position
+- **Team Report Enemy Position**
 
 If there are `McsBotPlayers` in the team currently in combat, command `McsBotPlayers` to report known enemy positions.
 
-- Team Report Self Status
+- **Team Report Self Status**
 
 Command `McsBotPlayers` to report own health and supply status.
 
-- Team On Your Own
+- **Team On Your Own**
 
 Command `McsBotPlayers` to act independently.
 
-- Team Regroup
+- **Team Regroup**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to follow the `McsLeadPlayer`.
 
-- Team Go To
+- **Team Go To**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to go to a specified location.
 
-- Team Hold Position
+- **Team Hold Position**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to stay in place.
 
-- Team Force Teleport
+- **Team Force Teleport**
 
 Clear aggro for all team `McsBotPlayers` and attempt to teleport all of them to current location.
 
-- Team Change Aiming Body Part Type
+- **Team Change Aiming Body Part Type**
 
 Command `McsBotPlayers` to change preferred combat aiming body part.
 
-- Team Escort
-- - Team Quest Escort
-- - Team Exfil Escort
-- - Team Transit Escort
-- - Team Switch Escort
+- **Team Escort**
+- - **Team Quest Escort**
+- - **Team Exfil Escort**
+- - **Team Transit Escort**
+- - **Team Switch Escort**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to escort to the designated location.
 
-- Team Drop Target Loot
+- **Team Drop Target Loot**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
 
-- Team Clear Area
+- **Team Clear Area**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to clear the surrounding area of a specified location.
 
-- Change Formation
+- **Change Formation**
 
 Apply saved formation preset immediately.
 
@@ -322,19 +322,19 @@ Apply saved formation preset immediately.
 
 ### Player
 
-- Teammate Highlight
+- **Teammate Highlight**
 
 Whether to highlight all `McsBotPlayer` characters in raid.
 
-- Teammate Highlight Hotkey
+- **Teammate Highlight Hotkey**
 
-- Teammate Highlight Color
+- **Teammate Highlight Color**
 
-- Enable Mcs Subtitles
+- **Enable Mcs Subtitles**
 
 Whether to use subtitles to display `McsBotPlayer` reports.
 
-- ShowBrevityCode
+- **Show Brevity Code**
 
 Use brevity codes to replace original nicknames for display.
 
