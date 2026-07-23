@@ -30,6 +30,38 @@ You can even generate AI types provided by third-party mods such as [Black Divis
 
 [id-customspawntype]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/customspawntype.webp 'CustomSpawnType'
 
+---
+
+### What Can Mcs Offer You?
+
+The answer: the ultimate comfortable service experience.
+
+#### A Powerful and Flexible Command System
+
+Beyond a handful of basic movement commands, and built upon EFT's own Action Menu, Mcs injects limitless possibilities into its command system.
+
+This lets you assign a `McsBotPlayer` to lead you to all kinds of destinations — quest locations, exfil points, transit points, switches, and especially those areas you want to reach but whose location you don't know. In that case you can simply have them lead the way in front of you; just follow their steps and you'll arrive at your destination (provided, of course, that the location itself allows AI to go there).
+
+You can even delegate certain actions to them to complete independently in your stead, so you don't have to handle everything personally. For example, Mcs allows proxy actions under supported quest conditions — at a single command, they can head to a quest location on their own to perform operations such as repairing, visiting quest position, or installing items. You can complete the quest without ever going to the site yourself.
+
+Or perhaps you want to flip a switch that opens an exfil. You can order them to go operate it themselves while you head straight for the exfil; once the switch is turned on, you can simply extract, instead of having to go open the switch yourself first and then move to the exfil to extract as before.
+
+And besides keeping you safe, if you're in a complex area with enemies potentially lurking around, you can order them to thoroughly search every corner of a specified location.
+
+#### Make Every Gain Entirely Yours
+
+As a mod that delivers the perfect service experience, your `McsBotPlayer` should naturally be able to actively scavenge loot according to your settings. You can set blocked item types, a loot value threshold, whether to loot items containing specific keywords, and more. They will also nest looted items to a certain degree, plundering as much of the loot you need as possible. However, in the end these gains still need to be collected by you personally before they can be carried out of the raid.
+
+#### The Final Piece to Accomplishing Great Deeds
+
+**The Formation System**
+
+This system lets you configure a 7×7 formation matrix in which you can set your own position and those of your teammates, along with the spacing between them. Now you have a well-trained, powerful squad that maintains its formation at all times. You can also save the current formation as a preset via hotkey and give it a custom name, then quickly apply formation presets through the command system to handle any scenario.
+
+#### Configurations That Take Effect Independently for Each Player
+
+As is well known, Mcs supports installing the Fika Addon to work in a Fika multiplayer environment. And as we also know, in a Fika multiplayer environment almost all of a raid's computation is performed on the host. For that reason, we would not want every `McsBotPlayer` behavior to be dictated solely by the host. Not to worry — Mcs also supports syncing some of the configuration items, so a user acting as the host can have different squads compute using their own respective configurations, including loot scavenging configuration, formation positioning configuration, and more. I guarantee you can get the same experience as when using Mcs in your own local raid.
+
 ## Tutorial
 
 ### Installation
