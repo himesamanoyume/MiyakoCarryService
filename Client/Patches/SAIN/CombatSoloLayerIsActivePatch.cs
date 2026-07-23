@@ -62,14 +62,14 @@ public sealed class CombatSoloLayerIsActivePatch : ModulePatch
 
             if (state.SainAllowed)
             {
-                if (sqrDist > ExitSainSqr)
+                if (sqrDist > SainDistanceConstants.ExitSainSqr)
                 {
                     state.SainAllowed = false;
                 }
             }
             else
             {
-                if (sqrDist < EnterSainSqr)
+                if (sqrDist < SainDistanceConstants.EnterSainSqr)
                 {
                     state.SainAllowed = true;
                 }

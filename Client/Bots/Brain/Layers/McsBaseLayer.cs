@@ -547,7 +547,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
                     });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldGoToPoint]));
+                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
                 }
                 return true;
             }

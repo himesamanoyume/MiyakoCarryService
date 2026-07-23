@@ -13,6 +13,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     {
         public float _contactTime = 0f;
         public float _nextRecalcGoalTime = 0f;
+        public const float FightHoldTime = 3f;
+        public float _lastHaveEnemyTime = -999f;
+        public bool _deferToSain = false;
 
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -389,14 +392,41 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData == null)
                 {
+                    _lastHaveEnemyTime = -999f;
                     return false;
                 }
 
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled && mcsLeadPlayerPos.McsSqrDistance(goalEnemy.CurrPosition) <= 35f * 35f)
+                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled)
                 {
-                    return false;
+                    var sqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
+                    if (_deferToSain)
+                    {
+                        if (sqrDist > SainDistanceConstants.ExitSainSqr)
+                        {
+                            _deferToSain = false;
+                        }
+                    }
+                    else
+                    {
+                        if (sqrDist < SainDistanceConstants.EnterSainSqr)
+                        {
+                            _deferToSain = true;
+                        }
+                    }
+
+                    if (_deferToSain)
+                    {
+                        return false;
+                    }
                 }
+
+                _lastHaveEnemyTime = Time.time;
+                return true;
+            }
+
+            if (Time.time - _lastHaveEnemyTime < FightHoldTime)
+            {
                 return true;
             }
 
