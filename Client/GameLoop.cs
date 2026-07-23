@@ -515,7 +515,8 @@ namespace MiyakoCarryService.Client
 
                     var botSpawnParams = new BotSpawnParams
                     {
-                        ShallBeGroup = new ShallBeGroupParams(true, false, 5)
+                        ShallBeGroup = new ShallBeGroupParams(true, false, 5),
+                        Id_spawn = "Mcs"
                     };
 
                     var botProfileDataClass = new BotProfileDataClass(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
