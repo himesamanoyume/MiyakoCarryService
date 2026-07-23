@@ -2,12 +2,6 @@
 
 ## 低优先级
 
-- 尝试让护航能够一起进入BTR
-- - `Singleton<GameWorld>.Instance.BtrController`
-- - 门口站位点：`BTRSide.GoInPoints()`，BTRSide 经 `BtrView.GetBtrSide(sideId)` 获取
-- - 登/下车：`BtrController.LocalGoIn/LocalGoOut`，或 `BTRVehicle.Interact`
-- - 乘客判定：`BTRVehicle.IsPassenger(player, out passengerInfo)`
-- - 老板状态：`Player.BtrState`
 - 全队/个人新增同步行动指令：玩家与护航同步扔雷、同步姿态（何时应该同步，何时应该自主行动，插入到哪段行为中，较难界定）
 - 个人新增代理整理战利品指令：将护航周围5米的无主战利品以最高价值、尽可能嵌套的方式进行收集（难点在于需要打破当前的单一目标战利品锁定机制，还有对套包算法的开发）
 - 个人新增召唤增援指令：所有类型护航都可长按结束后花费可配置的卢布在战局中召唤好友位中的闲置护航，Boss类型护航还额外增加免费召唤3位小弟的选项，且整个过程复用邪教徒仪式的召唤圈资源和天气事件（难点在于需要适配4人以上的护航，以及需要实现全新的万圣节事件控制器，还要适配Fika）
@@ -18,6 +12,7 @@
 
 ## 已知问题
 
+- Fika无头下`MoreBotsAPI.HuntManager.OnBotCreated`
 - 有时会0弹药战斗，并且不进行换弹（因为武器管理器认为武器未准备好）
 - AttackMoving有时不开枪（同样因为武器管理器认为武器未准备好）
 - 护航有时在已进入战斗的情况下 自己或老板受到攻击了也不立即反击
