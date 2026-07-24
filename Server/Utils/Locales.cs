@@ -35,5 +35,7 @@ namespace MiyakoCarryService.Server.Utils
         public const string MCSINVENTORYMODERAGFAIRREFUSE = "Mcs/McsInventoryModeRagfairRefuse";
         public const string NEWVERSIONNOTIFY = "Mcs/NewVersionNotify";
         public const string MCSBOTPLAYEREXPIRED = "Mcs/McsBotPlayerExpired";
+        public const string INVAILDPROFILETRADERINFOWARNING = "Mcs/InvaildProfileTraderInfoWarning";
+        public const string INVAILDSERVERTRADERTABLEWARNING = "Mcs/InvaildServerTraderTableWarning";
     }
 }

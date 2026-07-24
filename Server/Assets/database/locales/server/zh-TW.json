@@ -18,5 +18,6 @@
     "Mcs/CurrentPriceIncrease": "當前永久漲價: {0}%",
     "Mcs/GenerateProfileError": "生成護航的 {0} 存檔異常，已生成對應預設存檔",
     "Mcs/McsInventoryModeRagfairRefuse": "處於護航庫存模式，無法在跳蚤市場上架交易單",
-    "Mcs/NewVersionNotify": "宮子護航店 檢測到新版本: {0} ---> {1}"
+    "Mcs/NewVersionNotify": "宮子護航店 檢測到新版本: {0} ---> {1}",
+    "Mcs/McsBotPlayerExpired": "已過期"
 }

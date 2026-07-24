@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -16,6 +17,7 @@ namespace MiyakoCarryService.Server.Services
     [Injectable(InjectionType.Singleton)]
     public class LocaleService(
         FileUtil fileUtil,
+        JsonUtil jsonUtil,
         ConfigService configService,
         ServerLocalisationService serverLocalisationService,
         LocaleTable localeTable
@@ -26,11 +28,16 @@ namespace MiyakoCarryService.Server.Services
         Dictionary<string, Dictionary<string, string>> _globalLocales = [];
         Dictionary<string, Dictionary<string, string>> _serverLocales = [];
 
+        private readonly List<string> _supportedGlobalLocales = ["ch", "ru", "en"];
+        private readonly List<string> _supportedServerLocales = ["zh-cn", "zh-TW", "ru", "en"];
+
         public async Task OnPostLoadAsync()
         {
             _globalLocales = await RecursiveLoadFiles(_globalLocaleFolderDir);
+            await FillUnsupportedLocales(_globalLocaleFolderDir, _globalLocales, _supportedGlobalLocales);
             await UpdateGlobalLocales(_globalLocales);
             _serverLocales = await RecursiveLoadFiles(_serverLocaleFolderDir);
+            await FillUnsupportedLocales(_serverLocaleFolderDir, _serverLocales, _supportedServerLocales);
             await UpdateServerLocales(_serverLocales);
         }
 
@@ -125,6 +132,28 @@ namespace MiyakoCarryService.Server.Services
             }
 
             return locales;
+        }
+
+        public async Task FillUnsupportedLocales(string path, Dictionary<string, Dictionary<string, string>> locales, List<string> supportedLocales)
+        {
+            if (!locales.TryGetValue("en", out var enLocale) || enLocale is null)
+            {
+                return;
+            }
+
+            foreach (var localeName in locales.Keys.ToList())
+            {
+                if (supportedLocales.Contains(localeName))
+                {
+                    continue;
+                }
+
+                var copied = new Dictionary<string, string>(enLocale);
+                locales[localeName] = copied;
+
+                var filePath = Path.Combine(path, $"{localeName}.json");
+                await fileUtil.WriteFileAsync(filePath, jsonUtil.Serialize(copied, true));
+            }
         }
     }
 }

@@ -18,5 +18,6 @@
     "Mcs/CurrentPriceIncrease": "Текущее повышение цены: {0}%",
     "Mcs/GenerateProfileError": "Ошибка генерации carry service profile для {0}, вместо него был создан профиль по умолчанию",
     "Mcs/McsInventoryModeRagfairRefuse": "В режиме инвентаря наёмника нельзя добавить предложения на барахолку.",
-    "Mcs/NewVersionNotify": "Доступна новая версия MiyakoCarryService: {0} ---> {1}"
+    "Mcs/NewVersionNotify": "Доступна новая версия MiyakoCarryService: {0} ---> {1}",
+    "Mcs/McsBotPlayerExpired": "Expired"
 }

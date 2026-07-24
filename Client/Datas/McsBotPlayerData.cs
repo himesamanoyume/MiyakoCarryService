@@ -26,8 +26,8 @@ namespace MiyakoCarryService.Client.Datas
         public Vector3? TargetPos = null;
         public string ProxyTargetId = null;
         public LootData LootingTarget = null;
-        public List<Vector3> ClearAreaPoints = null;  
-        public int ClearAreaIndex = 0;  
+        public List<Vector3> ClearAreaPoints = null;
+        public int ClearAreaIndex = 0;
         public float ClearAreaLookAroundUntil = 0f;
         public bool IsLooting
         {
@@ -47,6 +47,9 @@ namespace MiyakoCarryService.Client.Datas
         private readonly HashSet<string> _decisions = new();
         private HashSet<LootData> _vanishingCurseLootItems = new();
         public bool IsMcsLayerActive = false;
+        public bool IsBtrLeaving = false; 
+        public byte BtrTargetSide = 0;
+        public byte BtrTargetSlot = 0;
 
         public void SetDecision(string[] exclude = null, params string[] decisions)
         {

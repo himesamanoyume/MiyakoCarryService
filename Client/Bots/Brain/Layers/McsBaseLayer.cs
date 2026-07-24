@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.InventoryLogic;
@@ -186,6 +187,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(GoToExcuteProxyActionLogic), EndGoToExcuteProxyAction);
             RegisterAction(typeof(DropTargetLootLogic), EndDropTargetLootLogic);
             RegisterAction(typeof(HealStimulatorsLogic), EndHealStimulators);
+            RegisterAction(typeof(GoToBtrLogic), EndGoToBtr);
         }
 
         public virtual bool EndHeal()
@@ -253,6 +255,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
+            return true;
+        }
+
+        public virtual bool EndGoToBtr()
+        {
             return true;
         }
 
@@ -547,7 +554,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
                     });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldGoToPoint]));
+                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
                 }
                 return true;
             }
@@ -1819,6 +1826,102 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             _nextAnimatorFixTime = time + 1;
             return true;
+        }
+
+        public virtual bool TryGetBtrFollowAction(float time, out Action action)
+        {
+            action = null;
+
+            var btrController = Singleton<GameWorld>.Instance.BtrController;
+            if (btrController == null || btrController.BtrVehicle == null || btrController.BtrView == null)
+            {
+                return false;
+            }
+
+            var leadPlayer = McsBotPlayerData.LeadPlayer;
+            if (leadPlayer == null)
+            {
+                return false;
+            }
+
+            var btrVehicle = btrController.BtrVehicle;
+            var selfPlayer = BotOwner.GetPlayer;
+            var selfIsPassenger = btrVehicle.IsPassenger(selfPlayer, out var selfPassenger);
+            var bossInBtr = leadPlayer.BtrState == EPlayerBtrState.Inside || leadPlayer.BtrState == EPlayerBtrState.GoIn;
+            var bossOutBtr = leadPlayer.BtrState == EPlayerBtrState.Outside || leadPlayer.BtrState == EPlayerBtrState.GoOut;
+
+            if (bossInBtr && !selfIsPassenger)
+            {
+                if (!TryFindFreeSeat(btrController, out byte sideId, out byte slotId, out Vector3 doorPos))
+                {
+                    return false;
+                }
+
+                McsBotPlayerData.BtrTargetSide = sideId;
+                McsBotPlayerData.BtrTargetSlot = slotId;
+                McsBotPlayerData.IsBtrLeaving = false;
+
+                if (_nextUpdatePosTime < time)
+                {
+                    UpdateCommonMoveTarget(doorPos, out float nextTime);
+                    _nextUpdatePosTime = time + nextTime;
+                }
+
+                if (_currentMoveTarget.HasValue)
+                {
+                    BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                }
+
+                action = new Action(typeof(GoToBtrLogic), "Mcs:GoToBtr");
+                return true;
+            }
+
+            if (selfIsPassenger && !bossOutBtr)
+            {
+                McsBotPlayerData.IsBtrLeaving = false;
+                RefreshStuckTimer();
+                action = new Action(typeof(HoldPositionLogic), "Mcs:BtrStay");
+                return true;
+            }
+
+            if (selfIsPassenger && bossOutBtr)
+            {
+                McsBotPlayerData.IsBtrLeaving = true;
+                McsBotPlayerData.BtrTargetSide = selfPassenger.SideId;
+                McsBotPlayerData.BtrTargetSlot = selfPassenger.SlotId;
+                action = new Action(typeof(GoToBtrLogic), "Mcs:LeaveBtr");
+                return true;
+            }
+            return false;
+        }
+
+        public virtual bool TryFindFreeSeat(BTRControllerClass btrController, out byte sideId, out byte slotId, out Vector3 doorPos)
+        {
+            sideId = 0;
+            slotId = 0;
+            doorPos = Vector3.zero;
+
+            for (byte s = 0; s <= 1; s++)
+            {
+                var side = btrController.BtrView.GetBtrSide(s);
+                if (side == null)
+                {
+                    continue;
+                }
+
+                var info = side.SideInfo();
+                for (byte slot = 0; slot < info.Length; slot++)
+                {
+                    if (info[slot])
+                    {
+                        sideId = s;
+                        slotId = slot;
+                        doorPos = side.GoInPoints().Item1;
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

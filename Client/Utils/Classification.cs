@@ -300,7 +300,16 @@ namespace MiyakoCarryService.Client.Utils
             "InfectedWait",
             "Leave Map",
             "PmcPveTarget",
-            "Pursuit"
+            "Pursuit",
+            "SAIN : SAIN Debug",
+            "SAIN : Avoid Threat",
+            // "SAIN : Combat Layer",
+            "SAIN : Squad Layer",
+            "SAIN : Extract",
+            "OrbitBrainLayer",
+            "Looting",
+            "BotMind_Looting",
+            "BotMind_Questing"
         };
     }
 }

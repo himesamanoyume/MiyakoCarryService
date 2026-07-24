@@ -93,36 +93,44 @@ namespace MiyakoCarryService.Fika
                         continue;
                     }
 
-                    var completeProfileDescriptorClass = new ProfileDescriptor
+                    try
                     {
-                        AccountId = groupPlayerViewModelClass.AccountId,
-                        Id = groupPlayerViewModelClass.Id,
-                        Info = new ProfileInfoDescriptor()
+                        var completeProfileDescriptorClass = new ProfileDescriptor
                         {
-                            Level = groupPlayerViewModelClass.Info.Level,
-                            Experience = ProfileInfo.GetExperience(groupPlayerViewModelClass.Info.Level),
-                            PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
-                            MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
-                            SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
-                            Nickname = groupPlayerViewModelClass.Info.Nickname,
-                            Side = groupPlayerViewModelClass.Info.Side,
-                            GameVersion = groupPlayerViewModelClass.Info.GameVersion,
-                            HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
-                            SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
-                        },
-                        Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
-                        Health = new(),
-                        InsuredItems = [],
-                        Inventory = new()
-                        {
-                            Equipment = ItemBinarySerializer.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, FullySearchedSearchController.Instance)
-                        },
-                        TaskConditionCounters = [],
-                        Encyclopedia = []
-                    };
+                            AccountId = groupPlayerViewModelClass.AccountId,
+                            Id = groupPlayerViewModelClass.Id,
+                            Info = new ProfileInfoDescriptor()
+                            {
+                                Level = groupPlayerViewModelClass.Info.Level,
+                                Experience = ProfileInfo.GetExperience(groupPlayerViewModelClass.Info.Level),
+                                PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
+                                MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
+                                SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
+                                Nickname = groupPlayerViewModelClass.Info.Nickname,
+                                Side = groupPlayerViewModelClass.Info.Side,
+                                GameVersion = groupPlayerViewModelClass.Info.GameVersion,
+                                HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
+                                SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
+                            },
+                            Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
+                            Health = new(),
+                            InsuredItems = [],
+                            Inventory = new()
+                            {
+                                Equipment = ItemBinarySerializer.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, FullySearchedSearchController.Instance)
+                            },
+                            TaskConditionCounters = [],
+                            Encyclopedia = []
+                        };
 
-                    var profile = new Profile(completeProfileDescriptorClass);
-                    visualProfiles.Add(profile, false);
+                        var profile = new Profile(completeProfileDescriptorClass);
+                        visualProfiles.Add(profile, false);
+                    }
+                    catch
+                    {
+                        
+                    }
+
                 }
             }
         }

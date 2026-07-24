@@ -233,5 +233,7 @@
     "Mcs/ChangeFormationCommand Name": "改变队形",
     "Mcs/ChangeFormationCommand TargetName": "立即应用已保存的队形预设",
     "Mcs/ShowBrevityCode Key": "显示代号",
-    "Mcs/ShowBrevityCode Description": "用代号来代替原本的名称进行显示"
+    "Mcs/ShowBrevityCode Description": "用代号来代替原本的名称进行显示",
+    "Mcs/InvaildProfileTraderInfoWarning": "异常情况预警：当前检测到您的存档当中并不存在宫子商人的数据，如果这种情况持续得不到解决，这将可能导致您无法获取到订单任务，或者无法正常完成任务",
+    "Mcs/InvaildServerTraderTableWarning": "异常情况预警：当前检测到服务端的商人列表当中并不存在宫子商人的数据，如果这种情况持续得不到解决，这将可能导致您无法获取到订单任务，或者无法正常完成任务"
 }

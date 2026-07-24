@@ -65,6 +65,29 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                         null
                     );
                 }
+
+                if (!TraderService.CheckProfileTraderInfo(sessionId))
+                {
+                    MailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        ServerLocalisationService.GetText(Locales.INVAILDPROFILETRADERINFOWARNING),
+                        null
+                    );
+                }
+
+                if (!TraderService.CheckServerTraderTable())
+                {
+                    MailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        ServerLocalisationService.GetText(Locales.INVAILDSERVERTRADERTABLEWARNING),
+                        null
+                    );
+                }
+
                 request.Type = MessageType.NpcTraderMessage;
             }
         }

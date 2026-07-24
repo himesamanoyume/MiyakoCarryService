@@ -9,7 +9,9 @@ using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Helpers.Quest;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Quests;
+using SPTarkov.Server.Core.Services;
 
 namespace MiyakoCarryService.Server.Patches.OrderQuest
 {
@@ -30,6 +32,31 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         private static InfoController InfoController { get => field ??= ServiceProvider.GetService<InfoController>(); }
         private static TraderController TraderController { get => field ??= ServiceProvider.GetService<TraderController>(); }
         private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
+        private static DatabaseService DatabaseService { get => field ??= ServiceLocator.ServiceProvider.GetService<DatabaseService>(); }
+
+        [PatchPrefix]
+        public static void Prefix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
+        {
+            if (pmcData?.TradersInfo is null)
+            {
+                return;
+            }
+
+            if (pmcData.TradersInfo.ContainsKey(Services.TraderService.MiyakoTraderId))
+            {
+                return;
+            }
+
+            pmcData.TradersInfo[Services.TraderService.MiyakoTraderId] = new TraderInfo
+            {
+                LoyaltyLevel = 1,
+                SalesSum = 0.0,
+                Standing = 0.0,
+                NextResupply = 0,
+                Unlocked = true,
+                Disabled = false,
+            };
+        }
 
         [PatchPostfix]
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)

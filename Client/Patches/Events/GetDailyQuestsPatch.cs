@@ -14,10 +14,21 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.GetDailyQuests));
 
         [PatchPostfix]
-        public static async void Postfix(Task<RepeatableQuestsRange[]> __result)
+        public static void Postfix(ref Task<RepeatableQuestsRange[]> __result)
         {
-            await __result;
-            foreach (var dailyQuestClass in __result.Result)
+            __result = RewriteOrderTraderIdAsync(__result);
+        }
+
+        private static async Task<RepeatableQuestsRange[]> RewriteOrderTraderIdAsync(Task<RepeatableQuestsRange[]> original)
+        {
+            var result = await original;
+
+            if (result == null)
+            {
+                return result;
+            }
+
+            foreach (var dailyQuestClass in result)
             {
                 if (dailyQuestClass.Name == "Order")
                 {
@@ -28,6 +39,8 @@ namespace MiyakoCarryService.Client.Patches.Events
                     break;
                 }
             }
+
+            return result;
         }
     }
 }
