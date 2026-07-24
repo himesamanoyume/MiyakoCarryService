@@ -380,6 +380,14 @@ namespace MiyakoCarryService.Client
 
         public async Task SpawnMcsBotPlayer()
         {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var currentGameWorldInstanceId = gameWorld.GetInstanceID();  
+            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)  
+            {  
+                _loadedMcsLeadPlayer.Clear();  
+                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;  
+            }
+
             var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
             var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers(new()
             {
@@ -402,14 +410,6 @@ namespace MiyakoCarryService.Client
                 {
                     await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobPriorityClass.Immediate, new Progress<LoadingProgressStruct>(), default);
                 }
-            }
-
-            var gameWorld = Singleton<GameWorld>.Instance;
-            var currentGameWorldInstanceId = gameWorld.GetInstanceID();  
-            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)  
-            {  
-                _loadedMcsLeadPlayer.Clear();  
-                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;  
             }
 
             var leadPlayers = mcsProfilesDict

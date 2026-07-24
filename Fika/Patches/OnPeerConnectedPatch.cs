@@ -30,44 +30,51 @@ namespace MiyakoCarryService.Fika.Patches
                     continue;
                 }
 
-                var profiles = new Dictionary<Profile, bool>();
-                var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
+                try
                 {
-                    AccountId = groupPlayerViewModelClass.AccountId,
-                    Id = groupPlayerViewModelClass.Id,
-                    Info = new ProfileInfoClass()
+                    var profiles = new Dictionary<Profile, bool>();
+                    var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
                     {
-                        Level = groupPlayerViewModelClass.Info.Level,
-                        Experience = InfoClass.GetExperience(groupPlayerViewModelClass.Info.Level),
-                        PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
-                        MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
-                        SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
-                        Nickname = groupPlayerViewModelClass.Info.Nickname,
-                        MainProfileNickname = groupPlayerViewModelClass.Info.Nickname,
-                        Side = groupPlayerViewModelClass.Info.Side,
-                        GameVersion = groupPlayerViewModelClass.Info.GameVersion,
-                        HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
-                        SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
-                    },
-                    Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
-                    Health = new(),
-                    InsuredItems = [],
-                    Inventory = new()
-                    {
-                        Equipment = EFTItemSerializerClass.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, GClass2240.Instance)
-                    },
-                    TaskConditionCounters = [],
-                    Encyclopedia = []
-                };
+                        AccountId = groupPlayerViewModelClass.AccountId,
+                        Id = groupPlayerViewModelClass.Id,
+                        Info = new ProfileInfoClass()
+                        {
+                            Level = groupPlayerViewModelClass.Info.Level,
+                            Experience = InfoClass.GetExperience(groupPlayerViewModelClass.Info.Level),
+                            PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
+                            MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
+                            SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
+                            Nickname = groupPlayerViewModelClass.Info.Nickname,
+                            MainProfileNickname = groupPlayerViewModelClass.Info.Nickname,
+                            Side = groupPlayerViewModelClass.Info.Side,
+                            GameVersion = groupPlayerViewModelClass.Info.GameVersion,
+                            HasCoopExtension = groupPlayerViewModelClass.Info.HasCoopExtension,
+                            SavageLockTime = groupPlayerViewModelClass.Info.SavageLockTime,
+                        },
+                        Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
+                        Health = new(),
+                        InsuredItems = [],
+                        Inventory = new()
+                        {
+                            Equipment = EFTItemSerializerClass.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, GClass2240.Instance)
+                        },
+                        TaskConditionCounters = [],
+                        Encyclopedia = []
+                    };
 
-                var profile = new Profile(completeProfileDescriptorClass);
-                profiles.Add(profile, false);
-                var profilePacket = new LoadingProfilePacket()
+                    var profile = new Profile(completeProfileDescriptorClass);
+                    profiles.Add(profile, false);
+                    var profilePacket = new LoadingProfilePacket()
+                    {
+                        Profiles = profiles
+                    };
+                    __instance.SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
+                    await Task.Delay(1000);
+                }
+                catch
                 {
-                    Profiles = profiles
-                };
-                __instance.SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
-                await Task.Delay(1000);
+                    
+                }
             }
         }
     }

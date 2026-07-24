@@ -32,7 +32,11 @@ namespace MiyakoCarryService.Server.Services
     )
     {
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
+
+        // 预留给以后增援护航的
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadHelperMemberGroups = new();
+        // end
+
         private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
         private SemaphoreSlim _saveLock = new(1, 1);
@@ -177,11 +181,8 @@ namespace MiyakoCarryService.Server.Services
             try
             {
                 _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
-                var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
-                foreach (var matchPlayerId in matchPlayerIds)
-                {
-                    _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
-                }
+                _leadHelperMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
+                _matchLeaders.TryRemove(mcsLeadPlayerId, out _);
             }
             finally
             {
