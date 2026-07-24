@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Extensions
         
         extension(Profile profile)
         {
-            public string McsNickname => MiyakoCarryServicePlugin.ShowBrevityCode.Value ? "Rabbit" + McsMgr.GetMcsBotPlayerIndex(profile.Id, false) : profile.Info.Nickname;
+            public string McsNickname => MiyakoCarryServicePlugin.ShowBrevityCode.Value ? "Rabbit" + McsMgr.GetMcsBotPlayerIndex(profile.Id, false) : profile.Nickname;
         }
     }
 }

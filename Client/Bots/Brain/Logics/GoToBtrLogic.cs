@@ -108,7 +108,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 mcsBotPlayerData.IsTaskRunning = true;
 
-                var packet = new PlayerInteractPacket
+                var packet = new InteractWithBtrPacket
                 {
                     HasInteraction = true,
                     InteractionType = EInteractionType.GoIn,
@@ -118,7 +118,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 };
 
 
-                var status = btrVehicle.method_39(player, packet);
+                var status = btrVehicle.InteractInternal(player, packet);
                 if (status != EBtrInteractionStatus.Confirmed)
                 {
 
@@ -164,7 +164,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
                 mcsBotPlayerData.IsTaskRunning = true;
 
-                var packet = new PlayerInteractPacket
+                var packet = new InteractWithBtrPacket
                 {
                     HasInteraction = true,
                     InteractionType = EInteractionType.GoOut,
@@ -173,7 +173,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     Fast = false
                 };
 
-                var status = btrVehicle.method_39(player, packet);
+                var status = btrVehicle.InteractInternal(player, packet);
                 if (status == EBtrInteractionStatus.Confirmed || status == EBtrInteractionStatus.EmptySlot)
                 {
                     mcsBotPlayerData.IsBtrLeaving = false;

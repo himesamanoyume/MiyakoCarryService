@@ -540,7 +540,7 @@ namespace MiyakoCarryService.Server.Services
 
         public bool CheckServerTraderTable()
         {
-            return databaseService.GetTables().Traders.ContainsKey(MiyakoTraderId);
+            return tradersTable.ContainsKey(MiyakoTraderId);
         }
     }
 }

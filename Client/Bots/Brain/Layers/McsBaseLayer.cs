@@ -5,6 +5,7 @@ using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.Vehicle;
 using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
@@ -1895,7 +1896,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public virtual bool TryFindFreeSeat(BTRControllerClass btrController, out byte sideId, out byte slotId, out Vector3 doorPos)
+        public virtual bool TryFindFreeSeat(BtrController btrController, out byte sideId, out byte slotId, out Vector3 doorPos)
         {
             sideId = 0;
             slotId = 0;

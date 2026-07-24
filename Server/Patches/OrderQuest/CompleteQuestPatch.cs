@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
 
         [PatchPrefix]
-        public static void Prefix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionID)
+        public static void Prefix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)
         {
             if (pmcData?.TradersInfo is null)
             {
