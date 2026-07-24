@@ -17,23 +17,23 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.UpdateBuildList));
 
         [PatchPrefix]
-        public static bool Prefix(EEquipmentBuildType ___eequipmentBuildType_0, EquipmentBuildsStorage ___equipmentBuildsStorage, Tab ____customBuildsTab, Tab ____standardBuildsTab, TabGroup ___tabGroup_1)
+        public static bool Prefix(EEquipmentBuildType ____currentBuildTabType, EquipmentBuildsStorage ____buildStorage, Tab ____customBuildsTab, Tab ____standardBuildsTab, TabGroup ____buildTypesTabGroup)
         {
             if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
                 return true;
             }
 
-            if (___equipmentBuildsStorage == null || ____customBuildsTab == null || ____standardBuildsTab == null || ___tabGroup_1 == null)
+            if (____buildStorage == null || ____customBuildsTab == null || ____standardBuildsTab == null || ____buildTypesTabGroup == null)
             {
                 return true;
             }
 
-            if (___eequipmentBuildType_0 == EEquipmentBuildType.Custom && !___equipmentBuildsStorage.HasCustomBuilds)
+            if (____currentBuildTabType == EEquipmentBuildType.Custom && !____buildStorage.HasCustomBuilds)
             {
                 ____customBuildsTab.SetInteractable(false);
                 ____customBuildsTab.Deselect().HandleExceptions();
-                ___tabGroup_1.Show(____standardBuildsTab, true);
+                ____buildTypesTabGroup.Show(____standardBuildsTab, true);
                 return false;
             }
             return true;

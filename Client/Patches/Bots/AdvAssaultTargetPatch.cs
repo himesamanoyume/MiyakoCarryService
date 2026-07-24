@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(AdvAssaultTargetLayer __instance, ref bool __result)
         {
-            if (McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
+            if (McsMgr.IsMcsBotPlayer(__instance._owner.ProfileId))
             {
                 __result = false;
                 return false;

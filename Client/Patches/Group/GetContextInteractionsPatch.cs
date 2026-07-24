@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Patches.Group
         private static async void OnRefreshFriendList()
         {
             var session = GameLoop.Instance.Session;
-            session.SocialNetwork.SteamOnlyFriendsList.Clear();
+            session.SocialNetwork.FriendsList.Clear();
             session.GetFriendsList(result =>
             {
                 if (!result.Succeed)
@@ -81,7 +81,7 @@ namespace MiyakoCarryService.Client.Patches.Group
                 }
 
                 session.SocialNetwork.CG_method_13(result);  
-                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.method_0(); 
+                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.UpdateFriendList(); 
             });
         }
 
@@ -113,12 +113,12 @@ namespace MiyakoCarryService.Client.Patches.Group
                 _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
             }
 
-            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
+            var menuOperation = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
 
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            await mainMenuControllerClass.AfterErrorHandler();
+            await menuOperation.AfterErrorHandler();
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
             await GameLoop.Instance.Session.RequestBuilds();

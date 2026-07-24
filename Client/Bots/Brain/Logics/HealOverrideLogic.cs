@@ -14,37 +14,37 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(BaseIntent data)
         {
-            if (botOwner_0.Medecine.Using)
+            if (_owner.Medecine.Using)
             {
                 return;
             }
 
-            if (botOwner_0.WeaponManager.Reload.Reloading)
+            if (_owner.WeaponManager.Reload.Reloading)
             {
-                botOwner_0.WeaponManager.Reload.TryStopReload();
+                _owner.WeaponManager.Reload.TryStopReload();
             }
 
-            botOwner_0.LookData.SetLookPointByHearing();
-            var shallStartUse = botOwner_0.Medecine.FirstAid.ShallStartUse();
-            if (shallStartUse && botOwner_0.Medecine.FirstAid.IsBleeding)
+            _owner.LookData.SetLookPointByHearing();
+            var shallStartUse = _owner.Medecine.FirstAid.ShallStartUse();
+            if (shallStartUse && _owner.Medecine.FirstAid.IsBleeding)
             {
                 _baseLogic.UpdateNodeByMain(data);
-                botOwner_0.SetPose(1f);
-                botOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
+                _owner.SetPose(1f);
+                _owner.Medecine.FirstAid.TryApplyToCurrentPart();
             }
-            else if (botOwner_0.Medecine.SurgicalKit.ShallStartUse())
+            else if (_owner.Medecine.SurgicalKit.ShallStartUse())
             {
-                botOwner_0.StopMove();
-                botOwner_0.SetPose(0f);
-                botOwner_0.Medecine.SurgicalKit.ApplyToCurrentPart();
+                _owner.StopMove();
+                _owner.SetPose(0f);
+                _owner.Medecine.SurgicalKit.ApplyToCurrentPart();
             }
             else if (shallStartUse)
             {
                 _baseLogic.UpdateNodeByMain(data);
-                botOwner_0.SetPose(1f);
-                botOwner_0.Medecine.FirstAid.TryApplyToCurrentPart();
+                _owner.SetPose(1f);
+                _owner.Medecine.FirstAid.TryApplyToCurrentPart();
             }
-            botOwner_0.Sprint(false);
+            _owner.Sprint(false);
         }
     }
 }

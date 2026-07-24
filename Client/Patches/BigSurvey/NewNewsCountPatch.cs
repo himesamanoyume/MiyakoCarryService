@@ -21,12 +21,12 @@ public sealed class NewNewsCountPatch : ModulePatch
     public static bool Prefix(MenuTaskBar __instance, ref int value)
     {
         var menuTaskBarTraverse = Traverse.Create(__instance);
-        var newNewsCount = menuTaskBarTraverse.Field<int>("int_5").Value;
+        var newNewsCount = menuTaskBarTraverse.Field<int>("_newNewsCount").Value;
         if (newNewsCount == value)
         {
             return false;
         }
-        menuTaskBarTraverse.Field("int_5").SetValue(value);
+        menuTaskBarTraverse.Field("_newNewsCount").SetValue(value);
         var _newNewsObject = menuTaskBarTraverse.Field<GameObject>("_newNewsObject").Value;
         _newNewsObject.SetActive(value > 0);
         _newNewsObject.GetComponent<Image>().color = Draw.DarkRed.Rgb;

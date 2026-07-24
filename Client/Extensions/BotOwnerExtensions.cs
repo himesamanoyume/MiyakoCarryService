@@ -358,7 +358,7 @@ namespace MiyakoCarryService.Client.Extensions
                     return;
                 }
 
-                var handsIdle = !player.HandsController.IsAimingButtonPressing
+                var handsIdle = !player.HandsController.IsAiming
                         && !player.HandsController.IsInventoryOpen()
                         && !player.HandsController.IsInInteractionStrictCheck()
                         && !player.HandsController.IsHandsProcessing();

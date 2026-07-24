@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(BotFirstAid __instance)
         {
-            if (!McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
+            if (!McsMgr.IsMcsBotPlayer(__instance._owner.ProfileId))
             {
                 return;
             }
@@ -34,11 +34,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            var healthController = __instance.botOwner_0.GetPlayer.HealthController;
+            var healthController = __instance._owner.GetPlayer.HealthController;
             var fracture = healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common);
             if (fracture != null)
             {
-                __instance.nullable_0 = fracture.BodyPart;
+                __instance._bodyPartToHeal = fracture.BodyPart;
                 __instance.Damaged = true;
             }
         }

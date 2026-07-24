@@ -179,25 +179,25 @@ namespace MiyakoCarryService.Client
                 TarkovApplication.Exist(out var tarkovApplication);
                 var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
 
-                var mainMenuShowOperation = tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
+                var menuOperation = tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
                 var array = await Session.GetDailyQuests();
                 if (!array.IsNullOrEmpty())
                 {
-                    if (mainMenuShowOperation == null)
+                    if (menuOperation == null)
                     {
                         return;
                     }
 
-                    if (mainMenuShowOperation._questControllerClientBackend == null)
+                    if (menuOperation.QuestController == null)
                     {
                         return;
                     }
 
-                    if (mainMenuShowOperation._questControllerClientBackend._questBook == null)
+                    if (menuOperation.QuestController.Quests == null)
                     {
                         return;
                     }
-                    mainMenuShowOperation._questControllerClientBackend._questBook.UpdateDailyQuests(array);
+                    menuOperation.QuestController.Quests.UpdateDailyQuests(array);
                 }
             }
         }
@@ -230,7 +230,7 @@ namespace MiyakoCarryService.Client
                     }
                 }
 
-                if (sessionBackendClass.dictionary_0.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
+                if (sessionBackendClass._profileUpdaters.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
                 {
                     profileUpdater.UpdateProfile(profileChangesPocoClass);
                 }

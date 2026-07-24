@@ -60,7 +60,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassAddItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "action_0").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_addItemEvent").FieldType, "Invoke");
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
@@ -109,7 +109,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassRemoveItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "action_1").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_removeItemEvent").FieldType, "Invoke");
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 

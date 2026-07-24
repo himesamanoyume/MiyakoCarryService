@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class LocalQuestControllerClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestControllerClientBackend.CG_HandoverItem), nameof(QuestControllerClientBackend.CG_HandoverItem.MoveNext));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestControllerClientBackend.CG_HandoverItem), "MoveNext");
 
         [PatchPostfix]
         public static void Postfix(QuestControllerClientBackend.CG_HandoverItem __instance)

@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotWeaponSelector __instance)
         {
-            if (McsMgr.IsMcsBotPlayer(__instance.botOwner_0.ProfileId))
+            if (McsMgr.IsMcsBotPlayer(__instance._owner.ProfileId))
             {
                 if (!__instance._errorStuckLog && __instance._startChangeTime > 0f && Time.time - __instance._startChangeTime > 20f)
                 {

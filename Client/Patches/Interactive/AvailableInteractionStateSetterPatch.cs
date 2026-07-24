@@ -46,9 +46,9 @@ namespace MiyakoCarryService.Client.Patches.Interactive
 
             if (__instance is BindableState<AvailableInteractionState> bindable)
             {
-                if (ReferenceEquals(bindable.gparam_0, value))
+                if (ReferenceEquals(bindable.CurrentState, value))
                 {
-                    bindable.gparam_0 = null;
+                    bindable.CurrentState = null;
                 }
             }
         }

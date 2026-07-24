@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotBewarePlantedMine __instance)
         {
-            if (!__instance.botOwner_0.IsMcsBotPlayer)
+            if (!__instance._owner.IsMcsBotPlayer)
             {
                 return true;
             }
@@ -26,12 +26,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
             {
                 return false;
             }
-            var nearestMines = __instance.botOwner_0.VoxelesPersonalData.CurVoxel.GetNearestMines();
+            var nearestMines = __instance._owner.VoxelesPersonalData.CurVoxel.GetNearestMines();
             if (nearestMines.Count == 0)
             {
                 return false;
             }
-            if (!__instance.botOwner_0.HasPathAndNotComplete)
+            if (!__instance._owner.HasPathAndNotComplete)
             {
                 __instance._nextCheck = Time.time + 0.5f;
                 return false;
@@ -49,8 +49,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     continue;
                 }
 
-                var vector = nearestMine.Pos - __instance.botOwner_0.Position;
-                if (Vector3.Dot(vector, __instance.botOwner_0.LookDirection) >= 0f && Mathf.Abs(vector.y) <= 1f)
+                var vector = nearestMine.Pos - __instance._owner.Position;
+                if (Vector3.Dot(vector, __instance._owner.LookDirection) >= 0f && Mathf.Abs(vector.y) <= 1f)
                 {
                     float sqrMagnitude = vector.sqrMagnitude;
                     if (sqrMagnitude < max)
@@ -71,14 +71,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return false;
             }
             var vector2 = (plantedMineAIInfo.Pos + plantedMineAIInfo2.Pos) * 0.5f;
-            if (__instance.botOwner_0.Mover.TryRelacePathAround(vector2, list, out var botCurrentPathAbstractClass))
+            if (__instance._owner.Mover.TryRelacePathAround(vector2, list, out var botCurrentPathAbstractClass))
             {
                 __instance._nextCheck = Time.time + 4f;
                 return false;
             }
-            if (plantedMineAIInfo.CanTakeToDeactivate(__instance.botOwner_0.Id) && __instance.botOwner_0.Mover.IsPointOnCurrentWay(plantedMineAIInfo.Pos, 2.5f))
+            if (plantedMineAIInfo.CanTakeToDeactivate(__instance._owner.Id) && __instance._owner.Mover.IsPointOnCurrentWay(plantedMineAIInfo.Pos, 2.5f))
             {
-                __instance.botOwner_0.BewarePlantedMine.SetMineToDeactivate(plantedMineAIInfo);
+                __instance._owner.BewarePlantedMine.SetMineToDeactivate(plantedMineAIInfo);
             }
             __instance._nextCheck = Time.time + 2f;
             return false;

@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 
         public static void SetSupplyData(Trader trader, SupplyData supplyData)
         {
-            trader.supplyData_0 = supplyData;
+            trader._supplyData = supplyData;
         }
 
         private static async void UpdateSupplyData(Trader trader)

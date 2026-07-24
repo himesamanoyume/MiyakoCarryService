@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
                 {
-                    return new Action(typeof(GoToExfiltrationPointNodeLogic), "Mcs:GotoExit");
+                    return new Action(typeof(GoToExfiltrationPointLogic), "Mcs:GotoExit");
                 }
                 return new Action(typeof(HoldPositionLogic), "Mcs:HoldExf");
             }

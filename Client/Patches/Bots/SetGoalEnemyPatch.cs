@@ -16,36 +16,36 @@ namespace MiyakoCarryService.Client.Patches.Bots
         protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BotMemory), nameof(BotMemory.GoalEnemy));
 
         [PatchPrefix]
-        public static bool Prefix(BotMemory __instance, Action<BotOwner> ___action_1, ref EnemyInfo value)
+        public static bool Prefix(BotMemory __instance, Action<BotOwner> ____onGoalEnemyChanged, ref EnemyInfo value)
         {
             try
             {
-                if (__instance.enemyInfo_0 == value)
+                if (__instance._goalEnemy == value)
                 {
                     return false;
                 }
 
-                if (value == null || (__instance.enemyInfo_0 != value && __instance.botOwner_0.HealthController.IsAlive == true))
+                if (value == null || (__instance._goalEnemy != value && __instance._owner.HealthController.IsAlive == true))
                 {
-                    __instance.botOwner_0.AimingManager.CurrentAiming.LoseTarget();
+                    __instance._owner.AimingManager.CurrentAiming.LoseTarget();
                 }
 
-                if (__instance.enemyInfo_0 != null)
+                if (__instance._goalEnemy != null)
                 {
-                    var oldPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(__instance.enemyInfo_0.Person.ProfileId);
+                    var oldPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(__instance._goalEnemy.Person.ProfileId);
                     if (oldPlayer != null)
                     {
                         oldPlayer.BeingHitAction -= __instance.GoalTargetBeingHitAction;
                     }
-                    __instance.LastEnemy = __instance.enemyInfo_0;
+                    __instance.LastEnemy = __instance._goalEnemy;
                 }
 
-                var flag = __instance.enemyInfo_0 != value;
-                __instance.enemyInfo_0 = value;
+                var flag = __instance._goalEnemy != value;
+                __instance._goalEnemy = value;
 
-                if (__instance.enemyInfo_0 != null)
+                if (__instance._goalEnemy != null)
                 {
-                    var newPlayer = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(__instance.enemyInfo_0.Person.ProfileId);
+                    var newPlayer = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(__instance._goalEnemy.Person.ProfileId);
                     if (newPlayer != null)
                     {
                         newPlayer.BeingHitAction += __instance.GoalTargetBeingHitAction;
@@ -53,17 +53,17 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     __instance.ReportAboutEnemyToAll();
                 }
 
-                if (___action_1 != null && flag)
+                if (____onGoalEnemyChanged != null && flag)
                 {
-                    ___action_1(__instance.botOwner_0);
+                    ____onGoalEnemyChanged(__instance._owner);
                 }
 
-                if (__instance.enemyInfo_0 != null)
+                if (__instance._goalEnemy != null)
                 {
                     __instance.EnemySetTime = Time.time;
-                    if (!__instance.enemyInfo_0.IsVisible)
+                    if (!__instance._goalEnemy.IsVisible)
                     {
-                        __instance.botOwner_0.AimingManager.CurrentAiming.LoseTarget();
+                        __instance._owner.AimingManager.CurrentAiming.LoseTarget();
                     }
                 }
 

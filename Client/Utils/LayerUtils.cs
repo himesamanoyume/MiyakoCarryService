@@ -121,7 +121,7 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var baseBrain = botOwner.Brain.BaseBrain;
-            var dict = baseBrain.dictionary_0;
+            var dict = baseBrain._layers;
 
             foreach (var index in dict.Keys.ToList())
             {
@@ -172,7 +172,7 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var baseBrain = botOwner.Brain.BaseBrain;
-            if (baseBrain.dictionary_0.ContainsKey(cached.Index))
+            if (baseBrain._layers.ContainsKey(cached.Index))
             {
                 return false;
             }

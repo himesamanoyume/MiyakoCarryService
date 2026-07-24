@@ -10,16 +10,16 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public void McsRefreshMeds()
             {
-                if (!botFirstAid.botOwner_0.Settings.FileSettings.Mind.CAN_USE_MEDS)
+                if (!botFirstAid._owner.Settings.FileSettings.Mind.CAN_USE_MEDS)
                 {
                     return;
                 }
 
-                var healthController = botFirstAid.botOwner_0.GetPlayer.HealthController;
-                botFirstAid.list_0.Clear();
-                botFirstAid.botOwner_0.GetPlayer.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, botFirstAid.list_0, null, null);
+                var healthController = botFirstAid._owner.GetPlayer.HealthController;
+                botFirstAid._medsList.Clear();
+                botFirstAid._owner.GetPlayer.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, botFirstAid._medsList, null, null);
 
-                if (botFirstAid.list_0.Count == 0)
+                if (botFirstAid._medsList.Count == 0)
                 {
                     return;
                 }
@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Extensions
                     var med = botFirstAid.FindMedForEffect(EDamageEffectType.HeavyBleeding);
                     if (med != null)
                     {
-                        botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                        botFirstAid._owner.Medecine.FirstAid.CurUsingMeds = med;
                         botFirstAid.CurUsingMeds = med;
                         return;
                     }
@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Extensions
                     var med = botFirstAid.FindMedForEffect(EDamageEffectType.LightBleeding);
                     if (med != null)
                     {
-                        botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                        botFirstAid._owner.Medecine.FirstAid.CurUsingMeds = med;
                         botFirstAid.CurUsingMeds = med;
                         return;
                     }
@@ -53,14 +53,14 @@ namespace MiyakoCarryService.Client.Extensions
                         var med = botFirstAid.McsFindSplint();
                         if (med != null)
                         {
-                            botFirstAid.botOwner_0.Medecine.FirstAid.CurUsingMeds = med;
+                            botFirstAid._owner.Medecine.FirstAid.CurUsingMeds = med;
                             botFirstAid.CurUsingMeds = med;
                             return;
                         }
                     }
                 }
 
-                var medKitItemClasses = botFirstAid.list_0.OfType<MedKit>().ToList();
+                var medKitItemClasses = botFirstAid._medsList.OfType<MedKit>().ToList();
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
                 {
@@ -80,8 +80,8 @@ namespace MiyakoCarryService.Client.Extensions
 
             public bool McsIsFullHp()
             {
-                var healthController = botFirstAid.botOwner_0.GetPlayer.HealthController;
-                foreach (var part in botFirstAid.ebodyPart_0)
+                var healthController = botFirstAid._owner.GetPlayer.HealthController;
+                foreach (var part in botFirstAid.parts)
                 {
                     var health = healthController.GetBodyPartHealth(part, false);
                     if (health.Current < health.Maximum)
@@ -94,7 +94,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public Meds McsFindSplint()
             {
-                foreach (var med in botFirstAid.list_0)
+                foreach (var med in botFirstAid._medsList)
                 {
                     if (!med.TryGetItemComponent(out HealthEffectsComponent healthEffectsComponent))
                     {
@@ -114,7 +114,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             private Meds FindMedForEffect(EDamageEffectType effect)
             {
-                foreach (var med in botFirstAid.list_0)
+                foreach (var med in botFirstAid._medsList)
                 {
                     if (botFirstAid.CanTreatEffect(med, effect))
                     {

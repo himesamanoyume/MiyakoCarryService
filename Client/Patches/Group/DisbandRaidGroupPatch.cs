@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Patches.Group
         {
             TasksExtensions.HandleExceptions(__instance.SendVoid(new SendRequest
             {
-                Url = __instance.BackendUrls.Main + "/mcs/client/match/group/delete",
+                Url = __instance._backendUrls.Main + "/mcs/client/match/group/delete",
                 Retries = SendRequest.NoRetries
             }, callback));
             return false;

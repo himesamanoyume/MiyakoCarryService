@@ -176,7 +176,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(ShootToSmokeLogic), EndShootToSmoke);
             RegisterAction(typeof(ShootFromStationaryLogic), EndShootFromStationary);
             RegisterAction(typeof(RunToEnemyLogic), EndRunToEnemy);
-            RegisterAction(typeof(GoToExfiltrationPointNodeLogic), EndGoToExfiltrationPoint);
+            RegisterAction(typeof(GoToExfiltrationPointLogic), EndGoToExfiltrationPoint);
             RegisterAction(typeof(MeleeAttackLogic), EndMeleeAttack);
             RegisterAction(typeof(RunToPointLogic), EndGoToPoint);
             RegisterAction(typeof(EscortToPointByWayLogic), EndEscortToPointByWay);
@@ -1168,7 +1168,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if ((Time.time - goalEnemy.PersonalPersuitDistance) > 5f)
+            if ((Time.time - goalEnemy.PersonalLastSeenTime) > 5f)
             {
                 return true;
             }
@@ -1813,7 +1813,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            var handsIdle = !player.HandsController.IsAimingButtonPressing
+            var handsIdle = !player.HandsController.IsAiming
                         && !player.HandsController.IsInventoryOpen()
                         && !player.HandsController.IsInInteractionStrictCheck()
                         && !player.HandsController.IsHandsProcessing();

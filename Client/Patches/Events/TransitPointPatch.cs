@@ -55,12 +55,11 @@ namespace MiyakoCarryService.Client.Patches.Events
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(Dictionary<string, string> ___dictionary_0, string groupId, out HashSet<string> singlePlayers, out HashSet<string> partyPlayers, out bool partyIsFull, ref HashSet<string> __result)
+        public static bool Prefix(Dictionary<string, string> ____playerGroups, string groupId, out HashSet<string> singlePlayers, out HashSet<string> partyPlayers, out bool partyIsFull, ref HashSet<string> __result)
         {
             var hashSet = new HashSet<string>();
-            foreach (var kvp in ___dictionary_0)
+            foreach ((var key, var value) in ____playerGroups)
             {
-                kvp.Deconstruct(out var key, out var value);
                 if (value.Equals(groupId))
                 {
                     hashSet.Add(key);
