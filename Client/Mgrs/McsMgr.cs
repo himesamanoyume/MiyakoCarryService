@@ -162,7 +162,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             return squadMembers.AddOrUpdate(
                 mcsBotPlayerId,
-                id => FetchMcsBotPlayer(id),
+                FetchMcsBotPlayer,
                 (id, oldMcsBotPlayer) => oldMcsBotPlayer ?? FetchMcsBotPlayer(id)
             );
         }

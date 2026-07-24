@@ -120,6 +120,14 @@ namespace MiyakoCarryService.Client.Datas
             _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
             _leadPlayeRef = new(bossPlayer);
             CollectVanishingCurseLootItems();
+            if (mcsAILeadPlayer.McsBotPlayerConfig.EnableKeepFormation)
+            {
+                AddDecision(Decisions.ShouldKeepFormation);
+            }
+            else
+            {
+                RemoveDecision(Decisions.ShouldKeepFormation);
+            }
         }
 
         public void CollectVanishingCurseLootItems()
