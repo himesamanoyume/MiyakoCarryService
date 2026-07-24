@@ -34,6 +34,7 @@ namespace MiyakoCarryService.Client
         public bool IsGameStarted = false;
         private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
         private HashSet<MongoID> _loadedMcsLeadPlayer = new();
+        private int? _lastSpawnGameWorldInstanceId = null;
 
         public ISession Session
         {
@@ -106,7 +107,7 @@ namespace MiyakoCarryService.Client
                     assetBytes = memoryStream.ToArray();
                 }
 
-                AssetBundle bundle = AssetBundle.LoadFromMemory(assetBytes);
+                var bundle = AssetBundle.LoadFromMemory(assetBytes);
                 if (bundle != null)
                 {
                     HighlightShader = bundle.LoadAsset<Shader>(highlightShaderName);
@@ -404,6 +405,12 @@ namespace MiyakoCarryService.Client
             }
 
             var gameWorld = Singleton<GameWorld>.Instance;
+            var currentGameWorldInstanceId = gameWorld.GetInstanceID();  
+            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)  
+            {  
+                _loadedMcsLeadPlayer.Clear();  
+                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;  
+            }
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
