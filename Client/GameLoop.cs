@@ -859,7 +859,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
             settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Look.CAN_USE_LIGHT = true;
+            settings.FileSettings.Look.CAN_USE_LIGHT = false;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
