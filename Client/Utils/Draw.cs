@@ -1,3 +1,4 @@
+using MiyakoCarryService.Client.Models;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
