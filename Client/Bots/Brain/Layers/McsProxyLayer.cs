@@ -100,7 +100,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) 
+                || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) 
+                || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction)
+                || McsBotPlayerData.HasDecision(Decisions.ShouldStationaryWeaponProxyAction))
             {
                 return true;
             }

@@ -1,7 +1,9 @@
 
 using System;
+using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -90,6 +92,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
+
+                if (McsBotPlayerData != null && McsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                {
+                    var stationary = BotOwner.WeaponManager.Stationary;
+                    if (stationary.CurLink == null)
+                    {
+                        var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId);
+                        if (interactableObjectData is StationaryWeaponData stationaryWeaponData)
+                        {
+                            var stationaryWeapon = stationaryWeaponData?.StationaryWeapon;
+                            if (stationaryWeapon != null && BotOwner.Position.McsSqrDistance(stationaryWeapon.OperatorPosition) <= 4f * 4f)
+                            {
+                                var stationaryWeaponLink = stationaryWeaponData.StationaryWeaponLink;
+                                if (stationaryWeaponLink != null)
+                                {
+                                    stationary.SetTargetStationary(stationaryWeaponLink);
+                                    stationary.Take();
+                                };
+                            }
+                        }
+                    }
+
+                    var botLogicDecision = stationary.GetCurrentDecision();
+                    if (botLogicDecision == BotLogicDecision.shootFromStationary)
+                    {
+                        return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                    }
+                }
 
                 if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                 {

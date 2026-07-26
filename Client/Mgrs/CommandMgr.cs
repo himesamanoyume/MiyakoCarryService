@@ -36,6 +36,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.OpenInventory.ToString(), OpenInventoryCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.GoToExfil.ToString(), GoToExfilCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.ChangeFormation.ToString(), ChangeFormationCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.StationaryWeaponProxyAction.ToString(), StationaryWeaponProxyActionCommandAction);
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
@@ -311,7 +312,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 menu.RegisterCommand(
                     stationaryWeaponData.GetActionName(),
                     stationaryWeaponData.GetActionTargetName(myPlayerPos),
-                    ECommandType.InteractionProxyAction.ToString(), mcsBotPlayers,
+                    ECommandType.StationaryWeaponProxyAction.ToString(), mcsBotPlayers,
                     disabled: stationaryWeaponData.IsProxyActionDisabled,
                     resolver: () => new McsCommandContext
                     {
@@ -503,6 +504,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
+                if (mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                {
+                    botOwner.WeaponManager.Stationary.DropCurWeapon(false, true);
+                }
             }
             botOwner.TalkMsg(new McsMsg
             {
@@ -521,6 +526,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
+                if (mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                {
+                    botOwner.WeaponManager.Stationary.DropCurWeapon(false, true);
+                }
             }
             botOwner.TalkMsg(new McsMsg
             {
@@ -845,6 +854,31 @@ namespace MiyakoCarryService.Client.Mgrs
             mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldClearArea);
             botOwner.Mover.LastTimePosChanged = Time.time;
             botOwner.StopMove();
+        }
+
+        public virtual void StationaryWeaponProxyActionCommandAction(McsCommandContext ctx)
+        {
+            var mcsBotPlayer = ctx.McsBotPlayer;
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            if (botOwner.Memory.HaveEnemy)
+            {
+                botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Negative });
+            }
+            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.StopMove();
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldStationaryWeaponProxyAction);
+                var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(ctx.TargetId);
+                if (interactableObjectData != null)
+                {
+                    mcsBotPlayerData.ProxyTargetId = interactableObjectData.Id();
+                    mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
+                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                }
+                mcsBotPlayerData.IsLooting = false;
+            }
         }
 
         #endregion

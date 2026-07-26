@@ -19,6 +19,7 @@ namespace MiyakoCarryService.Client.Enums
         ReportAboutSelf,
         ClearArea,
         OpenInventory,
-        ChangeFormation
+        ChangeFormation,
+        StationaryWeaponProxyAction,
     }
 }

@@ -239,5 +239,7 @@
     "Mcs/TeamStationaryWeaponEscortCommand Name": "全队护送至固定武器",
     "Mcs/TeamStationaryWeaponEscortCommand TargetName": "全队护送至地图中的某个固定武器",
     "Mcs/StationaryWeaponEscortCommand Name": "护送至固定武器",
-    "Mcs/StationaryWeaponEscortCommand TargetName": "命令护航护送至地图中的某个固定武器"
+    "Mcs/StationaryWeaponEscortCommand TargetName": "命令护航护送至地图中的某个固定武器",
+    "Mcs/StationaryWeaponProxyCommand Name": "代理操作固定武器",
+    "Mcs/StationaryWeaponProxyCommand TargetName": "命令护航代理操作指定固定武器"
 }

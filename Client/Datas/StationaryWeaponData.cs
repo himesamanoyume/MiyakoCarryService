@@ -10,11 +10,24 @@ namespace MiyakoCarryService.Client.Datas
     public class StationaryWeaponData : InteractableObjectData
     {
         private WeakReference<StationaryWeapon> _stationaryWeaponRef;
-        public StationaryWeapon StationaryWeapon => _stationaryWeaponRef.TryGetTarget(out var door) ? door : null;
+        public StationaryWeapon StationaryWeapon => _stationaryWeaponRef.TryGetTarget(out var stationaryWeapon) ? stationaryWeapon : null;
+        private WeakReference<StationaryWeaponLink> _stationaryWeaponLinkRef;
+        public StationaryWeaponLink StationaryWeaponLink => _stationaryWeaponLinkRef.TryGetTarget(out var stationaryWeaponLink) ? stationaryWeaponLink : null;
 
-        public StationaryWeaponData(StationaryWeapon stationaryWeapon): base()
+        public StationaryWeaponData(StationaryWeapon stationaryWeapon) : base()
         {
             _stationaryWeaponRef = new WeakReference<StationaryWeapon>(stationaryWeapon);
+            var weapon = StationaryWeapon;
+            if (weapon == null)
+            {
+                return;
+            }
+
+            var link = CreateStationaryWeaponLink(weapon);
+            if (link != null)
+            {
+                _stationaryWeaponLinkRef = new WeakReference<StationaryWeaponLink>(link);
+            }
         }
 
         public override string GetActionName() => StationaryWeapon.Item.LocalizedName();
@@ -53,5 +66,28 @@ namespace MiyakoCarryService.Client.Datas
         public override bool IsProxyActionDisabled() => StationaryWeapon.Locked;
 
         public override InteractableObject GetInteractiveObject() => StationaryWeapon;
+
+        private StationaryWeaponLink CreateStationaryWeaponLink(StationaryWeapon weapon)
+        {
+            var newLink = new GameObject($"McsStationaryWeaponLink_{weapon.Id}");
+            newLink.transform.position = weapon.OperatorPosition;
+
+            var link = newLink.GetOrAddComponent<StationaryWeaponLink>();
+
+            if (!link.Init() || link.BadLoad || link.Weapon != weapon)
+            {
+                UnityEngine.Object.Destroy(newLink);
+                return null;
+            }
+
+            var corePoint = AICorePointHolder.GetClosest(weapon.OperatorPosition);
+            if (corePoint != null)
+            {
+                link.SetCorePoint(corePoint);
+            }
+            link.Init();
+
+            return link;
+        }
     }
 }

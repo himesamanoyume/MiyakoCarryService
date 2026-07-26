@@ -15,5 +15,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string ShouldDropTargetLoot = "Mcs.ShouldDropTargetLoot";
         public const string ShouldClearArea = "Mcs.ShouldClearArea";
         public const string ShouldKeepFormation = "Mcs.ShouldKeepFormation";
+        public const string ShouldStationaryWeaponProxyAction = "Mcs.ShouldStationaryWeaponProxyAction";  
+        public const string ShouldUseStationaryWeapon = "Mcs.ShouldUseStationaryWeapon";
     }
 }

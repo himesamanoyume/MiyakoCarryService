@@ -164,12 +164,31 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         await Task.Delay(1000);
                         InteractionCallback(mcsBotPlayerData);
                     }
-                    else if (interactableObjectData is StationaryWeaponData stationaryWeaponData)
+                }
+                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldStationaryWeaponProxyAction))
+                {
+                    var stationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
+                    if (stationaryWeaponData == null || stationaryWeaponData.StationaryWeapon == null)
                     {
-                        // mcsBotPlayerData.Player.OperateStationaryWeapon(stationaryWeaponData.StationaryWeapon, StationaryPacketStruct.EStationaryCommand.Occupy);
-                        await Task.Delay(1000);
                         InteractionCallback(mcsBotPlayerData);
+                        return;
                     }
+
+                    var stationary = BotOwner.WeaponManager.Stationary;
+                    var stationaryWeaponLink = stationaryWeaponData.StationaryWeaponLink;
+                    if (stationaryWeaponLink == null)
+                    {
+                        InteractionCallback(mcsBotPlayerData);
+                        return;
+                    }
+                    else
+                    {
+                        stationary.SetTargetStationary(stationaryWeaponLink);
+                        stationary.Take();
+                    }
+                    
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldUseStationaryWeapon, Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.TargetPos = null;
                 }
             }
             catch (Exception e)
@@ -187,7 +206,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private void InteractionCallback(McsBotPlayerData mcsBotPlayerData)
         {
-            mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition]);
+            mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition, Decisions.ShouldUseStationaryWeapon, Decisions.ShouldStationaryWeaponProxyAction]);
             mcsBotPlayerData.TargetPos = null;
             mcsBotPlayerData.ProxyTargetId = null;
         }

@@ -239,5 +239,7 @@
     "Mcs/TeamStationaryWeaponEscortCommand Name": "Team Escort to Stationary Weapon",
     "Mcs/TeamStationaryWeaponEscortCommand TargetName": "Command all carry service players to escort to a stationary weapon on the map",
     "Mcs/StationaryWeaponEscortCommand Name": "Escort to Stationary Weapon",
-    "Mcs/StationaryWeaponEscortCommand TargetName": "Command carry service player to escort to a stationary weapon on the map"
+    "Mcs/StationaryWeaponEscortCommand TargetName": "Command carry service player to escort to a stationary weapon on the map",
+    "Mcs/StationaryWeaponProxyCommand Name": "Proxy Operate Stationary Weapon",
+    "Mcs/StationaryWeaponProxyCommand TargetName": "Command carry service player proxy to operate the specified stationary weapon"
 }
