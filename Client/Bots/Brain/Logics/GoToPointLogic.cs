@@ -34,11 +34,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (!BotOwner.Memory.HaveEnemy && botWithin50 && leaderMovementContext.IsInPronePose)
             {
                 _baseLogic.method_0();
+                BotOwner.BotLight?.TurnOff(false, true);
                 BotOwner.GoToSomePointData.UpdateToGo(false, 0f, leaderMovementContext.PoseLevel);
             }
             else if (!BotOwner.Memory.HaveEnemy && botWithin50 && (leaderMovementContext.PoseLevel < 1f || leaderMovementContext.PoseLevel == 1f && leaderRelativeSpeed < 1f))
             {
                 _baseLogic.method_0();
+                BotOwner.BotLight?.TurnOff(false, true);
                 BotOwner.GoToSomePointData.UpdateToGo(false, leaderMovementContext.CharacterMovementSpeed, leaderMovementContext.PoseLevel);
             }
             else

@@ -866,7 +866,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
             settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
-            settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
+            settings.FileSettings.Look.LightOnVisionDistance = 5f;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
             settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 120f;
             settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
