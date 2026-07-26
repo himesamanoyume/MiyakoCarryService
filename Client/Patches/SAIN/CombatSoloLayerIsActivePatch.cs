@@ -12,7 +12,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.SAIN
 {
     /// <summary>
-    /// 
+    /// 控制 CombatSoloLayer 是否应该激活
     /// </summary>
     public sealed class CombatSoloLayerIsActivePatch : ModulePatch
     {
