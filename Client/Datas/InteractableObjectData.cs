@@ -7,6 +7,6 @@ namespace MiyakoCarryService.Client.Datas
     {
         public abstract string Id();
         public abstract bool IsProxyActionDisabled();
-        public abstract WorldInteractiveObject GetWorldInteractiveObject();
+        public abstract InteractableObject GetInteractiveObject();
     }
 }

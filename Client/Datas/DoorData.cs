@@ -59,6 +59,6 @@ namespace MiyakoCarryService.Client.Datas
 
         public override bool IsProxyActionDisabled() => true;
 
-        public override WorldInteractiveObject GetWorldInteractiveObject() => Door;
+        public override InteractableObject GetInteractiveObject() => Door;
     }
 }

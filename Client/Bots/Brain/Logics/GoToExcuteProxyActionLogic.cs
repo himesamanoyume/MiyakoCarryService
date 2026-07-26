@@ -164,6 +164,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         await Task.Delay(1000);
                         InteractionCallback(mcsBotPlayerData);
                     }
+                    else if (interactableObjectData is StationaryWeaponData stationaryWeaponData)
+                    {
+                        // mcsBotPlayerData.Player.OperateStationaryWeapon(stationaryWeaponData.StationaryWeapon, StationaryPacketStruct.EStationaryCommand.Occupy);
+                        await Task.Delay(1000);
+                        InteractionCallback(mcsBotPlayerData);
+                    }
                 }
             }
             catch (Exception e)

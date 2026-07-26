@@ -9,6 +9,7 @@ namespace MiyakoCarryService.Client.Extensions
     {
         private static SwitchDataMgr SwitchDataMgr => MgrAccessor.Get<SwitchDataMgr>();
         private static DoorDataMgr DoorDataMgr => MgrAccessor.Get<DoorDataMgr>();
+        private static StationaryWeaponDataMgr StationaryWeaponDataMgr => MgrAccessor.Get<StationaryWeaponDataMgr>();
 
         extension(GameWorld gameWorld)
         {
@@ -28,6 +29,12 @@ namespace MiyakoCarryService.Client.Extensions
                 if (switchData != null)
                 {
                     return switchData;
+                }
+
+                var stationaryWeaponData = StationaryWeaponDataMgr.FindStationaryWeapon(id);
+                if (stationaryWeaponData != null)
+                {
+                    return stationaryWeaponData;
                 }
                 return null;
             }

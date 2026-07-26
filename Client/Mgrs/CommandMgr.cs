@@ -191,6 +191,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 isTeam ? Locales.TEAMSWITCHESCORTCOMMAND_TARGETNAME : Locales.SWITCHESCORTCOMMAND_TARGETNAME,
                 m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<SwitchData, SwitchDataMgr>()));
 
+            menu.RegisterSubMenu(
+                isTeam ? Locales.TEAMSTATIONARYWEAPONESCORTCOMMAND_NAME : Locales.STATIONARYWEAPONESCORTCOMMAND_NAME,
+                isTeam ? Locales.TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME : Locales.STATIONARYWEAPONESCORTCOMMAND_TARGETNAME,
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>()));
+
             CommandUtils.Apply(EMenuId.Escort.ToString(), menu, mcsBotPlayers);
         }
 
@@ -240,6 +245,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             menu.RegisterSubMenu(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, m => BuildQuestProxyMenu(m, mcsBotPlayers));
             menu.RegisterSubMenu(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, m => BuildSwitchProxyMenu(m, mcsBotPlayers));
+            menu.RegisterSubMenu(Locales.STATIONARYWEAPONPROXYCOMMAND_NAME, Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME, m => BuildStationaryWeaponProxyMenu(m, mcsBotPlayers));
 
             CommandUtils.Apply(EMenuId.Proxy.ToString(), menu, mcsBotPlayers);
         }
@@ -292,6 +298,25 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         Position = switchData.GetPos(),
                         TargetId = switchData.Id()
+                    });
+            }
+            // 展示内容为开关列表，不进行扩展
+        }
+
+        public virtual void BuildStationaryWeaponProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        {
+            var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
+            foreach (var stationaryWeaponData in Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>())
+            {
+                menu.RegisterCommand(
+                    stationaryWeaponData.GetActionName(),
+                    stationaryWeaponData.GetActionTargetName(myPlayerPos),
+                    ECommandType.InteractionProxyAction.ToString(), mcsBotPlayers,
+                    disabled: stationaryWeaponData.IsProxyActionDisabled,
+                    resolver: () => new McsCommandContext
+                    {
+                        Position = stationaryWeaponData.GetPos(),
+                        TargetId = stationaryWeaponData.Id()
                     });
             }
             // 展示内容为开关列表，不进行扩展

@@ -216,5 +216,11 @@ namespace MiyakoCarryService.Client.Utils
         public const string CHANGEFORMATIONCOMMAND_TARGETNAME = "Mcs/ChangeFormationCommand TargetName";
         public const string SHOWBREVITYCODE_KEY = "Mcs/ShowBrevityCode Key";
         public const string SHOWBREVITYCODE_DESCRIPTION = "Mcs/ShowBrevityCode Description";
+        public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/TeamStationaryWeaponEscortCommand Name";
+        public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/TeamStationaryWeaponEscortCommand TargetName";
+        public const string STATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/StationaryWeaponEscortCommand Name";
+        public const string STATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/StationaryWeaponEscortCommand TargetName";
+        public const string STATIONARYWEAPONPROXYCOMMAND_NAME = "Mcs/StationaryWeaponProxyCommand Name";
+        public const string STATIONARYWEAPONPROXYCOMMAND_TARGETNAME = "Mcs/StationaryWeaponProxyCommand TargetName";
     }
 }
