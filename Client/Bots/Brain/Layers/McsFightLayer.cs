@@ -126,12 +126,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var canShoot = goalEnemy.CanShoot;
-#if DEBUG
-                // if (canShoot)
-                // {
-                //     MiyakoCarryServicePlugin.Logger.LogWarning($"CanShoot: {canShoot}, Distance: {goalEnemy.Distance}, IsVisible: {goalEnemy.IsVisible}");
-                // }
-#endif
                 var isProtectWantKill = ProtectWantKill();
                 var isProtectCareKill = ProtectCareKill();
 
@@ -155,6 +149,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
                         safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                     }
+
+                    var isEnemyPosLost = IsEnemyPosLost();
 
                     if (safeFire && haveBullets.Value)
                     {
@@ -194,7 +190,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing1");
@@ -212,7 +208,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 _nextUpdatePosTime = time + nextTime;
                             }
 
-                            if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                            if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                             {
                                 RefreshStuckTimer();
                                 if (_currentMoveTarget.HasValue)
@@ -247,7 +243,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing3");
@@ -288,7 +284,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing4");
@@ -303,7 +299,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 _nextUpdatePosTime = time + nextTime;
                             }
 
-                            if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                            if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                             {
                                 RefreshStuckTimer();
                                 if (_currentMoveTarget.HasValue)
@@ -340,7 +336,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing6");
@@ -402,14 +398,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     var sqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
                     if (_deferToSain)
                     {
-                        if (sqrDist > SainDistanceConstants.ExitSainSqr)
+                        if (sqrDist > SAINUtils.ExitSainSqr)
                         {
                             _deferToSain = false;
                         }
                     }
                     else
                     {
-                        if (sqrDist < SainDistanceConstants.EnterSainSqr)
+                        if (sqrDist < SAINUtils.EnterSainSqr)
                         {
                             _deferToSain = true;
                         }
@@ -431,6 +427,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
+        }
+
+        public override bool IsEnemyPosLost()
+        {
+            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
+            {
+                return true;
+            }
+            return base.IsEnemyPosLost();
         }
     }
 }

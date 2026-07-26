@@ -15,6 +15,7 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Servers.Ws;
+using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -27,11 +28,16 @@ namespace MiyakoCarryService.Server.Services
         IServiceProvider serviceProvider,
         ProfileHelper profileHelper,
         InfoService infoService,
-        ProfileService profileService
+        ProfileService profileService,
+        ICloner cloner
     )
     {
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadMemberGroups = new();
+
+        // 预留给以后增援护航的
         private readonly ConcurrentDictionary<MongoId, List<int>> _leadHelperMemberGroups = new();
+        // end
+
         private readonly ConcurrentDictionary<MongoId, HashSet<MongoId>> _matchLeaders = new();
         private readonly Dictionary<MongoId, McsBotPlayerConfigRequestData> _mcsBotPlayerConfigs = new();
         private SemaphoreSlim _saveLock = new(1, 1);
@@ -176,11 +182,8 @@ namespace MiyakoCarryService.Server.Services
             try
             {
                 _leadMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
-                var matchPlayerIds = _matchLeaders.GetOrAdd(mcsLeadPlayerId, _ => new());
-                foreach (var matchPlayerId in matchPlayerIds)
-                {
-                    _leadMemberGroups.GetOrAdd(matchPlayerId, _ => new()).Clear();
-                }
+                _leadHelperMemberGroups.GetOrAdd(mcsLeadPlayerId, _ => new()).Clear();
+                _matchLeaders.TryRemove(mcsLeadPlayerId, out _);
             }
             finally
             {
@@ -327,7 +330,9 @@ namespace MiyakoCarryService.Server.Services
                 var pmcDatas = await Task.Run(() =>
                 {
                     var profiles = GetAllGroupMemberProfiles(mcsLeadPlayerId);
-                    return profiles.Select(p => isPmc ? p.CharacterData.PmcData : p.CharacterData.ScavData).ToList();
+                    return profiles.Select(p => isPmc ? p.CharacterData.PmcData : p.CharacterData.ScavData)
+                                .Select(CloneAndRemapInventoryIds)
+                                .ToList();
                 });
 
                 var mcsLeadPlayerProfile = profileHelper.GetFullProfile(mcsLeadPlayerId);
@@ -343,6 +348,81 @@ namespace MiyakoCarryService.Server.Services
             );
 
             return mcsPmcDatas;
+        }
+
+        public PmcData CloneAndRemapInventoryIds(PmcData originalPmcData)
+        {
+            var clonePmcData = cloner.Clone(originalPmcData);
+
+            var inventory = clonePmcData?.Inventory;
+            if (inventory?.Items is null || inventory.Items.Count == 0)
+            {
+                return clonePmcData;
+            }
+
+            var idMap = new Dictionary<MongoId, MongoId>();
+            foreach (var item in inventory.Items)
+            {
+                idMap[item.Id] = new MongoId();
+            }
+
+            foreach (var item in inventory.Items)
+            {
+                if (idMap.TryGetValue(item.Id, out var newId))
+                {
+                    item.Id = newId;
+                }
+
+                if (!string.IsNullOrEmpty(item.ParentId) && idMap.TryGetValue(item.ParentId, out var newParentId))
+                {
+                    item.ParentId = newParentId;
+                }
+            }
+
+            inventory.Equipment = Remap(idMap, inventory.Equipment);
+            inventory.Stash = Remap(idMap, inventory.Stash);
+            inventory.QuestRaidItems = Remap(idMap, inventory.QuestRaidItems);
+            inventory.QuestStashItems = Remap(idMap, inventory.QuestStashItems);
+            inventory.SortingTable = Remap(idMap, inventory.SortingTable);
+            inventory.HideoutCustomizationStashId = Remap(idMap, inventory.HideoutCustomizationStashId);
+
+            if (inventory.FastPanel is not null)
+            {
+                foreach (var key in inventory.FastPanel.Keys.ToList())
+                {
+                    inventory.FastPanel[key] = Remap(idMap, inventory.FastPanel[key]);
+                }
+            }
+
+            if (inventory.HideoutAreaStashes is not null)
+            {
+                foreach (var key in inventory.HideoutAreaStashes.Keys.ToList())
+                {
+                    inventory.HideoutAreaStashes[key] = Remap(idMap, inventory.HideoutAreaStashes[key]);
+                }
+            }
+
+            if (inventory.FavoriteItems is not null)
+            {
+                inventory.FavoriteItems = inventory.FavoriteItems.Select(favoriteItem => Remap(idMap, favoriteItem)).ToList();
+            }
+
+            return clonePmcData;
+        }
+
+        public MongoId Remap(Dictionary<MongoId, MongoId> idMap, MongoId id)
+        {
+            return idMap.TryGetValue(id, out var newId) ? newId : id;
+        }
+
+        public MongoId? Remap(Dictionary<MongoId, MongoId> idMap, MongoId? id)
+        {
+            if (id is null)
+            {
+                return null;
+            }
+
+            return idMap.TryGetValue(id.Value, out var newId) ? newId : id;
         }
 
         public async Task<Dictionary<MongoId, McsBotPlayerConfigRequestData>> GetMcsBotPlayerConfigs(MongoId mcsLeadPlayerId)

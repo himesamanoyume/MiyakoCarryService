@@ -1,8 +1,6 @@
-
-
 using UnityEngine;
 
-namespace MiyakoCarryService.Client.Utils
+namespace MiyakoCarryService.Client.Models
 {
     public class SColor
     {

@@ -190,6 +190,7 @@ namespace MiyakoCarryService.Client.Utils
 
         public static readonly HashSet<string> RemoveLayerNames = new()
         {
+            // Vanilla
             "AssaultHaveEnemy",
             "MarksmanEnemy",
             "PushAndSup",
@@ -301,15 +302,32 @@ namespace MiyakoCarryService.Client.Utils
             "Leave Map",
             "PmcPveTarget",
             "Pursuit",
+            // end
+            // SAIN
             "SAIN : SAIN Debug",
             "SAIN : Avoid Threat",
             // "SAIN : Combat Layer",
             "SAIN : Squad Layer",
             "SAIN : Extract",
+            // end
+            // Orbit
             "OrbitBrainLayer",
+            // end
+            // LootingBots
             "Looting",
+            // end
+            // BotMind
             "BotMind_Looting",
-            "BotMind_Questing"
+            "BotMind_Questing",
+            "MedicBuddy_Medic",
+            "MedicBuddy_Shooter",
+            // end
+            // QuestingBots
+            "SleepingLayer",
+            "BotObjectiveLayer",
+            "BotFollowerLayer",
+            "BotFollowerRegroupLayer"
+            // end
         };
     }
 }

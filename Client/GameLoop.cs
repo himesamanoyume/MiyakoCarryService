@@ -36,6 +36,7 @@ namespace MiyakoCarryService.Client
         public bool IsGameStarted = false;
         private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
         private HashSet<MongoID> _loadedMcsLeadPlayer = new();
+        private int? _lastSpawnGameWorldInstanceId = null;
 
         public IEftSession Session
         {
@@ -108,7 +109,7 @@ namespace MiyakoCarryService.Client
                     assetBytes = memoryStream.ToArray();
                 }
 
-                AssetBundle bundle = AssetBundle.LoadFromMemory(assetBytes);
+                var bundle = AssetBundle.LoadFromMemory(assetBytes);
                 if (bundle != null)
                 {
                     HighlightShader = bundle.LoadAsset<Shader>(highlightShaderName);
@@ -381,6 +382,14 @@ namespace MiyakoCarryService.Client
 
         public async Task SpawnMcsBotPlayer()
         {
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var currentGameWorldInstanceId = gameWorld.GetInstanceID();  
+            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)  
+            {  
+                _loadedMcsLeadPlayer.Clear();  
+                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;  
+            }
+
             var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
             var mcsProfilesDict = await McsRequestHandler.GetMcsBotPlayers(new()
             {
@@ -404,8 +413,6 @@ namespace MiyakoCarryService.Client
                     await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Local, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobYieldPriority.Immediate, new Progress<InitLevelProgress>(), default);
                 }
             }
-
-            var gameWorld = Singleton<GameWorld>.Instance;
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
@@ -867,14 +874,14 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
             settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Look.CAN_USE_LIGHT = true;
+            settings.FileSettings.Look.CAN_USE_LIGHT = false;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
             settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
-            settings.FileSettings.Look.LightOnVisionDistance = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
+            settings.FileSettings.Look.LightOnVisionDistance = 5f;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
             settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 120f;
             settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
