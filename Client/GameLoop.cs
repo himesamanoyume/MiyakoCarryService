@@ -636,6 +636,11 @@ namespace MiyakoCarryService.Client
                                 botOwner.Brain.OnSetStrategy += handler;
                             }
 
+                            EventMgr.Notify(new McsBotPlayerActivatedEvent
+                            {
+                                McsBotPlayerId = botOwner.ProfileId
+                            });
+
                             if (!MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                             {
                                 return;

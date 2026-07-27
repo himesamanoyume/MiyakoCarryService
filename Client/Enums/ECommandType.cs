@@ -21,5 +21,6 @@ namespace MiyakoCarryService.Client.Enums
         OpenInventory,
         ChangeFormation,
         StationaryWeaponProxyAction,
+        FollowMe,
     }
 }

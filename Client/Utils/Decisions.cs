@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string ShouldExfil = "Mcs.ShouldExfil";
         public const string ShouldGoToPoint = "Mcs.ShouldGoToPoint";
         public const string ShouldHoldPosition = "Mcs.ShouldHoldPosition";
-        public const string ShouldRegroup = "Mcs.ShouldRegroup";
+        public const string ShouldFollowMe = "Mcs.ShouldFollowMe";
         public const string ShouldQuestProxyAction = "Mcs.ShouldQuestProxyAction";
         public const string ShouldLootProxyAction = "Mcs.ShouldLootProxyAction";
         public const string ShouldInteractionProxyAction = "Mcs.ShouldInteractionProxyAction";

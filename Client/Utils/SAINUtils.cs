@@ -258,7 +258,7 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return false;
             }
-            return mcsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition) || mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) || mcsBotPlayerData.HasDecision(Decisions.ShouldRegroup);
+            return mcsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition) || mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) || mcsBotPlayerData.HasDecision(Decisions.ShouldFollowMe);
         }
 
         public static bool ShouldRedirect(BotOwner botOwner, out McsBotPlayerData mcsBotPlayerData)
@@ -273,7 +273,7 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return false;
             }
-            return mcsBotPlayerData.HasDecision(Decisions.ShouldRegroup) || mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation);
+            return mcsBotPlayerData.HasDecision(Decisions.ShouldFollowMe) || mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation);
         }
 
         public static bool TryGetMoveTarget(BotOwner botOwner, McsBotPlayerData mcsBotPlayerData, out Vector3 target)

@@ -222,5 +222,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string STATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/StationaryWeaponEscortCommand TargetName";
         public const string STATIONARYWEAPONPROXYCOMMAND_NAME = "Mcs/StationaryWeaponProxyCommand Name";
         public const string STATIONARYWEAPONPROXYCOMMAND_TARGETNAME = "Mcs/StationaryWeaponProxyCommand TargetName";
+        public const string FOLLOWMECOMMAND_NAME = "Mcs/FollowMeCommand Name";
+        public const string FOLLOWMECOMMAND_TARGETNAME = "Mcs/FollowMeCommand TargetName";
+        public const string TEAMFOLLOWMECOMMAND_NAME = "Mcs/TeamFollowMeCommand Name";
+        public const string TEAMFOLLOWMECOMMAND_TARGETNAME = "Mcs/TeamFollowMeCommand TargetName";
     }
 }

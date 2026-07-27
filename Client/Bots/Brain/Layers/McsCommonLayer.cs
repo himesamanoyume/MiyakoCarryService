@@ -118,7 +118,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
                 {
                     if (_nextUpdatePosTime < time)
                     {

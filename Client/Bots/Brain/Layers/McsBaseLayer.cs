@@ -471,7 +471,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -511,7 +511,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
-                        McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                        McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
@@ -549,12 +549,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort))
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
                     });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
+                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldFollowMe, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
                 }
                 return true;
             }
@@ -1026,7 +1026,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
             {
                 return true;
             }
@@ -1588,7 +1588,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation]);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                     // 使用保持队形时在狭窄环境中容易连续触发大量对话，这在Fika联机下会造成大量数据包传输

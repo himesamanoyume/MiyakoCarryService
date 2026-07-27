@@ -82,9 +82,9 @@
     "Mcs/TeamOnYourOwnCommand Name": "全队自主行动",
     "Mcs/TeamOnYourOwnCommand TargetName": "让所有护航自行决策",
     "Mcs/RegroupCommand Name": "集结",
-    "Mcs/RegroupCommand TargetName": "命令护航跟随老板",
+    "Mcs/RegroupCommand TargetName": "命令护航中断一切行动并归队",
     "Mcs/TeamRegroupCommand Name": "全队集结",
-    "Mcs/TeamRegroupCommand TargetName": "让所有护航跟随老板",
+    "Mcs/TeamRegroupCommand TargetName": "让所有护航中断一切行动并归队",
     "Mcs/GoToPointCommand Name": "前往",
     "Mcs/GoToPointCommand TargetName": "命令护航前往指定地点",
     "Mcs/TeamGoToPointCommand Name": "全队前往",
@@ -241,5 +241,9 @@
     "Mcs/StationaryWeaponEscortCommand Name": "护送至固定武器",
     "Mcs/StationaryWeaponEscortCommand TargetName": "命令护航护送至地图中的某个固定武器",
     "Mcs/StationaryWeaponProxyCommand Name": "代理操作固定武器",
-    "Mcs/StationaryWeaponProxyCommand TargetName": "命令护航代理操作指定固定武器"
+    "Mcs/StationaryWeaponProxyCommand TargetName": "命令护航代理操作指定固定武器",
+    "Mcs/FollowMeCommand Name": "跟随我",
+    "Mcs/FollowMeCommand TargetName": "命令护航跟随老板，此状态下护航将不会主动进攻敌人、不会进行战利品掠夺",
+    "Mcs/TeamFollowMeCommand Name": "全队跟随我",
+    "Mcs/TeamFollowMeCommand TargetName": "让所有护航跟随老板，此状态下护航将不会主动进攻敌人、不会进行掠夺战利品"
 }
