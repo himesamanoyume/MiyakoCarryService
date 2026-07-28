@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private ShootFromStationaryBaseLogic _baseLogic;
 
         private float _scanPhase;
-        private const float ScanPeriod = 4f; 
+        private const float ScanPeriod = 4f;
         private const float ScanDistance = 30f;
         private const float ScanPitchDown = 2f;
 
@@ -21,13 +21,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         public override void Update(CustomLayer.ActionData data)
         {
             var stationary = BotOwner.WeaponManager.Stationary;
-
             _baseLogic.UpdateNodeByMain(data);
-            if (BotOwner.WeaponManager.Stationary.IsEnemyAtSector(BotOwner.WeaponManager.Stationary.CurLink))
+            if (stationary.IsEnemyAtSector(stationary.CurLink))
             {
                 return;
             }
-
             ScanSector(stationary.CurLink);
         }
 

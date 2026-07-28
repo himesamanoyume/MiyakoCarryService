@@ -184,7 +184,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     else
                     {
                         stationary.SetTargetStationary(stationaryWeaponLink);
-                        stationary.Take();
+                        // stationary.Take();
                     }
                     
                     mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldUseStationaryWeapon, Decisions.ShouldHoldPosition);

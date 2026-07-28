@@ -52,6 +52,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentDeactivateRetries = 0;
         public float _currentHealTimeout = 10f;
         public float _nextAnimatorFixTime = 0f;
+        public string _cachedProxyTargetId;
+        public StationaryWeaponData _cachedStationaryWeaponData;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -1061,13 +1063,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndShootFromStationary()
         {
-            if (BotOwner.Medecine.FirstAid.Have2Do)
+            if (IsEnemyPosLost())
             {
-                return true;
-            }
-            if (BotOwner.Medecine.SurgicalKit.HaveWork)
-            {
-                return true;
+                if (BotOwner.Medecine.FirstAid.Have2Do)
+                {
+                    return true;
+                }
+                if (BotOwner.Medecine.SurgicalKit.HaveWork)
+                {
+                    return true;
+                }
             }
             var curLink = BotOwner.WeaponManager.Stationary.CurLink;
             if (curLink == null)
@@ -1078,18 +1083,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            if (WasHitRecently(4f))
-            {
-                return true;
-            }
             if (!curLink.IsFree(BotOwner.Id))
             {
                 return true;
             }
-            if (BotOwner.SuppressStationary.CurUsingLogic.IsReady() && BotOwner.SuppressStationary.CurUsingLogic.CanStartSupressEnemy(BotOwner.Memory.GoalEnemy))
-            {
-                return true;
-            }
+            // if (BotOwner.SuppressStationary.CurUsingLogic.IsReady() && BotOwner.SuppressStationary.CurUsingLogic.CanStartSupressEnemy(BotOwner.Memory.GoalEnemy))
+            // {
+            //     return true;
+            // }
             return false;
         }
 
