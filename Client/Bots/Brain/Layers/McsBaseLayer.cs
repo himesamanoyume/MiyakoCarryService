@@ -936,6 +936,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndShootFromPlace()
         {
+            if (!BotOwner.Memory.HaveEnemy)
+            {
+                return true;
+            }
             if (BotOwner.DogFight.ShallStartCauseHavePlace())
             {
                 return true;
@@ -1087,10 +1091,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            // if (BotOwner.SuppressStationary.CurUsingLogic.IsReady() && BotOwner.SuppressStationary.CurUsingLogic.CanStartSupressEnemy(BotOwner.Memory.GoalEnemy))
-            // {
-            //     return true;
-            // }
+            if (BotOwner.Memory.HaveEnemy && !BotOwner.WeaponManager.Stationary.IsEnemyAtSector(BotOwner.WeaponManager.Stationary.CurLink))
+            {
+                return true;
+            }
             return false;
         }
 
@@ -1928,25 +1932,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
             return false;
-        }
-
-        public virtual bool IsTargetPitchReachable(StationaryWeapon stationaryWeapon, Vector3 targetPos)
-        {
-            var origin = stationaryWeapon.OperatorPosition;
-            var delta = targetPos - origin;
-
-            var horizontal = new Vector3(delta.x, 0f, delta.z).magnitude;
-            if (horizontal < 0.01f)
-            {
-                return false;
-            }
-
-            var requiredPitch = Mathf.Atan2(-delta.y, horizontal) * Mathf.Rad2Deg;
-            var pitchLimit = stationaryWeapon.PitchLimit;
-            var min = Mathf.Min(pitchLimit.x, pitchLimit.y);
-            var max = Mathf.Max(pitchLimit.x, pitchLimit.y);
-
-            return requiredPitch >= min - 2f && requiredPitch <= max + 2f;
         }
     }
 }

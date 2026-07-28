@@ -126,9 +126,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
                         }
 
-                        if (goalEnemy == null || stationary.IsEnemyAtSector(stationary.CurLink) || stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary)
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (stationary.IsEnemyAtSector(stationary.CurLink) && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary)))
                         {
-                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon1");
+                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
                         }
                     }
                 }
@@ -301,7 +301,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation))
+                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) && !McsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
