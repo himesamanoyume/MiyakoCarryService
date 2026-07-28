@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
@@ -1926,6 +1927,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
             return false;
+        }
+
+        public virtual bool IsTargetPitchReachable(StationaryWeapon stationaryWeapon, Vector3 targetPos)
+        {
+            var origin = stationaryWeapon.OperatorPosition;
+            var delta = targetPos - origin;
+
+            var horizontal = new Vector3(delta.x, 0f, delta.z).magnitude;
+            if (horizontal < 0.01f)
+            {
+                return false;
+            }
+
+            var requiredPitch = Mathf.Atan2(-delta.y, horizontal) * Mathf.Rad2Deg;
+            var pitchLimit = stationaryWeapon.PitchLimit;
+            var min = Mathf.Min(pitchLimit.x, pitchLimit.y);
+            var max = Mathf.Max(pitchLimit.x, pitchLimit.y);
+
+            return requiredPitch >= min - 2f && requiredPitch <= max + 2f;
         }
     }
 }

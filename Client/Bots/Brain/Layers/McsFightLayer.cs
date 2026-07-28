@@ -107,7 +107,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         var operatorPos = stationaryWeapon.OperatorPosition;
                         var sqrToOperator = BotOwner.Position.McsSqrDistance(operatorPos);
 
-                        if (needHeal && isEnemyPosLost)
+                        if (needHeal)
                         {
                             if (stationary.CurLink != null && stationary.Taken)
                             {
@@ -117,28 +117,44 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             return new Action(typeof(HealLogic), "Mcs:StationaryHealing");
                         }
 
-                        if (sqrToOperator > 1f * 1f)
+                        if (!stationaryWeaponLink.HaveAmmo())
                         {
-                            BotOwner.GoToSomePointData.SetPoint(operatorPos);
-                            return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                            if (stationary.CurLink != null && stationary.Taken)
+                            {
+                                stationary.DropCurWeapon(false, true);
+                            }
                         }
-
-                        if (stationary.CurLink == null)
+                        else
                         {
-                            stationary.SetTargetStationary(stationaryWeaponLink);
-                        }
+                            if (sqrToOperator >= 2f * 2f)
+                            {
+                                BotOwner.GoToSomePointData.SetPoint(operatorPos);
+                                return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                            }
 
-                        var decision = stationary.GetCurrentDecision();
+                            if (stationary.CurLink == null)
+                            {
+                                stationary.SetTargetStationary(stationaryWeaponLink);
+                            }
 
-                        if (goalEnemy == null || decision == BotLogicDecision.shootFromStationary)
-                        {
-                            stationary.Take();
-                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
-                        }
+                            var enemyReachable = true;
+                            if (goalEnemy != null && goalEnemy.Person != null)
+                            {
+                                enemyReachable = IsTargetPitchReachable(stationaryWeapon, goalEnemy.Person.Position);
+                            }
 
-                        if (stationary.CurLink != null && stationary.Taken)
-                        {
-                            stationary.DropCurWeapon(false, true);
+                            var decision = stationary.GetCurrentDecision();
+
+                            if (goalEnemy == null || (decision == BotLogicDecision.shootFromStationary && enemyReachable))
+                            {
+                                stationary.Take();
+                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                            }
+
+                            if (stationary.CurLink != null && stationary.Taken)
+                            {
+                                stationary.DropCurWeapon(false, true);
+                            }
                         }
                     }
                 }

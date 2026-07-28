@@ -18,9 +18,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic = new(botOwner);
         }
 
-        public override void Start() => base.Start();
-        public override void Stop() => base.Stop();
-
         public override void Update(CustomLayer.ActionData data)
         {
             var stationary = BotOwner.WeaponManager.Stationary;
@@ -28,7 +25,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic.UpdateNodeByMain(data);
             if (BotOwner.WeaponManager.Stationary.IsEnemyAtSector(BotOwner.WeaponManager.Stationary.CurLink))
             {
-                MiyakoCarryServicePlugin.Logger.LogWarning("可进行射击");
                 return;
             }
 
