@@ -911,8 +911,8 @@ namespace MiyakoCarryService.Client
 
             botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(1f);
 
-            botOwner.LookSensor.ShootFromEyes = true;
-            settings.FileSettings.Look.SHOOT_FROM_EYES = true;
+            botOwner.LookSensor.ShootFromEyes = false;
+            settings.FileSettings.Look.SHOOT_FROM_EYES = false;
 
             botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
             botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;

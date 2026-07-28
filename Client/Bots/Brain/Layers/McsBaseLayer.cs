@@ -1064,6 +1064,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
+            if (BotOwner.Medecine.SurgicalKit.HaveWork)
+            {
+                return true;
+            }
             var curLink = BotOwner.WeaponManager.Stationary.CurLink;
             if (curLink == null)
             {

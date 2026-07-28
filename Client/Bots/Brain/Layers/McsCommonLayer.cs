@@ -75,9 +75,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
+                var needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
+
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
-                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                    if (needHeal)
                     {
                         RefreshStuckTimer();
                         return new Action(typeof(HealLogic), "Mcs:CommonHealing1");
@@ -99,7 +101,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                if (needHeal)
                 {
                     if (_nextUpdatePosTime < time)
                     {
