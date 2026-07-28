@@ -10,6 +10,11 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Common.Utils;
+using System.Threading;
+using System;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using HarmonyLib;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -38,6 +43,9 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.ChangeFormation.ToString(), ChangeFormationCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.StationaryWeaponProxyAction.ToString(), StationaryWeaponProxyActionCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.FollowMe.ToString(), FollowMeCommandAction);
+#if DEBUG
+            CommandUtils.RegisterCommandHandler(ECommandType.DebugSpawnAI.ToString(), DebugSpawnAICommandAction);
+#endif
         }
 
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
@@ -106,6 +114,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 menu.RegisterSubMenu(mcsBotPlayer.Profile.McsNickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
             }
 
+#if DEBUG
+
+            menu.RegisterSubMenu("Debug", "调试指令菜单", m => BuildDebugMenu(m, [mcsBotPlayers.FirstOrDefault()]));
+
+#endif
+
             // 不打算对根菜单进行扩展
             // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
@@ -156,6 +170,15 @@ namespace MiyakoCarryService.Client.Mgrs
 
             CommandUtils.Apply(EMenuId.Member.ToString(), menu, mcsBotPlayers);
         }
+
+#if DEBUG
+        public virtual void BuildDebugMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        {
+            menu.RegisterCommand("生成AI", "", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
+            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            ? new McsCommandContext { Position = hit.point } : null);
+        }
+#endif
 
         public virtual void BuildFormationMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
@@ -329,6 +352,86 @@ namespace MiyakoCarryService.Client.Mgrs
         #endregion
 
         #region Action
+
+#if DEBUG
+
+        public virtual void DebugSpawnAICommandAction(McsCommandContext ctx)
+        {
+            Diz.Utils.AsyncWorker.RunInMainTread(async () =>
+            {
+                var pos = ctx.Position.Value;
+                var botGame = Singleton<IBotGame>.Instance;
+                var botsController = botGame?.BotsController;
+                var botSpawner = botsController?.BotSpawner;
+                var botCreator = botSpawner?.BotCreator;
+                if (botCreator == null)
+                {
+                    return;
+                }
+
+                // 随机敌方：这里用 pmcBEAR + normal 难度，可自行替换  
+                var side = EPlayerSide.Usec;
+                var wildSpawnType = WildSpawnType.pmcUSEC;
+                var botDifficulty = BotDifficulty.normal;
+
+                var botSpawnParams = new BotSpawnParams
+                {
+                    ShallBeGroup = new ShallBeGroupParams(false, false, 1),
+                    Id_spawn = "McsDebugEnemy"
+                };
+
+                var botProfileDataClass = new BotProfileDataClass(side, wildSpawnType, botDifficulty, 1, botSpawnParams);
+
+                var botCreationDataClass = await BotCreationDataClass.Create(botProfileDataClass, botCreator, 0, botSpawner);
+                if (botCreationDataClass == null)
+                {
+                    return;
+                }
+
+                var cloneProfile = ctx.McsBotPlayer.Profile.Clone();
+                cloneProfile.Id = MongoID.Generate();
+                cloneProfile.Info.GroupId = "McsDebug";
+                cloneProfile.Info.Settings.BotDifficulty = BotDifficulty.easy;
+                AccessTools.Field(typeof(Profile), nameof(cloneProfile.AccountId)).SetValue(cloneProfile, GClass856.RandomInclude(30560334, 33560336).ToString());
+                botCreationDataClass.AddProfile(cloneProfile);
+
+                var closestGroupPoint = botsController.CoversData.GetClosest(pos);
+                botCreationDataClass.AddPosition(pos, closestGroupPoint.CorePointInGame.Id);
+                var closestZone = botSpawner.GetClosestZone(pos, out _); 
+
+                // 普通敌对分组：把玩家当敌人（不 AddAlly / 不 RemoveEnemy）  
+                var groupAction = new Func<BotOwner, BotZone, BotsGroup>((botOwner, botZone) =>
+                {
+                    var enemies = botSpawner.method_5(botOwner);
+                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner.DeadBodiesController, botSpawner.AllPlayers, false);
+                    botSpawner.Groups.AddNoKey(botsGroup, botZone);
+                    botsGroup.AddMember(botOwner, false);
+                    return botsGroup;
+                });
+
+                var onActivate = new Action<BotOwner>(botOwner =>
+                {
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    botSpawner.method_11(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
+                    ctx.McsBotPlayer.BotOwner.BotsGroup.AddEnemy(botOwner.GetPlayer, EBotEnemyCause.addBotAtGroup);
+                    var mcsBotPlayers = McsMgr.GetAllAliveMcsBotPlayer();
+                    foreach (var mcsBotPlayer in mcsBotPlayers)
+                    {
+                        
+                    }
+                });
+
+                botSpawner.InSpawnProcess += 1;
+                var cancellationToken = new CancellationToken();
+                await botCreator.ActivateBot(
+                    botCreationDataClass.Profiles[0],
+                    new GClass682(pos, botCreationDataClass.GetPosition().CorePointId, true),
+                    closestZone, true, groupAction, onActivate, cancellationToken);
+            });
+        }
+
+#endif
 
         public virtual void ChangeFormationCommandAction(McsCommandContext ctx)
         {

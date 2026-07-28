@@ -22,5 +22,8 @@ namespace MiyakoCarryService.Client.Enums
         ChangeFormation,
         StationaryWeaponProxyAction,
         FollowMe,
+#if DEBUG
+        DebugSpawnAI,
+#endif
     }
 }
