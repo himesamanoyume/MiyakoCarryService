@@ -20,6 +20,8 @@ namespace MiyakoCarryService.Client.Utils
     {
         private static readonly Dictionary<string, List<Action<McsCommandMenu, Player[]>>> _extensions = new();
         private static readonly Stack<Action<McsCommandMenu>> _menuStack = new();
+        private static readonly Stack<int> _selectionStack = new();
+        private static int _pendingSelectedIndex = -1;
         private static ActionsReturnClass _currentMenu;
         private static ActionsTypesClass _cancelAction;
         private static readonly List<ActionsTypesClass> _injectedObjectActions = new();
@@ -76,6 +78,8 @@ namespace MiyakoCarryService.Client.Utils
         public static void ClearMenuStack()
         {
             _menuStack.Clear();
+            _selectionStack.Clear();
+            _pendingSelectedIndex = -1;
         }
 
         public static void RegisterCommandMenu(string menuKey, Action<McsCommandMenu, Player[]> menu)
@@ -168,14 +172,25 @@ namespace MiyakoCarryService.Client.Utils
             }
             else
             {
-                _currentMenu?.InitSelected();
+                if (_currentMenu != null && _pendingSelectedIndex >= 0 && _pendingSelectedIndex < _currentMenu.Actions.Count && !_currentMenu.Actions[_pendingSelectedIndex].Disabled)
+                {
+                    _currentMenu.SelectedAction = _currentMenu.Actions[_pendingSelectedIndex];
+                }
+                else
+                {
+                    _currentMenu?.InitSelected();
+                }
             }
+
+            _pendingSelectedIndex = -1;
             GamePlayerOwner.AvailableInteractionState.Value = _currentMenu;
         }
 
         public static void CloseCommandMenuAction()
         {
             _menuStack.Clear();
+            _selectionStack.Clear();
+            _pendingSelectedIndex = -1;
             _currentMenu = null;
             _cancelAction = null;
             _injectedObjectActions.Clear();
@@ -201,6 +216,12 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void OpenMenu(Action<McsCommandMenu> builder)
         {
+            if (_menuStack.Count > 0 && _currentMenu != null)
+            {
+                var index = _currentMenu.SelectedAction != null ? _currentMenu.Actions.IndexOf(_currentMenu.SelectedAction) : -1;
+                _selectionStack.Push(index);
+            }
+
             _menuStack.Push(builder);
             RenderMenu();
         }
@@ -210,6 +231,7 @@ namespace MiyakoCarryService.Client.Utils
             if (_menuStack.Count > 1)
             {
                 _menuStack.Pop();
+                _pendingSelectedIndex = _selectionStack.Count > 0 ? _selectionStack.Pop() : -1;
             }
             RenderMenu();
         }

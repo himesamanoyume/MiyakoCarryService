@@ -104,7 +104,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (!BotOwner.WeaponManager.Reload.Reloading)
                 {
                     var haveBullets = BotOwner.WeaponManager.HaveBullets;
-                    if (!haveBullets || BotOwner.McsGetCurrentMagAmmoRatio() <= 0.9f)
+                    if (!haveBullets || BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                     {
                         BotOwner.WeaponManager.Reload.McsTryReload();
                     }
