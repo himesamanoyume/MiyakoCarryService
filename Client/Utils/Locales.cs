@@ -230,5 +230,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string BTRESCORTCOMMAND_TARGETNAME = "Mcs/BtrEscortCommand TargetName";
         public const string TEAMBTRESCORTCOMMAND_NAME = "Mcs/TeamBtrEscortCommand Name";
         public const string TEAMBTRESCORTCOMMAND_TARGETNAME = "Mcs/TeamBtrEscortCommand TargetName";
+        public const string AIRDROPESCORTCOMMAND_NAME = "Mcs/AirdropEscortCommand Name";
+        public const string AIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/AirdropEscortCommand TargetName";
+        public const string TEAMAIRDROPESCORTCOMMAND_NAME = "Mcs/TeamAirdropEscortCommand Name";
+        public const string TEAMAIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/TeamAirdropEscortCommand TargetName";
     }
 }

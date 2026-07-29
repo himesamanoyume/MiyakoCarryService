@@ -114,5 +114,18 @@ namespace MiyakoCarryService.Client.Mgrs
                 return null;
             }
         }
+
+        public List<LootData> GetAirdrops()
+        {
+            var airdropLootDatas = new List<LootData>();
+            foreach (LootData lootData in _datas)
+            {
+                if (Classification.AirdropIds.Contains(lootData.Item.TemplateId))
+                {
+                    airdropLootDatas.Add(lootData);
+                }
+            }
+            return airdropLootDatas;
+        }
     }
 }

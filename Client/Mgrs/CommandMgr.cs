@@ -233,8 +233,26 @@ namespace MiyakoCarryService.Client.Mgrs
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
                     ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => btrController.BtrVehicle.VehicleRouteState == EVehicleRouteState.OnDepot);
             }
+
+            menu.RegisterSubMenu(
+                isTeam ? Locales.TEAMAIRDROPESCORTCOMMAND_NAME : Locales.AIRDROPESCORTCOMMAND_NAME,
+                isTeam ? Locales.TEAMAIRDROPESCORTCOMMAND_TARGETNAME : Locales.AIRDROPESCORTCOMMAND_TARGETNAME,
+                m => BuildAirdropEscortMenu(m, mcsBotPlayers, LootDataMgr.GetAirdrops()));
             
             CommandUtils.Apply(EMenuId.Escort.ToString(), menu, mcsBotPlayers);
+        }
+
+        public virtual void BuildAirdropEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<LootData> lootDatas)
+        {
+            var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
+            foreach (var lootData in lootDatas)
+            {
+                menu.RegisterCommand(
+                    lootData.Item.Name.McsLocalized(),
+                    string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, lootData.RootTransform.position))),
+                    ECommandType.EscortWorld.ToString(), mcsBotPlayers,
+                    resolver: () => new McsCommandContext { Position = lootData.RootTransform.position });
+            }
         }
 
         public virtual void BuildWorldEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<WorldData> worldDatas)
