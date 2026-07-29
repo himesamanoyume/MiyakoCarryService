@@ -26,6 +26,7 @@ namespace MiyakoCarryService.Client.Events
         public string CommandPacketType { get; set; }
         public Vector3? Position { get; set; }
         public BodyPartType AimingBodyPartType { get; set; }
+        public bool ShouldCheckExclude { get; set; }
         public string TargetId { get; set; }
         public Dictionary<string, McsValue> Extensions { get; set; }
     }

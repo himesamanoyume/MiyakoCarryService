@@ -254,5 +254,9 @@
     "Mcs/AirdropEscortCommand TargetName": "命令护航护送至空投",
     "Mcs/TeamAirdropEscortCommand Name": "全队护送至空投",
     "Mcs/TeamAirdropEscortCommand TargetName": "全队护送至空投",
-    "Mcs/OnFight": "当前正在交战，会视情况暂时推迟执行部分指令。"
+    "Mcs/OnFight": "当前正在交战，会视情况暂时推迟执行部分指令。",
+    "Mcs/ExcludeOrTakeOverCommand Name": "排除/接管",
+    "Mcs/ExcludeOrTakeOverCommand TargetName": "排除指令将使护航不受全队指令影响，接管指令则会恢复全队指令对护航的影响",
+    "Mcs/Excluded": "已被全队指令排除。",
+    "Mcs/TakenOver": "已被全队指令重新接管。"
 }

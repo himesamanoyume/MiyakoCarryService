@@ -254,5 +254,9 @@
     "Mcs/AirdropEscortCommand TargetName": "Command carry service player to escort to airdrop",
     "Mcs/TeamAirdropEscortCommand Name": "Team Escort to Airdrop",
     "Mcs/TeamAirdropEscortCommand TargetName": "Command all carry service players to escort to airdrop",
-    "Mcs/OnFight": "Currently in combat; some commands may be temporarily deferred depending on the situation."
+    "Mcs/OnFight": "Currently in combat; some commands may be temporarily deferred depending on the situation.",
+    "Mcs/ExcludeOrTakeOverCommand Name": "Exclude / Take Over",
+    "Mcs/ExcludeOrTakeOverCommand TargetName": "Exclude command will prevent carry service player from receiving team commands; Take Over command will restore team command control over carry service player",
+    "Mcs/Excluded": "Excluded from team commands.",
+    "Mcs/TakenOver": "Restored to team command control."
 }

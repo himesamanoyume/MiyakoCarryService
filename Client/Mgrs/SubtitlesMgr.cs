@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -191,7 +192,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
-            return msg.Keys[0].McsLocalized();
+            var sb = new StringBuilder();
+            foreach (var key in msg.Keys)
+            {
+                sb.Append(key.McsLocalized());
+            }
+            return sb.ToString();
         }
 
         public string HandlePhraseMine(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)

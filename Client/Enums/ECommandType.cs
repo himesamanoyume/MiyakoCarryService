@@ -23,6 +23,7 @@ namespace MiyakoCarryService.Client.Enums
         StationaryWeaponProxyAction,
         FollowMe,
         EscortBtr,
+        ExcludeOrTakeOver,
 #if DEBUG
         DebugSpawnAI,
         DebugTeleport,

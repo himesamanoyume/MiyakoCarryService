@@ -43,6 +43,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.StationaryWeaponProxyAction.ToString(), StationaryWeaponProxyActionCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.FollowMe.ToString(), FollowMeCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.EscortBtr.ToString(), EscortToBtrPosCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.ExcludeOrTakeOver.ToString(), ExcludeOrTakeOverCommandAction);
 #if DEBUG
             CommandUtils.RegisterCommandHandler(ECommandType.DebugSpawnAI.ToString(), DebugSpawnAICommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.DebugTeleport.ToString(), DebugTeleportCommandAction);
@@ -109,7 +110,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            menu.RegisterSubMenu(Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME, m => BuildTeamMenu(m, mcsBotPlayers), disabled: () => mcsBotPlayers.All(p => !p.HealthController.IsAlive));
+            menu.RegisterSubMenu(Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME, m => BuildTeamMenu(m, mcsBotPlayers, true), disabled: () => mcsBotPlayers.All(p => !p.HealthController.IsAlive));
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
@@ -126,31 +127,32 @@ namespace MiyakoCarryService.Client.Mgrs
             // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
-            menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMFOLLOWMECOMMAND_NAME, Locales.TEAMFOLLOWMECOMMAND_TARGETNAME, ECommandType.FollowMe.ToString(), mcsBotPlayers);
+            menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMFOLLOWMECOMMAND_NAME, Locales.TEAMFOLLOWMECOMMAND_TARGETNAME, ECommandType.FollowMe.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
             menu.RegisterCommand(Locales.TEAMGOTOPOINTCOMMAND_NAME, Locales.TEAMGOTOPOINTCOMMAND_TARGETNAME, ECommandType.GoToPoint.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
             out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
-            ? new McsCommandContext { Position = hit.point } : null);
-            menu.RegisterCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers);
-            menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers);
-            menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, true));
-            menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
+            ? new McsCommandContext { Position = hit.point, ShouldCheckExclude = isTeam } : null, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMHOLDPOSITIONCOMMAND_NAME, Locales.TEAMHOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, isTeam));
+            menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers, isTeam));
             menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
             out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
-            ? new McsCommandContext { Position = hit.point } : null);
-            menu.RegisterSubMenu(Locales.CHANGEFORMATIONCOMMAND_NAME, Locales.CHANGEFORMATIONCOMMAND_TARGETNAME, m => BuildFormationMenu(m, [mcsBotPlayers.FirstOrDefault()]));
-            menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers);
+            ? new McsCommandContext { Position = hit.point, ShouldCheckExclude = isTeam } : null, shouldCheckExclude: isTeam);
+            menu.RegisterSubMenu(Locales.CHANGEFORMATIONCOMMAND_NAME, Locales.CHANGEFORMATIONCOMMAND_TARGETNAME, m => BuildFormationMenu(m, [mcsBotPlayers.FirstOrDefault()], false));
+            menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
 
             CommandUtils.Apply(EMenuId.Team.ToString(), menu, mcsBotPlayers);
         }
 
         public virtual void BuildMemberMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
+            menu.RegisterCommand(Locales.EXCLUDEORTAKEOVERCOMMAND_NAME, Locales.EXCLUDEORTAKEOVERCOMMAND_TARGETNAME, ECommandType.ExcludeOrTakeOver.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.REPORTABOUTENEMYCOMMAND_NAME, Locales.REPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.REPORTABOUTSELFCOMMAND_NAME, Locales.REPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.ONYOUROWNCOMMAND_NAME, Locales.ONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers);
@@ -162,9 +164,9 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.HOLDPOSITIONCOMMAND_NAME, Locales.HOLDPOSITIONCOMMAND_TARGETNAME, ECommandType.HoldPosition.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.DROPTARGETLOOTCOMMAND_NAME, Locales.DROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers);
             menu.RegisterCommand(Locales.OPENINVENTORYCOMMAND_NAME, Locales.OPENINVENTORYCOMMAND_TARGETNAME, ECommandType.OpenInventory.ToString(), mcsBotPlayers, isLocal: true, disabled: () => MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction);
-            menu.RegisterSubMenu(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers));
+            menu.RegisterSubMenu(Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.CHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers, false));
             menu.RegisterSubMenu(Locales.ESCORTCOMMAND_NAME, Locales.ESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, false));
-            menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers));
+            menu.RegisterSubMenu(Locales.PROXYCOMMAND_NAME, Locales.PROXYCOMMAND_TARGETNAME, m => BuildProxyMenu(m, mcsBotPlayers, false));
             menu.RegisterCommand(Locales.CLEARAREACOMMAND_NAME, Locales.CLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
             out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
@@ -176,13 +178,19 @@ namespace MiyakoCarryService.Client.Mgrs
 #if DEBUG
         public virtual void BuildDebugMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
-            menu.RegisterCommand("生成AI", "指定地点生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand("传送", "传送至指定地点", ECommandType.DebugTeleport.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
+
+            if (!McsMgr.IsHost)
+            {
+                return;
+            }
+
+            menu.RegisterCommand("生成AI", "指定地点生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand("生成空投", "指定地点生成空投", ECommandType.DebugInitAirdrop.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
         }
 #endif
 
-        public virtual void BuildFormationMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildFormationMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var formationDatas = FormationDataMgr.GetDatas<FormationData>();
             foreach (var formationData in formationDatas)
@@ -193,7 +201,12 @@ namespace MiyakoCarryService.Client.Mgrs
                     ECommandType.ChangeFormation.ToString(),
                     mcsBotPlayers,
                     isLocal: true,
-                    resolver: () => new McsCommandContext() { TargetId = formationData.Id }
+                    resolver: () => new McsCommandContext 
+                    { 
+                        TargetId = formationData.Id,
+                        ShouldCheckExclude = isTeam
+                    },
+                    shouldCheckExclude: isTeam
                 );
             }
         }
@@ -203,27 +216,27 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMQUESTESCORTCOMMAND_NAME : Locales.QUESTESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMQUESTESCORTCOMMAND_TARGETNAME : Locales.QUESTESCORTCOMMAND_TARGETNAME,
-                m => BuildQuestEscortMenu(m, mcsBotPlayers));
+                m => BuildQuestEscortMenu(m, mcsBotPlayers, isTeam));
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMTRANSITESCORTCOMMAND_NAME : Locales.TRANSITESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMTRANSITESCORTCOMMAND_TARGETNAME : Locales.TRANSITESCORTCOMMAND_TARGETNAME,
-                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<TransitData, TransitDataMgr>()));
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<TransitData, TransitDataMgr>(), isTeam));
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMEXFILESCORTCOMMAND_NAME : Locales.EXFILESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME : Locales.EXFILESCORTCOMMAND_TARGETNAME,
-                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<ExfilData, ExfilDataMgr>()));
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<ExfilData, ExfilDataMgr>(), isTeam));
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMSWITCHESCORTCOMMAND_NAME : Locales.SWITCHESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMSWITCHESCORTCOMMAND_TARGETNAME : Locales.SWITCHESCORTCOMMAND_TARGETNAME,
-                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<SwitchData, SwitchDataMgr>()));
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<SwitchData, SwitchDataMgr>(), isTeam));
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMSTATIONARYWEAPONESCORTCOMMAND_NAME : Locales.STATIONARYWEAPONESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME : Locales.STATIONARYWEAPONESCORTCOMMAND_TARGETNAME,
-                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>()));
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>(), isTeam));
 
             var btrController = Singleton<GameWorld>.Instance.BtrController;
             if (btrController != null && btrController.Initiated())
@@ -231,25 +244,25 @@ namespace MiyakoCarryService.Client.Mgrs
                 menu.RegisterCommand(
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_NAME : Locales.BTRESCORTCOMMAND_NAME,
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
-                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => btrController.BtrVehicle.VehicleRouteState == EVehicleRouteState.OnDepot);
+                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => btrController.BtrVehicle.VehicleRouteState == EVehicleRouteState.OnDepot, shouldCheckExclude: isTeam);
             }
             else
             {
                 menu.RegisterCommand(
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_NAME : Locales.BTRESCORTCOMMAND_NAME,
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
-                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => true);
+                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => true, shouldCheckExclude: isTeam);
             }
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMAIRDROPESCORTCOMMAND_NAME : Locales.AIRDROPESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMAIRDROPESCORTCOMMAND_TARGETNAME : Locales.AIRDROPESCORTCOMMAND_TARGETNAME,
-                m => BuildAirdropEscortMenu(m, mcsBotPlayers, LootDataMgr.GetAirdrops()));
+                m => BuildAirdropEscortMenu(m, mcsBotPlayers, LootDataMgr.GetAirdrops(), isTeam));
             
             CommandUtils.Apply(EMenuId.Escort.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildAirdropEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<LootData> lootDatas)
+        public virtual void BuildAirdropEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<LootData> lootDatas, bool isTeam)
         {
             var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var lootData in lootDatas)
@@ -258,11 +271,15 @@ namespace MiyakoCarryService.Client.Mgrs
                     lootData.Item.Name.McsLocalized(),
                     string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, lootData.RootTransform.position))),
                     ECommandType.EscortWorld.ToString(), mcsBotPlayers,
-                    resolver: () => new McsCommandContext { Position = lootData.RootTransform.position });
+                    resolver: () => new McsCommandContext 
+                    { 
+                        Position = lootData.RootTransform.position,
+                        ShouldCheckExclude = isTeam
+                    }, shouldCheckExclude: isTeam);
             }
         }
 
-        public virtual void BuildWorldEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<WorldData> worldDatas)
+        public virtual void BuildWorldEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<WorldData> worldDatas, bool isTeam)
         {
             var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var worldData in worldDatas)
@@ -272,13 +289,17 @@ namespace MiyakoCarryService.Client.Mgrs
                     worldData.GetActionTargetName(myPlayerPos),
                     ECommandType.EscortWorld.ToString(), mcsBotPlayers,
                     disabled: worldData.IsDisabled,
-                    resolver: () => new McsCommandContext { Position = worldData.GetPos() });
+                    resolver: () => new McsCommandContext 
+                    { 
+                        Position = worldData.GetPos(),
+                        ShouldCheckExclude = isTeam 
+                    }, shouldCheckExclude: isTeam);
             }
 
             CommandUtils.Apply(EMenuId.WorldEscort.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildQuestEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildQuestEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
             if (questDataMgr == null)
@@ -288,32 +309,36 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach ((var questDataClass, var questDatas) in questDataMgr.GetQuestDataByGroup())
             {
-                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, m => BuildWorldEscortMenu(m, mcsBotPlayers, questDatas.Cast<WorldData>()));
+                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, m => BuildWorldEscortMenu(m, mcsBotPlayers, questDatas.Cast<WorldData>(), isTeam));
             }
             CommandUtils.Apply(EMenuId.QuestEscort.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildAimingMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildAimingMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             foreach (var bodyPartType in Classification.AimingBodyPartTypes)
             {
                 var name = Tools.GetBodyPartTypeLocales(bodyPartType).McsLocalized();
-                menu.RegisterCommand(name, name, ECommandType.AimingBodyPart.ToString(), mcsBotPlayers, resolver: () => new McsCommandContext { AimingBodyPartType = bodyPartType });
+                menu.RegisterCommand(name, name, ECommandType.AimingBodyPart.ToString(), mcsBotPlayers, resolver: () => new McsCommandContext 
+                { 
+                    AimingBodyPartType = bodyPartType,
+                    ShouldCheckExclude = isTeam
+                }, shouldCheckExclude: isTeam);
             }
 
             CommandUtils.Apply(EMenuId.Aiming.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
-            menu.RegisterSubMenu(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, m => BuildQuestProxyMenu(m, mcsBotPlayers));
-            menu.RegisterSubMenu(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, m => BuildSwitchProxyMenu(m, mcsBotPlayers));
-            menu.RegisterSubMenu(Locales.STATIONARYWEAPONPROXYCOMMAND_NAME, Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME, m => BuildStationaryWeaponProxyMenu(m, mcsBotPlayers));
+            menu.RegisterSubMenu(Locales.QUESTPROXYCOMMAND_NAME, Locales.QUESTPROXYCOMMAND_TARGETNAME, m => BuildQuestProxyMenu(m, mcsBotPlayers, isTeam));
+            menu.RegisterSubMenu(Locales.SWITCHPROXYCOMMAND_NAME, Locales.SWITCHPROXYCOMMAND_TARGETNAME, m => BuildSwitchProxyMenu(m, mcsBotPlayers, isTeam));
+            menu.RegisterSubMenu(Locales.STATIONARYWEAPONPROXYCOMMAND_NAME, Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME, m => BuildStationaryWeaponProxyMenu(m, mcsBotPlayers, isTeam));
 
             CommandUtils.Apply(EMenuId.Proxy.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildQuestProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildQuestProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
             if (questDataMgr == null)
@@ -323,12 +348,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach ((var questDataClass, var questDatas) in questDataMgr.GetQuestDataByGroup())
             {
-                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, m => BuildSubQuestProxyMenu(m, mcsBotPlayers, questDatas));
+                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, m => BuildSubQuestProxyMenu(m, mcsBotPlayers, questDatas, isTeam));
             }
             CommandUtils.Apply(EMenuId.QuestProxy.ToString(), menu, mcsBotPlayers);
         }
 
-        public virtual void BuildSubQuestProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, List<QuestData> questDatas)
+        public virtual void BuildSubQuestProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, List<QuestData> questDatas, bool isTeam)
         {
             var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var questData in questDatas)
@@ -341,13 +366,15 @@ namespace MiyakoCarryService.Client.Mgrs
                     resolver: () => new McsCommandContext
                     {
                         Position = questData.GetPos(),
-                        TargetId = questData.Id()
-                    });
+                        TargetId = questData.Id(),
+                        ShouldCheckExclude = isTeam
+                    },
+                    shouldCheckExclude: isTeam);
             }
             // 展示内容为任务列表，不进行扩展
         }
 
-        public virtual void BuildSwitchProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildSwitchProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var switchData in Gameloop.GetDatas<SwitchData, SwitchDataMgr>())
@@ -360,13 +387,15 @@ namespace MiyakoCarryService.Client.Mgrs
                     resolver: () => new McsCommandContext
                     {
                         Position = switchData.GetPos(),
-                        TargetId = switchData.Id()
-                    });
+                        TargetId = switchData.Id(),
+                        ShouldCheckExclude = isTeam
+                    },
+                    shouldCheckExclude: isTeam);
             }
             // 展示内容为开关列表，不进行扩展
         }
 
-        public virtual void BuildStationaryWeaponProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
+        public virtual void BuildStationaryWeaponProxyMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var stationaryWeaponData in Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>())
@@ -379,8 +408,10 @@ namespace MiyakoCarryService.Client.Mgrs
                     resolver: () => new McsCommandContext
                     {
                         Position = stationaryWeaponData.GetPos(),
-                        TargetId = stationaryWeaponData.Id()
-                    });
+                        TargetId = stationaryWeaponData.Id(),
+                        ShouldCheckExclude = isTeam
+                    },
+                    shouldCheckExclude: isTeam);
             }
             // 展示内容为开关列表，不进行扩展
         }
@@ -481,6 +512,15 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void ChangeFormationCommandAction(McsCommandContext ctx)
         {
             FormationDataMgr.ApplyFormationData(ctx.TargetId);
+            var mcsBotPlayers = McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(ctx.McsLeadPlayer.ProfileId);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
+                var botOwner = mcsBotPlayer.AIData.BotOwner;
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger
+                });
+            }
         }
 
         public virtual void OpenInventoryCommandAction(McsCommandContext ctx)
@@ -721,6 +761,33 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.TargetPos = null;
                 mcsBotPlayerData.ProxyTargetId = null;
+            }
+        }
+
+        public virtual void ExcludeOrTakeOverCommandAction(McsCommandContext ctx)
+        {
+            var mcsBotPlayer = ctx.McsBotPlayer;
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.IsExcluded = !mcsBotPlayerData.IsExcluded;
+                if (mcsBotPlayerData.IsExcluded)
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.PhraseNone,
+                        Keys = [Locales.EXCLUDED]
+                    });
+                }
+                else
+                {
+                    botOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.PhraseNone,
+                        Keys = [Locales.TAKENOVER]
+                    });
+                }
             }
         }
 

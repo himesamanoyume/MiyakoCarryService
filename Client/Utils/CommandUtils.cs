@@ -54,6 +54,14 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return;
             }
+
+            var mcsBotPlayer = ctx.McsBotPlayer;
+            var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+            if (ctx.ShouldCheckExclude && mcsBotPlayerData.IsExcluded)
+            {
+                return;
+            }
+
             if (_handlersMap.TryGetValue(ctx.CommandType, out var handler))
             {
                 handler(ctx);
@@ -262,7 +270,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 else
                 {
-                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver, entry.IsLocal)));
+                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver, entry.IsLocal, entry.ShouldCheckExclude)));
                 }
             }
 
@@ -274,7 +282,7 @@ namespace MiyakoCarryService.Client.Utils
             return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
         }
 
-        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver, bool isLocal = false)
+        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver, bool isLocal = false, bool shouldCheckExclude = false)
         {
             var data = resolver?.Invoke();
             if (resolver != null && data == null)
@@ -292,6 +300,7 @@ namespace MiyakoCarryService.Client.Utils
                     TargetId = data?.TargetId,
                     AimingBodyPartType = data?.AimingBodyPartType ?? default,
                     Extensions = data?.Extensions ?? new(),
+                    ShouldCheckExclude = data?.ShouldCheckExclude ?? shouldCheckExclude,
                     McsBotPlayer = mcsBotPlayer
                 };
 
@@ -311,6 +320,7 @@ namespace MiyakoCarryService.Client.Utils
                             Position = ctx.Position,
                             TargetId = ctx.TargetId,
                             AimingBodyPartType = ctx.AimingBodyPartType,
+                            ShouldCheckExclude = ctx.ShouldCheckExclude,
                             Extensions = ctx.Extensions
                         });
                     }

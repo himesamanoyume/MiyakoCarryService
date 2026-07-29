@@ -50,6 +50,7 @@ namespace MiyakoCarryService.Client.Datas
         public bool IsBtrLeaving = false; 
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
+        public bool IsExcluded = false;
 
         public void SetDecision(string[] exclude = null, params string[] decisions)
         {

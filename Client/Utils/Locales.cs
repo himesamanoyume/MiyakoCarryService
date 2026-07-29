@@ -193,6 +193,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMDROPTARGETLOOTCOMMAND_TARGETNAME = "Mcs/TeamDropTargetLootCommand TargetName";
         public const string MINE = "Mcs/Mine";
         public const string ONFIGHT = "Mcs/OnFight";
+        public const string EXCLUDED = "Mcs/Excluded";
+        public const string TAKENOVER = "Mcs/TakenOver";
         public const string CLEARAREACOMMAND_NAME = "Mcs/ClearAreaCommand Name";
         public const string CLEARAREACOMMAND_TARGETNAME = "Mcs/ClearAreaCommand TargetName";
         public const string TEAMCLEARAREACOMMAND_NAME = "Mcs/TeamClearAreaCommand Name";
@@ -235,5 +237,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string AIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/AirdropEscortCommand TargetName";
         public const string TEAMAIRDROPESCORTCOMMAND_NAME = "Mcs/TeamAirdropEscortCommand Name";
         public const string TEAMAIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/TeamAirdropEscortCommand TargetName";
+        public const string EXCLUDEORTAKEOVERCOMMAND_NAME = "Mcs/ExcludeOrTakeOverCommand Name";
+        public const string EXCLUDEORTAKEOVERCOMMAND_TARGETNAME = "Mcs/ExcludeOrTakeOverCommand TargetName";
     }
 }

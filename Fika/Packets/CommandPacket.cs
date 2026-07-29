@@ -13,6 +13,7 @@ namespace MiyakoCarryService.Fika.Packets
         public string CommandType;
         public Vector3? Position;
         public BodyPartType AimingBodyPartType;
+        public bool ShouldCheckExclude;
         public Dictionary<string, McsValue> Extensions;
 
         public override void Deserialize(NetDataReader reader)
@@ -21,6 +22,7 @@ namespace MiyakoCarryService.Fika.Packets
             CommandType = reader.GetString();
             Position = reader.GetNullableUnmanaged<Vector3>();
             AimingBodyPartType = reader.GetEnum<BodyPartType>();
+            ShouldCheckExclude = reader.GetBool();
             var count = reader.GetInt();
             Extensions = new();
             for (int i = 0; i < count; i++)
@@ -55,6 +57,7 @@ namespace MiyakoCarryService.Fika.Packets
             writer.Put(CommandType, 0);
             writer.PutNullableUnmanaged(Position);
             writer.PutEnum(AimingBodyPartType);
+            writer.Put(ShouldCheckExclude);
             writer.Put(Extensions.Count);
             foreach (var kv in Extensions)
             {

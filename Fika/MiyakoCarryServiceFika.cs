@@ -176,6 +176,7 @@ namespace MiyakoCarryService.Fika
                     AimingBodyPartType = packet.AimingBodyPartType,
                     McsLeadPlayer = mcsLeadPlayer,
                     McsBotPlayer = mcsBotPlayer,
+                    ShouldCheckExclude = packet.ShouldCheckExclude,
                     Extensions = packet.Extensions
                 });
             }
