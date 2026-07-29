@@ -20,6 +20,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
         {
             try
             {
+                if (value != null && (value.Person == null || value.Person.HealthController == null || !value.Person.HealthController.IsAlive))
+                {
+                    value = null;
+                }
+
                 if (__instance.EnemyInfo_0 == value)
                 {
                     return false;

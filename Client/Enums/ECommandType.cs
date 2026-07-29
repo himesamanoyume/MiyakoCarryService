@@ -24,6 +24,7 @@ namespace MiyakoCarryService.Client.Enums
         FollowMe,
 #if DEBUG
         DebugSpawnAI,
+        DebugTeleport,
 #endif
     }
 }

@@ -45,6 +45,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.FollowMe.ToString(), FollowMeCommandAction);
 #if DEBUG
             CommandUtils.RegisterCommandHandler(ECommandType.DebugSpawnAI.ToString(), DebugSpawnAICommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.DebugTeleport.ToString(), DebugTeleportCommandAction);
 #endif
         }
 
@@ -174,8 +175,9 @@ namespace MiyakoCarryService.Client.Mgrs
 #if DEBUG
         public virtual void BuildDebugMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
-            menu.RegisterCommand("生成AI", "", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            menu.RegisterCommand("生成AI", "生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterCommand("传送", "传送至指定地点", ECommandType.DebugTeleport.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point } : null);
         }
 #endif
@@ -428,6 +430,11 @@ namespace MiyakoCarryService.Client.Mgrs
                     new GClass682(pos, botCreationDataClass.GetPosition().CorePointId, true),
                     closestZone, true, groupAction, onActivate, cancellationToken);
             });
+        }
+
+        public virtual void DebugTeleportCommandAction(McsCommandContext ctx)
+        {
+            Singleton<GameWorld>.Instance.MainPlayer.Teleport(ctx.Position.Value);
         }
 
 #endif
