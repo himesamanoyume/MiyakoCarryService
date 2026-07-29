@@ -25,20 +25,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _baseLogic = new(botOwner);
         }
 
-        public override void Start()
-        {
-            base.Start();
-            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
-
-            if (mcsBotPlayerData != null)
-            {
-                BotOwner.TalkMsg(new McsMsg
-                {
-                    PhraseTrigger = EPhraseTrigger.Roger
-                });
-            }
-        }
-
         public override void Update(CustomLayer.ActionData data)
         {
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();

@@ -253,5 +253,6 @@
     "Mcs/AirdropEscortCommand Name": "Escort to Airdrop",
     "Mcs/AirdropEscortCommand TargetName": "Command carry service player to escort to airdrop",
     "Mcs/TeamAirdropEscortCommand Name": "Team Escort to Airdrop",
-    "Mcs/TeamAirdropEscortCommand TargetName": "Command all carry service players to escort to airdrop"
+    "Mcs/TeamAirdropEscortCommand TargetName": "Command all carry service players to escort to airdrop",
+    "Mcs/OnFight": "Currently in combat; some commands may be temporarily deferred depending on the situation."
 }

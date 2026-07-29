@@ -253,5 +253,6 @@
     "Mcs/AirdropEscortCommand Name": "护送至空投",
     "Mcs/AirdropEscortCommand TargetName": "命令护航护送至空投",
     "Mcs/TeamAirdropEscortCommand Name": "全队护送至空投",
-    "Mcs/TeamAirdropEscortCommand TargetName": "全队护送至空投"
+    "Mcs/TeamAirdropEscortCommand TargetName": "全队护送至空投",
+    "Mcs/OnFight": "当前正在交战，会视情况暂时推迟执行部分指令。"
 }

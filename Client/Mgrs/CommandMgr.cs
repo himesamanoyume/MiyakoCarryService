@@ -226,12 +226,19 @@ namespace MiyakoCarryService.Client.Mgrs
                 m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>()));
 
             var btrController = Singleton<GameWorld>.Instance.BtrController;
-            if (btrController.Initiated())
+            if (btrController != null && btrController.Initiated())
             {
                 menu.RegisterCommand(
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_NAME : Locales.BTRESCORTCOMMAND_NAME,
                     isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
                     ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => btrController.BtrVehicle.VehicleRouteState == EVehicleRouteState.OnDepot);
+            }
+            else
+            {
+                menu.RegisterCommand(
+                    isTeam ? Locales.TEAMBTRESCORTCOMMAND_NAME : Locales.BTRESCORTCOMMAND_NAME,
+                    isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
+                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => true);
             }
 
             menu.RegisterSubMenu(
@@ -530,7 +537,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.IsLooting = false;
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Roger,
+                    PhraseTrigger = EPhraseTrigger.Going,
                 });
             }
         }
@@ -780,7 +787,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Roger
+                    PhraseTrigger = EPhraseTrigger.Going
                 });
             }
             else
@@ -852,7 +859,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
                     botOwner.TalkMsg(new McsMsg
                     {
-                        PhraseTrigger = EPhraseTrigger.Roger,
+                        PhraseTrigger = EPhraseTrigger.Going,
                     });
                 }
                 mcsBotPlayerData.IsLooting = false;
@@ -898,7 +905,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.TargetPos = lootData.RootTransform.position;
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Roger,
+                    PhraseTrigger = EPhraseTrigger.Going,
                 });
             }
             else
@@ -1060,7 +1067,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     mcsBotPlayerData.ProxyTargetId = interactableObjectData.Id();
                     mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
-                    botOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Roger });
+                    botOwner.TalkMsg(new McsMsg 
+                    { 
+                        PhraseTrigger = EPhraseTrigger.Going 
+                    });
                 }
                 mcsBotPlayerData.IsLooting = false;
             }

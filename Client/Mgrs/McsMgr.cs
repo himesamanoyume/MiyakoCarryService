@@ -374,6 +374,14 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
                     }
+
+                    if (mcsBotPlayerConfig.EnableLooting)
+                    {
+                        botOwner.TalkMsg(new McsMsg
+                        {
+                            PhraseTrigger = EPhraseTrigger.Going
+                        });
+                    }
                 }
             }
 
