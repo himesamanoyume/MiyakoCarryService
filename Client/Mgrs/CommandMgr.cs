@@ -46,6 +46,7 @@ namespace MiyakoCarryService.Client.Mgrs
 #if DEBUG
             CommandUtils.RegisterCommandHandler(ECommandType.DebugSpawnAI.ToString(), DebugSpawnAICommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.DebugTeleport.ToString(), DebugTeleportCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.DebugInitAirdrop.ToString(), DebugInitAirdropCommandAction);
 #endif
         }
 
@@ -175,10 +176,9 @@ namespace MiyakoCarryService.Client.Mgrs
 #if DEBUG
         public virtual void BuildDebugMenu(McsCommandMenu menu, Player[] mcsBotPlayers)
         {
-            menu.RegisterCommand("生成AI", "生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
-            ? new McsCommandContext { Position = hit.point } : null);
-            menu.RegisterCommand("传送", "传送至指定地点", ECommandType.DebugTeleport.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
-            ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterCommand("生成AI", "指定地点生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterCommand("传送", "传送至指定地点", ECommandType.DebugTeleport.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterCommand("生成空投", "指定地点生成空投", ECommandType.DebugInitAirdrop.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
         }
 #endif
 
@@ -239,12 +239,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void BuildWorldEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, IEnumerable<WorldData> worldDatas)
         {
-            var mainPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
+            var myPlayerPos = Singleton<GameWorld>.Instance.MainPlayer.Position;
             foreach (var worldData in worldDatas)
             {
                 menu.RegisterCommand(
                     worldData.GetActionName(),
-                    worldData.GetActionTargetName(mainPos),
+                    worldData.GetActionTargetName(myPlayerPos),
                     ECommandType.EscortWorld.ToString(), mcsBotPlayers,
                     disabled: worldData.IsDisabled,
                     resolver: () => new McsCommandContext { Position = worldData.GetPos() });
@@ -444,6 +444,11 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void DebugTeleportCommandAction(McsCommandContext ctx)
         {
             Singleton<GameWorld>.Instance.MainPlayer.Teleport(ctx.Position.Value);
+        }
+
+        public virtual void DebugInitAirdropCommandAction(McsCommandContext ctx)
+        {
+            Singleton<GameWorld>.Instance.InitAirdrop(Classification.AirdropIds.Random(), true, ctx.Position.HasValue ? ctx.Position.Value : Singleton<GameWorld>.Instance.MainPlayer.Position);
         }
 
 #endif

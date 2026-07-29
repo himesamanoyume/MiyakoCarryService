@@ -147,6 +147,21 @@ namespace MiyakoCarryService.Client.Utils
             typeof(GInterface370)
         };
 
+        public static readonly HashSet<string> AirdropIds = new()
+        {
+            "61a89e5445a2672acf66c877",
+            "61a89e812cc17d60cc5f9879",
+            "6223349b3136504a544d1608",
+            "622334c873090231d904a9fc",
+            "622334fa3136504a544d160c",
+            "6223351bb5d97a7b2c635ca7",
+            "62f10b79e7ee985f386b2f47",
+            "633ffb5d419dbf4bea7004c6",
+            "66da1b49099cf6adcc07a36b",
+            "66da1b546916142b3b022777",
+            "67614e3a6a90e4f10b0b140d"
+        };
+
         public static readonly HashSet<string> AllBrainNames = [.. Enum.GetNames(typeof(EBrainName))];
 
         public static readonly Dictionary<string, string> ImportantSwitchIdsInfo = new()

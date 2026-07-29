@@ -26,6 +26,7 @@ namespace MiyakoCarryService.Client.Enums
 #if DEBUG
         DebugSpawnAI,
         DebugTeleport,
+        DebugInitAirdrop,
 #endif
     }
 }
