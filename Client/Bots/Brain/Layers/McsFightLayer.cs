@@ -112,7 +112,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 stationary.DropCurWeapon(false, true);
                             }
                             RefreshStuckTimer();
-                            return new Action(typeof(HealLogic), "Mcs:StationaryHealing");
+                            return new Action(typeof(StationaryHealLogic), "Mcs:StationaryHealing");
                         }
 
                         if (stationary.CurLink == null)

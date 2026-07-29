@@ -169,6 +169,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             RegisterAction(typeof(GoToCoverPointLogic), EndGoToCoverPoint);
             RegisterAction(typeof(HealLogic), EndHeal);
+            RegisterAction(typeof(StationaryHealLogic), EndHeal);
             RegisterAction(typeof(RunToCoverLogic), EndRunToCover);
             RegisterAction(typeof(SimplePatrolLogic), EndSimplePatrol);
             RegisterAction(typeof(HoldPositionLogic), EndHoldPosition);
