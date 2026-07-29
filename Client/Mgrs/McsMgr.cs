@@ -33,6 +33,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             base.Start();
             EventMgr.Subscribe<ConfigEntrySettingChangedEvent>(UpdateMcsBotPlayerConfig, this);
+            EventMgr.Subscribe<OnPlayerDeadEvent>(OnPlayerDead, this);
         }
 
         public override void OnGameWorldEnded(GameWorldEndedEvent @event)
@@ -619,6 +620,39 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
             }
             return null;
+        }
+
+        private void OnPlayerDead(OnPlayerDeadEvent @event)
+        {
+            var deadPlayer = @event.DeadPlayer;
+            if (deadPlayer == null)
+            {
+                return;
+            }
+
+            IPlayer deadEnemy = deadPlayer;
+
+            foreach (var mcsSquad in _mcsSquadDict.Values)
+            {
+                foreach (var mcsBotPlayer in mcsSquad.Values)
+                {
+                    var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+                    if (botOwner == null || botOwner.EnemiesController == null)
+                    {
+                        continue;
+                    }
+
+                    if (botOwner.Memory.GoalEnemy?.Person == deadEnemy)
+                    {
+                        botOwner.Memory.GoalEnemy = null;
+                    }
+
+                    if (botOwner.EnemiesController.EnemyInfos.ContainsKey(deadEnemy))
+                    {
+                        botOwner.EnemiesController.Remove(deadEnemy);
+                    }
+                }
+            }
         }
     }
 }

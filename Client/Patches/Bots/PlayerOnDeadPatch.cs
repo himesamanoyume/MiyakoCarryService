@@ -2,6 +2,7 @@
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -10,7 +11,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 使服务端开启平衡限制时，清除护航的自带物品
+    /// 使服务端开启平衡限制时，清除护航的自带物品，并通过广播事件立即清理敌人信息
     /// </summary>
     public sealed class PlayerOnDeadPatch : ModulePatch
     {
@@ -43,6 +44,20 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             mcsBotPlayerData.HandleBalanceRestriction();
+        }
+
+        [PatchPostfix]
+        public static void Postfix(Player __instance, EDamageType damageType)
+        {
+            if (!Tools.IsHost)
+            {
+                return;
+            }
+
+            EventMgr.Notify(new OnPlayerDeadEvent
+            {
+                DeadPlayer = __instance
+            });
         }
     }
 }

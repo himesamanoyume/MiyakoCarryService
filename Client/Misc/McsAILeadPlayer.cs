@@ -109,7 +109,6 @@ namespace MiyakoCarryService.Client.Misc
                 var botOwner = mcsBotPlayer.BotOwner;
 
                 McsLeadPlayer.BotsGroup.AddEnemy(seenBotOwner, EBotEnemyCause.callForHelp2);
-                // McsLeadPlayer.BotsGroup.ReportAboutEnemy(seenBotOwner, EEnemyPartVisibleType.Visible, botOwner);
 
                 if (botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {

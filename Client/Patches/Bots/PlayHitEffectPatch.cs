@@ -52,7 +52,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         {
                             mcsAILeadPlayer.CalcGoalEnemy(shooterPlayer);
                         }
-                        // mcsBotPlayer.BotsGroup.ReportAboutEnemy(shooter.iPlayer, EEnemyPartVisibleType.Visible, botOwner);
                     }
                 }
             }
