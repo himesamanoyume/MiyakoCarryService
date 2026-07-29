@@ -113,7 +113,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Memory.IsUnderFire)
+            if (CanShootNow())
             {
                 return false;
             }
