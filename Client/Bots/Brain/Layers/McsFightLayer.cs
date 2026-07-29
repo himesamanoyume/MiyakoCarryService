@@ -120,15 +120,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             stationary.SetTargetStationary(stationaryWeaponLink);
                         }
 
-                        if (sqrToOperator >= 1f)
+                        if (_nextUpdatePosTime < time)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(operatorPos);
+                            UpdateCommonMoveTarget(operatorPos, out float nextTime);
+                            _nextUpdatePosTime = time + nextTime;
+                        }
+
+                        if (sqrToOperator >= 1.5f && _currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
                             return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
                         }
 
-                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (stationary.IsEnemyAtSector(stationary.CurLink) && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary)))
+                        var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
+
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
                         {
                             return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                        }
+
+                        if (goalEnemy == null)
+                        {
+                            ScanSector(stationaryWeaponLink);
                         }
                     }
                 }

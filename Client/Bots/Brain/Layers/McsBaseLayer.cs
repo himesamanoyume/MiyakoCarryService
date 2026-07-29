@@ -54,6 +54,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public float _nextAnimatorFixTime = 0f;
         public string _cachedProxyTargetId;
         public StationaryWeaponData _cachedStationaryWeaponData;
+        public float _scanPhase = 0f;
+        public const float SCANPERIOD = 4f;
+        public const float SCANDISTANCE = 30f;
+        public const float SCANPITCHDOWN = 2f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -1932,6 +1936,54 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
             return false;
+        }
+
+        public virtual bool IsTargetPitchReachable(StationaryWeapon stationaryWeapon, Vector3 targetPos)
+        {
+            var origin = stationaryWeapon.OperatorPosition;
+            var delta = targetPos - origin;
+
+            var horizontal = new Vector3(delta.x, 0f, delta.z).magnitude;
+            if (horizontal < 0.01f)
+            {
+                return false;
+            }
+
+            var requiredPitch = Mathf.Atan2(-delta.y, horizontal) * Mathf.Rad2Deg;
+            var pitchLimit = stationaryWeapon.PitchLimit;
+            var min = Mathf.Min(pitchLimit.x, pitchLimit.y);
+            var max = Mathf.Max(pitchLimit.x, pitchLimit.y);
+
+            return requiredPitch >= min - 2f && requiredPitch <= max + 2f;
+        }
+
+        public virtual void ScanSector(StationaryWeaponLink link)
+        {
+            var weapon = link.Weapon;
+            if (weapon == null)
+            {
+                return;
+            }
+
+            var halfAngleDeg = Mathf.Acos(Mathf.Clamp(link.CosAngleBase, -1f, 1f)) * Mathf.Rad2Deg;
+
+            _scanPhase += Time.deltaTime / SCANPERIOD;
+            var tri = Mathf.PingPong(_scanPhase, 1f);
+            var yawDeg = Mathf.Lerp(-halfAngleDeg, halfAngleDeg, tri);
+
+            var baseDir = link.InitialDir;
+            baseDir.y = 0f;
+            if (baseDir.sqrMagnitude < 0.001f)
+            {
+                return;
+            }
+            baseDir.Normalize();
+
+            var dir = Quaternion.AngleAxis(yawDeg, Vector3.up) * baseDir;
+            dir = Quaternion.AngleAxis(SCANPITCHDOWN, Vector3.Cross(dir, Vector3.up)) * dir;
+            var scanPoint = weapon.OperatorPosition + dir * SCANDISTANCE;
+            BotOwner.AimingManager.CurrentAiming.SetTarget(scanPoint);
+            BotOwner.AimingManager.NodeUpdate();
         }
     }
 }

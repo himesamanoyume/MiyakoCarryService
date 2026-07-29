@@ -397,9 +397,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
                 var closestGroupPoint = botsController.CoversData.GetClosest(pos);
                 botCreationDataClass.AddPosition(pos, closestGroupPoint.CorePointInGame.Id);
-                var closestZone = botSpawner.GetClosestZone(pos, out _); 
+                var closestZone = botSpawner.GetClosestZone(pos, out _);
 
-                // 普通敌对分组：把玩家当敌人（不 AddAlly / 不 RemoveEnemy）  
                 var groupAction = new Func<BotOwner, BotZone, BotsGroup>((botOwner, botZone) =>
                 {
                     var enemies = botSpawner.method_5(botOwner);
@@ -418,7 +417,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     var mcsBotPlayers = McsMgr.GetAllAliveMcsBotPlayer();
                     foreach (var mcsBotPlayer in mcsBotPlayers)
                     {
-                        
+
                     }
                 });
 
@@ -735,6 +734,11 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             var mcsBotPlayer = ctx.McsBotPlayer;
             var botOwner = mcsBotPlayer.AIData.BotOwner;
+            var stationary = botOwner.WeaponManager?.Stationary;
+            if (stationary != null && stationary.CurLink != null && stationary.Taken)
+            {
+                stationary.DropCurWeapon(false, true);
+            }
             botOwner.StopMove();
             botOwner.Mover.AllowTeleport();
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
