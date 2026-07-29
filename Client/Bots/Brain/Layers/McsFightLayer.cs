@@ -71,9 +71,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
-                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive))
+                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive || goalEnemy.Person.AIData.BotOwner.Brain == null || goalEnemy.Person.AIData.BotOwner.BotState is EBotState.NonActive))
                     {
                         BotOwner.Memory.GoalEnemy = null;
+                        if (BotOwner.EnemiesController.EnemyInfos.ContainsKey(goalEnemy.Person))
+                        {
+                            BotOwner.EnemiesController.Remove(goalEnemy.Person);
+                        }
                         _nextRecalcGoalTime = 0f;
                     }
 
