@@ -245,5 +245,9 @@
     "Mcs/FollowMeCommand Name": "跟随我",
     "Mcs/FollowMeCommand TargetName": "命令护航跟随老板，此状态下护航将不会主动进攻敌人、不会进行战利品掠夺",
     "Mcs/TeamFollowMeCommand Name": "全队跟随我",
-    "Mcs/TeamFollowMeCommand TargetName": "让所有护航跟随老板，此状态下护航将不会主动进攻敌人、不会进行掠夺战利品"
+    "Mcs/TeamFollowMeCommand TargetName": "让所有护航跟随老板，此状态下护航将不会主动进攻敌人、不会进行掠夺战利品",
+    "Mcs/BtrEscortCommand Name": "护送至BTR",
+    "Mcs/BtrEscortCommand TargetName": "护送至BTR",
+    "Mcs/TeamBtrEscortCommand Name": "全队护送至BTR",
+    "Mcs/TeamBtrEscortCommand TargetName": "全队护送至BTR"
 }

@@ -546,23 +546,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.TargetPos.HasValue)
+            var hasEscortToBtr = McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr);
+            var hasEscort = McsBotPlayerData.HasDecision(Decisions.ShouldEscort);
+            var btrController = Singleton<GameWorld>.Instance.BtrController;
+            if ((hasEscort && !McsBotPlayerData.TargetPos.HasValue) || (hasEscortToBtr && !btrController.Initiated()))
             {
                 return true;
             }
 
-            var sqrDistance = McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position);
+            var sqrDistance = hasEscort ? McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position) : btrController.BtrView.GetBtrSide(1).GoInPoints().Item1.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort))
+                McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                BotOwner.TalkMsg(new McsMsg
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
-                    BotOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.OnPosition
-                    });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldFollowMe, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
-                }
+                    PhraseTrigger = EPhraseTrigger.OnPosition
+                });
+                TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldFollowMe, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldEscortToBtr, Decisions.ShouldKeepFormation]));
                 return true;
             }
             else if (BotOwner.GoToSomePointData.IsCome())

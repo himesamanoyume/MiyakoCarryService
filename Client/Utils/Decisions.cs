@@ -17,5 +17,6 @@ namespace MiyakoCarryService.Client.Utils
         public const string ShouldKeepFormation = "Mcs.ShouldKeepFormation";
         public const string ShouldStationaryWeaponProxyAction = "Mcs.ShouldStationaryWeaponProxyAction";  
         public const string ShouldUseStationaryWeapon = "Mcs.ShouldUseStationaryWeapon";
+        public const string ShouldEscortToBtr = "Mcs.ShouldEscortToBtr";
     }
 }

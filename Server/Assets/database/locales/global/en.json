@@ -245,5 +245,9 @@
     "Mcs/FollowMeCommand Name": "Follow Me",
     "Mcs/FollowMeCommand TargetName": "Command carry service player to follow me. In this state carry service players will not proactively attack enemies or loot",
     "Mcs/TeamFollowMeCommand Name": "Team Follow Me",
-    "Mcs/TeamFollowMeCommand TargetName": "All carry service players to follow me. In this state carry service players will not proactively attack enemies or loot"
+    "Mcs/TeamFollowMeCommand TargetName": "All carry service players to follow me. In this state carry service players will not proactively attack enemies or loot",
+    "Mcs/BtrEscortCommand Name": "Escort to BTR",
+    "Mcs/BtrEscortCommand TargetName": "Command carry service player to escort to BTR",
+    "Mcs/TeamBtrEscortCommand Name": "Team Escort to BTR",
+    "Mcs/TeamBtrEscortCommand TargetName": "Command all carry service players to escort to BTR"
 }

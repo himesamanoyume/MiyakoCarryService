@@ -226,5 +226,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string FOLLOWMECOMMAND_TARGETNAME = "Mcs/FollowMeCommand TargetName";
         public const string TEAMFOLLOWMECOMMAND_NAME = "Mcs/TeamFollowMeCommand Name";
         public const string TEAMFOLLOWMECOMMAND_TARGETNAME = "Mcs/TeamFollowMeCommand TargetName";
+        public const string BTRESCORTCOMMAND_NAME = "Mcs/BtrEscortCommand Name";
+        public const string BTRESCORTCOMMAND_TARGETNAME = "Mcs/BtrEscortCommand TargetName";
+        public const string TEAMBTRESCORTCOMMAND_NAME = "Mcs/TeamBtrEscortCommand Name";
+        public const string TEAMBTRESCORTCOMMAND_TARGETNAME = "Mcs/TeamBtrEscortCommand TargetName";
     }
 }

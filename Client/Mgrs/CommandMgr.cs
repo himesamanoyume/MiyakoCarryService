@@ -12,7 +12,6 @@ using MiyakoCarryService.Client.Utils;
 using SPT.Common.Utils;
 using System.Threading;
 using System;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using HarmonyLib;
 
@@ -43,6 +42,7 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.RegisterCommandHandler(ECommandType.ChangeFormation.ToString(), ChangeFormationCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.StationaryWeaponProxyAction.ToString(), StationaryWeaponProxyActionCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.FollowMe.ToString(), FollowMeCommandAction);
+            CommandUtils.RegisterCommandHandler(ECommandType.EscortBtr.ToString(), EscortToBtrPosCommandAction);
 #if DEBUG
             CommandUtils.RegisterCommandHandler(ECommandType.DebugSpawnAI.ToString(), DebugSpawnAICommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.DebugTeleport.ToString(), DebugTeleportCommandAction);
@@ -225,6 +225,15 @@ namespace MiyakoCarryService.Client.Mgrs
                 isTeam ? Locales.TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME : Locales.STATIONARYWEAPONESCORTCOMMAND_TARGETNAME,
                 m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<StationaryWeaponData, StationaryWeaponDataMgr>()));
 
+            var btrController = Singleton<GameWorld>.Instance.BtrController;
+            if (btrController.Initiated())
+            {
+                menu.RegisterCommand(
+                    isTeam ? Locales.TEAMBTRESCORTCOMMAND_NAME : Locales.BTRESCORTCOMMAND_NAME,
+                    isTeam ? Locales.TEAMBTRESCORTCOMMAND_TARGETNAME : Locales.BTRESCORTCOMMAND_TARGETNAME,
+                    ECommandType.EscortBtr.ToString(), mcsBotPlayers, disabled: () => btrController.BtrVehicle.VehicleRouteState == EVehicleRouteState.OnDepot);
+            }
+            
             CommandUtils.Apply(EMenuId.Escort.ToString(), menu, mcsBotPlayers);
         }
 
@@ -660,6 +669,29 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 PhraseTrigger = EPhraseTrigger.Roger
             });
+        }
+
+        public virtual void EscortToBtrPosCommandAction(McsCommandContext ctx)
+        {
+            var mcsBotPlayer = ctx.McsBotPlayer;
+            var botOwner = mcsBotPlayer.AIData.BotOwner;
+            if (botOwner.Memory.HaveEnemy)
+            {
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Negative
+                });
+            }
+            botOwner.Mover.LastTimePosChanged = Time.time;
+            botOwner.StopMove();
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
+            {
+                mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldEscortToBtr);
+                mcsBotPlayerData.IsLooting = false;
+                mcsBotPlayerData.TargetPos = null;
+                mcsBotPlayerData.ProxyTargetId = null;
+            }
         }
 
         public virtual void GoToPointCommandAction(McsCommandContext ctx)
