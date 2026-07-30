@@ -96,7 +96,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData != null && McsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
                 {
                     var stationary = BotOwner.WeaponManager.Stationary;
-                    if (McsBotPlayerData.ProxyTargetId != _cachedProxyTargetId)
+                    if (_cachedProxyTargetId == null || _cachedStationaryWeaponData == null || McsBotPlayerData.ProxyTargetId != _cachedProxyTargetId)
                     {
                         _cachedProxyTargetId = McsBotPlayerData.ProxyTargetId;
                         _cachedStationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId) as StationaryWeaponData;

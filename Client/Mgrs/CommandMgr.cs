@@ -129,8 +129,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
-            menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
-            menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
+            menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers, shouldCheckExclude: false);
+            menu.RegisterCommand(Locales.TEAMREPORTABOUTSELFCOMMAND_NAME, Locales.TEAMREPORTABOUTSELFCOMMAND_TARGETNAME, ECommandType.ReportAboutSelf.ToString(), mcsBotPlayers, shouldCheckExclude: false);
             menu.RegisterCommand(Locales.TEAMONYOUROWNCOMMAND_NAME, Locales.TEAMONYOUROWNCOMMAND_TARGETNAME, ECommandType.OnYourOwn.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
             menu.RegisterCommand(Locales.TEAMREGROUPCOMMAND_NAME, Locales.TEAMREGROUPCOMMAND_TARGETNAME, ECommandType.Regroup.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
             menu.RegisterCommand(Locales.TEAMFOLLOWMECOMMAND_NAME, Locales.TEAMFOLLOWMECOMMAND_TARGETNAME, ECommandType.FollowMe.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
@@ -141,8 +141,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterCommand(Locales.TEAMDROPTARGETLOOTCOMMAND_NAME, Locales.TEAMDROPTARGETLOOTCOMMAND_TARGETNAME, ECommandType.DropTargetLoot.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);
             menu.RegisterSubMenu(Locales.TEAMESCORTCOMMAND_NAME, Locales.TEAMESCORTCOMMAND_TARGETNAME, m => BuildEscortMenu(m, mcsBotPlayers, isTeam));
             menu.RegisterSubMenu(Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_NAME, Locales.TEAMCHANGEAIMINGBODYPARTTYPECOMMAND_TARGETNAME, m => BuildAimingMenu(m, mcsBotPlayers, isTeam));
-            menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay,
-            out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
+            menu.RegisterCommand(Locales.TEAMCLEARAREACOMMAND_NAME, Locales.TEAMCLEARAREACOMMAND_TARGETNAME, ECommandType.ClearArea.ToString(), mcsBotPlayers, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayerMaskClass.HighPolyWithTerrainMask)
             ? new McsCommandContext { Position = hit.point, ShouldCheckExclude = isTeam } : null, shouldCheckExclude: isTeam);
             menu.RegisterSubMenu(Locales.CHANGEFORMATIONCOMMAND_NAME, Locales.CHANGEFORMATIONCOMMAND_TARGETNAME, m => BuildFormationMenu(m, [mcsBotPlayers.FirstOrDefault()], false));
             menu.RegisterCommand(Locales.TEAMFORCETELEPORTCOMMAND_NAME, Locales.TEAMFORCETELEPORTCOMMAND_TARGETNAME, ECommandType.Teleport.ToString(), mcsBotPlayers, shouldCheckExclude: isTeam);

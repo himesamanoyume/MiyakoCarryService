@@ -1100,6 +1100,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
+            if (!BotOwner.Memory.HaveEnemy)
+            {
+                ScanSector(curLink);
+            }
             return false;
         }
 
