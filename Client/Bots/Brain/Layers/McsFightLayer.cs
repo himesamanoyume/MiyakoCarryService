@@ -151,9 +151,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 BotOwner.StopMove();
                                 BotOwner.Mover.AllowTeleport();
                                 BotOwner.GetPlayer.Teleport(operatorPos, true);
-                                BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
-                                BotOwner.Mover.LastGoodCastPointTime = time;
-                                BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                                BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
+                                BotOwner.Mover._lastGoodCastPointTime = time;
+                                BotOwner.Mover._prevPosLinkedTime = 0f;
                                 BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
                                 BotOwner.Mover.RecalcWay();
                                 BotOwner.Mover.Pause = true;
