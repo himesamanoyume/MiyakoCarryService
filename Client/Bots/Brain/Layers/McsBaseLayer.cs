@@ -96,6 +96,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Start()
         {
             base.Start();
+            // if (MiyakoCarryServicePlugin.SAINInstalled)
+            // {
+            //     // 如果不执行这段代码，当护航从SAIN的Layer回到Mcs的Layer时，就会卡住不动
+            //     SAINUtils.ResetSAINLayer(BotOwner);
+            // }
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsMcsLayerActive = true;
