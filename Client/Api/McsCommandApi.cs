@@ -102,9 +102,9 @@ namespace MiyakoCarryService.Client.Api
             return CommandUtils.GetAliveMembers();
         }
         
-        public static void Execute(McsCommandContext ctx)
+        public static void Execute(McsCommandContext ctx, bool shouldCheckData)
         {
-            CommandUtils.Execute(ctx);
+            CommandUtils.Execute(ctx, shouldCheckData);
         }
     }
 }

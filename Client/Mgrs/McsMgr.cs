@@ -380,7 +380,8 @@ namespace MiyakoCarryService.Client.Mgrs
                     {
                         botOwner.TalkMsg(new McsMsg
                         {
-                            PhraseTrigger = EPhraseTrigger.Going
+                            PhraseTrigger = EPhraseTrigger.Going,
+                            Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                         });
                     }
                 }

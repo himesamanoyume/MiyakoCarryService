@@ -102,10 +102,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         _cachedStationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
                     }
 
-                    if (_cachedStationaryWeaponData.StationaryWeapon != null && _cachedStationaryWeaponData.StationaryWeaponLink != null)
+                    var stationaryWeapon = _cachedStationaryWeaponData?.StationaryWeapon;
+                    var stationaryWeaponLink = _cachedStationaryWeaponData?.StationaryWeaponLink;
+
+                    if (_cachedProxyTargetId != null && stationaryWeapon != null && stationaryWeaponLink != null)
                     {
-                        var stationaryWeapon = _cachedStationaryWeaponData.StationaryWeapon;
-                        var stationaryWeaponLink = _cachedStationaryWeaponData.StationaryWeaponLink;
                         var operatorPos = stationaryWeapon.OperatorPosition;
                         var sqrToOperator = BotOwner.Position.McsSqrDistance(operatorPos);
 

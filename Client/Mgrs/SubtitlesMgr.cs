@@ -213,9 +213,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public string HandlePhraseWithOnFight(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
-            foreach (var key in msg.Keys)
+            if (msg.Keys != null)
             {
-                content += key.McsLocalized();
+                foreach (var key in msg.Keys)
+                {
+                    content += key.McsLocalized();
+                }
             }
             return content;
         }

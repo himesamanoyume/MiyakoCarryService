@@ -48,18 +48,21 @@ namespace MiyakoCarryService.Client.Utils
             );
         }
 
-        public static void Execute(McsCommandContext ctx)
+        public static void Execute(McsCommandContext ctx, bool shouldCheckData)
         {
             if (ctx?.CommandType == null)
             {
                 return;
             }
 
-            var mcsBotPlayer = ctx.McsBotPlayer;
-            var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
-            if (ctx.ShouldCheckExclude && mcsBotPlayerData.IsExcluded)
+            if (shouldCheckData)
             {
-                return;
+                var mcsBotPlayer = ctx.McsBotPlayer;
+                var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+                if (ctx.ShouldCheckExclude && mcsBotPlayerData.IsExcluded)
+                {
+                    return;
+                }
             }
 
             if (_handlersMap.TryGetValue(ctx.CommandType, out var handler))
@@ -309,7 +312,7 @@ namespace MiyakoCarryService.Client.Utils
                     if (isLocal)
                     {
                         ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                        Execute(ctx);
+                        Execute(ctx, false);
                     }
                     else
                     {
@@ -328,7 +331,7 @@ namespace MiyakoCarryService.Client.Utils
                 else
                 {
                     ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                    Execute(ctx);
+                    Execute(ctx, true);
                 }
             });
             CloseCommandMenuAction();

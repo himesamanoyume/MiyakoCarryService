@@ -178,7 +178,7 @@ namespace MiyakoCarryService.Fika
                     McsBotPlayer = mcsBotPlayer,
                     ShouldCheckExclude = packet.ShouldCheckExclude,
                     Extensions = packet.Extensions
-                });
+                }, true);
             }
         }
 
