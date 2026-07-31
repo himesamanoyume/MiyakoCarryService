@@ -195,6 +195,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string ONFIGHT = "Mcs/OnFight";
         public const string EXCLUDED = "Mcs/Excluded";
         public const string TAKENOVER = "Mcs/TakenOver";
+        public const string ONOUTOFAMMO = "Mcs/OnOutOfAmmo";
         public const string CLEARAREACOMMAND_NAME = "Mcs/ClearAreaCommand Name";
         public const string CLEARAREACOMMAND_TARGETNAME = "Mcs/ClearAreaCommand TargetName";
         public const string TEAMCLEARAREACOMMAND_NAME = "Mcs/TeamClearAreaCommand Name";

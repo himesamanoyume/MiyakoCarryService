@@ -258,5 +258,6 @@
     "Mcs/ExcludeOrTakeOverCommand Name": "排除/接管",
     "Mcs/ExcludeOrTakeOverCommand TargetName": "排除指令将使护航不受全队指令影响，接管指令则会恢复全队指令对护航的影响",
     "Mcs/Excluded": "已被全队指令排除。",
-    "Mcs/TakenOver": "已被全队指令重新接管。"
+    "Mcs/TakenOver": "已被全队指令重新接管。",
+    "Mcs/OnOutOfAmmo": "弹药耗尽。"
 }

@@ -258,5 +258,6 @@
     "Mcs/ExcludeOrTakeOverCommand Name": "Exclude / Take Over",
     "Mcs/ExcludeOrTakeOverCommand TargetName": "Exclude command will prevent carry service player from receiving team commands; Take Over command will restore team command control over carry service player",
     "Mcs/Excluded": "Excluded from team commands.",
-    "Mcs/TakenOver": "Restored to team command control."
+    "Mcs/TakenOver": "Restored to team command control.",
+    "Mcs/OnOutOfAmmo": "Out of ammo."
 }
