@@ -40,6 +40,7 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly Action<object, int> _activeLayerSetter = BuildInstanceIntSetter(_botActivationType, "ActiveLayer");
         private static readonly Action<object> _manualUpdateInvoker = BuildVoidMethodInvoker(_botActivationType, "ManualUpdate");
         private static readonly Action<object, Vector3, bool, float, bool> _walkToPointInvoker = BuildWalkToPointInvoker();
+        private static readonly Action<object, Vector3, bool, float, bool> _runToPointInvoker = BuildRunToPointInvoker();
 
         private static readonly Func<object, object> _moverBotGetter = BuildInstanceGetter(SainMoverType, "Bot");
         private static readonly Func<object, BotOwner> _botComponentBotOwnerGetter = BuildBotOwnerGetter(SainMoverType?.GetProperty("Bot")?.PropertyType ?? SainMoverType?.GetField("Bot")?.FieldType);
@@ -51,7 +52,6 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly ConditionalWeakTable<object, BotOwner> _playerComponentBotOwners = new();
         private static readonly ConditionalWeakTable<object, BotOwner> _moverBotOwners = new();
         private static readonly ConditionalWeakTable<object, BotOwner> _dogFightBotOwners = new();
-        private static readonly ConditionalWeakTable<object, StrongBox<bool>> _mcsBotPlayerInstances = new();
 
         public static bool IsMcsBotPlayer(object instance, Func<object, BotOwner> botOwnerResolver)
         {
@@ -60,15 +60,8 @@ namespace MiyakoCarryService.Client.Utils
                 return false;
             }
 
-            if (_mcsBotPlayerInstances.TryGetValue(instance, out var box))
-            {
-                return box.Value;
-            }
-
             var botOwner = botOwnerResolver(instance);
-            var isMcsBotPlayer = botOwner != null && botOwner.IsMcsBotPlayer;
-            _mcsBotPlayerInstances.Add(instance, new StrongBox<bool>(isMcsBotPlayer));
-            return isMcsBotPlayer;
+            return botOwner != null && botOwner.IsMcsBotPlayer;
         }
 
         public static BotOwner GetPlayerComponentBotOwner(object playerComponent)
@@ -297,6 +290,31 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
+        private static Action<object, Vector3, bool, float, bool> BuildRunToPointInvoker()
+        {
+            if (RunToPointMethod == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var instance = Expression.Parameter(typeof(object), "inst");
+                var point = Expression.Parameter(typeof(Vector3), "point");
+                var mustHaveCompletePath = Expression.Parameter(typeof(bool), "mustHaveCompletePath");
+                var reachDist = Expression.Parameter(typeof(float), "reachDist");
+                var checkSameWay = Expression.Parameter(typeof(bool), "checkSameWay");
+
+                var call = Expression.Call(Expression.Convert(instance, SainMoverType), RunToPointMethod, point, mustHaveCompletePath, reachDist, checkSameWay);
+                return Expression.Lambda<Action<object, Vector3, bool, float, bool>>(call, instance, point, mustHaveCompletePath, reachDist, checkSameWay).Compile();
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return null;
+            }
+        }
+
         public static bool ShouldStandStill(BotOwner botOwner)
         {
             if (botOwner == null)
@@ -395,6 +413,11 @@ namespace MiyakoCarryService.Client.Utils
 
             _activeLayerSetter?.Invoke(botActivation, 0); // ESAINLayer.None = 0  
             _manualUpdateInvoker?.Invoke(botActivation);
+        }
+
+        public static void RunToPoint(object mover, Vector3 point)
+        {
+            _runToPointInvoker?.Invoke(mover, point, false, -1f, true);
         }
     }
 }
