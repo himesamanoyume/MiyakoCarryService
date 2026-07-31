@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Client.Patches.Interactive
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_14));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, Door door, ref ActionsReturnClass __result)
@@ -59,7 +58,6 @@ namespace MiyakoCarryService.Client.Patches.Interactive
         }
     }
 
-
     /// <summary>
     /// 护航代理拾取战利品
     /// </summary>
@@ -68,7 +66,6 @@ namespace MiyakoCarryService.Client.Patches.Interactive
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_8));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        private static CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
 
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, LootItem lootItem, ref ActionsReturnClass __result)
@@ -101,10 +98,55 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.McsNickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandUtils.Dispatch(  
-                        ECommandType.LootProxyAction.ToString(),  
-                        [mcsBotPlayer],  
+                    Action = () => CommandUtils.Dispatch(
+                        ECommandType.LootProxyAction.ToString(),
+                        [mcsBotPlayer],
                         () => new McsCommandContext { TargetId = lootData.Item.Id }
+                    ),
+                    Disabled = !mcsBotPlayer.HealthController.IsAlive
+                });
+            }
+        }
+    }
+
+    /// <summary>  
+    /// 护航代理操作固定武器
+    /// </summary>  
+    public sealed class StationaryWeaponGetActionsClassPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_17));
+
+        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+
+        [PatchPostfix]
+        public static void Postfix(GamePlayerOwner owner, StationaryWeapon stationaryWeapon, ref ActionsReturnClass __result)
+        {
+            var stationaryWeaponData = stationaryWeapon.GetData();
+            if (stationaryWeaponData == null)
+            {
+                return;
+            }
+
+            var mcsBotPlayers = McsMgr.GetAllMyMcsSquadMembers(out var mcsLeadPlayer);
+            if (mcsLeadPlayer == null)
+            {
+                return;
+            }
+            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
+            foreach (var mcsBotPlayer in mcsBotPlayers)
+            {
+                __result.Actions.Add(new ActionsTypesClass
+                {
+                    Name = Locales.STATIONARYWEAPONPROXYCOMMAND_NAME.McsLocalized() + " " + mcsBotPlayer.Profile.McsNickname,
+                    TargetName = Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME,
+                    Action = () => CommandUtils.Dispatch(
+                        ECommandType.StationaryWeaponProxyAction.ToString(),
+                        [mcsBotPlayer],
+                        () => new McsCommandContext 
+                        { 
+                            Position = stationaryWeaponData.GetPos(),
+                            TargetId = stationaryWeaponData.Id(),
+                        }
                     ),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
