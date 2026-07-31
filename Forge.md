@@ -250,7 +250,15 @@ Command `McsBotPlayer` to act independently.
 
 - **Regroup**
 
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to follow the `McsLeadPlayer`.
+Command `McsBotPlayer` to stop all actions and regroup.
+
+- **Follow Me**
+
+Command `McsBotPlayer` to follow the `McsLeadPlayer`. In this state, `McsBotPlayer` will not proactively attack enemies or loot.
+
+- **Exclude / Takeover**
+
+Exclude command will prevent `McsBotPlayer` from receiving team commands; Take Over command will restore team command control over `McsBotPlayer`.
 
 - **Go To**
 
@@ -277,6 +285,9 @@ Command `McsBotPlayer` to change preferred combat aiming body part.
 - - **Exfil Escort**
 - - **Transit Escort**
 - - **Switch Escort**
+- - **Stationary Weapon Escort**
+- - **BTR Escort**
+- - **Airdrop Escort**
 
 If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort to the designated location.
 
@@ -312,7 +323,11 @@ Command `McsBotPlayers` to act independently.
 
 - **Team Regroup**
 
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to follow the `McsLeadPlayer`.
+Command all `McsBotPlayers` to stop all actions and regroup.
+
+- **Team Follow Me**
+
+Command all `McsBotPlayers` to follow the `McsLeadPlayer`. In this state, they will not proactively attack enemies or loot.
 
 - **Team Go To**
 
@@ -335,6 +350,9 @@ Command `McsBotPlayers` to change preferred combat aiming body part.
 - - **Team Exfil Escort**
 - - **Team Transit Escort**
 - - **Team Switch Escort**
+- - **Team Stationary Weapon Escort**
+- - **Team BTR Escort**
+- - **Team Airdrop Escort**
 
 If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to escort to the designated location.
 

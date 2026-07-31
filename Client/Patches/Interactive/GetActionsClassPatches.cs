@@ -138,7 +138,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 __result.Actions.Add(new InteractionAction
                 {
-                    Name = Locales.STATIONARYWEAPONPROXYCOMMAND_NAME.McsLocalized() + " " + mcsBotPlayer.Profile.McsNickname,
+                    Name = mcsBotPlayer.Profile.McsNickname + " " + Locales.STATIONARYWEAPONPROXYCOMMAND_NAME.McsLocalized(),
                     TargetName = Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME,
                     Action = () => CommandUtils.Dispatch(
                         ECommandType.StationaryWeaponProxyAction.ToString(),

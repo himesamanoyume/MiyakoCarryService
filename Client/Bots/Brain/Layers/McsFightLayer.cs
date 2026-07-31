@@ -18,6 +18,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public const float FightHoldTime = 3f;
         public float _lastHaveEnemyTime = -999f;
         public bool _deferToSain = false;
+        public float _goToStationaryStuckTime = -999f;
+        public float _lastSqrToOperator = float.MaxValue;
 
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -133,8 +135,47 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         if (sqrToOperator >= 1.5f && _currentMoveTarget.HasValue)
                         {
+                            if (sqrToOperator < _lastSqrToOperator - 0.5f)
+                            {
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = sqrToOperator;
+                            }
+                            else if (_goToStationaryStuckTime <= 0f || _goToStationaryStuckTime > time)
+                            {
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = sqrToOperator;
+                            }
+
+                            if (sqrToOperator < 9f && time - _goToStationaryStuckTime > 8f)
+                            {
+                                BotOwner.StopMove();
+                                BotOwner.Mover.AllowTeleport();
+                                BotOwner.GetPlayer.Teleport(operatorPos, true);
+                                BotOwner.Mover.LastGoodCastPoint = BotOwner.Mover.PrevSuccessLinkedFrom_1 = BotOwner.Mover.PrevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
+                                BotOwner.Mover.LastGoodCastPointTime = time;
+                                BotOwner.Mover.PrevPosLinkedTime_1 = 0f;
+                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
+                                BotOwner.Mover.RecalcWay();
+                                BotOwner.Mover.Pause = true;
+
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = float.MaxValue;
+                                RefreshStuckTimer();
+
+                                if (stationary.CurLink == null)
+                                {
+                                    stationary.SetTargetStationary(stationaryWeaponLink);
+                                }
+                                return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                            }
+
                             BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
                             return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                        }
+                        else
+                        {
+                            _goToStationaryStuckTime = -999f;
+                            _lastSqrToOperator = float.MaxValue;
                         }
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
@@ -150,6 +191,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             ScanSector(stationaryWeaponLink);
                         }
                     }
+                }
+                else
+                {
+                    _goToStationaryStuckTime = -999f;
+                    _lastSqrToOperator = float.MaxValue;
                 }
 
                 if (goalEnemy == null)

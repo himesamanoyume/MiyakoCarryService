@@ -56,6 +56,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 { EPhraseTrigger.Negative, Locales.NEGATIVE },
                 { EPhraseTrigger.Mine, Locales.MINE },
                 { EPhraseTrigger.OnFight, Locales.ONFIGHT },
+                { EPhraseTrigger.OnOutOfAmmo, Locales.ONOUTOFAMMO },
                 // 空短语、临时内容，用于传递任意Key实现任何对话内容
                 { EPhraseTrigger.PhraseNone, "PhraseNone" }
             };

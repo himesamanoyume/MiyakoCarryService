@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -19,40 +20,38 @@ namespace MiyakoCarryService.Client.Utils
         public const float EnterSainSqr = EnterSainDist * EnterSainDist;
         public const float ExitSainSqr = ExitSainDist * ExitSainDist;
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+
         public static readonly Type PlayerComponentType = Type.GetType("SAIN.Components.PlayerComponent, SAIN");
-        public static readonly MethodInfo SetTargetMoveDirectionMethod = AccessTools.Method(Type.GetType("SAIN.Classes.PlayerMovementController, SAIN"), "SetTargetMoveDirection");
-        private static readonly Func<object, BotOwner> _playerComponentBotOwnerGetter = BuildBotOwnerGetter(PlayerComponentType);
-        private static readonly ConditionalWeakTable<object, BotOwner> _playerComponentBotOwners = new();
         public static readonly Type SainMoverType = Type.GetType("SAIN.SAINComponent.Classes.Mover.SAINMoverClass, SAIN");
-
         public static readonly Type DogFightType = Type.GetType("SAIN.SAINComponent.Classes.Mover.DogFight, SAIN");
+        public static readonly Type SAINEnableClassType = Type.GetType("SAIN.SAINEnableClass, SAIN");
+        private static readonly Type _sainBotComponentType = GetSAINMethod?.GetParameters().ElementAtOrDefault(1)?.ParameterType?.GetElementType();
+        private static readonly Type _botActivationType = _sainBotComponentType?.GetProperty("BotActivation")?.PropertyType ?? _sainBotComponentType?.GetField("BotActivation")?.FieldType;
 
+        public static readonly MethodInfo SetTargetMoveDirectionMethod = AccessTools.Method(Type.GetType("SAIN.Classes.PlayerMovementController, SAIN"), "SetTargetMoveDirection");
         public static readonly MethodInfo RunToPointMethod = AccessTools.Method(SainMoverType, "RunToPoint");
-
         public static readonly MethodInfo WalkToPointMethod = AccessTools.Method(SainMoverType, "WalkToPoint");
-
         public static readonly MethodInfo RunToPointByWayMethod = AccessTools.Method(SainMoverType, "RunToPointByWay");
-
         public static readonly MethodInfo WalkToPointByWayMethod = AccessTools.Method(SainMoverType, "WalkToPointByWay");
-
         public static readonly MethodInfo ManualUpdateMethod = AccessTools.Method(SainMoverType, "ManualUpdate");
-
         public static readonly MethodInfo DogFightMoveMethod = AccessTools.Method(DogFightType, "DogFightMove");
+        public static readonly MethodInfo GetSAINMethod = AccessTools.Method(SAINEnableClassType, "GetSAIN");
+
+        private static readonly Action<object, int> _activeLayerSetter = BuildInstanceIntSetter(_botActivationType, "ActiveLayer");
+        private static readonly Action<object> _manualUpdateInvoker = BuildVoidMethodInvoker(_botActivationType, "ManualUpdate");
+        private static readonly Action<object, Vector3, bool, float, bool> _walkToPointInvoker = BuildWalkToPointInvoker();
+        private static readonly Action<object, Vector3, bool, float, bool> _runToPointInvoker = BuildRunToPointInvoker();
 
         private static readonly Func<object, object> _moverBotGetter = BuildInstanceGetter(SainMoverType, "Bot");
-
         private static readonly Func<object, BotOwner> _botComponentBotOwnerGetter = BuildBotOwnerGetter(SainMoverType?.GetProperty("Bot")?.PropertyType ?? SainMoverType?.GetField("Bot")?.FieldType);
-
+        private static readonly Func<object, BotOwner> _playerComponentBotOwnerGetter = BuildBotOwnerGetter(PlayerComponentType);
+        private static readonly Func<object, object> _botActivationGetter = BuildInstanceGetter(_sainBotComponentType, "BotActivation");
         private static readonly Func<object, bool> _moverMovingGetter = BuildBoolGetter(SainMoverType, "Moving");
-
         private static readonly Func<object, BotOwner> _dogFightBotOwnerGetter = BuildBotOwnerGetter(DogFightType);
 
-        private static readonly Action<object, Vector3, bool, float, bool> _walkToPointInvoker = BuildWalkToPointInvoker();
-
+        private static readonly ConditionalWeakTable<object, BotOwner> _playerComponentBotOwners = new();
         private static readonly ConditionalWeakTable<object, BotOwner> _moverBotOwners = new();
-
         private static readonly ConditionalWeakTable<object, BotOwner> _dogFightBotOwners = new();
-        private static readonly ConditionalWeakTable<object, StrongBox<bool>> _mcsBotPlayerInstances = new();
 
         public static bool IsMcsBotPlayer(object instance, Func<object, BotOwner> botOwnerResolver)
         {
@@ -61,15 +60,8 @@ namespace MiyakoCarryService.Client.Utils
                 return false;
             }
 
-            if (_mcsBotPlayerInstances.TryGetValue(instance, out var box))
-            {
-                return box.Value;
-            }
-
             var botOwner = botOwnerResolver(instance);
-            var isMcsBotPlayer = botOwner != null && botOwner.IsMcsBotPlayer;
-            _mcsBotPlayerInstances.Add(instance, new StrongBox<bool>(isMcsBotPlayer));
-            return isMcsBotPlayer;
+            return botOwner != null && botOwner.IsMcsBotPlayer;
         }
 
         public static BotOwner GetPlayerComponentBotOwner(object playerComponent)
@@ -176,6 +168,61 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
+        private static Action<object, int> BuildInstanceIntSetter(Type type, string member)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var instance = Expression.Parameter(typeof(object), "o");
+                var value = Expression.Parameter(typeof(int), "v");
+
+                var prop = type.GetProperty(member);
+                var field = prop == null ? type.GetField(member) : null;
+                var memberType = prop != null ? prop.PropertyType : field.FieldType;
+
+                var target = Expression.Convert(instance, type);
+                var memberAccess = prop != null ? Expression.Property(target, prop) : Expression.Field(target, field);
+
+                var assign = Expression.Assign(memberAccess, Expression.Convert(value, memberType));
+                return Expression.Lambda<Action<object, int>>(assign, instance, value).Compile();
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return null;
+            }
+        }
+
+        private static Action<object> BuildVoidMethodInvoker(Type type, string method)
+        {
+            if (type == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var methodInfo = AccessTools.Method(type, method);
+                if (methodInfo == null)
+                {
+                    return null;
+                }
+
+                var instance = Expression.Parameter(typeof(object), "o");
+                var call = Expression.Call(Expression.Convert(instance, type), methodInfo);
+                return Expression.Lambda<Action<object>>(call, instance).Compile();
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return null;
+            }
+        }
+
         private static Func<object, BotOwner> BuildBotOwnerGetter(Type type)
         {
             if (type == null)
@@ -234,6 +281,31 @@ namespace MiyakoCarryService.Client.Utils
                 var checkSameWay = Expression.Parameter(typeof(bool), "checkSameWay");
 
                 var call = Expression.Call(Expression.Convert(instance, SainMoverType), WalkToPointMethod, point, mustHaveCompletePath, reachDist, checkSameWay);
+                return Expression.Lambda<Action<object, Vector3, bool, float, bool>>(call, instance, point, mustHaveCompletePath, reachDist, checkSameWay).Compile();
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return null;
+            }
+        }
+
+        private static Action<object, Vector3, bool, float, bool> BuildRunToPointInvoker()
+        {
+            if (RunToPointMethod == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var instance = Expression.Parameter(typeof(object), "inst");
+                var point = Expression.Parameter(typeof(Vector3), "point");
+                var mustHaveCompletePath = Expression.Parameter(typeof(bool), "mustHaveCompletePath");
+                var reachDist = Expression.Parameter(typeof(float), "reachDist");
+                var checkSameWay = Expression.Parameter(typeof(bool), "checkSameWay");
+
+                var call = Expression.Call(Expression.Convert(instance, SainMoverType), RunToPointMethod, point, mustHaveCompletePath, reachDist, checkSameWay);
                 return Expression.Lambda<Action<object, Vector3, bool, float, bool>>(call, instance, point, mustHaveCompletePath, reachDist, checkSameWay).Compile();
             }
             catch (Exception e)
@@ -316,6 +388,36 @@ namespace MiyakoCarryService.Client.Utils
 
             target = mcsLeadPlayerPos;
             return true;
+        }
+
+        public static void ResetSAINLayer(BotOwner botOwner)
+        {
+            if (GetSAINMethod == null || botOwner == null)
+            {
+                return;
+            }
+
+            var parameters = new object[] { botOwner.ProfileId, null };
+            GetSAINMethod.Invoke(null, parameters);
+            var sainBot = parameters[1];
+            if (sainBot == null)
+            {
+                return;
+            }
+
+            var botActivation = _botActivationGetter?.Invoke(sainBot);
+            if (botActivation == null)
+            {
+                return;
+            }
+
+            _activeLayerSetter?.Invoke(botActivation, 0); // ESAINLayer.None = 0  
+            _manualUpdateInvoker?.Invoke(botActivation);
+        }
+
+        public static void RunToPoint(object mover, Vector3 point)
+        {
+            _runToPointInvoker?.Invoke(mover, point, false, -1f, true);
         }
     }
 }

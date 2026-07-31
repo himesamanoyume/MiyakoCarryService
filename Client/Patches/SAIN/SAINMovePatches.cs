@@ -185,7 +185,23 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 return;
             }
 
-            SAINUtils.WalkToPoint(__instance, target);
+            var sqrToTarget = botOwner.Position.McsSqrDistance(target);
+            if (sqrToTarget <= 1.5f * 1.5f)
+            {
+                return;
+            }
+
+            var mcsBotPlayerConfig = mcsBotPlayerData.McsAILeadPlayer?.McsBotPlayerConfig;
+            var isKeepFormation = mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) && mcsBotPlayerConfig != null && mcsBotPlayerConfig.EnableKeepFormation;
+
+            if (isKeepFormation && sqrToTarget >= 64f)
+            {
+                SAINUtils.RunToPoint(__instance, target);
+            }
+            else
+            {
+                SAINUtils.WalkToPoint(__instance, target);
+            }
         }
     }
 }
