@@ -1,8 +1,7 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Helpers.Traders;
 using SPTarkov.Server.Core.Models.Common;
@@ -13,19 +12,19 @@ namespace MiyakoCarryService.Server.Patches.Trader
     /// <summary>
     /// 处于护航库存模式时，宫子商人提供全物品购买
     /// </summary>
+    [Injectable]
     public sealed class GetAssortPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderAssortHelper), nameof(TraderAssortHelper.GetAssort));
 
-        public GetAssortPatch(IServiceProvider serviceProvider)
+        public GetAssortPatch(Controllers.ProfileController profileController, Controllers.TraderController traderController)
         {
-            ServiceProvider = serviceProvider;
+            _profileController = profileController;
+            _traderController = traderController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static Controllers.TraderController TraderController { get => field ??= ServiceProvider.GetService<Controllers.TraderController>(); }
+        private static Controllers.ProfileController _profileController;
+        private static Controllers.TraderController _traderController;
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, MongoId traderId, ref TraderAssort __result)
@@ -35,14 +34,14 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!ProfileController.IsMcsBotPlayerInventoryMode(sessionId))  
+            if (!_profileController.IsMcsBotPlayerInventoryMode(sessionId))  
             {  
                 return;
             }  
 
-            var traderAssort = TraderController.GetMcsBotPlayerInventoryModeAssort();
+            var traderAssort = _traderController.GetMcsBotPlayerInventoryModeAssort();
 
-            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))
+            if (_profileController.IsMcsBotPlayerInventoryMode(sessionId))
             {
                 __result = traderAssort;
             }

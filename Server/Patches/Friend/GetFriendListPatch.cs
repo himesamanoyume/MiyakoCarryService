@@ -1,11 +1,10 @@
 
-using System;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.ChatBot;
 using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Common;
@@ -18,28 +17,31 @@ namespace MiyakoCarryService.Server.Patches.Friend
     /// <summary>
     /// 修复获取好友列表时的一些bug，并实现护航作为好友显示
     /// </summary>
+    [Injectable]
     public sealed class GetFriendListPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(DialogueController), nameof(DialogueController.GetFriendList));
 
-        public GetFriendListPatch(IServiceProvider serviceProvider)
+        public GetFriendListPatch(MiyakoChatBot miyakoChatBot, Controllers.ProfileController profileController, Controllers.ConfigController configController, Controllers.InfoController infoController, ServerLocalisationService serverLocalisationService)
         {
-            ServiceProvider = serviceProvider;
+            _miyakoChatBot = miyakoChatBot;
+            _profileController = profileController;
+            _configController = configController;
+            _infoController = infoController;
+            _serverLocalisationService = serverLocalisationService;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static MiyakoChatBot MiyakoChatBot { get => field ??= ServiceProvider.GetService<MiyakoChatBot>(); }
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static Controllers.ConfigController ConfigController { get => field ??= ServiceProvider.GetService<Controllers.ConfigController>(); }
-        private static Controllers.InfoController InfoController { get => field ??= ServiceProvider.GetService<Controllers.InfoController>(); }
-        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceProvider.GetService<ServerLocalisationService>(); }
+        private static MiyakoChatBot _miyakoChatBot;
+        private static Controllers.ProfileController _profileController;
+        private static Controllers.ConfigController _configController;
+        private static Controllers.InfoController _infoController;
+        private static ServerLocalisationService _serverLocalisationService;
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, ref GetFriendListDataResponse __result)
         {
-            __result.Friends.Add(MiyakoChatBot.GetChatBot());
-            var mcsBotPlayerProfiles = ProfileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
+            __result.Friends.Add(_miyakoChatBot.GetChatBot());
+            var mcsBotPlayerProfiles = _profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
 
             if (mcsBotPlayerProfiles is not null)
             {
@@ -52,7 +54,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
 
                     var mcsPmcData = mcsBotPlayerProfile.CharacterData.PmcData;
 
-                    var displayName = InfoController.IsOrderExpiredByBotPlayerProfileId(mcsPmcData.Id.Value) ? $"({ServerLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsPmcData.Info.Nickname}" : mcsPmcData.Info.Nickname;
+                    var displayName = _infoController.IsOrderExpiredByBotPlayerProfileId(mcsPmcData.Id.Value) ? $"({_serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsPmcData.Info.Nickname}" : mcsPmcData.Info.Nickname;
 
                     var searchFriendResponse = new SearchFriendResponse
                     {
@@ -60,7 +62,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
                         Aid = mcsPmcData.Aid,
                         Info = new UserDialogDetails
                         {
-                            Nickname = displayName + $" [{ConfigController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
+                            Nickname = displayName + $" [{_configController.GetSpawnTypeDisplayName(mcsPmcData.Info.Settings.Role)}]",
                             Side = mcsPmcData.Info.Side,
                             Level = mcsPmcData.Info.Level,
                             MemberCategory = mcsPmcData.Info.MemberCategory,

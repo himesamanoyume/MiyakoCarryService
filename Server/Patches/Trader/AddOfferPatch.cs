@@ -1,9 +1,8 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Common;
@@ -19,29 +18,31 @@ namespace MiyakoCarryService.Server.Patches.Trader
     /// <summary>
     /// 处于护航库存模式时，阻止上架跳蚤市场
     /// </summary>
+    [Injectable]
     public sealed class AddOfferPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RagfairController), nameof(RagfairController.AddPlayerOffer));
 
-        public AddOfferPatch(IServiceProvider serviceProvider)
+        public AddOfferPatch(EventOutputHolder eventOutputHolder, HttpResponseUtil httpResponseUtil, ServerLocalisationService serverLocalisationService, Controllers.ProfileController profileController)
         {
-            ServiceProvider = serviceProvider;
+            _eventOutputHolder = eventOutputHolder;
+            _httpResponseUtil = httpResponseUtil;
+            _serverLocalisationService = serverLocalisationService;
+            _profileController = profileController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static EventOutputHolder EventOutputHolder { get => field ??= ServiceProvider.GetService<EventOutputHolder>(); }
-        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceProvider.GetService<HttpResponseUtil>(); }
-        private static ServerLocalisationService ServerLocalisationService { get => field ??= ServiceProvider.GetService<ServerLocalisationService>(); }
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
+        private static EventOutputHolder _eventOutputHolder;
+        private static HttpResponseUtil _httpResponseUtil;
+        private static ServerLocalisationService _serverLocalisationService;
+        private static Controllers.ProfileController _profileController;
 
         [PatchPrefix]  
         public static bool Prefix(PmcData pmcData, AddOfferRequestData offerRequest, MongoId sessionID, ref ItemEventRouterResponse __result)  
         {  
-            var output = EventOutputHolder.GetOutput(sessionID);
-            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionID))  
+            var output = _eventOutputHolder.GetOutput(sessionID);
+            if (_profileController.IsMcsBotPlayerInventoryMode(sessionID))  
             {
-                __result = HttpResponseUtil.AppendErrorToOutput(output, ServerLocalisationService.GetText(Locales.MCSINVENTORYMODERAGFAIRREFUSE));
+                __result = _httpResponseUtil.AppendErrorToOutput(output, _serverLocalisationService.GetText(Locales.MCSINVENTORYMODERAGFAIRREFUSE));
                 return false;
             }  
             return true;

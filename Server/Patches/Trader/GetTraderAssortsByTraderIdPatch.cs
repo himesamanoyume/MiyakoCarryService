@@ -1,8 +1,7 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Helpers.Traders;
 using SPTarkov.Server.Core.Models.Common;
@@ -13,18 +12,17 @@ namespace MiyakoCarryService.Server.Patches.Trader
     /// <summary>
     /// 处于护航库存模式时，使宫子商人能够正常交易
     /// </summary>
+    [Injectable]
     public sealed class GetTraderAssortsByTraderIdPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TraderHelper), nameof(TraderHelper.GetTraderAssortsByTraderId));
 
-        public GetTraderAssortsByTraderIdPatch(IServiceProvider serviceProvider)
+        public GetTraderAssortsByTraderIdPatch(Controllers.TraderController traderController)
         {
-            ServiceProvider = serviceProvider;
+            _traderController = traderController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static Controllers.TraderController TraderController { get => field ??= ServiceProvider.GetService<Controllers.TraderController>(); }
+        private static Controllers.TraderController _traderController;
 
         [PatchPrefix]  
         public static bool Prefix(MongoId traderId, ref TraderAssort? __result)  
@@ -34,7 +32,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return true;
             }
 
-            __result = TraderController.GetMcsBotPlayerInventoryModeAssort();
+            __result = _traderController.GetMcsBotPlayerInventoryModeAssort();
             return false;
         }
     }

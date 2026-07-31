@@ -36,6 +36,7 @@ using SPTarkov.Server.Core.Services.Commerce;
 using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Services.Profile;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -70,7 +71,7 @@ namespace MiyakoCarryService.Server.Services
         HideoutTable hideoutTable,
         PlayerScavConfig playerScavConfig,
         CompatibilityService compatibilityService,
-        ProfileValidatorService profileValidatorService
+        ProfileMigrationService profileMigrationService
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
@@ -238,7 +239,7 @@ namespace MiyakoCarryService.Server.Services
             SptProfile mcsBotPlayerProfile;
             try
             {
-                mcsBotPlayerProfile = profileValidatorService.MigrateAndValidateProfile(profile);
+                mcsBotPlayerProfile = profileMigrationService.MigrateAndValidateProfile(profile);
             }
             catch (InvalidOperationException)
             {

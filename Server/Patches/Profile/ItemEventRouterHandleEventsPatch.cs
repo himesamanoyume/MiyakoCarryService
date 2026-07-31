@@ -1,11 +1,10 @@
 
-using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Services;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.Models.Common;
@@ -18,32 +17,33 @@ namespace MiyakoCarryService.Server.Patches.Profile
     /// <summary>
     /// 修复护航库存模式下交易等行为不会刷新库存数据的问题
     /// </summary>
+    [Injectable]
     public sealed class ItemEventRouterHandleEventsPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemEventCallbacks), nameof(ItemEventCallbacks.HandleEvents));
 
-        public ItemEventRouterHandleEventsPatch(IServiceProvider serviceProvider)
+        public ItemEventRouterHandleEventsPatch(ProfileService profileService, JsonUtil jsonUtil, HttpResponseUtil httpResponseUtil)
         {
-            ServiceProvider = serviceProvider;
+            _profileService = profileService;
+            _jsonUtil = jsonUtil;
+            _httpResponseUtil = httpResponseUtil;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static ProfileService ProfileService { get => field ??= ServiceProvider.GetService<ProfileService>(); }
-        private static JsonUtil JsonUtil { get => field ??= ServiceProvider.GetService<JsonUtil>(); }
-        private static HttpResponseUtil HttpResponseUtil { get => field ??= ServiceProvider.GetService<HttpResponseUtil>(); }
+        private static ProfileService _profileService;
+        private static JsonUtil _jsonUtil;
+        private static HttpResponseUtil _httpResponseUtil;
 
 
         [PatchPostfix]
         public static void Postfix(string url, ItemEventRouterRequest info, MongoId sessionID,
             CancellationToken cancellationToken, ref ValueTask<string> __result)
         {
-            if (!ProfileService.IsMcsBotPlayerInventoryMode(sessionID)) 
+            if (!_profileService.IsMcsBotPlayerInventoryMode(sessionID)) 
             {
                 return;
             }
 
-            var mcsBotProfiles = ProfileService.GetMcsBotPlayerProfileForInventoryMode(sessionID);
+            var mcsBotProfiles = _profileService.GetMcsBotPlayerProfileForInventoryMode(sessionID);
             if (mcsBotProfiles is null || mcsBotProfiles.Count == 0) 
             {
                 return;
@@ -56,7 +56,7 @@ namespace MiyakoCarryService.Server.Patches.Profile
         private static async ValueTask<string> ReplaceProfileChangesKey(ValueTask<string> originalTask, MongoId originalKey, MongoId newKey)
         {
             var response = await originalTask;
-            var wrapper = JsonUtil.Deserialize<GetBodyResponseData<ItemEventRouterResponse>>(response);
+            var wrapper = _jsonUtil.Deserialize<GetBodyResponseData<ItemEventRouterResponse>>(response);
             var restored = wrapper?.Data ?? new ItemEventRouterResponse();
 
             if (restored.ProfileChanges != null && restored.ProfileChanges.TryGetValue(originalKey, out var profileChange))
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Server.Patches.Profile
                 restored.ProfileChanges[newKey] = profileChange;
             }
 
-            return HttpResponseUtil.GetBody(restored);
+            return _httpResponseUtil.GetBody(restored);
         }
     }
 }

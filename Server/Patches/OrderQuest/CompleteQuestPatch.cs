@@ -1,10 +1,9 @@
 
-using System;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Helpers.Quest;
 using SPTarkov.Server.Core.Models.Common;
@@ -17,20 +16,21 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
     /// <summary>
     /// 对应的Order或Ticket任务完成时，根据订单信息生成对应的护航存档，或是减免全局涨价惩罚
     /// </summary>
+    [Injectable]
     public sealed class CompleteQuestPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestHelper), nameof(QuestHelper.CompleteQuest));
 
-        public CompleteQuestPatch(IServiceProvider serviceProvider)
+        public CompleteQuestPatch(InfoController infoController, TraderController traderController, ProfileController profileController)
         {
-            ServiceProvider = serviceProvider;
+            _infoController = infoController;
+            _traderController = traderController;
+            _profileController = profileController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static InfoController InfoController { get => field ??= ServiceProvider.GetService<InfoController>(); }
-        private static TraderController TraderController { get => field ??= ServiceProvider.GetService<TraderController>(); }
-        private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
+        private static InfoController _infoController;
+        private static TraderController _traderController;
+        private static ProfileController _profileController;
 
         [PatchPrefix]
         public static void Prefix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)
@@ -60,7 +60,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
         public static void Postfix(PmcData pmcData, CompleteQuestRequestData request, MongoId sessionId)
         {
             var completedQuestId = request.QuestId;
-            var orderInfos = InfoController.GetOrderInfos(sessionId);
+            var orderInfos = _infoController.GetOrderInfos(sessionId);
             foreach (var orderInfo in orderInfos)
             {
                 if (completedQuestId == orderInfo.QuestId)
@@ -71,43 +71,43 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
                         var originalOrder = orderInfos.FirstOrDefault(o => o.QuestId == targetQuestId);
                         if (originalOrder is not null)
                         {
-                            InfoController.ApplyRenew(originalOrder.QuestId, originalOrder.Duration);
+                            _infoController.ApplyRenew(originalOrder.QuestId, originalOrder.Duration);
                             foreach (var mcsBotPlayerId in originalOrder.PlayerIds)
                             {
-                                var mcsBotPlayerProfile = ProfileController.GetMcsBotPlayerProfile(originalOrder.McsLeadPlayerId, mcsBotPlayerId);
+                                var mcsBotPlayerProfile = _profileController.GetMcsBotPlayerProfile(originalOrder.McsLeadPlayerId, mcsBotPlayerId);
                                 if (mcsBotPlayerProfile is null)
                                 {
                                     continue;
                                 }
-                                InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, originalOrder.McsLeadPlayerId);
+                                _infoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, originalOrder.McsLeadPlayerId);
                             }
                         }
 
-                        InfoController.RemoveOrderInfo(orderInfo);
+                        _infoController.RemoveOrderInfo(orderInfo);
                     }
                     else
                     {
-                        InfoController.SetBaseInfoStarted(orderInfo);
+                        _infoController.SetBaseInfoStarted(orderInfo);
                         foreach (var mcsBotPlayerId in orderInfo.PlayerIds)
                         {
-                            var mcsBotPlayerProfile = ProfileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
-                            InfoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
+                            var mcsBotPlayerProfile = _profileController.Generate(orderInfo.McsLeadPlayerId, mcsBotPlayerId, pmcData, orderInfo);
+                            _infoController.CompleteOrderQuestSendFriendRequest(mcsBotPlayerProfile, orderInfo.McsLeadPlayerId);
                         }
                     }
                     break;
                 }
             }
-            var ticketInfos = InfoController.GetTicketInfos(sessionId);
+            var ticketInfos = _infoController.GetTicketInfos(sessionId);
             foreach (var ticketInfo in ticketInfos)
             {
                 if (completedQuestId == ticketInfo.QuestId)
                 {
-                    InfoController.SetBaseInfoStarted(ticketInfo);
-                    TraderController.ModifyPunishmentMulti(ticketInfo.Percent / 100d, false);
+                    _infoController.SetBaseInfoStarted(ticketInfo);
+                    _traderController.ModifyPunishmentMulti(ticketInfo.Percent / 100d, false);
                     break;
                 }
             }
-            _ = InfoController.SaveOrderAndTicketInfo();
+            _ = _infoController.SaveOrderAndTicketInfo();
         }
     }
 }

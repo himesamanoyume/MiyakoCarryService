@@ -1,11 +1,10 @@
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers.Profile;
@@ -19,30 +18,30 @@ namespace MiyakoCarryService.Server.Patches.Friend
     /// <summary>
     /// 实现玩家能够查看护航的资料
     /// </summary>
+    [Injectable]
     public sealed class GetOtherProfilePatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SPTarkov.Server.Core.Controllers.ProfileController), nameof(SPTarkov.Server.Core.Controllers.ProfileController.GetOtherProfile));
 
-        public GetOtherProfilePatch(IServiceProvider serviceProvider)
+        public GetOtherProfilePatch(ProfileController profileController, ProfileHelper profileHelper)
         {
-            ServiceProvider = serviceProvider;
+            _profileController = profileController;
+            _profileHelper = profileHelper;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static ProfileController ProfileController { get => field ??= ServiceProvider.GetService<ProfileController>(); }
-        private static ProfileHelper ProfileHelper { get => field ??= ServiceProvider.GetService<ProfileHelper>(); }
+        private static ProfileController _profileController;
+        private static ProfileHelper _profileHelper;
 
         [PatchPrefix]
         public static bool Prefix(MongoId sessionId, GetOtherProfileRequest request, ref GetOtherProfileResponse __result)
         {
-            var mcsFullProfileToView = ProfileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
+            var mcsFullProfileToView = _profileController.GetMcsBotPlayerProfileByAccountId(sessionId, request.AccountId);
             if (mcsFullProfileToView is null)
             {
                 return true;
             }
 
-            var bossPmcProfile = ProfileHelper.GetPmcProfile(sessionId);
+            var bossPmcProfile = _profileHelper.GetPmcProfile(sessionId);
             var mcsBotPlayerPmcProfile = mcsFullProfileToView.CharacterData.PmcData;
             var mcsBotPlayerScavProfile = mcsFullProfileToView.CharacterData.ScavData;
 
@@ -88,7 +87,7 @@ namespace MiyakoCarryService.Server.Patches.Friend
                     Items = mcsBotPlayerPmcProfile.Inventory.Items 
                 },
                 Achievements = bossPmcProfile is not null ? bossPmcProfile.Achievements : mcsBotPlayerPmcProfile.Achievements,
-                FavoriteItems = ProfileHelper.GetOtherProfileFavorites(mcsBotPlayerPmcProfile),
+                FavoriteItems = _profileHelper.GetOtherProfileFavorites(mcsBotPlayerPmcProfile),
                 PmcStats = new OtherProfileStats
                 {
                     Eft = new OtherProfileSubStats

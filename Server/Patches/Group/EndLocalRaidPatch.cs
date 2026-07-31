@@ -1,9 +1,8 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Extensions;
@@ -15,18 +14,17 @@ namespace MiyakoCarryService.Server.Patches.Group
     /// <summary>
     /// 战局结束时如果类型不是转移，则清空该玩家的小队成员
     /// </summary>
+    [Injectable]
     public sealed class EndLocalRaidPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchController), nameof(MatchController.EndLocalRaidAsync));
 
-        public EndLocalRaidPatch(IServiceProvider serviceProvider)
+        public EndLocalRaidPatch(RaidController raidController)
         {
-            ServiceProvider = serviceProvider;
+            _raidController = raidController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static RaidController RaidController { get => field ??= ServiceProvider.GetService<RaidController>(); }
+        private static RaidController _raidController;
 
         [PatchPrefix]
         public static void Prefix(MongoId sessionId, EndLocalRaidRequestData request)
@@ -36,7 +34,7 @@ namespace MiyakoCarryService.Server.Patches.Group
             {
                 return;
             }
-            RaidController.ClearGroupMember(sessionId);
+            _raidController.ClearGroupMember(sessionId);
         }
     }
 }

@@ -1,7 +1,6 @@
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Generators.Ragfair;
 using SPTarkov.Server.Core.Models.Common;
@@ -13,19 +12,19 @@ namespace MiyakoCarryService.Server.Patches.Trader
     /// <summary>  
     /// 生成跳蚤市场供货时，宫子商人为护航库存模式提供全物品购买 
     /// </summary>  
+    [Injectable]
     public sealed class GenerateFleaOffersForTraderPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(RagfairOfferGenerator), nameof(RagfairOfferGenerator.GenerateFleaOffersForTrader));
 
-        public GenerateFleaOffersForTraderPatch(IServiceProvider serviceProvider)
+        public GenerateFleaOffersForTraderPatch(TradersTable tradersTable, Controllers.TraderController traderController)
         {
-            ServiceProvider = serviceProvider;
+            _tradersTable = tradersTable;
+            _traderController = traderController;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static TradersTable TradersTable { get => field ??= ServiceProvider.GetService<TradersTable>(); }
-        private static Controllers.TraderController TraderController { get => field ??= ServiceProvider.GetService<Controllers.TraderController>(); }
+        private static TradersTable _tradersTable;
+        private static Controllers.TraderController _traderController;
 
         [PatchPrefix]
         public static void Prefix(MongoId traderId)
@@ -35,12 +34,12 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!TradersTable.TryGetValue(traderId, out var trader))
+            if (!_tradersTable.TryGetValue(traderId, out var trader))
             {
                 return;
             }
 
-            trader.Assort = TraderController.GetMcsBotPlayerInventoryModeAssort();
+            trader.Assort = _traderController.GetMcsBotPlayerInventoryModeAssort();
         }
 
         [PatchPostfix]
@@ -51,7 +50,7 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!TradersTable.TryGetValue(traderId, out var trader))
+            if (!_tradersTable.TryGetValue(traderId, out var trader))
             {
                 return;
             }

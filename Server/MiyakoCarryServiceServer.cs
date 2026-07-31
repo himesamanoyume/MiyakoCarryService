@@ -2,21 +2,15 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Services;
-using MiyakoCarryService.Server.Patches.Dialogue;
-using MiyakoCarryService.Server.Patches.Group;
-using MiyakoCarryService.Server.Patches.Friend;
-using MiyakoCarryService.Server.Patches.OrderQuest;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using SPTarkov.Server.Core.Utils;
 using System.Collections.Generic;
-using MiyakoCarryService.Server.Patches.Profile;
-using MiyakoCarryService.Server.Patches.Trader;
 using MiyakoCarryService.Server.Utils;
 using System.Threading;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Services.Locales;
-using System;
+using SPTarkov.Reflection.Patching;
 
 namespace MiyakoCarryService.Server
 {
@@ -24,39 +18,17 @@ namespace MiyakoCarryService.Server
     {
         [Injectable(TypePriority = OnLoadOrder.Preload)]
         public class MiyakoCarryServiceServerPreLoad(
-            IServiceProvider serviceProvider,
+            IEnumerable<IRuntimePatch> patches,
             ConfigService configService
         ) : IOnLoad
         {
             public async Task OnLoadAsync(CancellationToken cancellationToken)
             {
                 await configService.OnPreLoadAsync();
-                new GetClientRepeatableQuestsPatch(serviceProvider).Enable();
-                new ChangeRepeatableQuestPatch(serviceProvider).Enable();
-                new CompleteQuestPatch(serviceProvider).Enable();
-                new GetOtherProfilePatch(serviceProvider).Enable();
-                new GetFriendListPatch(serviceProvider).Enable();
-                new GameStartPatch(serviceProvider).Enable();
-                new SendGroupInvitePatch(serviceProvider).Enable();
-                new LeaveGroupPatch(serviceProvider).Enable();
-                new RemovePlayerFromGroupPatch(serviceProvider).Enable();
-                new EndLocalRaidPatch(serviceProvider).Enable();
-                new GetGroupStatusPatch(serviceProvider).Enable();
-                new SendLocalisedNpcMessageToPlayerPatch().Enable();
-                new GenerateDialogueViewPatch(serviceProvider).Enable();
-                new GetDialogByIdFromProfilePatch(serviceProvider).Enable();
-                new SaveProfileAsyncPatch(serviceProvider).Enable();
-                new GetProfilePatch(serviceProvider).Enable();
-                new ItemEventRouterHandleEventsPatch(serviceProvider).Enable();
-                new GenerateFleaOffersForTraderPatch(serviceProvider).Enable();
-                new GetAssortPatch(serviceProvider).Enable();
-                new GetTraderAssortsByTraderIdPatch(serviceProvider).Enable();
-                new AddOfferPatch(serviceProvider).Enable();
-                new RemovePlayerBuildPatch(serviceProvider).Enable();
-                new SaveEquipmentBuildPatch(serviceProvider).Enable();
-                new SaveWeaponBuildPatch(serviceProvider).Enable();
-                new WebSocketDisconnectPatch(serviceProvider).Enable();
-
+                foreach (var patch in patches)
+                {
+                    patch.Enable();
+                }
                 await Task.CompletedTask;
             }
         }

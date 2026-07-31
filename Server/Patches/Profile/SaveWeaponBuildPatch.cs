@@ -1,9 +1,8 @@
 
-using System;
 using System.Reflection;
 using HarmonyLib;
-using Microsoft.Extensions.DependencyInjection;
 using MiyakoCarryService.Server.Controllers;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Helpers.Profile;
@@ -15,29 +14,30 @@ namespace MiyakoCarryService.Server.Patches.Profile
     /// <summary>
     /// 检测到玩家处于护航库存模式时，改为获取此玩家的护航预设
     /// </summary>
+    [Injectable]
     public sealed class SaveWeaponBuildPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BuildController), nameof(BuildController.SaveWeaponBuild));
 
-        public SaveWeaponBuildPatch(IServiceProvider serviceProvider)
+        public SaveWeaponBuildPatch(Controllers.ProfileController profileController, BuildsController buildsController, ProfileHelper profileHelper)
         {
-            ServiceProvider = serviceProvider;
+            _profileController = profileController;
+            _buildsController = buildsController;
+            _profileHelper = profileHelper;
         }
 
-        private static IServiceProvider ServiceProvider;
-
-        private static Controllers.ProfileController ProfileController { get => field ??= ServiceProvider.GetService<Controllers.ProfileController>(); }
-        private static BuildsController BuildsController { get => field ??= ServiceProvider.GetService<BuildsController>(); }
-        private static ProfileHelper ProfileHelper { get => field ??= ServiceProvider.GetService<ProfileHelper>(); }
+        private static Controllers.ProfileController _profileController;
+        private static BuildsController _buildsController;
+        private static ProfileHelper _profileHelper;
 
         [PatchPostfix]
         public static void Postfix(MongoId sessionId, PresetBuildActionRequestData request)
         {
-            if (ProfileController.IsMcsBotPlayerInventoryMode(sessionId))
+            if (_profileController.IsMcsBotPlayerInventoryMode(sessionId))
             {
-                var profile = ProfileHelper.GetFullProfile(sessionId);
-                _ = BuildsController.SaveUserBuilds(sessionId, profile.UserBuildData);
-                var profiles = ProfileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
+                var profile = _profileHelper.GetFullProfile(sessionId);
+                _ = _buildsController.SaveUserBuilds(sessionId, profile.UserBuildData);
+                var profiles = _profileController.GetAllMcsBotPlayerProfileByBossId(sessionId);
                 foreach (var _profile in profiles)
                 {
                     if (_profile.ProfileInfo.ProfileId == profile.ProfileInfo.ProfileId)
@@ -45,9 +45,9 @@ namespace MiyakoCarryService.Server.Patches.Profile
                         continue;
                     }
                     _profile.UserBuildData = profile.UserBuildData;
-                    BuildsController.ExaminedUserBuildsItem(_profile, _profile.UserBuildData);
+                    _buildsController.ExaminedUserBuildsItem(_profile, _profile.UserBuildData);
                 }
-                _ = ProfileController.SaveAllMcsBotPlayerProfile(sessionId);
+                _ = _profileController.SaveAllMcsBotPlayerProfile(sessionId);
             }
         }
     }
