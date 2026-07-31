@@ -140,6 +140,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
                         {
+                            BotOwner.ShootData.EndShoot();
                             return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
                         }
 

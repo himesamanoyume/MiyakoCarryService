@@ -256,6 +256,8 @@ namespace MiyakoCarryService.Client
                 _patches.Add(new RunToPointByWayPatch());
                 _patches.Add(new WalkToPointByWayPatch());
                 _patches.Add(new MoverManualUpdatePatch());
+                _patches.Add(new CalcGoalDropEnemyPatch());
+                _patches.Add(new CheckCanShootPatch());
             }
 
 #if DEBUG
