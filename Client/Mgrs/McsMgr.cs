@@ -352,46 +352,64 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void UpdateMcsBotPlayerConfig(MongoID mcsLeadPlayerId, McsBotPlayerConfig mcsBotPlayerConfig)
         {
-            var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
-            foreach (var mcsBotPlayer in mcsBotPlayers)
-            {
-                var botOwner = mcsBotPlayer?.AIData?.BotOwner;
-                if (botOwner == null)
-                {
-                    continue;
-                }
-                var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    if (!mcsBotPlayerConfig.EnableLooting)
-                    {
-                        mcsBotPlayerData.IsLooting = false;
-                    }
-                    if (mcsBotPlayerConfig.EnableKeepFormation)
-                    {
-                        mcsBotPlayerData.AddDecision(Decisions.ShouldKeepFormation);
-                    }
-                    else
-                    {
-                        mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
-                    }
-
-                    if (mcsBotPlayerConfig.EnableLooting)
-                    {
-                        botOwner.TalkMsg(new McsMsg
-                        {
-                            PhraseTrigger = EPhraseTrigger.Going,
-                            Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
-                        });
-                    }
-                }
-            }
-
             McsLeadPlayerConfigs.AddOrUpdate(
                 mcsLeadPlayerId,
-                id => mcsBotPlayerConfig,
+                (id) => mcsBotPlayerConfig,
                 (id, oldConfig) =>
                 {
+                    var mcsBotPlayers = GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
+                    foreach (var mcsBotPlayer in mcsBotPlayers)
+                    {
+                        var botOwner = mcsBotPlayer?.AIData?.BotOwner;
+                        if (botOwner == null)
+                        {
+                            continue;
+                        }
+                        var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+                        if (mcsBotPlayerData != null)
+                        {
+                            if (!mcsBotPlayerConfig.EnableLooting)
+                            {
+                                mcsBotPlayerData.IsLooting = false;
+                            }
+
+                            if (mcsBotPlayerConfig.EnableKeepFormation)
+                            {
+                                mcsBotPlayerData.AddDecision(Decisions.ShouldKeepFormation);
+                            }
+                            else
+                            {
+                                mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
+                            }
+
+                            if (oldConfig.EnableKeepFormation != mcsBotPlayerConfig.EnableKeepFormation)
+                            {
+                                botOwner.TalkMsg(new McsMsg
+                                {
+                                    PhraseTrigger = EPhraseTrigger.Roger
+                                });
+                            }
+
+                            if (oldConfig.EnableLooting != mcsBotPlayerConfig.EnableLooting)
+                            {
+                                if (mcsBotPlayerConfig.EnableLooting)
+                                {
+                                    botOwner.TalkMsg(new McsMsg
+                                    {
+                                        PhraseTrigger = EPhraseTrigger.Going,
+                                        Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
+                                    });
+                                }
+                                else
+                                {
+                                    botOwner.TalkMsg(new McsMsg
+                                    {
+                                        PhraseTrigger = EPhraseTrigger.Roger
+                                    });
+                                }
+                            }
+                        }
+                    }
                     oldConfig.EnableLooting = mcsBotPlayerConfig.EnableLooting;
                     oldConfig.PriceThreshold = mcsBotPlayerConfig.PriceThreshold;
                     oldConfig.KeywordItemText = mcsBotPlayerConfig.KeywordItemText;
