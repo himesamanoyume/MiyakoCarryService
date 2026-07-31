@@ -96,32 +96,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Start()
         {
             base.Start();
-            if (MiyakoCarryServicePlugin.SAINInstalled)
-            {
-                // 如果不执行这段代码，当护航从SAIN的Layer回到Mcs的Layer时，就会卡住不动
-                var getSAINMethod = AccessTools.Method(Type.GetType("SAIN.SAINEnableClass, SAIN"), "GetSAIN");
-                if (getSAINMethod == null)
-                {
-                    return;
-                }
-
-                var parameters = new object[] { BotOwner.ProfileId, null };
-                getSAINMethod.Invoke(null, parameters);
-
-                if (parameters[1] is not object sainBot || sainBot == null)
-                {
-                    return;
-                }
-
-                var sainBotTraverse = Traverse.Create(sainBot);
-                var botActivation = sainBotTraverse.Property("BotActivation").GetValue();
-                if (botActivation != null)
-                {
-                    var botActivationTraverse = Traverse.Create(botActivation);
-                    botActivationTraverse.Property("ActiveLayer").SetValue(0); // ESAINLayer.None = 0  
-                    botActivationTraverse.Method("ManualUpdate").GetValue();
-                }
-            }
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsMcsLayerActive = true;
@@ -1801,7 +1775,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public void RefreshStuckTimer()
         {
-            BotOwner.Mover.LastPos = BotOwner.Position;
             BotOwner.Mover.LastTimePosChanged = Time.time;
         }
 
@@ -1898,7 +1871,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (selfIsPassenger && !bossOutBtr)
             {
                 McsBotPlayerData.IsBtrLeaving = false;
-                RefreshStuckTimer();
                 action = new Action(typeof(HoldPositionLogic), "Mcs:BtrStay");
                 return true;
             }

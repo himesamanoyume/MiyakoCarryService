@@ -22,7 +22,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 BotOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Going
+                    PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
         }
@@ -39,7 +40,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
-                    RefreshStuckTimer();
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                 }
 

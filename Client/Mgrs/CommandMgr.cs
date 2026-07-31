@@ -563,6 +563,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Negative,
+                    Keys = [Locales.ONFIGHT]
                 });
             }
             botOwner.Mover.LastTimePosChanged = Time.time;
@@ -577,6 +578,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = mcsBotPlayerData.BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
         }
@@ -802,7 +804,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             botOwner.TalkMsg(new McsMsg
             {
-                PhraseTrigger = EPhraseTrigger.Going
+                PhraseTrigger = EPhraseTrigger.Going,
+                Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
             });
 
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
@@ -853,14 +856,16 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Going
+                    PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
             else
             {
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Negative
+                    PhraseTrigger = EPhraseTrigger.Negative,
+                    Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
         }
@@ -926,6 +931,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     botOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.Going,
+                        Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                     });
                 }
                 mcsBotPlayerData.IsLooting = false;
@@ -972,6 +978,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
             else
@@ -979,6 +986,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Negative,
+                    Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
                 mcsBotPlayerData.RemoveDecision(Decisions.ShouldLootProxyAction);
                 mcsBotPlayerData.ProxyTargetId = null;
@@ -1101,7 +1109,8 @@ namespace MiyakoCarryService.Client.Mgrs
 
             botOwner.TalkMsg(new McsMsg
             {
-                PhraseTrigger = EPhraseTrigger.Going
+                PhraseTrigger = EPhraseTrigger.Going,
+                Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
             });
             mcsBotPlayerData.ClearAreaPoints = seg;
             mcsBotPlayerData.ClearAreaIndex = 0;
@@ -1135,7 +1144,8 @@ namespace MiyakoCarryService.Client.Mgrs
                     mcsBotPlayerData.TargetPos = interactableObjectData.GetPos();
                     botOwner.TalkMsg(new McsMsg 
                     { 
-                        PhraseTrigger = EPhraseTrigger.Going 
+                        PhraseTrigger = EPhraseTrigger.Going,
+                        Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                     });
                 }
                 mcsBotPlayerData.IsLooting = false;

@@ -17,6 +17,11 @@ namespace MiyakoCarryService.Client.Datas
         public StationaryWeaponData(StationaryWeapon stationaryWeapon) : base()
         {
             _stationaryWeaponRef = new WeakReference<StationaryWeapon>(stationaryWeapon);
+            if (!Tools.IsHost)
+            {
+                return;
+            }
+
             var weapon = StationaryWeapon;
             if (weapon == null)
             {

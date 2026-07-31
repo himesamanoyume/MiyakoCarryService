@@ -17,6 +17,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public McsClearAreaLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
+            
         }
 
         public override void Start()
@@ -24,7 +25,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             base.Start();
             if (McsBotPlayerData != null)
             {
-                BotOwner.TalkMsg(new McsMsg { PhraseTrigger = EPhraseTrigger.Going });
+                BotOwner.TalkMsg(new McsMsg 
+                { 
+                    PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
+                });
             }
         }
 
