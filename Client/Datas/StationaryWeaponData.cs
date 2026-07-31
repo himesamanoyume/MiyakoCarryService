@@ -1,4 +1,5 @@
 using System;
+using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -53,9 +54,9 @@ namespace MiyakoCarryService.Client.Datas
             for (int attempt = 0; attempt < 30; attempt++)
             {
                 var samplePos = new Vector3(
-                    center.x + GClass856.Random(-1, 1),
-                    center.y + GClass856.Random(-1, 1),
-                    center.z + GClass856.Random(-1, 1)
+                    center.x + MyExtensions.Random(-1, 1),
+                    center.y + MyExtensions.Random(-1, 1),
+                    center.z + MyExtensions.Random(-1, 1)
                 );
 
                 if (NavMesh.SamplePosition(samplePos, out var hit, 1f, -1))

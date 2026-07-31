@@ -115,12 +115,12 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     /// </summary>  
     public sealed class StationaryWeaponGetActionsClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GetActionsClass), nameof(GetActionsClass.smethod_17));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(StationaryWeapon)]);
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(GamePlayerOwner owner, StationaryWeapon stationaryWeapon, ref ActionsReturnClass __result)
+        public static void Postfix(GamePlayerOwner owner, StationaryWeapon stationaryWeapon, ref AvailableInteractionState __result)
         {
             var stationaryWeaponData = stationaryWeapon.GetData();
             if (stationaryWeaponData == null)
@@ -136,7 +136,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
-                __result.Actions.Add(new ActionsTypesClass
+                __result.Actions.Add(new InteractionAction
                 {
                     Name = Locales.STATIONARYWEAPONPROXYCOMMAND_NAME.McsLocalized() + " " + mcsBotPlayer.Profile.McsNickname,
                     TargetName = Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME,

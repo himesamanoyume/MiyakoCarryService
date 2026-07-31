@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class CalcGoalDropEnemyPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotCalcGoal), nameof(BotCalcGoal.method_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotCalcGoal), nameof(BotCalcGoal.CalcGoalTarget));
 
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
@@ -24,12 +24,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (__instance.BotOwner_0 == null || !McsMgr.IsMcsBotPlayer(__instance.BotOwner_0.ProfileId))
+            if (__instance._owner == null || !McsMgr.IsMcsBotPlayer(__instance._owner.ProfileId))
             {
                 return;
             }
 
-            var mcsBotPlayerData = __instance.BotOwner_0.GetMcsBotPlayerData();
+            var mcsBotPlayerData = __instance._owner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null && mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
             {
                 withDropEnemy = false;

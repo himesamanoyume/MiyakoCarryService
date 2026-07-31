@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(EnemyPart __instance, BotOwner botOwner, GClass542 partVision)
+        public static void Postfix(EnemyPart __instance, BotOwner botOwner, EnemyPartVision partVision, bool checkOnlyIfVisible = true)
         {
             if (botOwner == null || __instance.CanShoot)
             {
@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             if (partVision != null && partVision.Visible)
             {
                 __instance.CanShoot = true;
-                __instance.CanShootLastValue = true;
+                __instance._canShootLastValue = true;
             }
         }
     }
