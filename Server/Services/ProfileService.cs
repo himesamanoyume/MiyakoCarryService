@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -68,7 +69,8 @@ namespace MiyakoCarryService.Server.Services
         TradersTable tradersTable,
         HideoutTable hideoutTable,
         PlayerScavConfig playerScavConfig,
-        CompatibilityService compatibilityService
+        CompatibilityService compatibilityService,
+        ProfileValidatorService profileValidatorService
     )
     {
         private readonly string _profileFolderDir = System.IO.Path.Join(configService.GetModPath(), "Assets", "database", "profiles");
@@ -222,13 +224,30 @@ namespace MiyakoCarryService.Server.Services
         private async Task LoadMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             var filePath = System.IO.Path.Combine(_profileFolderDir, mcsLeadPlayerId, $"{mcsBotPlayerId}.json");
-            if (fileUtil.FileExists(filePath))
+            if (!fileUtil.FileExists(filePath))
             {
-                var mcsBotPlayerProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
-                if (mcsBotPlayerProfile is not null)
-                {
-                    _profiles.GetOrAdd(mcsLeadPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
-                }
+                return;
+            }
+
+            var profile = await jsonUtil.DeserializeFromFileAsync<JsonObject>(filePath);
+            if (profile is null)
+            {
+                return;
+            }
+
+            SptProfile mcsBotPlayerProfile;
+            try
+            {
+                mcsBotPlayerProfile = profileValidatorService.MigrateAndValidateProfile(profile);
+            }
+            catch (InvalidOperationException)
+            {
+                mcsBotPlayerProfile = await jsonUtil.DeserializeFromFileAsync<SptProfile>(filePath);
+            }
+
+            if (mcsBotPlayerProfile is not null)
+            {
+                _profiles.GetOrAdd(mcsLeadPlayerId, _ => new()).GetOrAdd(mcsBotPlayerId, mcsBotPlayerProfile);
             }
         }
 

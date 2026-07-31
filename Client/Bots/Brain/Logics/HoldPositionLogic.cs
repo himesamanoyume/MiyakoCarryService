@@ -1,6 +1,7 @@
 
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -15,16 +16,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Start()
         {
+            BotOwner.Mover.LastPos = BotOwner.Position;
             base.Start();
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
         }
 
         public override void Update(CustomLayer.ActionData data)
         {
+            BotOwner.Mover.LastTimePosChanged = Time.time;
             _baseLogic.UpdateNodeByMain(data);
         }
     }

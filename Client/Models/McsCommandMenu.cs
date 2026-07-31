@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Models
         public McsCommandMenu RegisterCommand(
             string name, string targetName, 
             string commandType, Player[] mcsBotPlayers,
-            bool isLocal = false,
+            bool isLocal = false, bool shouldCheckExclude = false,
             Func<bool> disabled = null, McsCommandResolver resolver = null)
         {
             Entries.Add(new McsCommandEntry
@@ -22,9 +22,10 @@ namespace MiyakoCarryService.Client.Models
                 TargetName = targetName,
                 DisabledPredicate = disabled,
                 CommandType = commandType,
+                ShouldCheckExclude = shouldCheckExclude,
                 McsBotPlayers = mcsBotPlayers,
                 IsLocal = isLocal,
-                Resolver = resolver,  
+                Resolver = resolver,
             });
             return this;
         }
@@ -51,7 +52,7 @@ namespace MiyakoCarryService.Client.Models
             public Func<bool> DisabledPredicate;
             public bool IsLocal;
             public bool Disabled => DisabledPredicate?.Invoke() ?? false;
-
+            public bool ShouldCheckExclude;
             public string CommandType;
             public Player[] McsBotPlayers;
             public McsCommandResolver Resolver;

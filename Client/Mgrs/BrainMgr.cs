@@ -36,12 +36,12 @@ namespace MiyakoCarryService.Client.Mgrs
         private void InitCustomLayerMaps()
         {
             LayerUtils.RegisterCustomLayer(typeof(McsCommonLayer), 65);
-            LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 66);
-            LayerUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 67);
-            LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 68);
-            LayerUtils.RegisterCustomLayer(typeof(McsClearAreaLayer), 69);
-            LayerUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 89);
-            LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 186);
+            LayerUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 66);
+            LayerUtils.RegisterCustomLayer(typeof(McsClearAreaLayer), 67);
+            LayerUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 68);
+            LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 185);
+            LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 186);
+            LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 187);
         }
 
         public override void OnRaidEnded()

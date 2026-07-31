@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Models
     {
         public Player McsLeadPlayer;
         public Player McsBotPlayer;
-
+        public bool ShouldCheckExclude;
         public string CommandType;
         public Vector3? Position;
         public BodyPartType AimingBodyPartType;

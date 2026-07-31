@@ -59,6 +59,6 @@ namespace MiyakoCarryService.Client.Datas
 
         public override bool IsProxyActionDisabled() => Switch.DoorState is not EDoorState.Shut;
 
-        public override WorldInteractiveObject GetWorldInteractiveObject() => Switch;
+        public override InteractableObject GetInteractiveObject() => Switch;
     }
 }

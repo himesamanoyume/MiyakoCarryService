@@ -22,7 +22,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 BotOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Going
+                    PhraseTrigger = EPhraseTrigger.Going,
+                    Keys = BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
         }
@@ -39,7 +40,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
-                    RefreshStuckTimer();
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                 }
 
@@ -90,7 +90,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Memory.IsUnderFire)
+            if (CanShootNow())
             {
                 return false;
             }
@@ -100,7 +100,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) 
+                || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) 
+                || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction)
+                || McsBotPlayerData.HasDecision(Decisions.ShouldStationaryWeaponProxyAction))
             {
                 return true;
             }

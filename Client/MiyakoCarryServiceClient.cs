@@ -226,6 +226,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new IsAllowedPlayerPatch());
             _patches.Add(new DoorGetActionsClassPatch());
             _patches.Add(new LootItemGetActionsClassPatch());
+            _patches.Add(new StationaryWeaponGetActionsClassPatch());
             _patches.Add(new RefreshMedsPatch());
             _patches.Add(new BotHearingSensorPatch());
             _patches.Add(new PlayerSayPatch());
@@ -257,6 +258,8 @@ namespace MiyakoCarryService.Client
                 _patches.Add(new RunToPointByWayPatch());
                 _patches.Add(new WalkToPointByWayPatch());
                 _patches.Add(new MoverManualUpdatePatch());
+                _patches.Add(new CalcGoalDropEnemyPatch());
+                _patches.Add(new CheckCanShootPatch());
             }
 
 #if DEBUG

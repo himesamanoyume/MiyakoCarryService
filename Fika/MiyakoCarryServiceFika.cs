@@ -176,8 +176,9 @@ namespace MiyakoCarryService.Fika
                     AimingBodyPartType = packet.AimingBodyPartType,
                     McsLeadPlayer = mcsLeadPlayer,
                     McsBotPlayer = mcsBotPlayer,
+                    ShouldCheckExclude = packet.ShouldCheckExclude,
                     Extensions = packet.Extensions
-                });
+                }, true);
             }
         }
 
@@ -289,6 +290,7 @@ namespace MiyakoCarryService.Fika
                     Position = @event.Position,
                     TargetId = @event.TargetId,
                     AimingBodyPartType = @event.AimingBodyPartType,
+                    ShouldCheckExclude = @event.ShouldCheckExclude,
                     Extensions = @event.Extensions ?? new Dictionary<string, McsValue>(),
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId

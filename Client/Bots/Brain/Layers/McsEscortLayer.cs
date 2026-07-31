@@ -1,5 +1,6 @@
 
 using System;
+using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Extensions;
@@ -37,6 +38,32 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (McsBotPlayerData == null)
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
+                }
+
+                if (McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr))
+                {
+                    var btrController = Singleton<GameWorld>.Instance.BtrController;
+                    var side = btrController.BtrView.GetBtrSide(1);
+                    if (side == null)
+                    {
+                        return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindBtrSide");
+                    }
+
+                    var doorPos = side.GoInPoints().Item1;
+                    if (_nextUpdatePosTime < time)
+                    {
+                        McsBotPlayerData.TargetPos = doorPos;
+                        UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                        _nextUpdatePosTime = time + nextTime;
+                    }
+
+                    if (_currentMoveTarget.HasValue)
+                    {
+                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
+                    }
+
+                    return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
                 }
 
                 if (McsBotPlayerData.TargetPos.HasValue)
@@ -86,7 +113,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Memory.IsUnderFire)
+            if (CanShootNow())
             {
                 return false;
             }
@@ -96,7 +123,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
+            if ((McsBotPlayerData.HasDecision(Decisions.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue) || McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr))
             {
                 return true;
             }

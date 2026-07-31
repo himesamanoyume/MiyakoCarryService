@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private GameObject _subtitlesViewTemplate;
         private Dictionary<MongoID, Subtitles> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
-        private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, string>> _phraseHandleMaps;
+        private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, Player, string>> _phraseHandleMaps;
         private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         public override void Start()
@@ -54,6 +54,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 { EPhraseTrigger.FollowMe, Locales.FOLLOWME },
                 { EPhraseTrigger.Negative, Locales.NEGATIVE },
                 { EPhraseTrigger.Mine, Locales.MINE },
+                { EPhraseTrigger.OnFight, Locales.ONFIGHT },
                 // 空短语、临时内容，用于传递任意Key实现任何对话内容
                 { EPhraseTrigger.PhraseNone, "PhraseNone" }
             };
@@ -65,6 +66,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 { EPhraseTrigger.LootGeneric, HandleLootGeneric },
                 { EPhraseTrigger.PhraseNone, HandlePhraseNone },
                 { EPhraseTrigger.Mine, HandlePhraseMine },
+                { EPhraseTrigger.Going, HandlePhraseWithOnFight },
+                { EPhraseTrigger.Negative, HandlePhraseWithOnFight },
             };
 
             TasksExtensions.HandleExceptions(Init());
@@ -140,7 +143,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public string HandleOnFirstContact(string content, McsMsg msg, Player mcsLeadPlayer)
+        public string HandleOnFirstContact(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
             var toEnemy = msg.Position.Value - mcsLeadPlayer.Position;
             var flatToEnemy = new Vector3(toEnemy.x, 0, toEnemy.z);
@@ -174,30 +177,47 @@ namespace MiyakoCarryService.Client.Mgrs
             return content;
         }
 
-        public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer)
+        public string HandleOnLoot(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
             content = string.Format(content, msg.Keys[0].McsLocalized(), msg.Keys[1].McsLocalized());
             return content;
         }
 
-        public string HandleLootGeneric(string content, McsMsg msg, Player mcsLeadPlayer)
+        public string HandleLootGeneric(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
             content = string.Format(content, msg.Keys[0].McsLocalized());
             return content;
         }
 
-        public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer)
+        public string HandlePhraseNone(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
-            return msg.Keys[0].McsLocalized();
+            var sb = new StringBuilder();
+            foreach (var key in msg.Keys)
+            {
+                sb.Append(key.McsLocalized());
+            }
+            return sb.ToString();
         }
 
-        public string HandlePhraseMine(string content, McsMsg msg, Player mcsLeadPlayer)
+        public string HandlePhraseMine(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
             content = string.Format(content, msg.Keys[0], msg.Keys[1]);
             var healthStates = Json.Deserialize<List<HealthState>>(msg.Keys[2]);
             if (healthStates.Count > 0)
             {
                 content += " " + string.Join(", ", healthStates.Select(h => $"{h.BodyPart.McsLocalized()} {h.EffectType.McsLocalized()}"));
+            }
+            return content;
+        }
+
+        public string HandlePhraseWithOnFight(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
+        {
+            if (msg.Keys != null)
+            {
+                foreach (var key in msg.Keys)
+                {
+                    content += key.McsLocalized();
+                }
             }
             return content;
         }
@@ -218,7 +238,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             if (_phraseHandleMaps.TryGetValue(msg.PhraseTrigger, out var action))
             {
-                talkContent = action(talkContent, msg, mcsLeadPlayer);
+                talkContent = action(talkContent, msg, mcsLeadPlayer, mcsBotPlayer);
             }
 
             if (!_subTitles.ContainsKey(mcsBotPlayer.Profile.Id))

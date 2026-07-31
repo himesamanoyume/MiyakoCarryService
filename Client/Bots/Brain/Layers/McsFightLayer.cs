@@ -1,7 +1,9 @@
 
 using System;
+using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -69,9 +71,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
                 if (!MiyakoCarryServicePlugin.SAINInstalled)
                 {
-                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive))
+                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive || goalEnemy.Person.AIData.BotOwner.Brain == null || goalEnemy.Person.AIData.BotOwner.BotState is EBotState.NonActive))
                     {
                         BotOwner.Memory.GoalEnemy = null;
+                        if (BotOwner.EnemiesController.EnemyInfos.ContainsKey(goalEnemy.Person))
+                        {
+                            BotOwner.EnemiesController.Remove(goalEnemy.Person);
+                        }
                         _nextRecalcGoalTime = 0f;
                     }
 
@@ -84,13 +90,74 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     goalEnemy = BotOwner.Memory.GoalEnemy;
                 }
 
+                var needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
+                var isEnemyPosLost = IsEnemyPosLost();
+
+                if (McsBotPlayerData != null && McsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                {
+                    var stationary = BotOwner.WeaponManager.Stationary;
+                    if (_cachedProxyTargetId == null || _cachedStationaryWeaponData == null || McsBotPlayerData.ProxyTargetId != _cachedProxyTargetId)
+                    {
+                        _cachedProxyTargetId = McsBotPlayerData.ProxyTargetId;
+                        _cachedStationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
+                    }
+
+                    var stationaryWeapon = _cachedStationaryWeaponData?.StationaryWeapon;
+                    var stationaryWeaponLink = _cachedStationaryWeaponData?.StationaryWeaponLink;
+
+                    if (_cachedProxyTargetId != null && stationaryWeapon != null && stationaryWeaponLink != null)
+                    {
+                        var operatorPos = stationaryWeapon.OperatorPosition;
+                        var sqrToOperator = BotOwner.Position.McsSqrDistance(operatorPos);
+
+                        if (needHeal && isEnemyPosLost)
+                        {
+                            if (stationary.CurLink != null && stationary.Taken)
+                            {
+                                stationary.DropCurWeapon(false, true);
+                            }
+                            RefreshStuckTimer();
+                            return new Action(typeof(StationaryHealLogic), "Mcs:StationaryHealing");
+                        }
+
+                        if (stationary.CurLink == null)
+                        {
+                            stationary.SetTargetStationary(stationaryWeaponLink);
+                        }
+
+                        if (_nextUpdatePosTime < time)
+                        {
+                            UpdateCommonMoveTarget(operatorPos, out float nextTime);
+                            _nextUpdatePosTime = time + nextTime;
+                        }
+
+                        if (sqrToOperator >= 1.5f && _currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                        }
+
+                        var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
+
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
+                        {
+                            BotOwner.ShootData.EndShoot();
+                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                        }
+
+                        if (goalEnemy == null)
+                        {
+                            ScanSector(stationaryWeaponLink);
+                        }
+                    }
+                }
+
                 if (goalEnemy == null)
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy");
                 }
 
                 var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
-
                 if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                 {
                     return new Action(typeof(ShootFromCoverLogic), "Mcs:ShootFromCover");
@@ -150,8 +217,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                     }
 
-                    var isEnemyPosLost = IsEnemyPosLost();
-
                     if (safeFire && haveBullets.Value)
                     {
                         if (goalEnemy.IsVisible)
@@ -190,7 +255,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                                    if (needHeal && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing1");
@@ -208,7 +273,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 _nextUpdatePosTime = time + nextTime;
                             }
 
-                            if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                            if (needHeal && isEnemyPosLost)
                             {
                                 RefreshStuckTimer();
                                 if (_currentMoveTarget.HasValue)
@@ -243,7 +308,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                                    if (needHeal && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing3");
@@ -255,7 +320,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation))
+                        if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) && !McsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
                         {
                             return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                         }
@@ -284,7 +349,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                                 {
-                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                                    if (needHeal && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing4");
@@ -299,7 +364,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 _nextUpdatePosTime = time + nextTime;
                             }
 
-                            if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                            if (needHeal && isEnemyPosLost)
                             {
                                 RefreshStuckTimer();
                                 if (_currentMoveTarget.HasValue)
@@ -336,7 +401,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    if (((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use)) && isEnemyPosLost)
+                                    if (needHeal && isEnemyPosLost)
                                     {
                                         RefreshStuckTimer();
                                         return new Action(typeof(HealLogic), "Mcs:FightHealing6");
@@ -369,6 +434,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 #endif
 
+            var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null && mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+            {
+                return true;
+            }
+
             if (BotOwner.Memory.HaveEnemy)
             {
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
@@ -385,7 +456,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData == null)
                 {
                     _lastHaveEnemyTime = -999f;

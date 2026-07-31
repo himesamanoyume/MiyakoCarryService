@@ -23,6 +23,8 @@ namespace MiyakoCarryService.Client.Utils
         private static AvailableInteractionState _currentMenu;
         private static InteractionAction _cancelAction;
         private static readonly List<InteractionAction> _injectedObjectActions = new();
+        private static readonly Stack<int> _selectionStack = new();
+        private static int _pendingSelectedIndex = -1;
         public static bool IsCommandMenuOpen => _menuStack.Count > 0;
         public static AvailableInteractionState CurrentMenu => _currentMenu;
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
@@ -46,12 +48,23 @@ namespace MiyakoCarryService.Client.Utils
             );
         }
 
-        public static void Execute(McsCommandContext ctx)
+        public static void Execute(McsCommandContext ctx, bool shouldCheckData)
         {
             if (ctx?.CommandType == null)
             {
                 return;
             }
+
+            if (shouldCheckData)
+            {
+                var mcsBotPlayer = ctx.McsBotPlayer;
+                var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+                if (ctx.ShouldCheckExclude && mcsBotPlayerData.IsExcluded)
+                {
+                    return;
+                }
+            }
+
             if (_handlersMap.TryGetValue(ctx.CommandType, out var handler))
             {
                 handler(ctx);
@@ -76,6 +89,8 @@ namespace MiyakoCarryService.Client.Utils
         public static void ClearMenuStack()
         {
             _menuStack.Clear();
+            _selectionStack.Clear();
+            _pendingSelectedIndex = -1;
         }
 
         public static void RegisterCommandMenu(string menuKey, Action<McsCommandMenu, Player[]> menu)
@@ -168,14 +183,25 @@ namespace MiyakoCarryService.Client.Utils
             }
             else
             {
-                _currentMenu?.InitSelected();
+                if (_currentMenu != null && _pendingSelectedIndex >= 0 && _pendingSelectedIndex < _currentMenu.Actions.Count && !_currentMenu.Actions[_pendingSelectedIndex].Disabled)
+                {
+                    _currentMenu.SelectedAction = _currentMenu.Actions[_pendingSelectedIndex];
+                }
+                else
+                {
+                    _currentMenu?.InitSelected();
+                }
             }
+
+            _pendingSelectedIndex = -1;
             GamePlayerOwner.AvailableInteractionState.Value = _currentMenu;
         }
 
         public static void CloseCommandMenuAction()
         {
             _menuStack.Clear();
+            _selectionStack.Clear();
+            _pendingSelectedIndex = -1;
             _currentMenu = null;
             _cancelAction = null;
             _injectedObjectActions.Clear();
@@ -201,6 +227,12 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void OpenMenu(Action<McsCommandMenu> builder)
         {
+            if (_menuStack.Count > 0 && _currentMenu != null)
+            {
+                var index = _currentMenu.SelectedAction != null ? _currentMenu.Actions.IndexOf(_currentMenu.SelectedAction) : -1;
+                _selectionStack.Push(index);
+            }
+
             _menuStack.Push(builder);
             RenderMenu();
         }
@@ -210,6 +242,7 @@ namespace MiyakoCarryService.Client.Utils
             if (_menuStack.Count > 1)
             {
                 _menuStack.Pop();
+                _pendingSelectedIndex = _selectionStack.Count > 0 ? _selectionStack.Pop() : -1;
             }
             RenderMenu();
         }
@@ -240,7 +273,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 else
                 {
-                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver, entry.IsLocal)));
+                    actionsReturnClass.Actions.Add(MakeCommand(entry.Name, entry.TargetName, entry.Disabled, () => Dispatch(entry.CommandType, entry.McsBotPlayers, entry.Resolver, entry.IsLocal, entry.ShouldCheckExclude)));
                 }
             }
 
@@ -252,7 +285,7 @@ namespace MiyakoCarryService.Client.Utils
             return McsMgr.GetAllAliveMcsSquadMembersByMcsLeadId(Singleton<GameWorld>.Instance.MainPlayer.ProfileId).ToArray();
         }
 
-        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver, bool isLocal = false)
+        public static void Dispatch(string commandType, Player[] mcsBotPlayers, McsCommandResolver resolver, bool isLocal = false, bool shouldCheckExclude = false)
         {
             var data = resolver?.Invoke();
             if (resolver != null && data == null)
@@ -270,6 +303,7 @@ namespace MiyakoCarryService.Client.Utils
                     TargetId = data?.TargetId,
                     AimingBodyPartType = data?.AimingBodyPartType ?? default,
                     Extensions = data?.Extensions ?? new(),
+                    ShouldCheckExclude = data?.ShouldCheckExclude ?? shouldCheckExclude,
                     McsBotPlayer = mcsBotPlayer
                 };
 
@@ -278,7 +312,7 @@ namespace MiyakoCarryService.Client.Utils
                     if (isLocal)
                     {
                         ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                        Execute(ctx);
+                        Execute(ctx, false);
                     }
                     else
                     {
@@ -289,6 +323,7 @@ namespace MiyakoCarryService.Client.Utils
                             Position = ctx.Position,
                             TargetId = ctx.TargetId,
                             AimingBodyPartType = ctx.AimingBodyPartType,
+                            ShouldCheckExclude = ctx.ShouldCheckExclude,
                             Extensions = ctx.Extensions
                         });
                     }
@@ -296,7 +331,7 @@ namespace MiyakoCarryService.Client.Utils
                 else
                 {
                     ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                    Execute(ctx);
+                    Execute(ctx, true);
                 }
             });
             CloseCommandMenuAction();

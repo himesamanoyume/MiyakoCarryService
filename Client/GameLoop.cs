@@ -144,6 +144,7 @@ namespace MiyakoCarryService.Client
             BaseMgr.Enable(typeof(DamageTriggerDataMgr));
             BaseMgr.Enable(typeof(RoomTrapDataMgr));
             BaseMgr.Enable(typeof(DoorDataMgr));
+            BaseMgr.Enable(typeof(StationaryWeaponDataMgr));
             BaseMgr.Enable(typeof(FormationDataMgr));
 
             // BrainMgr必须在最后，用以脚本引擎重载
@@ -650,6 +651,11 @@ namespace MiyakoCarryService.Client
                                 botOwner.Brain.OnSetStrategy += handler;
                             }
 
+                            EventMgr.Notify(new McsBotPlayerActivatedEvent
+                            {
+                                McsBotPlayerId = botOwner.ProfileId
+                            });
+
                             if (!MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
                             {
                                 return;
@@ -757,7 +763,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 120f;
+            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 180f;
             settings.FileSettings.Mind.REVENGE_TO_GROUP = false;
             settings.FileSettings.Mind.IGNORE_TRAP = false;
             settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
@@ -802,9 +808,6 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Boss.BIG_PIPE_ARTILLERY_COUNT = 1;
             settings.FileSettings.Boss.EFFECT_REGENERATION_PER_MIN = 10f;
 
-            settings.FileSettings.Core.CanGrenade = true;
-            settings.FileSettings.Core.CanRun = true;
-
             settings.FileSettings.Cover.CHECK_CLOSEST_FRIEND = true;
             settings.FileSettings.Cover.DOG_FIGHT_AFTER_LEAVE = 1f;
             settings.FileSettings.Cover.HIDE_TO_COVER_TIME = 5f;
@@ -826,6 +829,10 @@ namespace MiyakoCarryService.Client
                 BotDifficulty.impossible => 0.25f,
                 _ => 1.0f
             };
+
+            settings.FileSettings.Core.CanGrenade = true;
+            settings.FileSettings.Core.CanRun = true;
+            settings.FileSettings.Core.VisibleDistance = 400f + 20f * botDifficultyInt;
 
             settings.FileSettings.Aiming.MAX_AIM_PRECICING = 60f;
             settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 1f * aimingDifficultyMultiplier;
@@ -873,17 +880,17 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 100f + 20f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 400f + 20f * botDifficultyInt;
             settings.FileSettings.Look.CAN_USE_LIGHT = false;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
-            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 120f;
+            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 180f;
             settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
             settings.FileSettings.Look.LightOnVisionDistance = 5f;
             settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
-            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 120f;
+            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 180f;
             settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
             settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
@@ -895,8 +902,8 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Look.NO_GRASS_DIST = 20.0f;
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
-            settings.FileSettings.Look.FAR_DISTANCE = 300f;
-            settings.FileSettings.Look.MIDDLE_DIST = 200f;
+            settings.FileSettings.Look.FAR_DISTANCE = 500f;
+            settings.FileSettings.Look.MIDDLE_DIST = 300f;
             settings.FileSettings.Look.MiddleDeltaTimeSec = 0.1f;
             settings.FileSettings.Look.FarDeltaTimeSec = 0.1f;
 
@@ -915,13 +922,14 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;
             settings.FileSettings.Shoot.NEXT_SINGLE_SHOT_PAUSE = 0f;
             settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST = 300f;
+            settings.FileSettings.Shoot.AGS_17_DIST_TO_LEAVE = 20f;
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
 
             botOwner.GetPlayer.ActiveHealthController.SetDamageCoeff(1f);
 
-            botOwner.LookSensor.ShootFromEyes = true;
-            settings.FileSettings.Look.SHOOT_FROM_EYES = true;
+            botOwner.LookSensor.ShootFromEyes = false;
+            settings.FileSettings.Look.SHOOT_FROM_EYES = false;
 
             botOwner.GetPlayer.Physical.Stamina.ForceMode = true;
             botOwner.GetPlayer.Physical.HandsStamina.ForceMode = true;

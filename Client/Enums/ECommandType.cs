@@ -19,6 +19,15 @@ namespace MiyakoCarryService.Client.Enums
         ReportAboutSelf,
         ClearArea,
         OpenInventory,
-        ChangeFormation
+        ChangeFormation,
+        StationaryWeaponProxyAction,
+        FollowMe,
+        EscortBtr,
+        ExcludeOrTakeOver,
+#if DEBUG
+        DebugSpawnAI,
+        DebugTeleport,
+        DebugInitAirdrop,
+#endif
     }
 }

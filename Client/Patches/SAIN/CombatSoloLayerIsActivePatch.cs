@@ -12,7 +12,7 @@ using SPT.Reflection.Patching;
 namespace MiyakoCarryService.Client.Patches.SAIN
 {
     /// <summary>
-    /// 
+    /// 控制 CombatSoloLayer 是否应该激活
     /// </summary>
     public sealed class CombatSoloLayerIsActivePatch : ModulePatch
     {
@@ -33,12 +33,6 @@ namespace MiyakoCarryService.Client.Patches.SAIN
             var botOwner = __instance.BotOwner;
             if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
             {
-                var goalEnemy = botOwner?.Memory?.GoalEnemy;
-                if (goalEnemy == null)
-                {
-                    return true;
-                }
-
                 var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData == null)
                 {
@@ -46,6 +40,19 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 }
 
                 var state = _states.GetOrCreateValue(botOwner);
+                if (mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                {
+                    state.SainAllowed = false;
+                    __result = false;
+                    return false;
+                }
+
+                var goalEnemy = botOwner?.Memory?.GoalEnemy;
+                if (goalEnemy == null)
+                {
+                    return true;
+                }
+                
                 var mcsLeadPlayerPos = botOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
                 var sqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
 

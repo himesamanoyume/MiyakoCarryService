@@ -192,6 +192,9 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMDROPTARGETLOOTCOMMAND_NAME = "Mcs/TeamDropTargetLootCommand Name";
         public const string TEAMDROPTARGETLOOTCOMMAND_TARGETNAME = "Mcs/TeamDropTargetLootCommand TargetName";
         public const string MINE = "Mcs/Mine";
+        public const string ONFIGHT = "Mcs/OnFight";
+        public const string EXCLUDED = "Mcs/Excluded";
+        public const string TAKENOVER = "Mcs/TakenOver";
         public const string CLEARAREACOMMAND_NAME = "Mcs/ClearAreaCommand Name";
         public const string CLEARAREACOMMAND_TARGETNAME = "Mcs/ClearAreaCommand TargetName";
         public const string TEAMCLEARAREACOMMAND_NAME = "Mcs/TeamClearAreaCommand Name";
@@ -216,5 +219,25 @@ namespace MiyakoCarryService.Client.Utils
         public const string CHANGEFORMATIONCOMMAND_TARGETNAME = "Mcs/ChangeFormationCommand TargetName";
         public const string SHOWBREVITYCODE_KEY = "Mcs/ShowBrevityCode Key";
         public const string SHOWBREVITYCODE_DESCRIPTION = "Mcs/ShowBrevityCode Description";
+        public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/TeamStationaryWeaponEscortCommand Name";
+        public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/TeamStationaryWeaponEscortCommand TargetName";
+        public const string STATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/StationaryWeaponEscortCommand Name";
+        public const string STATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/StationaryWeaponEscortCommand TargetName";
+        public const string STATIONARYWEAPONPROXYCOMMAND_NAME = "Mcs/StationaryWeaponProxyCommand Name";
+        public const string STATIONARYWEAPONPROXYCOMMAND_TARGETNAME = "Mcs/StationaryWeaponProxyCommand TargetName";
+        public const string FOLLOWMECOMMAND_NAME = "Mcs/FollowMeCommand Name";
+        public const string FOLLOWMECOMMAND_TARGETNAME = "Mcs/FollowMeCommand TargetName";
+        public const string TEAMFOLLOWMECOMMAND_NAME = "Mcs/TeamFollowMeCommand Name";
+        public const string TEAMFOLLOWMECOMMAND_TARGETNAME = "Mcs/TeamFollowMeCommand TargetName";
+        public const string BTRESCORTCOMMAND_NAME = "Mcs/BtrEscortCommand Name";
+        public const string BTRESCORTCOMMAND_TARGETNAME = "Mcs/BtrEscortCommand TargetName";
+        public const string TEAMBTRESCORTCOMMAND_NAME = "Mcs/TeamBtrEscortCommand Name";
+        public const string TEAMBTRESCORTCOMMAND_TARGETNAME = "Mcs/TeamBtrEscortCommand TargetName";
+        public const string AIRDROPESCORTCOMMAND_NAME = "Mcs/AirdropEscortCommand Name";
+        public const string AIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/AirdropEscortCommand TargetName";
+        public const string TEAMAIRDROPESCORTCOMMAND_NAME = "Mcs/TeamAirdropEscortCommand Name";
+        public const string TEAMAIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/TeamAirdropEscortCommand TargetName";
+        public const string EXCLUDEORTAKEOVERCOMMAND_NAME = "Mcs/ExcludeOrTakeOverCommand Name";
+        public const string EXCLUDEORTAKEOVERCOMMAND_TARGETNAME = "Mcs/ExcludeOrTakeOverCommand TargetName";
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
 using HarmonyLib;
@@ -52,6 +53,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public int _currentDeactivateRetries = 0;
         public float _currentHealTimeout = 10f;
         public float _nextAnimatorFixTime = 0f;
+        public string _cachedProxyTargetId;
+        public StationaryWeaponData _cachedStationaryWeaponData;
+        public float _scanPhase = 0f;
+        public const float SCANPERIOD = 4f;
+        public const float SCANDISTANCE = 30f;
+        public const float SCANPITCHDOWN = 2f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
@@ -90,32 +97,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Start()
         {
             base.Start();
-            if (MiyakoCarryServicePlugin.SAINInstalled)
-            {
-                // 如果不执行这段代码，当护航从SAIN的Layer回到Mcs的Layer时，就会卡住不动
-                var getSAINMethod = AccessTools.Method(Type.GetType("SAIN.SAINEnableClass, SAIN"), "GetSAIN");
-                if (getSAINMethod == null)
-                {
-                    return;
-                }
-
-                var parameters = new object[] { BotOwner.ProfileId, null };
-                getSAINMethod.Invoke(null, parameters);
-
-                if (parameters[1] is not object sainBot || sainBot == null)
-                {
-                    return;
-                }
-
-                var sainBotTraverse = Traverse.Create(sainBot);
-                var botActivation = sainBotTraverse.Property("BotActivation").GetValue();
-                if (botActivation != null)
-                {
-                    var botActivationTraverse = Traverse.Create(botActivation);
-                    botActivationTraverse.Property("ActiveLayer").SetValue(0); // ESAINLayer.None = 0  
-                    botActivationTraverse.Method("ManualUpdate").GetValue();
-                }
-            }
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsMcsLayerActive = true;
@@ -163,6 +144,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             RegisterAction(typeof(GoToCoverPointLogic), EndGoToCoverPoint);
             RegisterAction(typeof(HealLogic), EndHeal);
+            RegisterAction(typeof(StationaryHealLogic), EndHeal);
             RegisterAction(typeof(RunToCoverLogic), EndRunToCover);
             RegisterAction(typeof(SimplePatrolLogic), EndSimplePatrol);
             RegisterAction(typeof(HoldPositionLogic), EndHoldPosition);
@@ -472,7 +454,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -512,7 +494,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
-                        McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                        McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
@@ -540,23 +522,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.TargetPos.HasValue)
+            var hasEscortToBtr = McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr);
+            var hasEscort = McsBotPlayerData.HasDecision(Decisions.ShouldEscort);
+            var btrController = Singleton<GameWorld>.Instance.BtrController;
+            if ((hasEscort && !McsBotPlayerData.TargetPos.HasValue) || (hasEscortToBtr && !btrController.Initiated()))
             {
                 return true;
             }
 
-            var sqrDistance = McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position);
+            var sqrDistance = hasEscort ? McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position) : btrController.BtrView.GetBtrSide(1).GoInPoints().Item1.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldEscort))
+                McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                BotOwner.TalkMsg(new McsMsg
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
-                    BotOwner.TalkMsg(new McsMsg
-                    {
-                        PhraseTrigger = EPhraseTrigger.OnPosition
-                    });
-                    TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldRegroup, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldKeepFormation]));
-                }
+                    PhraseTrigger = EPhraseTrigger.OnPosition
+                });
+                TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldFollowMe, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldEscortToBtr, Decisions.ShouldKeepFormation]));
                 return true;
             }
             else if (BotOwner.GoToSomePointData.IsCome())
@@ -934,6 +916,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndShootFromPlace()
         {
+            if (!BotOwner.Memory.HaveEnemy)
+            {
+                return true;
+            }
             if (BotOwner.DogFight.ShallStartCauseHavePlace())
             {
                 return true;
@@ -1027,7 +1013,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+            if (McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
             {
                 return true;
             }
@@ -1061,9 +1047,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndShootFromStationary()
         {
-            if (BotOwner.Medecine.FirstAid.Have2Do)
+            if (IsEnemyPosLost())
             {
-                return true;
+                if (BotOwner.Medecine.FirstAid.Have2Do)
+                {
+                    return true;
+                }
+                if (BotOwner.Medecine.SurgicalKit.HaveWork)
+                {
+                    return true;
+                }
             }
             var curLink = BotOwner.WeaponManager.Stationary.CurLink;
             if (curLink == null)
@@ -1074,17 +1067,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return true;
             }
-            if (WasHitRecently(4f))
-            {
-                return true;
-            }
             if (!curLink.IsFree(BotOwner.Id))
             {
                 return true;
             }
-            if (BotOwner.SuppressStationary.CurUsingLogic.IsReady() && BotOwner.SuppressStationary.CurUsingLogic.CanStartSupressEnemy(BotOwner.Memory.GoalEnemy))
+            if (BotOwner.Memory.HaveEnemy && !BotOwner.WeaponManager.Stationary.IsEnemyAtSector(BotOwner.WeaponManager.Stationary.CurLink))
             {
                 return true;
+            }
+            if (!BotOwner.Memory.HaveEnemy)
+            {
+                ScanSector(curLink);
             }
             return false;
         }
@@ -1589,14 +1582,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldRegroup, Decisions.ShouldKeepFormation]);
+                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
-                    // 使用保持队形时在狭窄环境中容易连续触发大量对话，这在Fika联机下会造成大量数据包传输
-                    // BotOwner.TalkMsg(new McsMsg
-                    // {
-                    //     PhraseTrigger = EPhraseTrigger.Negative,
-                    // });
                     return _lastCanRunResult;
                 }
 
@@ -1783,7 +1771,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public void RefreshStuckTimer()
         {
-            BotOwner.Mover._lastPos = BotOwner.Position;
             BotOwner.Mover._lastTimePosChanged = Time.time;
         }
 
@@ -1880,7 +1867,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (selfIsPassenger && !bossOutBtr)
             {
                 McsBotPlayerData.IsBtrLeaving = false;
-                RefreshStuckTimer();
                 action = new Action(typeof(HoldPositionLogic), "Mcs:BtrStay");
                 return true;
             }
@@ -1923,6 +1909,54 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
             return false;
+        }
+
+        public virtual bool IsTargetPitchReachable(StationaryWeapon stationaryWeapon, Vector3 targetPos)
+        {
+            var origin = stationaryWeapon.OperatorPosition;
+            var delta = targetPos - origin;
+
+            var horizontal = new Vector3(delta.x, 0f, delta.z).magnitude;
+            if (horizontal < 0.01f)
+            {
+                return false;
+            }
+
+            var requiredPitch = Mathf.Atan2(-delta.y, horizontal) * Mathf.Rad2Deg;
+            var pitchLimit = stationaryWeapon.PitchLimit;
+            var min = Mathf.Min(pitchLimit.x, pitchLimit.y);
+            var max = Mathf.Max(pitchLimit.x, pitchLimit.y);
+
+            return requiredPitch >= min - 2f && requiredPitch <= max + 2f;
+        }
+
+        public virtual void ScanSector(StationaryWeaponLink link)
+        {
+            var weapon = link.Weapon;
+            if (weapon == null)
+            {
+                return;
+            }
+
+            var halfAngleDeg = Mathf.Acos(Mathf.Clamp(link.CosAngleBase, -1f, 1f)) * Mathf.Rad2Deg;
+
+            _scanPhase += Time.deltaTime / SCANPERIOD;
+            var tri = Mathf.PingPong(_scanPhase, 1f);
+            var yawDeg = Mathf.Lerp(-halfAngleDeg, halfAngleDeg, tri);
+
+            var baseDir = link.InitialDir;
+            baseDir.y = 0f;
+            if (baseDir.sqrMagnitude < 0.001f)
+            {
+                return;
+            }
+            baseDir.Normalize();
+
+            var dir = Quaternion.AngleAxis(yawDeg, Vector3.up) * baseDir;
+            dir = Quaternion.AngleAxis(SCANPITCHDOWN, Vector3.Cross(dir, Vector3.up)) * dir;
+            var scanPoint = weapon.OperatorPosition + dir * SCANDISTANCE;
+            BotOwner.AimingManager.CurrentAiming.SetTarget(scanPoint);
+            BotOwner.AimingManager.NodeUpdate();
         }
     }
 }

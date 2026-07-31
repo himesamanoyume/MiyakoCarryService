@@ -2,6 +2,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -75,9 +76,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
+                var needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                 {
-                    if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                    if (needHeal)
                     {
                         RefreshStuckTimer();
                         return new Action(typeof(HealLogic), "Mcs:CommonHealing1");
@@ -99,14 +101,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                if ((BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use))
+                if (!BotOwner.WeaponManager.Reload.Reloading)
+                {
+                    var haveBullets = BotOwner.WeaponManager.HaveBullets;
+                    if (!haveBullets || BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
+                    {
+                        BotOwner.WeaponManager.Reload.McsTryReload();
+                    }
+                }
+
+                if (needHeal)
                 {
                     if (_nextUpdatePosTime < time)
                     {
                         UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
                         _nextUpdatePosTime = time + nextTime;
                     }
-                    
+
                     RefreshStuckTimer();
                     if (_currentMoveTarget.HasValue)
                     {
@@ -118,7 +129,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldRegroup))
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
                 {
                     if (_nextUpdatePosTime < time)
                     {
