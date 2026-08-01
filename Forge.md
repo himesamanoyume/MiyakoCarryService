@@ -1,5 +1,7 @@
 This mod will check for updates online.
 
+### SPT, see you next time
+
 [Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)
 
 # {.tabset}
@@ -79,9 +81,9 @@ As is well known, Mcs supports installing the Fika Addon to work in a Fika multi
 
 Mcs mimics a carry service in the gaming industry. In this process, you need to select the desired service, place an order and pay, and play together with the player who comes to serve you. Therefore, Mcs provides a trader `Tsukiyuki Miyako` to handle all these actions
 
-![totorial][id-totorial]
+![tutorial][id-tutorial]
 
-[id-totorial]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/tutorial.webp 'How To Generate McsBotPlayer'
+[id-tutorial]: https://raw.githubusercontent.com/himesamanoyume/MiyakoCarryService/refs/heads/main/Preview/tutorial.webp 'How To Generate McsBotPlayer'
 
 If you cannot see the Group Panel, please check whether you have UI Fixes installed, then open Advanced Settings in the Configuration Manager, navigate to Interface -> Show Group Panel, and enable it.
 
