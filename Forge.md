@@ -1,5 +1,7 @@
 This mod will check for updates online.
 
+[Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)
+
 # {.tabset}
 
 ## Description

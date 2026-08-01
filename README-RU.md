@@ -48,3 +48,7 @@ MiyakoCarryService - Это мод для генерации товарищей 
 [SPT-LootingBots](https://github.com/Skwizzy/SPT-LootingBots)
 
 [SPT-BigBrain](https://github.com/DrakiaXYZ/SPT-BigBrain)
+
+### Поддержите меня
+
+[Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)
