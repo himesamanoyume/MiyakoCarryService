@@ -190,12 +190,12 @@ namespace MiyakoCarryService.Client.Patches.Group
                 _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
             }
 
-            var mainMenuControllerClass = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_mainMenuShowOperation").Value;
+            var menuOperation = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
 
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            await mainMenuControllerClass.AfterErrorHandler();
+            await menuOperation.AfterErrorHandler();
             EventMgr.Notify(new UpdateProfileEvent());
             await GameLoop.Instance.Session.RequestBuilds();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);

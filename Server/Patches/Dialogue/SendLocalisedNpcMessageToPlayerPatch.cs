@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -14,6 +15,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
     /// <summary>
     /// 每当宫子发送消息时，都将原本的临时商人Id改为以宫子Id发送
     /// </summary>
+    [Injectable]
     public sealed class SendLocalisedNpcMessageToPlayerPatch : AbstractPatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MailSendService), nameof(MailSendService.SendLocalisedNpcMessageToPlayer));
