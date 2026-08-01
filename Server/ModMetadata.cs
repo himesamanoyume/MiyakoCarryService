@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Server
         public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.0");
         public override List<string> Incompatibilities { get; init; }
         public override Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
-        public override string Url { get; init; } = "https://forge.sp-tarkov.com/mod/2709/miyako-carry-service";
+        public override string Url { get; init; } = "https://github.com/himesamanoyume/MiyakoCarryService";
         public override bool? IsBundleMod { get; init; } = false;
         public override string License { get; init; } = "CC BY-NC-SA 4.0";
         public override string ModGuid { get; init; } = "top.himesamanoyume.miyakocarryservice";

@@ -14,7 +14,7 @@
     <AssemblyTitle>MiyakoCarryServiceServer</AssemblyTitle>  
     <Version>1.0.14.0</Version>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Trademark>https://forge.sp-tarkov.com/mod/2709/miyako-carry-service</Trademark>
+    <Trademark>https://github.com/himesamanoyume/MiyakoCarryService</Trademark>
     <RootNamespace>MiyakoCarryService.Server</RootNamespace>
     <NoWarn>CS0618;CS8632;CS9107</NoWarn>
   </PropertyGroup>
