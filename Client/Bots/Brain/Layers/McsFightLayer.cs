@@ -267,7 +267,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         if (goalEnemy.IsVisible)
                         {
-                            if (!BotOwner.GoToSomePointData.IsCome())
+                            if (!BotOwner.GoToSomePointData.IsCome() && !McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
                             {
                                 return new Action(typeof(AttackMovingLogic), "Mcs:AttackMoving");
                             }
