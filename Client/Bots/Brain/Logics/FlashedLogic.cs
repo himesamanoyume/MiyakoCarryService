@@ -5,7 +5,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class FlashedLogic : McsBotBaseLogic
     {
-        private FlashedBaseLogic _baseLogic;
+        private FlashedNode _baseLogic;
 
         public FlashedLogic(BotOwner botOwner) : base(botOwner)
         {

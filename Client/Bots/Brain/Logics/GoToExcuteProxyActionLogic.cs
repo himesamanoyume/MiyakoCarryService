@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class GoToExcuteProxyActionLogic : McsBotBaseLogic
     {
-        private GoToPointBaseLogic _baseLogic;
+        private GoToSomePoint _baseLogic;
         private int _currentLootingRetries = 0;
         private float _lastTimeCheckDistance = 0f;
         public GoToExcuteProxyActionLogic(BotOwner botOwner) : base(botOwner)

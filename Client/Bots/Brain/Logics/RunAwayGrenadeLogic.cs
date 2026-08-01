@@ -5,7 +5,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class RunAwayGrenadeLogic : McsBotBaseLogic
     {
-        private RunAwayGrenadeBaseLogic _baseLogic;
+        private RunAwayGrenade _baseLogic;
 
         public RunAwayGrenadeLogic(BotOwner botOwner) : base(botOwner)
         {

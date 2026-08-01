@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class HoldPositionOverrideLogic : HoldPositionBaseLogic
+    public class HoldPositionOverrideLogic : HoldPosition
     {
         public HoldPositionOverrideLogic(BotOwner bot) : base(bot)
         {
 
         }
 
-        public override void UpdateNodeByBrain(TimedFireIntent data)
+        public override void UpdateNodeByBrain(ShootHoldResultParams data)
         {
             _owner.Sprint(false, false);
             _owner.StopMove();

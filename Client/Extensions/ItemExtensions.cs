@@ -70,7 +70,7 @@ namespace MiyakoCarryService.Client.Extensions
 
                     var profileId = item.Owner switch
                     {
-                        CorpseTraderControllerClass c => c?.KilledProfileID,
+                        CorpseItemController c => c?.KilledProfileID,
                         _ => item.Owner?.ID
                     };
 
@@ -191,7 +191,7 @@ namespace MiyakoCarryService.Client.Extensions
                 try
                 {
                     var price = trader.GetUserItemPrice(item);
-                    var currency = TraderUtilsClass.GetCurrencyCharById(price.Value.CurrencyId.Value) switch
+                    var currency = CurrencyUtil.GetCurrencyCharById(price.Value.CurrencyId.Value) switch
                     {
                         "€" => ECurrencyType.EUR,
                         "$" => ECurrencyType.USD,
@@ -224,7 +224,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public IEnumerable<Item> GetAllChildItemsOnly()
             {
-                if (item is ContainerClass collection)
+                if (item is ContainerCollection collection)
                 {
                     foreach (var container in collection.Containers)
                     {

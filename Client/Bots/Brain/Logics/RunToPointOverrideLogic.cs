@@ -2,14 +2,14 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class RunToPointOverrideLogic : GoToPointBaseLogic
+    public class RunToPointOverrideLogic : GoToSomePoint
     {
         public RunToPointOverrideLogic(BotOwner bot) : base(bot)
         {
 
         }
 
-        public override void UpdateNodeByBrain(MoveIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultGoToPoint data)
         {
             _owner.SetPose(1f);
             _owner.SetTargetMoveSpeed(1f);

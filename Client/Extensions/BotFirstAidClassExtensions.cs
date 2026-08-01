@@ -1,5 +1,6 @@
 
 using System.Linq;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 
 namespace MiyakoCarryService.Client.Extensions
@@ -24,7 +25,7 @@ namespace MiyakoCarryService.Client.Extensions
                     return;
                 }
 
-                if (healthController.FindExistingEffect<HeavyBleedEffect>(EBodyPart.Common) != null)
+                if (healthController.FindExistingEffect<IHeavyBleeding>(EBodyPart.Common) != null)
                 {
                     var med = botFirstAid.FindMedForEffect(EDamageEffectType.HeavyBleeding);
                     if (med != null)
@@ -35,7 +36,7 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
-                if (healthController.FindExistingEffect<LightBleedEffect>(EBodyPart.Common) != null)
+                if (healthController.FindExistingEffect<ILightBleeding>(EBodyPart.Common) != null)
                 {
                     var med = botFirstAid.FindMedForEffect(EDamageEffectType.LightBleeding);
                     if (med != null)
@@ -48,7 +49,7 @@ namespace MiyakoCarryService.Client.Extensions
 
                 if (botFirstAid.McsIsFullHp())
                 {
-                    if (healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common) != null)
+                    if (healthController.FindExistingEffect<IFracture>(EBodyPart.Common) != null)
                     {
                         var med = botFirstAid.McsFindSplint();
                         if (med != null)

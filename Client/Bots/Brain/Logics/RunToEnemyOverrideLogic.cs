@@ -2,14 +2,14 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class RunToEnemyOverrideLogic : RunToEnemyBaseLogic
+    public class RunToEnemyOverrideLogic : RunToEnemy
     {
         public RunToEnemyOverrideLogic(BotOwner bot) : base(bot)
         {
 
         }
 
-        public override void UpdateNodeByBrain(BaseIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
             var canRun = DoorOpen() == DoorInteractionStatus.CanRun;
             _owner.SetTargetMoveSpeed(1f);

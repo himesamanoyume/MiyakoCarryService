@@ -9,6 +9,7 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using System;
 using MiyakoCarryService.Client.Utils;
+using EFT.InventoryLogic.Operations;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -163,7 +164,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(ItemController __instance, Item item, ItemAddress from, ItemAddress to, IOperationClass operation, Callback callback)
+        public static void Postfix(ItemController __instance, Item item, ItemAddress from, ItemAddress to, IInventoryOperation operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
@@ -238,7 +239,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(ItemController __instance, Item item, ItemAddress to, bool succeed, IOperationClass operation, Callback callback)
+        public static void Postfix(ItemController __instance, Item item, ItemAddress to, bool succeed, IInventoryOperation operation, Callback callback)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)

@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class ShootToSmokeLogic : McsBotBaseLogic
     {
-        private ShootToSmokeBaseLogic _baseLogic;
+        private AimingToSmoke _baseLogic;
 
         public ShootToSmokeLogic(BotOwner botOwner) : base(botOwner)
         {

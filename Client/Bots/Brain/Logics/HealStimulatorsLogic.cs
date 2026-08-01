@@ -5,7 +5,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class HealStimulatorsLogic : McsBotBaseLogic
     {
-        private HealStimulatorsBaseLogic _baseLogic;
+        private StimulatorsNode _baseLogic;
 
         public HealStimulatorsLogic(BotOwner botOwner) : base(botOwner)
         {

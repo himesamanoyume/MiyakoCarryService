@@ -1,4 +1,5 @@
 using System.Reflection;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
@@ -35,7 +36,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             var healthController = __instance._owner.GetPlayer.HealthController;
-            var fracture = healthController.FindExistingEffect<FractureEffect>(EBodyPart.Common);
+            var fracture = healthController.FindExistingEffect<IFracture>(EBodyPart.Common);
             if (fracture != null)
             {
                 __instance._bodyPartToHeal = fracture.BodyPart;

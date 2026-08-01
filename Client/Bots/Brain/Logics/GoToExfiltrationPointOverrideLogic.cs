@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class GoToExfiltrationPointOverrideLogic : GoToExfiltrationPointNodeBaseLogic
+    public class GoToExfiltrationPointOverrideLogic : GoToExfiltrationPointNode
     {
         public GoToExfiltrationPointOverrideLogic(BotOwner bot) : base(bot)
         {
 
         }
 
-        public override void UpdateNodeByBrain(BaseIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
             DoorOpen(true);
             var exfiltrationData = _owner.PatrollingData.ExfiltrationData;

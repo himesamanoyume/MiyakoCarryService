@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class FollowerPatrolLogic : McsBotBaseLogic
     {
-        private FollowerPatrolBaseLogic _baseLogic;
+        private PatrollingFollower _baseLogic;
 
         public FollowerPatrolLogic(BotOwner botOwner) : base(botOwner)
         {

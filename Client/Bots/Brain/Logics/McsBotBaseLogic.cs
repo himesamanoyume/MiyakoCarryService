@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         mcsBotPlayer.InventoryController.StrictCheckMagazine(magazineItemClass, false, 0, false, true);
                     }
 
-                    if (targetLootData.Item is ContainerClass containerClass && containerClass != null)
+                    if (targetLootData.Item is ContainerCollection containerClass && containerClass != null)
                     {
                         foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<Magazine>())
                         {
@@ -192,7 +192,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// </summary>
         protected async Task Transfer(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData)
         {
-            if (fromLootData.Item is ContainerClass containerClass)
+            if (fromLootData.Item is ContainerCollection containerClass)
             {
                 var firstLevelItems = containerClass.GetFirstLevelItems().ToList();
                 foreach (var firstLevelItem in firstLevelItems)

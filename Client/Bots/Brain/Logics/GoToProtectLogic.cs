@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class GoToProtectLogic : McsBotBaseLogic
     {
-        private GoToPointBaseLogic _baseLogic;
+        private GoToSomePoint _baseLogic;
 
         public GoToProtectLogic(BotOwner botOwner) : base(botOwner)
         {

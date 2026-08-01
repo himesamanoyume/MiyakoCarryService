@@ -3,16 +3,16 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class HealOverrideLogic : HealBaseLogic
+    public class HealOverrideLogic : HealNode
     {
-        private GoToPointBaseLogic _baseLogic;
+        private GoToSomePoint _baseLogic;
 
         public HealOverrideLogic(BotOwner botOwner) : base(botOwner)
         {
             _baseLogic = new(botOwner);
         }
 
-        public override void UpdateNodeByBrain(BaseIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
             if (_owner.Medecine.Using)
             {

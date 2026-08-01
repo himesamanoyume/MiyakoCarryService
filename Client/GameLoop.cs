@@ -219,7 +219,7 @@ namespace MiyakoCarryService.Client
         public async Task UpdateProfile()
         {
             var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
-            if (Session is SessionBackendClass sessionBackendClass)
+            if (Session is EftClientBackendSession sessionBackendClass)
             {
                 var profile = sessionBackendClass.Profile;
                 var correctInfo = profile.Info;

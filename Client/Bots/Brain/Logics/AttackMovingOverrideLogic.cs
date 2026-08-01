@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class AttackMovingOverrideLogic : AttackMovingBaseLogic
+    public class AttackMovingOverrideLogic : AttackMoving
     {
         private float _lastPathUpdateTime = 0f;
         private const float PATH_UPDATE_INTERVAL = 0.5f;
@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         }
 
-        public override void UpdateNodeByBrain(BaseIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
             DoorOpen();
             _owner.SetTargetMoveSpeed(1f);
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _owner.Steering.LookToMovingDirection();
         }
 
-        public override void AimingAndShoot(BaseIntent data)
+        public override void AimingAndShoot(CoreActionResultParams data)
         {
             var goalEnemy = _owner.Memory.GoalEnemy;
             if (goalEnemy != null && goalEnemy.CanShoot && goalEnemy.IsVisible)

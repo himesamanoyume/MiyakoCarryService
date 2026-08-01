@@ -1,5 +1,6 @@
 
 using System.Reflection;
+using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -12,10 +13,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class TryFindChangedContainerPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SearchControllerClass), nameof(SearchControllerClass.TryFindChangedContainer));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SearchController), nameof(SearchController.TryFindChangedContainer));
 
         [PatchPostfix]
-        public static void Postfix(ItemAddress address, [CanBeNull] out ContainerDataClass changedContainer, ref bool __result)
+        public static void Postfix(ItemAddress address, [CanBeNull] out ItemInfo changedContainer, ref bool __result)
         {
             changedContainer = null;
             if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)

@@ -106,7 +106,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                     stringBuilder.Append("```log\n");
                     stringBuilder.Append("- DateTime: ").Append(DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")).Append("\n");
                     stringBuilder.Append("- Mcs Version: ").Append(MiyakoCarryServicePlugin.ClientVersion).Append("\n");
-                    stringBuilder.Append("- EFT Version: ").Append(EFTVersionInfoClass.string_0).Append("\n")
+                    stringBuilder.Append("- EFT Version: ").Append(BuildInfo.string_0).Append("\n")
                         .Append("- SPT Version: ").Append(Json.Deserialize<VersionResponse>(RequestHandler.GetJson("/singleplayer/settings/version")).Version).Append("\n")
                         .Append("- System: ").Append(SystemInfo.operatingSystem).Append("\n")
                         .Append("- CPU: ").Append(SystemInfo.processorType).Append(" (").Append(SystemInfo.processorCount).Append("Core)\n")

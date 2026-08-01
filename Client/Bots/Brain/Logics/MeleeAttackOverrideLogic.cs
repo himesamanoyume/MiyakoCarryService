@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class MeleeAttackOverrideLogic : MeleeAttackBaseLogic
+    public class MeleeAttackOverrideLogic : OneMeleeAttackNode
     {
         private float _lastPathUpdateTime = 0f;
         private const float PATH_UPDATE_INTERVAL = 0.3f;
@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         }
 
-        public override void UpdateNodeByBrain(BaseIntent data)
+        public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
             var weaponManager = _owner.WeaponManager;
             var meleeData = weaponManager?.Melee;

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
-    public class DeactivateMineOverrideLogic : DeactivateMineBaseLogic
+    public class DeactivateMineOverrideLogic : DeactivateMineNode
     {
         public DeactivateMineOverrideLogic(BotOwner botOwner) : base(botOwner)
         {

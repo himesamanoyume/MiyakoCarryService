@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public sealed class DropTargetLootLogic : McsBotBaseLogic
     {
-        public GoToPointBaseLogic _baseLogic;
+        public GoToSomePoint _baseLogic;
         public float _nextCheckTime = Time.time;
         public DropTargetLootLogic(BotOwner botOwner) : base(botOwner)
         {

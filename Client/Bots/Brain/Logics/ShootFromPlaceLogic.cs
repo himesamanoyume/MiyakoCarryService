@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class ShootFromPlaceLogic : McsBotBaseLogic
     {
-        private ShootFromPlaceBaseLogic _baseLogic;
+        private ShootFromPlace _baseLogic;
 
         public ShootFromPlaceLogic(BotOwner botOwner) : base(botOwner)
         {

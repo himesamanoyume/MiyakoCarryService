@@ -11,7 +11,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class GoToBtrLogic : McsBotBaseLogic
     {
-        private GoToPointBaseLogic _baseLogic;
+        private GoToSomePoint _baseLogic;
         private int _currentRetries = 0;
         private float _lastTimeCheckDistance = 0f;
 

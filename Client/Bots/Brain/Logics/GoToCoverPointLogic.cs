@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class GoToCoverPointLogic : McsBotBaseLogic
     {
-        private GoToCoverPointBaseLogic _baseLogic;
+        private GoToCoverPoint _baseLogic;
 
         public GoToCoverPointLogic(BotOwner botOwner) : base(botOwner)
         {

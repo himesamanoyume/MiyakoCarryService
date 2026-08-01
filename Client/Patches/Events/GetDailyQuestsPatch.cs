@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Threading.Tasks;
+using EFT;
 using EFT.Quests;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -11,7 +12,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class GetDailyQuestsPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.GetDailyQuests));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EftClientBackendSession), nameof(EftClientBackendSession.GetDailyQuests));
 
         [PatchPostfix]
         public static void Postfix(ref Task<RepeatableQuestsRange[]> __result)

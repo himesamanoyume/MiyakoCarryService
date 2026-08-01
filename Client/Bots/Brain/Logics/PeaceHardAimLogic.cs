@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class PeaceHardAimLogic : McsBotBaseLogic
     {
-        private PeaceHardAimBaseLogic _baseLogic;
+        private PeaceHardAimNode _baseLogic;
 
         public PeaceHardAimLogic(BotOwner botOwner) : base(botOwner)
         {

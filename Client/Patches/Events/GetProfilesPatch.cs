@@ -17,10 +17,10 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class GetProfilesPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.GetProfiles));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EftClientBackendSession), nameof(EftClientBackendSession.GetProfiles));
 
         [PatchPrefix]
-        public static bool Prefix(SessionBackendClass __instance, ref Task __result)
+        public static bool Prefix(EftClientBackendSession __instance, ref Task __result)
         {
             if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         }
 
         [PatchPostfix]
-        public static async void Postfix(SessionBackendClass __instance, Task __result)
+        public static async void Postfix(EftClientBackendSession __instance, Task __result)
         {
             await __result;
             var profileStatuses = new List<ProfileStatus>();
@@ -47,7 +47,7 @@ namespace MiyakoCarryService.Client.Patches.Events
             __instance.AllProfileStatus = profileStatuses.ToArray();
         }
 
-        private static async Task GetMcsBotPlayerProfile(SessionBackendClass session)
+        private static async Task GetMcsBotPlayerProfile(EftClientBackendSession session)
         {
             var response = await McsRequestHandler.GetMcsBotPlayerProfiles();
 

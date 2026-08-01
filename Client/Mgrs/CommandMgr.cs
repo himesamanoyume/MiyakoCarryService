@@ -546,7 +546,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
                 if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is ItemController traderControllerClass)
                 {
-                    var inventoryActionClass = new InventoryActionClass
+                    var inventoryActionClass = new InteractionContextHelper.CG_GetAvailableInteractionState1
                     {
                         owner = CommandUtils.GamePlayerOwner,
                         rootItem = rootItem,

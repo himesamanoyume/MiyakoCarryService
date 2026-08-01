@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class RaidEndedPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SessionBackendClass), nameof(SessionBackendClass.LocalRaidEnded));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EftClientBackendSession), nameof(EftClientBackendSession.LocalRaidEnded));
 
         [PatchPrefix]
         public static void Prefix(LocalRaidSettings settings, SessionResult results, FlatItem[] lostInsuredItems, Dictionary<string, FlatItem[]> transferItems)

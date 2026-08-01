@@ -42,7 +42,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
             {
                 if (_item.PinLockState == EItemPinLockState.Locked)
                 {
-                    error = new ItemLockedClass(item);
+                    error = new ItemManipulator.ItemManuallyLockedError(item);
                     __result = false;
                     return false;
                 }
@@ -50,13 +50,13 @@ namespace MiyakoCarryService.Client.Patches.Inventory
 
             if (from.GetOwner() != controller && from.IsSpecialSlotAddress())
             {
-                error = new CannotMoveItemDuringRaidClass(item, from.Container.ID);
+                error = new ItemManipulator.CantRemoveFromEquipmentSlotDuringRaid(item, from.Container.ID);
                 __result = false;
                 return false;
             }
             
             var observerItemState = controller.SearchController.GetObserverItemState(item, from);
-            error = observerItemState == EObserverItemState.Known ? null : new UnknownItemManipulationClass(item, observerItemState);
+            error = observerItemState == EObserverItemState.Known ? null : new UnknownItemError(item, observerItemState);
             __result = true;
             return false;
         }

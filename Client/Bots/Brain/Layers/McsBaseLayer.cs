@@ -7,7 +7,6 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
-using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;

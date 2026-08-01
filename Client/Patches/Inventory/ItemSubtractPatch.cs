@@ -1,4 +1,5 @@
 using System.Reflection;
+using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -10,10 +11,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class ItemSubtract1Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemSubtractClass1), nameof(ItemSubtractClass1.method_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player.PlayerInventoryController.CG_SubtractFromDiscardLimits), nameof(EFT.Player.PlayerInventoryController.CG_SubtractFromDiscardLimits.method_0));
 
         [PatchPrefix]
-        public static bool Prefix(ItemSubtractClass1 __instance, Item itemToSubtract)
+        public static bool Prefix(Player.PlayerInventoryController.CG_SubtractFromDiscardLimits __instance, Item itemToSubtract)
         {
             if (GameLoop.Instance.IsVaildGameWorld)
             {
@@ -39,10 +40,10 @@ namespace MiyakoCarryService.Client.Patches.Inventory
 
     public sealed class ItemSubtract2Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemSubtractClass2), nameof(ItemSubtractClass2.method_0));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player.PlayerInventoryController.CG_AddDiscardLimits), nameof(Player.PlayerInventoryController.CG_AddDiscardLimits.method_0));
 
         [PatchPrefix]
-        public static bool Prefix(ItemSubtractClass2 __instance, Item itemToAdd)
+        public static bool Prefix(Player.PlayerInventoryController.CG_AddDiscardLimits __instance, Item itemToAdd)
         {
             if (GameLoop.Instance.IsVaildGameWorld)
             {

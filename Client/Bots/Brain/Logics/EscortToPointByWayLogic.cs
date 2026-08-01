@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class EscortToPointByWayLogic : McsBotBaseLogic
     {
-        private GoToPointBaseLogic _baseLogic;
+        private GoToSomePoint _baseLogic;
 
         public EscortToPointByWayLogic(BotOwner botOwner) : base(botOwner)
         {
