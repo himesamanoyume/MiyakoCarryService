@@ -40,3 +40,7 @@
 [SPT-LootingBots](https://github.com/Skwizzy/SPT-LootingBots)
 
 [SPT-BigBrain](https://github.com/DrakiaXYZ/SPT-BigBrain)
+
+### 支持我
+
+[Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)

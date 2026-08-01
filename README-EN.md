@@ -43,3 +43,7 @@ MiyakoCarryService is a mod that generates AI teammates.
 [SPT-LootingBots](https://github.com/Skwizzy/SPT-LootingBots)
 
 [SPT-BigBrain](https://github.com/DrakiaXYZ/SPT-BigBrain)
+
+### Support me
+
+[Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)
