@@ -29,13 +29,13 @@
 
 ---
 
-![custombottype](https://ods5.oddba.cn/user_files/23687/bbs/29648841_1776483848.png)
+![custombottype](/Preview/custombottype.webp)
 
 让任意类型的 AI 都能成为你的队友，甚至是 Boss。
 
 只要你的配置文件正确，你甚至可以生成由第三方模组提供的 AI 类型，例如 [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)、[UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home)、[RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)。
 
-![customspawntype](https://ods5.oddba.cn/user_files/23687/bbs/35371127_1771827285.png)
+![customspawntype](/Preview/customspawntype.webp)
 
 ---
 
@@ -84,7 +84,7 @@
 
 Mcs 模仿现实中的搬运服务流程。在这个过程中，你需要选择所需的服务，下单并支付，然后与来为你提供服务的玩家一起游玩。因此，Mcs 提供了一个名为 `Tsukiyuki Miyako` 的商人来处理这些事务。
 
-![tutorial](https://ods5.oddba.cn/user_files/23687/bbs/35529095_1776484381.png)
+![tutorial](./Preview/tutorial.webp)
 
 如果你看不到分组面板，请先检查是否安装了 `UI Fixes`，然后在配置管理器中打开 `Advanced Settings`，进入 `Interface -> Show Group Panel`，并启用它。
 
