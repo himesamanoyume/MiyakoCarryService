@@ -469,6 +469,8 @@ Use brevity codes to replace original nicknames for display.
 
 ### [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)
 
+Just as an example, please refer to the latest actual version for details.
+
 - blackDivLead
 - blackDivAssault
 - blackDivBreacher
@@ -476,12 +478,16 @@ Use brevity codes to replace original nicknames for display.
 
 ### [UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home)
 
+Just as an example, please refer to the latest actual version for details.
+
 - followeruntar
 - bossuntarlead
 - followeruntarmarksman
 - bossuntaroffice
 
 ### [RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)
+
+Just as an example, please refer to the latest actual version for details.
 
 - ruafRifleman
 - ruafRiflemanSenior

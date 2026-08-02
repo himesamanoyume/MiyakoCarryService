@@ -80,7 +80,7 @@ namespace MiyakoCarryService.Client.Mgrs
                                 MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
                                 MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
 
-                                if (!LayerUtils.IsMcsBotPlayerInjected(mcsBotPlayerData.Player.ProfileId))
+                                if (!LayerUtils.IsMcsBotPlayerInjected(mcsBotPlayerData.BotOwner))
                                 {
                                     BrainMgr.InjectLayers(baseBrain);
                                 }
