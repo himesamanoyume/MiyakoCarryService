@@ -327,7 +327,7 @@ namespace MiyakoCarryService.Fika
                 var netPeer = GetPeerByNetId(fikaMcsLeadPlayer.NetId);
                 if (netPeer == null)
                 {
-                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     return;
                 }
 
@@ -361,7 +361,7 @@ namespace MiyakoCarryService.Fika
                 var netPeer = GetPeerByNetId(fikaMcsLeadPlayer.NetId);
                 if (netPeer == null)
                 {
-                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     return;
                 }
 
