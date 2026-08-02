@@ -7,9 +7,9 @@ using EFT;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    /// <summary>  
-    /// 运行时按单个 BotOwner 实时增删/激活/恢复 BigBrain 自定义 Layer，绕过 BrainManager 的全局 brainNames 匹配，直接操作目标 Bot 的大脑。 
-    /// </summary>  
+    /// <summary>
+    /// 运行时按单个 BotOwner 实时增删/激活/恢复 BigBrain 自定义 Layer，绕过 BrainManager 的全局 brainNames 匹配，直接操作目标 Bot 的大脑。
+    /// </summary>
     internal static class LayerUtils
     {
         private static int _currentLayerId = 15156;
@@ -33,21 +33,43 @@ namespace MiyakoCarryService.Client.Utils
             _initialized = true;
         }
 
-        public static bool IsMcsBotPlayerInjected(string mcsBotPlayerId)
+        private static HashSet<string> GetBrainLayerNames(BotOwner botOwner)
         {
-            if (_injectedLayers.TryGetValue(mcsBotPlayerId, out var map))
+            var names = new HashSet<string>();
+            if (botOwner == null || botOwner.Brain?.BaseBrain == null)
             {
-                var registerdLayerNames = _customLayerMaps.Keys.Select(l => l.Name);
-                foreach ((var layerName, var layerId) in map)
-                {
-                    if (!registerdLayerNames.Contains(layerName))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return names;
             }
-            return false;
+
+            var dict = botOwner.Brain.BaseBrain.Dictionary_0;
+            foreach (var index in dict.Keys.ToList())
+            {
+                names.Add(dict[index].Name());
+            }
+            return names;
+        }
+
+        public static bool IsMcsBotPlayerInjected(BotOwner botOwner)
+        {
+            if (botOwner == null || botOwner.Brain?.BaseBrain == null || _customLayerMaps == null)
+            {
+                return false;
+            }
+
+            var brainLayerNames = GetBrainLayerNames(botOwner);
+            var map = _injectedLayers.TryGetValue(botOwner.ProfileId, out var _map) ? _map : (_injectedLayers[botOwner.ProfileId] = new());
+
+            var allInjected = true;
+            foreach (var customLayerType in _customLayerMaps.Keys)
+            {
+                var layerName = customLayerType.Name;
+                if (!brainLayerNames.Contains(layerName))
+                {
+                    map.Remove(layerName);
+                    allInjected = false;
+                }
+            }
+            return allInjected;
         }
 
         public static void RegisterCustomLayer(Type customLayerType, int priority)
@@ -57,7 +79,7 @@ namespace MiyakoCarryService.Client.Utils
                 _customLayerMaps = new();
             }
 
-            _customLayerMaps.AddOrUpdate(customLayerType, priority, 
+            _customLayerMaps.AddOrUpdate(customLayerType, priority,
                 (customLayerType, oldPriority) =>
                 {
                     oldPriority = priority;
@@ -90,7 +112,11 @@ namespace MiyakoCarryService.Client.Utils
             var map = _injectedLayers.TryGetValue(botOwner.ProfileId, out var _map) ? _map : (_injectedLayers[botOwner.ProfileId] = new());
             if (map.ContainsKey(layerName))
             {
-                return false;
+                if (GetBrainLayerNames(botOwner).Contains(layerName))
+                {
+                    return false;
+                }
+                map.Remove(layerName);
             }
 
             try
@@ -203,7 +229,7 @@ namespace MiyakoCarryService.Client.Utils
 
         public static bool McsHasLayer(BotOwner botOwner, string layerName)
         {
-            return botOwner != null && _injectedLayers.TryGetValue(botOwner.ProfileId, out var m) && m.ContainsKey(layerName);
+            return botOwner != null && GetBrainLayerNames(botOwner).Contains(layerName);
         }
     }
 }
