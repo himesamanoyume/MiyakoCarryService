@@ -34,7 +34,7 @@ In Fika multiplayer, each player can have their own `McsBotPlayer` squad.
 
 Allows any type of AI to become your teammate, even Bosses
 
-You can even generate AI types provided by third-party mods such as [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home), [UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home), [RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home), as long as your configuration file is correct.
+You can even generate AI types provided by third-party mods such as [Black Division Home](https://github.com/TacticalToaster/BlackDiv), [UNTAR Go Home!](https://github.com/TacticalToaster/TacticalToasterUNTARGH), [RUAF Come Home!](https://github.com/TacticalToaster/RUAFComeHome), as long as your configuration file is correct.
 
 ![customspawntype](/Preview/customspawntype.webp)
 
@@ -89,8 +89,6 @@ Mcs mimics a carry service in the gaming industry. In this process, you need to 
 
 If you cannot see the Group Panel, please check whether you have UI Fixes installed, then open Advanced Settings in the Configuration Manager, navigate to Interface -> Show Group Panel, and enable it.
 
-_Currently Mcs does not provide indefinite service. When the service period you set expires, `McsBotPlayer` will automatically delete the friend._
-
 ---
 
 ### How to Customize `McsBotPlayer` Equipment
@@ -135,7 +133,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 2. If you don't understand the following content, it's recommended not to mess around with it yourself. Incorrect modifications will cause errors. If you really want to change it, read on. You can also leave it to AI to do it. If it's still changed incorrectly, just delete `spawntype.json` and restart the server, and a new file will be generated again.
 3. First, you need to know the JSON format rules. It's best to use an editor like VS Code that can check JSON format.
 4. Then you need to know the `WildSpawnType` names of AI provided by third-party mods or built-in to the original game.
-5. Take [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home) as an example. It provides a Black Division WildSpawnType: `blackDivAssault`.
+5. Take [Black Division Home](https://github.com/TacticalToaster/BlackDiv) as an example. It provides a Black Division WildSpawnType: `blackDivAssault`.
 6. Now you need to add another type in the correct format in `spawntype.json`.
 
 ```jsonc
@@ -183,14 +181,16 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | --- | --- |
 | `Enable Looting` | Whether `McsBotPlayer` will attempt to loot items while not currently in combat. |
 | `Price Threshold` | Loot below this price will be ignored. |
-| `Loot Name Keyword` | Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords may be separated by `||`, `,`, or `，`. |
+| `Loot Name Keyword` | Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords may be separated by `\|\|`，`,`，`，`. |
 | `Loot Keyword Items` | Whether `McsBotPlayer` will attempt to loot keyword-matched items. |
 | `Blocked Item Types` | Supports select all / deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`. |
 | `Enable Keep Formation` | Whether to determine `McsBotPlayer` positions based on the formation matrix configuration. |
 | `Formation Matrix` | Used to configure the position of each `McsBotPlayer`. `★` represents your position, and the area above `★` indicates your facing direction. |
 | `Formation Spacing` | The spacing between formation members. |
 | `Formation Sequential Fill` | When enabled, if a `McsBotPlayer` dies in formation, the next squad member fills the empty slot in brevity-code order. |
-| `Save Formation Preset Hotkey` | Saves the current formation preset and binds a hotkey. *When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon to be installed first.* |
+| `Save Formation Preset Hotkey` | Saves the current formation preset and binds a hotkey. |
+
+> When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
 ### Command
 
@@ -232,7 +232,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `Team Clear Area` | If there are `McsBotPlayers` in the team not currently in combat, command them to clear the surrounding area of a specified location. |
 | `Change Formation` | Apply the saved formation preset immediately. |
 
-> The command system also works normally during Fika multiplayer, but this requires the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon to be installed first.
+> The command system also works normally during Fika multiplayer, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
 ### Player
 
@@ -323,21 +323,21 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 </details>
 
-### [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)
+### [Black Division Home](https://github.com/TacticalToaster/BlackDiv)
 
 - blackDivLead
 - blackDivAssault
 - blackDivBreacher
 - blackDivSupport
 
-### [UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home)
+### [UNTAR Go Home!](https://github.com/TacticalToaster/TacticalToasterUNTARGH)
 
 - followeruntar
 - bossuntarlead
 - followeruntarmarksman
 - bossuntaroffice
 
-### [RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)
+### [RUAF Come Home!](https://github.com/TacticalToaster/RUAFComeHome)
 
 - ruafRifleman
 - ruafRiflemanSenior
