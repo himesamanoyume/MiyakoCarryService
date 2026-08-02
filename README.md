@@ -82,7 +82,7 @@
 
 ### 如何生成 `McsBotPlayer`
 
-Mcs 模仿现实中的搬运服务流程。在这个过程中，你需要选择所需的服务，下单并支付，然后与来为你提供服务的玩家一起游玩。因此，Mcs 提供了一个名为 `Tsukiyuki Miyako` 的商人来处理这些事务。
+Mcs 模仿现实中的护航服务流程。在这个过程中，你需要选择所需的服务，下单并支付，然后与来为你提供服务的玩家一起游玩。因此，Mcs 提供了一个名为 `Tsukiyuki Miyako` 的商人来处理这些事务。
 
 ![tutorial](./Preview/tutorial.webp)
 
@@ -172,7 +172,7 @@ _2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可�
 | `PunishmentMultiMax` | 最大涨价惩罚倍数。 | `1`（即 `100%`） |
 | `OrderPendingPaymentTime` | 通过 Miyako 商人下单 `McsBotPlayer` 或发放补票时，动作任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
 | `CompensationPrice` | 当 `McsBotPlayer` 意外击杀 `McsLeadPlayer` 时的补偿金额，单位为卢布。 | `300000` 卢布 |
-| `CarryServiceLevelPrice` | 搬运服务等级基础定价，共 5 个等级，每个等级都设有上下限。 | 由等级区间决定 |
+| `CarryServiceLevelPrice` | 护航等级基础定价，共 5 个等级，每个等级都设有上下限。 | 由等级区间决定 |
 
 ## 功能
 
