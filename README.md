@@ -17,15 +17,15 @@
 
 ## 描述
 
-本文档会把 `Miyako Carry Service` 简称为 `Mcs`；你将会被称为 `McsLeadPlayer`，由 Mcs 生成的 AI 队友会被称为 `McsBotPlayer`。
+本文档会把 `Miyako Carry Service` 简称为 `Mcs`；你将会被称为 `老板`(McsLeadPlayer)，由 Mcs 生成的 AI 队友会被称为 `护航`(McsBotPlayer)。
 
-支持通过 `Mcs Inventory Mode` 对 `McsBotPlayer` 的装备进行完整自定义，支持把任意类型的 AI 生成为 `McsBotPlayer`，甚至可以是其他模组提供的 AI 类型；支持 `McsBotPlayers` 按指定规则拾取物资；支持通过指令系统对 `McsBotPlayers` 下达命令；兼容 `SAIN`，兼容 `Fika`。
+支持通过 `护航库存模式` 对 `护航` 的装备进行完整自定义，支持把任意类型的 AI 生成作为 `护航`，甚至可以是其他模组提供的 AI 类型；支持 `护航` 按指定规则拾取物资；支持通过指令系统对 `护航` 下达命令；兼容 `SAIN`，兼容 `Fika`。
 
 ---
 
 ![Fika](/Preview/fika.webp)
 
-在 `Fika` 多人模式中，每个玩家都可以拥有自己的 `McsBotPlayer` 小队。
+在 `Fika` 多人模式中，每个玩家都可以拥有自己的 `护航` 小队。
 
 ---
 
@@ -33,7 +33,7 @@
 
 让任意类型的 AI 都能成为你的队友，甚至是 Boss。
 
-只要你的配置文件正确，你甚至可以生成由第三方模组提供的 AI 类型，例如 [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)、[UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home)、[RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)。
+只要你的配置文件正确，你甚至可以生成由第三方模组提供的 AI 类型，例如 [Black Division Home](https://github.com/TacticalToaster/BlackDiv)、[UNTAR Go Home!](https://github.com/TacticalToaster/TacticalToasterUNTARGH)、[RUAF Come Home!](https://github.com/TacticalToaster/RUAFComeHome)。
 
 ![customspawntype](/Preview/customspawntype.webp)
 
@@ -45,29 +45,29 @@
 
 #### 强大且灵活的指令系统
 
-除了少量基础移动指令外，Mcs 在 `EFT` 自带的动作菜单基础之上，进一步为指令系统注入了无限可能。
+除了一些较为基础的行动指令以外，依托于 `EFT` 中自带的操作菜单，为指令系统注入了无限的可能性。
 
-这意味着你可以让一个 `McsBotPlayer` 带你前往各种目的地——任务地点、撤离点、转运点、开关点，尤其是你知道要去哪里，但却不知道具体位置的地点。你只需要让它在你前面带路，跟着它的脚步走就能到达目的地（前提当然是该地点本身允许 AI 前往）。
+这允许您指派AI队友引领您前往各种目标区域，比如各种任务地点、各个撤离点、各个转移点、各个开关，特别是那些你自己想要前往但是您不清楚位置在哪的区域，这时您就可以选择让他们为您在前方带路，您只需跟随他们的脚步，就可以到达目的地（当然前提是这些地点本身允许AI前往）
 
-你甚至可以把某些动作委托给它们自行完成，而不必你自己亲自处理。比如在支持的任务条件下，Mcs 允许代理动作——通过单次指令，它们就可以独自前往任务地点执行修理、前往任务点、安装物品等操作。你可以在不亲自前往现场的情况下完成任务。
+您甚至可以让他们直接代替您去独立执行某些行为，这样您就不需要事事都亲力亲为了，比如Mcs允许在已支持的任务条件下进行代理行动，只需要一声令下，他们就可以独自前往任务地点，进行修理、探点、安装等操作，您不需要到现场，也能完成任务
 
-或者你想打开某个触发撤离的开关，你可以直接命令它们自己去操作，而你则直接前往撤离点；开关打开后，你就可以直接撤离，不需要再先去开开关、再回去撤离的老路子了。
+又或者您希望打开某个开启撤离点的开关，那么您可以下令让他们自己前去操作，自己则径直前往撤离点，等到开关被开启后，您就可以直接撤离了，而不必像以往一样自己前去打开开关，再前往撤离点撤离
 
-此外，如果你身处复杂区域，周围可能潜伏着敌人，你也可以命令它们彻底搜索指定地点的每个角落。
+他们除了保您无虞以外，如果您处于一个复杂的区域，周围可能潜藏有敌人，那么您也可以下令让他们彻底搜查指定地点的每一个角落
 
 #### 让一切收益都归你所有
 
-作为一款追求极致服务体验的模组，你的 `McsBotPlayer` 自然应该能够根据你的设置主动搜刮物资。你可以设置屏蔽物品类型、最低价值阈值、是否拾取包含特定关键词的物品，以及更多内容。它们也会在一定程度上对拾取物资进行整理，尽可能多地拿走你需要的物资。不过，最终这些收益仍然需要你亲自收集并带出战局后才能真正属于你。
+作为提供完美服务体验的模组，您的AI队友自然应该能够依据您的设置，主动搜刮对应的战利品。您可以设定屏蔽的物品类型，战利品价值阈值，是否搜刮具有特定关键词的战利品等等，并且他们会在一定程度上对搜刮来的战利品进行嵌套，尽可能更多地掠夺一切您需要的战利品，不过最终这些收获都还是需要您亲自领取后才能带出战局
 
-#### 成就伟业的最后一块拼图
+#### 登神长阶的最后一块拼图
 
-**编队系统**
+**队形系统**
 
-该系统允许你配置一个 `7×7` 的编队矩阵，在其中设置你自己的位置、队友的位置，以及它们之间的间距。现在你就拥有一个训练有素、强大的小队，它会在任何时候保持编队姿态。你还可以通过快捷键将当前编队保存为预设，并给它自定义名称，然后通过指令系统快速应用编队预设来应对各种场景。
+该系统允许您配置一个`7x7`大小的队形矩阵，您可以在其中设定自己与其他队友的站位、间距，现在您已拥有了一支训练有素、时刻保持阵型的强大小队。您还可以通过快捷键将当前的队形保存为预设，并自定义队形名称，然后您将通过指令系统快速应用队形预设，以应对任何场景
 
 #### 可按玩家独立生效的配置
 
-众所周知，Mcs 支持安装 `Fika` 附加组件，以便在 `Fika` 多人模式下使用。我们也知道，在 `Fika` 多人模式中，几乎所有战局计算都由主机完成。因此，我们并不希望每个 `McsBotPlayer` 的行为都只由主机决定。别担心——Mcs 也支持同步部分配置项，因此作为主机的用户可以让不同小队使用各自的配置进行计算，包括拾取物资配置、编队站位配置等。我保证你可以获得和本地单人战局中使用 Mcs 一样的体验。
+总所周知，Mcs支持安装Fika Addon以做到在Fika联机环境下使用，而我们也知道，在Fika联机环境下，战局中几乎一切的运算都是在主机上进行的，也因此我们不会希望所有的AI队友行为全部以主机为准，没关系，Mcs也支持将部分配置项进行同步，实现作为主机的玩家能够为不同的玩家小队使用他们各自的配置来进行运算，包括战利品的掠夺配置、队形站位的配置等等，我保证您可以获得与您在自己本地战局中使用Mcs时同样的体验
 
 ## 教程
 
@@ -80,61 +80,59 @@
 
 ---
 
-### 如何生成 `McsBotPlayer`
+### 如何生成 `护航`
 
-Mcs 模仿现实中的护航服务流程。在这个过程中，你需要选择所需的服务，下单并支付，然后与来为你提供服务的玩家一起游玩。因此，Mcs 提供了一个名为 `Tsukiyuki Miyako` 的商人来处理这些事务。
+Mcs 模仿现实中的护航服务流程。在这个过程中，你需要选择所需的服务，下单并支付，然后与来为你提供服务的玩家一起游玩。因此，Mcs 提供了一个名为 `月雪宫子`(我老婆) 的商人来处理这些事务。
 
 ![tutorial](./Preview/tutorial.webp)
 
 如果你看不到分组面板，请先检查是否安装了 `UI Fixes`，然后在配置管理器中打开 `Advanced Settings`，进入 `Interface -> Show Group Panel`，并启用它。
 
-_目前 Mcs 不提供长期服务。当你设置的服务期限结束后，`McsBotPlayer` 会自动删除该队友。_
-
 ---
 
-### 如何自定义 `McsBotPlayer` 装备
+### 如何自定义 `护航` 装备
 
-1. 你需要先把某个已加入好友列表的 `McsBotPlayer` 作为好友。
-2. 从底部栏左下角打开 `Invite to group` 界面。
-3. 右键点击 `McsBotPlayer` 打开右键菜单，选择 `OPEN INVENTORY`。
-4. 此时你将进入 `Mcs Inventory Mode`。
-5. 在 `Mcs Inventory Mode` 中，你可以像正常游戏一样通过操作来自定义 `McsBotPlayer` 的装备。
-6. 进入 `Mcs Inventory Mode` 后，Miyako 商人会提供所有物品供你以 `1` 卢布购买。
-7. 想回到主角色，有两种方式：一种是再次通过 `Invite to group` 界面右键点击 `McsBotPlayer`，选择 `RETURN TO MAIN CHARACTER`；另一种是直接点击底部栏上的绿色 `Mcs Inventory Mode` 按钮，也能返回主角色。
+1. 你需要先把某个已加入好友列表的 `护航` 作为好友。
+2. 从底部栏左下角打开 `邀请至队伍` 界面。
+3. 右键点击 `护航` 打开右键菜单，选择 `打开库存`。
+4. 此时你将进入 `护航库存模式`。
+5. 在 `护航库存模式` 中，你可以像正常游戏一样通过操作来自定义 `护航` 的装备。
+6. 进入 `护航库存模式` 后，宫子 商人会提供所有物品供你以 `1` 卢布购买。
+7. 想回到主角色，有两种方式：一种是再次通过 `邀请至队伍` 界面右键点击 `护航`，选择 `返回主角色`；另一种是直接点击底部栏上的绿色 `护航库存模式` 按钮，也能返回主角色。
 
 ![McsInventoryMode](/Preview/mcsinventorymode.webp)
 
-_1. `Mcs Inventory Mode` 仅在 `PMC` 模式下修改 `McsBotPlayer` 的装备。众所周知，`PMC` 模式和 `SCAV` 模式是两种不同角色。根据游戏设定，你无法控制 `SCAV` 角色的装备，因此 Mcs 也会保持这一设定。_
+_1. `护航库存模式` 仅在 `PMC` 模式下修改 `护航` 的装备。众所周知，`PMC` 模式和 `SCAV` 模式是两种不同角色。根据游戏设定，你无法控制 `SCAV` 角色的装备，因此 Mcs 也会保持这一设定。_
 
-_2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可以选择结算或续订订单。只有在成功结算后，已过期 `McsBotPlayer` 的全部数据才会被永久删除；而续订会发放同等时长的新订单；一旦续订任务完成，服务到期时间也会相应延长。_
+_2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选择结算或续订订单。只有在成功结算后，已过期 `护航` 的全部数据才会被永久删除；而续订会发放同等时长的新订单；一旦续订任务完成，服务到期时间也会相应延长。_
 
 ### 如何续订与结算
 
-1. 同样地，打开底部栏左下角的 `Invite to group` 界面。
-2. 同样地，右键点击 `McsBotPlayer` 打开右键菜单，选择 `RENEW ORDER`。
+1. 同样地，打开底部栏左下角的 `邀请至队伍` 界面。
+2. 同样地，右键点击 `护航` 打开右键菜单，选择 `续订`。
 3. 然后会发放一项同等时长的新任务，完成后即可完成续订。
-4. 对于已过期的 `McsBotPlayer`，选择 `SETTLE ORDER` 会永久删除该订单下所有 `McsBotPlayer` 的全部数据。
-5. 过期 `McsBotPlayer` 的数据会被保留到你主动结算为止。你可以随时续订任何 `McsBotPlayer`，让过期的 `McsBotPlayer` 再次可用，或者延长尚未过期 `McsBotPlayer` 的服务时间。
+4. 对于已过期的 `护航`，选择 `结算` 会永久删除该订单下所有 `护航` 的全部数据。
+5. 过期 `护航` 的数据会被保留到你主动结算为止。你可以随时续订任何 `护航`，让过期的 `护航` 再次可用，或者延长尚未过期 `护航` 的服务时间。
 
 ---
 
-### 如何在战局中获取 `McsBotPlayers` 拾取的物资
+### 如何在战局中获取 `护航` 拾取的物资
 
-当 `McsBotPlayer` 拾取目标物资时，如果你不想等到它死亡后再通过尸体捡回这些物品，那么除了 `McsBotPlayer` 死亡后清理尸体外，你还可以在 `Mcs` 指令菜单中对单个 `McsBotPlayer` 使用 `OPEN INVENTORY` 指令，在它还活着的时候远程打开它的背包；或者使用 `DROP TARGET LOOT` 指令，让它在战局中把当前已经拾取的目标物资直接丢到你面前。
+当 `护航` 拾取目标物资时，如果你不想等到它死亡后再通过尸体捡回这些物品，那么除了 `护航` 死亡后清理尸体外，你还可以在 `Mcs` 指令菜单中对单个 `护航` 使用 `打开背包` 指令，在它还活着的时候远程打开它的背包；或者使用 `丢出目标战利品` 指令，让它在战局中把当前已经拾取的目标物资直接丢到你面前。
 
-根据游戏设定，`McsBotPlayer` 会模仿真实玩家的行为，因此在它拾取物资后，如果你自己不亲自拿走，那么这些物资在战局结束后都不会属于你。
+根据游戏设定，`护航` 会模仿真实玩家的行为，因此在它拾取物资后，如果你自己不亲自拿走，那么这些物资在战局结束后都不会属于你。
 
-> 如果你想要，那你就得自己拿走，和你已经知道的一样。
+> If you want it, then you'll have to take it, as you have already known.
 
 ---
 
-### 如何自定义 `McsBotPlayer` 类型
+### 如何自定义 `护航` 类型
 
 1. 先启动一次服务器，此时会在 `MiyakoCarryServiceServer/configs` 目录下生成 `spawntype.json`。
 2. 如果你不理解下面的内容，建议不要随意改动。错误的修改会导致报错。如果你真的想改，继续往下看。你也可以交给 AI 来处理。如果改得还是不对，就删除 `spawntype.json` 并重新启动服务器，新的文件会重新生成。
 3. 首先，你需要了解 JSON 格式规则。最好使用像 VS Code 这样的编辑器来检查 JSON 格式。
 4. 然后，你需要了解由第三方模组提供或原版游戏内置的 `WildSpawnType` 名称。
-5. 以 [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home) 为例。它提供了一个黑暗分部的 `WildSpawnType`：`blackDivAssault`。
+5. 以 [Black Division Home](https://github.com/TacticalToaster/BlackDiv) 为例。它提供了一个黑暗分部的 `WildSpawnType`：`blackDivAssault`。
 6. 现在你需要按照正确格式，在 `spawntype.json` 中添加另一种类型。
 
 ```jsonc
@@ -158,20 +156,20 @@ _2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可�
     // 最后一个 `}` 不要加 `,`。
 ```
 
-7. 确认 JSON 格式正确且数据填写无误后，重新启动服务器。这时，在 Miyako 商人的 `MESSENGER` 界面中使用帮助命令，就能在可用类型列表中看到全部类型。
-8. 如果在生成自定义类型时发生异常，你会在服务器日志中收到错误提示，并会回退到默认生成 `pmc` 类型 `McsBotPlayer`。此时，你需要检查你填写的自定义类型是否有误。
+7. 确认 JSON 格式正确且数据填写无误后，重新启动服务器。这时，在 宫子 商人的 `MESSENGER` 界面中使用帮助命令，就能在可用类型列表中看到全部类型。
+8. 如果在生成自定义类型时发生异常，你会在服务器日志中收到错误提示，并会回退到默认生成与你同阵营的PMC类型。此时，你需要检查你填写的自定义类型是否有误。
 
 ## 配置
 
 | 配置项 | 说明 | 默认值 |
 | --- | --- | --- |
-| `BalanceRestriction` | 启用后，`McsBotPlayer` 的 `OPEN INVENTORY` 指令将不可用，且所有带入战局的物品会获得 `Curse of Vanishing` 附魔；当 `McsBotPlayer` 死亡后，带入物品会立即在任何位置消失。 | `false` |
+| `BalanceRestriction` | 启用后，`护航` 的 `打开背包` 指令将不可用，且所有带入战局的物品会获得 `消失诅咒` 附魔；当 `护航` 死亡后，无论此带入物品当前身处何处，都会立即消失。 | `false` |
 | `CheckUpdate` | 是否在线检查版本更新。 | `true` |
 | `CheckIfdian` | 是否检查赞助者列表更新。 | `true` |
-| `TicketPricePerPercent` | 用于计算申请票据移除涨价惩罚时所支付罚金的单价，单位为卢布/百分比。 | `300000` 卢布/百分比 |
+| `TicketPricePerPercent` | 用于计算申请罚单移除涨价惩罚时所支付罚金的单价，单位为卢布/百分比。 | `300000` 卢布/百分比 |
 | `PunishmentMultiMax` | 最大涨价惩罚倍数。 | `1`（即 `100%`） |
-| `OrderPendingPaymentTime` | 通过 Miyako 商人下单 `McsBotPlayer` 或发放补票时，动作任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
-| `CompensationPrice` | 当 `McsBotPlayer` 意外击杀 `McsLeadPlayer` 时的补偿金额，单位为卢布。 | `300000` 卢布 |
+| `OrderPendingPaymentTime` | 通过 宫子 商人下单 `护航` 或发放补票时，行动任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
+| `CompensationPrice` | 当 `护航` 意外击杀 `老板` 时的补偿金额，单位为卢布。 | `300000` 卢布 |
 | `CarryServiceLevelPrice` | 护航等级基础定价，共 5 个等级，每个等级都设有上下限。 | 由等级区间决定 |
 
 ## 功能
@@ -180,16 +178,18 @@ _2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可�
 
 | 功能项 | 说明 |
 | --- | --- |
-| `Enable Looting` | 如果 `McsBotPlayer` 当前未处于战斗中，是否尝试拾取物品。 |
-| `Price Threshold` | 低于该价格的物品将被忽略。 |
-| `Loot Name Keyword` | 关键词为物品完整名称或缩写中包含的文本，支持使用 `||`、`,` 或 `，` 分隔多个关键词进行搜索。 |
-| `Loot Keyword Items` | `McsBotPlayer` 是否尝试拾取带有关键词的物品。 |
-| `Blocked Item Types` | 支持全选/全不选：`Ammo`、`Barter`、`Info`、`Container`、`Food`、`Backpack`、`Goggles`、`Pocket`、`Tactical Vest`、`Armor`、`Grenade`、`Headphone`、`Keys`、`Knife`、`Magazine`、`Meds`、`Mod`、`Special`、`Weapon`、`Other`。 |
-| `Enable Keep Formation` | 是否基于编队矩阵配置来决定 `McsBotPlayer` 的位置。 |
-| `Formation Matrix` | 用于配置每个 `McsBotPlayer` 的位置。`“★”` 表示你的所在位置，`“★”` 上方表示你的视线方向。 |
-| `Formation Spacing` | 编队成员之间的间距设置。 |
-| `Formation Sequential Fill` | 启用后，若编队中某个 `McsBotPlayer` 死亡，则下一个同队成员会按简写编码顺序补上空缺位置。 |
-| `Save Formation Preset Hotkey` | 保存当前编队预设并绑定快捷键。*在安装 Fika 时，战局中设置改动会自动同步到宿主，但前提是需先安装 [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) 插件。* |
+| `开启掠夺` | 如果 `护航` 当前未处于战斗中，是否尝试拾取物品。 |
+| `价值阈值` | 低于该价格的物品将被忽略。 |
+| `战利品名称关键词` | 关键词为物品完整名称或缩写中包含的文本，支持使用 `\|\|`，`,`，`，` 分隔多个关键词进行搜索。 |
+| `掠夺关键词战利品` | `护航` 是否尝试拾取带有关键词的物品。 |
+| `屏蔽物品类型` | 支持全选/全不选：`子弹`、`交换品`、`情报类`、`容器`、`食物`、`背包`、`护目镜`、`口袋`、`胸挂`、`背心`、`耳机`、`手雷`、`钥匙`、`近战武器`、`弹匣`、`医疗品`、`配件`、`特殊道具`、`枪械`、`其他`。 |
+| `开启保持队形` | 是否基于队形矩阵配置来决定 `护航` 的位置。 |
+| `队形矩阵` | 用于配置每个 `护航` 的位置。`“★”` 表示你的所在位置，`“★”` 上方表示你的视线朝向方向。 |
+| `队形间距` | 队形成员之间的间距设置。 |
+| `队形顺序补位` | 启用后，若队形中某个 `护航` 死亡，则会按照代号顺序补上空缺位置。 |
+| `保存队形预设快捷键` | 保存当前队形预设并绑定快捷键。|
+
+> 在安装 Fika 时，战局中设置改动会自动同步到宿主，但前提是需先安装 **MiyakoCarryServiceFika** 插件。
 
 ### 指令
 
@@ -197,51 +197,51 @@ _2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可�
 
 | 指令 | 说明 |
 | --- | --- |
-| `Report Enemy Position` | 若 `McsBotPlayer` 当前处于战斗中，则命令其汇报已知敌方位置。 |
-| `Report Self Status` | 命令 `McsBotPlayer` 汇报自身生命值与补给状态。 |
-| `On Your Own` | 命令 `McsBotPlayer` 自行行动。 |
-| `Regroup` | 命令 `McsBotPlayer` 停止当前动作并重新集结。 |
-| `Follow Me` | 命令 `McsBotPlayer` 跟随 `McsLeadPlayer`。在此状态下，`McsBotPlayer` 不会主动攻击敌人或拾取物资。 |
-| `Exclude / Takeover` | `Exclude` 指令会阻止 `McsBotPlayer` 接收队友指令；`Take Over` 指令则恢复对其的团队指令控制。 |
-| `Go To` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其前往指定位置。 |
-| `Hold Position` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其原地停留。 |
-| `Force Teleport` | 清除 `McsBotPlayer` 的仇恨并尝试将其瞬移到当前位置。 |
-| `Open Inventory` | 远程打开 `McsBotPlayer` 背包，用于转移其拾取到的物品。 |
-| `Change Aiming Body Part Type` | 命令 `McsBotPlayer` 切换偏好的战斗瞄准部位。 |
-| `Escort` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其护送到目标地点。子项包括：`Quest Escort`、`Exfil Escort`、`Transit Escort`、`Switch Escort`、`Stationary Weapon Escort`、`BTR Escort`、`Airdrop Escort`。 |
-| `Proxy Action` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其代理执行相关动作。子项包括：`Quest Proxy Action`、`Door Proxy Action`、`Loot Proxy Action`、`Switch Proxy Action`。 |
-| `Drop Target Loot` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其丢下此次战局中已拾取的目标物资。 |
-| `Clear Area` | 若 `McsBotPlayer` 当前未处于战斗中，则命令其清理指定地点周围区域。 |
+| `报告敌人方位` | 若 `护航` 当前处于战斗中，则命令其汇报已知敌方位置。 |
+| `报告自身状态` | 命令 `护航` 汇报自身生命值与补给状态。 |
+| `自主行动` | 命令 `护航` 自行决策。 |
+| `集结` | 命令 `护航` 停止当前一切行动并重新集结。 |
+| `跟随我` | 命令 `护航` 跟随 `老板`。在此状态下，`护航` 不会主动攻击敌人或拾取物资。 |
+| `排除/接管` | `Exclude` 指令会阻止 `护航` 接收队友指令；`Take Over` 指令则恢复对其的团队指令控制。 |
+| `前往` | 若 `护航` 当前未处于战斗中，则命令其前往指定位置。 |
+| `驻守` | 若 `护航` 当前未处于战斗中，则命令其原地停留。 |
+| `强制传送` | 清除 `护航` 的仇恨并尝试将其瞬移到当前位置。 |
+| `打开背包` | 远程打开 `护航` 背包，用于转移其拾取到的物品。 |
+| `改变瞄准部位` | 命令 `护航` 切换偏好的战斗瞄准部位。 |
+| `护送` | 若 `护航` 当前未处于战斗中，则命令其护送到目标地点。子项包括：`护送至任务地点`、`护送至撤离点`、`护送至转移点`、`护送至开关`、`护送至固定武器`、`护送至BTR`、`护送至空投箱`。 |
+| `代理行动` | 若 `护航` 当前未处于战斗中，则命令其代理执行相关行动。子项包括：`支持代理完成部分任务条件`、`代理开启上锁的门`、`代理拾取战利品`、`代理打开开关`。 |
+| `丢出目标战利品` | 若 `护航` 当前未处于战斗中，则命令其丢下此次战局中已拾取的目标物资。 |
+| `清扫区域` | 若 `护航` 当前未处于战斗中，则命令其清理指定地点周围区域。 |
 
 #### TeamCommand
 
 | 指令 | 说明 |
 | --- | --- |
-| `Team Report Enemy Position` | 若当前队伍中存在处于战斗中的 `McsBotPlayers`，则命令它们汇报已知敌方位置。 |
-| `Team Report Self Status` | 命令所有 `McsBotPlayers` 汇报自身生命值与补给状态。 |
-| `Team On Your Own` | 命令所有 `McsBotPlayers` 自行行动。 |
-| `Team Regroup` | 命令所有 `McsBotPlayers` 停止动作并重新集结。 |
-| `Team Follow Me` | 命令所有 `McsBotPlayers` 跟随 `McsLeadPlayer`。在此状态下，它们不会主动攻击敌人或拾取物资。 |
-| `Team Go To` | 若当前队伍中有未处于战斗中的 `McsBotPlayers`，则命令它们前往指定位置。 |
-| `Team Hold Position` | 若当前队伍中有未处于战斗中的 `McsBotPlayers`，则命令它们原地停留。 |
-| `Team Force Teleport` | 清除整个队伍 `McsBotPlayers` 的仇恨，并尝试将它们瞬移到当前位置。 |
-| `Team Change Aiming Body Part Type` | 命令所有 `McsBotPlayers` 切换偏好的战斗瞄准部位。 |
-| `Team Escort` | 若当前队伍中存在未处于战斗中的 `McsBotPlayers`，则命令它们护送到目标地点。子项包括：`Team Quest Escort`、`Team Exfil Escort`、`Team Transit Escort`、`Team Switch Escort`、`Team Stationary Weapon Escort`、`Team BTR Escort`、`Team Airdrop Escort`。 |
-| `Team Drop Target Loot` | 若当前队伍中有未处于战斗中的 `McsBotPlayers`，则命令它们丢下本次战局中已拾取的目标物资。 |
-| `Team Clear Area` | 若当前队伍中有未处于战斗中的 `McsBotPlayers`，则命令它们清理指定地点周围区域。 |
-| `Change Formation` | 立即应用已保存的编队预设。 |
+| `全队报告敌人方位` | 若当前队伍中存在处于战斗中的 `护航`，则命令它们汇报已知敌方位置。 |
+| `全队报告自身状态` | 命令所有 `护航` 汇报自身生命值与补给状态。 |
+| `全队自主行动` | 命令所有 `护航` 自行决策。 |
+| `全队集结` | 命令所有 `护航` 停止一切行动并重新集结。 |
+| `全队跟随我` | 命令所有 `护航` 跟随 `老板`。在此状态下，它们不会主动攻击敌人或拾取物资。 |
+| `全队前往` | 若当前队伍中有未处于战斗中的 `护航`，则命令它们前往指定位置。 |
+| `全队驻守` | 若当前队伍中有未处于战斗中的 `护航`，则命令它们原地停留。 |
+| `全队强制传送` | 清除整个队伍 `护航` 的仇恨，并尝试将它们瞬移到当前位置。 |
+| `全队改变瞄准部位` | 命令所有 `护航` 切换偏好的战斗瞄准部位。 |
+| `全队护送` | 若当前队伍中存在未处于战斗中的 `护航`，则命令它们护送到目标地点。子项包括：`全队护送至任务地点`、`全队护送至撤离点`、`全队护送至转移点`、`全队护送至开关`、`全队护送至固定武器`、`全队护送至BTR`、`全队护送至空投箱`。 |
+| `全队丢出目标战利品` | 若当前队伍中有未处于战斗中的 `护航`，则命令它们丢下本次战局中已拾取的目标物资。 |
+| `全队清扫区域` | 若当前队伍中有未处于战斗中的 `护航`，则命令它们清理指定地点周围区域。 |
+| `改变队形` | 立即应用已保存的队形预设。 |
 
-> 在安装 Fika 时，指令系统也可正常工作，但前提是需要先安装 [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) 插件。
+> 在安装 Fika 时，指令系统也可正常工作，但前提是需要先安装 **MiyakoCarryServiceFika** 插件。
 
 ### 玩家
 
 | 设置项 | 说明 |
 | --- | --- |
-| `Teammate Highlight` | 是否在战局中高亮所有 `McsBotPlayer` 角色。 |
-| `Teammate Highlight Hotkey` | 高亮快捷键设置。 |
-| `Teammate Highlight Color` | 高亮颜色设置。 |
-| `Enable Mcs Subtitles` | 是否使用字幕显示 `McsBotPlayer` 的报告信息。 |
-| `Show Brevity Code` | 是否用简短口令替换原始昵称进行显示。 |
+| `护航高亮` | 是否在战局中高亮所有 `护航` 角色。 |
+| `护航高亮快捷键` | 高亮快捷键设置。 |
+| `护航高亮颜色` | 高亮颜色设置。 |
+| `开启护航字幕` | 是否使用字幕显示 `护航` 的报告信息。 |
+| `显示代号` | 用代号来代替原本的名称进行显示。 |
 
 ## Language
 
@@ -322,21 +322,21 @@ _2. `McsBotPlayer` 的好友槽位在服务到期后会变得不可用。你可�
 
 </details>
 
-### [Black Division Home](https://forge.sp-tarkov.com/mod/2511/wtt-black-division-redacted-home)
+### [Black Division Home](https://github.com/TacticalToaster/BlackDiv)
 
 - blackDivLead
 - blackDivAssault
 - blackDivBreacher
 - blackDivSupport
 
-### [UNTAR Go Home!](https://forge.sp-tarkov.com/mod/2342/untar-go-home)
+### [UNTAR Go Home!](https://github.com/TacticalToaster/TacticalToasterUNTARGH)
 
 - followeruntar
 - bossuntarlead
 - followeruntarmarksman
 - bossuntaroffice
 
-### [RUAF Come Home!](https://forge.sp-tarkov.com/mod/2427/ruaf-come-home)
+### [RUAF Come Home!](https://github.com/TacticalToaster/RUAFComeHome)
 
 - ruafRifleman
 - ruafRiflemanSenior
