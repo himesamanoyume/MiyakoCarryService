@@ -128,7 +128,7 @@ namespace MiyakoCarryService.Fika
                     }
                     catch
                     {
-                        
+
                     }
 
                 }
@@ -267,8 +267,8 @@ namespace MiyakoCarryService.Fika
                 KeywordItemText = packet.KeywordItemText,
                 LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,
                 BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
-                EnableKeepFormation = packet.McsBotPlayerConfig.EnableKeepFormation,  
-                FormationMatrix = packet.FormationMatrix,  
+                EnableKeepFormation = packet.McsBotPlayerConfig.EnableKeepFormation,
+                FormationMatrix = packet.FormationMatrix,
                 FormationSpacing = packet.McsBotPlayerConfig.FormationSpacing,
                 FormationSequentialFill = packet.McsBotPlayerConfig.FormationSequentialFill,
             });
@@ -324,8 +324,14 @@ namespace MiyakoCarryService.Fika
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
 
-                // 为了适配老版本Fika无法获取NetPeer，使用流量损耗更大的广播方式
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                var netPeer = GetPeerByNetId(fikaMcsLeadPlayer.NetId);
+                if (netPeer == null)
+                {
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    return;
+                }
+
+                Singleton<IFikaNetworkManager>.Instance.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, netPeer);
             }
         }
 
@@ -352,8 +358,14 @@ namespace MiyakoCarryService.Fika
                     TargetId = @event.TargetId
                 };
 
-                // 为了适配老版本Fika无法获取NetPeer，使用流量损耗更大的广播方式
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                var netPeer = GetPeerByNetId(fikaMcsLeadPlayer.NetId);
+                if (netPeer == null)
+                {
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    return;
+                }
+
+                Singleton<IFikaNetworkManager>.Instance.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, netPeer);
             }
         }
 
@@ -390,6 +402,24 @@ namespace MiyakoCarryService.Fika
                 };
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
+        }
+
+        private NetPeer GetPeerByNetId(int netId)
+        {
+            if (Singleton<IFikaNetworkManager>.Instance is not FikaServer server)
+            {
+                return null;
+            }
+
+            foreach (var peer in server.NetServer)
+            {
+                if (peer is NetPeer netPeer && netPeer.Player != null && netPeer.Player.NetId == netId)
+                {
+                    return netPeer;
+                }
+            }
+
+            return null;
         }
     }
 }
