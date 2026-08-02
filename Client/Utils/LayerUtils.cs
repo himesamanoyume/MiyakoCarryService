@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Utils
                 return names;
             }
 
-            var dict = botOwner.Brain.BaseBrain.Dictionary_0;
+            var dict = botOwner.Brain.BaseBrain._layers;
             foreach (var index in dict.Keys.ToList())
             {
                 names.Add(dict[index].Name());
