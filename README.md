@@ -324,6 +324,8 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 
 ### [Black Division Home](https://github.com/TacticalToaster/BlackDiv)
 
+> 仅作为示例，请以实际最新版本的类型为准
+
 - blackDivLead
 - blackDivAssault
 - blackDivBreacher
@@ -331,12 +333,16 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 
 ### [UNTAR Go Home!](https://github.com/TacticalToaster/TacticalToasterUNTARGH)
 
+> 仅作为示例，请以实际最新版本的类型为准
+
 - followeruntar
 - bossuntarlead
 - followeruntarmarksman
 - bossuntaroffice
 
 ### [RUAF Come Home!](https://github.com/TacticalToaster/RUAFComeHome)
+
+> 仅作为示例，请以实际最新版本的类型为准
 
 - ruafRifleman
 - ruafRiflemanSenior
