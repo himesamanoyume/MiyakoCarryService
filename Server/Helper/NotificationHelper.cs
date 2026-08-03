@@ -128,16 +128,5 @@ namespace MiyakoCarryService.Server.Helper
                 }
             };
         }
-
-        public WsGroupMatchUserLeave GenerateWsGroupMatchUserLeave(SptProfile mcsBotPlayerProfile)
-        {
-            return new WsGroupMatchUserLeave
-            {
-                EventType = NotificationEventType.groupMatchUserLeave,
-                EventIdentifier = new(),
-                Nickname = $"({serverLocalisationService.GetText(Locales.MCSBOTPLAYEREXPIRED)}) {mcsBotPlayerProfile.ProfileInfo.Username} [{configController.GetSpawnTypeDisplayName(mcsBotPlayerProfile.CharacterData.PmcData.Info.Settings.Role)}]",
-                Aid = mcsBotPlayerProfile.ProfileInfo.Aid.Value,
-            };
-        }
     }
 }

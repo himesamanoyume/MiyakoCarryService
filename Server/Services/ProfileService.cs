@@ -118,10 +118,8 @@ namespace MiyakoCarryService.Server.Services
                     {
                         if (sptWebSocketConnectionHandler.IsWebSocketConnected(mcsLeadPlayerId))
                         {
-                            var notification = notificationHelper.GenerateWsGroupMatchUserLeave(mcsBotPlayerProfile);
-                            var notification2 = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
+                            var notification = notificationHelper.GenerateWsFriendsListAccept(mcsBotPlayerProfile, NotificationEventType.youAreRemovedFromFriendList);
                             await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification);
-                            await notificationSendHelper.SendMessageAsync(mcsLeadPlayerId, notification2);
                         }
                     }
                     finally
