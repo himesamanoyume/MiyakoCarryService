@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Api
     public static class McsConfigApi
     {
         /// <summary>
-        /// 
+        /// 注册配置项
         /// </summary>
         public static ConfigEntry<T> RegisterConfig<T>(
             EConfigType type,
@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Client.Api
         }
 
         /// <summary>
-        /// 
+        /// 注册配置项
         /// </summary>
         public static ConfigEntry<T> RegisterConfig<T>(
             string sectionName,
@@ -55,11 +55,19 @@ namespace MiyakoCarryService.Client.Api
         }
 
         /// <summary>
-        /// 
+        /// 获取配置项扩展数据
         /// </summary>
         public static Dictionary<string, McsValue> GetConfigSnapshot()
         {
             return McsBotPlayerConfigUtils.Snapshot();
+        }
+        
+        /// <summary>
+        /// 自定义枚举配置项绘制
+        /// </summary>
+        public static void CustomDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict, int xCount) where T : Enum
+        {
+            MiyakoCarryServicePlugin.Instance.CustomDrawer(entry, dict, xCount);
         }
     }
 }

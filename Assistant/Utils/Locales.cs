@@ -1,20 +1,9 @@
-using System.Collections.Generic;
-using MiyakoCarryService.Assistant.Enums;
-
 namespace MiyakoCarryService.Assistant.Utils
 {
-    /// <summary>
-    /// Assistant 客户端本地化键集合。键命名约定严格沿用 Client 的 <c>Mcs/&lt;FieldName&gt; Key</c> /
-    /// <c>Mcs/&lt;FieldName&gt; Description</c> 风格（参考 <see cref="MiyakoCarryService.Client.Utils.Locales"/>），
-    /// 字段名前缀 <c>Assistant</c> 以避免与 Client 同名键冲突。
-    /// 服务端 <c>Server/Assets/database/locales/global/*.json</c> 提供翻译副本。
-    /// </summary>
     public static class Locales
     {
-        // 配置段名（与 Plugin 内 section 字符串保持一致）
         public const string VOICE_SECTION = "Mcs/D.Voice";
 
-        // Each field: 同名 _KEY / _DESCRIPTION 常量
         public const string VOICEENABLED_KEY             = "Mcs/VoiceEnabled Key";
         public const string VOICEENABLED_DESCRIPTION     = "Mcs/VoiceEnabled Description";
 
@@ -78,7 +67,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMTIMEOUTSEC_KEY           = "Mcs/LlmTimeoutSec Key";
         public const string LLMTIMEOUTSEC_DESCRIPTION   = "Mcs/LlmTimeoutSec Description";
 
-        // 运行时反馈
         public const string VOICELISTENING          = "Mcs/VoiceListening";
         public const string VOICETRANSCRIBING       = "Mcs/VoiceTranscribing";
         public const string VOICEINTERPRETING      = "Mcs/VoiceInterpreting";
@@ -87,40 +75,25 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string VOICEPROVIDERMISSING    = "Mcs/VoiceProviderMissing";
         public const string VOICESTTFAILED          = "Mcs/VoiceSttFailed";
         public const string VOICELLMFAILED          = "Mcs/VoiceLlmFailed";
-
-        // EVoiceTriggerMode 在 ConfigurationManager 自定义绘制器中显示的本地化文案映射
-        public static readonly Dictionary<EVoiceTriggerMode, string> VoiceTriggerModeNames = new()
-        {
-            { EVoiceTriggerMode.PushToTalk, "Mcs/VoiceTriggerModePushToTalk" },
-            { EVoiceTriggerMode.FreeTalk,   "Mcs/VoiceTriggerModeFreeTalk" },
-        };
-
-        // ESttProvider 在 ConfigurationManager 自定义绘制器中显示的本地化文案映射
-        public static readonly Dictionary<ESttProvider, string> SttProviderNames = new()
-        {
-            { ESttProvider.None,          "Mcs/SttProviderNone" },
-            { ESttProvider.OpenAIWhisper, "Mcs/SttProviderOpenAIWhisper" },
-            { ESttProvider.AzureSpeech,    "Mcs/SttProviderAzureSpeech" },
-            { ESttProvider.GoogleSpeech,  "Mcs/SttProviderGoogleSpeech" },
-            { ESttProvider.AliyunNls,     "Mcs/SttProviderAliyunNls" },
-            { ESttProvider.TencentAsr,    "Mcs/SttProviderTencentAsr" },
-            { ESttProvider.XfyunIat,      "Mcs/SttProviderXfyunIat" },
-            { ESttProvider.VolcIat,       "Mcs/SttProviderVolcIat" },
-            { ESttProvider.BaiduAsr,      "Mcs/SttProviderBaiduAsr" },
-        };
-
-        // ELlmProvider 在 ConfigurationManager 自定义绘制器中显示的本地化文案映射
-        public static readonly Dictionary<ELlmProvider, string> LlmProviderNames = new()
-        {
-            { ELlmProvider.None,             "Mcs/LlmProviderNone" },
-            { ELlmProvider.OpenAICompatible, "Mcs/LlmProviderOpenAICompatible" },
-            { ELlmProvider.Anthropic,         "Mcs/LlmProviderAnthropic" },
-            { ELlmProvider.GoogleGemini,      "Mcs/LlmProviderGoogleGemini" },
-            { ELlmProvider.DashScope,         "Mcs/LlmProviderDashScope" },
-            { ELlmProvider.Zhipu,             "Mcs/LlmProviderZhipu" },
-            { ELlmProvider.Qianfan,           "Mcs/LlmProviderQianfan" },
-            { ELlmProvider.Spark,             "Mcs/LlmProviderSpark" },
-            { ELlmProvider.MiniMax,           "Mcs/LlmProviderMiniMax" },
-        };
+        public const string VOICETRIGGERMODEPUSH2TALK = "Mcs/VoiceTriggerModePushToTalk";
+        public const string VOICETRIGGERMODEFREETALK   = "Mcs/VoiceTriggerModeFreeTalk";
+        public const string STTPROVIDERNONE            = "Mcs/SttProviderNone";
+        public const string STTPROVIDEROPENAIWHISPER   = "Mcs/SttProviderOpenAIWhisper";
+        public const string STTPROVIDERAZURESPEECH     = "Mcs/SttProviderAzureSpeech";
+        public const string STTPROVIDERGOOGLESPEECH    = "Mcs/SttProviderGoogleSpeech";
+        public const string STTPROVIDERALIYUNNLS       = "Mcs/SttProviderAliyunNls";
+        public const string STTPROVIDERTENCENTASR      = "Mcs/SttProviderTencentAsr";
+        public const string STTPROVIDERXFYUNIAT        = "Mcs/SttProviderXfyunIat";
+        public const string STTPROVIDERVOLCIAT         = "Mcs/SttProviderVolcIat";
+        public const string STTPROVIDERBAIDUASR        = "Mcs/SttProviderBaiduAsr";
+        public const string LLMPROVIDERNONE             = "Mcs/LlmProviderNone";
+        public const string LLMPROVIDEROPENAICOMPATIBLE = "Mcs/LlmProviderOpenAICompatible";
+        public const string LLMPROVIDERANTHROPIC        = "Mcs/LlmProviderAnthropic";
+        public const string LLMPROVIDERGOOGLEGEMINI     = "Mcs/LlmProviderGoogleGemini";
+        public const string LLMPROVIDERDASHSCOPE        = "Mcs/LlmProviderDashScope";
+        public const string LLMPROVIDERZHIPU            = "Mcs/LlmProviderZhipu";
+        public const string LLMPROVIDERQIANFAN          = "Mcs/LlmProviderQianfan";
+        public const string LLMPROVIDERSPARK            = "Mcs/LlmProviderSpark";
+        public const string LLMPROVIDERMINIMAX          = "Mcs/LlmProviderMiniMax";
     }
 }

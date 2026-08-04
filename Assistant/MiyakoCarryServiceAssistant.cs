@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Bootstrap;
@@ -10,6 +9,7 @@ using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant
 {
@@ -117,8 +117,13 @@ namespace MiyakoCarryService.Assistant
                 Locales.VOICETRIGGERMODE_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry =>
-                        EnumDrawerHelper.Draw(entry, Locales.VoiceTriggerModeNames, 2)
+                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
+                        new Dictionary<EVoiceTriggerMode, string>
+                        {
+                            { EVoiceTriggerMode.PushToTalk, Locales.VOICETRIGGERMODEPUSH2TALK.McsLocalized() },
+                            { EVoiceTriggerMode.FreeTalk,   Locales.VOICETRIGGERMODEFREETALK.McsLocalized() },
+                        }, 2
+                    )
                 });
 
             VoiceHotKey = McsConfigApi.RegisterConfig(
@@ -161,8 +166,20 @@ namespace MiyakoCarryService.Assistant
                 Locales.STTPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry =>
-                        EnumDrawerHelper.Draw<ESttProvider>(entry, Locales.SttProviderNames, 3)
+                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
+                        new Dictionary<ESttProvider, string>
+                        {
+                            { ESttProvider.None,          Locales.STTPROVIDERNONE.McsLocalized() },
+                            { ESttProvider.OpenAIWhisper, Locales.STTPROVIDEROPENAIWHISPER.McsLocalized() },
+                            { ESttProvider.AzureSpeech,   Locales.STTPROVIDERAZURESPEECH.McsLocalized() },
+                            { ESttProvider.GoogleSpeech,  Locales.STTPROVIDERGOOGLESPEECH.McsLocalized() },
+                            { ESttProvider.AliyunNls,     Locales.STTPROVIDERALIYUNNLS.McsLocalized() },
+                            { ESttProvider.TencentAsr,    Locales.STTPROVIDERTENCENTASR.McsLocalized() },
+                            { ESttProvider.XfyunIat,      Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
+                            { ESttProvider.VolcIat,       Locales.STTPROVIDERVOLCIAT.McsLocalized() },
+                            { ESttProvider.BaiduAsr,      Locales.STTPROVIDERBAIDUASR.McsLocalized() },
+                        }, 3
+                    )
                 });
 
             SttApiKey = McsConfigApi.RegisterConfig(
@@ -203,8 +220,20 @@ namespace MiyakoCarryService.Assistant
                 Locales.LLMPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry =>
-                        EnumDrawerHelper.Draw(entry, Locales.LlmProviderNames, 3)
+                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
+                        new Dictionary<ELlmProvider, string>
+                        {
+                            { ELlmProvider.None,             Locales.LLMPROVIDERNONE.McsLocalized() },
+                            { ELlmProvider.OpenAICompatible, Locales.LLMPROVIDEROPENAICOMPATIBLE.McsLocalized() },
+                            { ELlmProvider.Anthropic,        Locales.LLMPROVIDERANTHROPIC.McsLocalized() },
+                            { ELlmProvider.GoogleGemini,     Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized() },
+                            { ELlmProvider.DashScope,        Locales.LLMPROVIDERDASHSCOPE.McsLocalized() },
+                            { ELlmProvider.Zhipu,            Locales.LLMPROVIDERZHIPU.McsLocalized() },
+                            { ELlmProvider.Qianfan,          Locales.LLMPROVIDERQIANFAN.McsLocalized() },
+                            { ELlmProvider.Spark,            Locales.LLMPROVIDERSPARK.McsLocalized() },
+                            { ELlmProvider.MiniMax,          Locales.LLMPROVIDERMINIMAX.McsLocalized() },
+                        }, 3
+                    )
                 });
 
             LlmApiKey = McsConfigApi.RegisterConfig(
@@ -253,6 +282,4 @@ namespace MiyakoCarryService.Assistant
                 new AcceptableValueRange<int>(3, 120));
         }
     }
-
-    // end
 }
