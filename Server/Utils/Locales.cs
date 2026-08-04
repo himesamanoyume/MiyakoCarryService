@@ -37,5 +37,12 @@ namespace MiyakoCarryService.Server.Utils
         public const string MCSBOTPLAYEREXPIRED = "Mcs/McsBotPlayerExpired";
         public const string INVAILDPROFILETRADERINFOWARNING = "Mcs/InvaildProfileTraderInfoWarning";
         public const string INVAILDSERVERTRADERTABLEWARNING = "Mcs/InvaildServerTraderTableWarning";
+        public const string MIYAKOTRADERLLMINTERPRETING = "Mcs/MiyakoTraderLlmInterpreting";
+        public const string MIYAKOTRADERLLMCONFIRMORDER = "Mcs/MiyakoTraderLlmConfirmOrder";
+        public const string MIYAKOTRADERLLMCONFIRMTICKET = "Mcs/MiyakoTraderLlmConfirmTicket";
+        public const string MIYAKOTRADERLLMREPLY = "Mcs/MiyakoTraderLlmReply";
+        public const string MIYAKOTRADERLLMDISABLED = "Mcs/MiyakoTraderLlmDisabled";
+        public const string MIYAKOTRADERLLMERROR = "Mcs/MiyakoTraderLlmError";
+        public const string MIYAKOTRADERLLMCOOLDOWN = "Mcs/MiyakoTraderLlmCooldown";
     }
 }

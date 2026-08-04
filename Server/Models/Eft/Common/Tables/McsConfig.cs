@@ -84,6 +84,36 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
             { 4, new () { Min = 28500, Max = 28500} },
             { 5, new () { Min = 30000, Max = 30000} }
         };
+
+        [JsonPropertyName("LlmEnabled")]
+        public bool LlmEnabled { get; set; } = false;
+
+        [JsonPropertyName("LlmProvider")]
+        public string LlmProvider { get; set; } = "OpenAICompatible";
+
+        [JsonPropertyName("LlmApiKey")]
+        public string LlmApiKey { get; set; } = "";
+
+        [JsonPropertyName("LlmBaseUrl")]
+        public string LlmBaseUrl { get; set; } = "";
+
+        [JsonPropertyName("LlmModel")]
+        public string LlmModel { get; set; } = "gpt-4o-mini";
+
+        [JsonPropertyName("LlmSystemPrompt")]
+        public string LlmSystemPrompt { get; set; } = "";
+
+        [JsonPropertyName("LlmTemperature")]
+        public double LlmTemperature { get; set; } = 0.2;
+
+        [JsonPropertyName("LlmMaxTokens")]
+        public int LlmMaxTokens { get; set; } = 512;
+
+        [JsonPropertyName("LlmTimeoutSec")]
+        public int LlmTimeoutSec { get; set; } = 15;
+
+        [JsonPropertyName("LlmMaxMessagesPerMinute")]
+        public int LlmMaxMessagesPerMinute { get; set; } = 10;
     }
 
     public record McsPluginConfig

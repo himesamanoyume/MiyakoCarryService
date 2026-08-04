@@ -1,0 +1,16 @@
+using System.Threading;
+using System.Threading.Tasks;
+using MiyakoCarryService.Assistant.Models;
+
+namespace MiyakoCarryService.Assistant.Providers.Llm
+{
+    /// <summary>讯飞星火 Spark Chat Completions。占位实装。</summary>
+    internal sealed class SparkProvider : ILlmProvider
+    {
+        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        {
+            await Task.Yield();
+            return new LlmIntent { Error = "SparkProvider：星火 Chat 桥接待落地（占位）" };
+        }
+    }
+}

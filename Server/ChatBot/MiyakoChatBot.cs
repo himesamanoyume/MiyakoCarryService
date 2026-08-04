@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Services;
+using MiyakoCarryService.Server.Services.Llm;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
@@ -23,7 +24,8 @@ namespace MiyakoCarryService.Server.ChatBot
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
         ProfileService profileService,
-        IEnumerable<MiyakoChatBotCommands> chatCommands
+        IEnumerable<MiyakoChatBotCommands> chatCommands,
+        LlmDispatcherService llmDispatcher
     ) : IDialogueChatBot
     {
         private static readonly MongoId _miyakoId = new(TraderService.MiyakoTraderId);
@@ -83,6 +85,15 @@ namespace MiyakoCarryService.Server.ChatBot
             if (string.Equals(splitCommand.FirstOrDefault(), "help", StringComparison.OrdinalIgnoreCase))
             {
                 return await SendPlayerHelpMessage(sessionId, request);
+            }
+
+            // LLM 兜底：玩家直接用自然语言对话时，由 LlmDispatcher 解释意图并派发到 QuestController 或纯回复。
+            // 原 mcs order/mcs ticket 走上面 splitCommand 流程，到达此处即为 free-text；
+            // LLM 关闭则 LlmDispatcher 返回 NotHandled，继续走原 unknown-command 流程。
+            var llmResult = await llmDispatcher.TryDispatchAsync(sessionId, request.Text);
+            if (llmResult.IsHandled)
+            {
+                return request.DialogId;
             }
 
             mailSendService.SendLocalisedNpcMessageToPlayer(

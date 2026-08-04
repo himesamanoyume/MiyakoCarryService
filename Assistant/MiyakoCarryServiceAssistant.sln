@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{372A590A-75B8-362A-8F42-B286D7F27969}") = "MiyakoCarryServiceAssistant", "MiyakoCarryServiceAssistant.csproj", "{0C33626F-2D86-D422-FD1E-FDA83BCE94F9}"
+EndProject
+Project("{372A590A-75B8-362A-8F42-B286D7F27969}") = "MiyakoCarryServiceClient", "..\Client\MiyakoCarryServiceClient.csproj", "{696AB45E-1303-48B7-9D03-C691EC3EAF71}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C33626F-2D86-D422-FD1E-FDA83BCE94F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C33626F-2D86-D422-FD1E-FDA83BCE94F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C33626F-2D86-D422-FD1E-FDA83BCE94F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C33626F-2D86-D422-FD1E-FDA83BCE94F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{696AB45E-1303-48B7-9D03-C691EC3EAF71}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9863B0C5-4F24-49B5-9CB9-C0CAEE757191}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,44 @@
+using Comfort.Common;
+using EFT;
+using UnityEngine;
+
+namespace MiyakoCarryService.Assistant.Services
+{
+    /// <summary>
+    /// 对玩家准星射线做物理投射，用作 <c>ECommandType.GoToPoint</c>/<c>EscortWorld</c>/<c>QuestProxyAction</c>
+    /// 等"需要位置/目标"类语音指令的隐式目标。复刻 MCS 菜单流程中 Resolver 的取目标逻辑。
+    /// </summary>
+    internal static class TargetResolver
+    {
+        public sealed class ResolvedTarget
+        {
+            public Vector3? Position;
+            public string TargetId;
+        }
+
+        public static bool IsInRaid()
+        {
+            return Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance != null
+                                          && Singleton<GameWorld>.Instance.MainPlayer != null;
+        }
+
+        /// <summary>
+        /// 取玩家准星在世界中的目标。命中 → 命中点 + (可能的)目标 Id；未命中 → 前方 maxDistance 处空地。
+        /// <c>TargetId</c> 只有在命中 loot/quest 互动物时由 LLM 直接 verbal 化指定时使用；
+        /// 实际的 id-to-WorldInteractiveObject 解析由 McsCommandApi 自身的 Resolver 在调用 ProcessCommand 时完成。
+        /// </summary>
+        public static ResolvedTarget ResolveForPlayer(Player player, float maxDistance = 1000f)
+        {
+            if (player == null) { return null; }
+
+            // 复刻 MCS 菜单流程的 Resolver：直接用玩家 InteractionRay 投射，命中即取 hit.point。
+            if (Physics.Raycast(player.InteractionRay, out var hit, maxDistance, LayersMaskController.HighPolyWithTerrainMask))
+            {
+                return new ResolvedTarget { Position = hit.point, TargetId = null };
+            }
+
+            var fwdPos = player.Position + player.InteractionRay.direction * Mathf.Min(maxDistance, 64f);
+            return new ResolvedTarget { Position = fwdPos, TargetId = null };
+        }
+    }
+}

@@ -19,5 +19,12 @@
     "Mcs/GenerateProfileError": "生成护航的 {0} 存档异常，已生成对应默认存档",
     "Mcs/McsInventoryModeRagfairRefuse": "处于护航库存模式，无法在跳蚤市场上架交易单",
     "Mcs/NewVersionNotify": "宫子护航店 检测到新版本: {0} ---> {1}",
-    "Mcs/McsBotPlayerExpired": "已过期"
+    "Mcs/McsBotPlayerExpired": "已过期",
+    "Mcs/MiyakoTraderLlmInterpreting": "让我想想……",
+    "Mcs/MiyakoTraderLlmConfirmOrder": "明白了，正在为你下单。",
+    "Mcs/MiyakoTraderLlmConfirmTicket": "好的，正在为你提交罚单减免请求。",
+    "Mcs/MiyakoTraderLlmReply": "{0}",
+    "Mcs/MiyakoTraderLlmDisabled": "当前服务器未启用 AI 服务。请使用 mcs order / mcs ticket 文本指令。",
+    "Mcs/MiyakoTraderLlmError": "AI 服务暂时不可用，请稍后再试。",
+    "Mcs/MiyakoTraderLlmCooldown": "你发送得太快了，请稍等片刻再试。"
 }
