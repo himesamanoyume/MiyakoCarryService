@@ -2,7 +2,7 @@ namespace MiyakoCarryService.Assistant.Utils
 {
     public static class Locales
     {
-        public const string VOICE_SECTION = "Mcs/D.Voice";
+        public const string ASSISTANT_SECTION = "Mcs/D.Assistant";
 
         public const string VOICEENABLED_KEY             = "Mcs/VoiceEnabled Key";
         public const string VOICEENABLED_DESCRIPTION     = "Mcs/VoiceEnabled Description";

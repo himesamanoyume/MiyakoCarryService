@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Linq;
 using ConfigurationManager;
 using SPT.Reflection.Patching;
 using UnityEngine;
@@ -147,9 +148,9 @@ namespace MiyakoCarryService.Client.Patches.BepInEx
                             _allSettings.Add(categoryName, categorySettings);
                         }
 
-                        var shouldDrawHeader = categories.Count > 1;
+                        var shouldDrawHeader = _allSettings.Count > 1;
 
-                        foreach (var item in _allSettings)
+                        foreach (var item in _allSettings.OrderBy(pair => pair.Value.Count == 0 ? int.MinValue : pair.Value.Max(setting => setting.Order)).ThenBy(pair => pair.Key))
                         {
                             CustomDrawCategory(item.Key, shouldDrawHeader, item.Value, hideSingleSectionValue, _fieldDrawer, _advancedSettingColor, _leftColumnWidth);
                         }

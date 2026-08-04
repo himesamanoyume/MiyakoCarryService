@@ -101,7 +101,7 @@ namespace MiyakoCarryService.Assistant
 
         private void SetupConfig()
         {
-            const string section = Locales.VOICE_SECTION;
+            const string section = Locales.ASSISTANT_SECTION;
             const int order = 400;
 
             VoiceEnabled = McsConfigApi.RegisterConfig(
@@ -178,7 +178,7 @@ namespace MiyakoCarryService.Assistant
                             { ESttProvider.XfyunIat,      Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
                             { ESttProvider.VolcIat,       Locales.STTPROVIDERVOLCIAT.McsLocalized() },
                             { ESttProvider.BaiduAsr,      Locales.STTPROVIDERBAIDUASR.McsLocalized() },
-                        }, 3
+                        }, 2
                     )
                 });
 
@@ -232,7 +232,7 @@ namespace MiyakoCarryService.Assistant
                             { ELlmProvider.Qianfan,          Locales.LLMPROVIDERQIANFAN.McsLocalized() },
                             { ELlmProvider.Spark,            Locales.LLMPROVIDERSPARK.McsLocalized() },
                             { ELlmProvider.MiniMax,          Locales.LLMPROVIDERMINIMAX.McsLocalized() },
-                        }, 3
+                        }, 2
                     )
                 });
 
