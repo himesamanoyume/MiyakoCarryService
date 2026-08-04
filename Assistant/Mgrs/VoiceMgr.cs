@@ -7,7 +7,6 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Events;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
-using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -117,7 +116,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
         private void HandlePushToTalk()
         {
             var hotKey = _cfg.HotKey;
-            bool down = MiyakoCarryService.Client.Utils.KeyInput.BetterIsDown(hotKey);
+            bool down = KeyInput.BetterIsDown(hotKey);
 
             if (down && !_capturing && _state == EVoiceState.Idle)
             {

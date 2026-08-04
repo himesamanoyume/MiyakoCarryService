@@ -9,7 +9,9 @@ using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Mgrs;
 
 namespace MiyakoCarryService.Assistant
 {
@@ -27,15 +29,13 @@ namespace MiyakoCarryService.Assistant
 #endif
 
         public static MiyakoCarryServiceAssistantPlugin Instance;
-        public static new readonly ManualLogSource Logger =
-            BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryServiceAssistant");
+        public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryServiceAssistant");
 
-        public static bool FikaInstalled { get; private set; } = false;
         public static bool IsLoadedByScriptEngine = false;
 
         internal AssistantVoiceConfig VoiceConfig;
 
-        #region Voice 配置项
+        #region Assistant
 
         public static ConfigEntry<bool> VoiceEnabled;
         public static ConfigEntry<EVoiceTriggerMode> VoiceTriggerMode;
@@ -73,13 +73,14 @@ namespace MiyakoCarryService.Assistant
 
         void Start()
         {
-            FikaInstalled = CheckPlugin([MiyakoCarryServicePlugin.FikaGUID]);
             SetupConfig();
             VoiceConfig = AssistantVoiceConfig.FromConfig();
             AssistantHttpClient.Initialize();
 
-            gameObject.AddComponent<VoiceMgr>();
-            Logger.LogInfo($"MiyakoCarryServiceAssistant 启动完成，按住说话/自由发言已就绪。Fika: {(FikaInstalled ? "已安装" : "未安装")}");
+            McsEventApi.Notify(new GameLoopMgrEnableEvent
+            {
+                MgrTypes = [typeof(VoiceMgr)]
+            });
         }
 
         void OnDestroy()

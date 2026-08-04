@@ -156,6 +156,15 @@ namespace MiyakoCarryService.Client
             EventMgr.Subscribe<UpdateProfileEvent>(OnUpdateProfile, this);
             EventMgr.Subscribe<UpdateDailyQuestsEvent>(OnUpdateDailyQuests, this);
             EventMgr.Subscribe<UpdateMiyakoTraderAssortmentEvent>(OnUpdateMiyakoTraderAssortment, this);
+            EventMgr.Subscribe<GameLoopMgrEnableEvent>(OnMgrEnable, this);
+        }
+
+        public void OnMgrEnable(GameLoopMgrEnableEvent @event)
+        {
+            foreach (var mgrType in @event.MgrTypes)
+            {
+                BaseMgr.Enable(mgrType);
+            }
         }
 
         public void OnUpdateProfile(UpdateProfileEvent @event)

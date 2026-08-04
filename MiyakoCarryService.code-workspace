@@ -38,6 +38,11 @@
                 "command": "dotnet restore Fika/MiyakoCarryServiceFika.sln --nologo",
             },
             {
+                "label": "assistant: restore",
+                "type": "shell",
+                "command": "dotnet restore Assistant/MiyakoCarryServiceAssistant.sln --nologo",
+            },
+            {
                 "label": "server: restore",
                 "type": "shell",
                 "command": "dotnet restore Server/MiyakoCarryServiceServer.sln --nologo",
@@ -122,6 +127,32 @@
                 }
             },
             {
+                "label": "assistant: build",
+                "type": "shell",
+                "command": "dotnet build Assistant/MiyakoCarryServiceAssistant.sln --nologo --no-restore --configuration Release",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "client: restore",
+                    "assistant: restore"
+                ],
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "assistant: debug build",
+                "type": "shell",
+                "command": "dotnet build Assistant/MiyakoCarryServiceAssistant.sln --nologo --no-restore --configuration Debug",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "client: restore",
+                    "assistant: restore"
+                ],
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
                 "label": "server: build",
                 "type": "shell",
                 "command": "dotnet build Server/MiyakoCarryServiceServer.sln --nologo --no-restore --configuration Release",
@@ -159,7 +190,8 @@
                 "dependsOn": [
                     "build: clean",
                     "server: build",
-                    "fika: build"
+                    "fika: build",
+                    "assistant: build"
                 ],
                 "group": "build"
             },
@@ -169,7 +201,8 @@
                 "dependsOn": [
                     "build: clean",
                     "server: debug build",
-                    "fika: debug build"
+                    "fika: debug build",
+                    "assistant: debug build"
                 ],
                 "group": "build"
             },
@@ -191,10 +224,31 @@
                 "command": "cmd",
                 "args": [
                     "/c",
+                    "if",
+                    "exist",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\"
+                ],
+                "group": {
+                    "kind": "build"
+                }
+            },
+            {
+                "label": "assistant: debug se move",
+                "type": "shell",
+                "command": "cmd",
+                "args": [
+                    "/c",
+                    "if",
+                    "exist",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceAssistant.dll",
+                    "move",
+                    "/Y",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceAssistant.dll",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\"
                 ],
                 "group": {
                     "kind": "build"
@@ -206,10 +260,13 @@
                 "command": "cmd",
                 "args": [
                     "/c",
+                    "if",
+                    "exist",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X\\BepInEx\\plugins\\MiyakoCarryServiceClient\\"
                 ],
                 "group": {
                     "kind": "build"
@@ -233,10 +290,13 @@
                 "command": "cmd",
                 "args": [
                     "/c",
+                    "if",
+                    "exist",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll'",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceClient.dll",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\"
                 ],
                 "group": {
                     "kind": "build"
@@ -248,10 +308,13 @@
                 "command": "cmd",
                 "args": [
                     "/c",
+                    "if",
+                    "exist",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll",
                     "move",
                     "/Y",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll'",
-                    "'D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\'"
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\scripts\\Himesamanoyume.MiyakoCarryServiceFika.dll",
+                    "D:\\OtherGames\\SPT4.1.X\\SPT-4.1.X-Headless\\BepInEx\\plugins\\MiyakoCarryServiceClient\\"
                 ],
                 "group": {
                     "kind": "build"
@@ -262,7 +325,8 @@
                 "dependsOrder": "sequence",
                 "dependsOn": [
                     "client: debug se move",
-                    "fika: debug se move"
+                    "fika: debug se move",
+                    "assistant: debug se move"
                 ],
                 "group": "build"
             },

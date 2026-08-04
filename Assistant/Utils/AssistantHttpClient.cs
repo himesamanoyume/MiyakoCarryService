@@ -20,10 +20,17 @@ namespace MiyakoCarryService.Assistant.Utils
                 return;
             }
 
-            _shared = new HttpClient(new HttpClientHandler
+            var handler = new HttpClientHandler();
+            try
             {
-                MaxConnectionsPerServer = 8,
-            }, disposeHandler: true)
+                handler.MaxConnectionsPerServer = 8;
+            }
+            catch (NotImplementedException)
+            {
+                // EFT 基于 Mono 运行时（MonoWebRequestHandler），未实现 MaxConnectionsPerServer，忽略该设置。
+            }
+
+            _shared = new HttpClient(handler, disposeHandler: true)
             {
                 Timeout = TimeSpan.FromSeconds(60),
             };
