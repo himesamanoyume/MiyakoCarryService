@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Assistant.Models
     {
         public string ApiKey;
         public string BaseUrl;
-        public string Model;
+        public string ModelId;
         public string Language;
         public string SystemPrompt;
         public double Temperature = 0.2;

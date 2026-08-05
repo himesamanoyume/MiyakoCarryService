@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
-            var model = string.IsNullOrEmpty(settings.Model) ? "whisper-1" : settings.Model;
+            var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
 
             using var form = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(wavBytes);

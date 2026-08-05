@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Assistant.Models
                 {
                     ApiKey = MiyakoCarryServiceAssistantPlugin.SttApiKey.Value,
                     BaseUrl = MiyakoCarryServiceAssistantPlugin.SttBaseUrl.Value,
-                    Model = MiyakoCarryServiceAssistantPlugin.SttModel.Value,
+                    ModelId = MiyakoCarryServiceAssistantPlugin.SttModelId.Value,
                     Language = MiyakoCarryServiceAssistantPlugin.SttLanguage.Value,
                     TimeoutSec = MiyakoCarryServiceAssistantPlugin.SttTimeoutSec.Value,
                 },
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Assistant.Models
                 {
                     ApiKey = MiyakoCarryServiceAssistantPlugin.LlmApiKey.Value,
                     BaseUrl = MiyakoCarryServiceAssistantPlugin.LlmBaseUrl.Value,
-                    Model = MiyakoCarryServiceAssistantPlugin.LlmModel.Value,
+                    ModelId = MiyakoCarryServiceAssistantPlugin.LlmModelId.Value,
                     SystemPrompt = MiyakoCarryServiceAssistantPlugin.LlmSystemPrompt.Value,
                     Temperature = MiyakoCarryServiceAssistantPlugin.LlmTemperature.Value,
                     MaxTokens = MiyakoCarryServiceAssistantPlugin.LlmMaxTokens.Value,

@@ -175,7 +175,7 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | `TraderLlmProvider` | 宫子商人 AI 使用的服务商：`OpenAICompatible`（兼容 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等）、`Anthropic`、`GoogleGemini`、`DashScope`、`Zhipu`、`Qianfan`、`Spark`、`MiniMax`。 | `OpenAICompatible` |
 | `TraderLlmApiKey` | 宫子商人 AI 服务商的 API Key。 | 空 |
 | `TraderLlmBaseUrl` | 可选自定义宫子商人 AI 的 Base URL（覆盖服务商默认值）。 | 空 |
-| `TraderLlmModel` | 宫子商人 AI 的模型名，服务商相关。 | `deepseek-v4-flash` |
+| `TraderLlmModelId` | 宫子商人 AI 的模型名，服务商相关。 | `deepseek-v4-flash` |
 | `TraderLlmSystemPrompt` | 可选自定义系统提示词，将拼接在默认提示词之前。 | 空 |
 | `TraderLlmTemperature` | 宫子商人 AI 的采样温度，范围 0到2，值越低结果越确定。 | `0.2` |
 | `TraderLlmMaxTokens` | 宫子商人 AI 单次回复的最大 Tokens，影响回复长度与成本。 | `3000` |

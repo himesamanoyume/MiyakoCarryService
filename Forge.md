@@ -208,9 +208,9 @@ API key for the Miyako trader's AI provider. Defaults to empty.
 
 Optional custom base URL for the Miyako trader's AI (overrides the provider default). Defaults to empty.
 
-- **TraderLlmModel**
+- **TraderLlmModelId**
 
-Model name for the Miyako trader's AI, provider-specific. Defaults to `gpt-4o-mini`.
+Model name for the Miyako trader's AI, provider-specific. Defaults to `deepseek-v4-flash`.
 
 - **TraderLlmSystemPrompt**
 

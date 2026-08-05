@@ -73,7 +73,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             {
                 ApiKey = serverConfig.TraderLlmApiKey,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
-                Model = serverConfig.TraderLlmModel,
+                Model = serverConfig.TraderLlmModelId,
                 SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp()),
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
@@ -340,6 +340,56 @@ namespace MiyakoCarryService.Server.Services.Llm
             }
             sb.Append("- 罚单 (ticket) price: ").Append(serverConfig.TicketPricePerPercent).AppendLine(" rubles per percent");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 服务端启动时的 LLM 连通性测试：当 <c>TraderLlmEnabled</c> 开启时自动执行一次，
+        /// 成功/失败均输出日志（失败附带原因）。使用最小化 system prompt，token 成本极低。
+        /// </summary>
+        public async Task TestConnectionAsync()
+        {
+            var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
+
+            if (!serverConfig.TraderLlmEnabled)
+            {
+                logger.Info("LLM 启动测试跳过：TraderLlmEnabled 未开启");
+                return;
+            }
+
+            var provider = CreateProvider(serverConfig.TraderLlmProvider);
+            if (provider == null)
+            {
+                logger.Error($"LLM 启动测试失败：TraderLlmProvider 配置无效（{serverConfig.TraderLlmProvider}）");
+                return;
+            }
+
+            var settings = new LlmProviderSettings
+            {
+                ApiKey = serverConfig.TraderLlmApiKey,
+                BaseUrl = serverConfig.TraderLlmBaseUrl,
+                Model = serverConfig.TraderLlmModel,
+                SystemPrompt = "You are a connectivity test. Reply with exactly: {\"replyText\":\"pong\"}",
+                Temperature = 0,
+                MaxTokens = 16,
+                TimeoutSec = serverConfig.TraderLlmTimeoutSec > 0 ? serverConfig.TraderLlmTimeoutSec : 15,
+            };
+
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(settings.TimeoutSec + 5));
+                var intent = await provider.InterpretAsync("ping", settings, cts.Token).ConfigureAwait(false);
+                if (intent == null || intent.IsError)
+                {
+                    logger.Error($"LLM 启动测试失败（{serverConfig.TraderLlmProvider}/{settings.Model}）：{intent?.Error ?? "null"}");
+                    return;
+                }
+
+                logger.Success($"LLM 启动测试成功（{serverConfig.TraderLlmProvider}/{settings.Model}）：{(string.IsNullOrEmpty(intent.ReplyText) ? "已收到响应" : intent.ReplyText)}");
+            }
+            catch (Exception ex)
+            {
+                logger.Error($"LLM 启动测试异常（{serverConfig.TraderLlmProvider}/{settings.Model}）：{ex.Message}");
+            }
         }
 
         private static ILlmProvider CreateProvider(string providerName)

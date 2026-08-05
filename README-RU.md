@@ -178,7 +178,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `TraderLlmProvider` | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
 | `TraderLlmApiKey` | API key for the Miyako trader's AI provider. | empty |
 | `TraderLlmBaseUrl` | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
-| `TraderLlmModel` | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
+| `TraderLlmModelId` | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
 | `TraderLlmSystemPrompt` | Optional custom system prompt prepended to the default prompt. | empty |
 | `TraderLlmTemperature` | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
 | `TraderLlmMaxTokens` | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |

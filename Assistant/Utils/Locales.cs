@@ -34,8 +34,8 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string STTBASEURL_KEY            = "Mcs/SttBaseUrl Key";
         public const string STTBASEURL_DESCRIPTION    = "Mcs/SttBaseUrl Description";
 
-        public const string STTMODEL_KEY              = "Mcs/SttModel Key";
-        public const string STTMODEL_DESCRIPTION     = "Mcs/SttModel Description";
+        public const string STTMODELID_KEY              = "Mcs/SttModelId Key";
+        public const string STTMODELID_DESCRIPTION     = "Mcs/SttModelId Description";
 
         public const string STTLANGUAGE_KEY           = "Mcs/SttLanguage Key";
         public const string STTLANGUAGE_DESCRIPTION  = "Mcs/SttLanguage Description";
@@ -52,8 +52,8 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMBASEURL_KEY            = "Mcs/LlmBaseUrl Key";
         public const string LLMBASEURL_DESCRIPTION    = "Mcs/LlmBaseUrl Description";
 
-        public const string LLMMODEL_KEY              = "Mcs/LlmModel Key";
-        public const string LLMMODEL_DESCRIPTION      = "Mcs/LlmModel Description";
+        public const string LLMMODELID_KEY              = "Mcs/LlmModelId Key";
+        public const string LLMMODELID_DESCRIPTION      = "Mcs/LlmModelId Description";
 
         public const string LLMSYSTEMPROMPT_KEY        = "Mcs/LlmSystemPrompt Key";
         public const string LLMSYSTEMPROMPT_DESCRIPTION = "Mcs/LlmSystemPrompt Description";

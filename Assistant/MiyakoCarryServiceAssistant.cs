@@ -45,13 +45,13 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<ESttProvider> SttProvider;
         public static ConfigEntry<string> SttApiKey;
         public static ConfigEntry<string> SttBaseUrl;
-        public static ConfigEntry<string> SttModel;
+        public static ConfigEntry<string> SttModelId;
         public static ConfigEntry<string> SttLanguage;
         public static ConfigEntry<int> SttTimeoutSec;
         public static ConfigEntry<ELlmProvider> LlmProvider;
         public static ConfigEntry<string> LlmApiKey;
         public static ConfigEntry<string> LlmBaseUrl;
-        public static ConfigEntry<string> LlmModel;
+        public static ConfigEntry<string> LlmModelId;
         public static ConfigEntry<string> LlmSystemPrompt;
         public static ConfigEntry<double> LlmTemperature;
         public static ConfigEntry<int> LlmMaxTokens;
@@ -176,16 +176,16 @@ namespace MiyakoCarryService.Assistant
                 "",
                 Locales.STTBASEURL_DESCRIPTION);
 
-            SttModel = McsConfigApi.RegisterConfig(
+            SttModelId = McsConfigApi.RegisterConfig(
                 section, order,
-                Locales.STTMODEL_KEY,
+                Locales.STTMODELID_KEY,
                 "",
-                Locales.STTMODEL_DESCRIPTION);
+                Locales.STTMODELID_DESCRIPTION);
 
             SttLanguage = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTLANGUAGE_KEY,
-                "zh-CN",
+                "",
                 Locales.STTLANGUAGE_DESCRIPTION);
 
             SttTimeoutSec = McsConfigApi.RegisterConfig(
@@ -230,11 +230,11 @@ namespace MiyakoCarryService.Assistant
                 "",
                 Locales.LLMBASEURL_DESCRIPTION);
 
-            LlmModel = McsConfigApi.RegisterConfig(
+            LlmModelId = McsConfigApi.RegisterConfig(
                 section, order,
-                Locales.LLMMODEL_KEY,
+                Locales.LLMMODELID_KEY,
                 "deepseek-v4-flash",
-                Locales.LLMMODEL_DESCRIPTION);
+                Locales.LLMMODELID_DESCRIPTION);
 
             LlmSystemPrompt = McsConfigApi.RegisterConfig(
                 section, order,

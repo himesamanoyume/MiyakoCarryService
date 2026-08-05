@@ -97,8 +97,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("TraderLlmBaseUrl")]
         public string TraderLlmBaseUrl { get; set; } = "";
 
-        [JsonPropertyName("TraderLlmModel")]
-        public string TraderLlmModel { get; set; } = "deepseek-v4-flash";
+        [JsonPropertyName("TraderLlmModelId")]
+        public string TraderLlmModelId { get; set; } = "deepseek-v4-flash";
 
         [JsonPropertyName("TraderLlmSystemPrompt")]
         public string TraderLlmSystemPrompt { get; set; } = "";
