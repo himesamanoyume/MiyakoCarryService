@@ -106,7 +106,6 @@
                 "command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Release",
                 "dependsOrder": "sequence",
                 "dependsOn": [
-                    "client: restore",
                     "fika: restore"
                 ],
                 "group": {
@@ -119,7 +118,6 @@
                 "command": "dotnet build Fika/MiyakoCarryServiceFika.sln --nologo --no-restore --configuration Debug",
                 "dependsOrder": "sequence",
                 "dependsOn": [
-                    "client: restore",
                     "fika: restore"
                 ],
                 "group": {
@@ -132,7 +130,6 @@
                 "command": "dotnet build Assistant/MiyakoCarryServiceAssistant.sln --nologo --no-restore --configuration Release",
                 "dependsOrder": "sequence",
                 "dependsOn": [
-                    "client: restore",
                     "assistant: restore"
                 ],
                 "group": {
@@ -145,7 +142,6 @@
                 "command": "dotnet build Assistant/MiyakoCarryServiceAssistant.sln --nologo --no-restore --configuration Debug",
                 "dependsOrder": "sequence",
                 "dependsOn": [
-                    "client: restore",
                     "assistant: restore"
                 ],
                 "group": {
@@ -190,6 +186,7 @@
                 "dependsOn": [
                     "build: clean",
                     "server: build",
+                    "client: build",
                     "fika: build",
                     "assistant: build"
                 ],
@@ -201,6 +198,7 @@
                 "dependsOn": [
                     "build: clean",
                     "server: debug build",
+                    "client: debug build",
                     "fika: debug build",
                     "assistant: debug build"
                 ],

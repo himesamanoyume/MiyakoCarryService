@@ -52,8 +52,14 @@
     <Reference Include="UnityEngine.UI" HintPath="..\Ref\UnityEngine.UI.dll" Private="false" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Client\MiyakoCarryServiceClient.csproj" />
+    <Reference Include="Himesamanoyume.MiyakoCarryServiceClient">
+      <HintPath>..\Client\bin\$(Configuration)\netstandard2.1\Himesamanoyume.MiyakoCarryServiceClient.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
+  <Target Name="CheckMcsClientAssembly" BeforeTargets="CoreCompile">
+    <Error Condition="!Exists('..\Client\bin\$(Configuration)\netstandard2.1\Himesamanoyume.MiyakoCarryServiceClient.dll')" Text="未找到 Client 构建产物（Configuration: $(Configuration)），请先构建 Client/MiyakoCarryServiceClient.sln 的对应配置。" />
+  </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <!-- Debug 构建 -->
     <Exec Command="if exist &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot; del /f /q &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Debug'" />
