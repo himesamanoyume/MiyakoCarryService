@@ -8,90 +8,59 @@ using MiyakoCarryService.Assistant.Events;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
 using MiyakoCarryService.Client.Api;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Assistant.Mgrs
 {
     /// <summary>
-    /// Assistant 语音管线编排单例。在 Plugin GameObject 上挂为组件，由 Unity 自动调用 Awake/Update/OnDestroy。
-    /// 状态机：Idle → Capturing → Transcribing → Interpreting → Dispatching → Idle。
-    /// <para>
-    /// PushToTalk: 按住 <see cref="AssistantVoiceConfig.HotKey"/> 录音，松开后端到端处理一次；
-    /// FreeTalk: 持续采样 + RMS VAD 自动起止，无按键。
-    /// </para>
+    /// Assistant 语音管线编排器
     /// </summary>
-    public sealed class VoiceMgr : MonoBehaviour
+    public sealed class VoiceMgr : BaseMgr
     {
-        public static VoiceMgr Instance;
-
-        private AssistantVoiceConfig _cfg;
         private AudioCaptureService _capture;
         private VadService _vad;
         private SttDispatcher _stt;
         private LlmDispatcher _llm;
-
         private EVoiceState _state = EVoiceState.Idle;
         private bool _capturing;
         private float _captureStartedAt;
         private CancellationTokenSource _processingCts;
-
-        // FreeTalk: VAD 状态
         private float _lastSpeechAt;
         private bool _speechStarted;
         private float _windowPeriodSeconds = 0.05f;
         private float _nextWindowAt;
-
-        // 跨帧派发：异步任务完成后写入，Update 主线程消费。
         private LlmIntent _pendingIntent;
         private string _pendingTranscribedText;
 
         void Awake()
         {
-            Instance = this;
-            _cfg = MiyakoCarryServiceAssistantPlugin.Instance.VoiceConfig;
             _capture = new AudioCaptureService();
             _vad = new VadService(new VadParams
             {
-                EnergyThreshold = _cfg.VadEnergyThreshold,
-                SilenceSeconds = _cfg.VadSilenceSeconds,
+                EnergyThreshold = MiyakoCarryServiceAssistantPlugin.VoiceVadEnergyThreshold.Value,
+                SilenceSeconds = MiyakoCarryServiceAssistantPlugin.VoiceVadSilenceSeconds.Value,
             });
-            _stt = new SttDispatcher(_cfg.SttProvider);
-            _llm = new LlmDispatcher(_cfg.LlmProvider);
+            _stt = new SttDispatcher(MiyakoCarryServiceAssistantPlugin.SttProvider.Value);
+            _llm = new LlmDispatcher(MiyakoCarryServiceAssistantPlugin.LlmProvider.Value);
         }
 
         void OnDestroy()
         {
             try { _processingCts?.Cancel(); } catch { }
             try { if (_capture.IsCapturing) _capture.End(); } catch { }
-            Instance = null;
-        }
-
-        public void Destroy()
-        {
-            if (Instance == this)
-            {
-                Instance = null;
-            }
+            base.OnMgrDestroy();
         }
 
         void Update()
         {
             // 配置项可被玩家在 ConfigurationManager 中实时修改；每帧轻量刷新敏感字段
-            if (_cfg == null)
+            _vad = new VadService(new VadParams
             {
-                return;
-            }
-
-            var liveCfg = MiyakoCarryServiceAssistantPlugin.Instance.VoiceConfig;
-            if (liveCfg != null)
-            {
-                _vad = new VadService(new VadParams
-                {
-                    EnergyThreshold = liveCfg.VadEnergyThreshold,
-                    SilenceSeconds = liveCfg.VadSilenceSeconds,
-                });
-            }
+                EnergyThreshold = MiyakoCarryServiceAssistantPlugin.VoiceVadEnergyThreshold.Value,
+                SilenceSeconds = MiyakoCarryServiceAssistantPlugin.VoiceVadSilenceSeconds.Value,
+            });
 
             // 主线程消费异步结果
             if (_state == EVoiceState.Dispatching && _pendingIntent != null)
@@ -99,14 +68,14 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 ConsumePendingIntent();
             }
 
-            if (!_cfg.Enabled || !TargetResolver.IsInRaid())
+            if (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !TargetResolver.IsInRaid())
             {
                 if (_capturing) { EndCapture(); }
                 _state = EVoiceState.Idle;
                 return;
             }
 
-            switch (_cfg.TriggerMode)
+            switch (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value)
             {
                 case EVoiceTriggerMode.PushToTalk: HandlePushToTalk(); break;
                 case EVoiceTriggerMode.FreeTalk: HandleFreeTalk(); break;
@@ -115,18 +84,17 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private void HandlePushToTalk()
         {
-            var hotKey = _cfg.HotKey;
-            bool down = KeyInput.BetterIsDown(hotKey);
+            var isDown = KeyInput.BetterIsDown(MiyakoCarryServiceAssistantPlugin.VoiceHotKey.Value);
 
-            if (down && !_capturing && _state == EVoiceState.Idle)
+            if (isDown && !_capturing && _state == EVoiceState.Idle)
             {
                 BeginCapture();
             }
-            else if (!down && _capturing && _state == EVoiceState.Capturing)
+            else if (!isDown && _capturing && _state == EVoiceState.Capturing)
             {
                 EndCapture();
             }
-            else if (_capturing && _state == EVoiceState.Capturing && Time.unscaledTime - _captureStartedAt > _cfg.CaptureMaxSeconds)
+            else if (_capturing && _state == EVoiceState.Capturing && Time.unscaledTime - _captureStartedAt > MiyakoCarryServiceAssistantPlugin.VoiceCaptureMaxSeconds.Value)
             {
                 EndCapture();
             }
@@ -140,18 +108,33 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            if (!_capturing) { return; }
+            if (!_capturing)
+            {
+                return;
+            }
 
             // 周期性采样窗口检测 RMS
-            if (Time.unscaledTime < _nextWindowAt) { return; }
+            if (Time.unscaledTime < _nextWindowAt)
+            {
+                return;
+            }
             _nextWindowAt = Time.unscaledTime + _windowPeriodSeconds;
 
             var clip = _capture.ActiveClip;
-            if (clip == null) { return; }
+            if (clip == null)
+            {
+                return;
+            }
             int currentPos = Microphone.GetPosition(null);
-            if (currentPos <= 0) { return; }
+            if (currentPos <= 0)
+            {
+                return;
+            }
             int windowSize = (int)(_capture.SampleRate * _windowPeriodSeconds);
-            if (currentPos < windowSize) { return; }
+            if (currentPos < windowSize)
+            {
+                return;
+            }
 
             var window = new float[windowSize];
             clip.GetData(window, currentPos - windowSize);
@@ -167,11 +150,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             else if (_speechStarted && _vad.ShouldStopAfterSilence(rms, Time.unscaledTime - _lastSpeechAt))
             {
-                // 静默超时结束 → 进入处理
                 _speechStarted = false;
                 EndCapture();
             }
-            else if (_captureStartedAt > 0 && Time.unscaledTime - _captureStartedAt > _cfg.CaptureMaxSeconds)
+            else if (_captureStartedAt > 0 && Time.unscaledTime - _captureStartedAt > MiyakoCarryServiceAssistantPlugin.VoiceCaptureMaxSeconds.Value)
             {
                 _speechStarted = false;
                 EndCapture();
@@ -180,7 +162,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private void BeginCapture()
         {
-            if (_capturing) { return; }
+            if (_capturing)
+            {
+                return;
+            }
             if (!_capture.Begin())
             {
                 Notification("麦克风不可用或被占用");
@@ -195,7 +180,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private void EndCapture()
         {
-            if (!_capturing) { return; }
+            if (!_capturing)
+            {
+                return;
+            }
             var samples = _capture.End();
             _capturing = false;
 
@@ -205,7 +193,14 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            try { _processingCts?.Cancel(); } catch { }
+            try
+            {
+                _processingCts?.Cancel();
+            }
+            catch
+            {
+
+            }
             _processingCts = new CancellationTokenSource();
             _ = ProcessCaptureAsync(samples, _processingCts.Token);
         }
@@ -220,12 +215,35 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 Channels = _capture.Channels,
             };
 
+            var sttSettings = new ProviderSettings
+            {
+                ApiKey = MiyakoCarryServiceAssistantPlugin.SttApiKey.Value,
+                BaseUrl = MiyakoCarryServiceAssistantPlugin.SttBaseUrl.Value,
+                ModelId = MiyakoCarryServiceAssistantPlugin.SttModelId.Value,
+                Language = MiyakoCarryServiceAssistantPlugin.SttLanguage.Value,
+                TimeoutSec = MiyakoCarryServiceAssistantPlugin.SttTimeoutSec.Value,
+            };
+
+            var llmSettings = new ProviderSettings
+            {
+                ApiKey = MiyakoCarryServiceAssistantPlugin.LlmApiKey.Value,
+                BaseUrl = MiyakoCarryServiceAssistantPlugin.LlmBaseUrl.Value,
+                ModelId = MiyakoCarryServiceAssistantPlugin.LlmModelId.Value,
+                SystemPrompt = MiyakoCarryServiceAssistantPlugin.LlmSystemPrompt.Value,
+                Temperature = MiyakoCarryServiceAssistantPlugin.LlmTemperature.Value,
+                MaxTokens = MiyakoCarryServiceAssistantPlugin.LlmMaxTokens.Value,
+                TimeoutSec = MiyakoCarryServiceAssistantPlugin.LlmTimeoutSec.Value,
+            };
+
             SttResult stt;
             try
             {
-                stt = await _stt.TranscribeAsync(segment, _cfg.SttSettings, ct).ConfigureAwait(true);
+                stt = await _stt.TranscribeAsync(segment, sttSettings, ct).ConfigureAwait(true);
             }
-            catch (OperationCanceledException) { return; }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT 异常：{ex}");
@@ -249,9 +267,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
             LlmIntent intent;
             try
             {
-                intent = await _llm.InterpretAsync(stt.Text, _cfg.LlmSettings, ct).ConfigureAwait(true);
+                intent = await _llm.InterpretAsync(stt.Text, llmSettings, ct).ConfigureAwait(true);
             }
-            catch (OperationCanceledException) { return; }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 异常：{ex}");
@@ -272,7 +293,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _pendingTranscribedText = null;
             _state = EVoiceState.Idle;
 
-            if (intent == null) { return; }
+            if (intent == null)
+            {
+                return;
+            }
 
             int dispatched = 0;
             string feedback = null;
@@ -314,7 +338,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 FeedbackMessage = feedback,
             });
 
-            if (_cfg.FeedbackSubtitles && !string.IsNullOrEmpty(feedback))
+            if (MiyakoCarryServiceAssistantPlugin.VoiceFeedbackSubtitles.Value && !string.IsNullOrEmpty(feedback))
             {
                 Notification(feedback);
             }
@@ -331,7 +355,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch
             {
-                // 忽略——通知失败不应阻断语音管线
+                
             }
         }
     }

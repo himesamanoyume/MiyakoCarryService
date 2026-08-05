@@ -40,9 +40,7 @@ namespace MiyakoCarryService.Assistant.Utils
 
         public static HttpClient WithTimeout(ProviderSettings settings)
         {
-            var timeout = settings?.TimeoutSec > 0
-                ? TimeSpan.FromSeconds(settings.TimeoutSec)
-                : TimeSpan.FromSeconds(30);
+            var timeout = settings?.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             if (_shared.Timeout != timeout)
             {
                 _shared.Timeout = timeout;

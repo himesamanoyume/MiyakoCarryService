@@ -4,7 +4,6 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Mgrs;
-using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
@@ -30,8 +29,6 @@ namespace MiyakoCarryService.Assistant
         public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryServiceAssistant");
 
         public static bool IsLoadedByScriptEngine = false;
-
-        internal AssistantVoiceConfig VoiceConfig;
 
         #region Assistant
 
@@ -72,7 +69,6 @@ namespace MiyakoCarryService.Assistant
         void Start()
         {
             SetupConfig();
-            VoiceConfig = AssistantVoiceConfig.FromConfig();
             AssistantHttpClient.Initialize();
 
             McsEventApi.Notify(new GameLoopMgrEnableEvent
