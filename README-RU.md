@@ -175,6 +175,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `CompensationPrice` | Compensation paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`, in roubles. | `300000` roubles |
 | `CarryServiceLevelPrice` | Base carry-service pricing for 5 levels, with minimum and maximum bounds for each level. | Determined by level range |
 | `TraderLlmEnabled` | Whether to enable the Miyako trader's AI chat (LLM). When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk. | `false` |
+| `TraderLlmStartupTest` | Whether to run one LLM connectivity test on server startup; set to `false` after the setup is confirmed to avoid repeated cost. | `true` |
 | `TraderLlmProvider` | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
 | `TraderLlmApiKey` | API key for the Miyako trader's AI provider. | empty |
 | `TraderLlmBaseUrl` | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |

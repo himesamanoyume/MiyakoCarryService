@@ -385,6 +385,10 @@ namespace MiyakoCarryService.Server.Services
 
                 if (orderInfo.Status != EInfoStatus.Started)
                 {
+                    if (orderInfo.Status == EInfoStatus.AvailableForStart)
+                    {
+                        RemoveOrderInfo(orderInfo);
+                    }
                     continue;
                 }
 

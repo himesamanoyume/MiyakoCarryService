@@ -171,7 +171,8 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | `OrderPendingPaymentTime` | 通过 宫子 商人下单 `护航` 或发放补票时，行动任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
 | `CompensationPrice` | 当 `护航` 意外击杀 `老板` 时的补偿金额，单位为卢布。 | `300000` 卢布 |
 | `CarryServiceLevelPrice` | 护航等级基础定价，共 5 个等级，每个等级都设有上下限。 | 由等级区间决定 |
-| `TraderLlmEnabled` | 是否启用宫子商人的 AI 对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言下单、购买罚单与闲聊。 | `false` |
+| `TraderLlmEnabled` | 是否启用宫子商人的 AI 对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言下单、下发罚单。 | `false` |
+| `TraderLlmStartupTest` | 是否在服务端启动时自动执行一次 LLM 连通性测试；配置完成后可设为 `false` 避免每次启动消耗。 | `true` |
 | `TraderLlmProvider` | 宫子商人 AI 使用的服务商：`OpenAICompatible`（兼容 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等）、`Anthropic`、`GoogleGemini`、`DashScope`、`Zhipu`、`Qianfan`、`Spark`、`MiniMax`。 | `OpenAICompatible` |
 | `TraderLlmApiKey` | 宫子商人 AI 服务商的 API Key。 | 空 |
 | `TraderLlmBaseUrl` | 可选自定义宫子商人 AI 的 Base URL（覆盖服务商默认值）。 | 空 |

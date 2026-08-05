@@ -88,6 +88,9 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("TraderLlmEnabled")]
         public bool TraderLlmEnabled { get; set; } = false;
 
+        [JsonPropertyName("TraderLlmStartupTest")]
+        public bool TraderLlmStartupTest { get; set; } = true;
+
         [JsonPropertyName("TraderLlmProvider")]
         public string TraderLlmProvider { get; set; } = "OpenAICompatible";
 

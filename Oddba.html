@@ -1054,8 +1054,13 @@
                 </tr>
                 <tr>
                     <td>TraderLlmEnabled</td>
-                    <td>是否启用宫子商人的AI对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言进行下单、购买罚单。</td>
+                    <td>是否启用宫子商人的AI对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言进行下单、下发罚单。</td>
                     <td>false</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmStartupTest</td>
+                    <td>是否在服务端启动时自动执行一次LLM连通性测试；配置完成后可设为false避免每次启动消耗。</td>
+                    <td>true</td>
                 </tr>
                 <tr>
                     <td>TraderLlmProvider</td>

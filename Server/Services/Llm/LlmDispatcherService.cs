@@ -343,12 +343,18 @@ namespace MiyakoCarryService.Server.Services.Llm
         }
 
         /// <summary>
-        /// 服务端启动时的 LLM 连通性测试：当 <c>TraderLlmEnabled</c> 开启时自动执行一次，
+        /// 服务端启动时的 LLM 连通性测试：当 <c>TraderLlmEnabled</c> 与 <c>TraderLlmStartupTest</c> 均开启时自动执行一次，
         /// 成功/失败均输出日志（失败附带原因）。使用最小化 system prompt，token 成本极低。
         /// </summary>
         public async Task TestConnectionAsync()
         {
             var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
+
+            if (!serverConfig.TraderLlmStartupTest)
+            {
+                logger.Info("LLM 启动测试跳过：TraderLlmStartupTest 未开启");
+                return;
+            }
 
             if (!serverConfig.TraderLlmEnabled)
             {
@@ -384,7 +390,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                     return;
                 }
 
-                logger.Success($"LLM 启动测试成功（{serverConfig.TraderLlmProvider}/{settings.ModelId}）：{(string.IsNullOrEmpty(intent.ReplyText) ? "已收到响应" : intent.ReplyText)}");
+                logger.Success($"LLM 启动测试成功（{serverConfig.TraderLlmProvider}/{settings.ModelId}）：{(string.IsNullOrEmpty(intent.ReplyText) ? "已收到响应" : intent.ReplyText)}（如无需每次启动测试，可在配置 TraderLlmStartupTest 中设为 false）");
             }
             catch (Exception ex)
             {

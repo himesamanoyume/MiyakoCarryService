@@ -196,6 +196,10 @@ Carry service level base price. There are 5 levels in total, in roubles, with an
 
 Whether to enable the Miyako trader's AI chat (LLM). Defaults to false. When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk.
 
+- **TraderLlmStartupTest**
+
+Whether to run one LLM connectivity test on server startup. Defaults to true. Set to `false` after the setup is confirmed to avoid repeated cost.
+
 - **TraderLlmProvider**
 
 AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. Defaults to `OpenAICompatible`.
