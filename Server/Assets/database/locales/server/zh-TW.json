@@ -19,5 +19,6 @@
     "Mcs/GenerateProfileError": "生成護航的 {0} 存檔異常，已生成對應預設存檔",
     "Mcs/McsInventoryModeRagfairRefuse": "處於護航庫存模式，無法在跳蚤市場上架交易單",
     "Mcs/NewVersionNotify": "宮子護航店 檢測到新版本: {0} ---> {1}",
-    "Mcs/McsBotPlayerExpired": "已過期"
+    "Mcs/McsBotPlayerExpired": "已過期",
+    "Mcs/MiyakoTraderLlmErrorDetail": "AI 服務暫時不可用，請稍後再試。\n錯誤原因：{0}"
 }

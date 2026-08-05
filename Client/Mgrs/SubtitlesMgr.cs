@@ -300,13 +300,13 @@ namespace MiyakoCarryService.Client.Mgrs
             private Coroutine _coroutine;
             private EPhraseTrigger _lastPhraseTrigger;
             private Profile _mcsBotPlayerProfile;
-            private float _colddown;
+            private float _cooddown;
 
             public Subtitles(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
             {
                 _lastPhraseTrigger = EPhraseTrigger.None;
                 _mcsBotPlayerProfile = mcsBotPlayerProfile;
-                _colddown = 0;
+                _cooddown = 0;
                 SubtitlesView = subtitlesView;
                 _gameLoop = gameLoop;
                 var subtitlesViewTraverse = Traverse.Create(subtitlesView);
@@ -317,7 +317,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (_lastPhraseTrigger == talkContentType)
                 {
-                    if (Time.time < _colddown)
+                    if (Time.time < _cooddown)
                     {
                         return;
                     }
@@ -332,7 +332,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 if (SubtitlesView != null)
                 {
                     SubtitlesView.ShowGameObject();
-                    _colddown = Time.time + 2f;
+                    _cooddown = Time.time + 2f;
                     _lastPhraseTrigger = talkContentType;
                     _coroutine = _gameLoop.StartCoroutine(Hide(4f));
                 }

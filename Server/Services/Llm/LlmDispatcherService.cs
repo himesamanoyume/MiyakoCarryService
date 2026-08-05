@@ -104,24 +104,14 @@ namespace MiyakoCarryService.Server.Services.Llm
             catch (Exception ex)
             {
                 logger.Error("LlmDispatcher 异常: " + ex);
-                mailSendService.SendLocalisedNpcMessageToPlayer(
-                    sessionId,
-                    TraderService.MiyakoTraderId,
-                    MessageType.NpcTraderMessage,
-                    Locales.MIYAKOTRADERLLMERROR,
-                    null);
+                SendLlmErrorDetail(sessionId, ex.Message);
                 return LlmDispatchResult.Handled();
             }
 
             if (intent == null || intent.IsError)
             {
                 logger.Warning("LlmDispatcher 意图解析失败: " + (intent?.Error ?? "null"));
-                mailSendService.SendLocalisedNpcMessageToPlayer(
-                    sessionId,
-                    TraderService.MiyakoTraderId,
-                    MessageType.NpcTraderMessage,
-                    Locales.MIYAKOTRADERLLMERROR,
-                    null);
+                SendLlmErrorDetail(sessionId, intent?.Error ?? "null");
                 return LlmDispatchResult.Handled();
             }
 
@@ -214,6 +204,25 @@ namespace MiyakoCarryService.Server.Services.Llm
             return ticket != null
                 && ticket.Percent >= MiyakoTraderPromptTemplates.MinTicketPercent
                 && ticket.Percent <= MiyakoTraderPromptTemplates.MaxTicketPercent;
+        }
+
+        /// <summary>
+        /// 向玩家发送 AI 错误通知并附带具体错误原因，避免只回复笼统的"AI 不可用"。
+        /// </summary>
+        private void SendLlmErrorDetail(MongoId sessionId, string reason)
+        {
+            const int maxReasonLength = 300;
+            if (reason != null && reason.Length > maxReasonLength)
+            {
+                reason = reason.Substring(0, maxReasonLength) + "...";
+            }
+
+            mailSendService.SendDirectNpcMessageToPlayer(
+                sessionId,
+                TraderService.MiyakoTraderId,
+                MessageType.NpcTraderMessage,
+                string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERLLMERRORDETAIL), reason),
+                null);
         }
 
         private string BuildSpawnTypeHelp()

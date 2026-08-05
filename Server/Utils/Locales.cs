@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Server.Utils
         public const string INVAILDSERVERTRADERTABLEWARNING = "Mcs/InvaildServerTraderTableWarning";
         public const string MIYAKOTRADERLLMINTERPRETING = "Mcs/MiyakoTraderLlmInterpreting";
         public const string MIYAKOTRADERLLMDISABLED = "Mcs/MiyakoTraderLlmDisabled";
-        public const string MIYAKOTRADERLLMERROR = "Mcs/MiyakoTraderLlmError";
+        public const string MIYAKOTRADERLLMERRORDETAIL = "Mcs/MiyakoTraderLlmErrorDetail";
         public const string MIYAKOTRADERLLMCOOLDOWN = "Mcs/MiyakoTraderLlmCooldown";
         public const string MIYAKOTRADERLLMENABLED = "Mcs/MiyakoTraderLlmEnabled";
     }

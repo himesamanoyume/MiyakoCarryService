@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Start()
         {
             base.Start();
-            _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN;
+            _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COODDOWN;
         }
 
         public override Action GetNextAction()

@@ -19,5 +19,6 @@
     "Mcs/GenerateProfileError": "Ошибка генерации carry service profile для {0}, вместо него был создан профиль по умолчанию",
     "Mcs/McsInventoryModeRagfairRefuse": "В режиме инвентаря наёмника нельзя добавить предложения на барахолку.",
     "Mcs/NewVersionNotify": "Доступна новая версия MiyakoCarryService: {0} ---> {1}",
-    "Mcs/McsBotPlayerExpired": "Expired"
+    "Mcs/McsBotPlayerExpired": "Expired",
+    "Mcs/MiyakoTraderLlmErrorDetail": "AI service is unavailable right now. Please try again later.\nError reason: {0}"
 }

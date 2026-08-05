@@ -67,8 +67,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public const float SPHERECAST_RADIUS = 0.1f;
         public const float SPHERECAST_DISTANCE = 2f;
         public const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
-        public const float ENTER_COMMON_LOOTING_COLDDOWN = 10f;
-        public const float LOOTING_FINNISHED_COLDDOWN = 1f;
+        public const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
+        public const float LOOTING_FINNISHED_COODDOWN = 1f;
         public const float WEAPON_SWITCH_COOLDOWN = 1f;
         public const float MELEE_CHECK_INTERVAL = 0.5f;
 
@@ -826,7 +826,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (Time.time > _nextLootingCheckTime && !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
             {
                 _currentLootingRetries += 1;
-                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COLDDOWN;
+                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COODDOWN;
                 return true;
             }
 
@@ -1759,7 +1759,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (!haveItemsToDrop)
             {
                 McsBotPlayerData.RemoveDecision([Decisions.ShouldDropTargetLoot]);
-                _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COLDDOWN * 2;
+                _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COODDOWN * 2;
                 return true;
             }
 

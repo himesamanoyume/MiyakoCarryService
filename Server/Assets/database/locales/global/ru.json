@@ -262,7 +262,6 @@
     "Mcs/OnOutOfAmmo": "Out of ammo.",
     "Mcs/MiyakoTraderLlmInterpreting": "Let me think about that...",
     "Mcs/MiyakoTraderLlmDisabled": "AI service is not configured on this server. Please use \"mcs order\" / \"mcs ticket\" text commands.",
-    "Mcs/MiyakoTraderLlmError": "AI service is unavailable right now. Please try again later.",
     "Mcs/MiyakoTraderLlmCooldown": "You're sending messages too quickly. Please wait a moment and try again.",
     "Mcs/MiyakoTraderLlmEnabled": "Miyako Trader's LLM service is now enabled. You can chat with her in natural language."
 }

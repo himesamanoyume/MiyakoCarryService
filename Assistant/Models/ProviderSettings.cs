@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Assistant.Models
         public string Language;
         public string SystemPrompt;
         public double Temperature = 0.2;
-        public int MaxTokens = 512;
+        public int MaxTokens = 3000;
         public int TimeoutSec = 15;
     }
 }

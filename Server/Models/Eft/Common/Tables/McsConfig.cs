@@ -107,7 +107,7 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         public double LlmTemperature { get; set; } = 0.2;
 
         [JsonPropertyName("LlmMaxTokens")]
-        public int LlmMaxTokens { get; set; } = 512;
+        public int LlmMaxTokens { get; set; } = 3000;
 
         [JsonPropertyName("LlmTimeoutSec")]
         public int LlmTimeoutSec { get; set; } = 15;

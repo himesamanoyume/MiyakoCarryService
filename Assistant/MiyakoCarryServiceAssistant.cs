@@ -252,7 +252,7 @@ namespace MiyakoCarryService.Assistant
             LlmMaxTokens = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMMAXTOKENS_KEY,
-                512,
+                3000,
                 Locales.LLMMAXTOKENS_DESCRIPTION,
                 new AcceptableValueRange<int>(64, 4096));
 

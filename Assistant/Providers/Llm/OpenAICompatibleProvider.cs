@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     new { role = "user", content = userText },
                 },
                 temperature = settings.Temperature,
-                max_tokens = settings.MaxTokens > 0 ? settings.MaxTokens : 512,
+                max_tokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
                 response_format = new { type = "json_object" },
             };
 
