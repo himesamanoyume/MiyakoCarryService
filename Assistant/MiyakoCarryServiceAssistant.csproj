@@ -9,6 +9,8 @@
     <DevGameScriptsMcsPath>$(DevGamePath)\BepInEx\scripts</DevGameScriptsMcsPath>
     <DevHeadlessGamePluginsMcsPath>$(DevHeadlessGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevHeadlessGamePluginsMcsPath>
     <BuildMcsPath>$(ProjectDir)..\Build\Assistant\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>
+    <BuildServerAddonPath>$(ProjectDir)..\Build\Assistant\SPT_Runtime\user\mods\MiyakoCarryServiceServer\Assets\database\locales\addon</BuildServerAddonPath>
+    <DevServerAddonPath>$(DevGamePath)\SPT_Runtime\user\mods\MiyakoCarryServiceServer\Assets\database\locales\addon</DevServerAddonPath>
     <AssemblyName>Himesamanoyume.MiyakoCarryServiceAssistant</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceAssistant</AssemblyProduct>
@@ -73,5 +75,9 @@
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevHeadlessGamePluginsMcsPath)\$(TargetFileName)&quot;" />
     <Exec Command="mkdir &quot;$(BuildMcsPath)&quot;" Condition="!Exists('$(BuildMcsPath)')" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMcsPath)\$(TargetFileName)&quot;" />
+
+    <!-- 服务端 addon 本地化：助手扩展的本地化部署到 MiyakoCarryServiceServer 的 addon 目录 -->
+    <Exec Command="xcopy &quot;$(ProjectDir)Assets\database\locales\addon\*.*&quot; &quot;$(BuildServerAddonPath)\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(ProjectDir)Assets\database\locales\addon\*.*&quot; &quot;$(DevServerAddonPath)\&quot; /E /I /Y" />
   </Target>
 </Project>

@@ -25,6 +25,7 @@ namespace MiyakoCarryService.Server.Services
     {
         private readonly string _globalLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "global");
         private readonly string _serverLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "server");
+        private readonly string _addonLocaleFolderDir = Path.Join(configService.GetModPath(), "Assets", "database", "locales", "addon");
         Dictionary<string, Dictionary<string, string>> _globalLocales = [];
         Dictionary<string, Dictionary<string, string>> _serverLocales = [];
 
@@ -34,11 +35,63 @@ namespace MiyakoCarryService.Server.Services
         public async Task OnPostLoadAsync()
         {
             _globalLocales = await RecursiveLoadFiles(_globalLocaleFolderDir);
+            _serverLocales = await RecursiveLoadFiles(_serverLocaleFolderDir);
+
+            await LoadAddonLocales();
+
             await FillUnsupportedLocales(_globalLocaleFolderDir, _globalLocales, _supportedGlobalLocales);
             await UpdateGlobalLocales(_globalLocales);
-            _serverLocales = await RecursiveLoadFiles(_serverLocaleFolderDir);
             await FillUnsupportedLocales(_serverLocaleFolderDir, _serverLocales, _supportedServerLocales);
             await UpdateServerLocales(_serverLocales);
+        }
+
+        /// <summary>
+        /// 加载 addon 目录下所有扩展插件的本地化：遍历 <c>addon/*</c> 下每个插件目录，
+        /// 读取其 <c>global</c> / <c>server</c> 子目录中的本地化文件，按 locale 名合并进现有字典（addon 覆盖本体）。
+        /// </summary>
+        private async Task LoadAddonLocales()
+        {
+            if (!fileUtil.DirectoryExists(_addonLocaleFolderDir))
+            {
+                return;
+            }
+
+            foreach (var pluginDir in fileUtil.GetDirectories(_addonLocaleFolderDir))
+            {
+                var globalDir = Path.Join(pluginDir, "global");
+                var serverDir = Path.Join(pluginDir, "server");
+
+                if (fileUtil.DirectoryExists(globalDir))
+                {
+                    MergeLocales(_globalLocales, await RecursiveLoadFiles(globalDir));
+                }
+
+                if (fileUtil.DirectoryExists(serverDir))
+                {
+                    MergeLocales(_serverLocales, await RecursiveLoadFiles(serverDir));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 将 <paramref name="source"/> 按 locale 名合并进 <paramref name="target"/>（键级别合并，source 覆盖 target）。
+        /// </summary>
+        private static void MergeLocales(Dictionary<string, Dictionary<string, string>> target, Dictionary<string, Dictionary<string, string>> source)
+        {
+            foreach ((var localeName, var localeDict) in source)
+            {
+                if (target.TryGetValue(localeName, out var existing))
+                {
+                    foreach ((var key, var value) in localeDict)
+                    {
+                        existing[key] = value;
+                    }
+                }
+                else
+                {
+                    target[localeName] = localeDict;
+                }
+            }
         }
 
         public async Task UpdateGlobalLocales(Dictionary<string, Dictionary<string, string>> locales)

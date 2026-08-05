@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using MiyakoCarryService.Assistant.Enums;
@@ -11,7 +10,6 @@ using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Mgrs;
 
 namespace MiyakoCarryService.Assistant
 {
@@ -81,23 +79,6 @@ namespace MiyakoCarryService.Assistant
             {
                 MgrTypes = [typeof(VoiceMgr)]
             });
-        }
-
-        void OnDestroy()
-        {
-            // VoiceMgr 挂在同一 GameObject 上，Unity 会自动级销毁它，无需手动 Destroy。
-        }
-
-        private static bool CheckPlugin(IEnumerable<string> guids)
-        {
-            foreach (var guid in guids)
-            {
-                if (!Chainloader.PluginInfos.ContainsKey(guid))
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         private void SetupConfig()

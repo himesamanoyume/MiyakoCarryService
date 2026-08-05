@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
@@ -84,7 +86,7 @@ namespace MiyakoCarryService.Assistant.Services
 
             var bodyPart = ParseBodyPart(intent.AimingBodyPart);
 
-            var useFikaBrige = MiyakoCarryServiceAssistantPlugin.FikaInstalled && !Tools.IsHost;
+            var useFikaBrige = MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost;
             int dispatched = 0;
             foreach (var bot in targets)
             {
