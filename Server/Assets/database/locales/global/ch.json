@@ -261,10 +261,8 @@
     "Mcs/TakenOver": "已被全队指令重新接管。",
     "Mcs/OnOutOfAmmo": "弹药耗尽。",
     "Mcs/MiyakoTraderLlmInterpreting": "让我想想……",
-    "Mcs/MiyakoTraderLlmConfirmOrder": "明白了，正在为你下单。",
-    "Mcs/MiyakoTraderLlmConfirmTicket": "好的，正在为你提交罚单减免请求。",
-    "Mcs/MiyakoTraderLlmReply": "{0}",
     "Mcs/MiyakoTraderLlmDisabled": "当前服务器未启用 AI 服务。请使用 mcs order / mcs ticket 文本指令。",
     "Mcs/MiyakoTraderLlmError": "AI 服务暂时不可用，请稍后再试。",
-    "Mcs/MiyakoTraderLlmCooldown": "你发送得太快了，请稍等片刻再试。"
+    "Mcs/MiyakoTraderLlmCooldown": "你发送得太快了，请稍等片刻再试。",
+    "Mcs/MiyakoTraderLlmEnabled": "当前宫子商人已开启大语言模型，你可以使用自然语言执行指令。"
 }

@@ -43,7 +43,7 @@
     "Mcs/LlmTimeoutSec Key": "LLM Timeout Sec",
     "Mcs/LlmTimeoutSec Description": "Per-request LLM timeout in seconds.",
     "Mcs/VoiceTriggerModePushToTalk": "Push To Talk",
-    "Mcs/VoiceTriggerModeFreeTalk": "Free Talk (VAD)",
+    "Mcs/VoiceTriggerModeFreeTalk": "Free Talk",
     "Mcs/SttProviderNone": "None",
     "Mcs/SttProviderOpenAIWhisper": "OpenAI Whisper",
     "Mcs/SttProviderAzureSpeech": "Azure Speech",

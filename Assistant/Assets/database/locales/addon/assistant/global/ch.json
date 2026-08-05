@@ -43,7 +43,7 @@
     "Mcs/LlmTimeoutSec Key": "LLM 超时秒数",
     "Mcs/LlmTimeoutSec Description": "每次 LLM 请求的超时秒数。",
     "Mcs/VoiceTriggerModePushToTalk": "按住说话",
-    "Mcs/VoiceTriggerModeFreeTalk": "自由发言（VAD）",
+    "Mcs/VoiceTriggerModeFreeTalk": "自由发言",
     "Mcs/SttProviderNone": "不使用",
     "Mcs/SttProviderOpenAIWhisper": "OpenAI Whisper",
     "Mcs/SttProviderAzureSpeech": "Azure 语音",

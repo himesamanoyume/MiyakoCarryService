@@ -146,7 +146,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    Locales.MIYAKOTRADERLLMCONFIRMORDER,
+                    Locales.MIYAKOTRADERORDERNEWQUEST,
                     null);
 
                 questController.CreateOrderQuest(sessionId, order.Players, spawnType, order.Level, order.Duration);
@@ -171,7 +171,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    Locales.MIYAKOTRADERLLMCONFIRMTICKET,
+                    Locales.MIYAKOTRADERTICKETNEWQUEST,
                     null);
 
                 questController.CreateTicketQuest(sessionId, ticket.Percent);
