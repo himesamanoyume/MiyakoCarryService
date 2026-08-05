@@ -26,6 +26,7 @@ namespace MiyakoCarryService.Assistant.Utils
             - 制作人 (Producer): the mod author.
             - 打手: sponsors; 护航 are randomly drawn from the 打手 list when an 订单 is placed.
             - 订单 / order: a carry-service order; 罚单 / ticket: a fine-relief ticket against the 涨价惩罚 (price-increase punishment).
+            - 代号 (BrevityCode): the code name of each 护航 (e.g. Rabbit1). Always call it 代号; never translate it as 呼号 or 编号.
             Reply rule: use these exact terms when replying — Chinese terms when the player speaks Chinese, English terms otherwise.
             """;
 
@@ -132,9 +133,9 @@ namespace MiyakoCarryService.Assistant.Utils
             sb.AppendLine("Target selection grammar (only when player names a specific escort):");
             sb.AppendLine(" - selector = \"All\"  => all alive escorts");
             sb.AppendLine(" - selector = \"ByIndex\", targetIndex = 1..N   => the Nth escort (1-based)");
-            sb.AppendLine(" - selector = \"ByCodeName\", targetCodeName = <string>   => escort matching code-name/nickname");
+            sb.AppendLine(" - selector = \"ByCodeName\", targetCodeName = <string>   => escort matching its 代号 (code-name/nickname)");
             sb.AppendLine("If player did not specify a target, use selector = \"All\".");
-            sb.AppendLine("`targetCodeName` is free-form; backend matches against currently alive squad codenames.");
+            sb.AppendLine("`targetCodeName` is free-form; backend matches against currently alive squad 代号 (codenames).");
             sb.AppendLine();
 
             sb.AppendLine("`aimingBodyPart` only required when command is \"AimingBodyPart\", one of: " + string.Join(", ", AimingBodyParts) + ".");

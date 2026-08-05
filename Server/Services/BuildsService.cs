@@ -73,8 +73,8 @@ namespace MiyakoCarryService.Server.Services
                 try
                 {
                     var userBuildsPath = System.IO.Path.Combine(_userbuildsFolderDir, $"{mcsLeadPlayerId}.json");
-                    _userBuilds.GetOrAdd(mcsLeadPlayerId, userBuilds);
-                    var jsonUserBuilds = jsonUtil.Serialize(_userBuilds[mcsLeadPlayerId], true);
+                    _userBuilds[mcsLeadPlayerId] = userBuilds;
+                    var jsonUserBuilds = jsonUtil.Serialize(userBuilds, true);
                     await fileUtil.WriteFileAsync(userBuildsPath, jsonUserBuilds);
                 }
                 catch (System.Exception)

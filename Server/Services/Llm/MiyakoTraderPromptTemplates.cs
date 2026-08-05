@@ -36,6 +36,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             - 订单 / order: a carry-service order placed by the 老板.
             - 罚单 / ticket: a fine-relief ticket that waives part of the 涨价惩罚.
             - 涨价惩罚 / price-increase punishment: the permanent price increase caused by hurting or killing 护航.
+            - 代号 (BrevityCode): the code name of each 护航 (e.g. Rabbit1). Always call it 代号; never translate it as 呼号 or 编号.
             - 结算 / settle: permanently delete all data of an expired order's 护航 (only after full payment).
             - 续订 / renew: extend or re-activate 护航 by completing a new same-duration order.
             Reply rule: when replying, use these exact terms — Chinese terms when the player writes Chinese, English terms otherwise. Never replace them with synonyms.
@@ -75,11 +76,11 @@ namespace MiyakoCarryService.Server.Services.Llm
 
             MECHANICS:
             - Loot rules: loot below the Price Threshold is ignored; keyword loot matches item full/short names (keywords separated by "||" or "," or "，"); blocked item types can be selected (Ammo, Barter, Info, Container, Food, Backpack, Goggles, Pocket, Tactical Vest, Armor, Grenade, Headphone, Keys, Knife, Magazine, Meds, Mod, Special, Weapon, Other); looted items are nested as much as possible. Loot picked up by 护航 must be taken personally by the 老板 to keep it after the raid.
-            - Formation system: a 7x7 formation matrix ("★" = the 老板's position; the top of "★" is the look direction), formation spacing, and sequential fill (a dead 护航's slot is filled by the next squad member in brevity-code order). Presets are saved by hotkey and applied via the Change Formation command.
+            - Formation system: a 7x7 formation matrix ("★" = the 老板's position; the top of "★" is the look direction), formation spacing, and sequential fill (a dead 护航's slot is filled by the next squad member in 代号 (BrevityCode) order). Presets are saved by hotkey and applied via the Change Formation command.
             - Mcs Inventory Mode: right-click a friend-listed 护航 in the "Invite to group" panel and select OPEN INVENTORY. Inside, customize the 护航's equipment exactly like normal gameplay, and Miyako sells all items for 1 ruble. Return to the main character by right-clicking the 护航 and selecting RETURN TO MAIN CHARACTER, or by clicking the green Mcs Inventory Mode button on the bottom bar. Only PMC-mode equipment is affected (SCAV equipment cannot be controlled by game design).
             - Price increase & punishment: hurting a 护航 permanently raises order prices by 1.07% per hit; killing one raises them by 15.6%. If a 护航 kills the 老板, CompensationPrice is paid. A 罚单 (ticket) waives part of the punishment: "mcs ticket {percent 1-100}".
             - Server configs (MiyakoCarryServiceServer): BalanceRestriction (when enabled, Open Inventory is disabled and items 护航 bring into raid get the "Curse of Vanishing" — they vanish wherever they are when the 护航 dies), CheckUpdate, CheckIfdian, TicketPricePerPercent (default 300000 rubles per percent), PunishmentMultiMax (cap of the price-increase punishment, default 1 = 100%), OrderPendingPaymentTime (payment quest expiry, default 900 seconds), CompensationPrice (default 300000 rubles), CarryServiceLevelPrice (5 carry-service levels / 护航级别, each with upper/lower bounds).
-            - Client configs include: Enable Looting, Price Threshold, Loot Name Keyword, Loot Keyword Items, Blocked Item Types, Enable Keep Formation, Formation Matrix, Formation Spacing, Formation Sequential Fill, Save Formation Preset Hotkey, Teammate Highlight (color/hotkey), Enable Mcs Subtitles, Show Brevity Code.
+            - Client configs include: Enable Looting, Price Threshold, Loot Name Keyword, Loot Keyword Items, Blocked Item Types, Enable Keep Formation, Formation Matrix, Formation Spacing, Formation Sequential Fill, Save Formation Preset Hotkey, Teammate Highlight (color/hotkey), Enable Mcs Subtitles, Show Brevity Code (显示代号).
             - Custom 护航 types: edit spawntype.json under MiyakoCarryServiceServer/configs — each entry {WildSpawnType, IsBoss, DisplayName}. If generation fails, it falls back to the default PMC type.
 
             TUTORIALS:

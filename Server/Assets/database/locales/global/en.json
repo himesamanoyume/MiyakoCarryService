@@ -263,5 +263,5 @@
     "Mcs/MiyakoTraderLlmInterpreting": "Let me think about that...",
     "Mcs/MiyakoTraderLlmDisabled": "AI service is not configured on this server. Please use \"mcs order\" / \"mcs ticket\" text commands.",
     "Mcs/MiyakoTraderLlmCooldown": "You're sending messages too quickly. Please wait a moment and try again.",
-    "Mcs/MiyakoTraderLlmEnabled": "Miyako Trader's LLM service is now enabled. You can chat with her in natural language."
+    "Mcs/MiyakoTraderLlmEnabled": "Miyako Trader's LLM service is now enabled. You can chat with her in natural language. Replies are AI-generated and for reference only; please rely on actual in-game conditions."
 }

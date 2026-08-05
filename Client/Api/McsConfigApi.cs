@@ -25,7 +25,7 @@ namespace MiyakoCarryService.Client.Api
             Action<T> apply = null
         )
         {
-            return RegisterConfig(nameof(type), (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide, getLocal, apply);
+            return RegisterConfig(type.ToString(), (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide, getLocal, apply);
         }
 
         /// <summary>
@@ -45,12 +45,16 @@ namespace MiyakoCarryService.Client.Api
             Action<T> apply = null
         )
         {
-            if (EConfigType.BASIC.ToString() == sectionName && (getLocal == null || apply == null))
+            if (EConfigType.BASIC.ToString() == sectionName)
             {
-                throw new Exception("为BASIC分类注册配置项时，必须传递getLocal和apply委托");
+                if (getLocal == null || apply == null)
+                {
+                    throw new Exception("为BASIC分类注册配置项时，必须传递getLocal和apply委托");
+                }
+
+                McsBotPlayerConfigUtils.Register(key, getLocal, apply);
             }
 
-            McsBotPlayerConfigUtils.Register(key, getLocal, apply);
             return MiyakoCarryServicePlugin.Instance.Register(sectionName, order, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
         }
 

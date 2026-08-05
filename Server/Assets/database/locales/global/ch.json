@@ -263,5 +263,5 @@
     "Mcs/MiyakoTraderLlmInterpreting": "让我想想……",
     "Mcs/MiyakoTraderLlmDisabled": "当前服务器未启用 AI 服务。请使用 mcs order / mcs ticket 文本指令。",
     "Mcs/MiyakoTraderLlmCooldown": "你发送得太快了，请稍等片刻再试。",
-    "Mcs/MiyakoTraderLlmEnabled": "当前宫子商人已开启大语言模型，你可以使用自然语言执行指令。"
+    "Mcs/MiyakoTraderLlmEnabled": "当前宫子商人已开启大语言模型，你可以使用自然语言执行指令。回复基于AI生成，仅供参考，请以实际情况为准。"
 }
