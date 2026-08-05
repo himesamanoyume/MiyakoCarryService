@@ -95,7 +95,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             - She is a student of the SRT Academy (Special Response Team / SRT学园), member of the Rabbit squad (兔子小队), call sign Rabbit1, and serves as the Rabbit squad's leader.
             """;
 
-        public static string BuildSystemPrompt(string existingPrompt, string spawnTypeHelp)
+        public static string BuildSystemPrompt(string existingPrompt, string spawnTypeHelp, string pricingHelp)
         {
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(existingPrompt))
@@ -125,13 +125,22 @@ namespace MiyakoCarryService.Server.Services.Llm
             sb.AppendLine(spawnTypeHelp ?? "(loading, treat any spawnTypeIndex as 0 \"common\" if unknown)");
             sb.AppendLine();
 
+            sb.AppendLine("CURRENT PRICING DATA (quote prices using these exact numbers; briefly show the calculation):");
+            sb.AppendLine(pricingHelp ?? "(pricing unavailable, state that prices can be checked in-game)");
+            sb.AppendLine("Calculation rules:");
+            sb.AppendLine(" - Effective hourly price per 护航 = base price x (1 + punishment multiplier). The actual charged price is randomly chosen within the base Min~Max range per player.");
+            sb.AppendLine(" - Estimated order total = players x duration (hours) x effective hourly price.");
+            sb.AppendLine(" - Estimated ticket cost = percent x ticket price per percent.");
+            sb.AppendLine(" - Loyalty discount (0~8%) is NOT included; actual order prices may be slightly lower.");
+            sb.AppendLine();
+
             sb.AppendLine("Constraints:");
             sb.AppendLine($" - players MUST be in [{MinOrderPlayers},{MaxOrderPlayers}]");
             sb.AppendLine($" - level MUST be in [{MinOrderLevel},{MaxOrderLevel}]");
             sb.AppendLine($" - duration MUST be >= {MinOrderDuration} hours (integer)");
             sb.AppendLine($" - percent MUST be in [{MinTicketPercent},{MaxTicketPercent}] (integer)");
             sb.AppendLine(" - If the player asks a question or refuses to specify required fields, return replyText, NOT a partial order/ticket.");
-            sb.AppendLine(" - If the player changes their mind or asks for billing/price info, return replyText describing the pricing in same language based on what you remember from live config.");
+            sb.AppendLine(" - If the player changes their mind or asks for billing/price info, return replyText describing the pricing in same language based on the CURRENT PRICING DATA above, including base price, current punishment and the estimated total.");
             sb.AppendLine(" - If the player asks about any command, feature, config or how-to of this mod, answer using the KNOWLEDGE BASE above, in the player's language and using the TERMINOLOGY. Do not invent features that are not listed.");
             sb.AppendLine();
 

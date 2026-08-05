@@ -233,7 +233,7 @@ namespace MiyakoCarryService.Assistant
             LlmModel = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMMODEL_KEY,
-                "gpt-4o-mini",
+                "deepseek-v4-flash",
                 Locales.LLMMODEL_DESCRIPTION);
 
             LlmSystemPrompt = McsConfigApi.RegisterConfig(

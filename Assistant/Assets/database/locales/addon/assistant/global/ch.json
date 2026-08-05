@@ -33,7 +33,7 @@
     "Mcs/LlmBaseUrl Key": "LLM Base URL",
     "Mcs/LlmBaseUrl Description": "可选自定义 LLM Base URL（仅对 OpenAI兼容 生效，覆盖服务商默认值）。",
     "Mcs/LlmModel Key": "LLM 模型",
-    "Mcs/LlmModel Description": "LLM 模型名。服务商相关；OpenAI兼容 默认 gpt-4o-mini。",
+    "Mcs/LlmModel Description": "LLM 模型名。服务商相关；OpenAI兼容 默认 deepseek-v4-flash。",
     "Mcs/LlmSystemPrompt Key": "LLM 系统提示词",
     "Mcs/LlmSystemPrompt Description": "可选自定义系统提示词，将拼接在 Assistant 语音指令模板前。",
     "Mcs/LlmTemperature Key": "LLM 采样温度",

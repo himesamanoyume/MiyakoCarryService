@@ -29,6 +29,7 @@ namespace MiyakoCarryService.Server.Services.Llm
         ServerLocalisationService serverLocalisationService,
         SPTarkov.Server.Core.Helpers.Profile.DialogueHelper dialogueHelper,
         LocaleService localeService,
+        TraderService traderService,
         ISptLogger<LlmDispatcherService> logger
     )
     {
@@ -41,13 +42,13 @@ namespace MiyakoCarryService.Server.Services.Llm
         {
             var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
 
-            if (!serverConfig.LlmEnabled)
+            if (!serverConfig.TraderLlmEnabled)
             {
                 return LlmDispatchResult.NotHandled();
             }
 
             // 限流：每分钟 LlmMaxMessagesPerMinute 条
-            var maxPerMinute = serverConfig.LlmMaxMessagesPerMinute > 0 ? serverConfig.LlmMaxMessagesPerMinute : 10;
+            var maxPerMinute = serverConfig.TraderLlmMaxMessagesPerMinute > 0 ? serverConfig.TraderLlmMaxMessagesPerMinute : 10;
             var bucket = _bucketsPerSession.GetOrAdd(sessionId, _ => new RateBucket(maxPerMinute));
             if (!bucket.TryConsume())
             {
@@ -70,16 +71,16 @@ namespace MiyakoCarryService.Server.Services.Llm
 
             var settings = new LlmProviderSettings
             {
-                ApiKey = serverConfig.LlmApiKey,
-                BaseUrl = serverConfig.LlmBaseUrl,
-                Model = serverConfig.LlmModel,
-                SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.LlmSystemPrompt, BuildSpawnTypeHelp()),
-                Temperature = serverConfig.LlmTemperature,
-                MaxTokens = serverConfig.LlmMaxTokens,
-                TimeoutSec = serverConfig.LlmTimeoutSec,
+                ApiKey = serverConfig.TraderLlmApiKey,
+                BaseUrl = serverConfig.TraderLlmBaseUrl,
+                Model = serverConfig.TraderLlmModel,
+                SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp()),
+                Temperature = serverConfig.TraderLlmTemperature,
+                MaxTokens = serverConfig.TraderLlmMaxTokens,
+                TimeoutSec = serverConfig.TraderLlmTimeoutSec,
             };
 
-            var provider = CreateProvider(serverConfig.LlmProvider);
+            var provider = CreateProvider(serverConfig.TraderLlmProvider);
             if (provider == null)
             {
                 mailSendService.SendLocalisedNpcMessageToPlayer(
@@ -94,7 +95,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             LlmIntent intent;
             try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(serverConfig.LlmTimeoutSec > 0 ? serverConfig.LlmTimeoutSec : 30));
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(serverConfig.TraderLlmTimeoutSec > 0 ? serverConfig.TraderLlmTimeoutSec : 30));
                 intent = await provider.InterpretAsync(BuildHistoryContext(sessionId, text), settings, cts.Token).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -231,7 +232,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             const int maxMessageLength = 300;
             const int maxTotalLength = 6000;
 
-            var maxHistory = configService.GetMcsPluginConfig().ServerConfig.LlmMaxHistoryMessages;
+            var maxHistory = configService.GetMcsPluginConfig().ServerConfig.TraderLlmMaxHistoryMessages;
             if (maxHistory <= 0)
             {
                 return currentText;
@@ -319,6 +320,25 @@ namespace MiyakoCarryService.Server.Services.Llm
                 var displayName = string.IsNullOrEmpty(kvp.Value.DisplayName) ? kvp.Value.WildSpawnType : kvp.Value.DisplayName;
                 sb.Append("- index ").Append(kvp.Key).Append(" -> ").AppendLine(displayName);
             }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 构建实时定价数据：当前涨价惩罚、各护航级别基准价格区间、罚单单价。
+        /// </summary>
+        private string BuildPricingHelp()
+        {
+            var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
+            var punishmentPercent = Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2);
+
+            var sb = new StringBuilder();
+            sb.Append("- Current 涨价惩罚 (price-increase punishment): ").Append(punishmentPercent).AppendLine("%");
+            sb.AppendLine("- Base price per 护航 per hour (rubles, before punishment):");
+            foreach (var kvp in serverConfig.CarryServiceLevelPrice.OrderBy(x => x.Key))
+            {
+                sb.Append("  level ").Append(kvp.Key).Append(": ").Append(kvp.Value.Min).Append(" ~ ").AppendLine(kvp.Value.Max.ToString());
+            }
+            sb.Append("- 罚单 (ticket) price: ").Append(serverConfig.TicketPricePerPercent).AppendLine(" rubles per percent");
             return sb.ToString();
         }
 

@@ -192,6 +192,50 @@ Compensation price. Paid when a `McsBotPlayer` accidentally kills the `McsLeadPl
 
 Carry service level base price. There are 5 levels in total, in roubles, with an upper and lower bound set for each level.
 
+- **TraderLlmEnabled**
+
+Whether to enable the Miyako trader's AI chat (LLM). Defaults to false. When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk.
+
+- **TraderLlmProvider**
+
+AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. Defaults to `OpenAICompatible`.
+
+- **TraderLlmApiKey**
+
+API key for the Miyako trader's AI provider. Defaults to empty.
+
+- **TraderLlmBaseUrl**
+
+Optional custom base URL for the Miyako trader's AI (overrides the provider default). Defaults to empty.
+
+- **TraderLlmModel**
+
+Model name for the Miyako trader's AI, provider-specific. Defaults to `gpt-4o-mini`.
+
+- **TraderLlmSystemPrompt**
+
+Optional custom system prompt prepended to the default prompt. Defaults to empty.
+
+- **TraderLlmTemperature**
+
+Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. Defaults to 0.2.
+
+- **TraderLlmMaxTokens**
+
+Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. Defaults to 3000.
+
+- **TraderLlmTimeoutSec**
+
+Per-request timeout in seconds for the Miyako trader's AI. Defaults to 15.
+
+- **TraderLlmMaxMessagesPerMinute**
+
+Maximum replies per minute from the Miyako trader's AI (rate limit). Defaults to 10.
+
+- **TraderLlmMaxHistoryMessages**
+
+Number of recent chat messages carried as context for the Miyako trader's AI, keeping the conversation coherent; set to 0 to disable. Defaults to 20.
+
 ## Features
 
 ### Basic

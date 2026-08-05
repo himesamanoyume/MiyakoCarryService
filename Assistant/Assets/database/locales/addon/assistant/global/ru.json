@@ -33,7 +33,7 @@
     "Mcs/LlmBaseUrl Key": "LLM Base URL",
     "Mcs/LlmBaseUrl Description": "Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible).",
     "Mcs/LlmModel Key": "LLM Model",
-    "Mcs/LlmModel Description": "LLM model name. Provider-specific; default gpt-4o-mini for OpenAI-Compatible.",
+    "Mcs/LlmModel Description": "LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible.",
     "Mcs/LlmSystemPrompt Key": "LLM System Prompt",
     "Mcs/LlmSystemPrompt Description": "Optional custom system prompt prepended to Assistant's voice-command instruction template.",
     "Mcs/LlmTemperature Key": "LLM Temperature",

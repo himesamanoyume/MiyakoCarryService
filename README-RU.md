@@ -174,6 +174,17 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `OrderPendingPaymentTime` | The pending duration of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket, in seconds. | `900` seconds (15 minutes) |
 | `CompensationPrice` | Compensation paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`, in roubles. | `300000` roubles |
 | `CarryServiceLevelPrice` | Base carry-service pricing for 5 levels, with minimum and maximum bounds for each level. | Determined by level range |
+| `TraderLlmEnabled` | Whether to enable the Miyako trader's AI chat (LLM). When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk. | `false` |
+| `TraderLlmProvider` | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
+| `TraderLlmApiKey` | API key for the Miyako trader's AI provider. | empty |
+| `TraderLlmBaseUrl` | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
+| `TraderLlmModel` | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
+| `TraderLlmSystemPrompt` | Optional custom system prompt prepended to the default prompt. | empty |
+| `TraderLlmTemperature` | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
+| `TraderLlmMaxTokens` | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
+| `TraderLlmTimeoutSec` | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
+| `TraderLlmMaxMessagesPerMinute` | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
+| `TraderLlmMaxHistoryMessages` | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
 
 ## Features
 

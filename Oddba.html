@@ -1008,36 +1008,104 @@
         <table style="margin: 15px; width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>配置项</td>
+                    <td>说明</td>
+                    <td>默认值</td>
+                </tr>
+                <tr>
                     <td>BalanceRestriction</td>
                     <td>平衡性调整。默认为false。当开启后将无法使用打开护航背包指令，且所有护航的带入战局物品都将附加<span style="color: rgb(192, 0, 0);">消失诅咒</span>附魔，当护航死亡时其带入的物品无论处于何处，都会立即消失</td>
+                    <td>false</td>
                 </tr>
                 <tr>
                     <td>CheckUpdate</td>
-                    <td>是否检查版本更新。默认为true。</td>
+                    <td>是否检查版本更新。</td>
+                    <td>true</td>
                 </tr>
                 <tr>
                     <td>CheckIfdian</td>
-                    <td>是否检查赞助者名单更新。默认为true。</td>
+                    <td>是否检查赞助者名单更新。</td>
+                    <td>true</td>
                 </tr>
                 <tr>
                     <td>TicketPricePerPercent</td>
-                    <td>罚单每百分比价格。用于申请罚单上缴罚款来消除涨价惩罚时的定价，单位为卢布/百分比，默认为300000卢布每百分比。</td>
+                    <td>罚单每百分比价格。用于申请罚单上缴罚款来消除涨价惩罚时的定价，单位为卢布/百分比。</td>
+                    <td>300000 卢布/百分比</td>
                 </tr>
                 <tr>
                     <td>PunishmentMultiMax</td>
-                    <td>涨价惩罚上限。单位为倍率，默认为1，即100%。例如值为5，则涨价惩罚上限将为500%。</td>
+                    <td>涨价惩罚上限。单位为倍率。</td>
+                    <td>1（即100%）例如值为5，则涨价惩罚上限将为500%。</td>
                 </tr>
                 <tr>
                     <td>OrderPendingPaymentTime</td>
-                    <td>订单待付款时间。下单护航、下发罚单时宫子商人提供的行动任务过期时间。单位为秒，默认为900秒，即15分钟。</td>
+                    <td>订单待付款时间。下单护航、下发罚单时宫子商人提供的行动任务过期时间。单位为秒。</td>
+                    <td>900 秒（15 分钟）</td>
                 </tr>
                 <tr>
                     <td>CompensationPrice</td>
-                    <td>赔偿价格。当护航误杀老板时会进行赔偿。单位为卢布，默认为300000卢布。</td>
+                    <td>赔偿价格。当护航误杀老板时会进行赔偿。单位为卢布。</td>
+                    <td>300000 卢布</td>
                 </tr>
                 <tr>
                     <td>CarryServiceLevelPrice</td>
                     <td>护航等级基准价格。共5级，单位为卢布，每个等级分别设有上下限</td>
+                    <td>由等级区间决定</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmEnabled</td>
+                    <td>是否启用宫子商人的AI对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言进行下单、购买罚单。</td>
+                    <td>false</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmProvider</td>
+                    <td>宫子商人AI使用的服务商：OpenAICompatible（兼容 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等）、Anthropic、GoogleGemini、DashScope、Zhipu、Qianfan、Spark、MiniMax。</td>
+                    <td>OpenAICompatible</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmApiKey</td>
+                    <td>宫子商人AI服务商的API Key。</td>
+                    <td>空</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmBaseUrl</td>
+                    <td>可选自定义宫子商人AI的Base URL（覆盖服务商默认值）。</td>
+                    <td>空</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmModel</td>
+                    <td>宫子商人AI的模型名，服务商相关。</td>
+                    <td>deepseek-v4-flash</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmSystemPrompt</td>
+                    <td>可选自定义系统提示词，将拼接在默认提示词之前。</td>
+                    <td>空</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmTemperature</td>
+                    <td>宫子商人AI的采样温度，值越低结果越确定。</td>
+                    <td>0.2</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmMaxTokens</td>
+                    <td>宫子商人AI单次回复的最大Tokens，影响回复长度与成本。</td>
+                    <td>3000 Tokens</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmTimeoutSec</td>
+                    <td>宫子商人AI单次请求的超时秒数。</td>
+                    <td>15 秒</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmMaxMessagesPerMinute</td>
+                    <td>宫子商人AI每分钟最大回复条数（限流）。</td>
+                    <td>10 条</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmMaxHistoryMessages</td>
+                    <td>宫子商人AI对话中携带的最近聊天记录条数，用于保持对话连贯；设为0关闭。</td>
+                    <td>20 条</td>
                 </tr>
             </tbody>
         </table>

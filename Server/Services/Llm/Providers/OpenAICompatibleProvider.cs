@@ -34,7 +34,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
-            var model = string.IsNullOrEmpty(settings.Model) ? "gpt-4o-mini" : settings.Model;
+            var model = string.IsNullOrEmpty(settings.Model) ? "deepseek-v4-flash" : settings.Model;
 
             var bodyObj = new
             {

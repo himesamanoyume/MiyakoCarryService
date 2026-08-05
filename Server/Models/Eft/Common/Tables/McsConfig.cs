@@ -85,38 +85,38 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
             { 5, new () { Min = 30000, Max = 30000} }
         };
 
-        [JsonPropertyName("LlmEnabled")]
-        public bool LlmEnabled { get; set; } = false;
+        [JsonPropertyName("TraderLlmEnabled")]
+        public bool TraderLlmEnabled { get; set; } = false;
 
-        [JsonPropertyName("LlmProvider")]
-        public string LlmProvider { get; set; } = "OpenAICompatible";
+        [JsonPropertyName("TraderLlmProvider")]
+        public string TraderLlmProvider { get; set; } = "OpenAICompatible";
 
-        [JsonPropertyName("LlmApiKey")]
-        public string LlmApiKey { get; set; } = "";
+        [JsonPropertyName("TraderLlmApiKey")]
+        public string TraderLlmApiKey { get; set; } = "";
 
-        [JsonPropertyName("LlmBaseUrl")]
-        public string LlmBaseUrl { get; set; } = "";
+        [JsonPropertyName("TraderLlmBaseUrl")]
+        public string TraderLlmBaseUrl { get; set; } = "";
 
-        [JsonPropertyName("LlmModel")]
-        public string LlmModel { get; set; } = "gpt-4o-mini";
+        [JsonPropertyName("TraderLlmModel")]
+        public string TraderLlmModel { get; set; } = "deepseek-v4-flash";
 
-        [JsonPropertyName("LlmSystemPrompt")]
-        public string LlmSystemPrompt { get; set; } = "";
+        [JsonPropertyName("TraderLlmSystemPrompt")]
+        public string TraderLlmSystemPrompt { get; set; } = "";
 
-        [JsonPropertyName("LlmTemperature")]
-        public double LlmTemperature { get; set; } = 0.2;
+        [JsonPropertyName("TraderLlmTemperature")]
+        public double TraderLlmTemperature { get; set; } = 0.2;
 
-        [JsonPropertyName("LlmMaxTokens")]
-        public int LlmMaxTokens { get; set; } = 3000;
+        [JsonPropertyName("TraderLlmMaxTokens")]
+        public int TraderLlmMaxTokens { get; set; } = 3000;
 
-        [JsonPropertyName("LlmTimeoutSec")]
-        public int LlmTimeoutSec { get; set; } = 15;
+        [JsonPropertyName("TraderLlmTimeoutSec")]
+        public int TraderLlmTimeoutSec { get; set; } = 15;
 
-        [JsonPropertyName("LlmMaxMessagesPerMinute")]
-        public int LlmMaxMessagesPerMinute { get; set; } = 10;
+        [JsonPropertyName("TraderLlmMaxMessagesPerMinute")]
+        public int TraderLlmMaxMessagesPerMinute { get; set; } = 10;
 
-        [JsonPropertyName("LlmMaxHistoryMessages")]
-        public int LlmMaxHistoryMessages { get; set; } = 20;
+        [JsonPropertyName("TraderLlmMaxHistoryMessages")]
+        public int TraderLlmMaxHistoryMessages { get; set; } = 20;
     }
 
     public record McsPluginConfig

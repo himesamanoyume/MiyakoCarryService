@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Server.Patches.Dialogue
                     null
                 );
 
-                if (_configService.GetMcsPluginConfig().ServerConfig.LlmEnabled)
+                if (_configService.GetMcsPluginConfig().ServerConfig.TraderLlmEnabled)
                 {
                     _mailSendService.SendLocalisedNpcMessageToPlayer(
                         sessionId,
