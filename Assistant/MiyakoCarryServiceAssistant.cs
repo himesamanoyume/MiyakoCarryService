@@ -103,7 +103,7 @@ namespace MiyakoCarryService.Assistant
                         new Dictionary<EVoiceTriggerMode, string>
                         {
                             { EVoiceTriggerMode.PushToTalk, Locales.VOICETRIGGERMODEPUSH2TALK.McsLocalized() },
-                            { EVoiceTriggerMode.FreeTalk,   Locales.VOICETRIGGERMODEFREETALK.McsLocalized() },
+                            { EVoiceTriggerMode.FreeTalk, Locales.VOICETRIGGERMODEFREETALK.McsLocalized() },
                         }, 2
                     )
                 });
@@ -151,15 +151,15 @@ namespace MiyakoCarryService.Assistant
                     CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ESttProvider, string>
                         {
-                            { ESttProvider.None,          Locales.STTPROVIDERNONE.McsLocalized() },
+                            { ESttProvider.None, Locales.STTPROVIDERNONE.McsLocalized() },
                             { ESttProvider.OpenAIWhisper, Locales.STTPROVIDEROPENAIWHISPER.McsLocalized() },
-                            { ESttProvider.AzureSpeech,   Locales.STTPROVIDERAZURESPEECH.McsLocalized() },
-                            { ESttProvider.GoogleSpeech,  Locales.STTPROVIDERGOOGLESPEECH.McsLocalized() },
-                            { ESttProvider.AliyunNls,     Locales.STTPROVIDERALIYUNNLS.McsLocalized() },
-                            { ESttProvider.TencentAsr,    Locales.STTPROVIDERTENCENTASR.McsLocalized() },
-                            { ESttProvider.XfyunIat,      Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
-                            { ESttProvider.VolcIat,       Locales.STTPROVIDERVOLCIAT.McsLocalized() },
-                            { ESttProvider.BaiduAsr,      Locales.STTPROVIDERBAIDUASR.McsLocalized() },
+                            { ESttProvider.AzureSpeech, Locales.STTPROVIDERAZURESPEECH.McsLocalized() },
+                            { ESttProvider.GoogleSpeech, Locales.STTPROVIDERGOOGLESPEECH.McsLocalized() },
+                            { ESttProvider.AliyunNls, Locales.STTPROVIDERALIYUNNLS.McsLocalized() },
+                            { ESttProvider.TencentAsr, Locales.STTPROVIDERTENCENTASR.McsLocalized() },
+                            { ESttProvider.XfyunIat, Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
+                            { ESttProvider.VolcIat, Locales.STTPROVIDERVOLCIAT.McsLocalized() },
+                            { ESttProvider.BaiduAsr, Locales.STTPROVIDERBAIDUASR.McsLocalized() },
                         }, 2
                     )
                 });
@@ -205,15 +205,15 @@ namespace MiyakoCarryService.Assistant
                     CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ELlmProvider, string>
                         {
-                            { ELlmProvider.None,             Locales.LLMPROVIDERNONE.McsLocalized() },
+                            { ELlmProvider.None, Locales.LLMPROVIDERNONE.McsLocalized() },
                             { ELlmProvider.OpenAICompatible, Locales.LLMPROVIDEROPENAICOMPATIBLE.McsLocalized() },
-                            { ELlmProvider.Anthropic,        Locales.LLMPROVIDERANTHROPIC.McsLocalized() },
-                            { ELlmProvider.GoogleGemini,     Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized() },
-                            { ELlmProvider.DashScope,        Locales.LLMPROVIDERDASHSCOPE.McsLocalized() },
-                            { ELlmProvider.Zhipu,            Locales.LLMPROVIDERZHIPU.McsLocalized() },
-                            { ELlmProvider.Qianfan,          Locales.LLMPROVIDERQIANFAN.McsLocalized() },
-                            { ELlmProvider.Spark,            Locales.LLMPROVIDERSPARK.McsLocalized() },
-                            { ELlmProvider.MiniMax,          Locales.LLMPROVIDERMINIMAX.McsLocalized() },
+                            { ELlmProvider.Anthropic, Locales.LLMPROVIDERANTHROPIC.McsLocalized() },
+                            { ELlmProvider.GoogleGemini, Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized() },
+                            { ELlmProvider.DashScope, Locales.LLMPROVIDERDASHSCOPE.McsLocalized() },
+                            { ELlmProvider.Zhipu, Locales.LLMPROVIDERZHIPU.McsLocalized() },
+                            { ELlmProvider.Qianfan, Locales.LLMPROVIDERQIANFAN.McsLocalized() },
+                            { ELlmProvider.Spark, Locales.LLMPROVIDERSPARK.McsLocalized() },
+                            { ELlmProvider.MiniMax, Locales.LLMPROVIDERMINIMAX.McsLocalized() },
                         }, 2
                     )
                 });
