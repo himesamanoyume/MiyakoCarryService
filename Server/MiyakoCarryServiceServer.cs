@@ -44,6 +44,7 @@ namespace MiyakoCarryService.Server
             CompatibilityService compatibilityService,
             ConfigService configService,
             InventoryService inventoryService,
+            Services.Llm.LlmDispatcherService llmDispatcherService,
             ServerLocalisationService serverLocalisationService,
             ISptLogger<MiyakoCarryServiceServerPostLoad> logger,
             JsonUtil jsonUtil
@@ -74,6 +75,7 @@ namespace MiyakoCarryService.Server
                 });
                 _ = CheckForUpdate();
                 _ = CheckForIfdianUpdate();
+                _ = llmDispatcherService.TestConnectionAsync();
 
                 await Task.CompletedTask;
             }

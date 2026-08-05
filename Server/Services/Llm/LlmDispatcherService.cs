@@ -73,7 +73,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             {
                 ApiKey = serverConfig.TraderLlmApiKey,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
-                Model = serverConfig.TraderLlmModelId,
+                ModelId = serverConfig.TraderLlmModelId,
                 SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp()),
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
@@ -367,10 +367,10 @@ namespace MiyakoCarryService.Server.Services.Llm
             {
                 ApiKey = serverConfig.TraderLlmApiKey,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
-                Model = serverConfig.TraderLlmModel,
+                ModelId = serverConfig.TraderLlmModelId,
                 SystemPrompt = "You are a connectivity test. Reply with exactly: {\"replyText\":\"pong\"}",
                 Temperature = 0,
-                MaxTokens = 16,
+                MaxTokens = 512,
                 TimeoutSec = serverConfig.TraderLlmTimeoutSec > 0 ? serverConfig.TraderLlmTimeoutSec : 15,
             };
 
@@ -380,15 +380,15 @@ namespace MiyakoCarryService.Server.Services.Llm
                 var intent = await provider.InterpretAsync("ping", settings, cts.Token).ConfigureAwait(false);
                 if (intent == null || intent.IsError)
                 {
-                    logger.Error($"LLM 启动测试失败（{serverConfig.TraderLlmProvider}/{settings.Model}）：{intent?.Error ?? "null"}");
+                    logger.Error($"LLM 启动测试失败（{serverConfig.TraderLlmProvider}/{settings.ModelId}）：{intent?.Error ?? "null"}");
                     return;
                 }
 
-                logger.Success($"LLM 启动测试成功（{serverConfig.TraderLlmProvider}/{settings.Model}）：{(string.IsNullOrEmpty(intent.ReplyText) ? "已收到响应" : intent.ReplyText)}");
+                logger.Success($"LLM 启动测试成功（{serverConfig.TraderLlmProvider}/{settings.ModelId}）：{(string.IsNullOrEmpty(intent.ReplyText) ? "已收到响应" : intent.ReplyText)}");
             }
             catch (Exception ex)
             {
-                logger.Error($"LLM 启动测试异常（{serverConfig.TraderLlmProvider}/{settings.Model}）：{ex.Message}");
+                logger.Error($"LLM 启动测试异常（{serverConfig.TraderLlmProvider}/{settings.ModelId}）：{ex.Message}");
             }
         }
 
@@ -397,14 +397,14 @@ namespace MiyakoCarryService.Server.Services.Llm
             return providerName switch
             {
                 "OpenAICompatible" => new OpenAICompatibleProvider(),
-                "Anthropic"        => new AnthropicProvider(),
-                "GoogleGemini"     => new GoogleGeminiProvider(),
-                "DashScope"        => new DashScopeProvider(),
-                "Zhipu"            => new ZhipuProvider(),
-                "Qianfan"          => new QianfanProvider(),
-                "Spark"            => new SparkProvider(),
-                "MiniMax"           => new MiniMaxProvider(),
-                _                  => null,
+                "Anthropic" => new AnthropicProvider(),
+                "GoogleGemini" => new GoogleGeminiProvider(),
+                "DashScope" => new DashScopeProvider(),
+                "Zhipu" => new ZhipuProvider(),
+                "Qianfan" => new QianfanProvider(),
+                "Spark" => new SparkProvider(),
+                "MiniMax" => new MiniMaxProvider(),
+                _ => null,
             };
         }
 

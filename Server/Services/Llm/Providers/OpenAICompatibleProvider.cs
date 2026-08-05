@@ -7,7 +7,6 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
-using MiyakoCarryService.Server.Services.Llm.Providers;
 
 namespace MiyakoCarryService.Server.Services.Llm.Providers
 {
@@ -33,27 +32,9 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                 return new LlmIntent { Error = "LlmApiKey 未填写" };
             }
 
-            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
-            var model = string.IsNullOrEmpty(settings.Model) ? "deepseek-v4-flash" : settings.Model;
-
-            var bodyObj = new
-            {
-                model,
-                messages = new[]
-                {
-                    new { role = "system", content = settings.SystemPrompt ?? "" },
-                    new { role = "user", content = userText },
-                },
-                temperature = settings.Temperature,
-                max_tokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
-                response_format = new { type = "json_object" },
-            };
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
-            {
-                Content = new StringContent(JsonSerializer.Serialize(bodyObj), Encoding.UTF8, "application/json"),
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
+            var modelId = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
+            var maxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000;
 
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -61,21 +42,61 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
 
             try
             {
-                using var response = await SharedClient.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
+                // 优先携带 response_format=json_object 以稳定 JSON 输出；
+                // 部分 OpenAI 兼容端点（如 OpenCode Zen 的 DeepSeek V4）不支持该参数，会返回 4xx 且错误含
+                // "not supported" / "json_object" / "response_format" 等字样，此时去掉该参数回退重试一次。
+                for (var attempt = 0; attempt < 2; attempt++)
                 {
-                    return new LlmIntent { Error = $"OpenAI-Compat HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}" };
+                    var useJsonObject = attempt == 0;
+                    var body = new JsonObject
+                    {
+                        ["model"] = modelId,
+                        ["messages"] = JsonSerializer.SerializeToNode(new[]
+                        {
+                            new { role = "system", content = settings.SystemPrompt ?? "" },
+                            new { role = "user", content = userText },
+                        }),
+                        ["temperature"] = settings.Temperature,
+                        ["max_tokens"] = maxTokens,
+                    };
+                    if (useJsonObject)
+                    {
+                        body["response_format"] = JsonSerializer.SerializeToNode(new { type = "json_object" });
+                    }
+
+                    using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
+                    {
+                        Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
+                    };
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+
+                    using var response = await SharedClient.SendAsync(request, cts.Token).ConfigureAwait(false);
+                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        if (useJsonObject
+                            && (int)response.StatusCode is 400 or 401 or 403 or 422
+                            && (responseString.Contains("not supported", StringComparison.OrdinalIgnoreCase)
+                                || responseString.Contains("json_object", StringComparison.OrdinalIgnoreCase)
+                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            continue;
+                        }
+
+                        return new LlmIntent { Error = $"OpenAI-Compat HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}" };
+                    }
+
+                    var json = JsonNode.Parse(responseString);
+                    var content = json?["choices"]?[0]?["message"]?["content"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(content))
+                    {
+                        return new LlmIntent { Error = "OpenAI-Compat 返回内容为空" };
+                    }
+
+                    return ParseIntentJson(content);
                 }
 
-                var json = JsonNode.Parse(responseString);
-                var content = json?["choices"]?[0]?["message"]?["content"]?.ToString();
-                if (string.IsNullOrWhiteSpace(content))
-                {
-                    return new LlmIntent { Error = "OpenAI-Compat 返回内容为空" };
-                }
-
-                return ParseIntentJson(content);
+                return new LlmIntent { Error = "OpenAI-Compat 请求失败（重试后仍被拒绝）" };
             }
             catch (OperationCanceledException)
             {

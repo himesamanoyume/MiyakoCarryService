@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Server.Models.Llm
     {
         public string ApiKey;
         public string BaseUrl;
-        public string Model;
+        public string ModelId;
         public string SystemPrompt;
         public double Temperature = 0.2;
         public int MaxTokens = 3000;
