@@ -114,6 +114,9 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("LlmMaxMessagesPerMinute")]
         public int LlmMaxMessagesPerMinute { get; set; } = 10;
+
+        [JsonPropertyName("LlmMaxHistoryMessages")]
+        public int LlmMaxHistoryMessages { get; set; } = 20;
     }
 
     public record McsPluginConfig

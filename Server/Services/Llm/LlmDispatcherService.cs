@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,7 +11,6 @@ using MiyakoCarryService.Server.Services.Llm.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Helpers.Dialogue;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Services.Commerce;
@@ -19,13 +19,7 @@ using SPTarkov.Server.Core.Services.Locales;
 namespace MiyakoCarryService.Server.Services.Llm
 {
     /// <summary>
-    /// 服务端 LLM 商人对话分发器。玩家在与宫子商人对话中输入任意自然语言文本时被调用：
-    /// <list type="bullet">
-    ///   <item>若 LLM 未启用，直接返回 <see cref="LlmDispatchResult.NotHandled()"/>，由 <see cref="MiyakoCarryService.Server.ChatBot.MiyakoChatBot"/> 走原 unknown-command 流程。</item>
-    ///   <item>若启用了限流且本玩家超限，返回 Cool-down 提示。</item>
-    ///   <item>否则发送 "interpreting" 提示，调 ILlmProvider，按意图路由到 <see cref="QuestController"/> 或纯聊天回复。</item>
-    /// </list>
-    /// 限流：按 sessionId 维护令牌桶，<see cref="McsPluginServerConfig.LlmMaxMessagesPerMinute"/> 控制每分钟最大消息数。
+    /// 服务端 LLM 商人对话分发器。玩家在与宫子商人对话中输入任意自然语言文本时被调用
     /// </summary>
     [Injectable(InjectionType.Singleton)]
     public class LlmDispatcherService(
@@ -33,6 +27,8 @@ namespace MiyakoCarryService.Server.Services.Llm
         QuestController questController,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
+        SPTarkov.Server.Core.Helpers.Profile.DialogueHelper dialogueHelper,
+        LocaleService localeService,
         ISptLogger<LlmDispatcherService> logger
     )
     {
@@ -99,7 +95,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(serverConfig.LlmTimeoutSec > 0 ? serverConfig.LlmTimeoutSec : 30));
-                intent = await provider.InterpretAsync(text, settings, cts.Token).ConfigureAwait(false);
+                intent = await provider.InterpretAsync(BuildHistoryContext(sessionId, text), settings, cts.Token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -223,6 +219,90 @@ namespace MiyakoCarryService.Server.Services.Llm
                 MessageType.NpcTraderMessage,
                 string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERLLMERRORDETAIL), reason),
                 null);
+        }
+
+        /// <summary>
+        /// 从玩家与宫子商人的聊天记录中构建 LLM 上下文。
+        /// 包含玩家消息（老板）、店长回复以及 <c>Mcs/*</c> 事件通知（订单/罚单创建等，以英文解析），
+        /// 并附加"仅回应当前消息"的指令，保证对话连贯。条数由 <c>LlmMaxHistoryMessages</c> 控制，0 表示关闭。
+        /// </summary>
+        private string BuildHistoryContext(MongoId sessionId, string currentText)
+        {
+            const int maxMessageLength = 300;
+            const int maxTotalLength = 6000;
+
+            var maxHistory = configService.GetMcsPluginConfig().ServerConfig.LlmMaxHistoryMessages;
+            if (maxHistory <= 0)
+            {
+                return currentText;
+            }
+
+            var dialogue = dialogueHelper.GetDialogsForProfile(sessionId).GetValueOrDefault(TraderService.MiyakoTraderId);
+            if (dialogue?.Messages is not { Count: > 0 })
+            {
+                return currentText;
+            }
+
+            var entries = new List<string>();
+            foreach (var message in dialogue.Messages)
+            {
+                // 跳过瞬时提示（正在思考/限流）
+                if (message.TemplateId is Locales.MIYAKOTRADERLLMINTERPRETING or Locales.MIYAKOTRADERLLMCOOLDOWN)
+                {
+                    continue;
+                }
+
+                var text = message.Text;
+                if (string.IsNullOrEmpty(text))
+                {
+                    if (message.TemplateId != null && message.TemplateId.StartsWith("Mcs/", StringComparison.Ordinal))
+                    {
+                        text = localeService.GetGlobalLocalizedText(message.TemplateId);
+                    }
+
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        continue;
+                    }
+                }
+
+                // 跳过与当前消息重复的玩家消息（刚发送的那条已由 SendPlayerMessageToNpc 写入记录）
+                if (message.MessageType == MessageType.UserMessage && string.Equals(text.Trim(), currentText.Trim(), StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (text.Length > maxMessageLength)
+                {
+                    text = text.Substring(0, maxMessageLength) + "...";
+                }
+
+                var speaker = message.MessageType == MessageType.UserMessage ? "Player" : "MiyakoTrader";
+                entries.Add($"{speaker}: {text}");
+            }
+
+            if (entries.Count == 0)
+            {
+                return currentText;
+            }
+
+            entries = entries.Skip(Math.Max(0, entries.Count - maxHistory)).ToList();
+
+            var sb = new StringBuilder("Chat history (context only — respond ONLY to the current message, never to the history):");
+            var total = 0;
+            foreach (var entry in entries)
+            {
+                if (total + entry.Length > maxTotalLength)
+                {
+                    break;
+                }
+
+                sb.Append('\n').Append(entry);
+                total += entry.Length;
+            }
+
+            sb.Append("\n\nCurrent message: ").Append(currentText);
+            return sb.ToString();
         }
 
         private string BuildSpawnTypeHelp()

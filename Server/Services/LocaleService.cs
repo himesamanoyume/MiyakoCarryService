@@ -187,6 +187,20 @@ namespace MiyakoCarryService.Server.Services
             return locales;
         }
 
+        /// <summary>
+        /// 从已合并的 global 本地化表（含 addon 扩展）中查询指定键的文案，供服务端侧读取客户端文案使用。
+        /// 指定语言缺失或键不存在时回退为键名本身。
+        /// </summary>
+        public string GetGlobalLocalizedText(string key, string locale = "en")
+        {
+            if (_globalLocales.TryGetValue(locale, out var localeDict) && localeDict.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+
+            return key;
+        }
+
         public async Task FillUnsupportedLocales(string path, Dictionary<string, Dictionary<string, string>> locales, List<string> supportedLocales)
         {
             if (!locales.TryGetValue("en", out var enLocale) || enLocale is null)
