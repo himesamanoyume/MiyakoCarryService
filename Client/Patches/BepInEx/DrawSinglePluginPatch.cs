@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Linq;
+using BepInEx.Configuration;
 using ConfigurationManager;
 using SPT.Reflection.Patching;
 using UnityEngine;

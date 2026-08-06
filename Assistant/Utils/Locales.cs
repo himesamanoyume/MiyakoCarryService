@@ -25,6 +25,18 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string VOICEFEEDBACKSUBTITLES_KEY           = "Mcs/VoiceFeedbackSubtitles Key";
         public const string VOICEFEEDBACKSUBTITLES_DESCRIPTION    = "Mcs/VoiceFeedbackSubtitles Description";
 
+        public const string RECORDDEVICE_KEY         = "Mcs/RecordDevice Key";
+        public const string RECORDDEVICE_DESCRIPTION = "Mcs/RecordDevice Description";
+
+        public const string STTDEBUGENABLED_KEY         = "Mcs/SttDebugEnabled Key";
+        public const string STTDEBUGENABLED_DESCRIPTION = "Mcs/SttDebugEnabled Description";
+        public const string STTDEBUGTEXT_KEY             = "Mcs/SttDebugText Key";
+        public const string STTDEBUGTEXT_DESCRIPTION     = "Mcs/SttDebugText Description";
+        public const string LLMDEBUGSEND_KEY             = "Mcs/LlmDebugSend Key";
+        public const string LLMDEBUGSEND_DESCRIPTION     = "Mcs/LlmDebugSend Description";
+        public const string LLMDEBUGRESULT_KEY           = "Mcs/LlmDebugResult Key";
+        public const string LLMDEBUGRESULT_DESCRIPTION   = "Mcs/LlmDebugResult Description";
+
         public const string STTPROVIDER_KEY              = "Mcs/SttProvider Key";
         public const string STTPROVIDER_DESCRIPTION     = "Mcs/SttProvider Description";
 

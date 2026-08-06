@@ -68,17 +68,38 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 ConsumePendingIntent();
             }
 
-            if (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !TargetResolver.IsInRaid())
+            var sttDebug = MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value;
+            var inRaid = TargetResolver.IsInRaid();
+
+            // STT 调试模式：独立于 VoiceEnabled，按当前选择的触发模式录音；
+            // 开关关闭或不在战局时结束捕获回 Idle
+            if (!sttDebug && (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !inRaid))
             {
-                if (_capturing) { EndCapture(); }
+                if (_capturing)
+                {
+                    EndCapture();
+                }
+                _state = EVoiceState.Idle;
+                return;
+            }
+            if (sttDebug && !inRaid)
+            {
+                if (_capturing)
+                {
+                    EndCapture();
+                }
                 _state = EVoiceState.Idle;
                 return;
             }
 
             switch (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value)
             {
-                case EVoiceTriggerMode.PushToTalk: HandlePushToTalk(); break;
-                case EVoiceTriggerMode.FreeTalk: HandleFreeTalk(); break;
+                case EVoiceTriggerMode.PushToTalk:
+                    HandlePushToTalk();
+                    break;
+                case EVoiceTriggerMode.FreeTalk:
+                    HandleFreeTalk();
+                    break;
             }
         }
 
@@ -135,6 +156,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 return;
             }
+            if (currentPos > clip.samples)
+            {
+                return;
+            }
 
             var window = new float[windowSize];
             clip.GetData(window, currentPos - windowSize);
@@ -165,6 +190,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
             if (_capturing)
             {
                 return;
+            }
+            // STT 调试模式：开始录音时先显示录音中状态，转写结果返回后再覆盖
+            if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+            {
+                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
             }
             if (!_capture.Begin())
             {
@@ -247,6 +277,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT 异常：{ex}");
+                if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+                {
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = $"STT 异常：{ex.Message}";
+                    _state = EVoiceState.Idle;
+                    return;
+                }
                 _pendingTranscribedText = string.Empty;
                 _pendingIntent = new LlmIntent { Error = $"STT 异常：{ex.Message}" };
                 _state = EVoiceState.Dispatching;
@@ -255,9 +291,23 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             if (!stt.IsSuccess || string.IsNullOrWhiteSpace(stt.Text))
             {
+                if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+                {
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt?.Error ?? Utils.Locales.VOICESTTFAILED;
+                    _state = EVoiceState.Idle;
+                    return;
+                }
                 _pendingTranscribedText = stt?.Text ?? string.Empty;
                 _pendingIntent = new LlmIntent { Error = stt?.Error ?? Utils.Locales.VOICESTTFAILED };
                 _state = EVoiceState.Dispatching;
+                return;
+            }
+
+            // STT 调试模式：转写文本覆盖写入调试字段，跳过 LLM 解释与派发
+            if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+            {
+                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt.Text;
+                _state = EVoiceState.Idle;
                 return;
             }
 
@@ -355,7 +405,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch
             {
-                
+
             }
         }
     }

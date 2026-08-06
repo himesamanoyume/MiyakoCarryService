@@ -1,14 +1,19 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Mgrs;
+using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Services;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using UnityEngine;
 
 namespace MiyakoCarryService.Assistant
 {
@@ -39,6 +44,7 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<float> VoiceVadEnergyThreshold;
         public static ConfigEntry<float> VoiceVadSilenceSeconds;
         public static ConfigEntry<bool> VoiceFeedbackSubtitles;
+        public static ConfigEntry<string> RecordDevice;
         public static ConfigEntry<ESttProvider> SttProvider;
         public static ConfigEntry<string> SttApiKey;
         public static ConfigEntry<string> SttBaseUrl;
@@ -53,6 +59,11 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<double> LlmTemperature;
         public static ConfigEntry<int> LlmMaxTokens;
         public static ConfigEntry<int> LlmTimeoutSec;
+
+        public static ConfigEntry<bool> SttDebugEnabled;
+        public static ConfigEntry<string> SttDebugText;
+        public static ConfigEntry<bool> LlmDebugSend;
+        public static ConfigEntry<string> LlmDebugResult;
 
         #endregion
 
@@ -79,6 +90,8 @@ namespace MiyakoCarryService.Assistant
 
         private void SetupConfig()
         {
+            #region ASSISTANT
+
             const string section = Locales.ASSISTANT_SECTION;
             const int order = 400;
 
@@ -137,6 +150,19 @@ namespace MiyakoCarryService.Assistant
                 true,
                 Locales.VOICEFEEDBACKSUBTITLES_DESCRIPTION);
 
+            var recordDevices = new List<string> { "Default" };
+            if (Microphone.devices != null)
+            {
+                recordDevices.AddRange(Microphone.devices);
+            }
+
+            RecordDevice = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.RECORDDEVICE_KEY,
+                "Default",
+                Locales.RECORDDEVICE_DESCRIPTION,
+                new AcceptableValueList<string>(recordDevices.ToArray()));
+
             SttProvider = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTPROVIDER_KEY,
@@ -144,7 +170,7 @@ namespace MiyakoCarryService.Assistant
                 Locales.STTPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
+                    CustomDrawer = static entry => McsConfigApi.DropdownDrawer(entry,
                         new Dictionary<ESttProvider, string>
                         {
                             { ESttProvider.None, Locales.STTPROVIDERNONE.McsLocalized() },
@@ -156,7 +182,7 @@ namespace MiyakoCarryService.Assistant
                             { ESttProvider.XfyunIat, Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
                             { ESttProvider.VolcIat, Locales.STTPROVIDERVOLCIAT.McsLocalized() },
                             { ESttProvider.BaiduAsr, Locales.STTPROVIDERBAIDUASR.McsLocalized() },
-                        }, 2
+                        }
                     )
                 });
 
@@ -198,7 +224,7 @@ namespace MiyakoCarryService.Assistant
                 Locales.LLMPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
+                    CustomDrawer = static entry => McsConfigApi.DropdownDrawer(entry,
                         new Dictionary<ELlmProvider, string>
                         {
                             { ELlmProvider.None, Locales.LLMPROVIDERNONE.McsLocalized() },
@@ -210,7 +236,7 @@ namespace MiyakoCarryService.Assistant
                             { ELlmProvider.Qianfan, Locales.LLMPROVIDERQIANFAN.McsLocalized() },
                             { ELlmProvider.Spark, Locales.LLMPROVIDERSPARK.McsLocalized() },
                             { ELlmProvider.MiniMax, Locales.LLMPROVIDERMINIMAX.McsLocalized() },
-                        }, 2
+                        }
                     )
                 });
 
@@ -258,6 +284,127 @@ namespace MiyakoCarryService.Assistant
                 15,
                 Locales.LLMTIMEOUTSEC_DESCRIPTION,
                 new AcceptableValueRange<int>(3, 120));
+
+            #endregion
+            #region DEBUG
+
+            const int debugOrder = 2000;
+
+            SttDebugEnabled = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.STTDEBUGENABLED_KEY,
+                false,
+                Locales.STTDEBUGENABLED_DESCRIPTION,
+                needNotify: false);
+
+            SttDebugText = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.STTDEBUGTEXT_KEY,
+                "",
+                Locales.STTDEBUGTEXT_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = DrawDebugReadonlyText,
+                    HideDefaultButton = true,
+                });
+
+            LlmDebugSend = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.LLMDEBUGSEND_KEY,
+                false,
+                Locales.LLMDEBUGSEND_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = static entry =>
+                    {
+                        if (GUILayout.Button(Locales.LLMDEBUGSEND_KEY.McsLocalized(), GUILayout.ExpandWidth(true)))
+                        {
+                            _ = RunLlmDebugTestAsync();
+                        }
+                    },
+                    HideDefaultButton = true,
+                });
+
+            LlmDebugResult = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.LLMDEBUGRESULT_KEY,
+                "",
+                Locales.LLMDEBUGRESULT_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = DrawDebugReadonlyText,
+                    HideDefaultButton = true,
+                });
+
+            #endregion
+        }
+
+        private static GUIStyle _debugReadonlyStyle;
+
+        private static void DrawDebugReadonlyText(ConfigEntryBase entry)
+        {
+            _debugReadonlyStyle ??= new GUIStyle(GUI.skin.label)
+            {
+                wordWrap = true,
+                stretchWidth = true,
+            };
+            GUILayout.Label((string)entry.BoxedValue ?? "", _debugReadonlyStyle);
+        }
+
+        /// <summary>
+        /// 使用当前 LLM 配置发送测试内容（默认取 STT 调试文本，为空则 "ping"），
+        /// 回复或报错信息覆盖写入 LLM 返回结果。
+        /// </summary>
+        private static async Task RunLlmDebugTestAsync()
+        {
+            // 请求开始前先显示请求中状态，结果返回后覆盖
+            LlmDebugResult.Value = "正在请求";
+            try
+            {
+                var settings = new ProviderSettings
+                {
+                    ApiKey = LlmApiKey.Value,
+                    BaseUrl = LlmBaseUrl.Value,
+                    ModelId = LlmModelId.Value,
+                    SystemPrompt = LlmSystemPrompt.Value,
+                    Temperature = LlmTemperature.Value,
+                    MaxTokens = LlmMaxTokens.Value,
+                    TimeoutSec = LlmTimeoutSec.Value,
+                };
+
+                var text = SttDebugText?.Value;
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    text = "ping";
+                }
+
+                var dispatcher = new LlmDispatcher(LlmProvider.Value);
+                var intent = await dispatcher.InterpretAsync(text, settings, System.Threading.CancellationToken.None).ConfigureAwait(true);
+
+                if (intent == null || intent.IsError)
+                {
+                    LlmDebugResult.Value = $"错误：{intent?.Error ?? "null"}";
+                }
+                else if (!string.IsNullOrEmpty(intent.ReplyText))
+                {
+                    LlmDebugResult.Value = intent.ReplyText;
+                }
+                else if (!string.IsNullOrEmpty(intent.CommandName))
+                {
+                    LlmDebugResult.Value = $"指令：{intent.CommandName}";
+                }
+                else
+                {
+                    LlmDebugResult.Value = "空响应";
+                }
+            }
+            catch (Exception ex)
+            {
+                LlmDebugResult.Value = $"错误：{ex.Message}";
+            }
         }
     }
 }

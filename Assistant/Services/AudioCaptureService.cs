@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 
@@ -28,9 +29,33 @@ namespace MiyakoCarryService.Assistant.Services
                 _clip = null;
             }
 
-            _clip = Microphone.Start(null, true, LoopSeconds, CaptureSampleRate);
+            _clip = Microphone.Start(ResolveMicDeviceName(), true, LoopSeconds, CaptureSampleRate);
             _capturing = _clip != null;
             return _capturing;
+        }
+
+        /// <summary>
+        /// 解析配置的录音设备名："Default"/空 或设备已不存在（热插拔）时返回 null（系统默认设备）。
+        /// </summary>
+        private static string ResolveMicDeviceName()
+        {
+            try
+            {
+                var device = MiyakoCarryServiceAssistantPlugin.RecordDevice?.Value;
+                if (string.IsNullOrEmpty(device) || device == "Default")
+                {
+                    return null;
+                }
+                if (Microphone.devices != null && Microphone.devices.Contains(device))
+                {
+                    return device;
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>结束录音。返回最后采样到的浮点样本数组。</summary>
@@ -62,6 +87,14 @@ namespace MiyakoCarryService.Assistant.Services
 
             // 提取最近的样本（截断到实际已采到的位置，避免填零尾巴）
             int samplesToTake = Math.Min(lastSamplePos, _clip.samples);
+            if (samplesToTake <= 0)
+            {
+                // 无有效采样：跳过 GetData（零长度读取会触发 Unity 原生 unlock 报错），直接清理
+                Microphone.End(null);
+                UnityEngine.Object.Destroy(_clip);
+                _clip = null;
+                return Array.Empty<float>();
+            }
             var data = new float[samplesToTake];
             try
             {
