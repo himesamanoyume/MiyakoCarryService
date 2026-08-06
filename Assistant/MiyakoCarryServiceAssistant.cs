@@ -135,16 +135,16 @@ namespace MiyakoCarryService.Assistant
             VoiceVadEnergyThreshold = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEVADENERGYTHRESHOLD_KEY,
-                0.02f,
+                0.03f,
                 Locales.VOICEVADENERGYTHRESHOLD_DESCRIPTION,
-                new AcceptableValueRange<float>(0.001f, 0.5f));
+                new AcceptableValueRange<float>(0.01f, 0.5f));
 
             VoiceVadSilenceSeconds = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEVADSILENCESECONDS_KEY,
-                1.2f,
+                1f,
                 Locales.VOICEVADSILENCESECONDS_DESCRIPTION,
-                new AcceptableValueRange<float>(0.3f, 5f));
+                new AcceptableValueRange<float>(0.5f, 5f));
 
             VoiceFeedbackSubtitles = McsConfigApi.RegisterConfig(
                 section, order,

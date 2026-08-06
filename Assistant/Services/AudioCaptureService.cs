@@ -225,6 +225,9 @@ namespace MiyakoCarryService.Assistant.Services
 
         public bool IsCapturing => _capturing;
 
+        /// <summary>当前麦克风写位置（使用与录音一致的缓存设备名，供 FreeTalk VAD 窗口采样）。</summary>
+        public int CurrentPosition => SafeGetPosition();
+
         /// <summary>实际采样率：以 Microphone 返回的 clip 频率为准（设备可能强制 48kHz），保证 WAV 头与数据一致。</summary>
         public int SampleRate => _clip != null && _clip.frequency > 0 ? _clip.frequency : CaptureSampleRate;
         public int Channels => CaptureChannels;

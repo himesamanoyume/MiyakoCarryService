@@ -31,6 +31,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
         private CancellationTokenSource _processingCts;
         private float _lastSpeechAt;
         private bool _speechStarted;
+        private int _speechConfirmCount;
         private float _windowPeriodSeconds = 0.05f;
         private float _nextWindowAt;
         private LlmIntent _pendingIntent;
@@ -57,12 +58,19 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         void Update()
         {
-            // 配置项可被玩家在 ConfigurationManager 中实时修改；每帧轻量刷新敏感字段
-            _vad = new VadService(new VadParams
+            // 配置项可被玩家在 ConfigurationManager 中实时修改；仅当参数变化时重建 VAD，
+            // 避免每帧重建导致自适应噪音地板状态丢失
+            var energyThreshold = MiyakoCarryServiceAssistantPlugin.VoiceVadEnergyThreshold.Value;
+            var silenceSeconds = MiyakoCarryServiceAssistantPlugin.VoiceVadSilenceSeconds.Value;
+            if (Math.Abs(_vad.EnergyThreshold - energyThreshold) > 0.0001f ||
+                Math.Abs(_vad.SilenceSeconds - silenceSeconds) > 0.0001f)
             {
-                EnergyThreshold = MiyakoCarryServiceAssistantPlugin.VoiceVadEnergyThreshold.Value,
-                SilenceSeconds = MiyakoCarryServiceAssistantPlugin.VoiceVadSilenceSeconds.Value,
-            });
+                _vad = new VadService(new VadParams
+                {
+                    EnergyThreshold = energyThreshold,
+                    SilenceSeconds = silenceSeconds,
+                });
+            }
 
             // 主线程消费异步结果
             if (_state == EVoiceState.Dispatching && _pendingIntent != null)
@@ -82,8 +90,13 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // 录音期间每帧把新样本从循环麦克风缓冲累积到内部缓冲（不录音时为无操作）
-            _capture.Poll();
+            // 录音期间每帧把新样本从循环麦克风缓冲累积到内部缓冲（不录音时为无操作）。
+            // FreeTalk：语音确认（_speechStarted）前不累积，待机空白从源头不进缓冲；
+            // PushToTalk：按键期间持续累积
+            if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.PushToTalk || _speechStarted)
+            {
+                _capture.Poll();
+            }
 
             // STT 调试模式：战局内外均可录音（菜单/藏身处也能测试麦克风与转写），
             // 不再受 inRaid 限制，继续按当前触发模式流程执行
@@ -141,7 +154,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 return;
             }
-            int currentPos = Microphone.GetPosition(null);
+            // 使用与录音一致的设备位置（AudioCaptureService 内部缓存设备名），
+            // 避免非默认设备时 VAD 窗口位置查询指向未录音的设备
+            int currentPos = _capture.CurrentPosition;
             if (currentPos <= 0)
             {
                 return;
@@ -160,25 +175,41 @@ namespace MiyakoCarryService.Assistant.Mgrs
             clip.GetData(window, currentPos - windowSize);
 
             float rms = _vad.ComputeRms(window);
+            // 用本窗 RMS 更新自适应噪音地板（语音窗自动排除），再判定语音
+            _vad.UpdateNoiseFloor(rms);
+
+            // STT 调试模式：逐窗输出 VAD 现场值，便于实测底噪并精调阈值
+            if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+            {
+                MiyakoCarryServiceAssistantPlugin.Logger.LogInfo(
+                    $"VAD rms={rms:F4} speech={_vad.IsSpeech(rms)} silence={Time.unscaledTime - _lastSpeechAt:F2}s");
+            }
+
             if (_vad.IsSpeech(rms))
             {
                 _lastSpeechAt = Time.unscaledTime;
-                if (!_speechStarted)
+                _speechConfirmCount++;
+                // 连续 2 窗（100ms）确认语音后才置位并丢弃之前的累积（含待机空白与噪音误触发），
+                // 让录音从真正的语音开始
+                if (!_speechStarted && _speechConfirmCount >= 2)
                 {
                     _speechStarted = true;
-                    // 首次检测到语音：丢弃待机累积的空白，让录音从语音开始
                     _capture.Reset();
                 }
             }
-            else if (_speechStarted && _vad.ShouldStopAfterSilence(rms, Time.unscaledTime - _lastSpeechAt))
+            else
             {
-                _speechStarted = false;
-                EndCapture();
-            }
-            else if (_captureStartedAt > 0 && Time.unscaledTime - _captureStartedAt > MiyakoCarryServiceAssistantPlugin.VoiceCaptureMaxSeconds.Value)
-            {
-                _speechStarted = false;
-                EndCapture();
+                _speechConfirmCount = 0;
+                if (_speechStarted && _vad.ShouldStopAfterSilence(rms, Time.unscaledTime - _lastSpeechAt))
+                {
+                    _speechStarted = false;
+                    EndCapture();
+                }
+                else if (_captureStartedAt > 0 && Time.unscaledTime - _captureStartedAt > MiyakoCarryServiceAssistantPlugin.VoiceCaptureMaxSeconds.Value)
+                {
+                    _speechStarted = false;
+                    EndCapture();
+                }
             }
         }
 
@@ -201,6 +232,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _capturing = true;
             _captureStartedAt = Time.unscaledTime;
             _speechStarted = false;
+            _speechConfirmCount = 0;
             _lastSpeechAt = Time.unscaledTime;
             _state = EVoiceState.Capturing;
         }
