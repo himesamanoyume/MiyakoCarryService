@@ -16,10 +16,54 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     /// </summary>
     public sealed class OpenAICompatibleProvider : ILlmProvider
     {
-        private static readonly HttpClient SharedClient = new()
+        private static HttpClient SharedClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60),
         };
+        private static string _appliedProxyHost;
+        private static string _appliedProxyPort;
+
+        /// <summary>
+        /// 按 HttpProxyHost/HttpProxyPort 应用代理（host 与 port 均非空且端口可解析时全量经代理转发，
+        /// 含本地地址；否则直连）。仅在配置变化时重建共享 HttpClient。
+        /// </summary>
+        public static void ApplyProxy(string host, string port)
+        {
+            var portValid = int.TryParse(port, out var parsedPort) && parsedPort > 0;
+            var useProxy = !string.IsNullOrEmpty(host) && portValid;
+            var effectiveHost = useProxy ? host : string.Empty;
+            var effectivePort = useProxy ? parsedPort.ToString() : string.Empty;
+
+            if (_appliedProxyHost == effectiveHost && _appliedProxyPort == effectivePort)
+            {
+                return;
+            }
+
+            _appliedProxyHost = effectiveHost;
+            _appliedProxyPort = effectivePort;
+
+            var old = SharedClient;
+            if (useProxy)
+            {
+                var handler = new HttpClientHandler
+                {
+                    UseProxy = true,
+                    Proxy = new System.Net.WebProxy(effectiveHost, parsedPort),
+                };
+                SharedClient = new HttpClient(handler, disposeHandler: true)
+                {
+                    Timeout = TimeSpan.FromSeconds(60),
+                };
+            }
+            else
+            {
+                SharedClient = new HttpClient()
+                {
+                    Timeout = TimeSpan.FromSeconds(60),
+                };
+            }
+            try { old.Dispose(); } catch { }
+        }
 
         public async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

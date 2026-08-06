@@ -92,6 +92,9 @@ namespace MiyakoCarryService.Server.Services.Llm
                 return LlmDispatchResult.Handled();
             }
 
+            // 按 HttpProxyHost/HttpProxyPort 应用代理（幂等，仅在配置变化时重建）
+            OpenAICompatibleProvider.ApplyProxy(serverConfig.HttpProxyHost, serverConfig.HttpProxyPort);
+
             LlmIntent intent;
             try
             {

@@ -45,6 +45,8 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<float> VoiceVadSilenceSeconds;
         public static ConfigEntry<bool> VoiceFeedbackSubtitles;
         public static ConfigEntry<string> RecordDevice;
+        public static ConfigEntry<string> HttpProxyHost;
+        public static ConfigEntry<string> HttpProxyPort;
         public static ConfigEntry<ESttProvider> SttProvider;
         public static ConfigEntry<string> SttApiKey;
         public static ConfigEntry<string> SttBaseUrl;
@@ -284,6 +286,18 @@ namespace MiyakoCarryService.Assistant
                 15,
                 Locales.LLMTIMEOUTSEC_DESCRIPTION,
                 new AcceptableValueRange<int>(3, 120));
+
+            HttpProxyHost = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.HTTPPROXYHOST_KEY,
+                "",
+                Locales.HTTPPROXYHOST_DESCRIPTION);
+
+            HttpProxyPort = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.HTTPPROXYPORT_KEY,
+                "",
+                Locales.HTTPPROXYPORT_DESCRIPTION);
 
             #endregion
             #region DEBUG

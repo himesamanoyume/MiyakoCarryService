@@ -120,6 +120,12 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("TraderLlmMaxHistoryMessages")]
         public int TraderLlmMaxHistoryMessages { get; set; } = 20;
+
+        [JsonPropertyName("HttpProxyHost")]
+        public string HttpProxyHost { get; set; } = "";
+
+        [JsonPropertyName("HttpProxyPort")]
+        public string HttpProxyPort { get; set; } = "";
     }
 
     public record McsPluginConfig

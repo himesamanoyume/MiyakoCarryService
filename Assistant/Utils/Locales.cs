@@ -28,6 +28,11 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string RECORDDEVICE_KEY         = "Mcs/RecordDevice Key";
         public const string RECORDDEVICE_DESCRIPTION = "Mcs/RecordDevice Description";
 
+        public const string HTTPPROXYHOST_KEY         = "Mcs/HttpProxyHost Key";
+        public const string HTTPPROXYHOST_DESCRIPTION = "Mcs/HttpProxyHost Description";
+        public const string HTTPPROXYPORT_KEY         = "Mcs/HttpProxyPort Key";
+        public const string HTTPPROXYPORT_DESCRIPTION = "Mcs/HttpProxyPort Description";
+
         public const string STTDEBUGENABLED_KEY         = "Mcs/SttDebugEnabled Key";
         public const string STTDEBUGENABLED_DESCRIPTION = "Mcs/SttDebugEnabled Description";
         public const string STTDEBUGTEXT_KEY             = "Mcs/SttDebugText Key";
