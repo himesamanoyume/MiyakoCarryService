@@ -7,6 +7,7 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Events;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
+using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
@@ -68,21 +69,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 ConsumePendingIntent();
             }
 
-            var sttDebug = MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value;
-            var inRaid = TargetResolver.IsInRaid();
-
-            // STT 调试模式：独立于 VoiceEnabled，按当前选择的触发模式录音；
-            // 开关关闭或不在战局时结束捕获回 Idle
-            if (!sttDebug && (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !inRaid))
-            {
-                if (_capturing)
-                {
-                    EndCapture();
-                }
-                _state = EVoiceState.Idle;
-                return;
-            }
-            if (sttDebug && !inRaid)
+            // 正常语音管线：需要 VoiceEnabled 且处于战局
+            if (!MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !GameLoop.Instance.IsVaildGameWorld))
             {
                 if (_capturing)
                 {
@@ -92,6 +80,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
+            // STT 调试模式：战局内外均可录音（菜单/藏身处也能测试麦克风与转写），
+            // 不再受 inRaid 限制，继续按当前触发模式流程执行
             switch (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value)
             {
                 case EVoiceTriggerMode.PushToTalk:
@@ -105,13 +95,13 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private void HandlePushToTalk()
         {
-            var isDown = KeyInput.BetterIsDown(MiyakoCarryServiceAssistantPlugin.VoiceHotKey.Value);
+            var isPressed = KeyInput.BetterIsPressed(MiyakoCarryServiceAssistantPlugin.VoiceHotKey.Value);
 
-            if (isDown && !_capturing && _state == EVoiceState.Idle)
+            if (isPressed && !_capturing && _state == EVoiceState.Idle)
             {
                 BeginCapture();
             }
-            else if (!isDown && _capturing && _state == EVoiceState.Capturing)
+            else if (!isPressed && _capturing && _state == EVoiceState.Capturing)
             {
                 EndCapture();
             }

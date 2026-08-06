@@ -53,7 +53,7 @@ namespace MiyakoCarryService.Assistant.Services
                 return 0;
             }
 
-            if (!TargetResolver.IsInRaid())
+            if (!GameLoop.Instance.IsVaildGameWorld)
             {
                 return 0;
             }

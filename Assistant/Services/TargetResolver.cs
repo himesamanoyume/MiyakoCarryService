@@ -1,4 +1,3 @@
-using Comfort.Common;
 using EFT;
 using UnityEngine;
 
@@ -14,12 +13,6 @@ namespace MiyakoCarryService.Assistant.Services
         {
             public Vector3? Position;
             public string TargetId;
-        }
-
-        public static bool IsInRaid()
-        {
-            return Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance != null
-                                          && Singleton<GameWorld>.Instance.MainPlayer != null;
         }
 
         /// <summary>
