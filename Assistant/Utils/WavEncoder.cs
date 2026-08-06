@@ -5,25 +5,25 @@ using System.Text;
 namespace MiyakoCarryService.Assistant.Utils
 {
     /// <summary>
-    /// 将 Assistant 录音得到的 PCM 浮点样本流编码为单声道 16-bit 16kHz WAV 字节流，
+    /// 将 Assistant 录音得到的 PCM 浮点样本流编码为单声道 16-bit 44.1kHz WAV 字节流，
     /// 适配 OpenAI Whisper、Azure Speech、阿里云 NLS 等主流 STT REST 接口的 multipart 上传格式。
     /// </summary>
     internal static class WavEncoder
     {
-        public static byte[] Encode(float[] samples, int sampleRate = 16000, int channels = 1)
+        public static byte[] Encode(float[] samples, int sampleRate = 44100, int channels = 1)
         {
             if (samples == null)
             {
                 return Array.Empty<byte>();
             }
 
-            // 16-bit PCM 量化
+            // 16-bit PCM 量化：负数乘 -32768、正数乘 32767（不能对负数乘 short.MinValue，否则负半波极性反转成杂音）
             var pcm = new short[samples.Length];
             for (int i = 0; i < samples.Length; i++)
             {
                 var v = samples[i];
                 v = Math.Max(-1f, Math.Min(1f, v));
-                pcm[i] = (short)(v < 0 ? v * short.MinValue : v * short.MaxValue);
+                pcm[i] = (short)(v < 0 ? v * 32768f : v * 32767f);
             }
 
             var byteRate = sampleRate * channels * 2;

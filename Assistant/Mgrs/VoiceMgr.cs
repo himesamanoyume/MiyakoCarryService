@@ -9,6 +9,7 @@ using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -50,7 +51,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
         void OnDestroy()
         {
             try { _processingCts?.Cancel(); } catch { }
-            try { if (_capture.IsCapturing) _capture.End(); } catch { }
+            try { _capture.Stop(); } catch { }
             base.OnMgrDestroy();
         }
 
@@ -74,11 +75,15 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 if (_capturing)
                 {
-                    EndCapture();
+                    // 门控关闭：丢弃当前段（麦克风会话保持，避免 End→Start 循环失败）
+                    _capture.Abort();
                 }
                 _state = EVoiceState.Idle;
                 return;
             }
+
+            // 录音期间每帧把新样本从循环麦克风缓冲累积到内部缓冲（不录音时为无操作）
+            _capture.Poll();
 
             // STT 调试模式：战局内外均可录音（菜单/藏身处也能测试麦克风与转写），
             // 不再受 inRaid 限制，继续按当前触发模式流程执行
@@ -161,6 +166,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 if (!_speechStarted)
                 {
                     _speechStarted = true;
+                    // 首次检测到语音：丢弃待机累积的空白，让录音从语音开始
+                    _capture.Reset();
                 }
             }
             else if (_speechStarted && _vad.ShouldStopAfterSilence(rms, Time.unscaledTime - _lastSpeechAt))
@@ -207,6 +214,15 @@ namespace MiyakoCarryService.Assistant.Mgrs
             var samples = _capture.End();
             _capturing = false;
 
+            // 自由说话：去掉结束后的静音尾巴，只保留说话内容
+            if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
+            {
+                samples = TrimTrailingSilence(samples);
+            }
+
+            MiyakoCarryServiceAssistantPlugin.Logger.LogInfo(
+                $"录音结束：{(samples == null ? 0 : samples.Length) / (float)_capture.SampleRate:F2}s，{(samples == null ? 0 : samples.Length)} 样本");
+
             if (samples == null || samples.Length == 0)
             {
                 // STT 调试模式：未捕获到音频时给出提示，避免"正在录音"状态卡死
@@ -228,6 +244,44 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             _processingCts = new CancellationTokenSource();
             _ = ProcessCaptureAsync(samples, _processingCts.Token);
+        }
+
+        /// <summary>裁剪 FreeTalk 录音尾部的静音（按 VAD 能量阈值以窗口为单位从末尾回退）。</summary>
+        private float[] TrimTrailingSilence(float[] samples)
+        {
+            if (samples == null || samples.Length == 0)
+            {
+                return samples;
+            }
+            int window = (int)(_capture.SampleRate * _windowPeriodSeconds);
+            if (window <= 0 || samples.Length < window)
+            {
+                return samples;
+            }
+
+            int end = samples.Length;
+            while (end >= window)
+            {
+                var win = new float[window];
+                Array.Copy(samples, end - window, win, 0, window);
+                if (_vad.IsSpeech(_vad.ComputeRms(win)))
+                {
+                    break;
+                }
+                end -= window;
+            }
+
+            if (end <= 0)
+            {
+                return Array.Empty<float>();
+            }
+            if (end >= samples.Length)
+            {
+                return samples;
+            }
+            var trimmed = new float[end];
+            Array.Copy(samples, trimmed, end);
+            return trimmed;
         }
 
         private async System.Threading.Tasks.Task ProcessCaptureAsync(float[] samples, CancellationToken ct)
@@ -288,12 +342,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt?.Error ?? Utils.Locales.VOICESTTFAILED;
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized();
                     _state = EVoiceState.Idle;
                     return;
                 }
                 _pendingTranscribedText = stt?.Text ?? string.Empty;
-                _pendingIntent = new LlmIntent { Error = stt?.Error ?? Utils.Locales.VOICESTTFAILED };
+                _pendingIntent = new LlmIntent { Error = stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized() };
                 _state = EVoiceState.Dispatching;
                 return;
             }

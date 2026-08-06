@@ -2,9 +2,10 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using BepInEx;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using Newtonsoft.Json.Linq;
@@ -30,6 +31,9 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = "WAV 编码失败" };
             }
 
+            // 保存本次录音到插件 DLL 同目录（调试用，每次覆盖；失败不影响转录）
+            SaveDebugWav(wavBytes);
+
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
             // 兼容 BaseUrl 已填写完整 /audio/transcriptions 端点的情况（如本地服务），避免重复拼接
@@ -37,7 +41,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 ? baseUrl
                 : $"{baseUrl}/audio/transcriptions";
 
-            using var form = new MultipartFormDataContent();
+            var form = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(wavBytes);
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
             form.Add(fileContent, "file", "voice.wav");
@@ -49,7 +53,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             form.Add(new StringContent("json"), "response_format");
 
             var client = AssistantHttpClient.WithTimeout(settings);
-            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+            var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
                 Content = form,
             };
@@ -88,12 +92,64 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = $"Whisper 异常：{ex.Message}" };
             }
+            finally
+            {
+                // Mono 的 MultipartContent.Dispose 存在 NRE 缺陷（请求成功后释放 multipart 表单时崩溃），
+                // 释放统一 try/catch 兜住，避免异常吞掉转写结果
+                try
+                {
+                    request.Dispose();
+                }
+                catch
+                {
+
+                }
+                try
+                {
+                    form.Dispose();
+                }
+                catch
+                {
+
+                }
+            }
         }
 
         private static string SafeTrim(string s, int max)
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
             return s.Length <= max ? s : s.Substring(0, max) + "...";
+        }
+
+        /// <summary>
+        /// 保存本次录音到插件 DLL 同目录的 <c>voice.wav</c>（每次覆盖；目录不可写等失败静默跳过）。
+        /// </summary>
+        private static void SaveDebugWav(byte[] wavBytes)
+        {
+            try
+            {
+                var dir = GetPluginDirectory();
+                if (string.IsNullOrEmpty(dir))
+                {
+                    return;
+                }
+                File.WriteAllBytes(Path.Combine(dir, "voice.wav"), wavBytes);
+            }
+            catch
+            {
+                // 保存失败不影响转录
+            }
+        }
+
+        private static string GetPluginDirectory()
+        {
+            var location = Assembly.GetExecutingAssembly().Location;
+            if (!string.IsNullOrEmpty(location))
+            {
+                return Path.GetDirectoryName(location);
+            }
+            // 脚本引擎加载时 Assembly.Location 为空，回退 BepInEx 插件目录
+            return BepInEx.Paths.PluginPath;
         }
     }
 }
