@@ -40,7 +40,7 @@
     "Mcs/LlmProvider Description": "云端大语言模型(LLM)服务商。设为 None 时禁用大语言模型解释；OpenAI兼容 覆盖 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等。",
     "Mcs/LlmApiKey Key": "大语言模型(LLM) API Key",
     "Mcs/LlmApiKey Description": "所选大语言模型(LLM)服务商的 API Key。",
-    "Mcs/LlmBaseUrl Key": "大语言模型 (LLM) Base URL",
+    "Mcs/LlmBaseUrl Key": "大语言模型(LLM) Base URL",
     "Mcs/LlmBaseUrl Description": "可选自定义大语言模型(LLM) Base URL（仅对 OpenAI兼容 服务商生效，覆盖服务商默认值）。",
     "Mcs/LlmModelId Key": "大语言模型(LLM) 模型",
     "Mcs/LlmModelId Description": "大语言模型(LLM) 模型名。服务商相关；OpenAI兼容 默认 deepseek-v4-flash。",

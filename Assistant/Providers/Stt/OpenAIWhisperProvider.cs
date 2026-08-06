@@ -24,11 +24,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = "AudioSegment 为空" };
             }
 
-            if (string.IsNullOrEmpty(settings?.ApiKey))
-            {
-                return new SttResult { Error = "SttApiKey 未填写" };
-            }
-
             var wavBytes = WavEncoder.Encode(audio.Samples, audio.SampleRate, audio.Channels);
             if (wavBytes.Length == 0)
             {
@@ -37,6 +32,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
+            // 兼容 BaseUrl 已填写完整 /audio/transcriptions 端点的情况（如本地服务），避免重复拼接
+            var endpoint = baseUrl.EndsWith("/audio/transcriptions", StringComparison.OrdinalIgnoreCase)
+                ? baseUrl
+                : $"{baseUrl}/audio/transcriptions";
 
             using var form = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(wavBytes);
@@ -50,15 +49,24 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             form.Add(new StringContent("json"), "response_format");
 
             var client = AssistantHttpClient.WithTimeout(settings);
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/audio/transcriptions")
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
                 Content = form,
             };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+            // 本地端点无需 ApiKey，为空时不附加 Authorization
+            if (!string.IsNullOrEmpty(settings.ApiKey))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+            }
+
+            // 请求级超时：按 SttTimeoutSec 精确生效，不受其它请求（如 LLM 调试）干扰
+            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(timeout);
 
             try
             {
-                using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
                 var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode)
                 {

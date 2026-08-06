@@ -27,10 +27,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             {
                 return new LlmIntent { Error = "用户文本为空" };
             }
-            if (string.IsNullOrEmpty(settings?.ApiKey))
-            {
-                return new LlmIntent { Error = "LlmApiKey 未填写" };
-            }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var modelId = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
@@ -68,7 +64,11 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                     {
                         Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
                     };
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                    // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
+                    if (!string.IsNullOrEmpty(settings.ApiKey))
+                    {
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                    }
 
                     using var response = await SharedClient.SendAsync(request, cts.Token).ConfigureAwait(false);
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);

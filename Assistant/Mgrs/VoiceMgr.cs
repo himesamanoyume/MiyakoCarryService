@@ -219,6 +219,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             if (samples == null || samples.Length == 0)
             {
+                // STT 调试模式：未捕获到音频时给出提示，避免"正在录音"状态卡死
+                if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+                {
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "未捕获到音频";
+                }
                 _state = EVoiceState.Idle;
                 return;
             }

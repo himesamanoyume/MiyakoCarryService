@@ -38,19 +38,18 @@ namespace MiyakoCarryService.Assistant.Utils
             _shared.DefaultRequestHeaders.ExpectContinue = false;
         }
 
+        /// <summary>
+        /// 返回共享 HttpClient。不再改写其 Timeout（固定 60s，与商人侧实现一致）；
+        /// 各服务商在请求内自行用 CancellationTokenSource + CancelAfter 控制超时，避免并发互相干扰。
+        /// </summary>
         public static HttpClient WithTimeout(ProviderSettings settings)
         {
-            var timeout = settings?.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            if (_shared.Timeout != timeout)
-            {
-                _shared.Timeout = timeout;
-            }
             return _shared;
         }
 
         public static HttpClient WithTimeout(int timeoutSec)
         {
-            return WithTimeout(new ProviderSettings { TimeoutSec = timeoutSec });
+            return _shared;
         }
     }
 }

@@ -25,16 +25,17 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = "用户文本为空" };
             }
-            if (string.IsNullOrEmpty(settings?.ApiKey))
-            {
-                return new LlmIntent { Error = "LlmApiKey 未填写" };
-            }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
 
             var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
             var client = AssistantHttpClient.WithTimeout(settings);
+
+            // 请求级超时：与商人侧实现一致，互不干扰
+            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(timeout);
 
             try
             {
@@ -64,9 +65,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     {
                         Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
                     };
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                    // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
+                    if (!string.IsNullOrEmpty(settings.ApiKey))
+                    {
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                    }
 
-                    using var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                    using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (!response.IsSuccessStatusCode)
                     {

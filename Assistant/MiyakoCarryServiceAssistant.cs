@@ -372,7 +372,8 @@ namespace MiyakoCarryService.Assistant
                     SystemPrompt = LlmSystemPrompt.Value,
                     Temperature = LlmTemperature.Value,
                     MaxTokens = LlmMaxTokens.Value,
-                    TimeoutSec = LlmTimeoutSec.Value,
+                    // 调试测试放宽超时：推理模型（如 DeepSeek V4 Flash）思考耗时较长，15s 默认值容易误判超时
+                    TimeoutSec = Math.Max(LlmTimeoutSec.Value, 60),
                 };
 
                 var text = SttDebugText?.Value;
