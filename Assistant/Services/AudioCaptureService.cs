@@ -11,8 +11,10 @@ namespace MiyakoCarryService.Assistant.Services
     /// 上层 PushToTalk/FreeTalk 两种模式共用。
     /// 采用 Dissonance / Fika VOIP 相同的"持续会话 + 连续小段轮询"方案：
     /// 麦克风会话只启动/停止一次（<see cref="Begin"/>/<see cref="Stop"/>），录音期间每帧
-    /// 通过 <see cref="Poll"/> 以"当前位置差"读取一小段样本累积到内部缓冲，而非在松键时一次性
-    /// 对大段 clip 做 GetData。
+    /// 通过 <see cref="Poll"/> 以"当前位置差"读取一小段样本，而非在松键时一次性对大段 clip 做 GetData。
+    /// 录音期间读到的样本始终喂入滚动预卷（最近 <see cref="PreRollSeconds"/> 秒）；仅当
+    /// <see cref="Arm"/>（语音确认）后才开始累积到段缓冲，段起点即包含语音起音前的预卷，
+    /// 避免 FreeTalk 确认机制截断说话的第一个字。
     /// 注意：<see cref="Microphone.GetPosition"/> 的实际回绕边界由设备硬件 ring buffer 决定
     /// （实测约 1 秒），与 clip 长度无关。回绕时读取"尾段 + 头段"补齐新音频，尾段终点使用
     /// 自适应实测边界 <see cref="_ringSize"/>（观测到的最大位置），绝不能使用 <see cref="AudioClip.samples"/>——
@@ -25,6 +27,9 @@ namespace MiyakoCarryService.Assistant.Services
         private const int CaptureChannels = 1;
         // 循环缓冲：设备实际回绕边界仅约 1s（由硬件决定），10s 缓冲对任何设备都留足余量
         private const int LoopSeconds = 10;
+        // 预卷时长：FreeTalk 语音确认（约 100ms 延迟）前保留的音频，保证首字起音完整
+        private const float PreRollSeconds = 0.4f;
+        private static readonly int PreRollSamples = (int)(CaptureSampleRate * PreRollSeconds);
 
         // 实际启动/读取/停止统一使用的设备名（null = 系统默认设备），避免 Start 与 GetPosition/End 指向不同设备
         private string _deviceName;
@@ -32,8 +37,12 @@ namespace MiyakoCarryService.Assistant.Services
         private int _ringSize;
 
         private bool _capturing;
+        // 已确认语音：为 true 时新样本才累积到段缓冲 _samples（FreeTalk 语音确认 / PTT 开始即置位）
+        private bool _armed;
         private int _lastReadPos;
         private readonly List<float> _samples = new List<float>();
+        // 滚动预卷：始终保留最近 PreRollSeconds 秒的样本，供语音确认时作为段起点
+        private readonly List<float> _preRoll = new List<float>();
 
         /// <summary>开始一段录音。麦克风未运行时启动，并重置本段累积缓冲与读取游标。</summary>
         public bool Begin()
@@ -56,15 +65,18 @@ namespace MiyakoCarryService.Assistant.Services
             }
 
             _samples.Clear();
+            _preRoll.Clear();
+            _armed = false;
             _lastReadPos = SafeGetPosition();
             _capturing = true;
             return true;
         }
 
         /// <summary>
-        /// 录音期间每帧调用：把自上次读取以来的新样本以小段追加到内部缓冲。
-        /// 位置回绕（cur &lt; _lastReadPos）时读取"尾段 + 头段"补齐新音频，尾段终点使用
-        /// 自适应实测边界，不读陈旧/未写入区段。不处于录音态时为无操作。
+        /// 每帧调用：把自上次读取以来的新样本读入。样本始终喂入滚动预卷；
+        /// 仅 <see cref="_armed"/> 时同时累积到段缓冲。位置回绕（cur &lt; _lastReadPos）时
+        /// 读取"尾段 + 头段"补齐新音频，尾段终点使用自适应实测边界，不读陈旧/未写入区段。
+        /// 不处于录音态时为无操作。
         /// </summary>
         public void Poll()
         {
@@ -82,7 +94,7 @@ namespace MiyakoCarryService.Assistant.Services
 
             if (cur > _lastReadPos)
             {
-                ReadInto(_lastReadPos, cur);
+                Feed(_lastReadPos, cur);
                 // 正常推进时顺带修正回绕边界估计（观测位置必然不超过真实边界）
                 if (_ringSize > 0 && cur > _ringSize)
                 {
@@ -98,19 +110,32 @@ namespace MiyakoCarryService.Assistant.Services
                     MiyakoCarryServiceAssistantPlugin.Logger.LogInfo($"麦克风回绕边界估计：{_ringSize} 样本");
                 }
                 int ringEnd = Math.Min(_ringSize, total);
-                ReadInto(_lastReadPos, ringEnd);
-                ReadInto(0, cur);
+                Feed(_lastReadPos, ringEnd);
+                Feed(0, cur);
             }
             _lastReadPos = cur;
         }
 
         /// <summary>
-        /// 丢弃当前累积但保持麦克风会话：清空缓冲并把游标重置到当前位置。
-        /// 用于 FreeTalk 首次检测到语音时去掉待机空白，让录音从语音开始。
+        /// 确认语音：置为累积状态，并以当前预卷（含语音起音前 0.4s）作为段起点。
+        /// PTT 在 Begin 后立即调用（预卷为空，等效直接开始累积）；FreeTalk 在连续语音窗口确认后调用。
+        /// </summary>
+        public void Arm()
+        {
+            _armed = true;
+            _samples.Clear();
+            _samples.AddRange(_preRoll);
+        }
+
+        /// <summary>
+        /// 丢弃当前累积并保持麦克风会话：清空缓冲/预卷并把游标重置到当前位置。
+        /// 用于 FreeTalk 静默段超时重置段计时（不触发 STT）。
         /// </summary>
         public void Reset()
         {
+            _armed = false;
             _samples.Clear();
+            _preRoll.Clear();
             _lastReadPos = SafeGetPosition();
         }
 
@@ -138,8 +163,8 @@ namespace MiyakoCarryService.Assistant.Services
             }
         }
 
-        /// <summary>把 clip 区间 [from, to) 的样本读入累积缓冲。</summary>
-        private void ReadInto(int from, int to)
+        /// <summary>把 clip 区间 [from, to) 的样本读入：喂入滚动预卷；已确认语音时同时累积到段缓冲。</summary>
+        private void Feed(int from, int to)
         {
             int count = to - from;
             if (count <= 0)
@@ -155,7 +180,16 @@ namespace MiyakoCarryService.Assistant.Services
             {
                 return;
             }
-            _samples.AddRange(chunk);
+            if (_armed)
+            {
+                _samples.AddRange(chunk);
+            }
+            _preRoll.AddRange(chunk);
+            int excess = _preRoll.Count - PreRollSamples;
+            if (excess > 0)
+            {
+                _preRoll.RemoveRange(0, excess);
+            }
         }
 
         /// <summary>结束本段录音：做最后一次轮询后返回本段全部样本（不停止麦克风）。</summary>
@@ -181,7 +215,9 @@ namespace MiyakoCarryService.Assistant.Services
         public void Abort()
         {
             _capturing = false;
+            _armed = false;
             _samples.Clear();
+            _preRoll.Clear();
             _lastReadPos = SafeGetPosition();
         }
 
@@ -189,7 +225,9 @@ namespace MiyakoCarryService.Assistant.Services
         public void Stop()
         {
             _capturing = false;
+            _armed = false;
             _samples.Clear();
+            _preRoll.Clear();
             if (_clip != null)
             {
                 try { Microphone.End(_deviceName); } catch { }

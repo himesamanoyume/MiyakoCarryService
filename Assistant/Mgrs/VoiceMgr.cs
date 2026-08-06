@@ -32,6 +32,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
         private float _lastSpeechAt;
         private bool _speechStarted;
         private int _speechConfirmCount;
+        // FreeTalk 最短有效语音时长兜底：拦截异常残留的极短/空音频，避免触发 STT
+        private const float MinFreeTalkSpeechSeconds = 0.3f;
+        // STT 调试模式：FreeTalk 上次返回结果（跨段持久），用于"正在监听：结果"显示
+        private string _debugLastResult;
         private float _windowPeriodSeconds = 0.05f;
         private float _nextWindowAt;
         private LlmIntent _pendingIntent;
@@ -90,13 +94,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // 录音期间每帧把新样本从循环麦克风缓冲累积到内部缓冲（不录音时为无操作）。
-            // FreeTalk：语音确认（_speechStarted）前不累积，待机空白从源头不进缓冲；
-            // PushToTalk：按键期间持续累积
-            if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.PushToTalk || _speechStarted)
-            {
-                _capture.Poll();
-            }
+            // 每帧轮询麦克风：样本始终喂入滚动预卷；是否累积到段缓冲由 AudioCaptureService
+            // 内部 _armed 决定（PTT 开始即置位；FreeTalk 语音确认后置位），不录音时为无操作
+            _capture.Poll();
 
             // STT 调试模式：战局内外均可录音（菜单/藏身处也能测试麦克风与转写），
             // 不再受 inRaid 限制，继续按当前触发模式流程执行
@@ -189,12 +189,17 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 _lastSpeechAt = Time.unscaledTime;
                 _speechConfirmCount++;
-                // 连续 2 窗（100ms）确认语音后才置位并丢弃之前的累积（含待机空白与噪音误触发），
-                // 让录音从真正的语音开始
+                // 连续 2 窗（100ms）确认语音后才置位并武装累积：段起点取内部预卷（含语音起音），
+                // 避免截断第一个字，同时丢弃确认前的待机空白与噪音误触发
                 if (!_speechStarted && _speechConfirmCount >= 2)
                 {
                     _speechStarted = true;
-                    _capture.Reset();
+                    _capture.Arm();
+                    // STT 调试模式：触发阈值确认语音，正式进入录音
+                    if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
+                    {
+                        MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
+                    }
                 }
             }
             else
@@ -207,8 +212,20 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 }
                 else if (_captureStartedAt > 0 && Time.unscaledTime - _captureStartedAt > MiyakoCarryServiceAssistantPlugin.VoiceCaptureMaxSeconds.Value)
                 {
-                    _speechStarted = false;
-                    EndCapture();
+                    if (_speechStarted)
+                    {
+                        // 说话中/刚说完超时：正常结束并发送
+                        _speechStarted = false;
+                        EndCapture();
+                    }
+                    else
+                    {
+                        // 全程无语音：丢弃累积、重同步游标并重置段计时，继续监听，绝不触发 STT
+                        _capture.Reset();
+                        _captureStartedAt = Time.unscaledTime;
+                        _lastSpeechAt = Time.unscaledTime;
+                        _speechConfirmCount = 0;
+                    }
                 }
             }
         }
@@ -219,15 +236,30 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 return;
             }
-            // STT 调试模式：开始录音时先显示录音中状态，转写结果返回后再覆盖
+            // STT 调试模式：PTT 按下即"正在录音"；FreeTalk 处于监听态（无结果时"正在监听"，
+            // 有上次结果时"正在监听：结果"），待语音确认后置"正在录音"
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
-                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
+                if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
+                {
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = string.IsNullOrEmpty(_debugLastResult)
+                        ? "正在监听"
+                        : $"正在监听：{_debugLastResult}";
+                }
+                else
+                {
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
+                }
             }
             if (!_capture.Begin())
             {
                 Notification("麦克风不可用或被占用");
                 return;
+            }
+            // PTT：按下即累积（无预卷需求）；FreeTalk 保持未武装，待语音确认后由 Arm() 置位
+            if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.PushToTalk)
+            {
+                _capture.Arm();
             }
             _capturing = true;
             _captureStartedAt = Time.unscaledTime;
@@ -250,6 +282,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
             {
                 samples = TrimTrailingSilence(samples);
+                // 最短时长兜底：异常残留的极短/空音频不发 STT
+                if (samples.Length < (int)(_capture.SampleRate * MinFreeTalkSpeechSeconds))
+                {
+                    samples = Array.Empty<float>();
+                }
             }
 
             MiyakoCarryServiceAssistantPlugin.Logger.LogInfo(
@@ -260,7 +297,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 // STT 调试模式：未捕获到音频时给出提示，避免"正在录音"状态卡死
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "未捕获到音频";
+                    SetDebugText("未捕获到音频");
                 }
                 _state = EVoiceState.Idle;
                 return;
@@ -360,7 +397,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT 异常：{ex}");
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = $"STT 异常：{ex.Message}";
+                    SetDebugText($"STT 异常：{ex.Message}");
                     _state = EVoiceState.Idle;
                     return;
                 }
@@ -374,7 +411,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized();
+                    SetDebugText(stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized());
                     _state = EVoiceState.Idle;
                     return;
                 }
@@ -387,7 +424,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             // STT 调试模式：转写文本覆盖写入调试字段，跳过 LLM 解释与派发
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
-                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = stt.Text;
+                SetDebugText(stt.Text);
                 _state = EVoiceState.Idle;
                 return;
             }
@@ -472,6 +509,23 @@ namespace MiyakoCarryService.Assistant.Mgrs
             if (MiyakoCarryServiceAssistantPlugin.VoiceFeedbackSubtitles.Value && !string.IsNullOrEmpty(feedback))
             {
                 Notification(feedback);
+            }
+        }
+
+        /// <summary>
+        /// STT 调试模式文本输出：FreeTalk 持久化上次结果并显示"正在监听：结果"，
+        /// PTT 直接显示原文本（现行为不变）。
+        /// </summary>
+        private void SetDebugText(string text)
+        {
+            if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
+            {
+                _debugLastResult = text;
+                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = $"正在监听：{text}";
+            }
+            else
+            {
+                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = text;
             }
         }
 
