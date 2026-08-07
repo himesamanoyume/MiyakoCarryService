@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
-using ClientLocales = MiyakoCarryService.Client.Utils.Locales;
 
 namespace MiyakoCarryService.Assistant.Utils
 {
@@ -32,7 +31,8 @@ namespace MiyakoCarryService.Assistant.Utils
 
         /// <summary>
         /// 指令对照表：<c>ECommandType</c> 枚举名 -> 对应的 <see cref="ClientLocales"/> 本地化键列表。
-        /// 构建提示词时统一以 <see cref="StringExtensions.McsLocalized"/> 解析，指令名跟随玩家游戏 UI 语言。
+        /// 显示名优先使用 TEAM*（全队/Team）系列权威词（如"全队集结"），无对应 TEAM 键的命令
+        /// 回退到原键；构建提示词与调试结果显示统一经 <see cref="GetLocalizedNames"/> 解析。
         /// <c>InteractionProxyAction</c> 是代理互动类子指令（代理操作开关/代理开门）的统一入口，
         /// 以玩家准星所指目标决定具体动作；<c>EndProxyAction</c> 为系统回调指令，不在此表中。
         /// </summary>
@@ -60,6 +60,23 @@ namespace MiyakoCarryService.Assistant.Utils
             { ECommandType.StationaryWeaponProxyAction.ToString(), [ClientLocales.STATIONARYWEAPONPROXYCOMMAND_NAME] },
             { ECommandType.DropTargetLoot.ToString(),              [ClientLocales.DROPTARGETLOOTCOMMAND_NAME] },
         };
+
+        /// <summary>
+        /// 取指令名的本地化显示名（多个本地化键用 " / " 连接，如 InteractionProxyAction 的"操作开关 / 打开门"）。
+        /// 无对照时原样返回枚举名。提示词与调试结果显示共用，保证权威词一致。
+        /// </summary>
+        public static string GetLocalizedNames(string commandName)
+        {
+            if (string.IsNullOrEmpty(commandName))
+            {
+                return commandName;
+            }
+            if (CommandGlossary.TryGetValue(commandName, out var keys))
+            {
+                return string.Join(" / ", keys.Select(key => key.McsLocalized()));
+            }
+            return commandName;
+        }
 
         public static readonly IReadOnlyList<string> UsableCommands =
         [
@@ -110,10 +127,7 @@ namespace MiyakoCarryService.Assistant.Utils
             sb.AppendLine("Command glossary (localized name(s) -> exact CommandName). Map the player's phrase to the EXACT CommandName, never invent a name:");
             foreach (var cmd in UsableCommands)
             {
-                var names = CommandGlossary.TryGetValue(cmd, out var keys)
-                    ? string.Join(" / ", keys.Select(key => key.McsLocalized()))
-                    : cmd;
-                sb.Append("- ").Append(names).Append(" -> ").AppendLine(cmd);
+                sb.Append("- ").Append(GetLocalizedNames(cmd)).Append(" -> ").AppendLine(cmd);
             }
             sb.AppendLine();
 
@@ -134,21 +148,28 @@ namespace MiyakoCarryService.Assistant.Utils
             sb.AppendLine(" - selector = \"All\"  => all alive escorts");
             sb.AppendLine(" - selector = \"ByIndex\", targetIndex = 1..N   => the Nth escort (1-based)");
             sb.AppendLine(" - selector = \"ByCodeName\", targetCodeName = <string>   => escort matching its 代号 (code-name/nickname)");
+            sb.AppendLine("Players may name MULTIPLE escorts at once (e.g., \"5号6号\" or \"Rabbit1、Rabbit2\"); then return targetIndices = [5,6] or targetCodeNames = [\"Rabbit1\",\"Rabbit2\"] instead of the single-value fields.");
+            sb.AppendLine("Note: \"N号\" is a shorthand for the Nth (1-based) escort; use selector \"ByIndex\" with targetIndices for it.");
             sb.AppendLine("If player did not specify a target, use selector = \"All\".");
-            sb.AppendLine("`targetCodeName` is free-form; backend matches against currently alive squad 代号 (codenames).");
+            sb.AppendLine("`targetCodeName(s)` are free-form; backend matches against currently alive squad 代号 (codenames).");
             sb.AppendLine();
 
             sb.AppendLine("`aimingBodyPart` only required when command is \"AimingBodyPart\", one of: " + string.Join(", ", AimingBodyParts) + ".");
             sb.AppendLine();
 
-            sb.AppendLine("If the phrase is small-talk or unrelated to escort commands, return:");
-            sb.AppendLine("  {\"replyText\": \"<reply in same language as user, max 80 chars>\"}");
+            sb.AppendLine("If the phrase cannot be mapped to ANY available command (small talk, filler, acknowledgement, unrelated), return:");
+            sb.AppendLine("  {\"error\":\"not_recognized\"}");
+            sb.AppendLine("Never output affirmations, acknowledgements, or any natural-language filler. Output only the JSON object for an actual command, or the error object above.");
             sb.AppendLine();
 
             sb.AppendLine("Command JSON schema:");
             sb.AppendLine("{\"command\":\"<CommandName>\",\"selector\":\"All|ByIndex|ByCodeName|Unspecified\",");
-            sb.AppendLine(" \"targetIndex\":<int|null>,\"targetCodeName\":<string|null>,\"aimingBodyPart\":<string|null>}");
-            sb.AppendLine("Example: {\"command\":\"FollowMe\",\"selector\":\"ByIndex\",\"targetIndex\":2,\"targetCodeName\":null,\"aimingBodyPart\":null}");
+            sb.AppendLine(" \"targetIndices\":[<int>...]|null,\"targetCodeNames\":[<string>...]|null,");
+            sb.AppendLine(" \"targetIndex\":<int|null>,\"targetCodeName\":<string|null>,\"aimingBodyPart\":<string|null>,\"optionIndex\":<int|null>}");
+            sb.AppendLine("`optionIndex` is ONLY for InteractionProxyAction / QuestProxyAction / StationaryWeaponProxyAction / EscortWorld, referring to the numbered \"Command options\" list appended to the user message (1-based). Set null when the player did not clearly pick one of the listed options.");
+            sb.AppendLine("Example: {\"command\":\"GoToPoint\",\"selector\":\"ByIndex\",\"targetIndices\":[5,6],\"targetCodeNames\":null,\"targetIndex\":null,\"targetCodeName\":null,\"aimingBodyPart\":null,\"optionIndex\":null}");
+            sb.AppendLine("Example: {\"command\":\"InteractionProxyAction\",\"selector\":\"All\",\"targetIndices\":null,\"targetCodeNames\":null,\"targetIndex\":null,\"targetCodeName\":null,\"aimingBodyPart\":null,\"optionIndex\":3}");
+            sb.AppendLine("Example: {\"command\":\"FollowMe\",\"selector\":\"ByIndex\",\"targetIndices\":null,\"targetCodeNames\":null,\"targetIndex\":2,\"targetCodeName\":null,\"aimingBodyPart\":null,\"optionIndex\":null}");
 
             return sb.ToString();
         }

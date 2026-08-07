@@ -1,4 +1,8 @@
 using EFT;
+using EFT.Interactive;
+using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Enums;
+using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
 namespace MiyakoCarryService.Assistant.Services
@@ -32,6 +36,54 @@ namespace MiyakoCarryService.Assistant.Services
 
             var fwdPos = player.Position + player.InteractionRay.direction * Mathf.Min(maxDistance, 64f);
             return new ResolvedTarget { Position = fwdPos, TargetId = null };
+        }
+
+        /// <summary>
+        /// 代理开门/代理拾取战利品的"选项显示状态"判定（复刻 GetActionsClassPatches 的条件）：
+        /// <c>InteractionProxyAction</c> 要求准星命中 <see cref="EDoorState.Locked"/> 的门；
+        /// <c>LootProxyAction</c> 要求命中非尸体的 LootItem。
+        /// 条件不满足时返回 null（调用方应提示"请对准目标"）。
+        /// </summary>
+        public static ResolvedTarget ResolveProxyTarget(Player player, string commandType, float maxDistance = 1000f)
+        {
+            if (player == null)
+            {
+                return null;
+            }
+
+            if (!Physics.Raycast(player.InteractionRay, out var hit, maxDistance, LayersMaskController.HighPolyWithTerrainMask))
+            {
+                return null;
+            }
+
+            if (commandType == ECommandType.InteractionProxyAction.ToString())
+            {
+                var door = hit.collider.GetComponentInParent<Door>();
+                if (door != null && door.DoorState == EDoorState.Locked)
+                {
+                    var doorData = door.GetData();
+                    return doorData != null
+                        ? new ResolvedTarget { Position = hit.point, TargetId = doorData.Id() }
+                        : null;
+                }
+                return null;
+            }
+
+            if (commandType == ECommandType.LootProxyAction.ToString())
+            {
+                var lootItem = hit.collider.GetComponentInParent<LootItem>();
+                if (lootItem != null && !(lootItem is Corpse))
+                {
+                    if (lootItem.Item.GetData() is LootData lootData)
+                    {
+                        return new ResolvedTarget { Position = hit.point, TargetId = lootData.Item.Id };
+                    }
+                }
+                return null;
+            }
+
+            // 其他代理类：退化为命中点（无目标 Id）
+            return new ResolvedTarget { Position = hit.point, TargetId = null };
         }
     }
 }

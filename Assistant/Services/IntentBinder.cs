@@ -42,9 +42,19 @@ namespace MiyakoCarryService.Assistant.Services
             ECommandType.DropTargetLoot.ToString(),
         };
 
+        /// <summary>支持"指令菜单选项"（optionIndex）派发的命令类型。</summary>
+        private static readonly HashSet<string> OptionCommands = new()
+        {
+            ECommandType.InteractionProxyAction.ToString(),
+            ECommandType.QuestProxyAction.ToString(),
+            ECommandType.StationaryWeaponProxyAction.ToString(),
+            ECommandType.EscortWorld.ToString(),
+        };
+
         /// <summary>
         /// 把意图绑定到 Llm 解析后选中的护航成员，按主机/副机路径派发。
-        /// 返回成功派发的护航成员数量。0 表示未派发（可能因为意图为空、护航为空或选择器未匹配）。
+        /// 返回成功派发的护航成员数量。0 表示未派发（可能因为意图为空、护航为空或选择器未匹配）；
+        /// -1 表示目标不可用（如代理开门/拾取战利品未处于"选项显示状态"，应提示玩家对准目标）。
         /// </summary>
         public static int BindAndDispatch(LlmIntent intent)
         {
@@ -71,16 +81,42 @@ namespace MiyakoCarryService.Assistant.Services
                 return 0;
             }
 
-            // 仅在需要 Position 的命令时取准星射线结果
+            // 仅在需要 Position 的命令时取准星射线结果；代理/护送类优先使用 LLM 选择的菜单选项
             Vector3? position = null;
             string targetId = null;
             if (CommandsNeedPosition.Contains(intent.CommandName) || CommandsNeedTargetId.Contains(intent.CommandName))
             {
-                var resolved = TargetResolver.ResolveForPlayer(mainPlayer);
-                if (resolved != null)
+                if (intent.OptionIndex.HasValue && OptionCommands.Contains(intent.CommandName))
                 {
+                    var options = McsCommandApi.GetVoiceMenuOptions();
+                    var idx = intent.OptionIndex.Value - 1;
+                    if (idx < 0 || idx >= options.Count)
+                    {
+                        return -1;
+                    }
+                    position = options[idx].Position;
+                    targetId = options[idx].TargetId;
+                }
+                else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString()
+                         || intent.CommandName == ECommandType.LootProxyAction.ToString())
+                {
+                    // 代理开门/拾取战利品：必须在"选项显示状态"（复刻补丁条件）下才能执行
+                    var resolved = TargetResolver.ResolveProxyTarget(mainPlayer, intent.CommandName);
+                    if (resolved == null)
+                    {
+                        return -1;
+                    }
                     position = resolved.Position;
                     targetId = resolved.TargetId;
+                }
+                else
+                {
+                    var resolved = TargetResolver.ResolveForPlayer(mainPlayer);
+                    if (resolved != null)
+                    {
+                        position = resolved.Position;
+                        targetId = resolved.TargetId;
+                    }
                 }
             }
 
@@ -129,6 +165,50 @@ namespace MiyakoCarryService.Assistant.Services
 
         private static Player[] SelectTargets(LlmIntent intent, Player[] aliveMembers)
         {
+            // 多目标：序号数组（1-based，越界跳过、去重），如 "5号6号"
+            if (intent.TargetIndices is { Count: > 0 })
+            {
+                var result = new List<Player>();
+                var seen = new HashSet<int>();
+                foreach (var idx in intent.TargetIndices)
+                {
+                    var i = idx - 1;
+                    if (i < 0 || i >= aliveMembers.Length || !seen.Add(i))
+                    {
+                        continue;
+                    }
+                    result.Add(aliveMembers[i]);
+                }
+                return result.ToArray();
+            }
+
+            // 多目标：代号数组（逐个包含匹配、去重），如 "Rabbit1、Rabbit2"
+            if (intent.TargetCodeNames is { Count: > 0 })
+            {
+                var result = new List<Player>();
+                var seen = new HashSet<Player>();
+                foreach (var name in intent.TargetCodeNames)
+                {
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        continue;
+                    }
+                    foreach (var member in aliveMembers)
+                    {
+                        var nick = member.Profile?.Nickname;
+                        if (string.IsNullOrEmpty(nick)
+                            || nick.IndexOf(name, StringComparison.OrdinalIgnoreCase) < 0
+                            || !seen.Add(member))
+                        {
+                            continue;
+                        }
+                        result.Add(member);
+                        break;
+                    }
+                }
+                return result.ToArray();
+            }
+
             if (intent.Selector == EIntentTargetSelector.All ||
                 intent.Selector == EIntentTargetSelector.Unspecified && !intent.TargetIndex.HasValue && string.IsNullOrEmpty(intent.TargetCodeName))
             {

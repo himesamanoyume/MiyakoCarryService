@@ -130,6 +130,65 @@ namespace MiyakoCarryService.Client.Mgrs
             // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
 
+        /// <summary>
+        /// 供语音管线枚举"代理/护送"类菜单选项（与玩家手动打开的子菜单一一对应）。
+        /// 递归展开代理（开关/任务/固定武器）与护送（撤离/传送/开关/固定武器等）子菜单，
+        /// 收集可执行且带目标数据的条目。选项顺序在单局内稳定，可用 1-based 序号引用。
+        /// </summary>
+        public virtual List<VoiceMenuOption> GetVoiceProxyEscortOptions(Player[] members)
+        {
+            var options = new List<VoiceMenuOption>();
+            if (members == null || members.Length == 0)
+            {
+                return options;
+            }
+
+            var menu = new McsCommandMenu();
+            BuildProxyMenu(menu, members, false);
+            BuildEscortMenu(menu, members, false);
+            CollectVoiceOptions(menu, options);
+            return options;
+        }
+
+        private void CollectVoiceOptions(McsCommandMenu menu, List<VoiceMenuOption> options)
+        {
+            foreach (var entry in menu.Entries)
+            {
+                if (entry.IsSubMenu)
+                {
+                    var sub = new McsCommandMenu();
+                    entry.BuildSubMenu(sub);
+                    CollectVoiceOptions(sub, options);
+                }
+                else if (IsVoiceOptionCommand(entry.CommandType) && !entry.Disabled)
+                {
+                    McsCommandContext ctx = null;
+                    try
+                    {
+                        ctx = entry.Resolver?.Invoke();
+                    }
+                    catch
+                    {
+                        // 单个选项解析失败不阻塞其余选项
+                    }
+                    options.Add(new VoiceMenuOption
+                    {
+                        Name = entry.Name,
+                        TargetName = entry.TargetName,
+                        CommandType = entry.CommandType,
+                        Position = ctx?.Position,
+                        TargetId = ctx?.TargetId,
+                    });
+                }
+            }
+        }
+
+        private static bool IsVoiceOptionCommand(string commandType)
+        {
+            return commandType is "InteractionProxyAction" or "QuestProxyAction"
+                or "StationaryWeaponProxyAction" or "EscortWorld";
+        }
+
         public virtual void BuildTeamMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             menu.RegisterCommand(Locales.TEAMREPORTABOUTENEMYCOMMAND_NAME, Locales.TEAMREPORTABOUTENEMYCOMMAND_TARGETNAME, ECommandType.ReportAboutEnemy.ToString(), mcsBotPlayers, shouldCheckExclude: false);

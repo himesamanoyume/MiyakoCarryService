@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -114,13 +115,18 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             try
             {
                 var json = JObject.Parse(content);
-                if (json["replyText"] is JToken replyToken && replyToken.Type != JTokenType.Null)
+                // 识别结果只允许是指令：LLM 返回 replyText/error 一律视为未识别
+                if (json["replyText"] is JToken replyToken
+                    && replyToken.Type != JTokenType.Null
+                    && !string.IsNullOrWhiteSpace(replyToken.ToString()))
                 {
-                    var replyText = replyToken.ToString();
-                    if (!string.IsNullOrWhiteSpace(replyText))
-                    {
-                        return new LlmIntent { ReplyText = replyText };
-                    }
+                    return new LlmIntent { Error = LlmIntent.NotRecognized };
+                }
+                if (json["error"] is JToken errToken
+                    && errToken.Type != JTokenType.Null
+                    && !string.IsNullOrWhiteSpace(errToken.ToString()))
+                {
+                    return new LlmIntent { Error = LlmIntent.NotRecognized };
                 }
 
                 var commandName = json.Value<string>("command");
@@ -148,6 +154,44 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     }
                 }
 
+                // 多目标：targetIndices / targetCodeNames 数组（优先于单值字段）
+                if (json["targetIndices"] is JToken idxArrToken && idxArrToken.Type == JTokenType.Array)
+                {
+                    var indices = new List<int>();
+                    foreach (var item in idxArrToken)
+                    {
+                        if (item.Type == JTokenType.Integer)
+                        {
+                            indices.Add(item.Value<int>());
+                        }
+                        else if (int.TryParse(item.ToString(), out var parsedArrIdx))
+                        {
+                            indices.Add(parsedArrIdx);
+                        }
+                    }
+                    if (indices.Count > 0)
+                    {
+                        intent.TargetIndices = indices;
+                    }
+                }
+
+                if (json["targetCodeNames"] is JToken codeArrToken && codeArrToken.Type == JTokenType.Array)
+                {
+                    var codeNames = new List<string>();
+                    foreach (var item in codeArrToken)
+                    {
+                        var s = item.ToString();
+                        if (!string.IsNullOrWhiteSpace(s))
+                        {
+                            codeNames.Add(s);
+                        }
+                    }
+                    if (codeNames.Count > 0)
+                    {
+                        intent.TargetCodeNames = codeNames;
+                    }
+                }
+
                 var codeToken = json["targetCodeName"];
                 if (codeToken != null && codeToken.Type != JTokenType.Null)
                 {
@@ -160,14 +204,28 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
                 if (intent.Selector == EIntentTargetSelector.Unspecified)
                 {
-                    intent.Selector = intent.TargetIndex.HasValue
+                    intent.Selector = intent.TargetIndices != null || intent.TargetIndex.HasValue
                         ? EIntentTargetSelector.ByIndex
-                        : EIntentTargetSelector.All;
+                        : intent.TargetCodeNames != null || !string.IsNullOrEmpty(intent.TargetCodeName)
+                            ? EIntentTargetSelector.ByCodeName
+                            : EIntentTargetSelector.All;
                 }
 
                 if (json["aimingBodyPart"] is JToken bodyToken && bodyToken.Type != JTokenType.Null)
                 {
                     intent.AimingBodyPart = bodyToken.ToString();
+                }
+
+                if (json["optionIndex"] is JToken optToken && optToken.Type != JTokenType.Null)
+                {
+                    if (optToken.Type == JTokenType.Integer)
+                    {
+                        intent.OptionIndex = optToken.Value<int>();
+                    }
+                    else if (int.TryParse(optToken.ToString(), out var parsedOpt))
+                    {
+                        intent.OptionIndex = parsedOpt;
+                    }
                 }
 
                 return intent;

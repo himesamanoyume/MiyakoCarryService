@@ -87,5 +87,7 @@
     "Mcs/VoiceUnhandled": "Voice command was not understood.",
     "Mcs/VoiceProviderMissing": "A STT/LLM provider is not configured.",
     "Mcs/VoiceSttFailed": "Speech recognition failed.",
-    "Mcs/VoiceLlmFailed": "Command interpretation failed."
+    "Mcs/VoiceLlmFailed": "Command interpretation failed.",
+    "Mcs/VoiceNotRecognized": "Command not recognized",
+    "Mcs/VoiceAimAtTarget": "Please aim at the target"
 }

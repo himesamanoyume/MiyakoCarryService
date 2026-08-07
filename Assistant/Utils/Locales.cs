@@ -93,6 +93,8 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string VOICEINTERPRETING      = "Mcs/VoiceInterpreting";
         public const string VOICEDISPATCHED        = "Mcs/VoiceDispatched";
         public const string VOICEUNHANDLED          = "Mcs/VoiceUnhandled";
+        public const string VOICENOTRECOGNIZED      = "Mcs/VoiceNotRecognized";
+        public const string VOICEAIMATTARGET        = "Mcs/VoiceAimAtTarget";
         public const string VOICEPROVIDERMISSING    = "Mcs/VoiceProviderMissing";
         public const string VOICESTTFAILED          = "Mcs/VoiceSttFailed";
         public const string VOICELLMFAILED          = "Mcs/VoiceLlmFailed";

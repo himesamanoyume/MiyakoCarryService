@@ -10,7 +10,7 @@
     "Mcs/VoiceCaptureMaxSeconds Description": "单次录音最长秒数，超过此长度将被截断。",
     "Mcs/VoiceVadEnergyThreshold Key": "自由发言音量阈值",
     "Mcs/VoiceVadEnergyThreshold Description": "自由发言 模式下触发语音开始的 RMS 能量阈值。若轻声被忽略请调低。",
-    "Mcs/VoiceVadSilenceSeconds Key": "自由发言 静音秒数",
+    "Mcs/VoiceVadSilenceSeconds Key": "自由发言静音秒数",
     "Mcs/VoiceVadSilenceSeconds Description": "自由发言 模式下结束录音所需的静音时长。",
     "Mcs/VoiceFeedbackSubtitles Key": "语音反馈字幕",
     "Mcs/VoiceFeedbackSubtitles Description": "每次语音指令下发后是否在游戏内显示通知。",
@@ -87,5 +87,7 @@
     "Mcs/VoiceUnhandled": "未能理解语音指令。",
     "Mcs/VoiceProviderMissing": "请先配置语音转文字(STT) / 大语言模型(LLM) 服务商。",
     "Mcs/VoiceSttFailed": "语音转文字失败。",
-    "Mcs/VoiceLlmFailed": "指令解析失败。"
+    "Mcs/VoiceLlmFailed": "指令解析失败。",
+    "Mcs/VoiceNotRecognized": "未识别出指令",
+    "Mcs/VoiceAimAtTarget": "请对准目标"
 }

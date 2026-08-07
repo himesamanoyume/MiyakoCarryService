@@ -1,3 +1,4 @@
+global using ClientLocales = MiyakoCarryService.Client.Utils.Locales;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -307,14 +308,14 @@ namespace MiyakoCarryService.Assistant
             const int debugOrder = 2000;
 
             SttDebugEnabled = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.STTDEBUGENABLED_KEY,
                 false,
                 Locales.STTDEBUGENABLED_DESCRIPTION,
                 needNotify: false);
 
             SttDebugText = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.STTDEBUGTEXT_KEY,
                 "",
                 Locales.STTDEBUGTEXT_DESCRIPTION,
@@ -326,7 +327,7 @@ namespace MiyakoCarryService.Assistant
                 });
 
             LlmDebugSend = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.LLMDEBUGSEND_KEY,
                 false,
                 Locales.LLMDEBUGSEND_DESCRIPTION,
@@ -344,7 +345,7 @@ namespace MiyakoCarryService.Assistant
                 });
 
             LlmDebugResult = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.LLMDEBUGRESULT_KEY,
                 "",
                 Locales.LLMDEBUGRESULT_DESCRIPTION,
@@ -356,14 +357,14 @@ namespace MiyakoCarryService.Assistant
                 });
 
             LlmDebugAutoEnabled = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.LLMDEBUGAUTOENABLED_KEY,
                 false,
                 Locales.LLMDEBUGAUTOENABLED_DESCRIPTION,
                 needNotify: false);
 
             LlmDebugAutoResult = McsConfigApi.RegisterConfig(
-                Client.Utils.Locales.DEBUG, debugOrder,
+                ClientLocales.DEBUG, debugOrder,
                 Locales.LLMDEBUGAUTORESULT_KEY,
                 "",
                 Locales.LLMDEBUGAUTORESULT_DESCRIPTION,
@@ -422,11 +423,15 @@ namespace MiyakoCarryService.Assistant
 
                 if (intent == null || intent.IsError)
                 {
-                    LlmDebugResult.Value = $"错误：{intent?.Error ?? "null"}";
+                    // 识别结果只允许指令：LLM 未识别统一显示，技术错误保留原文便于排查
+                    LlmDebugResult.Value = intent != null && intent.Error == LlmIntent.NotRecognized
+                        ? Locales.VOICENOTRECOGNIZED.McsLocalized()
+                        : $"错误：{intent?.Error ?? "null"}";
                 }
                 else if (!string.IsNullOrEmpty(intent.ReplyText))
                 {
-                    LlmDebugResult.Value = intent.ReplyText;
+                    // 提示词已禁止 replyText，此处仅为兼容旧模型输出的兜底
+                    LlmDebugResult.Value = Locales.VOICENOTRECOGNIZED.McsLocalized();
                 }
                 else if (!string.IsNullOrEmpty(intent.CommandName))
                 {

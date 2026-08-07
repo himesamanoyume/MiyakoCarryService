@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MiyakoCarryService.Assistant.Enums;
 
 namespace MiyakoCarryService.Assistant.Models
@@ -15,11 +16,19 @@ namespace MiyakoCarryService.Assistant.Models
     /// </summary>
     public sealed class LlmIntent
     {
+        /// <summary>LLM 未识别出任何指令时的统一错误标记（提示词规定返回该值）。</summary>
+        public const string NotRecognized = "not_recognized";
+
         public string CommandName;
         public EIntentTargetSelector Selector = EIntentTargetSelector.Unspecified;
         public int? TargetIndex;
         public string TargetCodeName;
+        // 多目标：一次指定多名护航（如 "5号6号" / "Rabbit1、Rabbit2"），优先于单目标字段
+        public List<int> TargetIndices;
+        public List<string> TargetCodeNames;
         public string AimingBodyPart;
+        // 代理/护送类指令：玩家话术命中的"指令菜单选项"序号（1-based，对应提示词中注入的编号列表）
+        public int? OptionIndex;
         public string ReplyText;
         public string Error;
 

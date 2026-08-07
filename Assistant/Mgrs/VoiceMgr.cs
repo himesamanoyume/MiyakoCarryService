@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading;
 using Comfort.Common;
 using EFT;
@@ -11,6 +12,7 @@ using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -448,10 +450,18 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _state = EVoiceState.Interpreting;
             _pendingTranscribedText = stt.Text;
 
+            // 代理/护送类指令：注入"指令菜单选项"（编号+本地化名+距离提示），LLM 据此返回 optionIndex
+            var llmText = stt.Text;
+            var optionsPrompt = BuildVoiceOptionsPrompt();
+            if (!string.IsNullOrEmpty(optionsPrompt))
+            {
+                llmText = stt.Text + "\n\n" + optionsPrompt;
+            }
+
             LlmIntent intent;
             try
             {
-                intent = await _llm.InterpretAsync(stt.Text, llmSettings, ct).ConfigureAwait(true);
+                intent = await _llm.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
             {
@@ -487,20 +497,22 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             if (intent.IsError)
             {
-                feedback = intent.Error;
-            }
-            else if (intent.IsReply)
-            {
-                feedback = intent.ReplyText;
+                // 识别结果只允许指令：LLM 未识别统一提示，技术错误保留原文便于排查
+                feedback = intent.Error == LlmIntent.NotRecognized
+                    ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized()
+                    : intent.Error;
             }
             else if (!string.IsNullOrEmpty(intent.CommandName))
             {
                 try
                 {
                     dispatched = IntentBinder.BindAndDispatch(intent);
-                    feedback = dispatched > 0
-                        ? $"已下发 {dispatched} 名护航：{intent.CommandName}"
-                        : $"无匹配护航成员：{intent.CommandName}";
+                    var localizedCommand = Utils.PromptTemplates.GetLocalizedNames(intent.CommandName);
+                    feedback = dispatched < 0
+                        ? Utils.Locales.VOICEAIMATTARGET.McsLocalized()
+                        : dispatched > 0
+                            ? $"已下发 {dispatched} 名护航：{localizedCommand}"
+                            : $"无匹配护航成员：{localizedCommand}";
                 }
                 catch (Exception ex)
                 {
@@ -510,7 +522,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             else
             {
-                feedback = "未识别到指令";
+                feedback = Utils.Locales.VOICENOTRECOGNIZED.McsLocalized();
             }
 
             McsEventApi.Notify(new VoiceCommandEvent
@@ -547,13 +559,19 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         /// <summary>
         /// 调试识别指令：用当前 LLM 配置解析转写文本，把实际将会调用的指令情况写入
-        /// "识别指令结果"（只识别，不派发）。
+        /// "识别指令结果"（只识别，不派发）。与正常管线一样注入代理/护送菜单选项。
         /// </summary>
         private async System.Threading.Tasks.Task RunDebugCommandTestAsync(string text, ProviderSettings llmSettings, CancellationToken ct)
         {
             try
             {
-                var intent = await _llm.InterpretAsync(text, llmSettings, ct).ConfigureAwait(true);
+                var llmText = text;
+                var optionsPrompt = BuildVoiceOptionsPrompt();
+                if (!string.IsNullOrEmpty(optionsPrompt))
+                {
+                    llmText = text + "\n\n" + optionsPrompt;
+                }
+                var intent = await _llm.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
                 MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = FormatDebugIntent(intent);
             }
             catch (OperationCanceledException)
@@ -566,37 +584,107 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
         }
 
-        /// <summary>格式化 LLM 指令识别结果：错误 / 纯回复 / 指令名+目标详情 / 无响应。</summary>
-        private static string FormatDebugIntent(LlmIntent intent)
+        /// <summary>
+        /// 构建"指令菜单选项"提示段（代理/护送类）：枚举当前战局菜单子选项，编号+本地化名+距离提示，
+        /// 供 LLM 通过 optionIndex 选择目标。战局外/失败/无选项时返回 null（不注入）。
+        /// </summary>
+        private string BuildVoiceOptionsPrompt()
+        {
+            try
+            {
+                if (!GameLoop.Instance.IsVaildGameWorld)
+                {
+                    return null;
+                }
+                var options = McsCommandApi.GetVoiceMenuOptions();
+                if (options.Count == 0)
+                {
+                    return null;
+                }
+
+                var sb = new StringBuilder();
+                sb.AppendLine("[Command options (numbered list) - ONLY relevant for InteractionProxyAction / QuestProxyAction / StationaryWeaponProxyAction / EscortWorld commands. If the player's phrase refers to one of these options (by its name, distance or description), return its optionIndex (1-based); otherwise set optionIndex to null. Do not mention this list otherwise.]");
+                for (int i = 0; i < options.Count; i++)
+                {
+                    var option = options[i];
+                    var display = string.IsNullOrEmpty(option.TargetName)
+                        ? option.Name
+                        : $"{option.Name}（{option.TargetName}）";
+                    sb.AppendLine($"{i + 1}. {display}");
+                }
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                MiyakoCarryServiceAssistantPlugin.Logger.LogWarning($"构建语音选项提示失败：{ex.Message}");
+                return null;
+            }
+        }
+
+        private static bool IsOptionCommand(string commandType)
+        {
+            return commandType is "InteractionProxyAction" or "QuestProxyAction"
+                or "StationaryWeaponProxyAction" or "EscortWorld";
+        }
+
+        /// <summary>格式化 LLM 指令识别结果：未识别 / 技术错误 / 指令名+目标详情 / 无响应。</summary>
+        private string FormatDebugIntent(LlmIntent intent)
         {
             if (intent == null || intent.IsError)
             {
-                return $"错误：{intent?.Error ?? "null"}";
-            }
-            if (intent.IsReply)
-            {
-                return intent.ReplyText;
+                // 识别结果只允许指令：LLM 未识别统一显示，技术错误保留原文便于排查
+                return intent != null && intent.Error == LlmIntent.NotRecognized
+                    ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized()
+                    : $"错误：{intent?.Error ?? "null"}";
             }
             if (!string.IsNullOrEmpty(intent.CommandName))
             {
-                string detail = string.Empty;
-                switch (intent.Selector)
+                // 代理/护送类且选择了菜单选项：直接显示所选选项名（含距离提示）
+                if (intent.OptionIndex.HasValue && IsOptionCommand(intent.CommandName))
                 {
-                    case EIntentTargetSelector.All:
-                        detail = "（全员）";
-                        break;
-                    case EIntentTargetSelector.ByIndex:
-                        detail = $"（成员 {intent.TargetIndex}）";
-                        break;
-                    case EIntentTargetSelector.ByCodeName:
-                        detail = $"（代号 {intent.TargetCodeName}）";
-                        break;
+                    var options = McsCommandApi.GetVoiceMenuOptions();
+                    var idx = intent.OptionIndex.Value - 1;
+                    if (idx >= 0 && idx < options.Count)
+                    {
+                        var option = options[idx];
+                        var optionName = string.IsNullOrEmpty(option.TargetName)
+                            ? option.Name
+                            : $"{option.Name}（{option.TargetName}）";
+                        return $"指令：{optionName}";
+                    }
+                    return $"指令：{Utils.PromptTemplates.GetLocalizedNames(intent.CommandName)}（选项 {intent.OptionIndex}）";
+                }
+
+                string detail = string.Empty;
+                if (intent.TargetIndices is { Count: > 0 })
+                {
+                    detail = $"（成员 {string.Join("、", intent.TargetIndices)}）";
+                }
+                else if (intent.TargetCodeNames is { Count: > 0 })
+                {
+                    detail = $"（代号 {string.Join("、", intent.TargetCodeNames)}）";
+                }
+                else
+                {
+                    switch (intent.Selector)
+                    {
+                        case EIntentTargetSelector.All:
+                            detail = "（全员）";
+                            break;
+                        case EIntentTargetSelector.ByIndex:
+                            detail = $"（成员 {intent.TargetIndex}）";
+                            break;
+                        case EIntentTargetSelector.ByCodeName:
+                            detail = $"（代号 {intent.TargetCodeName}）";
+                            break;
+                    }
                 }
                 if (!string.IsNullOrEmpty(intent.AimingBodyPart))
                 {
                     detail += $"（{intent.AimingBodyPart}）";
                 }
-                return $"指令：{intent.CommandName}{detail}";
+                // 显示本地化权威指令名（TEAM* 系列），与提示词 glossary 同源
+                return $"指令：{Utils.PromptTemplates.GetLocalizedNames(intent.CommandName)}{detail}";
             }
             return "无响应";
         }
