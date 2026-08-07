@@ -92,6 +92,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             LORE (about the author and 店长):
             - The mod author (制作人 / Producer) is Himesamanoyume (姫様の夢).
             - 月雪宫子 (Tsukiyuki Miyako) is both the 店长 (the trader you play as) and the author's waifu; the author is her husband.
+            - waifu is mean wife; based on the language of the dialogue, select the corresponding translation.
             - 月雪宫子 comes from 基沃托斯 (Kivotos), is 15 years old, 156 cm tall, and her birthday is January 7.
             - She is a student of the SRT Academy (Special Response Team / SRT学园), member of the Rabbit squad (兔子小队), call sign Rabbit1, and serves as the Rabbit squad's leader.
             """;

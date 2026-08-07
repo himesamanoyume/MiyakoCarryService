@@ -93,5 +93,7 @@
     "Mcs/VoiceDebugPlay Key": "播放录音",
     "Mcs/VoiceDebugPlay Description": "播放最近一次语音录制的内容（DEBUG 回放，需先有一次成功的录音）",
     "Mcs/VoiceDebugVadText Key": "自由发言监听状态",
-    "Mcs/VoiceDebugVadText Description": "实时显示自由发言的语音检测状态（rms 能量 / 是否语音 / 静音计时）"
+    "Mcs/VoiceDebugVadText Description": "实时显示自由发言的语音检测状态（rms 能量 / 是否语音 / 静音计时）",
+    "Mcs/LlmReasoningEffort Key": "大语言模型(LLM) 思考强度",
+    "Mcs/LlmReasoningEffort Description": "LLM 思考强度（reasoning effort）：default / low / medium / high / max。仅提供选项，此模型是否支持需根据实际情况而定；default 表示不传该参数，不支持的模型通常忽略该参数。"
 }

@@ -62,6 +62,7 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<double> LlmTemperature;
         public static ConfigEntry<int> LlmMaxTokens;
         public static ConfigEntry<int> LlmTimeoutSec;
+        public static ConfigEntry<string> LlmReasoningEffort;
 
         public static ConfigEntry<bool> SttDebugEnabled;
         public static ConfigEntry<string> SttDebugText;
@@ -319,6 +320,14 @@ namespace MiyakoCarryService.Assistant
                 new AcceptableValueRange<int>(3, 120)
             );
 
+            LlmReasoningEffort = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.LLMREASONINGEFFORT_KEY,
+                "low",
+                Locales.LLMREASONINGEFFORT_DESCRIPTION,
+                new AcceptableValueList<string>(["default", "low", "medium", "high", "max"])
+            );
+
             HttpProxyHost = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.HTTPPROXYHOST_KEY,
@@ -564,6 +573,7 @@ namespace MiyakoCarryService.Assistant
                     MaxTokens = LlmMaxTokens.Value,
                     // 调试测试放宽超时：推理模型（如 DeepSeek V4 Flash）思考耗时较长，15s 默认值容易误判超时
                     TimeoutSec = Math.Max(LlmTimeoutSec.Value, 60),
+                    ReasoningEffort = LlmReasoningEffort.Value,
                 };
 
                 var text = SttDebugText?.Value;

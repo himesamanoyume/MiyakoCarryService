@@ -14,5 +14,7 @@ namespace MiyakoCarryService.Assistant.Models
         public double Temperature = 0.2;
         public int MaxTokens = 3000;
         public int TimeoutSec = 15;
+        /// <summary>LLM 思考强度（reasoning effort）：default/low/medium/high/max，default 或空表示不传参。</summary>
+        public string ReasoningEffort;
     }
 }

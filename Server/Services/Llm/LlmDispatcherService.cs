@@ -80,6 +80,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
                 TimeoutSec = serverConfig.TraderLlmTimeoutSec,
+                ReasoningEffort = serverConfig.TraderLlmReasoningEffort,
             };
 
             var provider = CreateProvider(serverConfig.TraderLlmProvider);

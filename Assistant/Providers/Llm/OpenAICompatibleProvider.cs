@@ -46,6 +46,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var useJsonObject = attempt == 0;
+                    // 思考强度：default/空不传；不支持的端点报 400 且错误含 reasoning/not supported 时去掉重试
+                    var useReasoningEffort = attempt == 0
+                        && !string.IsNullOrEmpty(settings.ReasoningEffort)
+                        && settings.ReasoningEffort != "default";
                     var body = new JObject
                     {
                         ["model"] = model,
@@ -57,6 +61,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                         ["temperature"] = settings.Temperature,
                         ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
                     };
+                    if (useReasoningEffort)
+                    {
+                        body["reasoning_effort"] = settings.ReasoningEffort;
+                    }
                     if (useJsonObject)
                     {
                         body["response_format"] = JObject.FromObject(new { type = "json_object" });
@@ -76,11 +84,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (!response.IsSuccessStatusCode)
                     {
-                        if (useJsonObject
-                            && (int)response.StatusCode is 400 or 401 or 403 or 422
+                        // 不支持的端点（错误含 not supported/json_object/response_format/reasoning）去掉可选参数重试一次
+                        var unsupported = (int)response.StatusCode is 400 or 401 or 403 or 422
                             && (responseString.Contains("not supported", StringComparison.OrdinalIgnoreCase)
                                 || responseString.Contains("json_object", StringComparison.OrdinalIgnoreCase)
-                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)))
+                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)
+                                || responseString.Contains("reasoning", StringComparison.OrdinalIgnoreCase));
+                        if (attempt == 0 && unsupported)
                         {
                             continue;
                         }

@@ -85,9 +85,13 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                 // 优先携带 response_format=json_object 以稳定 JSON 输出；
                 // 部分 OpenAI 兼容端点（如 OpenCode Zen 的 DeepSeek V4）不支持该参数，会返回 4xx 且错误含
                 // "not supported" / "json_object" / "response_format" 等字样，此时去掉该参数回退重试一次。
+                // 思考强度 reasoning_effort 同理：default/空不传，不支持的端点去掉后重试。
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var useJsonObject = attempt == 0;
+                    var useReasoningEffort = attempt == 0
+                        && !string.IsNullOrEmpty(settings.ReasoningEffort)
+                        && settings.ReasoningEffort != "default";
                     var body = new JsonObject
                     {
                         ["model"] = modelId,
@@ -99,6 +103,10 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                         ["temperature"] = settings.Temperature,
                         ["max_tokens"] = maxTokens,
                     };
+                    if (useReasoningEffort)
+                    {
+                        body["reasoning_effort"] = settings.ReasoningEffort;
+                    }
                     if (useJsonObject)
                     {
                         body["response_format"] = JsonSerializer.SerializeToNode(new { type = "json_object" });
@@ -118,11 +126,13 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (!response.IsSuccessStatusCode)
                     {
-                        if (useJsonObject
-                            && (int)response.StatusCode is 400 or 401 or 403 or 422
+                        // 不支持的端点（错误含 not supported/json_object/response_format/reasoning）去掉可选参数重试一次
+                        var unsupported = (int)response.StatusCode is 400 or 401 or 403 or 422
                             && (responseString.Contains("not supported", StringComparison.OrdinalIgnoreCase)
                                 || responseString.Contains("json_object", StringComparison.OrdinalIgnoreCase)
-                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)))
+                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)
+                                || responseString.Contains("reasoning", StringComparison.OrdinalIgnoreCase));
+                        if (attempt == 0 && unsupported)
                         {
                             continue;
                         }

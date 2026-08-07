@@ -451,6 +451,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 Temperature = MiyakoCarryServiceAssistantPlugin.LlmTemperature.Value,
                 MaxTokens = MiyakoCarryServiceAssistantPlugin.LlmMaxTokens.Value,
                 TimeoutSec = MiyakoCarryServiceAssistantPlugin.LlmTimeoutSec.Value,
+                ReasoningEffort = MiyakoCarryServiceAssistantPlugin.LlmReasoningEffort.Value,
             };
 
             SttResult stt;

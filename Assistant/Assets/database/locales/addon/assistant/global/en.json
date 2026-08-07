@@ -93,5 +93,7 @@
     "Mcs/VoiceDebugPlay Key": "Play Recording",
     "Mcs/VoiceDebugPlay Description": "Play back the most recent voice recording (debug playback; requires a successful recording first)",
     "Mcs/VoiceDebugVadText Key": "FreeTalk VAD Status",
-    "Mcs/VoiceDebugVadText Description": "Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only."
+    "Mcs/VoiceDebugVadText Description": "Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only.",
+    "Mcs/LlmReasoningEffort Key": "LLM Reasoning Effort",
+    "Mcs/LlmReasoningEffort Description": "LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it."
 }

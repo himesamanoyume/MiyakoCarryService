@@ -92,6 +92,9 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMTIMEOUTSEC_KEY           = "Mcs/LlmTimeoutSec Key";
         public const string LLMTIMEOUTSEC_DESCRIPTION   = "Mcs/LlmTimeoutSec Description";
 
+        public const string LLMREASONINGEFFORT_KEY        = "Mcs/LlmReasoningEffort Key";
+        public const string LLMREASONINGEFFORT_DESCRIPTION = "Mcs/LlmReasoningEffort Description";
+
         public const string VOICELISTENING          = "Mcs/VoiceListening";
         public const string VOICETRANSCRIBING       = "Mcs/VoiceTranscribing";
         public const string VOICEINTERPRETING      = "Mcs/VoiceInterpreting";
