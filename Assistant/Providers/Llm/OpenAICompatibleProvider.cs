@@ -238,7 +238,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
         private static string SafeTrim(string s, int max)
         {
-            if (string.IsNullOrEmpty(s)) return string.Empty;
+            if (string.IsNullOrEmpty(s))
+            {
+                return string.Empty;
+            }
             return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }

@@ -10,6 +10,7 @@ using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
+using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
@@ -67,6 +68,35 @@ namespace MiyakoCarryService.Assistant.Mgrs
             base.OnMgrDestroy();
         }
 
+        /// <summary>
+        /// 战局开始：菜单场景启动的麦克风会话在跨场景（Unity 音频系统重置）后可能停止写入，
+        /// 重建会话并复位全部语音状态，保证战局内录音正常。
+        /// </summary>
+        public override void OnGameWorldStarted(GameWorldStartedEvent @event)
+        {
+            _capture.RestartForNewRaid();
+            _capturing = false;
+            _speechStarted = false;
+            _speechConfirmCount = 0;
+            _captureStartedAt = 0;
+            _lastSpeechAt = 0;
+            _state = EVoiceState.Idle;
+            base.OnGameWorldStarted(@event);
+        }
+
+        /// <summary>
+        /// 战局结束回到菜单：同样重建会话并复位状态，保证菜单调试与下次进战局时会话干净。
+        /// </summary>
+        public override void OnGameWorldEnded(GameWorldEndedEvent @event)
+        {
+            _capture.RestartForNewRaid();
+            _capturing = false;
+            _speechStarted = false;
+            _speechConfirmCount = 0;
+            _state = EVoiceState.Idle;
+            base.OnGameWorldEnded(@event);
+        }
+
         void Update()
         {
             // 配置项可被玩家在 ConfigurationManager 中实时修改；仅当参数变化时重建 VAD，
@@ -108,8 +138,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 if (_capturing)
                 {
-                    // 门控关闭：丢弃当前段（麦克风会话保持，避免 End→Start 循环失败）
+                    // 门控关闭：丢弃当前段并同步复位状态（麦克风会话保持，避免 End→Start 循环失败）
                     _capture.Abort();
+                    _capturing = false;
+                    _speechStarted = false;
+                    _speechConfirmCount = 0;
                 }
                 _state = EVoiceState.Idle;
                 return;
@@ -485,9 +518,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             try
             {
                 // 调试辅助：打印实际发送的完整提示词（System Prompt + User Text），便于核对与优化
-                MiyakoCarryServiceAssistantPlugin.Logger.LogWarning(
-                    "\n=== LLM System Prompt ===\n" + Utils.PromptTemplates.BuildSystemPrompt(llmSettings.SystemPrompt)
-                    + "\n=== LLM User Text ===\n" + llmText);
+                // MiyakoCarryServiceAssistantPlugin.Logger.LogWarning("\n=== LLM System Prompt ===\n" + Utils.PromptTemplates.BuildSystemPrompt(llmSettings.SystemPrompt) + "\n=== LLM User Text ===\n" + llmText);
                 intent = await _llm.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
             catch (OperationCanceledException)

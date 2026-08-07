@@ -235,6 +235,26 @@ namespace MiyakoCarryService.Assistant.Services
             }
         }
 
+        /// <summary>
+        /// 战局切换时重建麦克风会话：Unity 场景加载会重置音频系统，从菜单场景带入的旧会话
+        /// 在战局内可能停止写入（GetPosition 停滞/GetData 空）。销毁旧 clip 并置空，
+        /// 下次 <see cref="Begin"/> 会重新 Microphone.Start；新战局内仅此一次重建，
+        /// 规避 End→Start 循环导致的第二次录音失败问题。
+        /// </summary>
+        public void RestartForNewRaid()
+        {
+            _capturing = false;
+            _armed = false;
+            _samples.Clear();
+            _preRoll.Clear();
+            if (_clip != null)
+            {
+                try { Microphone.End(_deviceName); } catch { }
+                UnityEngine.Object.Destroy(_clip);
+                _clip = null;
+            }
+        }
+
         private int SafeGetPosition()
         {
             try
