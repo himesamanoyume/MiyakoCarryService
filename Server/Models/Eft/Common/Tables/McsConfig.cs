@@ -110,7 +110,7 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         public double TraderLlmTemperature { get; set; } = 0.2;
 
         [JsonPropertyName("TraderLlmMaxTokens")]
-        public int TraderLlmMaxTokens { get; set; } = 3000;
+        public int TraderLlmMaxTokens { get; set; } = 8192;
 
         [JsonPropertyName("TraderLlmTimeoutSec")]
         public int TraderLlmTimeoutSec { get; set; } = 15;

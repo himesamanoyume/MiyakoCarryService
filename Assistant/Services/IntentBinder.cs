@@ -165,19 +165,22 @@ namespace MiyakoCarryService.Assistant.Services
 
         private static Player[] SelectTargets(LlmIntent intent, Player[] aliveMembers)
         {
-            // 多目标：序号数组（1-based，越界跳过、去重），如 "5号6号"
+            // 多目标：序号数组（"5号6号" → [5,6]），按护航权威编号（RabbitN 编号）匹配，越界/重复跳过
             if (intent.TargetIndices is { Count: > 0 })
             {
                 var result = new List<Player>();
-                var seen = new HashSet<int>();
-                foreach (var idx in intent.TargetIndices)
+                var seen = new HashSet<Player>();
+                foreach (var requested in intent.TargetIndices)
                 {
-                    var i = idx - 1;
-                    if (i < 0 || i >= aliveMembers.Length || !seen.Add(i))
+                    foreach (var member in aliveMembers)
                     {
-                        continue;
+                        if (McsCommandApi.GetMcsBotPlayerIndex(member) != requested || !seen.Add(member))
+                        {
+                            continue;
+                        }
+                        result.Add(member);
+                        break;
                     }
-                    result.Add(aliveMembers[i]);
                 }
                 return result.ToArray();
             }
@@ -217,9 +220,16 @@ namespace MiyakoCarryService.Assistant.Services
 
             if (intent.Selector == EIntentTargetSelector.ByIndex && intent.TargetIndex.HasValue)
             {
-                var idx = intent.TargetIndex.Value - 1; // 1-based
-                if (idx < 0 || idx >= aliveMembers.Length) { return Array.Empty<Player>(); }
-                return new[] { aliveMembers[idx] };
+                // "N号" = 编号为 N 的护航（与玩家所见 RabbitN 一致），不是存活列表的第 N 位
+                var requested = intent.TargetIndex.Value;
+                foreach (var member in aliveMembers)
+                {
+                    if (McsCommandApi.GetMcsBotPlayerIndex(member) == requested)
+                    {
+                        return new[] { member };
+                    }
+                }
+                return Array.Empty<Player>();
             }
 
             if (intent.Selector == EIntentTargetSelector.ByCodeName && !string.IsNullOrEmpty(intent.TargetCodeName))

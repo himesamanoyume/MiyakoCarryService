@@ -484,6 +484,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             LlmIntent intent;
             try
             {
+                // 调试辅助：打印实际发送的完整提示词（System Prompt + User Text），便于核对与优化
+                MiyakoCarryServiceAssistantPlugin.Logger.LogWarning(
+                    "\n=== LLM System Prompt ===\n" + Utils.PromptTemplates.BuildSystemPrompt(llmSettings.SystemPrompt)
+                    + "\n=== LLM User Text ===\n" + llmText);
                 intent = await _llm.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
@@ -646,8 +650,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private static bool IsOptionCommand(string commandType)
         {
-            return commandType is "InteractionProxyAction" or "QuestProxyAction"
-                or "StationaryWeaponProxyAction" or "EscortWorld";
+            return commandType is "InteractionProxyAction" or "QuestProxyAction" or "StationaryWeaponProxyAction" or "EscortWorld";
         }
 
         /// <summary>格式化 LLM 指令识别结果：未识别 / 技术错误 / 指令名+目标详情 / 无响应。</summary>
