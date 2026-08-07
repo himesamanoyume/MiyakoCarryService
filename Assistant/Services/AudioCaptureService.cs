@@ -107,7 +107,6 @@ namespace MiyakoCarryService.Assistant.Services
                 if (_ringSize <= 0 || _ringSize > total)
                 {
                     _ringSize = Math.Min(Math.Max(_lastReadPos, cur), total);
-                    MiyakoCarryServiceAssistantPlugin.Logger.LogInfo($"麦克风回绕边界估计：{_ringSize} 样本");
                 }
                 int ringEnd = Math.Min(_ringSize, total);
                 Feed(_lastReadPos, ringEnd);

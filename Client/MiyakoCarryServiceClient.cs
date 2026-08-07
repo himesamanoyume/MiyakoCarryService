@@ -173,7 +173,6 @@ namespace MiyakoCarryService.Client
         {
             _patches.Add(new ContainsSearchStringPatch());
             _patches.Add(new DrawSinglePluginPatch());
-            _patches.Add(new DropdownPopupPatch());
             _patches.Add(new DrawFlagsFieldPatch());
             _patches.Add(new TraderScreensGroupShowPatch());
             _patches.Add(new RaidSettingsLocalPatch());
@@ -414,108 +413,6 @@ namespace MiyakoCarryService.Client
             if (newIndex != selectedIndex)
             {
                 entry.BoxedValue = values.GetValue(newIndex);
-            }
-        }
-
-        internal sealed class DropdownData
-        {
-            public Array Values;
-            public string[] Labels;
-        }
-
-        /// <summary>枚举下拉框的展开状态、选项缓存与按钮屏幕位置（按配置项）。弹层由 DropdownPopupPatch 悬浮绘制。</summary>
-        internal static readonly Dictionary<ConfigEntryBase, bool> DropdownExpanded = new();
-        internal static readonly Dictionary<ConfigEntryBase, DropdownData> DropdownOptions = new();
-        internal static readonly Dictionary<ConfigEntryBase, Rect> DropdownButtonScreenRects = new();
-
-        /// <summary>
-        /// 以本地化文案渲染枚举下拉框：按钮显示当前值，点击切换展开状态；
-        /// 选项弹层由 <see cref="Patches.BepInEx.DropdownPopupPatch"/> 在 SettingsWindow 绘制完成后悬浮于窗口上层。
-        /// </summary>
-        internal void DropdownDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict) where T : Enum
-        {
-            var values = Enum.GetValues(typeof(T));
-            var current = (T)entry.BoxedValue;
-            var currentLabel = dict.TryGetValue(current, out var label) ? label : current.ToString();
-
-            if (GUILayout.Button(currentLabel, GUILayout.ExpandWidth(true)))
-            {
-                var wasOpen = DropdownExpanded.TryGetValue(entry, out var open) && open;
-
-                // 打开本下拉时关闭其它已展开的下拉，与 ConfigurationManager 同时仅一个下拉的语义一致
-                foreach (var key in DropdownExpanded.Keys.ToList())
-                {
-                    DropdownExpanded[key] = false;
-                }
-                DropdownExpanded[entry] = !wasOpen;
-
-                // 展开时刷新选项缓存（本地化文案实时解析）
-                var labels = new string[values.Length];
-                for (int i = 0; i < values.Length; i++)
-                {
-                    var enumValue = (T)values.GetValue(i);
-                    labels[i] = dict.TryGetValue(enumValue, out var optionText) ? optionText : enumValue.ToString();
-                }
-                DropdownOptions[entry] = new DropdownData { Values = values, Labels = labels };
-            }
-
-            // 每帧记录按钮屏幕位置（含滚动偏移），供弹层跟随定位
-            var buttonRect = GUILayoutUtility.GetLastRect();
-            DropdownButtonScreenRects[entry] = new Rect(GUIUtility.GUIToScreenPoint(buttonRect.position), buttonRect.size);
-        }
-
-        /// <summary>
-        /// 在 ConfigurationManager 窗口内容绘制完成后悬浮绘制展开的选项弹层（不挤占布局高度，
-        /// 复刻原生 AcceptableValueList 的弹层行为）。
-        /// </summary>
-        internal static void DrawDropdownPopup()
-        {
-            var expanded = DropdownExpanded.FirstOrDefault(kvp => kvp.Value);
-            if (expanded.Key == null)
-            {
-                return;
-            }
-
-            var entry = expanded.Key;
-            if (!DropdownOptions.TryGetValue(entry, out var data)
-                || !DropdownButtonScreenRects.TryGetValue(entry, out var buttonRect)
-                || buttonRect.width <= 0)
-            {
-                DropdownExpanded[entry] = false;
-                return;
-            }
-
-            var popupWidth = Mathf.Max(buttonRect.width, 180f);
-            var rowHeight = 22f;
-            var popupHeight = data.Labels.Length * rowHeight;
-            var popupRect = new Rect(buttonRect.x, buttonRect.y + buttonRect.height, popupWidth, popupHeight);
-
-            // 超出窗口底部则向上翻转
-            var windowYMax = Screen.height;
-            if (popupRect.yMax > windowYMax)
-            {
-                popupRect.y = Mathf.Max(0f, buttonRect.y - popupHeight);
-            }
-
-            var mousePos = Event.current.mousePosition;
-            if (Event.current.type == EventType.MouseDown
-                && !popupRect.Contains(mousePos)
-                && !buttonRect.Contains(mousePos))
-            {
-                DropdownExpanded[entry] = false;
-                return;
-            }
-
-            GUI.Box(popupRect, GUIContent.none, GUI.skin.box);
-            for (int i = 0; i < data.Labels.Length; i++)
-            {
-                var optionRect = new Rect(popupRect.x, popupRect.y + i * rowHeight, popupRect.width, rowHeight);
-                if (GUI.Button(optionRect, data.Labels[i]))
-                {
-                    entry.BoxedValue = data.Values.GetValue(i);
-                    DropdownExpanded[entry] = false;
-                    return;
-                }
             }
         }
 

@@ -23,15 +23,15 @@
     "Mcs/SttDebugEnabled Key": "STT Debug Toggle",
     "Mcs/SttDebugEnabled Description": "When enabled, records and transcribes using the current configuration; the transcribed text overwrites the STT debug text field.",
     "Mcs/SttDebugText Key": "STT Debug Text",
-    "Mcs/SttDebugText Description": "The latest transcription result of a recording (read-only, not editable).",
+    "Mcs/SttDebugText Description": "The latest transcription result of a recording.",
     "Mcs/LlmDebugSend Key": "LLM Send Test",
     "Mcs/LlmDebugSend Description": "Sends the STT debug text to the LLM for testing; the reply or error overwrites the LLM result field.",
     "Mcs/LlmDebugResult Key": "LLM Result",
-    "Mcs/LlmDebugResult Description": "The latest reply or error message of an LLM test (read-only, not editable).",
+    "Mcs/LlmDebugResult Description": "The latest reply or error message of an LLM test.",
     "Mcs/LlmDebugAutoEnabled Key": "Debug Command Recognition",
     "Mcs/LlmDebugAutoEnabled Description": "When enabled, after STT transcription in debug mode, automatically calls the LLM for command recognition testing; the result is shown in 'Command Recognition Result'.",
     "Mcs/LlmDebugAutoResult Key": "Command Recognition Result",
-    "Mcs/LlmDebugAutoResult Description": "The latest automatic command recognition result, showing what command the LLM would actually call (read-only, not editable).",
+    "Mcs/LlmDebugAutoResult Description": "The latest automatic command recognition result, showing what command the LLM would actually call.",
     "Mcs/SttProvider Key": "STT Provider",
     "Mcs/SttProvider Description": "Cloud Speech-to-Text provider. None disables voice control; OpenAI Whisper is recommended for international users.",
     "Mcs/SttApiKey Key": "STT Api Key",
@@ -91,5 +91,7 @@
     "Mcs/VoiceNotRecognized": "Command not recognized",
     "Mcs/VoiceAimAtTarget": "Please aim at the target",
     "Mcs/VoiceDebugPlay Key": "Play Recording",
-    "Mcs/VoiceDebugPlay Description": "Play back the most recent voice recording (debug playback; requires a successful recording first)"
+    "Mcs/VoiceDebugPlay Description": "Play back the most recent voice recording (debug playback; requires a successful recording first)",
+    "Mcs/VoiceDebugVadText Key": "FreeTalk VAD Status",
+    "Mcs/VoiceDebugVadText Description": "Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only."
 }

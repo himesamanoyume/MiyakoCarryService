@@ -73,13 +73,5 @@ namespace MiyakoCarryService.Client.Api
         {
             MiyakoCarryServicePlugin.Instance.CustomDrawer(entry, dict, xCount);
         }
-
-        /// <summary>
-        /// 以本地化文案渲染枚举下拉框
-        /// </summary>
-        public static void DropdownDrawer<T>(ConfigEntryBase entry, Dictionary<T, string> dict) where T : Enum
-        {
-            MiyakoCarryServicePlugin.Instance.DropdownDrawer(entry, dict);
-        }
     }
 }

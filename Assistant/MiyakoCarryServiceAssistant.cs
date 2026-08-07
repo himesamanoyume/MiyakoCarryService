@@ -70,6 +70,7 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<bool> LlmDebugAutoEnabled;
         public static ConfigEntry<string> LlmDebugAutoResult;
         public static ConfigEntry<bool> VoiceDebugPlay;
+        public static ConfigEntry<string> VoiceDebugVadText;
 
         /// <summary>最近一次语音录制的样本与格式（供 DEBUG 区"播放录音"按钮回放）。</summary>
         public static float[] LastVoiceSamples;
@@ -110,7 +111,8 @@ namespace MiyakoCarryService.Assistant
                 section, order,
                 Locales.VOICEENABLED_KEY,
                 false,
-                Locales.VOICEENABLED_DESCRIPTION);
+                Locales.VOICEENABLED_DESCRIPTION
+            );
 
             VoiceTriggerMode = McsConfigApi.RegisterConfig(
                 section, order,
@@ -126,40 +128,46 @@ namespace MiyakoCarryService.Assistant
                             { EVoiceTriggerMode.FreeTalk, Locales.VOICETRIGGERMODEFREETALK.McsLocalized() },
                         }, 2
                     )
-                });
+                }
+            );
 
             VoiceHotKey = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEHOTKEY_KEY,
                 new KeyboardShortcut(),
-                Locales.VOICEHOTKEY_DESCRIPTION);
+                Locales.VOICEHOTKEY_DESCRIPTION
+            );
 
             VoiceCaptureMaxSeconds = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICECAPTUREMAXSECONDS_KEY,
                 15f,
                 Locales.VOICECAPTUREMAXSECONDS_DESCRIPTION,
-                new AcceptableValueRange<float>(3f, 60f));
+                new AcceptableValueRange<float>(3f, 60f)
+            );
 
             VoiceVadEnergyThreshold = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEVADENERGYTHRESHOLD_KEY,
                 0.01f,
                 Locales.VOICEVADENERGYTHRESHOLD_DESCRIPTION,
-                new AcceptableValueRange<float>(0.001f, 0.3f));
+                new AcceptableValueRange<float>(0.001f, 0.3f)
+            );
 
             VoiceVadSilenceSeconds = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEVADSILENCESECONDS_KEY,
                 1f,
                 Locales.VOICEVADSILENCESECONDS_DESCRIPTION,
-                new AcceptableValueRange<float>(0.5f, 5f));
+                new AcceptableValueRange<float>(0.5f, 5f)
+            );
 
             VoiceFeedbackSubtitles = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEFEEDBACKSUBTITLES_KEY,
                 true,
-                Locales.VOICEFEEDBACKSUBTITLES_DESCRIPTION);
+                Locales.VOICEFEEDBACKSUBTITLES_DESCRIPTION
+            );
 
             var recordDevices = new List<string> { "Default" };
             if (Microphone.devices != null)
@@ -172,7 +180,8 @@ namespace MiyakoCarryService.Assistant
                 Locales.RECORDDEVICE_KEY,
                 "Default",
                 Locales.RECORDDEVICE_DESCRIPTION,
-                new AcceptableValueList<string>(recordDevices.ToArray()));
+                new AcceptableValueList<string>(recordDevices.ToArray())
+            );
 
             SttProvider = McsConfigApi.RegisterConfig(
                 section, order,
@@ -181,7 +190,7 @@ namespace MiyakoCarryService.Assistant
                 Locales.STTPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry => McsConfigApi.DropdownDrawer(entry,
+                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ESttProvider, string>
                         {
                             { ESttProvider.None, Locales.STTPROVIDERNONE.McsLocalized() },
@@ -193,45 +202,46 @@ namespace MiyakoCarryService.Assistant
                             { ESttProvider.XfyunIat, Locales.STTPROVIDERXFYUNIAT.McsLocalized() },
                             { ESttProvider.VolcIat, Locales.STTPROVIDERVOLCIAT.McsLocalized() },
                             { ESttProvider.BaiduAsr, Locales.STTPROVIDERBAIDUASR.McsLocalized() },
-                        }
+                        }, 2
                     )
-                });
+                }
+            );
 
             SttApiKey = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTAPIKEY_KEY,
                 "",
-                Locales.STTAPIKEY_DESCRIPTION,
-                customAttributes: new ConfigurationManagerAttributes
-                {
-                    CustomDrawer = DrawPasswordText,
-                    HideDefaultButton = true,
-                });
+                Locales.STTAPIKEY_DESCRIPTION
+            );
 
             SttBaseUrl = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTBASEURL_KEY,
                 "",
-                Locales.STTBASEURL_DESCRIPTION);
+                Locales.STTBASEURL_DESCRIPTION
+            );
 
             SttModelId = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTMODELID_KEY,
                 "",
-                Locales.STTMODELID_DESCRIPTION);
+                Locales.STTMODELID_DESCRIPTION
+            );
 
             SttLanguage = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTLANGUAGE_KEY,
                 "",
-                Locales.STTLANGUAGE_DESCRIPTION);
+                Locales.STTLANGUAGE_DESCRIPTION
+            );
 
             SttTimeoutSec = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTTIMEOUTSEC_KEY,
                 15,
                 Locales.STTTIMEOUTSEC_DESCRIPTION,
-                new AcceptableValueRange<int>(3, 120));
+                new AcceptableValueRange<int>(3, 120)
+            );
 
             LlmProvider = McsConfigApi.RegisterConfig(
                 section, order,
@@ -240,7 +250,7 @@ namespace MiyakoCarryService.Assistant
                 Locales.LLMPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
-                    CustomDrawer = static entry => McsConfigApi.DropdownDrawer(entry,
+                    CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ELlmProvider, string>
                         {
                             { ELlmProvider.None, Locales.LLMPROVIDERNONE.McsLocalized() },
@@ -252,71 +262,76 @@ namespace MiyakoCarryService.Assistant
                             { ELlmProvider.Qianfan, Locales.LLMPROVIDERQIANFAN.McsLocalized() },
                             { ELlmProvider.Spark, Locales.LLMPROVIDERSPARK.McsLocalized() },
                             { ELlmProvider.MiniMax, Locales.LLMPROVIDERMINIMAX.McsLocalized() },
-                        }
+                        }, 2
                     )
-                });
+                }
+            );
 
             LlmApiKey = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMAPIKEY_KEY,
                 "",
-                Locales.LLMAPIKEY_DESCRIPTION,
-                customAttributes: new ConfigurationManagerAttributes
-                {
-                    CustomDrawer = DrawPasswordText,
-                    HideDefaultButton = true,
-                });
+                Locales.LLMAPIKEY_DESCRIPTION
+            );
 
             LlmBaseUrl = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMBASEURL_KEY,
                 "",
-                Locales.LLMBASEURL_DESCRIPTION);
+                Locales.LLMBASEURL_DESCRIPTION
+            );
 
             LlmModelId = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMMODELID_KEY,
                 "deepseek-v4-flash",
-                Locales.LLMMODELID_DESCRIPTION);
+                Locales.LLMMODELID_DESCRIPTION
+            );
 
             LlmSystemPrompt = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMSYSTEMPROMPT_KEY,
                 "",
-                Locales.LLMSYSTEMPROMPT_DESCRIPTION);
+                Locales.LLMSYSTEMPROMPT_DESCRIPTION
+            );
 
             LlmTemperature = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMTEMPERATURE_KEY,
                 0.2,
                 Locales.LLMTEMPERATURE_DESCRIPTION,
-                new AcceptableValueRange<double>(0d, 2d));
+                new AcceptableValueRange<double>(0d, 2d)
+            );
 
             LlmMaxTokens = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMMAXTOKENS_KEY,
                 3000,
                 Locales.LLMMAXTOKENS_DESCRIPTION,
-                new AcceptableValueRange<int>(64, 4096));
+                new AcceptableValueRange<int>(64, 4096)
+            );
 
             LlmTimeoutSec = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMTIMEOUTSEC_KEY,
                 15,
                 Locales.LLMTIMEOUTSEC_DESCRIPTION,
-                new AcceptableValueRange<int>(3, 120));
+                new AcceptableValueRange<int>(3, 120)
+            );
 
             HttpProxyHost = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.HTTPPROXYHOST_KEY,
                 "",
-                Locales.HTTPPROXYHOST_DESCRIPTION);
+                Locales.HTTPPROXYHOST_DESCRIPTION
+            );
 
             HttpProxyPort = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.HTTPPROXYPORT_KEY,
                 "",
-                Locales.HTTPPROXYPORT_DESCRIPTION);
+                Locales.HTTPPROXYPORT_DESCRIPTION
+            );
 
             #endregion
             #region DEBUG
@@ -328,7 +343,8 @@ namespace MiyakoCarryService.Assistant
                 Locales.STTDEBUGENABLED_KEY,
                 false,
                 Locales.STTDEBUGENABLED_DESCRIPTION,
-                needNotify: false);
+                needNotify: false
+            );
 
             SttDebugText = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
@@ -340,7 +356,21 @@ namespace MiyakoCarryService.Assistant
                 {
                     CustomDrawer = DrawDebugReadonlyText,
                     HideDefaultButton = true,
-                });
+                }
+            );
+
+            VoiceDebugVadText = McsConfigApi.RegisterConfig(
+                ClientLocales.DEBUG, debugOrder,
+                Locales.VOICEDEBUGVADTEXT_KEY,
+                "",
+                Locales.VOICEDEBUGVADTEXT_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = DrawDebugReadonlyText,
+                    HideDefaultButton = true,
+                }
+            );
 
             LlmDebugSend = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
@@ -358,7 +388,8 @@ namespace MiyakoCarryService.Assistant
                         }
                     },
                     HideDefaultButton = true,
-                });
+                }
+            );
 
             LlmDebugResult = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
@@ -370,14 +401,16 @@ namespace MiyakoCarryService.Assistant
                 {
                     CustomDrawer = DrawDebugReadonlyText,
                     HideDefaultButton = true,
-                });
+                }
+            );
 
             LlmDebugAutoEnabled = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
                 Locales.LLMDEBUGAUTOENABLED_KEY,
                 false,
                 Locales.LLMDEBUGAUTOENABLED_DESCRIPTION,
-                needNotify: false);
+                needNotify: false
+            );
 
             LlmDebugAutoResult = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
@@ -389,7 +422,8 @@ namespace MiyakoCarryService.Assistant
                 {
                     CustomDrawer = DrawDebugReadonlyText,
                     HideDefaultButton = true,
-                });
+                }
+            );
 
             VoiceDebugPlay = McsConfigApi.RegisterConfig(
                 ClientLocales.DEBUG, debugOrder,
@@ -407,7 +441,8 @@ namespace MiyakoCarryService.Assistant
                         }
                     },
                     HideDefaultButton = true,
-                });
+                }
+            );
 
             #endregion
         }

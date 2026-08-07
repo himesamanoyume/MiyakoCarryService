@@ -1,11 +1,8 @@
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using BepInEx;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using Newtonsoft.Json.Linq;
@@ -30,9 +27,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = "WAV 编码失败" };
             }
-
-            // 保存本次录音到插件 DLL 同目录（调试用，每次覆盖；失败不影响转录）
-            SaveDebugWav(wavBytes);
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
@@ -119,37 +113,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
             return s.Length <= max ? s : s.Substring(0, max) + "...";
-        }
-
-        /// <summary>
-        /// 保存本次录音到插件 DLL 同目录的 <c>voice.wav</c>（每次覆盖；目录不可写等失败静默跳过）。
-        /// </summary>
-        private static void SaveDebugWav(byte[] wavBytes)
-        {
-            try
-            {
-                var dir = GetPluginDirectory();
-                if (string.IsNullOrEmpty(dir))
-                {
-                    return;
-                }
-                File.WriteAllBytes(Path.Combine(dir, "voice.wav"), wavBytes);
-            }
-            catch
-            {
-                // 保存失败不影响转录
-            }
-        }
-
-        private static string GetPluginDirectory()
-        {
-            var location = Assembly.GetExecutingAssembly().Location;
-            if (!string.IsNullOrEmpty(location))
-            {
-                return Path.GetDirectoryName(location);
-            }
-            // 脚本引擎加载时 Assembly.Location 为空，回退 BepInEx 插件目录
-            return BepInEx.Paths.PluginPath;
         }
     }
 }

@@ -23,15 +23,15 @@
     "Mcs/SttDebugEnabled Key": "语音转文字(STT) 调试开关",
     "Mcs/SttDebugEnabled Description": "开启后使用当前配置进行录音并转写，转写文本会覆盖显示在 语音转文字(STT) 调试文本中。",
     "Mcs/SttDebugText Key": "语音转文字(STT) 调试文本",
-    "Mcs/SttDebugText Description": "最近一次录音的转写结果（只读，不可编辑）。",
+    "Mcs/SttDebugText Description": "最近一次录音的转写结果。",
     "Mcs/LlmDebugSend Key": "大语言模型(LLM) 发送测试",
     "Mcs/LlmDebugSend Description": "发送 STT 调试文本到 大语言模型(LLM) 进行测试，回复或报错信息会覆盖显示在 大语言模型(LLM) 返回结果中。",
     "Mcs/LlmDebugResult Key": "大语言模型(LLM) 返回结果",
-    "Mcs/LlmDebugResult Description": "最近一次 大语言模型(LLM) 测试的回复或错误信息（只读，不可编辑）。",
+    "Mcs/LlmDebugResult Description": "最近一次 大语言模型(LLM) 测试的回复或错误信息。",
     "Mcs/LlmDebugAutoEnabled Key": "调试识别指令",
     "Mcs/LlmDebugAutoEnabled Description": "开启后，在 STT 调试模式下转写完成后自动调用 大语言模型(LLM) 进行指令识别测试，识别结果显示在『识别指令结果』中。",
     "Mcs/LlmDebugAutoResult Key": "识别指令结果",
-    "Mcs/LlmDebugAutoResult Description": "最近一次自动指令识别的结果，显示 大语言模型(LLM) 实际将会调用的指令情况（只读，不可编辑）。",
+    "Mcs/LlmDebugAutoResult Description": "最近一次自动指令识别的结果，显示 大语言模型(LLM) 实际将会调用的指令情况。",
     "Mcs/SttProvider Key": "语音转文字(STT) 服务商",
     "Mcs/SttProvider Description": "云端语音转文字(STT)服务商。设为 None 时禁用语音控制；国际用户推荐使用 OpenAI Whisper。",
     "Mcs/SttApiKey Key": "语音转文字(STT) API Key",
@@ -91,5 +91,7 @@
     "Mcs/VoiceNotRecognized": "未识别出指令",
     "Mcs/VoiceAimAtTarget": "请对准目标",
     "Mcs/VoiceDebugPlay Key": "播放录音",
-    "Mcs/VoiceDebugPlay Description": "播放最近一次语音录制的内容（DEBUG 回放，需先有一次成功的录音）"
+    "Mcs/VoiceDebugPlay Description": "播放最近一次语音录制的内容（DEBUG 回放，需先有一次成功的录音）",
+    "Mcs/VoiceDebugVadText Key": "自由发言监听状态",
+    "Mcs/VoiceDebugVadText Description": "实时显示自由发言的语音检测状态（rms 能量 / 是否语音 / 静音计时）"
 }

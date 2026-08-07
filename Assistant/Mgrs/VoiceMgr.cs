@@ -199,11 +199,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
             // 用本窗 RMS 更新自适应噪音地板（语音窗自动排除），再判定语音
             _vad.UpdateNoiseFloor(rms);
 
-            // STT 调试模式：逐窗输出 VAD 现场值，便于实测底噪并精调阈值
+            // STT 调试模式：逐窗输出 VAD 现场值到调试只读文本（实时刷新，便于实测底噪并精调阈值）
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogInfo(
-                    $"VAD rms={rms:F4} speech={_vad.IsSpeech(rms)} silence={Time.unscaledTime - _lastSpeechAt:F2}s");
+                MiyakoCarryServiceAssistantPlugin.VoiceDebugVadText.Value =
+                    $"rms={rms:F4} speech={_vad.IsSpeech(rms)} silence={Time.unscaledTime - _lastSpeechAt:F2}s";
             }
 
             if (_vad.IsSpeech(rms))
@@ -310,8 +310,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 }
             }
 
-            MiyakoCarryServiceAssistantPlugin.Logger.LogInfo(
-                $"录音结束：{(samples == null ? 0 : samples.Length) / (float)_capture.SampleRate:F2}s，{(samples == null ? 0 : samples.Length)} 样本");
+            // MiyakoCarryServiceAssistantPlugin.Logger.LogInfo($"录音结束：{(samples == null ? 0 : samples.Length) / (float)_capture.SampleRate:F2}s，{(samples == null ? 0 : samples.Length)} 样本");
 
             if (samples == null || samples.Length == 0)
             {
