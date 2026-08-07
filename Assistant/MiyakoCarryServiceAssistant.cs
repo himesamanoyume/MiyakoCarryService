@@ -135,9 +135,9 @@ namespace MiyakoCarryService.Assistant
             VoiceVadEnergyThreshold = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.VOICEVADENERGYTHRESHOLD_KEY,
-                0.03f,
+                0.01f,
                 Locales.VOICEVADENERGYTHRESHOLD_DESCRIPTION,
-                new AcceptableValueRange<float>(0.01f, 0.5f));
+                new AcceptableValueRange<float>(0.001f, 0.3f));
 
             VoiceVadSilenceSeconds = McsConfigApi.RegisterConfig(
                 section, order,

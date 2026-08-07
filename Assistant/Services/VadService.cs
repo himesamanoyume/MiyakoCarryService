@@ -98,7 +98,7 @@ namespace MiyakoCarryService.Assistant.Services
 
     internal sealed class VadParams
     {
-        public float EnergyThreshold = 0.04f;
-        public float SilenceSeconds = 0.8f;
+        public float EnergyThreshold = 0.02f;
+        public float SilenceSeconds = 1f;
     }
 }

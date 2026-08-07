@@ -278,7 +278,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             var samples = _capture.End();
             _capturing = false;
 
-            // 自由说话：去掉结束后的静音尾巴，只保留说话内容
+            // 自由说话：只裁剪到"静音秒数一半"的尾巴——既不让静音过长，也不说完话立即截断
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
             {
                 samples = TrimTrailingSilence(samples);
@@ -315,7 +315,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _ = ProcessCaptureAsync(samples, _processingCts.Token);
         }
 
-        /// <summary>裁剪 FreeTalk 录音尾部的静音（按 VAD 能量阈值以窗口为单位从末尾回退）。</summary>
+        /// <summary>
+        /// 裁剪 FreeTalk 录音尾部的静音（按 VAD 能量阈值以窗口为单位从末尾回退），
+        /// 保留最后一个语音窗口之后"静音秒数一半"的尾巴：静音不会太长，也不会说完话立即被截断。
+        /// </summary>
         private float[] TrimTrailingSilence(float[] samples)
         {
             if (samples == null || samples.Length == 0)
@@ -328,28 +331,37 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return samples;
             }
 
-            int end = samples.Length;
-            while (end >= window)
+            // 从末尾回退，找到最后一个语音窗口的结束位置
+            int speechEnd = samples.Length;
+            while (speechEnd >= window)
             {
                 var win = new float[window];
-                Array.Copy(samples, end - window, win, 0, window);
+                Array.Copy(samples, speechEnd - window, win, 0, window);
                 if (_vad.IsSpeech(_vad.ComputeRms(win)))
                 {
                     break;
                 }
-                end -= window;
+                speechEnd -= window;
             }
 
-            if (end <= 0)
+            if (speechEnd <= 0)
             {
                 return Array.Empty<float>();
             }
-            if (end >= samples.Length)
+
+            // 保留 speechEnd 之后"静音秒数一半"的尾巴，其余裁掉
+            int keepTail = (int)(_capture.SampleRate * _vad.SilenceSeconds * 0.5f);
+            int keep = Math.Min(samples.Length, speechEnd + Math.Max(0, keepTail));
+            if (keep <= 0)
+            {
+                return Array.Empty<float>();
+            }
+            if (keep >= samples.Length)
             {
                 return samples;
             }
-            var trimmed = new float[end];
-            Array.Copy(samples, trimmed, end);
+            var trimmed = new float[keep];
+            Array.Copy(samples, trimmed, keep);
             return trimmed;
         }
 
