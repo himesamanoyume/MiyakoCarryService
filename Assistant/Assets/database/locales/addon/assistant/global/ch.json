@@ -89,5 +89,7 @@
     "Mcs/VoiceSttFailed": "语音转文字失败。",
     "Mcs/VoiceLlmFailed": "指令解析失败。",
     "Mcs/VoiceNotRecognized": "未识别出指令",
-    "Mcs/VoiceAimAtTarget": "请对准目标"
+    "Mcs/VoiceAimAtTarget": "请对准目标",
+    "Mcs/VoiceDebugPlay Key": "播放录音",
+    "Mcs/VoiceDebugPlay Description": "播放最近一次语音录制的内容（DEBUG 回放，需先有一次成功的录音）"
 }

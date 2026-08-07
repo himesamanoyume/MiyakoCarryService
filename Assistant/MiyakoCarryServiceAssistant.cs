@@ -69,6 +69,12 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<string> LlmDebugResult;
         public static ConfigEntry<bool> LlmDebugAutoEnabled;
         public static ConfigEntry<string> LlmDebugAutoResult;
+        public static ConfigEntry<bool> VoiceDebugPlay;
+
+        /// <summary>最近一次语音录制的样本与格式（供 DEBUG 区"播放录音"按钮回放）。</summary>
+        public static float[] LastVoiceSamples;
+        public static int LastVoiceSampleRate;
+        public static int LastVoiceChannels;
 
         #endregion
 
@@ -375,6 +381,24 @@ namespace MiyakoCarryService.Assistant
                     HideDefaultButton = true,
                 });
 
+            VoiceDebugPlay = McsConfigApi.RegisterConfig(
+                ClientLocales.DEBUG, debugOrder,
+                Locales.VOICEDEBUGPLAY_KEY,
+                false,
+                Locales.VOICEDEBUGPLAY_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = static entry =>
+                    {
+                        if (GUILayout.Button(Locales.VOICEDEBUGPLAY_KEY.McsLocalized(), GUILayout.ExpandWidth(true)))
+                        {
+                            PlayLastVoiceRecording();
+                        }
+                    },
+                    HideDefaultButton = true,
+                });
+
             #endregion
         }
 
@@ -388,6 +412,32 @@ namespace MiyakoCarryService.Assistant
                 stretchWidth = true,
             };
             GUILayout.Label((string)entry.BoxedValue ?? "", _debugReadonlyStyle);
+        }
+
+
+        /// <summary>回放最近一次语音录制（2D 播放，无样本时忽略）。</summary>
+        private static void PlayLastVoiceRecording()
+        {
+            try
+            {
+                var samples = LastVoiceSamples;
+                if (samples == null || samples.Length == 0 || Instance == null)
+                {
+                    return;
+                }
+                var channels = Math.Max(1, Math.Min(2, LastVoiceChannels));
+                var sampleRate = LastVoiceSampleRate > 0 ? LastVoiceSampleRate : 44100;
+                var clip = AudioClip.Create("mcs-voice-playback", samples.Length, channels, sampleRate, false);
+                clip.SetData(samples, 0);
+                var source = Instance.gameObject.GetComponent<AudioSource>() ?? Instance.gameObject.AddComponent<AudioSource>();
+                source.spatialBlend = 0f;
+                source.PlayOneShot(clip);
+                Destroy(clip, clip.length + 1f);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"播放录音失败：{ex.Message}");
+            }
         }
 
         /// <summary>

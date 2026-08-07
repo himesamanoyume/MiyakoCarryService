@@ -89,5 +89,7 @@
     "Mcs/VoiceSttFailed": "Speech recognition failed.",
     "Mcs/VoiceLlmFailed": "Command interpretation failed.",
     "Mcs/VoiceNotRecognized": "Command not recognized",
-    "Mcs/VoiceAimAtTarget": "Please aim at the target"
+    "Mcs/VoiceAimAtTarget": "Please aim at the target",
+    "Mcs/VoiceDebugPlay Key": "Play Recording",
+    "Mcs/VoiceDebugPlay Description": "Play back the most recent voice recording (debug playback; requires a successful recording first)"
 }

@@ -45,6 +45,8 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMDEBUGAUTOENABLED_DESCRIPTION = "Mcs/LlmDebugAutoEnabled Description";
         public const string LLMDEBUGAUTORESULT_KEY        = "Mcs/LlmDebugAutoResult Key";
         public const string LLMDEBUGAUTORESULT_DESCRIPTION = "Mcs/LlmDebugAutoResult Description";
+        public const string VOICEDEBUGPLAY_KEY             = "Mcs/VoiceDebugPlay Key";
+        public const string VOICEDEBUGPLAY_DESCRIPTION     = "Mcs/VoiceDebugPlay Description";
 
         public const string STTPROVIDER_KEY              = "Mcs/SttProvider Key";
         public const string STTPROVIDER_DESCRIPTION     = "Mcs/SttProvider Description";
