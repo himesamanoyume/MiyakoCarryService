@@ -161,6 +161,8 @@ namespace MiyakoCarryService.Assistant.Utils
             sb.AppendLine("  {\"error\":\"not_recognized\"}");
             sb.AppendLine("Never output affirmations, acknowledgements, or any natural-language filler. Output only the JSON object for an actual command, or the error object above.");
             sb.AppendLine();
+            sb.AppendLine("STT tolerance: the phrase comes from speech-to-text and may contain homophone/transcription errors (e.g., 驻守 \"HoldPosition\" mis-transcribed as 助手 \"assistant\", or 前往 as 犬亡). When the phrase looks like a known command with a homophone or typo, correct it to the CLOSEST command by pronunciation/meaning and map it — do NOT return not_recognized for such cases. Only return not_recognized when the phrase is truly unrelated to any command.");
+            sb.AppendLine();
 
             sb.AppendLine("Command JSON schema:");
             sb.AppendLine("{\"command\":\"<CommandName>\",\"selector\":\"All|ByIndex|ByCodeName|Unspecified\",");

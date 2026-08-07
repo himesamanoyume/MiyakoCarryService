@@ -27,6 +27,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
         private VadService _vad;
         private SttDispatcher _stt;
         private LlmDispatcher _llm;
+        // 记录当前生效的服务商，配置变化时重建分发器（修复游戏内切换服务商不生效的问题）
+        private ESttProvider _sttProvider;
+        private ELlmProvider _llmProvider;
         private EVoiceState _state = EVoiceState.Idle;
         private bool _capturing;
         private float _captureStartedAt;
@@ -53,6 +56,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
             });
             _stt = new SttDispatcher(MiyakoCarryServiceAssistantPlugin.SttProvider.Value);
             _llm = new LlmDispatcher(MiyakoCarryServiceAssistantPlugin.LlmProvider.Value);
+            _sttProvider = MiyakoCarryServiceAssistantPlugin.SttProvider.Value;
+            _llmProvider = MiyakoCarryServiceAssistantPlugin.LlmProvider.Value;
         }
 
         void OnDestroy()
@@ -76,6 +81,20 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     EnergyThreshold = energyThreshold,
                     SilenceSeconds = silenceSeconds,
                 });
+            }
+
+            // 服务商可被玩家在 ConfigurationManager 中实时修改；变化时重建分发器
+            var sttProvider = MiyakoCarryServiceAssistantPlugin.SttProvider.Value;
+            if (_sttProvider != sttProvider)
+            {
+                _stt = new SttDispatcher(sttProvider);
+                _sttProvider = sttProvider;
+            }
+            var llmProvider = MiyakoCarryServiceAssistantPlugin.LlmProvider.Value;
+            if (_llmProvider != llmProvider)
+            {
+                _llm = new LlmDispatcher(llmProvider);
+                _llmProvider = llmProvider;
             }
 
             // 主线程消费异步结果
@@ -304,6 +323,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 _state = EVoiceState.Idle;
                 return;
             }
+
+            // 保存最近一次录音，供 DEBUG 区"播放录音"按钮回放
+            MiyakoCarryServiceAssistantPlugin.LastVoiceSamples = samples;
+            MiyakoCarryServiceAssistantPlugin.LastVoiceSampleRate = _capture.SampleRate;
+            MiyakoCarryServiceAssistantPlugin.LastVoiceChannels = _capture.Channels;
 
             try
             {
