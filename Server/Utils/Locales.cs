@@ -11,6 +11,10 @@ namespace MiyakoCarryService.Server.Utils
         public const string ACCOUNTIDISINVAILD = "Mcs/AccountidIsInvaild";
         public const string MIYAKOTRADERWELCOME = "Mcs/MiyakoTraderWelcome";
         public const string MIYAKOTRADERCOMMANDERROR = "Mcs/MiyakoTraderCommandError";
+        public const string MIYAKOTRADERORDERNOTFOUND = "Mcs/MiyakoTraderOrderNotFound";
+        public const string MIYAKOTRADERRENEWSUCCESS = "Mcs/MiyakoTraderRenewSuccess";
+        public const string MIYAKOTRADERSETTLESUCCESS = "Mcs/MiyakoTraderSettleSuccess";
+        public const string MIYAKOTRADEROPERATIONFAILED = "Mcs/MiyakoTraderOperationFailed";
         public const string MIYAKOTRADERORDERNEWQUEST = "Mcs/MiyakoTraderOrderNewQuest";
         public const string MIYAKOTRADERTICKETNEWQUEST = "Mcs/MiyakoTraderTicketNewQuest";
         public const string MIYAKOTRADERTICKETREFUSE = "Mcs/MiyakoTraderTicketRefuse";

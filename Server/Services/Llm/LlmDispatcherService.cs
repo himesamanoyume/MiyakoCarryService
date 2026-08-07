@@ -25,6 +25,8 @@ namespace MiyakoCarryService.Server.Services.Llm
     public class LlmDispatcherService(
         ConfigService configService,
         QuestController questController,
+        ProfileService profileService,
+        InfoService infoService,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
         SPTarkov.Server.Core.Helpers.Profile.DialogueHelper dialogueHelper,
@@ -74,7 +76,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 ApiKey = serverConfig.TraderLlmApiKey,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
                 ModelId = serverConfig.TraderLlmModelId,
-                SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp()),
+                SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
                 TimeoutSec = serverConfig.TraderLlmTimeoutSec,
@@ -165,6 +167,76 @@ namespace MiyakoCarryService.Server.Services.Llm
                     null);
 
                 questController.CreateTicketQuest(sessionId, ticket.Percent);
+                return LlmDispatchResult.Handled();
+            }
+
+            if (intent.IsCommand && intent.Renew != null)
+            {
+                var renewAid = ResolveTargetAid(sessionId, intent.Renew.Target);
+                if (renewAid == null)
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERNOTFOUND),
+                        null);
+                    return LlmDispatchResult.Handled();
+                }
+
+                if (questController.RenewOrder(sessionId, renewAid))
+                {
+                    mailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        Locales.MIYAKOTRADERRENEWSUCCESS,
+                        null);
+                }
+                else
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADEROPERATIONFAILED),
+                        null);
+                }
+                return LlmDispatchResult.Handled();
+            }
+
+            if (intent.IsCommand && intent.Settle != null)
+            {
+                var settleAid = ResolveTargetAid(sessionId, intent.Settle.Target);
+                if (settleAid == null)
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERNOTFOUND),
+                        null);
+                    return LlmDispatchResult.Handled();
+                }
+
+                if (profileService.SettleOrder(sessionId, settleAid))
+                {
+                    mailSendService.SendLocalisedNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        Locales.MIYAKOTRADERSETTLESUCCESS,
+                        null);
+                }
+                else
+                {
+                    mailSendService.SendDirectNpcMessageToPlayer(
+                        sessionId,
+                        TraderService.MiyakoTraderId,
+                        MessageType.NpcTraderMessage,
+                        serverLocalisationService.GetText(Locales.MIYAKOTRADEROPERATIONFAILED),
+                        null);
+                }
                 return LlmDispatchResult.Handled();
             }
 
@@ -343,6 +415,93 @@ namespace MiyakoCarryService.Server.Services.Llm
             }
             sb.Append("- 罚单 (ticket) price: ").Append(serverConfig.TicketPricePerPercent).AppendLine(" rubles per percent");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 构建当前护航列表（昵称 + Aid + 订单状态/级别/时长），供 LLM 识别"续订/结算哪个护航"。
+        /// </summary>
+        private string BuildSquadsHelp(MongoId sessionId)
+        {
+            try
+            {
+                var orderInfos = infoService.GetOrderInfos(sessionId);
+                if (orderInfos == null || orderInfos.Count == 0)
+                {
+                    return null;
+                }
+
+                var sb = new StringBuilder();
+                foreach (var order in orderInfos)
+                {
+                    if (order.PlayerIds == null)
+                    {
+                        continue;
+                    }
+                    foreach (var botId in order.PlayerIds)
+                    {
+                        var profile = profileService.GetMcsBotPlayerProfile(sessionId, botId);
+                        if (profile?.ProfileInfo == null)
+                        {
+                            continue;
+                        }
+                        sb.Append("- ").Append(profile.ProfileInfo.Username)
+                          .Append(" | aid: ").Append(profile.ProfileInfo.Aid)
+                          .Append(" | status: ").Append(order.Status)
+                          .Append(" | level: ").Append(order.CarryServiceLevel)
+                          .Append(" | duration: ").Append(order.Duration).AppendLine("h");
+                    }
+                }
+                return sb.Length > 0 ? sb.ToString() : null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error("构建护航列表失败: " + ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 按玩家说的昵称或 Aid 匹配当前护航，返回其 Aid；未匹配返回 null。
+        /// </summary>
+        private string ResolveTargetAid(MongoId sessionId, string target)
+        {
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                return null;
+            }
+
+            var orderInfos = infoService.GetOrderInfos(sessionId);
+            if (orderInfos == null)
+            {
+                return null;
+            }
+
+            foreach (var order in orderInfos)
+            {
+                if (order.PlayerIds == null)
+                {
+                    continue;
+                }
+                foreach (var botId in order.PlayerIds)
+                {
+                    var profile = profileService.GetMcsBotPlayerProfile(sessionId, botId);
+                    if (profile?.ProfileInfo == null)
+                    {
+                        continue;
+                    }
+                    var aid = profile.ProfileInfo.Aid.ToString();
+                    if (string.Equals(aid, target, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return aid;
+                    }
+                    var nickname = profile.ProfileInfo.Username;
+                    if (!string.IsNullOrEmpty(nickname) && nickname.IndexOf(target, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return aid;
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>

@@ -194,7 +194,23 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                     };
                 }
 
-                return new LlmIntent { Error = "OpenAI-Compat 响应缺少 order/ticket/replyText 字段" };
+                if (node?["renew"] is JsonNode renewNode)
+                {
+                    return new LlmIntent
+                    {
+                        Renew = new RenewIntent { Target = renewNode["target"]?.ToString() ?? string.Empty },
+                    };
+                }
+
+                if (node?["settle"] is JsonNode settleNode)
+                {
+                    return new LlmIntent
+                    {
+                        Settle = new SettleIntent { Target = settleNode["target"]?.ToString() ?? string.Empty },
+                    };
+                }
+
+                return new LlmIntent { Error = "OpenAI-Compat 响应缺少 order/ticket/renew/settle/replyText 字段" };
             }
             catch (Exception ex)
             {

@@ -263,5 +263,9 @@
     "Mcs/MiyakoTraderLlmInterpreting": "让我想想……",
     "Mcs/MiyakoTraderLlmDisabled": "当前服务器未启用 AI 服务。请使用 mcs order / mcs ticket 文本指令。",
     "Mcs/MiyakoTraderLlmCooldown": "你发送得太快了，请稍等片刻再试。",
-    "Mcs/MiyakoTraderLlmEnabled": "当前宫子商人已开启大语言模型，你可以使用自然语言执行指令。回复基于AI生成，仅供参考，请以实际情况为准。"
+    "Mcs/MiyakoTraderLlmEnabled": "当前宫子商人已开启大语言模型，你可以使用自然语言执行指令。回复基于AI生成，仅供参考，请以实际情况为准。",
+    "Mcs/MiyakoTraderOrderNotFound": "未找到指定的护航，请确认其昵称或账号 ID",
+    "Mcs/MiyakoTraderRenewSuccess": "已为该护航续订订单，完成支付任务后生效",
+    "Mcs/MiyakoTraderSettleSuccess": "已结算该护航的订单，相关数据已删除",
+    "Mcs/MiyakoTraderOperationFailed": "操作失败（订单可能未过期或未完成支付）"
 }

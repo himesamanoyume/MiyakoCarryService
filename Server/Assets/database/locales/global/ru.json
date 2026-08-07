@@ -263,5 +263,9 @@
     "Mcs/MiyakoTraderLlmInterpreting": "Let me think about that...",
     "Mcs/MiyakoTraderLlmDisabled": "AI service is not configured on this server. Please use \"mcs order\" / \"mcs ticket\" text commands.",
     "Mcs/MiyakoTraderLlmCooldown": "You're sending messages too quickly. Please wait a moment and try again.",
-    "Mcs/MiyakoTraderLlmEnabled": "Miyako Trader's LLM service is now enabled. You can chat with her in natural language. Replies are AI-generated and for reference only; please rely on actual in-game conditions."
+    "Mcs/MiyakoTraderLlmEnabled": "Miyako Trader's LLM service is now enabled. You can chat with her in natural language. Replies are AI-generated and for reference only; please rely on actual in-game conditions.",
+    "Mcs/MiyakoTraderOrderNotFound": "Escort not found; please confirm its nickname or account ID",
+    "Mcs/MiyakoTraderRenewSuccess": "Order renewed for that escort; complete the new payment quest to activate",
+    "Mcs/MiyakoTraderSettleSuccess": "Order settled; related escort data has been deleted",
+    "Mcs/MiyakoTraderOperationFailed": "Operation failed (order may not be expired or not fully paid)"
 }

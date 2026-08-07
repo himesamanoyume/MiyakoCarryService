@@ -96,7 +96,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             - She is a student of the SRT Academy (Special Response Team / SRT学园), member of the Rabbit squad (兔子小队), call sign Rabbit1, and serves as the Rabbit squad's leader.
             """;
 
-        public static string BuildSystemPrompt(string existingPrompt, string spawnTypeHelp, string pricingHelp)
+        public static string BuildSystemPrompt(string existingPrompt, string spawnTypeHelp, string pricingHelp, string squadsHelp)
         {
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(existingPrompt))
@@ -118,12 +118,18 @@ namespace MiyakoCarryService.Server.Services.Llm
             sb.AppendLine("Available commands:");
             sb.AppendLine("- Order a carry-service squad. JSON: {\"order\":{ \"players\":<1-4>, \"spawnTypeIndex\":<int>, \"level\":<1-5>, \"duration\":<int hours> }}");
             sb.AppendLine("- Request ticket / friendly-fire penalty relief. JSON: {\"ticket\":{\"percent\":<1-100>}}");
+            sb.AppendLine("- Renew an existing 护航's order (续订: extend or re-activate by completing a new same-duration order). JSON: {\"renew\":{\"target\":\"<escort nickname or account id from CURRENT SQUAD DATA>\"}}");
+            sb.AppendLine("- Settle an expired 护航's order (结算: permanently delete all data of that order's 护航, only after full payment). JSON: {\"settle\":{\"target\":\"<escort nickname or account id from CURRENT SQUAD DATA>\"}}");
             sb.AppendLine("- Small-talk or unrelated question. JSON: {\"replyText\":\"<reply in same language as user, max 1000 chars>\"}");
             sb.AppendLine("- If the request is unclear or misspecified, return: {\"replyText\":\"<in same language, asking a clarifying question, max 200 chars>\"}");
             sb.AppendLine();
 
             sb.AppendLine("Current spawn type catalog (index -> name):");
             sb.AppendLine(spawnTypeHelp ?? "(loading, treat any spawnTypeIndex as 0 \"common\" if unknown)");
+            sb.AppendLine();
+
+            sb.AppendLine("CURRENT SQUAD DATA (used ONLY to identify WHICH 护航 an order belongs to when the player asks to renew or settle; identify by nickname or account id):");
+            sb.AppendLine(squadsHelp ?? "(no active 护航 orders found)");
             sb.AppendLine();
 
             sb.AppendLine("CURRENT PRICING DATA (quote prices using these exact numbers; briefly show the calculation):");
@@ -140,6 +146,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             sb.AppendLine($" - level MUST be in [{MinOrderLevel},{MaxOrderLevel}]");
             sb.AppendLine($" - duration MUST be >= {MinOrderDuration} hours (integer)");
             sb.AppendLine($" - percent MUST be in [{MinTicketPercent},{MaxTicketPercent}] (integer)");
+            sb.AppendLine(" - renew/settle target MUST match exactly one entry in CURRENT SQUAD DATA (nickname or account id); otherwise return replyText asking the player to specify which 护航, NOT a renew/settle object.");
             sb.AppendLine(" - If the player asks a question or refuses to specify required fields, return replyText, NOT a partial order/ticket.");
             sb.AppendLine(" - If the player changes their mind or asks for billing/price info, return replyText describing the pricing in same language based on the CURRENT PRICING DATA above, including base price, current punishment and the estimated total.");
             sb.AppendLine(" - If the player asks about any command, feature, config or how-to of this mod, answer using the KNOWLEDGE BASE above, in the player's language and using the TERMINOLOGY. Do not invent features that are not listed.");
@@ -148,6 +155,8 @@ namespace MiyakoCarryService.Server.Services.Llm
             sb.AppendLine("Output JSON schema (return EXACTLY one top-level key):");
             sb.AppendLine("  {\"order\":{\"players\":1,\"spawnTypeIndex\":0,\"level\":1,\"duration\":30}}");
             sb.AppendLine("  {\"ticket\":{\"percent\":50}}");
+            sb.AppendLine("  {\"renew\":{\"target\":\"<nickname or account id>\"}}");
+            sb.AppendLine("  {\"settle\":{\"target\":\"<nickname or account id>\"}}");
             sb.AppendLine("  {\"replyText\":\"<text>\"}");
 
             return sb.ToString();
