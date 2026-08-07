@@ -433,11 +433,15 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // STT 调试模式：转写文本覆盖写入调试字段，跳过 LLM 解释与派发
+            // STT 调试模式：转写文本覆盖写入调试字段；开启"调试识别指令"时自动调用 LLM 识别（只识别不派发）
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
                 SetDebugText(stt.Text);
                 _state = EVoiceState.Idle;
+                if (MiyakoCarryServiceAssistantPlugin.LlmDebugAutoEnabled.Value)
+                {
+                    _ = RunDebugCommandTestAsync(stt.Text, llmSettings, ct);
+                }
                 return;
             }
 
@@ -539,6 +543,62 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = text;
             }
+        }
+
+        /// <summary>
+        /// 调试识别指令：用当前 LLM 配置解析转写文本，把实际将会调用的指令情况写入
+        /// "识别指令结果"（只识别，不派发）。
+        /// </summary>
+        private async System.Threading.Tasks.Task RunDebugCommandTestAsync(string text, ProviderSettings llmSettings, CancellationToken ct)
+        {
+            try
+            {
+                var intent = await _llm.InterpretAsync(text, llmSettings, ct).ConfigureAwait(true);
+                MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = FormatDebugIntent(intent);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 调试识别异常：{ex}");
+                MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = $"错误：{ex.Message}";
+            }
+        }
+
+        /// <summary>格式化 LLM 指令识别结果：错误 / 纯回复 / 指令名+目标详情 / 无响应。</summary>
+        private static string FormatDebugIntent(LlmIntent intent)
+        {
+            if (intent == null || intent.IsError)
+            {
+                return $"错误：{intent?.Error ?? "null"}";
+            }
+            if (intent.IsReply)
+            {
+                return intent.ReplyText;
+            }
+            if (!string.IsNullOrEmpty(intent.CommandName))
+            {
+                string detail = string.Empty;
+                switch (intent.Selector)
+                {
+                    case EIntentTargetSelector.All:
+                        detail = "（全员）";
+                        break;
+                    case EIntentTargetSelector.ByIndex:
+                        detail = $"（成员 {intent.TargetIndex}）";
+                        break;
+                    case EIntentTargetSelector.ByCodeName:
+                        detail = $"（代号 {intent.TargetCodeName}）";
+                        break;
+                }
+                if (!string.IsNullOrEmpty(intent.AimingBodyPart))
+                {
+                    detail += $"（{intent.AimingBodyPart}）";
+                }
+                return $"指令：{intent.CommandName}{detail}";
+            }
+            return "无响应";
         }
 
         private static void Notification(string message)

@@ -41,6 +41,10 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMDEBUGSEND_DESCRIPTION     = "Mcs/LlmDebugSend Description";
         public const string LLMDEBUGRESULT_KEY           = "Mcs/LlmDebugResult Key";
         public const string LLMDEBUGRESULT_DESCRIPTION   = "Mcs/LlmDebugResult Description";
+        public const string LLMDEBUGAUTOENABLED_KEY       = "Mcs/LlmDebugAutoEnabled Key";
+        public const string LLMDEBUGAUTOENABLED_DESCRIPTION = "Mcs/LlmDebugAutoEnabled Description";
+        public const string LLMDEBUGAUTORESULT_KEY        = "Mcs/LlmDebugAutoResult Key";
+        public const string LLMDEBUGAUTORESULT_DESCRIPTION = "Mcs/LlmDebugAutoResult Description";
 
         public const string STTPROVIDER_KEY              = "Mcs/SttProvider Key";
         public const string STTPROVIDER_DESCRIPTION     = "Mcs/SttProvider Description";

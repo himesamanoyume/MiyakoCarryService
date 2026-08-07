@@ -66,6 +66,8 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<string> SttDebugText;
         public static ConfigEntry<bool> LlmDebugSend;
         public static ConfigEntry<string> LlmDebugResult;
+        public static ConfigEntry<bool> LlmDebugAutoEnabled;
+        public static ConfigEntry<string> LlmDebugAutoResult;
 
         #endregion
 
@@ -346,6 +348,25 @@ namespace MiyakoCarryService.Assistant
                 Locales.LLMDEBUGRESULT_KEY,
                 "",
                 Locales.LLMDEBUGRESULT_DESCRIPTION,
+                needNotify: false,
+                customAttributes: new ConfigurationManagerAttributes
+                {
+                    CustomDrawer = DrawDebugReadonlyText,
+                    HideDefaultButton = true,
+                });
+
+            LlmDebugAutoEnabled = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.LLMDEBUGAUTOENABLED_KEY,
+                false,
+                Locales.LLMDEBUGAUTOENABLED_DESCRIPTION,
+                needNotify: false);
+
+            LlmDebugAutoResult = McsConfigApi.RegisterConfig(
+                Client.Utils.Locales.DEBUG, debugOrder,
+                Locales.LLMDEBUGAUTORESULT_KEY,
+                "",
+                Locales.LLMDEBUGAUTORESULT_DESCRIPTION,
                 needNotify: false,
                 customAttributes: new ConfigurationManagerAttributes
                 {
