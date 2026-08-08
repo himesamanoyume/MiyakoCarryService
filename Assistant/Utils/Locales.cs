@@ -113,7 +113,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string VOICELLMFAILED          = "Mcs/VoiceLlmFailed";
         public const string VOICETRIGGERMODEPUSH2TALK = "Mcs/VoiceTriggerModePushToTalk";
         public const string VOICETRIGGERMODEFREETALK   = "Mcs/VoiceTriggerModeFreeTalk";
-        public const string STTPROVIDERNONE            = "Mcs/SttProviderNone";
         public const string STTPROVIDEROPENAIWHISPER   = "Mcs/SttProviderOpenAIWhisper";
         public const string STTPROVIDERAZURESPEECH     = "Mcs/SttProviderAzureSpeech";
         public const string STTPROVIDERGOOGLESPEECH    = "Mcs/SttProviderGoogleSpeech";
@@ -122,7 +121,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string STTPROVIDERXFYUNIAT        = "Mcs/SttProviderXfyunIat";
         public const string STTPROVIDERVOLCIAT         = "Mcs/SttProviderVolcIat";
         public const string STTPROVIDERBAIDUASR        = "Mcs/SttProviderBaiduAsr";
-        public const string LLMPROVIDERNONE             = "Mcs/LlmProviderNone";
         public const string LLMPROVIDEROPENAICOMPATIBLE = "Mcs/LlmProviderOpenAICompatible";
         public const string LLMPROVIDERANTHROPIC        = "Mcs/LlmProviderAnthropic";
         public const string LLMPROVIDERGOOGLEGEMINI     = "Mcs/LlmProviderGoogleGemini";

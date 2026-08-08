@@ -6,7 +6,6 @@ namespace MiyakoCarryService.Assistant.Enums
     /// </summary>
     public enum ELlmProvider
     {
-        None,
         OpenAICompatible,
         Anthropic,
         GoogleGemini,

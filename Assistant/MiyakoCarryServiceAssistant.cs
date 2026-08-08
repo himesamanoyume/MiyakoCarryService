@@ -190,14 +190,13 @@ namespace MiyakoCarryService.Assistant
             SttProvider = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTPROVIDER_KEY,
-                ESttProvider.None,
+                ESttProvider.OpenAIWhisper,
                 Locales.STTPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ESttProvider, string>
                         {
-                            { ESttProvider.None, Locales.STTPROVIDERNONE.McsLocalized() },
                             { ESttProvider.OpenAIWhisper, Locales.STTPROVIDEROPENAIWHISPER.McsLocalized() },
                             { ESttProvider.AzureSpeech, Locales.STTPROVIDERAZURESPEECH.McsLocalized() },
                             { ESttProvider.GoogleSpeech, Locales.STTPROVIDERGOOGLESPEECH.McsLocalized() },
@@ -257,14 +256,13 @@ namespace MiyakoCarryService.Assistant
             LlmProvider = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMPROVIDER_KEY,
-                ELlmProvider.None,
+                ELlmProvider.OpenAICompatible,
                 Locales.LLMPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ELlmProvider, string>
                         {
-                            { ELlmProvider.None, Locales.LLMPROVIDERNONE.McsLocalized() },
                             { ELlmProvider.OpenAICompatible, Locales.LLMPROVIDEROPENAICOMPATIBLE.McsLocalized() },
                             { ELlmProvider.Anthropic, Locales.LLMPROVIDERANTHROPIC.McsLocalized() },
                             { ELlmProvider.GoogleGemini, Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized() },

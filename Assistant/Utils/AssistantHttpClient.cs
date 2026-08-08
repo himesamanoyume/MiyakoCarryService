@@ -30,11 +30,7 @@ namespace MiyakoCarryService.Assistant.Utils
 
         private static HttpClient CreateClient(bool useProxy)
         {
-            var handler = new HttpClientHandler
-            {
-                MaxConnectionsPerServer = 8
-            };
-
+            var handler = new HttpClientHandler();
             if (useProxy)
             {
                 handler.UseProxy = true;
