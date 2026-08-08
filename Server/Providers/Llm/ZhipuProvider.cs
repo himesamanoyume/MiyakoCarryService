@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Providers.Llm
+namespace MiyakoCarryService.Server.Providers.Llm
 {
     /// <summary>
     /// 智谱 GLM Chat Completions：<c>POST /api/paas/v4/chat/completions</c>。

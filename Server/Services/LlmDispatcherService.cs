@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
 using MiyakoCarryService.Server.Models.Llm;
-using MiyakoCarryService.Server.Services.Llm.Providers;
+using MiyakoCarryService.Server.Providers.Llm;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
@@ -264,7 +264,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             return LlmDispatchResult.Handled();
         }
 
-        private static bool ValidateOrder(OrderIntent order)
+        private bool ValidateOrder(OrderIntent order)
         {
             return order != null
                 && order.Players >= Tools.MinOrderPlayers
@@ -274,7 +274,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 && order.Duration >= Tools.MinOrderDuration;
         }
 
-        private static bool ValidateTicket(TicketIntent ticket)
+        private bool ValidateTicket(TicketIntent ticket)
         {
             return ticket != null
                 && ticket.Percent >= Tools.MinTicketPercent
@@ -609,30 +609,6 @@ namespace MiyakoCarryService.Server.Services.Llm
                 var consumed = Interlocked.Increment(ref _consumed);
                 return consumed <= _maxPerMinute;
             }
-        }
-    }
-
-    /// <summary>
-    /// LLM 分发结果。<see cref="IsHandled"/> 为 true 表示已处理（无论成功/兜底），
-    /// false 时由调用方走原 unknown-command 流程。
-    /// </summary>
-    public readonly struct LlmDispatchResult
-    {
-        public bool IsHandled { get; }
-
-        private LlmDispatchResult(bool handled)
-        {
-            IsHandled = handled;
-        }
-
-        public static LlmDispatchResult Handled()
-        {
-            return new LlmDispatchResult(true);
-        }
-
-        public static LlmDispatchResult NotHandled()
-        {
-            return new LlmDispatchResult(false);
         }
     }
 }

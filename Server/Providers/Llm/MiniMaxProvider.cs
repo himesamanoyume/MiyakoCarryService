@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Providers.Llm
+namespace MiyakoCarryService.Server.Providers.Llm
 {
     /// <summary>
     /// MiniMax v2 Chat Completions：<c>POST /v2/text/chat_completions</c>，Bearer ApiKey 鉴权。

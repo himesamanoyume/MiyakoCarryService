@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Providers.Llm
+namespace MiyakoCarryService.Server.Providers.Llm
 {
     /// <summary>
     /// Google Gemini <c>generateContent</c> REST：

@@ -11,6 +11,7 @@ using System.Threading;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Reflection.Patching;
+using MiyakoCarryService.Server.Services.Llm;
 
 namespace MiyakoCarryService.Server
 {
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Server
             CompatibilityService compatibilityService,
             ConfigService configService,
             InventoryService inventoryService,
-            Services.Llm.LlmDispatcherService llmDispatcherService,
+            LlmDispatcherService llmDispatcherService,
             ServerLocalisationService serverLocalisationService,
             ISptLogger<MiyakoCarryServiceServerPostLoad> logger,
             JsonUtil jsonUtil

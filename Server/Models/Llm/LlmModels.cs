@@ -67,4 +67,24 @@ namespace MiyakoCarryService.Server.Models.Llm
     {
         public string Target;
     }
+
+    public readonly struct LlmDispatchResult
+    {
+        public bool IsHandled { get; }
+
+        private LlmDispatchResult(bool handled)
+        {
+            IsHandled = handled;
+        }
+
+        public static LlmDispatchResult Handled()
+        {
+            return new LlmDispatchResult(true);
+        }
+
+        public static LlmDispatchResult NotHandled()
+        {
+            return new LlmDispatchResult(false);
+        }
+    }
 }
