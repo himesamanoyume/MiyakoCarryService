@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Server.Services
             var files = fileUtil.GetFiles(_userbuildsFolderDir).Where(item => fileUtil.GetFileExtension(item) == "json");
             foreach (var userBuildsPath in files)
             {
-                var mcsLeadPlayerId = System.IO.Path.GetFileNameWithoutExtension(userBuildsPath);
+                var mcsLeadPlayerId = Path.GetFileNameWithoutExtension(userBuildsPath);
                 if (MongoId.IsValidMongoId(mcsLeadPlayerId))
                 {
                     await LoadUserBuilds(mcsLeadPlayerId, userBuildsPath);
@@ -72,12 +72,12 @@ namespace MiyakoCarryService.Server.Services
             {
                 try
                 {
-                    var userBuildsPath = System.IO.Path.Combine(_userbuildsFolderDir, $"{mcsLeadPlayerId}.json");
+                    var userBuildsPath = Path.Combine(_userbuildsFolderDir, $"{mcsLeadPlayerId}.json");
                     _userBuilds[mcsLeadPlayerId] = userBuilds;
                     var jsonUserBuilds = jsonUtil.Serialize(userBuilds, true);
                     await fileUtil.WriteFileAsync(userBuildsPath, jsonUserBuilds);
                 }
-                catch (System.Exception)
+                catch
                 {
                     
                 }

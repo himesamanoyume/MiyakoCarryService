@@ -37,6 +37,11 @@ namespace MiyakoCarryService.Server.Services.Llm
     )
     {
         private readonly ConcurrentDictionary<MongoId, RateBucket> _bucketsPerSession = new();
+        private const int DefaultMaxConcurrent = 16;
+        private static readonly TimeSpan GateWaitTimeout = TimeSpan.FromSeconds(15);
+        private SemaphoreSlim _llmGate = new(DefaultMaxConcurrent, DefaultMaxConcurrent);
+        private int _gateCapacity = DefaultMaxConcurrent;
+        private readonly object _gateLock = new();
 
         /// <summary>
         /// 尝试用 LLM 解释并处理用户消息。返回是否被处理（true 时由调用方返回 <c>request.DialogId</c>）。
@@ -100,6 +105,22 @@ namespace MiyakoCarryService.Server.Services.Llm
             // 按 HttpProxyHost/HttpProxyPort 应用代理（幂等，仅在配置变化时重建）
             provider.ApplyProxy(serverConfig.HttpProxyHost, serverConfig.HttpProxyPort);
 
+            // 全局并发闸门：限制同时最多 TraderLlmMaxConcurrent 个 LLM 请求在途（保护上游 API/代理）。
+            // 到达上限的请求在 SemaphoreSlim 内部排队，任一在途请求完成（Release）即自动放行队首；
+            // 排队超过 GateWaitTimeout 仍未轮到时，给玩家"繁忙"提示并放弃本次请求（Handled 兜底）。
+            var gate = EnsureGate(serverConfig.TraderLlmMaxConcurrent);
+            var entered = await gate.WaitAsync(GateWaitTimeout, CancellationToken.None).ConfigureAwait(false);
+            if (!entered)
+            {
+                mailSendService.SendLocalisedNpcMessageToPlayer(
+                    sessionId,
+                    TraderService.MiyakoTraderId,
+                    MessageType.NpcTraderMessage,
+                    Locales.MIYAKOTRADERLLMCOOLDOWN,
+                    null);
+                return LlmDispatchResult.Handled();
+            }
+
             LlmIntent intent;
             try
             {
@@ -111,6 +132,10 @@ namespace MiyakoCarryService.Server.Services.Llm
                 logger.Error("LlmDispatcher 异常: " + ex);
                 SendLlmErrorDetail(sessionId, ex.Message);
                 return LlmDispatchResult.Handled();
+            }
+            finally
+            {
+                gate.Release();
             }
 
             if (intent == null || intent.IsError)
@@ -580,34 +605,33 @@ namespace MiyakoCarryService.Server.Services.Llm
             };
         }
 
-        private sealed class RateBucket
+        /// <summary>
+        /// 确保并发闸门容量与配置 TraderLlmMaxConcurrent 一致；配置变化时（lock 内）重建闸门。
+        /// 非法值（&lt;=0）回退默认 <see cref="DefaultMaxConcurrent"/>。
+        /// 注意：重建瞬间挂在旧闸门上的等待者不再获得许可，会等到排队超时被兜底（可接受）。
+        /// </summary>
+        private SemaphoreSlim EnsureGate(int maxConcurrent)
         {
-            private readonly int _maxPerMinute;
-            private int _consumed;
-            private long _windowStartTicks;
-
-            public RateBucket(int maxPerMinute)
+            if (maxConcurrent <= 0)
             {
-                _maxPerMinute = maxPerMinute;
-                _windowStartTicks = DateTime.UtcNow.Ticks;
+                maxConcurrent = DefaultMaxConcurrent;
             }
 
-            public bool TryConsume()
+            if (_gateCapacity == maxConcurrent)
             {
-                var now = DateTime.UtcNow.Ticks;
-                var windowTicks = TimeSpan.FromMinutes(1).Ticks;
-                var start = Interlocked.Read(ref _windowStartTicks);
-                if (now - start >= windowTicks)
+                return _llmGate;
+            }
+
+            lock (_gateLock)
+            {
+                if (_gateCapacity == maxConcurrent)
                 {
-                    // 进入新窗口
-                    if (Interlocked.CompareExchange(ref _windowStartTicks, now, start) == start)
-                    {
-                        Interlocked.Exchange(ref _consumed, 0);
-                    }
+                    return _llmGate;
                 }
 
-                var consumed = Interlocked.Increment(ref _consumed);
-                return consumed <= _maxPerMinute;
+                _llmGate = new SemaphoreSlim(maxConcurrent, maxConcurrent);
+                _gateCapacity = maxConcurrent;
+                return _llmGate;
             }
         }
     }

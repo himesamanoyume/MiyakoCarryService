@@ -124,6 +124,9 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("TraderLlmMaxMessagesPerMinute")]
         public int TraderLlmMaxMessagesPerMinute { get; set; } = 10;
 
+        [JsonPropertyName("TraderLlmMaxConcurrent")]
+        public int TraderLlmMaxConcurrent { get; set; } = 16;
+
         [JsonPropertyName("TraderLlmMaxHistoryMessages")]
         public int TraderLlmMaxHistoryMessages { get; set; } = 20;
 
