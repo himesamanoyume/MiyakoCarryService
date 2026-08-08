@@ -52,7 +52,8 @@
                 "dependsOrder": "sequence",
                 "dependsOn": [
                     "plugin: package",
-                    "fika: package"
+                    "fika: package",
+                    "assistant: package"
                 ],
                 "group": "build"
             },
@@ -78,6 +79,18 @@
                     "Bypass",
                     "-Command",
                     "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\Fika\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryServiceFika-$ver.zip\" -Force"
+                ],
+            },
+            {
+                "label": "assistant: package",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "$ver = Get-Content '${workspaceFolder}\\version.txt' | Select-Object -First 1; Compress-Archive -Path '${workspaceFolder}\\Build\\Assistant\\*' -DestinationPath \"${workspaceFolder}\\MiyakoCarryServiceAssistant-$ver.zip\" -Force"
                 ],
             },
             {
