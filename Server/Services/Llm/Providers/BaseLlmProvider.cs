@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -10,23 +11,32 @@ using MiyakoCarryService.Server.Models.Llm;
 namespace MiyakoCarryService.Server.Services.Llm.Providers
 {
     /// <summary>
-    /// 服务端 LLM 服务商适配器接口。所有厂商共享同一份 <see cref="LlmProviderSettings"/> 配置项。
+    /// 服务端 LLM 服务商适配器基类。所有厂商共享同一份 <see cref="LlmProviderSettings"/> 配置项，
+    /// 并共用同一个共享 HttpClient（含代理应用）。
     /// </summary>
     public abstract class BaseLlmProvider : ILlmProvider
     {
-        protected HttpClient SharedClient = new()
+        /// <summary>错误信息厂商名前缀（如 "OpenAI-Compat"），子类可覆盖。</summary>
+        protected virtual string ProviderTag
         {
-            Timeout = TimeSpan.FromSeconds(60),
-        };
+            get { return "OpenAI-Compat"; }
+        }
 
-        private string _appliedProxyHost;
-        private string _appliedProxyPort;
+        private static HttpClient _sharedClient = CreateClient(useProxy: false);
+        private static string _appliedProxyHost;
+        private static string _appliedProxyPort;
+
+        /// <summary>所有子类共享的 HttpClient 单源，避免重复创建连接池。</summary>
+        protected static HttpClient SharedClient
+        {
+            get { return _sharedClient; }
+        }
 
         /// <summary>
         /// 按 HttpProxyHost/HttpProxyPort 应用代理（host 与 port 均非空且端口可解析时全量经代理转发，
         /// 含本地地址；否则直连）。仅在配置变化时重建共享 HttpClient。
         /// </summary>
-        public void ApplyProxy(string host, string port)
+        public static void ApplyProxy(string host, string port)
         {
             var portValid = int.TryParse(port, out var parsedPort) && parsedPort > 0;
             var useProxy = !string.IsNullOrEmpty(host) && portValid;
@@ -41,33 +51,105 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             _appliedProxyHost = effectiveHost;
             _appliedProxyPort = effectivePort;
 
-            var old = SharedClient;
+            var old = _sharedClient;
+            _sharedClient = CreateClient(useProxy);
+            try
+            {
+                old.Dispose();
+            }
+            catch
+            {
+            }
+        }
+
+        private static HttpClient CreateClient(bool useProxy)
+        {
             if (useProxy)
             {
                 var handler = new HttpClientHandler
                 {
                     UseProxy = true,
-                    Proxy = new System.Net.WebProxy(effectiveHost, parsedPort),
+                    Proxy = new System.Net.WebProxy(_appliedProxyHost, int.Parse(_appliedProxyPort)),
                 };
-                SharedClient = new HttpClient(handler, disposeHandler: true)
+                return new HttpClient(handler, disposeHandler: true)
                 {
                     Timeout = TimeSpan.FromSeconds(60),
                 };
             }
-            else
+            return new HttpClient()
             {
-                SharedClient = new HttpClient()
-                {
-                    Timeout = TimeSpan.FromSeconds(60),
-                };
-            }
-            try { old.Dispose(); } catch { }
+                Timeout = TimeSpan.FromSeconds(60),
+            };
         }
-        
+
+        /// <summary>
+        /// HTTP 发送结果。成功时 <see cref="Error"/> 为 null 且 <see cref="ResponseText"/> 为响应原文；
+        /// 失败时 <see cref="HttpStatus"/>（如有）与 <see cref="ErrorBody"/>（原文）供重试/关键字判断使用。
+        /// </summary>
+        protected sealed class PostResponse
+        {
+            public string ResponseText;
+            public int? HttpStatus;
+            public string ErrorBody;
+            public string Error;
+
+            public bool IsSuccess
+            {
+                get { return Error == null; }
+            }
+        }
+
         public virtual async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {
             await Task.Yield();
             return new LlmIntent { Error = "此接口未实现" };
+        }
+
+        /// <summary>
+        /// 统一 JSON POST 骨架：请求级超时、错误包装（"{ProviderTag} ..." 前缀）与 catch 均在此处理，
+        /// 子类只需提供 endpoint/body，并通过 <paramref name="configureRequest"/> 注入鉴权/自定义头。
+        /// 注意：<paramref name="configureRequest"/> 在 try 块内执行，其异常统一按 "{ProviderTag} 异常" 处理。
+        /// </summary>
+        protected async Task<PostResponse> PostJsonAsync(
+            string endpoint,
+            JsonObject body,
+            LlmProviderSettings settings,
+            CancellationToken cancellationToken,
+            Action<HttpRequestMessage> configureRequest = null)
+        {
+            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(timeout);
+
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+                {
+                    Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
+                };
+                configureRequest?.Invoke(request);
+
+                using var response = await SharedClient.SendAsync(request, cts.Token).ConfigureAwait(false);
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new PostResponse
+                    {
+                        HttpStatus = (int)response.StatusCode,
+                        ErrorBody = responseString,
+                        Error = $"{ProviderTag} HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}",
+                    };
+                }
+                return new PostResponse { ResponseText = responseString };
+            }
+            catch (OperationCanceledException)
+            {
+                return new PostResponse { Error = $"{ProviderTag} 请求超时" };
+            }
+            catch (Exception ex)
+            {
+                return new PostResponse { Error = $"{ProviderTag} 异常：{ex.Message}" };
+            }
         }
 
         public string SafeTrim(string s, int max)

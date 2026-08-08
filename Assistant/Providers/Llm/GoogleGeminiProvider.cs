@@ -1,11 +1,9 @@
 using System;
-using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -18,6 +16,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     public sealed class GoogleGeminiProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
+        private const string DefaultModel = "gemini-2.0-flash";
+
+        protected override string ProviderTag
+        {
+            get { return "Gemini"; }
+        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -43,12 +47,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
-            if (content.StartsWith("Gemini ", StringComparison.Ordinal))
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
             {
-                return new LlmIntent { Error = content };
+                return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(content);
+            return ParseIntentJson(result.ResponseText);
         }
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
@@ -61,44 +65,19 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
-            return ExtractText(content) ?? content;
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return result.Error;
+            }
+            return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            
-            var model = string.IsNullOrEmpty(settings.ModelId) ? "gemini-2.0-flash" : settings.ModelId;
-
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
-
-            try
-            {
-                var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
-                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-                {
-                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
-                };
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return $"Gemini HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}";
-                }
-                return responseString;
-            }
-            catch (OperationCanceledException)
-            {
-                return "Gemini 请求超时";
-            }
-            catch (Exception ex)
-            {
-                return $"Gemini 异常：{ex.Message}";
-            }
+            var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
+            var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
+            return SendJsonAsync(endpoint, body, settings, cancellationToken);
         }
 
         private static string ExtractText(string responseString)

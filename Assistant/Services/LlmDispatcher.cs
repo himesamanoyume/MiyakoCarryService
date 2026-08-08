@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Enums;
+using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Providers.Llm;
 

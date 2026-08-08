@@ -1,13 +1,9 @@
 using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
-using MiyakoCarryService.Assistant.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -19,87 +15,60 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     public sealed class VolcIatProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://openspeech.bytedance.com";
-        private const int RequiredRate = 16000;
+
+        protected override string ProviderTag
+        {
+            get { return "火山"; }
+        }
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            if (audio == null || audio.LengthSamples == 0)
-            {
-                return new SttResult { Error = "AudioSegment 为空" };
-            }
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
                 return new SttResult { Error = "火山需填写 SttApiKey（AppID）与 SttApiSecret（AccessToken）" };
             }
-
-            var rate = audio.SampleRate;
-            var samples = audio.Samples;
-            if (rate != RequiredRate)
+            if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
-                samples = Tools.Resample(samples, rate, RequiredRate);
-                rate = RequiredRate;
-            }
-            var wavBytes = Tools.Encode(samples, rate, 1);
-            if (wavBytes.Length == 0)
-            {
-                return new SttResult { Error = "WAV 编码失败" };
+                return new SttResult { Error = prepareError };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
+            var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+            var signature = Md5($"appid={settings.ApiKey}&token={settings.ApiSecret}&ts={ts}");
+            var endpoint = $"{baseUrl}/api/v1/auc/get_one_sentence_recognition" +
+                $"?appid={Uri.EscapeDataString(settings.ApiKey)}&token={Uri.EscapeDataString(settings.ApiSecret)}&signature={signature}&ts={ts}";
 
+            var result = await SendRawAsync(endpoint, wavBytes, "application/octet-stream", settings, cancellationToken,
+                truncateLen: 240);
+            if (!result.IsSuccess)
+            {
+                return new SttResult { Error = result.Error };
+            }
+
+            var json = ParseResponseJson(result);
+            if (json == null)
+            {
+                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+            }
+            var code = json.Value<int>("code");
+            if (code != 0)
+            {
+                return new SttResult { Error = $"火山识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
+            }
+
+            var resultBase64 = json.Value<string>("result");
+            if (string.IsNullOrEmpty(resultBase64))
+            {
+                return new SttResult { Text = string.Empty, DetectedLanguage = settings.Language };
+            }
             try
             {
-                var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-                var signature = Md5($"appid={settings.ApiKey}&token={settings.ApiSecret}&ts={ts}");
-                var endpoint = $"{baseUrl}/api/v1/auc/get_one_sentence_recognition" +
-                    $"?appid={Uri.EscapeDataString(settings.ApiKey)}&token={Uri.EscapeDataString(settings.ApiSecret)}&signature={signature}&ts={ts}";
-
-                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-                {
-                    Content = new ByteArrayContent(wavBytes),
-                };
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new SttResult { Error = $"火山 HTTP {response.StatusCode}: {SafeTrim(responseString, 240)}" };
-                }
-
-                var json = JObject.Parse(responseString);
-                var code = json.Value<int>("code");
-                if (code != 0)
-                {
-                    return new SttResult { Error = $"火山识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
-                }
-
-                var resultBase64 = json.Value<string>("result");
-                if (string.IsNullOrEmpty(resultBase64))
-                {
-                    return new SttResult { Text = string.Empty, DetectedLanguage = settings.Language };
-                }
-                try
-                {
-                    var text = Encoding.UTF8.GetString(Convert.FromBase64String(resultBase64));
-                    return new SttResult { Text = text, DetectedLanguage = settings.Language };
-                }
-                catch (Exception ex)
-                {
-                    return new SttResult { Error = $"火山结果解码失败：{ex.Message}" };
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                return new SttResult { Error = "火山请求超时" };
+                var text = Encoding.UTF8.GetString(Convert.FromBase64String(resultBase64));
+                return new SttResult { Text = text, DetectedLanguage = settings.Language };
             }
             catch (Exception ex)
             {
-                return new SttResult { Error = $"火山异常：{ex.Message}" };
+                return new SttResult { Error = $"火山结果解码失败：{ex.Message}" };
             }
         }
 

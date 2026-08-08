@@ -7,6 +7,6 @@ namespace MiyakoCarryService.Server.Interfaces
 {
     public interface ILlmProvider
     {
-        protected Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken);
+        Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
 
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,21 +10,53 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    public abstract class BaseLlmProvider : ILlmProvider
+    public abstract class BaseLlmProvider : BaseProvider, ILlmProvider
     {
         public virtual Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new LlmIntent { Error = "此接口未实现" });
         }
 
         public virtual Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.FromResult("该服务商不支持 Ping 测试");
         }
 
-        protected virtual async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        /// <summary>
+        /// 提取 OpenAI 兼容响应中 <c>choices[0].message.content</c> 的文本；
+        /// 解析失败或内容为空时返回 null。
+        /// </summary>
+        protected static string ExtractChatContentText(string responseString)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var json = JObject.Parse(responseString);
+                return json["choices"]?[0]?["message"]?["content"]?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 构造 OpenAI 兼容 Chat Completions 请求体（model/messages/temperature/max_tokens）。
+        /// <paramref name="maxTokensFieldName"/> 可定制输出 token 上限字段名（如 MiniMax 的 tokens_to_generate）。
+        /// </summary>
+        protected static JObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        {
+            var messages = new JArray
+            {
+                new JObject { ["role"] = "system", ["content"] = systemPrompt },
+                new JObject { ["role"] = "user", ["content"] = userText },
+            };
+            return new JObject
+            {
+                ["model"] = model,
+                ["messages"] = messages,
+                ["temperature"] = temperature,
+                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 3000,
+            };
         }
 
         public LlmIntent ParseIntentJson(string content)
@@ -152,15 +183,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
             }
-        }
-
-        public string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s))
-            {
-                return string.Empty;
-            }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

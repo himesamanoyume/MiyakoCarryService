@@ -18,14 +18,14 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         private const string DefaultGateway = "https://nls-gateway-cn-shanghai.aliyuncs.com";
         private const string DefaultTokenApi = "https://nls-meta.cn-shanghai.aliyuncs.com";
-        private const int RequiredRate = 16000;
+
+        protected override string ProviderTag
+        {
+            get { return "阿里"; }
+        }
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            if (audio == null || audio.LengthSamples == 0)
-            {
-                return new SttResult { Error = "AudioSegment 为空" };
-            }
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
                 return new SttResult { Error = "阿里 NLS 需填写 SttApiKey（AccessKeyId）、SttApiSecret（AccessKeySecret）与 SttModelId（appkey）" };
@@ -34,27 +34,16 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = "阿里 NLS 需在 SttModelId 中填写 appkey" };
             }
-
-            var rate = audio.SampleRate;
-            var samples = audio.Samples;
-            if (rate != RequiredRate)
+            if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
-                samples = Tools.Resample(samples, rate, RequiredRate);
-                rate = RequiredRate;
-            }
-            var wavBytes = Tools.Encode(samples, rate, 1);
-            if (wavBytes.Length == 0)
-            {
-                return new SttResult { Error = "WAV 编码失败" };
+                return new SttResult { Error = prepareError };
             }
 
             var gateway = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultGateway : settings.BaseUrl.TrimEnd('/');
             var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
 
-            try
+            using (var tokenCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
-                using var tokenCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 tokenCts.CancelAfter(TimeSpan.FromSeconds(15));
                 var token = await FetchTokenAsync(client, settings, tokenCts.Token).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(token))
@@ -62,39 +51,31 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                     return new SttResult { Error = "阿里 NLS token 换取失败（请检查 AccessKeyId/AccessKeySecret）" };
                 }
 
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                cts.CancelAfter(timeout);
-                var endpoint = $"{gateway}/stream/v1/asr?appkey={Uri.EscapeDataString(settings.ModelId)}" + $"&format=wav&sample_rate={RequiredRate}&enable_punctuation_prediction=true&enable_inverse_text_normalization=true";
-                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+                var endpoint = $"{gateway}/stream/v1/asr?appkey={Uri.EscapeDataString(settings.ModelId)}" +
+                    $"&format=wav&sample_rate={RequiredRate}&enable_punctuation_prediction=true&enable_inverse_text_normalization=true";
+                var result = await SendRawAsync(endpoint, wavBytes, "application/octet-stream", settings, cancellationToken,
+                    request =>
+                    {
+                        request.Headers.Add("X-NLS-AppKey", settings.ModelId);
+                        request.Headers.Add("X-NLS-Token", token);
+                    },
+                    truncateLen: 240);
+                if (!result.IsSuccess)
                 {
-                    Content = new ByteArrayContent(wavBytes),
-                };
-                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-                request.Headers.Add("X-NLS-AppKey", settings.ModelId);
-                request.Headers.Add("X-NLS-Token", token);
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new SttResult { Error = $"阿里 HTTP {response.StatusCode}: {SafeTrim(responseString, 240)}" };
+                    return new SttResult { Error = result.Error };
                 }
 
-                var json = JObject.Parse(responseString);
+                var json = ParseResponseJson(result);
+                if (json == null)
+                {
+                    return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                }
                 var status = json.Value<int>("status");
                 if (status != 20000000)
                 {
                     return new SttResult { Error = $"阿里识别失败 {status}: {json.Value<string>("message") ?? "未知错误"}" };
                 }
                 return new SttResult { Text = json.Value<string>("result") ?? string.Empty, DetectedLanguage = settings.Language };
-            }
-            catch (OperationCanceledException)
-            {
-                return new SttResult { Error = "阿里请求超时" };
-            }
-            catch (Exception ex)
-            {
-                return new SttResult { Error = $"阿里异常：{ex.Message}" };
             }
         }
 

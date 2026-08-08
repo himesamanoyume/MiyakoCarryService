@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
+using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
 using MiyakoCarryService.Server.Services.Llm.Providers;
 using MiyakoCarryService.Server.Utils;

@@ -1,5 +1,4 @@
 using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -20,6 +19,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     public sealed class ZhipuProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://open.bigmodel.cn";
+        private const string DefaultModel = "glm-4-flash";
+
+        protected override string ProviderTag
+        {
+            get { return "Zhipu"; }
+        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -29,72 +34,34 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
-            var body = BuildBody(systemPrompt, userText, settings.MaxTokens, settings.Temperature);
+            var body = BuildChatCompletionsBody(DefaultModel, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
 
-            var content = await PostAsync(body, settings, cancellationToken);
-            if (content.StartsWith("Zhipu ", StringComparison.Ordinal))
+            var result = await PostAsync(body, settings, cancellationToken);
+            if (!result.IsSuccess)
             {
-                return new LlmIntent { Error = content };
+                return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(content);
+            return ParseIntentJson(result.ResponseText);
         }
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var body = BuildBody("You are a connectivity test. Reply with exactly: pong", "ping", 64, 0d);
-            var content = await PostAsync(body, settings, cancellationToken);
-            return ExtractText(content) ?? content;
-        }
-
-        private static JObject BuildBody(string systemPrompt, string userText, int maxTokens, double temperature)
-        {
-            var messages = new JArray();
-            messages.Add(new JObject { ["role"] = "system", ["content"] = systemPrompt });
-            messages.Add(new JObject { ["role"] = "user", ["content"] = userText });
-            return new JObject
+            var body = BuildChatCompletionsBody(DefaultModel, "You are a connectivity test. Reply with exactly: pong", "ping", 0d, 64);
+            var result = await PostAsync(body, settings, cancellationToken);
+            if (!result.IsSuccess)
             {
-                ["model"] = "glm-4-flash",
-                ["messages"] = messages,
-                ["temperature"] = temperature,
-                ["max_tokens"] = maxTokens > 0 ? maxTokens : 3000,
-            };
+                return result.Error;
+            }
+            return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private async Task<string> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private Task<PostResponse> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var jwt = BuildJwt(settings);
 
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
-
-            try
-            {
-                var endpoint = $"{baseUrl}/api/paas/v4/chat/completions";
-                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-                {
-                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
-                };
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return $"Zhipu HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}";
-                }
-                return responseString;
-            }
-            catch (OperationCanceledException)
-            {
-                return "Zhipu 请求超时";
-            }
-            catch (Exception ex)
-            {
-                return $"Zhipu 异常：{ex.Message}";
-            }
+            return SendJsonAsync($"{baseUrl}/api/paas/v4/chat/completions", body, settings, cancellationToken,
+                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt));
         }
 
         private static string BuildJwt(ProviderSettings settings)
@@ -130,20 +97,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return $"{signingInput}.{Base64Url(signature)}";
         }
 
-        private static string Base64Url(byte[] data) => Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        private static string Base64Url(string s) => Base64Url(Encoding.UTF8.GetBytes(s));
-
-        private static string ExtractText(string responseString)
+        private static string Base64Url(byte[] data)
         {
-            try
-            {
-                var json = JObject.Parse(responseString);
-                return json["choices"]?[0]?["message"]?["content"]?.ToString();
-            }
-            catch
-            {
-                return null;
-            }
+            return Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        private static string Base64Url(string s)
+        {
+            return Base64Url(Encoding.UTF8.GetBytes(s));
         }
     }
 }

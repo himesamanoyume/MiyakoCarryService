@@ -1,7 +1,5 @@
 using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -26,10 +24,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var modelId = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
             var maxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000;
-
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
 
             try
             {
@@ -63,35 +57,33 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
                         body["response_format"] = JsonSerializer.SerializeToNode(new { type = "json_object" });
                     }
 
-                    using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
-                    {
-                        Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
-                    };
-                    // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
-                    if (!string.IsNullOrEmpty(settings.ApiKey))
-                    {
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
-                    }
+                    var result = await PostJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,
+                        request =>
+                        {
+                            // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
+                            if (!string.IsNullOrEmpty(settings.ApiKey))
+                            {
+                                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                            }
+                        });
 
-                    using var response = await SharedClient.SendAsync(request, cts.Token).ConfigureAwait(false);
-                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!response.IsSuccessStatusCode)
+                    if (!result.IsSuccess)
                     {
                         // 不支持的端点（错误含 not supported/json_object/response_format/reasoning）去掉可选参数重试一次
-                        var unsupported = (int)response.StatusCode is 400 or 401 or 403 or 422
-                            && (responseString.Contains("not supported", StringComparison.OrdinalIgnoreCase)
-                                || responseString.Contains("json_object", StringComparison.OrdinalIgnoreCase)
-                                || responseString.Contains("response_format", StringComparison.OrdinalIgnoreCase)
-                                || responseString.Contains("reasoning", StringComparison.OrdinalIgnoreCase));
+                        var unsupported = result.HttpStatus is 400 or 401 or 403 or 422
+                            && (result.ErrorBody?.Contains("not supported", StringComparison.OrdinalIgnoreCase) == true
+                                || result.ErrorBody?.Contains("json_object", StringComparison.OrdinalIgnoreCase) == true
+                                || result.ErrorBody?.Contains("response_format", StringComparison.OrdinalIgnoreCase) == true
+                                || result.ErrorBody?.Contains("reasoning", StringComparison.OrdinalIgnoreCase) == true);
                         if (attempt == 0 && unsupported)
                         {
                             continue;
                         }
 
-                        return new LlmIntent { Error = $"OpenAI-Compat HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}" };
+                        return new LlmIntent { Error = result.Error };
                     }
 
-                    var json = JsonNode.Parse(responseString);
+                    var json = JsonNode.Parse(result.ResponseText);
                     var content = json?["choices"]?[0]?["message"]?["content"]?.ToString();
                     if (string.IsNullOrWhiteSpace(content))
                     {

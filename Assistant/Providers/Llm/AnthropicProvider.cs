@@ -1,12 +1,9 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -18,7 +15,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     public sealed class AnthropicProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://api.anthropic.com";
+        private const string DefaultModel = "claude-sonnet-4-20250514";
         private const string ApiVersion = "2023-06-01";
+
+        protected override string ProviderTag
+        {
+            get { return "Anthropic"; }
+        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -32,7 +35,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var model = string.IsNullOrEmpty(settings.ModelId) ? "claude-sonnet-4-20250514" : settings.ModelId;
+            var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
 
             var body = new JObject
@@ -52,7 +55,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var model = string.IsNullOrEmpty(settings.ModelId) ? "claude-sonnet-4-20250514" : settings.ModelId;
+            var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
             var body = new JObject
             {
@@ -65,53 +68,33 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 }),
             };
 
-            var reply = await PostAsync(baseUrl, body, settings, cancellationToken);
-            return ExtractText(reply) ?? reply;
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return result.Error;
+            }
+            return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
         private async Task<LlmIntent> SendAndParseAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
-            if (content.StartsWith("Anthropic ", StringComparison.Ordinal))
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
             {
-                return new LlmIntent { Error = content };
+                return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(content);
+            return ParseIntentJson(result.ResponseText);
         }
 
-        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
-
-            try
-            {
-                using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1/messages")
+            return SendJsonAsync($"{baseUrl}/v1/messages", body, settings, cancellationToken,
+                request =>
                 {
-                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
-                };
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
-                request.Headers.Add("x-api-key", settings.ApiKey);
-                request.Headers.Add("anthropic-version", ApiVersion);
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return $"Anthropic HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}";
-                }
-                return responseString;
-            }
-            catch (OperationCanceledException)
-            {
-                return "Anthropic 请求超时";
-            }
-            catch (Exception ex)
-            {
-                return $"Anthropic 异常：{ex.Message}";
-            }
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                    request.Headers.Add("x-api-key", settings.ApiKey);
+                    request.Headers.Add("anthropic-version", ApiVersion);
+                });
         }
 
         private string ExtractText(string responseString)

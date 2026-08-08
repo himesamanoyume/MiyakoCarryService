@@ -1,12 +1,8 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -19,6 +15,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     public sealed class DashScopeProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://dashscope.aliyuncs.com";
+        private const string DefaultModel = "qwen-plus";
+
+        protected override string ProviderTag
+        {
+            get { return "DashScope"; }
+        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -38,7 +40,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
             var body = new JObject
             {
-                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? "qwen-plus" : settings.ModelId,
+                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
                 ["input"] = new JObject { ["messages"] = messages },
                 ["parameters"] = new JObject
                 {
@@ -48,19 +50,19 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
-            if (content.StartsWith("DashScope ", StringComparison.Ordinal))
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
             {
-                return new LlmIntent { Error = content };
+                return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(content);
+            return ParseIntentJson(result.ResponseText);
         }
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var body = new JObject
             {
-                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? "qwen-plus" : settings.ModelId,
+                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
                 ["input"] = new JObject
                 {
                     ["messages"] = JArray.FromObject(new[]
@@ -73,42 +75,18 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
-            return ExtractText(content) ?? content;
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return result.Error;
+            }
+            return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
-
-            try
-            {
-                var endpoint = $"{baseUrl}/api/v1/services/aigc/text-generation/generation";
-                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-                {
-                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
-                };
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return $"DashScope HTTP {response.StatusCode}: {SafeTrim(responseString, 320)}";
-                }
-                return responseString;
-            }
-            catch (OperationCanceledException)
-            {
-                return "DashScope 请求超时";
-            }
-            catch (Exception ex)
-            {
-                return $"DashScope 异常：{ex.Message}";
-            }
+            return SendJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken,
+                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
         }
 
         private static string ExtractText(string responseString)

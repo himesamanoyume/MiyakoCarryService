@@ -1,12 +1,10 @@
 using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
-using MiyakoCarryService.Assistant.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -19,14 +17,14 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     public sealed class XfyunIatProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://iat-api.xfyun.cn";
-        private const int RequiredRate = 16000;
+
+        protected override string ProviderTag
+        {
+            get { return "讯飞"; }
+        }
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            if (audio == null || audio.LengthSamples == 0)
-            {
-                return new SttResult { Error = "AudioSegment 为空" };
-            }
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
                 return new SttResult { Error = "讯飞需填写 SttApiKey（apiKey）与 SttApiSecret（apiSecret）" };
@@ -35,101 +33,79 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = "讯飞需在 SttModelId 中填写 app_id" };
             }
-
-            var rate = audio.SampleRate;
-            var samples = audio.Samples;
-            if (rate != RequiredRate)
+            if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
-                samples = Tools.Resample(samples, rate, RequiredRate);
-                rate = RequiredRate;
-            }
-            var wavBytes = Tools.Encode(samples, rate, 1);
-            if (wavBytes.Length == 0)
-            {
-                return new SttResult { Error = "WAV 编码失败" };
+                return new SttResult { Error = prepareError };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var host = new Uri(baseUrl).Host;
-            var client = AssistantHttpClient.WithTimeout();
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
+            var date = DateTime.UtcNow.ToString("R");
+            var authorization = BuildAuthorization(host, date, settings.ApiKey, settings.ApiSecret);
 
-            try
+            var body = new JObject
             {
-                var date = DateTime.UtcNow.ToString("R");
-                var authorization = BuildAuthorization(host, date, settings.ApiKey, settings.ApiSecret);
-
-                var body = new JObject
+                ["common"] = new JObject { ["app_id"] = settings.ModelId },
+                ["business"] = new JObject
                 {
-                    ["common"] = new JObject { ["app_id"] = settings.ModelId },
-                    ["business"] = new JObject
+                    ["aue"] = "raw",
+                    ["auf"] = $"audio/L16;rate={RequiredRate}",
+                    ["vad_eos"] = 3000,
+                    ["domain"] = "iat",
+                    ["language"] = string.IsNullOrEmpty(settings.Language) ? "zh_cn" : settings.Language,
+                },
+                ["data"] = new JObject
+                {
+                    ["audio"] = Convert.ToBase64String(wavBytes),
+                    ["sample_rate"] = RequiredRate,
+                },
+            };
+
+            var result = await SendJsonAsync($"{baseUrl}/v2/iat", body, settings, cancellationToken,
+                request =>
+                {
+                    // 讯飞要求 content-type 不带 charset 参数
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    request.Headers.Add("Authorization", authorization);
+                    request.Headers.Add("Date", date);
+                },
+                truncateLen: 240);
+            if (!result.IsSuccess)
+            {
+                return new SttResult { Error = result.Error };
+            }
+
+            var json = ParseResponseJson(result);
+            if (json == null)
+            {
+                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+            }
+            var code = json.Value<int>("code");
+            if (code != 0)
+            {
+                return new SttResult { Error = $"讯飞识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
+            }
+
+            var sb = new StringBuilder();
+            if (json["data"]?["result"]?["rg"] is JArray rg)
+            {
+                foreach (var item in rg)
+                {
+                    var v = item?["v"]?.ToString();
+                    if (string.IsNullOrEmpty(v))
                     {
-                        ["aue"] = "raw",
-                        ["auf"] = $"audio/L16;rate={RequiredRate}",
-                        ["vad_eos"] = 3000,
-                        ["domain"] = "iat",
-                        ["language"] = string.IsNullOrEmpty(settings.Language) ? "zh_cn" : settings.Language,
-                    },
-                    ["data"] = new JObject
+                        continue;
+                    }
+                    try
                     {
-                        ["audio"] = Convert.ToBase64String(wavBytes),
-                        ["sample_rate"] = RequiredRate,
-                    },
-                };
-
-                using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v2/iat")
-                {
-                    Content = new StringContent(body.ToString(), Encoding.UTF8, "application/json"),
-                };
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                request.Headers.Add("Authorization", authorization);
-                request.Headers.Add("Date", date);
-
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new SttResult { Error = $"讯飞 HTTP {response.StatusCode}: {SafeTrim(responseString, 240)}" };
-                }
-
-                var json = JObject.Parse(responseString);
-                var code = json.Value<int>("code");
-                if (code != 0)
-                {
-                    return new SttResult { Error = $"讯飞识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
-                }
-
-                var sb = new StringBuilder();
-                if (json["data"]?["result"]?["rg"] is JArray rg)
-                {
-                    foreach (var item in rg)
+                        sb.Append(Encoding.UTF8.GetString(Convert.FromBase64String(v)));
+                    }
+                    catch
                     {
-                        var v = item?["v"]?.ToString();
-                        if (string.IsNullOrEmpty(v))
-                        {
-                            continue;
-                        }
-                        try
-                        {
-                            sb.Append(Encoding.UTF8.GetString(Convert.FromBase64String(v)));
-                        }
-                        catch
-                        {
-                        }
                     }
                 }
-                return new SttResult { Text = sb.ToString(), DetectedLanguage = settings.Language };
             }
-            catch (OperationCanceledException)
-            {
-                return new SttResult { Error = "讯飞请求超时" };
-            }
-            catch (Exception ex)
-            {
-                return new SttResult { Error = $"讯飞异常：{ex.Message}" };
-            }
+            return new SttResult { Text = sb.ToString(), DetectedLanguage = settings.Language };
         }
 
         private string BuildAuthorization(string host, string date, string apiKey, string apiSecret)

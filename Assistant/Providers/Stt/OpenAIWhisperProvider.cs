@@ -4,8 +4,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
-using MiyakoCarryService.Assistant.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -15,17 +13,16 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class OpenAIWhisperProvider : BaseSttProvider
     {
+        protected override string ProviderTag
+        {
+            get { return "Whisper"; }
+        }
+
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            if (audio == null || audio.LengthSamples == 0)
+            if (!TryPrepareWav(audio, out var wavBytes, out var prepareError))
             {
-                return new SttResult { Error = "AudioSegment 为空" };
-            }
-
-            var wavBytes = Tools.Encode(audio.Samples, audio.SampleRate, audio.Channels);
-            if (wavBytes.Length == 0)
-            {
-                return new SttResult { Error = "WAV 编码失败" };
+                return new SttResult { Error = prepareError };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
@@ -46,32 +43,30 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             form.Add(new StringContent("json"), "response_format");
 
-            var client = AssistantHttpClient.WithTimeout();
-            var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-            {
-                Content = form,
-            };
-            // 本地端点无需 ApiKey，为空时不附加 Authorization
-            if (!string.IsNullOrEmpty(settings.ApiKey))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
-            }
-
-            // 请求级超时：按 SttTimeoutSec 精确生效，不受其它请求（如 LLM 调试）干扰
-            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(timeout);
-
+            HttpRequestMessage request = null;
             try
             {
-                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
-                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                if (!response.IsSuccessStatusCode)
+                request = new HttpRequestMessage(HttpMethod.Post, endpoint)
                 {
-                    return new SttResult { Error = $"Whisper HTTP {response.StatusCode}: {SafeTrim(responseString, 240)}" };
+                    Content = form,
+                };
+                // 本地端点无需 ApiKey，为空时不附加 Authorization
+                if (!string.IsNullOrEmpty(settings.ApiKey))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
                 }
 
-                var json = JObject.Parse(responseString);
+                var result = await SendAsync(request, settings, cancellationToken, truncateLen: 240);
+                if (!result.IsSuccess)
+                {
+                    return new SttResult { Error = result.Error };
+                }
+
+                var json = ParseResponseJson(result);
+                if (json == null)
+                {
+                    return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                }
                 return new SttResult
                 {
                     Text = json.Value<string>("text") ?? string.Empty,
@@ -92,11 +87,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 // 释放统一 try/catch 兜住，避免异常吞掉转写结果
                 try
                 {
-                    request.Dispose();
+                    request?.Dispose();
                 }
                 catch
                 {
-
                 }
                 try
                 {
@@ -104,7 +98,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 }
                 catch
                 {
-
                 }
             }
         }
