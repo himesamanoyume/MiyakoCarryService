@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         private const string DefaultBaseUrl = "https://iat-api.xfyun.cn";
 
-        protected override string ProviderTag
-        {
-            get { return "讯飞"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))

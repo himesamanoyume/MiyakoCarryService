@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// 讯飞星火 OpenAI 兼容 HTTP 端点：<c>POST /v1/chat/completions</c>。
@@ -17,11 +17,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://spark-api-open.xf-yun.com";
         private const string DefaultModel = "generalv3.5";
-
-        protected override string ProviderTag
-        {
-            get { return "Spark"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

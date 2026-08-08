@@ -17,11 +17,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://spark-api-open.xf-yun.com";
         private const string DefaultModel = "generalv3.5";
 
-        protected override string ProviderTag
-        {
-            get { return "Spark"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

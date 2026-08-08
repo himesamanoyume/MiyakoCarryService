@@ -21,11 +21,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://open.bigmodel.cn";
         private const string DefaultModel = "glm-4-flash";
 
-        protected override string ProviderTag
-        {
-            get { return "Zhipu"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

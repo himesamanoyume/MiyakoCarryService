@@ -16,11 +16,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://qianfan.baidubce.com";
         private const string DefaultModel = "ernie-4.5-turbo-128k";
 
-        protected override string ProviderTag
-        {
-            get { return "Qianfan"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

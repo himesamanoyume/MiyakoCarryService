@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultModel = "claude-sonnet-4-20250514";
         private const string ApiVersion = "2023-06-01";
 
-        protected override string ProviderTag
-        {
-            get { return "Anthropic"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

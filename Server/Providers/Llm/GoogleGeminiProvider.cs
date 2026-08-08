@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// Google Gemini <c>generateContent</c> REST：
@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
         private const string DefaultModel = "gemini-2.0-flash";
-
-        protected override string ProviderTag
-        {
-            get { return "Gemini"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// 智谱 GLM Chat Completions：<c>POST /api/paas/v4/chat/completions</c>。
@@ -19,11 +19,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://open.bigmodel.cn";
         private const string DefaultModel = "glm-4-flash";
-
-        protected override string ProviderTag
-        {
-            get { return "Zhipu"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

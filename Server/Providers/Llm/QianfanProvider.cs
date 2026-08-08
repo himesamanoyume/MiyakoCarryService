@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// 百度千帆 OpenAI 兼容 v2 端点：<c>POST /v2/chat/completions</c>，Bearer ApiKey 鉴权。
@@ -16,11 +16,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://qianfan.baidubce.com";
         private const string DefaultModel = "ernie-4.5-turbo-128k";
-
-        protected override string ProviderTag
-        {
-            get { return "Qianfan"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

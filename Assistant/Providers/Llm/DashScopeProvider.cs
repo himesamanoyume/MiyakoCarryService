@@ -17,11 +17,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://dashscope.aliyuncs.com";
         private const string DefaultModel = "qwen-plus";
 
-        protected override string ProviderTag
-        {
-            get { return "DashScope"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

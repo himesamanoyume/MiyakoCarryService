@@ -16,11 +16,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         private const string DefaultBaseUrl = "https://asr.tencentcloudapi.com";
 
-        protected override string ProviderTag
-        {
-            get { return "腾讯云"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))

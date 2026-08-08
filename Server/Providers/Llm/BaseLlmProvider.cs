@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// 服务端 LLM 服务商适配器基类。所有厂商共享同一份 <see cref="LlmProviderSettings"/> 配置项，
@@ -17,9 +17,12 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     public abstract class BaseLlmProvider : ILlmProvider
     {
         /// <summary>错误信息厂商名前缀（如 "OpenAI-Compat"），子类可覆盖。</summary>
-        protected virtual string ProviderTag
+        protected string ProviderTag
         {
-            get { return "OpenAI-Compat"; }
+            get
+            {
+                return field ??= GetType().Name;
+            }
         }
 
         private static HttpClient _sharedClient = CreateClient(useProxy: false);

@@ -17,11 +17,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://api.minimax.chat";
         private const string DefaultModel = "MiniMax-Text-01";
 
-        protected override string ProviderTag
-        {
-            get { return "MiniMax"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

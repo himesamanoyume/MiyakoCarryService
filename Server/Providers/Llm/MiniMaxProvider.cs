@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// MiniMax v2 Chat Completions：<c>POST /v2/text/chat_completions</c>，Bearer ApiKey 鉴权。
@@ -15,11 +15,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://api.minimax.chat";
         private const string DefaultModel = "MiniMax-Text-01";
-
-        protected override string ProviderTag
-        {
-            get { return "MiniMax"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

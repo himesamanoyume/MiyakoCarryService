@@ -16,11 +16,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         private const string DefaultBaseUrl = "https://speech.googleapis.com";
 
-        protected override string ProviderTag
-        {
-            get { return "Google"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey))

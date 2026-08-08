@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://api.deepseek.com";
         private const string DefaultModel = "deepseek-v4-flash";
 
-        protected override string ProviderTag
-        {
-            get { return "OpenAI-Compat"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

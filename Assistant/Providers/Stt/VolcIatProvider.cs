@@ -16,11 +16,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         private const string DefaultBaseUrl = "https://openspeech.bytedance.com";
 
-        protected override string ProviderTag
-        {
-            get { return "火山"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))

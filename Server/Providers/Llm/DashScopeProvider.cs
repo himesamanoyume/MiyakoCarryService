@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// 阿里云 DashScope 通义千问 Chat Completions：
@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
     {
         private const string DefaultBaseUrl = "https://dashscope.aliyuncs.com";
         private const string DefaultModel = "qwen-plus";
-
-        protected override string ProviderTag
-        {
-            get { return "DashScope"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

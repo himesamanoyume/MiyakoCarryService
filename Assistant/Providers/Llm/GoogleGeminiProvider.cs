@@ -18,11 +18,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
         private const string DefaultModel = "gemini-2.0-flash";
 
-        protected override string ProviderTag
-        {
-            get { return "Gemini"; }
-        }
-
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))

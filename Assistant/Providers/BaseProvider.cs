@@ -19,11 +19,13 @@ namespace MiyakoCarryService.Assistant.Providers
     /// </summary>
     public abstract class BaseProvider
     {
-        /// <summary>
-        /// 错误信息厂商名前缀，例如 "Zhipu" / "讯飞"。所有错误文案均以该前缀开头。
-        /// </summary>
-        protected abstract string ProviderTag { get; }
-
+        protected string ProviderTag
+        {
+            get
+            {
+                return field ??= GetType().Name;
+            }
+        }
         /// <summary>
         /// HTTP 发送结果。成功时 <see cref="Error"/> 为 null 且 <see cref="ResponseText"/> 为响应原文；
         /// 失败时 <see cref="HttpStatus"/>（如有）与 <see cref="ErrorBody"/>（原文）供重试/关键字判断使用。

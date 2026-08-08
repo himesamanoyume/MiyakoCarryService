@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
 
-namespace MiyakoCarryService.Server.Services.Llm.Providers
+namespace MiyakoCarryService.Server.Services.Providers.Llm
 {
     /// <summary>
     /// Anthropic Claude Messages API <c>/v1/messages</c>。
@@ -17,11 +17,6 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
         private const string DefaultBaseUrl = "https://api.anthropic.com";
         private const string DefaultModel = "claude-sonnet-4-20250514";
         private const string ApiVersion = "2023-06-01";
-
-        protected override string ProviderTag
-        {
-            get { return "Anthropic"; }
-        }
 
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {

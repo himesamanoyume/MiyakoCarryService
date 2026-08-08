@@ -19,11 +19,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         private const string DefaultGateway = "https://nls-gateway-cn-shanghai.aliyuncs.com";
         private const string DefaultTokenApi = "https://nls-meta.cn-shanghai.aliyuncs.com";
 
-        protected override string ProviderTag
-        {
-            get { return "阿里"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))

@@ -13,11 +13,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class OpenAIWhisperProvider : BaseSttProvider
     {
-        protected override string ProviderTag
-        {
-            get { return "Whisper"; }
-        }
-
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (!TryPrepareWav(audio, out var wavBytes, out var prepareError))
