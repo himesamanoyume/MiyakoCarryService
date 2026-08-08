@@ -554,8 +554,8 @@ namespace MiyakoCarryService.Assistant
         }
 
         /// <summary>
-        /// 使用当前 LLM 配置发送测试内容（默认取 STT 调试文本，为空则 "ping"），
-        /// 回复或报错信息覆盖写入 LLM 返回结果。
+        /// 使用当前 LLM 配置发送连通性测试（最小化请求，成功时回复应为 "pong"），
+        /// 回复或报错信息覆盖写入 LLM 返回结果。不做指令识别。
         /// </summary>
         private static async Task RunLlmDebugTestAsync()
         {
@@ -576,35 +576,13 @@ namespace MiyakoCarryService.Assistant
                     ReasoningEffort = LlmReasoningEffort.Value,
                 };
 
-                var text = SttDebugText?.Value;
-                if (string.IsNullOrWhiteSpace(text))
-                {
-                    text = "ping";
-                }
-
                 var dispatcher = new LlmDispatcher(LlmProvider.Value);
-                var intent = await dispatcher.InterpretAsync(text, settings, System.Threading.CancellationToken.None).ConfigureAwait(true);
+                var reply = await dispatcher.PingAsync(settings, System.Threading.CancellationToken.None).ConfigureAwait(true);
 
-                if (intent == null || intent.IsError)
-                {
-                    // 识别结果只允许指令：LLM 未识别统一显示，技术错误保留原文便于排查
-                    LlmDebugResult.Value = intent != null && intent.Error == LlmIntent.NotRecognized
-                        ? Locales.VOICENOTRECOGNIZED.McsLocalized()
-                        : $"错误：{intent?.Error ?? "null"}";
-                }
-                else if (!string.IsNullOrEmpty(intent.ReplyText))
-                {
-                    // 提示词已禁止 replyText，此处仅为兼容旧模型输出的兜底
-                    LlmDebugResult.Value = Locales.VOICENOTRECOGNIZED.McsLocalized();
-                }
-                else if (!string.IsNullOrEmpty(intent.CommandName))
-                {
-                    LlmDebugResult.Value = $"指令：{intent.CommandName}";
-                }
-                else
-                {
-                    LlmDebugResult.Value = "空响应";
-                }
+                // 连通性测试：回复含 pong（忽略大小写）即成功，统一显示 pong
+                LlmDebugResult.Value = reply.IndexOf("pong", StringComparison.OrdinalIgnoreCase) >= 0
+                    ? "pong"
+                    : reply;
             }
             catch (Exception ex)
             {

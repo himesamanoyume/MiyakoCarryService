@@ -11,5 +11,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     internal interface ILlmProvider
     {
         Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken);
+
+        /// <summary>连通性测试：发送最小化请求，返回模型回复原文（如 "pong"），失败返回描述文本。</summary>
+        Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken);
     }
 }

@@ -40,5 +40,14 @@ namespace MiyakoCarryService.Assistant.Services
             }
             return await _provider.InterpretAsync(userText, settings, cancellationToken).ConfigureAwait(false);
         }
+
+        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        {
+            if (_provider == null)
+            {
+                return "LlmProvider 未配置或未启用";
+            }
+            return await _provider.PingAsync(settings, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

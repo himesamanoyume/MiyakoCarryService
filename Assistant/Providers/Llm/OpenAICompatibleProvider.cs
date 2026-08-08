@@ -120,6 +120,61 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
+        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        {
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
+            var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
+            var client = AssistantHttpClient.WithTimeout(settings);
+
+            var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(timeout);
+
+            try
+            {
+                // 最小化连通性测试：不做指令解析，仅取模型回复原文
+                var body = new JObject
+                {
+                    ["model"] = model,
+                    ["messages"] = JArray.FromObject(new[]
+                    {
+                        new { role = "system", content = "You are a connectivity test. Reply with exactly: pong" },
+                        new { role = "user", content = "ping" },
+                    }),
+                    ["temperature"] = 0d,
+                    ["max_tokens"] = 64,
+                };
+
+                using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json"),
+                };
+                if (!string.IsNullOrEmpty(settings.ApiKey))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+                }
+
+                using var response = await client.SendAsync(request, cts.Token).ConfigureAwait(false);
+                var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return $"HTTP {response.StatusCode}: {SafeTrim(responseString, 240)}";
+                }
+
+                var json = JObject.Parse(responseString);
+                var content = json["choices"]?[0]?["message"]?["content"]?.ToString();
+                return string.IsNullOrWhiteSpace(content) ? "(空响应)" : content;
+            }
+            catch (OperationCanceledException)
+            {
+                return "请求超时";
+            }
+            catch (Exception ex)
+            {
+                return $"异常：{ex.Message}";
+            }
+        }
+
         internal static LlmIntent ParseIntentJson(string content)
         {
             try
