@@ -42,7 +42,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(result.ResponseText);
+
+            var content = ExtractChatContentText(result.ResponseText);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new LlmIntent { Error = "Spark 返回内容为空" };
+            }
+            return ParseIntentJson(content);
         }
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)

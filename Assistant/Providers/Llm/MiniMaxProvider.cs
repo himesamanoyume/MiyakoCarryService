@@ -50,7 +50,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = businessError };
             }
-            return ParseIntentJson(result.ResponseText);
+
+            var content = ExtractChatContentText(result.ResponseText);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new LlmIntent { Error = "MiniMax 返回内容为空" };
+            }
+            return ParseIntentJson(content);
         }
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)

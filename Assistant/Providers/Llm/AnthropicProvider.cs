@@ -83,7 +83,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = result.Error };
             }
-            return ParseIntentJson(result.ResponseText);
+
+            var content = ExtractText(result.ResponseText);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new LlmIntent { Error = "Anthropic 返回内容为空" };
+            }
+            return ParseIntentJson(content);
         }
 
         private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
