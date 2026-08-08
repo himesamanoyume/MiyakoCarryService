@@ -12,6 +12,6 @@ namespace MiyakoCarryService.Assistant.Enums
         /// <summary>对按 1-based 索引指定的单个护航成员执行（<c>LlmIntent.TargetIndex</c>）。</summary>
         ByIndex,
         /// <summary>对按代号/昵称指定的单个护航成员执行（<c>LlmIntent.TargetCodeName</c>）。</summary>
-        ByCodeName,
+        ByName,
     }
 }

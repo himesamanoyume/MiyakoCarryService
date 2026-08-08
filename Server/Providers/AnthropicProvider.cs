@@ -1,5 +1,3 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -70,7 +68,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             return ParseIntentJson(content);
         }
 
-        private string ExtractText(string responseString)
+        public override string ExtractText(string responseString)
         {
             try
             {

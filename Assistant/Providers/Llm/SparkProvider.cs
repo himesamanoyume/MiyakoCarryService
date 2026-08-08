@@ -37,7 +37,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
 
-            var result = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (!result.IsSuccess)
             {
                 return new LlmIntent { Error = result.Error };
@@ -55,7 +56,9 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var body = BuildChatCompletionsBody(model, "You are a connectivity test. Reply with exactly: pong", "ping", 0d, 64);
-            var result = await PostAsync(body, settings, cancellationToken);
+
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (!result.IsSuccess)
             {
                 return result.Error;
@@ -63,13 +66,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private Task<PostResponse> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var bearer = string.IsNullOrEmpty(settings.ApiSecret) ? settings.ApiKey : $"{settings.ApiKey}:{settings.ApiSecret}";
-
-            return SendJsonAsync($"{baseUrl}/v1/chat/completions", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer));
+            return SendJsonAsync($"{baseUrl}/v1/chat/completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer));
         }
     }
 }

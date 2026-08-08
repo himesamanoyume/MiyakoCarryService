@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
         /// 按 HttpProxyHost/HttpProxyPort 应用代理（host 与 port 均非空且端口可解析时全量经代理转发，
         /// 含本地地址；否则直连）。仅在配置变化时重建共享 HttpClient。
         /// </summary>
-        public static void ApplyProxy(string host, string port)
+        public void ApplyProxy(string host, string port)
         {
             var portValid = int.TryParse(port, out var parsedPort) && parsedPort > 0;
             var useProxy = !string.IsNullOrEmpty(host) && portValid;
@@ -59,6 +59,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             }
             catch
             {
+                
             }
         }
 
@@ -86,7 +87,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
         /// HTTP 发送结果。成功时 <see cref="Error"/> 为 null 且 <see cref="ResponseText"/> 为响应原文；
         /// 失败时 <see cref="HttpStatus"/>（如有）与 <see cref="ErrorBody"/>（原文）供重试/关键字判断使用。
         /// </summary>
-        protected sealed class PostResponse
+        public sealed class PostResponse
         {
             public string ResponseText;
             public int? HttpStatus;
@@ -261,6 +262,11 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             {
                 return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
             }
+        }
+
+        public virtual string ExtractText(string responseString)
+        {
+            throw new NotImplementedException();
         }
     }
 }

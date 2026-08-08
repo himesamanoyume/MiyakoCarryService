@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
-using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
 using MiyakoCarryService.Server.Services.Llm.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Helpers.Profile;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Services.Commerce;
@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Server.Services.Llm
         InfoService infoService,
         MailSendService mailSendService,
         ServerLocalisationService serverLocalisationService,
-        SPTarkov.Server.Core.Helpers.Profile.DialogueHelper dialogueHelper,
+        DialogueHelper dialogueHelper,
         LocaleService localeService,
         TraderService traderService,
         ISptLogger<LlmDispatcherService> logger
@@ -78,7 +78,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 ApiSecret = serverConfig.TraderLlmApiSecret,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
                 ModelId = serverConfig.TraderLlmModelId,
-                SystemPrompt = MiyakoTraderTools.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
+                SystemPrompt = Tools.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
                 TimeoutSec = serverConfig.TraderLlmTimeoutSec,
@@ -98,7 +98,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             }
 
             // 按 HttpProxyHost/HttpProxyPort 应用代理（幂等，仅在配置变化时重建）
-            OpenAICompatibleProvider.ApplyProxy(serverConfig.HttpProxyHost, serverConfig.HttpProxyPort);
+            provider.ApplyProxy(serverConfig.HttpProxyHost, serverConfig.HttpProxyPort);
 
             LlmIntent intent;
             try
@@ -267,18 +267,18 @@ namespace MiyakoCarryService.Server.Services.Llm
         private static bool ValidateOrder(OrderIntent order)
         {
             return order != null
-                && order.Players >= MiyakoTraderTools.MinOrderPlayers
-                && order.Players <= MiyakoTraderTools.MaxOrderPlayers
-                && order.Level >= MiyakoTraderTools.MinOrderLevel
-                && order.Level <= MiyakoTraderTools.MaxOrderLevel
-                && order.Duration >= MiyakoTraderTools.MinOrderDuration;
+                && order.Players >= Tools.MinOrderPlayers
+                && order.Players <= Tools.MaxOrderPlayers
+                && order.Level >= Tools.MinOrderLevel
+                && order.Level <= Tools.MaxOrderLevel
+                && order.Duration >= Tools.MinOrderDuration;
         }
 
         private static bool ValidateTicket(TicketIntent ticket)
         {
             return ticket != null
-                && ticket.Percent >= MiyakoTraderTools.MinTicketPercent
-                && ticket.Percent <= MiyakoTraderTools.MaxTicketPercent;
+                && ticket.Percent >= Tools.MinTicketPercent
+                && ticket.Percent <= Tools.MaxTicketPercent;
         }
 
         /// <summary>
@@ -564,7 +564,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             }
         }
 
-        private static ILlmProvider CreateProvider(string providerName)
+        private BaseLlmProvider CreateProvider(string providerName)
         {
             return providerName switch
             {

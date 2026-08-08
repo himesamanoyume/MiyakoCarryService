@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Assistant.Providers
         /// HTTP 发送结果。成功时 <see cref="Error"/> 为 null 且 <see cref="ResponseText"/> 为响应原文；
         /// 失败时 <see cref="HttpStatus"/>（如有）与 <see cref="ErrorBody"/>（原文）供重试/关键字判断使用。
         /// </summary>
-        protected sealed class PostResponse
+        public sealed class PostResponse
         {
             public string ResponseText;
             public int? HttpStatus;

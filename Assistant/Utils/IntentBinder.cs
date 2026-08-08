@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BepInEx.Bootstrap;
 using Comfort.Common;
 using EFT;
 using MiyakoCarryService.Assistant.Enums;
@@ -10,10 +9,9 @@ using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Models;
-using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
-namespace MiyakoCarryService.Assistant.Services
+namespace MiyakoCarryService.Assistant.Utils
 {
     /// <summary>
     /// 把 <see cref="LlmIntent"/> 与本地活护航成员流绑定，组装 <see cref="McsCommandContext"/> 后派发。
@@ -97,8 +95,7 @@ namespace MiyakoCarryService.Assistant.Services
                     position = options[idx].Position;
                     targetId = options[idx].TargetId;
                 }
-                else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString()
-                         || intent.CommandName == ECommandType.LootProxyAction.ToString())
+                else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString() || intent.CommandName == ECommandType.LootProxyAction.ToString())
                 {
                     // 代理开门/拾取战利品：必须在"选项显示状态"（复刻补丁条件）下才能执行
                     var resolved = TargetResolver.ResolveProxyTarget(mainPlayer, intent.CommandName);
@@ -122,7 +119,7 @@ namespace MiyakoCarryService.Assistant.Services
 
             var bodyPart = ParseBodyPart(intent.AimingBodyPart);
 
-            var useFikaBrige = MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost;
+            var useFikaBrige = MiyakoCarryServicePlugin.FikaInstalled && !Client.Utils.Tools.IsHost;
             int dispatched = 0;
             foreach (var bot in targets)
             {
@@ -232,7 +229,7 @@ namespace MiyakoCarryService.Assistant.Services
                 return Array.Empty<Player>();
             }
 
-            if (intent.Selector == EIntentTargetSelector.ByCodeName && !string.IsNullOrEmpty(intent.TargetCodeName))
+            if (intent.Selector == EIntentTargetSelector.ByName && !string.IsNullOrEmpty(intent.TargetCodeName))
             {
                 foreach (var member in aliveMembers)
                 {

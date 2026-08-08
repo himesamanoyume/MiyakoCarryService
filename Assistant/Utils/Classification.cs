@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Enums;
 
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Assistant.Utils
             Reply rule: use these exact terms when replying — Chinese terms when the player speaks Chinese, English terms otherwise.
             """;
 
-        public static readonly Dictionary<string, IReadOnlyList<string>> CommandGlossary = new()
+        public static readonly Dictionary<string, HashSet<string>> CommandGlossary = new()
         {
             { ECommandType.FollowMe.ToString(),                    [ClientLocales.FOLLOWMECOMMAND_NAME] },
             { ECommandType.HoldPosition.ToString(),                [ClientLocales.HOLDPOSITIONCOMMAND_NAME] },
@@ -45,9 +46,8 @@ namespace MiyakoCarryService.Assistant.Utils
             { ECommandType.DropTargetLoot.ToString(),              [ClientLocales.DROPTARGETLOOTCOMMAND_NAME] },
         };
 
-        public static readonly IReadOnlyList<string> UsableCommands =
+        public static readonly HashSet<string> UsableCommands =
         [
-            // 无需目标的指令
             ECommandType.FollowMe.ToString(),
             ECommandType.HoldPosition.ToString(),
             ECommandType.Regroup.ToString(),
@@ -60,7 +60,6 @@ namespace MiyakoCarryService.Assistant.Utils
             ECommandType.ReportAboutEnemy.ToString(),
             ECommandType.ReportAboutSelf.ToString(),
             ECommandType.EscortBtr.ToString(),
-            // 需要准星射线/目标的指令：仅由玩家口述动词，Position/TargetId 由 Assistant 后端补全
             ECommandType.GoToPoint.ToString(),
             ECommandType.EscortWorld.ToString(),
             ECommandType.Teleport.ToString(),
@@ -72,6 +71,6 @@ namespace MiyakoCarryService.Assistant.Utils
             ECommandType.DropTargetLoot.ToString(),
         ];
 
-        public static readonly IReadOnlyList<string> AimingBodyParts = ["Head", "Body", "LeftArm", "RightArm", "LeftLeg", "RightLeg"];
+        public static readonly HashSet<string> AimingBodyParts = [.. Enum.GetNames(typeof(BodyPartType))];
     }
 }

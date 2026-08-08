@@ -73,10 +73,9 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            return SendJsonAsync($"{baseUrl}/v2/text/chat_completions", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
+            return SendJsonAsync($"{baseUrl}/v2/text/chat_completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
         }
 
         private string CheckBusinessError(string responseString)

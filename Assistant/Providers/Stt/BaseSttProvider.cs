@@ -37,7 +37,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         /// <summary>
         /// 校验音频段非空。通过返回 null；失败返回携带错误信息的 <see cref="SttResult"/>。
         /// </summary>
-        protected static SttResult ValidateAudio(AudioSegment audio)
+        protected SttResult ValidateAudio(AudioSegment audio)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         /// <summary>
         /// 按音频原始采样率/声道编码为 WAV。
         /// </summary>
-        protected static bool TryPrepareWav(AudioSegment audio, out byte[] wavBytes, out string error)
+        protected bool TryPrepareWav(AudioSegment audio, out byte[] wavBytes, out string error)
         {
             var invalid = ValidateAudio(audio);
             if (invalid != null)
@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         /// <summary>
         /// 强制 16kHz 单声道：采样率不一致时先线性重采样，再编码为 WAV。
         /// </summary>
-        protected static bool TryPrepare16kWav(AudioSegment audio, out byte[] wavBytes, out string error)
+        protected bool TryPrepare16kWav(AudioSegment audio, out byte[] wavBytes, out string error)
         {
             var invalid = ValidateAudio(audio);
             if (invalid != null)

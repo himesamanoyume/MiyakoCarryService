@@ -5,7 +5,7 @@ using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
-namespace MiyakoCarryService.Assistant.Services
+namespace MiyakoCarryService.Assistant.Utils
 {
     /// <summary>
     /// 对玩家准星射线做物理投射，用作 <c>ECommandType.GoToPoint</c>/<c>EscortWorld</c>/<c>QuestProxyAction</c>

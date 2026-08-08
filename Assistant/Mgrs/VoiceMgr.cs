@@ -8,6 +8,7 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Events;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
+using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
@@ -747,7 +748,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                         case EIntentTargetSelector.ByIndex:
                             detail = $"（成员 {intent.TargetIndex}）";
                             break;
-                        case EIntentTargetSelector.ByCodeName:
+                        case EIntentTargetSelector.ByName:
                             detail = $"（代号 {intent.TargetCodeName}）";
                             break;
                     }

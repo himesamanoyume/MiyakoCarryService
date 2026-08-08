@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         /// 提取 OpenAI 兼容响应中 <c>choices[0].message.content</c> 的文本；
         /// 解析失败或内容为空时返回 null。
         /// </summary>
-        protected static string ExtractChatContentText(string responseString)
+        protected string ExtractChatContentText(string responseString)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         /// 构造 OpenAI 兼容 Chat Completions 请求体（model/messages/temperature/max_tokens）。
         /// <paramref name="maxTokensFieldName"/> 可定制输出 token 上限字段名（如 MiniMax 的 tokens_to_generate）。
         /// </summary>
-        protected static JObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        protected JObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
         {
             var messages = new JArray
             {
@@ -147,7 +147,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     intent.TargetCodeName = codeToken.ToString();
                     if (intent.Selector == EIntentTargetSelector.Unspecified && !string.IsNullOrEmpty(intent.TargetCodeName))
                     {
-                        intent.Selector = EIntentTargetSelector.ByCodeName;
+                        intent.Selector = EIntentTargetSelector.ByName;
                     }
                 }
 
@@ -156,7 +156,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     intent.Selector = intent.TargetIndices != null || intent.TargetIndex.HasValue
                         ? EIntentTargetSelector.ByIndex
                         : intent.TargetCodeNames != null || !string.IsNullOrEmpty(intent.TargetCodeName)
-                            ? EIntentTargetSelector.ByCodeName
+                            ? EIntentTargetSelector.ByName
                             : EIntentTargetSelector.All;
                 }
 
@@ -183,6 +183,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
             }
+        }
+
+        public virtual Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             return ParseIntentJson(content);
         }
 
-        private static string ExtractText(string responseString)
+        public override string ExtractText(string responseString)
         {
             try
             {

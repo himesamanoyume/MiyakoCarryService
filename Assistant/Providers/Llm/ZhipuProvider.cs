@@ -36,7 +36,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var body = BuildChatCompletionsBody(DefaultModel, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
 
-            var result = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (!result.IsSuccess)
             {
                 return new LlmIntent { Error = result.Error };
@@ -53,7 +54,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var body = BuildChatCompletionsBody(DefaultModel, "You are a connectivity test. Reply with exactly: pong", "ping", 0d, 64);
-            var result = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var result = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (!result.IsSuccess)
             {
                 return result.Error;
@@ -61,16 +63,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private Task<PostResponse> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var jwt = BuildJwt(settings);
-
-            return SendJsonAsync($"{baseUrl}/api/paas/v4/chat/completions", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt));
+            return SendJsonAsync($"{baseUrl}/api/paas/v4/chat/completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt));
         }
 
-        private static string BuildJwt(ProviderSettings settings)
+        private string BuildJwt(ProviderSettings settings)
         {
             var apiKey = settings?.ApiKey ?? string.Empty;
             var apiSecret = settings?.ApiSecret ?? string.Empty;

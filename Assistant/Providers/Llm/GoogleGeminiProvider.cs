@@ -79,14 +79,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
             return SendJsonAsync(endpoint, body, settings, cancellationToken);
         }
 
-        private static string ExtractText(string responseString)
+        private string ExtractText(string responseString)
         {
             try
             {

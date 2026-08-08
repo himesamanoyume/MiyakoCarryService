@@ -92,7 +92,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ParseIntentJson(content);
         }
 
-        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             return SendJsonAsync($"{baseUrl}/v1/messages", body, settings, cancellationToken,
                 request =>

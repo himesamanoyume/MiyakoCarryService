@@ -1,5 +1,4 @@
 using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -49,7 +48,7 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
             return ParseIntentJson(content);
         }
 
-        private Task<PostResponse> PostAsync(JsonObject body, LlmProviderSettings settings, CancellationToken cancellationToken)
+        public Task<PostResponse> PostAsync(JsonObject body, LlmProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var jwt = BuildJwt(settings);

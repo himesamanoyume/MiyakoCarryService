@@ -89,13 +89,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            return SendJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
+            return SendJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
         }
 
-        private static string ExtractText(string responseString)
+        private string ExtractText(string responseString)
         {
             try
             {
