@@ -61,10 +61,24 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _llmProvider = MiyakoCarryServiceAssistantPlugin.LlmProvider.Value;
         }
 
-        void OnDestroy()
+        public override void OnMgrDestroy()
         {
-            try { _processingCts?.Cancel(); } catch { }
-            try { _capture.Stop(); } catch { }
+            try
+            {
+                _processingCts?.Cancel();
+            }
+            catch
+            {
+
+            }
+            try
+            {
+                _capture.Stop();
+            }
+            catch
+            {
+
+            }
             base.OnMgrDestroy();
         }
 
@@ -74,6 +88,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
         /// </summary>
         public override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
+            base.OnGameWorldStarted(@event);
             _capture.RestartForNewRaid();
             _capturing = false;
             _speechStarted = false;
@@ -81,7 +96,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _captureStartedAt = 0;
             _lastSpeechAt = 0;
             _state = EVoiceState.Idle;
-            base.OnGameWorldStarted(@event);
         }
 
         /// <summary>
@@ -89,12 +103,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
         /// </summary>
         public override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
+            base.OnGameWorldEnded(@event);
             _capture.RestartForNewRaid();
             _capturing = false;
             _speechStarted = false;
             _speechConfirmCount = 0;
             _state = EVoiceState.Idle;
-            base.OnGameWorldEnded(@event);
         }
 
         void Update()
@@ -436,6 +450,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             var sttSettings = new ProviderSettings
             {
                 ApiKey = MiyakoCarryServiceAssistantPlugin.SttApiKey.Value,
+                ApiSecret = MiyakoCarryServiceAssistantPlugin.SttApiSecret.Value,
                 BaseUrl = MiyakoCarryServiceAssistantPlugin.SttBaseUrl.Value,
                 ModelId = MiyakoCarryServiceAssistantPlugin.SttModelId.Value,
                 Language = MiyakoCarryServiceAssistantPlugin.SttLanguage.Value,
@@ -445,6 +460,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             var llmSettings = new ProviderSettings
             {
                 ApiKey = MiyakoCarryServiceAssistantPlugin.LlmApiKey.Value,
+                ApiSecret = MiyakoCarryServiceAssistantPlugin.LlmApiSecret.Value,
                 BaseUrl = MiyakoCarryServiceAssistantPlugin.LlmBaseUrl.Value,
                 ModelId = MiyakoCarryServiceAssistantPlugin.LlmModelId.Value,
                 SystemPrompt = MiyakoCarryServiceAssistantPlugin.LlmSystemPrompt.Value,

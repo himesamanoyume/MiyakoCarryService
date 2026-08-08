@@ -50,12 +50,14 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<string> HttpProxyPort;
         public static ConfigEntry<ESttProvider> SttProvider;
         public static ConfigEntry<string> SttApiKey;
+        public static ConfigEntry<string> SttApiSecret;
         public static ConfigEntry<string> SttBaseUrl;
         public static ConfigEntry<string> SttModelId;
         public static ConfigEntry<string> SttLanguage;
         public static ConfigEntry<int> SttTimeoutSec;
         public static ConfigEntry<ELlmProvider> LlmProvider;
         public static ConfigEntry<string> LlmApiKey;
+        public static ConfigEntry<string> LlmApiSecret;
         public static ConfigEntry<string> LlmBaseUrl;
         public static ConfigEntry<string> LlmModelId;
         public static ConfigEntry<string> LlmSystemPrompt;
@@ -215,6 +217,13 @@ namespace MiyakoCarryService.Assistant
                 Locales.STTAPIKEY_DESCRIPTION
             );
 
+            SttApiSecret = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.STTAPISECRET_KEY,
+                "",
+                Locales.STTAPISECRET_DESCRIPTION
+            );
+
             SttBaseUrl = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTBASEURL_KEY,
@@ -273,6 +282,13 @@ namespace MiyakoCarryService.Assistant
                 Locales.LLMAPIKEY_KEY,
                 "",
                 Locales.LLMAPIKEY_DESCRIPTION
+            );
+
+            LlmApiSecret = McsConfigApi.RegisterConfig(
+                section, order,
+                Locales.LLMAPISECRET_KEY,
+                "",
+                Locales.LLMAPISECRET_DESCRIPTION
             );
 
             LlmBaseUrl = McsConfigApi.RegisterConfig(
@@ -471,63 +487,6 @@ namespace MiyakoCarryService.Assistant
             GUILayout.Label((string)entry.BoxedValue ?? "", _debugReadonlyStyle);
         }
 
-        /// <summary>
-        /// 密码输入框：前 3 位明文显示，其余以 "*" 掩码。编辑按"尾部追加/退格/尾部替换"语义重建真实值
-        /// （掩码区不可直接选中编辑；删除或替换落在掩码区时按尾部处理）。
-        /// </summary>
-        private static void DrawPasswordText(ConfigEntryBase entry)
-        {
-            var current = (string)entry.BoxedValue ?? string.Empty;
-            if (!_passwordBuffers.TryGetValue(entry, out var buffer))
-            {
-                buffer = current;
-                _passwordBuffers[entry] = buffer;
-            }
-
-            var masked = buffer.Length <= 3 ? buffer : buffer.Substring(0, 3) + new string('*', buffer.Length - 3);
-            var newMasked = GUILayout.TextField(masked, GUILayout.ExpandWidth(true));
-            if (newMasked == masked)
-            {
-                return;
-            }
-
-            if (newMasked.Length > masked.Length)
-            {
-                // 尾部追加：仅采纳非掩码新增字符
-                var added = newMasked.Substring(masked.Length);
-                if (added != new string('*', added.Length))
-                {
-                    buffer += added;
-                }
-            }
-            else if (newMasked.Length < masked.Length)
-            {
-                // 尾部退格：删掉一个真实尾部字符
-                if (buffer.Length > 0)
-                {
-                    buffer = buffer.Substring(0, buffer.Length - 1);
-                }
-            }
-            else
-            {
-                // 长度相同：视为尾部字符替换（取最后一个非掩码变化字符）
-                for (int i = masked.Length - 1; i >= 0; i--)
-                {
-                    if (newMasked[i] != masked[i] && newMasked[i] != '*')
-                    {
-                        if (buffer.Length > 0)
-                        {
-                            buffer = buffer.Substring(0, buffer.Length - 1) + newMasked[i];
-                        }
-                        break;
-                    }
-                }
-            }
-
-            _passwordBuffers[entry] = buffer;
-            entry.BoxedValue = buffer;
-        }
-
         /// <summary>回放最近一次语音录制（2D 播放，无样本时忽略）。</summary>
         private static void PlayLastVoiceRecording()
         {
@@ -566,6 +525,7 @@ namespace MiyakoCarryService.Assistant
                 var settings = new ProviderSettings
                 {
                     ApiKey = LlmApiKey.Value,
+                    ApiSecret = LlmApiSecret.Value,
                     BaseUrl = LlmBaseUrl.Value,
                     ModelId = LlmModelId.Value,
                     SystemPrompt = LlmSystemPrompt.Value,

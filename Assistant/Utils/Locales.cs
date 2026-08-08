@@ -56,6 +56,9 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string STTAPIKEY_KEY              = "Mcs/SttApiKey Key";
         public const string STTAPIKEY_DESCRIPTION      = "Mcs/SttApiKey Description";
 
+        public const string STTAPISECRET_KEY            = "Mcs/SttApiSecret Key";
+        public const string STTAPISECRET_DESCRIPTION    = "Mcs/SttApiSecret Description";
+
         public const string STTBASEURL_KEY            = "Mcs/SttBaseUrl Key";
         public const string STTBASEURL_DESCRIPTION    = "Mcs/SttBaseUrl Description";
 
@@ -72,7 +75,10 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMPROVIDER_DESCRIPTION    = "Mcs/LlmProvider Description";
 
         public const string LLMAPIKEY_KEY              = "Mcs/LlmApiKey Key";
-        public const string LLMAPIKEY_DESCRIPTION     = "Mcs/LlmApiKey Description";
+        public const string LLMAPIKEY_DESCRIPTION      = "Mcs/LlmApiKey Description";
+
+        public const string LLMAPISECRET_KEY            = "Mcs/LlmApiSecret Key";
+        public const string LLMAPISECRET_DESCRIPTION    = "Mcs/LlmApiSecret Description";
 
         public const string LLMBASEURL_KEY            = "Mcs/LlmBaseUrl Key";
         public const string LLMBASEURL_DESCRIPTION    = "Mcs/LlmBaseUrl Description";
