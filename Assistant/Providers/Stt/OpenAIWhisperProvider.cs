@@ -13,9 +13,9 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// OpenAI Whisper / 任何兼容 <c>/v1/audio/transcriptions</c> 的服务商（如 Groq Whisper、Deepgram 兼容端点等）。
     /// 多部分表单上传 WAV，预期 JSON 响应 <c>{"text":"..."}</c>。
     /// </summary>
-    internal sealed class OpenAIWhisperProvider : ISttProvider
+    internal sealed class OpenAIWhisperProvider : BaseSttProvider
     {
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             form.Add(new StringContent("json"), "response_format");
 
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
                 Content = form,
@@ -107,12 +107,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
                 }
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) return string.Empty;
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

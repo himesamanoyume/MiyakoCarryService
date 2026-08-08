@@ -14,12 +14,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 先用 client_credentials 换取 access_token，再 POST <c>/server_api</c> 提交 base64 WAV（强制 16kHz）。
     /// ApiKey = client_id，ApiSecret = client_secret。
     /// </summary>
-    internal sealed class BaiduAsrProvider : ISttProvider
+    internal sealed class BaiduAsrProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://vop.baidubce.com";
         private const int RequiredRate = 16000;
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
 
             try
@@ -125,12 +125,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return null;
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

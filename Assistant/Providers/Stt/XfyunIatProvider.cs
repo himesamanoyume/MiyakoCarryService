@@ -16,13 +16,13 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 鉴权：HMAC-SHA256 生成 authorization 头（ApiKey=apiKey，ApiSecret=apiSecret，ModelId=app_id）。
     /// 强制 16kHz；响应文本在 data.result.rg[].v（base64）中按序拼接。
     /// </summary>
-    internal sealed class XfyunIatProvider : ISttProvider
+    internal sealed class XfyunIatProvider : BaseSttProvider
     {
         private const string DefaultHost = "iat-api.xfyun.cn";
         private const string DefaultBaseUrl = "https://iat-api.xfyun.cn";
         private const int RequiredRate = 16000;
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var host = new Uri(baseUrl).Host;
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -142,12 +142,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 signature = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(signatureOrigin)));
             }
             return $"api_key=\"{apiKey}\", algorithm=\"hmac-sha256\", headers=\"host date request-line\", signature=\"{signature}\"";
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

@@ -14,11 +14,11 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// <c>POST /v1/speech:recognize?key={ApiKey}</c>，JSON 携带 LINEAR16 base64 音频。
     /// BaseUrl 留空用官方端点，可覆盖为自建代理/中转。
     /// </summary>
-    internal sealed class GoogleSpeechProvider : ISttProvider
+    internal sealed class GoogleSpeechProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://speech.googleapis.com";
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 },
             };
 
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -100,12 +100,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = $"Google 异常：{ex.Message}" };
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
 
             var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
 
             // 请求级超时：与商人侧实现一致，互不干扰
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
 
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

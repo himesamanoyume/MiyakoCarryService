@@ -16,29 +16,24 @@ namespace MiyakoCarryService.Assistant.Utils
 
         public static HttpClient Shared => _shared ?? throw new InvalidOperationException("AssistantHttpClient 未初始化");
 
-        public static void Initialize()
+        public static void Init()
         {
             if (_shared != null)
             {
                 return;
             }
 
-            _shared = CreateClient(useProxy: false);
+            _shared = CreateClient(false);
             _shared.DefaultRequestHeaders.ConnectionClose = false;
             _shared.DefaultRequestHeaders.ExpectContinue = false;
         }
 
         private static HttpClient CreateClient(bool useProxy)
         {
-            var handler = new HttpClientHandler();
-            try
+            var handler = new HttpClientHandler
             {
-                handler.MaxConnectionsPerServer = 8;
-            }
-            catch (NotImplementedException)
-            {
-                // EFT 基于 Mono 运行时（MonoWebRequestHandler），未实现 MaxConnectionsPerServer，忽略该设置。
-            }
+                MaxConnectionsPerServer = 8
+            };
 
             if (useProxy)
             {
@@ -62,8 +57,8 @@ namespace MiyakoCarryService.Assistant.Utils
         /// </summary>
         public static void ApplyProxy()
         {
-            var host = MiyakoCarryServiceAssistantPlugin.HttpProxyHost?.Value;
-            var port = MiyakoCarryServiceAssistantPlugin.HttpProxyPort?.Value;
+            var host = MiyakoCarryServiceAssistantPlugin.HttpProxyHost.Value;
+            var port = MiyakoCarryServiceAssistantPlugin.HttpProxyPort.Value;
             var portValid = int.TryParse(port, out var parsedPort) && parsedPort > 0;
 
             var useProxy = !string.IsNullOrEmpty(host) && portValid;
@@ -87,20 +82,21 @@ namespace MiyakoCarryService.Assistant.Utils
             _shared = CreateClient(useProxy);
             _shared.DefaultRequestHeaders.ConnectionClose = false;
             _shared.DefaultRequestHeaders.ExpectContinue = false;
-            try { old.Dispose(); } catch { }
+            try
+            {
+                old.Dispose();
+            }
+            catch
+            {
+
+            }
         }
 
         /// <summary>
-        /// 返回共享 HttpClient。不再改写其 Timeout（固定 60s，与商人侧实现一致）；
-        /// 各服务商在请求内自行用 CancellationTokenSource + CancelAfter 控制超时，避免并发互相干扰。
+        /// 返回共享 HttpClient（确保代理配置已应用）。超时不在共享实例上改写（固定 60s），
+        /// 各服务商在请求内自行以 CancellationTokenSource + CancelAfter 控制超时，避免并发互相干扰。
         /// </summary>
-        public static HttpClient WithTimeout(ProviderSettings settings)
-        {
-            ApplyProxy();
-            return _shared;
-        }
-
-        public static HttpClient WithTimeout(int timeoutSec)
+        public static HttpClient WithTimeout()
         {
             ApplyProxy();
             return _shared;

@@ -81,7 +81,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
         private async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -114,7 +114,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        private static string ExtractText(string responseString)
+        private string ExtractText(string responseString)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return null;
         }
 
-        private static string SafeTrim(string s, int max)
+        private string SafeTrim(string s, int max)
         {
             if (string.IsNullOrEmpty(s)) { return string.Empty; }
             return s.Length <= max ? s : s.Substring(0, max) + "...";

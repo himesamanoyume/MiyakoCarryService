@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 以 <c>Ocp-Apim-Subscription-Key</c> 鉴权，WAV 二进制直接上传。
     /// BaseUrl 留空时提示填写（订阅区域未知，无法推断默认区域）。
     /// </summary>
-    internal sealed class AzureSpeechProvider : ISttProvider
+    internal sealed class AzureSpeechProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://eastasia.stt.speech.microsoft.com";
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var endpoint = $"{baseUrl}/speech/recognition/conversation/cognitiveservices/v1" +
                 $"?language={Uri.EscapeDataString(string.IsNullOrEmpty(settings.Language) ? "zh-CN" : settings.Language)}&format=simple";
 
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -86,12 +86,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return new SttResult { Error = $"Azure 异常：{ex.Message}" };
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

@@ -14,13 +14,13 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// ApiKey = AccessKeyId，ApiSecret = AccessKeySecret，ModelId = appkey。
     /// 强制 16kHz。BaseUrl 可覆盖网关域名（默认上海）。
     /// </summary>
-    internal sealed class AliyunNlsProvider : ISttProvider
+    internal sealed class AliyunNlsProvider : BaseSttProvider
     {
         private const string DefaultGateway = "https://nls-gateway-cn-shanghai.aliyuncs.com";
         private const string DefaultTokenApi = "https://nls-meta.cn-shanghai.aliyuncs.com";
         private const int RequiredRate = 16000;
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
 
             var gateway = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultGateway : settings.BaseUrl.TrimEnd('/');
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
 
             try
@@ -118,12 +118,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             {
                 return null;
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

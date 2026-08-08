@@ -1,6 +1,7 @@
 global using ClientLocales = MiyakoCarryService.Client.Utils.Locales;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Configuration;
@@ -75,12 +76,12 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<bool> VoiceDebugPlay;
         public static ConfigEntry<string> VoiceDebugVadText;
 
-        /// <summary>最近一次语音录制的样本与格式（供 DEBUG 区"播放录音"按钮回放）。</summary>
+        #endregion
+
         public static float[] LastVoiceSamples;
         public static int LastVoiceSampleRate;
         public static int LastVoiceChannels;
 
-        #endregion
 
         void Awake()
         {
@@ -95,7 +96,7 @@ namespace MiyakoCarryService.Assistant
         void Start()
         {
             SetupConfig();
-            AssistantHttpClient.Initialize();
+            AssistantHttpClient.Init();
 
             McsEventApi.Notify(new GameLoopMgrEnableEvent
             {
@@ -474,9 +475,6 @@ namespace MiyakoCarryService.Assistant
 
         private static GUIStyle _debugReadonlyStyle;
 
-        /// <summary>密码输入框的编辑缓冲（按配置项保存编辑中的真实值）。</summary>
-        private static readonly Dictionary<ConfigEntryBase, string> _passwordBuffers = new();
-
         private static void DrawDebugReadonlyText(ConfigEntryBase entry)
         {
             _debugReadonlyStyle ??= new GUIStyle(GUI.skin.label)
@@ -531,18 +529,15 @@ namespace MiyakoCarryService.Assistant
                     SystemPrompt = LlmSystemPrompt.Value,
                     Temperature = LlmTemperature.Value,
                     MaxTokens = LlmMaxTokens.Value,
-                    // 调试测试放宽超时：推理模型（如 DeepSeek V4 Flash）思考耗时较长，15s 默认值容易误判超时
-                    TimeoutSec = Math.Max(LlmTimeoutSec.Value, 60),
+                    TimeoutSec = LlmTimeoutSec.Value,
                     ReasoningEffort = LlmReasoningEffort.Value,
                 };
 
                 var dispatcher = new LlmDispatcher(LlmProvider.Value);
-                var reply = await dispatcher.PingAsync(settings, System.Threading.CancellationToken.None).ConfigureAwait(true);
+                var reply = await dispatcher.PingAsync(settings, CancellationToken.None).ConfigureAwait(true);
 
                 // 连通性测试：回复含 pong（忽略大小写）即成功，统一显示 pong
-                LlmDebugResult.Value = reply.IndexOf("pong", StringComparison.OrdinalIgnoreCase) >= 0
-                    ? "pong"
-                    : reply;
+                LlmDebugResult.Value = reply.IndexOf("pong", StringComparison.OrdinalIgnoreCase) >= 0 ? "pong" : reply;
             }
             catch (Exception ex)
             {

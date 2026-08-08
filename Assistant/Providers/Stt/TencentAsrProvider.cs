@@ -15,12 +15,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 腾讯云 ASR 一句话识别（SentenceRecognition，TC3-HMAC-SHA256 签名）。
     /// SecretId = ApiKey，SecretKey = ApiSecret。强制 16kHz WAV，base64 提交。
     /// </summary>
-    internal sealed class TencentAsrProvider : ISttProvider
+    internal sealed class TencentAsrProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://asr.tencentcloudapi.com";
         private const int RequiredRate = 16000;
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var host = new Uri(baseUrl).Host;
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -111,7 +111,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
         }
 
-        private static string BuildAuthorization(string host, string body, long timestamp, string date, string secretId, string secretKey)
+        protected override string BuildAuthorization(string host, string body, long timestamp, string date, string secretId, string secretKey)
         {
             var payloadHash = Sha256Hex(body);
             var canonicalRequest = $"POST\n/\n\ncontent-type:application/json; charset=utf-8\nhost:{host}\n\ncontent-type;host\n{payloadHash}";
@@ -153,12 +153,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 sb.Append(b.ToString("x2"));
             }
             return sb.ToString();
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

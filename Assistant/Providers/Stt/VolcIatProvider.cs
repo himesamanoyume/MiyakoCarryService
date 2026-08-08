@@ -16,12 +16,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 鉴权：query 携带 appid/token/signature/ts，signature = MD5("appid={appid}&token={token}&ts={ts}")。
     /// ApiKey = AppID，ApiSecret = AccessToken。强制 16kHz，raw 音频上传，响应 result 为 base64 文本。
     /// </summary>
-    internal sealed class VolcIatProvider : ISttProvider
+    internal sealed class VolcIatProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://openspeech.bytedance.com";
         private const int RequiredRate = 16000;
 
-        public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (audio == null || audio.LengthSamples == 0)
             {
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -113,12 +113,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 sb.Append(b.ToString("x2"));
             }
             return sb.ToString();
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

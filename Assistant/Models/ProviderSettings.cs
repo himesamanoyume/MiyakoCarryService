@@ -7,7 +7,6 @@ namespace MiyakoCarryService.Assistant.Models
     public sealed class ProviderSettings
     {
         public string ApiKey;
-        /// <summary>双密钥服务商的第二个密钥（讯飞 apiSecret / 腾讯 SecretKey / 百度 SecretKey / 火山 AccessToken / 阿里 AccessKeySecret / 智谱 secret 等）。</summary>
         public string ApiSecret;
         public string BaseUrl;
         public string ModelId;
@@ -16,7 +15,6 @@ namespace MiyakoCarryService.Assistant.Models
         public double Temperature = 0.2;
         public int MaxTokens = 3000;
         public int TimeoutSec = 15;
-        /// <summary>LLM 思考强度（reasoning effort）：default/low/medium/high/max，default 或空表示不传参。</summary>
         public string ReasoningEffort;
     }
 }

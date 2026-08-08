@@ -52,9 +52,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
         private static JObject BuildBody(string model, string systemPrompt, string userText, int maxTokens, double temperature)
         {
-            var messages = new JArray();
-            messages.Add(new JObject { ["role"] = "system", ["content"] = systemPrompt });
-            messages.Add(new JObject { ["role"] = "user", ["content"] = userText });
+            var messages = new JArray
+            {
+                new JObject { ["role"] = "system", ["content"] = systemPrompt },
+                new JObject { ["role"] = "user", ["content"] = userText }
+            };
             return new JObject
             {
                 ["model"] = model,
@@ -68,7 +70,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
 
-            var client = AssistantHttpClient.WithTimeout(settings);
+            var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
@@ -100,7 +102,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        private static string ExtractText(string responseString)
+        private string ExtractText(string responseString)
         {
             try
             {
@@ -113,7 +115,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        private static string SafeTrim(string s, int max)
+        private string SafeTrim(string s, int max)
         {
             if (string.IsNullOrEmpty(s)) { return string.Empty; }
             return s.Length <= max ? s : s.Substring(0, max) + "...";
