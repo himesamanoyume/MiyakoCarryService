@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = "LlmApiKey 未填写（DashScope API Key）" };
             }
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var messages = new JArray();
             messages.Add(new JObject { ["role"] = "system", ["content"] = systemPrompt });
             messages.Add(new JObject { ["role"] = "user", ["content"] = userText });

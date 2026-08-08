@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 先用 client_credentials 换取 access_token，再 POST <c>/server_api</c> 提交 base64 WAV（强制 16kHz）。
     /// ApiKey = client_id，ApiSecret = client_secret。
     /// </summary>
-    internal sealed class BaiduAsrProvider : BaseSttProvider
+    public sealed class BaiduAsrProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://vop.baidubce.com";
         private const int RequiredRate = 16000;
@@ -35,10 +35,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var samples = audio.Samples;
             if (rate != RequiredRate)
             {
-                samples = AudioResampler.Resample(samples, rate, RequiredRate);
+                samples = Tools.Resample(samples, rate, RequiredRate);
                 rate = RequiredRate;
             }
-            var wavBytes = WavEncoder.Encode(samples, rate, 1);
+            var wavBytes = Tools.Encode(samples, rate, 1);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };

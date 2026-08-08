@@ -6,7 +6,7 @@ namespace MiyakoCarryService.Server.Services.Llm
     /// 服务端 Miyako 商人 LLM 系统提示词模板，向 LLM 描述术语、模组知识、可用命令槽位与 JSON 返回结构。
     /// 术语与知识库内容与 README.md / Forge.md / Oddba.html 保持一致。
     /// </summary>
-    public static class MiyakoTraderPromptTemplates
+    public static class MiyakoTraderTools
     {
         /// <summary>当前可用的"订单"指令对应护送数量的范围。</summary>
         public const int MinOrderPlayers = 1;
@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Server.Services.Llm
 
         /// <summary>
         /// 权威术语表。玩家可能用中文或英文描述同一概念，LLM 必须原样使用下列术语，不得自行换词。
-        /// 注意：与 Assistant 项目 <c>PromptTemplates</c> 中的术语段保持同步。
+        /// 注意：与 Assistant 项目 <c>Tools</c> 中的术语段保持同步。
         /// </summary>
         private const string Terminology = """
             TERMINOLOGY — authoritative project terms. Use them exactly; never rename or paraphrase them:

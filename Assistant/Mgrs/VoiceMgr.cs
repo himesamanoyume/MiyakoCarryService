@@ -13,7 +13,6 @@ using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -535,7 +534,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             try
             {
                 // 调试辅助：打印实际发送的完整提示词（System Prompt + User Text），便于核对与优化
-                // MiyakoCarryServiceAssistantPlugin.Logger.LogWarning("\n=== LLM System Prompt ===\n" + Utils.PromptTemplates.BuildSystemPrompt(llmSettings.SystemPrompt) + "\n=== LLM User Text ===\n" + llmText);
+                // MiyakoCarryServiceAssistantPlugin.Logger.LogWarning("\n=== LLM System Prompt ===\n" + Utils.Tools.BuildSystemPrompt(llmSettings.SystemPrompt) + "\n=== LLM User Text ===\n" + llmText);
                 intent = await _llm.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
@@ -582,7 +581,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 try
                 {
                     dispatched = IntentBinder.BindAndDispatch(intent);
-                    var localizedCommand = Utils.PromptTemplates.GetLocalizedNames(intent.CommandName);
+                    var localizedCommand = Utils.Tools.GetLocalizedNames(intent.CommandName);
                     feedback = dispatched < 0
                         ? Utils.Locales.VOICEAIMATTARGET.McsLocalized()
                         : dispatched > 0
@@ -696,7 +695,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
         }
 
-        private static bool IsOptionCommand(string commandType)
+        private bool IsOptionCommand(string commandType)
         {
             return commandType is "InteractionProxyAction" or "QuestProxyAction" or "StationaryWeaponProxyAction" or "EscortWorld";
         }
@@ -726,7 +725,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                             : $"{option.Name}（{option.TargetName}）";
                         return $"指令：{optionName}";
                     }
-                    return $"指令：{Utils.PromptTemplates.GetLocalizedNames(intent.CommandName)}（选项 {intent.OptionIndex}）";
+                    return $"指令：{Utils.Tools.GetLocalizedNames(intent.CommandName)}（选项 {intent.OptionIndex}）";
                 }
 
                 string detail = string.Empty;
@@ -758,12 +757,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     detail += $"（{intent.AimingBodyPart}）";
                 }
                 // 显示本地化权威指令名（TEAM* 系列），与提示词 glossary 同源
-                return $"指令：{Utils.PromptTemplates.GetLocalizedNames(intent.CommandName)}{detail}";
+                return $"指令：{Utils.Tools.GetLocalizedNames(intent.CommandName)}{detail}";
             }
             return "无响应";
         }
 
-        private static void Notification(string message)
+        private void Notification(string message)
         {
             try
             {

@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = "LlmApiKey 未填写（千帆 API Key）" };
             }
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var model = string.IsNullOrEmpty(settings.ModelId) ? "ernie-4.5-turbo-128k" : settings.ModelId;
             var body = BuildBody(model, systemPrompt, userText, settings.MaxTokens, settings.Temperature);
 

@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 腾讯云 ASR 一句话识别（SentenceRecognition，TC3-HMAC-SHA256 签名）。
     /// SecretId = ApiKey，SecretKey = ApiSecret。强制 16kHz WAV，base64 提交。
     /// </summary>
-    internal sealed class TencentAsrProvider : BaseSttProvider
+    public sealed class TencentAsrProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://asr.tencentcloudapi.com";
         private const int RequiredRate = 16000;
@@ -35,10 +35,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var samples = audio.Samples;
             if (rate != RequiredRate)
             {
-                samples = AudioResampler.Resample(samples, rate, RequiredRate);
+                samples = Tools.Resample(samples, rate, RequiredRate);
                 rate = RequiredRate;
             }
-            var wavBytes = WavEncoder.Encode(samples, rate, 1);
+            var wavBytes = Tools.Encode(samples, rate, 1);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };
@@ -111,7 +111,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
         }
 
-        protected override string BuildAuthorization(string host, string body, long timestamp, string date, string secretId, string secretKey)
+        private string BuildAuthorization(string host, string body, long timestamp, string date, string secretId, string secretKey)
         {
             var payloadHash = Sha256Hex(body);
             var canonicalRequest = $"POST\n/\n\ncontent-type:application/json; charset=utf-8\nhost:{host}\n\ncontent-type;host\n{payloadHash}";

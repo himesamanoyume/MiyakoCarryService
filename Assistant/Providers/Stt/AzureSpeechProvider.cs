@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 以 <c>Ocp-Apim-Subscription-Key</c> 鉴权，WAV 二进制直接上传。
     /// BaseUrl 留空时提示填写（订阅区域未知，无法推断默认区域）。
     /// </summary>
-    internal sealed class AzureSpeechProvider : BaseSttProvider
+    public sealed class AzureSpeechProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://eastasia.stt.speech.microsoft.com";
 
@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = "SttApiKey 未填写（Azure Subscription Key）" };
             }
 
-            var wavBytes = WavEncoder.Encode(audio.Samples, audio.SampleRate, audio.Channels);
+            var wavBytes = Tools.Encode(audio.Samples, audio.SampleRate, audio.Channels);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };

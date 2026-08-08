@@ -16,9 +16,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 鉴权：HMAC-SHA256 生成 authorization 头（ApiKey=apiKey，ApiSecret=apiSecret，ModelId=app_id）。
     /// 强制 16kHz；响应文本在 data.result.rg[].v（base64）中按序拼接。
     /// </summary>
-    internal sealed class XfyunIatProvider : BaseSttProvider
+    public sealed class XfyunIatProvider : BaseSttProvider
     {
-        private const string DefaultHost = "iat-api.xfyun.cn";
         private const string DefaultBaseUrl = "https://iat-api.xfyun.cn";
         private const int RequiredRate = 16000;
 
@@ -41,10 +40,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var samples = audio.Samples;
             if (rate != RequiredRate)
             {
-                samples = AudioResampler.Resample(samples, rate, RequiredRate);
+                samples = Tools.Resample(samples, rate, RequiredRate);
                 rate = RequiredRate;
             }
-            var wavBytes = WavEncoder.Encode(samples, rate, 1);
+            var wavBytes = Tools.Encode(samples, rate, 1);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };
@@ -133,7 +132,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
         }
 
-        private static string BuildAuthorization(string host, string date, string apiKey, string apiSecret)
+        private string BuildAuthorization(string host, string date, string apiKey, string apiSecret)
         {
             var signatureOrigin = $"host: {host}\ndate: {date}\nPOST /v2/iat HTTP/1.1";
             string signature;

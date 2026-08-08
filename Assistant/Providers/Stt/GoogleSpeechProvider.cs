@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// <c>POST /v1/speech:recognize?key={ApiKey}</c>，JSON 携带 LINEAR16 base64 音频。
     /// BaseUrl 留空用官方端点，可覆盖为自建代理/中转。
     /// </summary>
-    internal sealed class GoogleSpeechProvider : BaseSttProvider
+    public sealed class GoogleSpeechProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://speech.googleapis.com";
 
@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = "SttApiKey 未填写（Google API Key）" };
             }
 
-            var wavBytes = WavEncoder.Encode(audio.Samples, audio.SampleRate, audio.Channels);
+            var wavBytes = Tools.Encode(audio.Samples, audio.SampleRate, audio.Channels);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };

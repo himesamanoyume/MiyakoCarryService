@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = "LlmApiKey 未填写（Gemini API Key）" };
             }
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var body = new JObject
             {
                 ["system_instruction"] = new JObject { ["parts"] = JArray.FromObject(new[] { new { text = systemPrompt } }) },

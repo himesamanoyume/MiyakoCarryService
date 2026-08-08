@@ -33,7 +33,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "claude-sonnet-4-20250514" : settings.ModelId;
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
 
             var body = new JObject
             {

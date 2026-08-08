@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// 鉴权：query 携带 appid/token/signature/ts，signature = MD5("appid={appid}&token={token}&ts={ts}")。
     /// ApiKey = AppID，ApiSecret = AccessToken。强制 16kHz，raw 音频上传，响应 result 为 base64 文本。
     /// </summary>
-    internal sealed class VolcIatProvider : BaseSttProvider
+    public sealed class VolcIatProvider : BaseSttProvider
     {
         private const string DefaultBaseUrl = "https://openspeech.bytedance.com";
         private const int RequiredRate = 16000;
@@ -36,10 +36,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var samples = audio.Samples;
             if (rate != RequiredRate)
             {
-                samples = AudioResampler.Resample(samples, rate, RequiredRate);
+                samples = Tools.Resample(samples, rate, RequiredRate);
                 rate = RequiredRate;
             }
-            var wavBytes = WavEncoder.Encode(samples, rate, 1);
+            var wavBytes = Tools.Encode(samples, rate, 1);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };

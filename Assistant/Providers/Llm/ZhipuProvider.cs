@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = "用户文本为空" };
             }
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var body = BuildBody(systemPrompt, userText, settings.MaxTokens, settings.Temperature);
 
             var content = await PostAsync(body, settings, cancellationToken);

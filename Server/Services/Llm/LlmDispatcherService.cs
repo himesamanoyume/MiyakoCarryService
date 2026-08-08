@@ -76,7 +76,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 ApiKey = serverConfig.TraderLlmApiKey,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
                 ModelId = serverConfig.TraderLlmModelId,
-                SystemPrompt = MiyakoTraderPromptTemplates.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
+                SystemPrompt = MiyakoTraderTools.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
                 Temperature = serverConfig.TraderLlmTemperature,
                 MaxTokens = serverConfig.TraderLlmMaxTokens,
                 TimeoutSec = serverConfig.TraderLlmTimeoutSec,
@@ -265,18 +265,18 @@ namespace MiyakoCarryService.Server.Services.Llm
         private static bool ValidateOrder(OrderIntent order)
         {
             return order != null
-                && order.Players >= MiyakoTraderPromptTemplates.MinOrderPlayers
-                && order.Players <= MiyakoTraderPromptTemplates.MaxOrderPlayers
-                && order.Level >= MiyakoTraderPromptTemplates.MinOrderLevel
-                && order.Level <= MiyakoTraderPromptTemplates.MaxOrderLevel
-                && order.Duration >= MiyakoTraderPromptTemplates.MinOrderDuration;
+                && order.Players >= MiyakoTraderTools.MinOrderPlayers
+                && order.Players <= MiyakoTraderTools.MaxOrderPlayers
+                && order.Level >= MiyakoTraderTools.MinOrderLevel
+                && order.Level <= MiyakoTraderTools.MaxOrderLevel
+                && order.Duration >= MiyakoTraderTools.MinOrderDuration;
         }
 
         private static bool ValidateTicket(TicketIntent ticket)
         {
             return ticket != null
-                && ticket.Percent >= MiyakoTraderPromptTemplates.MinTicketPercent
-                && ticket.Percent <= MiyakoTraderPromptTemplates.MaxTicketPercent;
+                && ticket.Percent >= MiyakoTraderTools.MinTicketPercent
+                && ticket.Percent <= MiyakoTraderTools.MaxTicketPercent;
         }
 
         /// <summary>

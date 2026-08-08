@@ -22,10 +22,5 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
-
-        protected virtual string BuildAuthorization(string host, string body, long timestamp, string date, string secretId, string secretKey)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

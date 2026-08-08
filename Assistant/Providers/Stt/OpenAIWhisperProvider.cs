@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// OpenAI Whisper / 任何兼容 <c>/v1/audio/transcriptions</c> 的服务商（如 Groq Whisper、Deepgram 兼容端点等）。
     /// 多部分表单上传 WAV，预期 JSON 响应 <c>{"text":"..."}</c>。
     /// </summary>
-    internal sealed class OpenAIWhisperProvider : BaseSttProvider
+    public sealed class OpenAIWhisperProvider : BaseSttProvider
     {
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = "AudioSegment 为空" };
             }
 
-            var wavBytes = WavEncoder.Encode(audio.Samples, audio.SampleRate, audio.Channels);
+            var wavBytes = Tools.Encode(audio.Samples, audio.SampleRate, audio.Channels);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };

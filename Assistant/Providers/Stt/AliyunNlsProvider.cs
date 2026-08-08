@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// ApiKey = AccessKeyId，ApiSecret = AccessKeySecret，ModelId = appkey。
     /// 强制 16kHz。BaseUrl 可覆盖网关域名（默认上海）。
     /// </summary>
-    internal sealed class AliyunNlsProvider : BaseSttProvider
+    public sealed class AliyunNlsProvider : BaseSttProvider
     {
         private const string DefaultGateway = "https://nls-gateway-cn-shanghai.aliyuncs.com";
         private const string DefaultTokenApi = "https://nls-meta.cn-shanghai.aliyuncs.com";
@@ -39,10 +39,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var samples = audio.Samples;
             if (rate != RequiredRate)
             {
-                samples = AudioResampler.Resample(samples, rate, RequiredRate);
+                samples = Tools.Resample(samples, rate, RequiredRate);
                 rate = RequiredRate;
             }
-            var wavBytes = WavEncoder.Encode(samples, rate, 1);
+            var wavBytes = Tools.Encode(samples, rate, 1);
             if (wavBytes.Length == 0)
             {
                 return new SttResult { Error = "WAV 编码失败" };
@@ -64,11 +64,10 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 cts.CancelAfter(timeout);
-                var endpoint = $"{gateway}/stream/v1/asr?appkey={Uri.EscapeDataString(settings.ModelId)}" +
-                    $"&format=wav&sample_rate={RequiredRate}&enable_punctuation_prediction=true&enable_inverse_text_normalization=true";
+                var endpoint = $"{gateway}/stream/v1/asr?appkey={Uri.EscapeDataString(settings.ModelId)}" + $"&format=wav&sample_rate={RequiredRate}&enable_punctuation_prediction=true&enable_inverse_text_normalization=true";
                 using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
                 {
-                    Content = new System.Net.Http.ByteArrayContent(wavBytes),
+                    Content = new ByteArrayContent(wavBytes),
                 };
                 request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
                 request.Headers.Add("X-NLS-AppKey", settings.ModelId);
@@ -99,7 +98,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
         }
 
-        private static async Task<string> FetchTokenAsync(HttpClient client, ProviderSettings settings, CancellationToken ct)
+        private async Task<string> FetchTokenAsync(HttpClient client, ProviderSettings settings, CancellationToken ct)
         {
             try
             {

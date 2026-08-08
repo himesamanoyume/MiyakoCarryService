@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = "LlmApiKey 未填写（星火 APIKey）" };
             }
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var body = BuildBody(settings, systemPrompt, userText, settings.MaxTokens, settings.Temperature);
 
             var content = await PostAsync(body, settings, cancellationToken);

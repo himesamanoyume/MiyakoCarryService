@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
 
-            var systemPrompt = PromptTemplates.BuildSystemPrompt(settings.SystemPrompt);
+            var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var client = AssistantHttpClient.WithTimeout();
 
             // 请求级超时：与商人侧实现一致，互不干扰
