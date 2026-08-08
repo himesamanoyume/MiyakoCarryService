@@ -1,11 +1,11 @@
-param(
+﻿param(
     [string]$WorkspaceFolder,
-    [string]$RepoName = "Himesamanoyume/MiyakoCarryService",
-    [string]$PluginVtReportFile = "plugin_vt_report_url.txt",
-    [string]$FikaVtReportFile = "fika_vt_report_url.txt"
+    [string]$RepoName = "Himesamanoyume/MiyakoCarryService"
 )
 
 $ErrorActionPreference = "Stop"
+
+. (Join-Path $PSScriptRoot "artifact-manifest.ps1")
 
 $ver = Get-Content "$WorkspaceFolder\version.txt" | Select-Object -First 1
 if (-not $ver) {
@@ -13,16 +13,14 @@ if (-not $ver) {
     exit 1
 }
 
-$pluginZipPath = Join-Path $WorkspaceFolder "MiyakoCarryService-$ver.zip"
-if (-not (Test-Path $pluginZipPath)) {
-    Write-Host "Error: Release zip not found at $pluginZipPath"
-    exit 1
-}
+$artifacts = Get-McsArtifacts $ver
 
-$fikaZipPath = Join-Path $WorkspaceFolder "MiyakoCarryServiceFika-$ver.zip"
-if (-not (Test-Path $fikaZipPath)) {
-    Write-Host "Error: Release zip not found at $fikaZipPath"
-    exit 1
+foreach ($artifact in $artifacts) {
+    $zipPath = Join-Path $WorkspaceFolder $artifact.ZipFile
+    if (-not (Test-Path $zipPath)) {
+        Write-Host "Error: Release zip not found at $zipPath"
+        exit 1
+    }
 }
 
 $token = $env:GITHUB_TOKEN
@@ -31,34 +29,15 @@ if (-not $token) {
     exit 1
 }
 
-$pluginVtUrl = ""
-$fikaVtUrl = ""
-
-$pluginVtReportPath = Join-Path $WorkspaceFolder $PluginVtReportFile
-if (Test-Path $pluginVtReportPath) {
-    $pluginVtUrl = Get-Content $pluginVtReportPath | Select-Object -First 1
-    # Remove-Item $pluginVtReportPath -Force
-    # Write-Host "VT report URL loaded and temp file cleaned up."
-} else {
-    Write-Host "Warning: VT report file not found, releasing without scan link."
-}
-
-$fikaVtReportPath = Join-Path $WorkspaceFolder $FikaVtReportFile
-if (Test-Path $fikaVtReportPath) {
-    $fikaVtUrl = Get-Content $fikaVtReportPath | Select-Object -First 1
-    # Remove-Item $fikaVtReportPath -Force
-    # Write-Host "VT report URL loaded and temp file cleaned up."
-} else {
-    Write-Host "Warning: VT report file not found, releasing without scan link."
-}
-
 $bodyText = ""
-if ($pluginVtUrl) {
-    $bodyText += "`n`nPlugin VT: $pluginVtUrl"
-}
-
-if ($fikaVtUrl) {
-    $bodyText += "`n`nFika Addon VT: $fikaVtUrl"
+foreach ($artifact in $artifacts) {
+    $reportPath = Join-Path $WorkspaceFolder $artifact.ReportFile
+    if (Test-Path $reportPath) {
+        $vtUrl = Get-Content $reportPath | Select-Object -First 1
+        $bodyText += "`n`n$($artifact.Name) VT: $vtUrl"
+    } else {
+        Write-Host "Warning: VT report file not found for $($artifact.Name), releasing without scan link."
+    }
 }
 
 try {
@@ -75,7 +54,7 @@ try {
     } | ConvertTo-Json
 
     $apiUri = "https://api.github.com/repos/$RepoName/releases"
-    
+
     Write-Host "Creating draft release for v$ver..."
     $releaseRes = Invoke-RestMethod -Uri $apiUri -Method Post -Headers $headers -Body $releaseBody -ContentType "application/json; charset=utf-8"
     Write-Host "Draft release created: $($releaseRes.html_url)"
@@ -86,46 +65,36 @@ try {
         Authorization = "Bearer $token"
     }
 
-    $pluginFileName = [System.IO.Path]::GetFileName($pluginZipPath)
-    Write-Host "Uploading $pluginFileName to release..."
-    $pluginFileBytes = [System.IO.File]::ReadAllBytes($pluginZipPath)
-    
-    $pluginUploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$pluginFileName" `
-        -Method Post `
-        -Headers $uploadHeaders `
-        -Body $pluginFileBytes `
-        -ContentType "application/zip"
+    foreach ($artifact in $artifacts) {
+        $zipPath = Join-Path $WorkspaceFolder $artifact.ZipFile
+        $fileName = [System.IO.Path]::GetFileName($zipPath)
+        Write-Host "Uploading $fileName to release..."
+        $fileBytes = [System.IO.File]::ReadAllBytes($zipPath)
 
-    Write-Host "Asset uploaded successfully: $($pluginUploadRes.browser_download_url)"
+        $uploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$fileName" `
+            -Method Post `
+            -Headers $uploadHeaders `
+            -Body $fileBytes `
+            -ContentType "application/zip"
 
-    $fikaFileName = [System.IO.Path]::GetFileName($fikaZipPath)
-    Write-Host "Uploading $fikaFileName to release..."
-    $fikaFileBytes = [System.IO.File]::ReadAllBytes($fikaZipPath)
+        Write-Host "Asset uploaded successfully: $($uploadRes.browser_download_url)"
+    }
 
-    $fikaUploadRes = Invoke-RestMethod -Uri "$uploadUrl`?name=$fikaFileName" `
-        -Method Post `
-        -Headers $uploadHeaders `
-        -Body $fikaFileBytes `
-        -ContentType "application/zip"
-
-    Write-Host "Asset uploaded successfully: $($fikaUploadRes.browser_download_url)"
     Write-Host "`nAll done! Draft release is ready for review.`n"
 
-    $pluginFinalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$pluginFileName"
-    $fikaFinalDownloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$fikaFileName"
-
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "Plugin Download URL : $pluginFinalDownloadUrl"
-    Write-Host "Fika Addon Download URL : $fikaFinalDownloadUrl"
-    if ($pluginVtUrl) {
-        Write-Host "Plugin VT Report    : $pluginVtUrl"
-    } else {
-        Write-Host "Plugin VT Report    : (Not available)" -ForegroundColor Yellow
-    }
-    if ($fikaVtUrl) {
-        Write-Host "Fika Addon VT Report    : $fikaVtUrl"
-    } else {
-        Write-Host "Fika Addon VT Report    : (Not available)" -ForegroundColor Yellow
+    foreach ($artifact in $artifacts) {
+        $fileName = [System.IO.Path]::GetFileName($artifact.ZipFile)
+        $downloadUrl = "https://github.com/$RepoName/releases/download/v$ver/$fileName"
+        Write-Host "$($artifact.Name) Download URL : $downloadUrl"
+
+        $reportPath = Join-Path $WorkspaceFolder $artifact.ReportFile
+        if (Test-Path $reportPath) {
+            $vtUrl = Get-Content $reportPath | Select-Object -First 1
+            Write-Host "$($artifact.Name) VT Report    : $vtUrl"
+        } else {
+            Write-Host "$($artifact.Name) VT Report    : (Not available)" -ForegroundColor Yellow
+        }
     }
     Write-Host "Draft Page   : $($releaseRes.html_url)"
     Write-Host "Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service"
