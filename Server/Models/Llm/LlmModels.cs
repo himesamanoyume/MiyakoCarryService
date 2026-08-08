@@ -7,6 +7,7 @@ namespace MiyakoCarryService.Server.Models.Llm
     public sealed class LlmProviderSettings
     {
         public string ApiKey;
+        public string ApiSecret;
         public string BaseUrl;
         public string ModelId;
         public string SystemPrompt;

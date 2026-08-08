@@ -97,6 +97,9 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         [JsonPropertyName("TraderLlmApiKey")]
         public string TraderLlmApiKey { get; set; } = "";
 
+        [JsonPropertyName("TraderLlmApiSecret")]
+        public string TraderLlmApiSecret { get; set; } = "";
+
         [JsonPropertyName("TraderLlmBaseUrl")]
         public string TraderLlmBaseUrl { get; set; } = "";
 

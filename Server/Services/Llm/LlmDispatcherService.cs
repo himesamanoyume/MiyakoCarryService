@@ -75,6 +75,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             var settings = new LlmProviderSettings
             {
                 ApiKey = serverConfig.TraderLlmApiKey,
+                ApiSecret = serverConfig.TraderLlmApiSecret,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
                 ModelId = serverConfig.TraderLlmModelId,
                 SystemPrompt = MiyakoTraderTools.BuildSystemPrompt(serverConfig.TraderLlmSystemPrompt, BuildSpawnTypeHelp(), BuildPricingHelp(), BuildSquadsHelp(sessionId)),
@@ -536,6 +537,7 @@ namespace MiyakoCarryService.Server.Services.Llm
             var settings = new LlmProviderSettings
             {
                 ApiKey = serverConfig.TraderLlmApiKey,
+                ApiSecret = serverConfig.TraderLlmApiSecret,
                 BaseUrl = serverConfig.TraderLlmBaseUrl,
                 ModelId = serverConfig.TraderLlmModelId,
                 SystemPrompt = "You are a connectivity test. Reply with exactly: {\"replyText\":\"pong\"}",

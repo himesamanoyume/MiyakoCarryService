@@ -106,6 +106,42 @@ namespace MiyakoCarryService.Server.Services.Llm.Providers
         }
 
         /// <summary>
+        /// 提取 OpenAI 兼容响应中 <c>choices[0].message.content</c> 的文本；
+        /// 解析失败或内容为空时返回 null。
+        /// </summary>
+        protected static string ExtractChatContentText(string responseString)
+        {
+            try
+            {
+                var node = JsonNode.Parse(responseString);
+                return node?["choices"]?[0]?["message"]?["content"]?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 构造 OpenAI 兼容 Chat Completions 请求体（model/messages/temperature/max_tokens）。
+        /// <paramref name="maxTokensFieldName"/> 可定制输出 token 上限字段名（如 MiniMax 的 tokens_to_generate）。
+        /// </summary>
+        protected static JsonObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        {
+            return new JsonObject
+            {
+                ["model"] = model,
+                ["messages"] = JsonSerializer.SerializeToNode(new[]
+                {
+                    new { role = "system", content = systemPrompt ?? "" },
+                    new { role = "user", content = userText },
+                }),
+                ["temperature"] = temperature,
+                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 3000,
+            };
+        }
+
+        /// <summary>
         /// 统一 JSON POST 骨架：请求级超时、错误包装（"{ProviderTag} ..." 前缀）与 catch 均在此处理，
         /// 子类只需提供 endpoint/body，并通过 <paramref name="configureRequest"/> 注入鉴权/自定义头。
         /// 注意：<paramref name="configureRequest"/> 在 try 块内执行，其异常统一按 "{ProviderTag} 异常" 处理。
