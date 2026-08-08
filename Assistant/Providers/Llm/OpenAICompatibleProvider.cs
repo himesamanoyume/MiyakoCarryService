@@ -18,9 +18,9 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// OpenAI / DeepSeek / Moonshot / Together / vLLM / Ollama / LM Studio / LocalAI 等。
     /// 通过 <c>BaseUrl</c> 切换端点，配置项统一为 <c>ApiKey / BaseUrl / Model / SystemPrompt / Temperature / MaxTokens / TimeoutSec</c>。
     /// </summary>
-    internal sealed class OpenAICompatibleProvider : ILlmProvider
+    public sealed class OpenAICompatibleProvider : BaseLlmProvider
     {
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -120,7 +120,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
@@ -173,141 +173,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return $"异常：{ex.Message}";
             }
-        }
-
-        internal static LlmIntent ParseIntentJson(string content)
-        {
-            try
-            {
-                var json = JObject.Parse(content);
-                // 识别结果只允许是指令：LLM 返回 replyText/error 一律视为未识别
-                if (json["replyText"] is JToken replyToken
-                    && replyToken.Type != JTokenType.Null
-                    && !string.IsNullOrWhiteSpace(replyToken.ToString()))
-                {
-                    return new LlmIntent { Error = LlmIntent.NotRecognized };
-                }
-                if (json["error"] is JToken errToken
-                    && errToken.Type != JTokenType.Null
-                    && !string.IsNullOrWhiteSpace(errToken.ToString()))
-                {
-                    return new LlmIntent { Error = LlmIntent.NotRecognized };
-                }
-
-                var commandName = json.Value<string>("command");
-                if (string.IsNullOrWhiteSpace(commandName))
-                {
-                    return new LlmIntent { Error = "OpenAI-Compat 响应缺少 command 字段" };
-                }
-
-                var intent = new LlmIntent { CommandName = commandName };
-                var selectorStr = json.Value<string>("selector");
-                if (Enum.TryParse<EIntentTargetSelector>(selectorStr, ignoreCase: true, out var selector))
-                {
-                    intent.Selector = selector;
-                }
-
-                if (json["targetIndex"] is JToken idxToken && idxToken.Type != JTokenType.Null)
-                {
-                    if (idxToken.Type == JTokenType.Integer)
-                    {
-                        intent.TargetIndex = idxToken.Value<int>();
-                    }
-                    else if (int.TryParse(idxToken.ToString(), out var parsedIdx))
-                    {
-                        intent.TargetIndex = parsedIdx;
-                    }
-                }
-
-                // 多目标：targetIndices / targetCodeNames 数组（优先于单值字段）
-                if (json["targetIndices"] is JToken idxArrToken && idxArrToken.Type == JTokenType.Array)
-                {
-                    var indices = new List<int>();
-                    foreach (var item in idxArrToken)
-                    {
-                        if (item.Type == JTokenType.Integer)
-                        {
-                            indices.Add(item.Value<int>());
-                        }
-                        else if (int.TryParse(item.ToString(), out var parsedArrIdx))
-                        {
-                            indices.Add(parsedArrIdx);
-                        }
-                    }
-                    if (indices.Count > 0)
-                    {
-                        intent.TargetIndices = indices;
-                    }
-                }
-
-                if (json["targetCodeNames"] is JToken codeArrToken && codeArrToken.Type == JTokenType.Array)
-                {
-                    var codeNames = new List<string>();
-                    foreach (var item in codeArrToken)
-                    {
-                        var s = item.ToString();
-                        if (!string.IsNullOrWhiteSpace(s))
-                        {
-                            codeNames.Add(s);
-                        }
-                    }
-                    if (codeNames.Count > 0)
-                    {
-                        intent.TargetCodeNames = codeNames;
-                    }
-                }
-
-                var codeToken = json["targetCodeName"];
-                if (codeToken != null && codeToken.Type != JTokenType.Null)
-                {
-                    intent.TargetCodeName = codeToken.ToString();
-                    if (intent.Selector == EIntentTargetSelector.Unspecified && !string.IsNullOrEmpty(intent.TargetCodeName))
-                    {
-                        intent.Selector = EIntentTargetSelector.ByCodeName;
-                    }
-                }
-
-                if (intent.Selector == EIntentTargetSelector.Unspecified)
-                {
-                    intent.Selector = intent.TargetIndices != null || intent.TargetIndex.HasValue
-                        ? EIntentTargetSelector.ByIndex
-                        : intent.TargetCodeNames != null || !string.IsNullOrEmpty(intent.TargetCodeName)
-                            ? EIntentTargetSelector.ByCodeName
-                            : EIntentTargetSelector.All;
-                }
-
-                if (json["aimingBodyPart"] is JToken bodyToken && bodyToken.Type != JTokenType.Null)
-                {
-                    intent.AimingBodyPart = bodyToken.ToString();
-                }
-
-                if (json["optionIndex"] is JToken optToken && optToken.Type != JTokenType.Null)
-                {
-                    if (optToken.Type == JTokenType.Integer)
-                    {
-                        intent.OptionIndex = optToken.Value<int>();
-                    }
-                    else if (int.TryParse(optToken.ToString(), out var parsedOpt))
-                    {
-                        intent.OptionIndex = parsedOpt;
-                    }
-                }
-
-                return intent;
-            }
-            catch (Exception ex)
-            {
-                return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
-            }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s))
-            {
-                return string.Empty;
-            }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

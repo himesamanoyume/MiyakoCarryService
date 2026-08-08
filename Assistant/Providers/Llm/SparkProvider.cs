@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// 鉴权：Bearer 为星火 APIKey（新版形如 "{apikey}:{apisecret}"）；若 ApiSecret 已单独填写则拼接 "{ApiKey}:{ApiSecret}"。
     /// 意图解析复用 OpenAI 兼容的 JSON schema。
     /// </summary>
-    internal sealed class SparkProvider : ILlmProvider
+    public sealed class SparkProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://spark-api-open.xf-yun.com";
 
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -39,10 +39,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = content };
             }
-            return OpenAICompatibleProvider.ParseIntentJson(content);
+            return ParseIntentJson(content);
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var body = BuildBody(settings, "You are a connectivity test. Reply with exactly: pong", "ping", 64, 0d);
             var content = await PostAsync(body, settings, cancellationToken);
@@ -111,12 +111,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return null;
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

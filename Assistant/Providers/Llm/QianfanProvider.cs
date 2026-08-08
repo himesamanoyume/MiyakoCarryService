@@ -15,11 +15,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// 百度千帆 OpenAI 兼容 v2 端点：<c>POST /v2/chat/completions</c>，Bearer ApiKey 鉴权。
     /// 意图解析复用 OpenAI 兼容的 JSON schema。
     /// </summary>
-    internal sealed class QianfanProvider : ILlmProvider
+    public sealed class QianfanProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://qianfan.baidubce.com";
 
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -39,10 +39,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = content };
             }
-            return OpenAICompatibleProvider.ParseIntentJson(content);
+            return ParseIntentJson(content);
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var model = string.IsNullOrEmpty(settings.ModelId) ? "ernie-4.5-turbo-128k" : settings.ModelId;
             var body = BuildBody(model, "You are a connectivity test. Reply with exactly: pong", "ping", 64, 0d);
@@ -113,12 +113,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return null;
             }
-        }
-
-        private string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

@@ -15,12 +15,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// Anthropic Claude Messages API <c>/v1/messages</c>。
     /// 鉴权：<c>x-api-key</c> + <c>anthropic-version</c> 头。意图解析复用 OpenAI 兼容的 JSON schema。
     /// </summary>
-    internal sealed class AnthropicProvider : ILlmProvider
+    public sealed class AnthropicProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://api.anthropic.com";
         private const string ApiVersion = "2023-06-01";
 
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -49,7 +49,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return await SendAndParseAsync(baseUrl, body, settings, cancellationToken);
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "claude-sonnet-4-20250514" : settings.ModelId;
@@ -76,10 +76,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return new LlmIntent { Error = content };
             }
-            return OpenAICompatibleProvider.ParseIntentJson(content);
+            return ParseIntentJson(content);
         }
 
-        private async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
@@ -136,12 +136,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
             }
             return null;
-        }
-
-        private string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

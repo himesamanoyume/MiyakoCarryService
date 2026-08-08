@@ -4,7 +4,7 @@ using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 
-namespace MiyakoCarryService.Server.Interface
+namespace MiyakoCarryService.Server.Interfaces
 {
     public interface IMcsCommand
     {

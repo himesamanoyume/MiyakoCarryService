@@ -16,11 +16,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// 输出 token 上限用 <c>tokens_to_generate</c>；错误信息在 <c>base_resp</c>。
     /// 意图解析复用 OpenAI 兼容的 JSON schema。
     /// </summary>
-    internal sealed class MiniMaxProvider : ILlmProvider
+    public sealed class MiniMaxProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://api.minimax.chat";
 
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -34,18 +34,20 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var body = BuildBody(settings, systemPrompt, userText, settings.MaxTokens, settings.Temperature);
 
-            var content = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (content.StartsWith("MiniMax ", StringComparison.Ordinal))
             {
                 return new LlmIntent { Error = content };
             }
-            return OpenAICompatibleProvider.ParseIntentJson(content);
+            return ParseIntentJson(content);
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var body = BuildBody(settings, "You are a connectivity test. Reply with exactly: pong", "ping", 64, 0d);
-            var content = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
             return ExtractText(content) ?? content;
         }
 
@@ -63,10 +65,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             };
         }
 
-        private async Task<string> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-
             var client = AssistantHttpClient.WithTimeout();
             var timeout = settings.TimeoutSec > 0 ? TimeSpan.FromSeconds(settings.TimeoutSec) : TimeSpan.FromSeconds(30);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -119,12 +119,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return null;
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }

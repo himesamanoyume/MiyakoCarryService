@@ -3,7 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Controllers;
-using MiyakoCarryService.Server.Interface;
+using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Services;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;

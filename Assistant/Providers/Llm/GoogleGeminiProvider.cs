@@ -15,11 +15,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// <c>POST /v1beta/models/{model}:generateContent?key={ApiKey}</c>。
     /// 意图解析复用 OpenAI 兼容的 JSON schema。
     /// </summary>
-    internal sealed class GoogleGeminiProvider : ILlmProvider
+    public sealed class GoogleGeminiProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
 
-        public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
@@ -42,15 +42,16 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 },
             };
 
-            var content = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (content.StartsWith("Gemini ", StringComparison.Ordinal))
             {
                 return new LlmIntent { Error = content };
             }
-            return OpenAICompatibleProvider.ParseIntentJson(content);
+            return ParseIntentJson(content);
         }
 
-        public async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
+        public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
             var body = new JObject
             {
@@ -59,13 +60,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 ["generationConfig"] = new JObject { ["temperature"] = 0d, ["maxOutputTokens"] = 64 },
             };
 
-            var content = await PostAsync(body, settings, cancellationToken);
+            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            var content = await PostAsync(baseUrl, body, settings, cancellationToken);
             return ExtractText(content) ?? content;
         }
 
-        private async Task<string> PostAsync(JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        protected override async Task<string> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
+            
             var model = string.IsNullOrEmpty(settings.ModelId) ? "gemini-2.0-flash" : settings.ModelId;
 
             var client = AssistantHttpClient.WithTimeout();
@@ -122,12 +124,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 return null;
             }
-        }
-
-        private static string SafeTrim(string s, int max)
-        {
-            if (string.IsNullOrEmpty(s)) { return string.Empty; }
-            return s.Length <= max ? s : s.Substring(0, max) + "...";
         }
     }
 }
