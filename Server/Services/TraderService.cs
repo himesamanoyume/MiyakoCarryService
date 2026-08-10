@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -361,7 +362,90 @@ namespace MiyakoCarryService.Server.Services
                 }
             }
 
+            MergeTraderAssortGroups();
+
             return Task.CompletedTask;
+        }
+
+        private void MergeTraderAssortGroups()
+        {
+            var addedGroupKeys = new HashSet<string>();
+
+            foreach (var kvp in tradersTable)
+            {
+                if (kvp.Key == MiyakoTraderId || kvp.Key == TempOrderTraderId)
+                {
+                    continue;
+                }
+
+                var assort = kvp.Value?.Assort;
+                if (assort?.Items == null)
+                {
+                    continue;
+                }
+
+                foreach (var root in assort.Items.Where(item => item.ParentId == "hideout"))
+                {
+                    var children = assort.Items.Where(item => string.Equals(item.ParentId, root.Id.ToString(), StringComparison.Ordinal)).ToList();
+
+                    var fingerprint = BuildGroupFingerprint(root, children);
+                    if (!addedGroupKeys.Add(fingerprint))
+                    {
+                        continue;
+                    }
+
+                    AddAssortGroup(root, children);
+                }
+            }
+        }
+
+        private string BuildGroupFingerprint(Item root, List<Item> children)
+        {
+            var sb = new StringBuilder();
+            sb.Append(root.Template);
+            foreach (var child in children.OrderBy(child => child.SlotId, StringComparer.Ordinal))
+            {
+                sb.Append('|').Append(child.SlotId).Append(':').Append(child.Template);
+            }
+            return sb.ToString();
+        }
+
+        private void AddAssortGroup(Item root, List<Item> children)
+        {
+            _mcsBotPlayerInventoryModeItems.Add(new Item
+            {
+                Id = root.Id,
+                Template = root.Template,
+                ParentId = "hideout",
+                SlotId = "hideout",
+                Upd = new Upd
+                {
+                    UnlimitedCount = true,
+                    StackObjectsCount = 9999999,
+                    BuyRestrictionCurrent = 0
+                }
+            });
+
+            foreach (var child in children)
+            {
+                _mcsBotPlayerInventoryModeItems.Add(new Item
+                {
+                    Id = child.Id,
+                    Template = child.Template,
+                    ParentId = root.Id.ToString(),
+                    SlotId = child.SlotId,
+                    Upd = child.Upd
+                });
+            }
+
+            var barterScheme = new BarterScheme
+            {
+                Count = 1,
+                Template = ItemTpl.MONEY_ROUBLES
+            };
+
+            _mcsBotPlayerInventoryModeBarterScheme.Add(root.Id, [[barterScheme]]);
+            _mcsBotPlayerInventoryModeLoyalLevelItems.Add(root.Id, 1);
         }
 
         public TraderAssort GetMcsBotPlayerInventoryModeAssort()
