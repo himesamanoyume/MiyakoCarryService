@@ -7,9 +7,9 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class GameWorldExtensions
     {
-        private static SwitchDataMgr SwitchDataMgr => MgrAccessor.Get<SwitchDataMgr>();
-        private static DoorDataMgr DoorDataMgr => MgrAccessor.Get<DoorDataMgr>();
-        private static StationaryWeaponDataMgr StationaryWeaponDataMgr => MgrAccessor.Get<StationaryWeaponDataMgr>();
+        private static SwitchDataMgr SwitchDataMgr => field ??= MgrAccessor.Get<SwitchDataMgr>();
+        private static DoorDataMgr DoorDataMgr => field ??= MgrAccessor.Get<DoorDataMgr>();
+        private static StationaryWeaponDataMgr StationaryWeaponDataMgr => field ??= MgrAccessor.Get<StationaryWeaponDataMgr>();
 
         extension(GameWorld gameWorld)
         {

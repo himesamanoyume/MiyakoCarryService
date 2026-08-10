@@ -51,7 +51,7 @@ namespace MiyakoCarryService.Client.Misc
         public List<Player> ClearAreaCacheMembers;
         public List<List<Vector3>> ClearAreaCacheSegments;
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public void CleanupDeadEnemies()
         {

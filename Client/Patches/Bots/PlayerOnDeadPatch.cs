@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.OnDead));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static void Prefix(Player __instance, EDamageType damageType)

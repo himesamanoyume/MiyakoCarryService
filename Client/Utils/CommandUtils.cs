@@ -27,7 +27,7 @@ namespace MiyakoCarryService.Client.Utils
         private static int _pendingSelectedIndex = -1;
         public static bool IsCommandMenuOpen => _menuStack.Count > 0;
         public static AvailableInteractionState CurrentMenu => _currentMenu;
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
         private static NavMeshTriangulation? _cachedTriangulation;
 
         private static ConcurrentDictionary<string, McsCommandHandler> _handlersMap;

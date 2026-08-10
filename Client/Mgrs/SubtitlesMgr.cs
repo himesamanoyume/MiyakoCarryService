@@ -27,7 +27,7 @@ namespace MiyakoCarryService.Client.Mgrs
         private Dictionary<MongoID, Subtitles> _subTitles = new();
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, Player, string>> _phraseHandleMaps;
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public override void Start()
         {

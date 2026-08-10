@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(GameWorld), nameof(GameWorld.OnGameStarted));
 
-        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
+        private static SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
         [PatchPrefix]
         public static void Prefix()

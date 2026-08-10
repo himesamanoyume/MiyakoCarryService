@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotFirstAid), nameof(BotFirstAid.FindDamagedPart));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(BotFirstAid __instance)

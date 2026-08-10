@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(LighthouseTraderZone), nameof(LighthouseTraderZone.IsAllowedPlayer));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(Player player, List<Player> ___allowedPlayers, ref bool __result)

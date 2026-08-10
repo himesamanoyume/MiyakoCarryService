@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.Say));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(Player __instance, EPhraseTrigger phrase, bool demand = false, float delay = 0f, ETagStatus mask = 0, int probability = 100, bool aggressive = false)

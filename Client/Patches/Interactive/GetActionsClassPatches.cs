@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(Door)]);
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, Door door, ref AvailableInteractionState __result)
@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(LootItem)]);
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, LootItem lootItem, ref AvailableInteractionState __result)
@@ -117,7 +117,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(InteractionContextHelper), nameof(InteractionContextHelper.GetAvailableActions), [typeof(GamePlayerOwner), typeof(StationaryWeapon)]);
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, StationaryWeapon stationaryWeapon, ref AvailableInteractionState __result)

@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TriggerWithId), nameof(TriggerWithId.TriggerEnter));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TriggerWithId __instance, Player player)
@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TriggerWithId), nameof(TriggerWithId.TriggerExit));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(TriggerWithId __instance, Player player)

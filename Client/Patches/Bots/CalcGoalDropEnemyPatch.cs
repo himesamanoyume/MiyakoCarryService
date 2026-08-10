@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotCalcGoal), nameof(BotCalcGoal.CalcGoalTarget));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static void Prefix(BotCalcGoal __instance, ref bool withDropEnemy)

@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EnemyInfo), nameof(EnemyInfo.GetPartToShoot));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static bool Prefix(EnemyInfo __instance, ref Vector3 __result)

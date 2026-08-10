@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return result;
         }
 
-        private BrainMgr BrainMgr => MgrAccessor.Get<BrainMgr>();
+        private BrainMgr BrainMgr => field ??= MgrAccessor.Get<BrainMgr>();
 
         public override void Start()
         {

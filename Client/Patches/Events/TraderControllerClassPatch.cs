@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(ItemController).GetConstructors()[0];
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(ItemController __instance)
@@ -63,7 +63,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_addItemEvent").FieldType, "Invoke");
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(object __instance, AddItemEventArgs obj)
@@ -112,7 +112,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_removeItemEvent").FieldType, "Invoke");
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(object __instance, RemoveItemEventArgs obj)
@@ -161,7 +161,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(ItemController).GetMethods().FirstOrDefault(m => m.Name == nameof(ItemController.OutProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(ItemController __instance, Item item, ItemAddress from, ItemAddress to, IInventoryOperation operation, Callback callback)
@@ -236,7 +236,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => typeof(ItemController).GetMethods().FirstOrDefault(m => m.Name == nameof(ItemController.InProcess) && m.IsVirtual && m.GetParameters().Length == 5);
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
         public static void Postfix(ItemController __instance, Item item, ItemAddress to, bool succeed, IInventoryOperation operation, Callback callback)

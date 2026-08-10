@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Utils
 {
     public static class Tools
     {
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public static bool IsHost => McsMgr.IsHost;
         private static ConcurrentDictionary<string, int> _formationOpenCells = new();

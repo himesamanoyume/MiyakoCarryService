@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class ProfileExtensions
     {
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
         
         extension(Profile profile)
         {

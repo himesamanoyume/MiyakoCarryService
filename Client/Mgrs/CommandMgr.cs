@@ -54,9 +54,9 @@ namespace MiyakoCarryService.Client.Mgrs
 #endif
         }
 
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        private LootDataMgr LootDataMgr => MgrAccessor.Get<LootDataMgr>();
-        private FormationDataMgr FormationDataMgr => MgrAccessor.Get<FormationDataMgr>();
+        private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
+        private LootDataMgr LootDataMgr => field ??= MgrAccessor.Get<LootDataMgr>();
+        private FormationDataMgr FormationDataMgr => field ??= MgrAccessor.Get<FormationDataMgr>();
 
         public override void OnRaidStarted()
         {

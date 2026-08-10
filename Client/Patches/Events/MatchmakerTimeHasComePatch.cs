@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 	{
 		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(IEftSession), typeof(RaidSettings), typeof(MatchmakerPlayersController)]);
 
-		private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+		private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
 		[PatchPrefix]
 		public static void Prefix(IEftSession session, RaidSettings raidSettings, MatchmakerPlayersController matchmaker)

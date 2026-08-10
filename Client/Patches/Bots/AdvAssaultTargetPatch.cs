@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(AdvAssaultTargetLayer), nameof(AdvAssaultTargetLayer.ShallUseNow));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static bool Prefix(AdvAssaultTargetLayer __instance, ref bool __result)

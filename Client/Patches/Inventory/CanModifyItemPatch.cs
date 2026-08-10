@@ -16,13 +16,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class CanModifyItemPatch : ModulePatch
     {
-        private static McsMgr McsMgr
-        {
-            get
-            {
-                return field ??= MgrAccessor.Get<McsMgr>();
-            }
-        }
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemManipulator), nameof(ItemManipulator.CanModifyItem));
 

@@ -116,7 +116,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        protected SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
+        protected SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
         public override bool IsCurrentActionEnding()
         {

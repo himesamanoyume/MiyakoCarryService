@@ -19,7 +19,7 @@ namespace MiyakoCarryService.Client.Utils
         public const float ExitSainDist = 52f;
         public const float EnterSainSqr = EnterSainDist * EnterSainDist;
         public const float ExitSainSqr = ExitSainDist * ExitSainDist;
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public static readonly Type PlayerComponentType = Type.GetType("SAIN.Components.PlayerComponent, SAIN");
         public static readonly Type SainMoverType = Type.GetType("SAIN.SAINComponent.Classes.Mover.SAINMoverClass, SAIN");

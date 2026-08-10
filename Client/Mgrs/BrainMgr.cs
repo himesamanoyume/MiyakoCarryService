@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     internal class BrainMgr : BaseMgr
     {
-        private McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
         
         public override void Start()
         {

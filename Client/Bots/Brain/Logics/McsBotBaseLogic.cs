@@ -17,9 +17,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public abstract class McsBotBaseLogic(BotOwner botOwner) : CustomLogic(botOwner)
     {
-        protected McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
-        protected QuestDataMgr QuestDataMgr => MgrAccessor.Get<QuestDataMgr>();
-        protected CommandMgr CommandMgr => MgrAccessor.Get<CommandMgr>();
+        protected McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
+        protected QuestDataMgr QuestDataMgr => field ??= MgrAccessor.Get<QuestDataMgr>();
+        protected CommandMgr CommandMgr => field ??= MgrAccessor.Get<CommandMgr>();
+        
         protected async Task Execute(McsBotPlayerData mcsBotPlayerData, IItemOperationResult action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;

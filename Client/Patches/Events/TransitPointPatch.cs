@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.method_7));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static void Prefix(HashSet<string> players)
@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Client.Patches.Events
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.SeparateGroupPlayers));
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
         public static bool Prefix(Dictionary<string, string> ____playerGroups, string groupId, out HashSet<string> singlePlayers, out HashSet<string> partyPlayers, out bool partyIsFull, ref HashSet<string> __result)

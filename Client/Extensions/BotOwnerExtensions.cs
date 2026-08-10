@@ -13,11 +13,11 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class BotOwnerExtensions
     {
-        private static PlayerDataMgr PlayerDataMgr => MgrAccessor.Get<PlayerDataMgr>();
+        private static PlayerDataMgr PlayerDataMgr => field ??= MgrAccessor.Get<PlayerDataMgr>();
 
-        private static McsMgr McsMgr => MgrAccessor.Get<McsMgr>();
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
-        private static SubtitlesMgr SubtitlesMgr => MgrAccessor.Get<SubtitlesMgr>();
+        private static SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
         private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
 
