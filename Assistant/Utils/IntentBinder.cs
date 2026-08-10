@@ -13,14 +13,6 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Assistant.Utils
 {
-    /// <summary>
-    /// 把 <see cref="LlmIntent"/> 与本地活护航成员流绑定，组装 <see cref="McsCommandContext"/> 后派发。
-    /// <para>
-    /// 主机/单机：调用 <see cref="McsCommandApi.Execute"/> 本地执行。副机：用 <see cref="McsEventApi.Notify"/>
-    /// 触发 <see cref="CommandMgrHandleFikaEvent"/>，由 Fika Addon 自动转发到主机（与现有菜单流程同一路径）。
-    /// </para>
-    /// <para>只针对玩家自己的护航队员；需要目标位置的指令由 <see cref="TargetResolver"/> 用准星射线补全。</para>
-    /// </summary>
     internal static class IntentBinder
     {
         private static readonly HashSet<string> CommandsNeedPosition = new()
@@ -40,7 +32,6 @@ namespace MiyakoCarryService.Assistant.Utils
             ECommandType.DropTargetLoot.ToString(),
         };
 
-        /// <summary>支持"指令菜单选项"（optionIndex）派发的命令类型。</summary>
         private static readonly HashSet<string> OptionCommands = new()
         {
             ECommandType.InteractionProxyAction.ToString(),
@@ -49,11 +40,6 @@ namespace MiyakoCarryService.Assistant.Utils
             ECommandType.EscortWorld.ToString(),
         };
 
-        /// <summary>
-        /// 把意图绑定到 Llm 解析后选中的护航成员，按主机/副机路径派发。
-        /// 返回成功派发的护航成员数量。0 表示未派发（可能因为意图为空、护航为空或选择器未匹配）；
-        /// -1 表示目标不可用（如代理开门/拾取战利品未处于"选项显示状态"，应提示玩家对准目标）。
-        /// </summary>
         public static int BindAndDispatch(LlmIntent intent)
         {
             if (intent == null || intent.IsError || intent.IsReply || string.IsNullOrEmpty(intent.CommandName))
@@ -79,7 +65,6 @@ namespace MiyakoCarryService.Assistant.Utils
                 return 0;
             }
 
-            // 仅在需要 Position 的命令时取准星射线结果；代理/护送类优先使用 LLM 选择的菜单选项
             Vector3? position = null;
             string targetId = null;
             if (CommandsNeedPosition.Contains(intent.CommandName) || CommandsNeedTargetId.Contains(intent.CommandName))
@@ -97,7 +82,6 @@ namespace MiyakoCarryService.Assistant.Utils
                 }
                 else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString() || intent.CommandName == ECommandType.LootProxyAction.ToString())
                 {
-                    // 代理开门/拾取战利品：必须在"选项显示状态"（复刻补丁条件）下才能执行
                     var resolved = TargetResolver.ResolveProxyTarget(mainPlayer, intent.CommandName);
                     if (resolved == null)
                     {
@@ -162,7 +146,6 @@ namespace MiyakoCarryService.Assistant.Utils
 
         private static Player[] SelectTargets(LlmIntent intent, Player[] aliveMembers)
         {
-            // 多目标：序号数组（"5号6号" → [5,6]），按护航权威编号（RabbitN 编号）匹配，越界/重复跳过
             if (intent.TargetIndices is { Count: > 0 })
             {
                 var result = new List<Player>();
@@ -182,8 +165,7 @@ namespace MiyakoCarryService.Assistant.Utils
                 return result.ToArray();
             }
 
-            // 多目标：代号数组（逐个包含匹配、去重），如 "Rabbit1、Rabbit2"
-            if (intent.TargetCodeNames is { Count: > 0 })
+            if (intent.TargetCodeNames.Count > 0)
             {
                 var result = new List<Player>();
                 var seen = new HashSet<Player>();
@@ -195,10 +177,8 @@ namespace MiyakoCarryService.Assistant.Utils
                     }
                     foreach (var member in aliveMembers)
                     {
-                        var nick = member.Profile?.Nickname;
-                        if (string.IsNullOrEmpty(nick)
-                            || nick.IndexOf(name, StringComparison.OrdinalIgnoreCase) < 0
-                            || !seen.Add(member))
+                        var nickname = member.Profile?.Nickname;
+                        if (string.IsNullOrEmpty(nickname) || nickname.IndexOf(name, StringComparison.OrdinalIgnoreCase) < 0 || !seen.Add(member))
                         {
                             continue;
                         }
@@ -217,13 +197,12 @@ namespace MiyakoCarryService.Assistant.Utils
 
             if (intent.Selector == EIntentTargetSelector.ByIndex && intent.TargetIndex.HasValue)
             {
-                // "N号" = 编号为 N 的护航（与玩家所见 RabbitN 一致），不是存活列表的第 N 位
                 var requested = intent.TargetIndex.Value;
                 foreach (var member in aliveMembers)
                 {
                     if (McsCommandApi.GetMcsBotPlayerIndex(member) == requested)
                     {
-                        return new[] { member };
+                        return [member];
                     }
                 }
                 return Array.Empty<Player>();
@@ -234,22 +213,27 @@ namespace MiyakoCarryService.Assistant.Utils
                 foreach (var member in aliveMembers)
                 {
                     var name = member.Profile?.Nickname;
-                    if (string.IsNullOrEmpty(name)) { continue; }
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        continue;
+                    }
                     if (name.IndexOf(intent.TargetCodeName, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        return new[] { member };
+                        return [member];
                     }
                 }
                 return Array.Empty<Player>();
             }
 
-            // 退化兜底：未指定 → 全员
             return aliveMembers;
         }
 
         private static BodyPartType ParseBodyPart(string s)
         {
-            if (string.IsNullOrEmpty(s)) { return default; }
+            if (string.IsNullOrEmpty(s))
+            {
+                return default;
+            }
             return Enum.TryParse<BodyPartType>(s, ignoreCase: true, out var bp) ? bp : default;
         }
     }

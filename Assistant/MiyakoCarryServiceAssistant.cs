@@ -461,7 +461,26 @@ namespace MiyakoCarryService.Assistant
                     {
                         if (GUILayout.Button(Locales.VOICEDEBUGPLAY_KEY.McsLocalized(), GUILayout.ExpandWidth(true)))
                         {
-                            PlayLastVoiceRecording();
+                            try
+                            {
+                                var samples = LastVoiceSamples;
+                                if (samples == null || samples.Length == 0 || Instance == null)
+                                {
+                                    return;
+                                }
+                                var channels = Math.Max(1, Math.Min(2, LastVoiceChannels));
+                                var sampleRate = LastVoiceSampleRate > 0 ? LastVoiceSampleRate : 44100;
+                                var clip = AudioClip.Create("mcs-voice-playback", samples.Length, channels, sampleRate, false);
+                                clip.SetData(samples, 0);
+                                var source = Instance.gameObject.GetComponent<AudioSource>() ?? Instance.gameObject.AddComponent<AudioSource>();
+                                source.spatialBlend = 0f;
+                                source.PlayOneShot(clip);
+                                Destroy(clip, clip.length + 1f);
+                            }
+                            catch
+                            {
+                                
+                            }
                         }
                     },
                     HideDefaultButton = true,
@@ -481,31 +500,6 @@ namespace MiyakoCarryService.Assistant
                 stretchWidth = true,
             };
             GUILayout.Label((string)entry.BoxedValue ?? "", _debugReadonlyStyle);
-        }
-
-        /// <summary>回放最近一次语音录制（2D 播放，无样本时忽略）。</summary>
-        private static void PlayLastVoiceRecording()
-        {
-            try
-            {
-                var samples = LastVoiceSamples;
-                if (samples == null || samples.Length == 0 || Instance == null)
-                {
-                    return;
-                }
-                var channels = Math.Max(1, Math.Min(2, LastVoiceChannels));
-                var sampleRate = LastVoiceSampleRate > 0 ? LastVoiceSampleRate : 44100;
-                var clip = AudioClip.Create("mcs-voice-playback", samples.Length, channels, sampleRate, false);
-                clip.SetData(samples, 0);
-                var source = Instance.gameObject.GetComponent<AudioSource>() ?? Instance.gameObject.AddComponent<AudioSource>();
-                source.spatialBlend = 0f;
-                source.PlayOneShot(clip);
-                Destroy(clip, clip.length + 1f);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"播放录音失败：{ex.Message}");
-            }
         }
 
         /// <summary>
@@ -534,12 +528,11 @@ namespace MiyakoCarryService.Assistant
                 var dispatcher = new LlmDispatcher(LlmProvider.Value);
                 var reply = await dispatcher.PingAsync(settings, CancellationToken.None).ConfigureAwait(true);
 
-                // 连通性测试：回复含 pong（忽略大小写）即成功，统一显示 pong
                 LlmDebugResult.Value = reply.IndexOf("pong", StringComparison.OrdinalIgnoreCase) >= 0 ? "pong" : reply;
             }
             catch (Exception ex)
             {
-                LlmDebugResult.Value = $"错误：{ex.Message}";
+                LlmDebugResult.Value = $"Error：{ex.Message}";
             }
         }
     }

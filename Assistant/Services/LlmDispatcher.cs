@@ -20,18 +20,16 @@ namespace MiyakoCarryService.Assistant.Services
             _provider = type switch
             {
                 ELlmProvider.OpenAICompatible => new OpenAICompatibleProvider(),
-                ELlmProvider.Anthropic        => new AnthropicProvider(),
-                ELlmProvider.GoogleGemini     => new GoogleGeminiProvider(),
-                ELlmProvider.DashScope        => new DashScopeProvider(),
-                ELlmProvider.Zhipu            => new ZhipuProvider(),
-                ELlmProvider.Qianfan           => new QianfanProvider(),
-                ELlmProvider.Spark            => new SparkProvider(),
-                ELlmProvider.MiniMax          => new MiniMaxProvider(),
-                _                             => null,
+                ELlmProvider.Anthropic => new AnthropicProvider(),
+                ELlmProvider.GoogleGemini => new GoogleGeminiProvider(),
+                ELlmProvider.DashScope => new DashScopeProvider(),
+                ELlmProvider.Zhipu => new ZhipuProvider(),
+                ELlmProvider.Qianfan => new QianfanProvider(),
+                ELlmProvider.Spark => new SparkProvider(),
+                ELlmProvider.MiniMax => new MiniMaxProvider(),
+                _ => null,
             };
         }
-
-        public bool IsConfigured => _provider != null;
 
         public async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {

@@ -1,7 +1,6 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using MiyakoCarryService.Assistant.Models;
 
 namespace MiyakoCarryService.Assistant.Utils
 {
@@ -14,18 +13,19 @@ namespace MiyakoCarryService.Assistant.Utils
         private static string _appliedProxyHost;
         private static string _appliedProxyPort;
 
-        public static HttpClient Shared => _shared ?? throw new InvalidOperationException("AssistantHttpClient 未初始化");
+        public static HttpClient Shared => _shared ?? Init();
 
-        public static void Init()
+        public static HttpClient Init()
         {
             if (_shared != null)
             {
-                return;
+                return null;
             }
 
             _shared = CreateClient(false);
             _shared.DefaultRequestHeaders.ConnectionClose = false;
             _shared.DefaultRequestHeaders.ExpectContinue = false;
+            return _shared;
         }
 
         private static HttpClient CreateClient(bool useProxy)
@@ -47,10 +47,6 @@ namespace MiyakoCarryService.Assistant.Utils
             };
         }
 
-        /// <summary>
-        /// 按 HttpProxyHost/HttpProxyPort 配置应用代理（host 与 port 均非空且端口可解析时全量经代理转发，
-        /// 含本地地址；否则直连）。仅在配置变化时重建共享 HttpClient。
-        /// </summary>
         public static void ApplyProxy()
         {
             var host = MiyakoCarryServiceAssistantPlugin.HttpProxyHost.Value;
@@ -88,10 +84,6 @@ namespace MiyakoCarryService.Assistant.Utils
             }
         }
 
-        /// <summary>
-        /// 返回共享 HttpClient（确保代理配置已应用）。超时不在共享实例上改写（固定 60s），
-        /// 各服务商在请求内自行以 CancellationTokenSource + CancelAfter 控制超时，避免并发互相干扰。
-        /// </summary>
         public static HttpClient WithTimeout()
         {
             ApplyProxy();

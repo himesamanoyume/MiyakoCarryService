@@ -20,18 +20,16 @@ namespace MiyakoCarryService.Assistant.Services
             _provider = type switch
             {
                 ESttProvider.OpenAIWhisper => new OpenAIWhisperProvider(),
-                ESttProvider.AzureSpeech   => new AzureSpeechProvider(),
-                ESttProvider.GoogleSpeech  => new GoogleSpeechProvider(),
-                ESttProvider.AliyunNls     => new AliyunNlsProvider(),
-                ESttProvider.TencentAsr    => new TencentAsrProvider(),
-                ESttProvider.XfyunIat      => new XfyunIatProvider(),
-                ESttProvider.VolcIat       => new VolcIatProvider(),
-                ESttProvider.BaiduAsr       => new BaiduAsrProvider(),
-                _                          => null,
+                ESttProvider.AzureSpeech => new AzureSpeechProvider(),
+                ESttProvider.GoogleSpeech => new GoogleSpeechProvider(),
+                ESttProvider.AliyunNls => new AliyunNlsProvider(),
+                ESttProvider.TencentAsr => new TencentAsrProvider(),
+                ESttProvider.XfyunIat => new XfyunIatProvider(),
+                ESttProvider.VolcIat => new VolcIatProvider(),
+                ESttProvider.BaiduAsr => new BaiduAsrProvider(),
+                _ => null,
             };
         }
-
-        public bool IsConfigured => _provider != null;
 
         public async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {

@@ -77,11 +77,11 @@ namespace MiyakoCarryService.Assistant.Services
                 {
                     return _params.EnergyThreshold;
                 }
-                int count = _floorFull ? FloorWindowCount : _floorHead;
+                var count = _floorFull ? FloorWindowCount : _floorHead;
                 var sorted = new float[count];
                 Array.Copy(_floorHistory, sorted, count);
                 Array.Sort(sorted);
-                float median = sorted[count / 2];
+                var median = sorted[count / 2];
                 return Math.Max(_params.EnergyThreshold, median * NoiseFloorFactor);
             }
         }
@@ -89,7 +89,6 @@ namespace MiyakoCarryService.Assistant.Services
         public float EnergyThreshold => _params.EnergyThreshold;
         public float SilenceSeconds => _params.SilenceSeconds;
 
-        /// <summary>持续静默是否长时间超过 SilenceSeconds，可结束录音。</summary>
         public bool ShouldStopAfterSilence(float currentRms, float silenceSeconds)
         {
             return !IsSpeech(currentRms) && silenceSeconds >= _params.SilenceSeconds;
