@@ -5,6 +5,9 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using JetBrains.Annotations;
 using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
+using System.Linq;
 
 namespace MiyakoCarryService.Client.Patches.Inventory
 {
@@ -13,6 +16,14 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class TryFindChangedContainerPatch : ModulePatch
     {
+        private static McsMgr McsMgr
+        {
+            get
+            {
+                return field ??= MgrAccessor.Get<McsMgr>();
+            }
+        }
+
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SearchController), nameof(SearchController.TryFindChangedContainer));
 
         [PatchPostfix]
@@ -23,6 +34,19 @@ namespace MiyakoCarryService.Client.Patches.Inventory
             {
                 return;
             }
+
+            var ownerId = address?.GetRootItem()?.Owner?.ID;
+            if (string.IsNullOrEmpty(ownerId))
+            {
+                return;
+            }
+
+            var mcsSquad = McsMgr.GetAllMyMcsSquadMembers(out _);
+            if (mcsSquad == null || !mcsSquad.Any(player => player.ProfileId == ownerId))
+            {
+                return;
+            }
+
             __result = false;
         }
     }

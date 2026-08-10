@@ -5,6 +5,9 @@ using EFT;
 using Diz.LanguageExtensions;
 using System.Collections.Generic;
 using HarmonyLib;
+using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
+using System.Linq;
 
 namespace MiyakoCarryService.Client.Patches.Inventory
 {
@@ -13,6 +16,14 @@ namespace MiyakoCarryService.Client.Patches.Inventory
     /// </summary>
     public sealed class CanModifyItemPatch : ModulePatch
     {
+        private static McsMgr McsMgr
+        {
+            get
+            {
+                return field ??= MgrAccessor.Get<McsMgr>();
+            }
+        }
+
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemManipulator), nameof(ItemManipulator.CanModifyItem));
 
         [PatchPrefix]
@@ -24,6 +35,18 @@ namespace MiyakoCarryService.Client.Patches.Inventory
             }
 
             if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)
+            {
+                return true;
+            }
+
+            var ownerId = controller?.RootItem?.Owner?.ID;
+            if (string.IsNullOrEmpty(ownerId))
+            {
+                return true;
+            }
+
+            var mcsSquad = McsMgr.GetAllMyMcsSquadMembers(out _);
+            if (mcsSquad == null || !mcsSquad.Any(player => player.ProfileId == ownerId))
             {
                 return true;
             }
