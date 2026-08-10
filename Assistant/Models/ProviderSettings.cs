@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Assistant.Models
 {
-    public sealed class ProviderSettings
+    public class ProviderSettings
     {
         public string ApiKey;
         public string ApiSecret;

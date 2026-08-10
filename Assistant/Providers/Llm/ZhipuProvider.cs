@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -18,6 +19,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// </summary>
     public sealed class ZhipuProvider : BaseLlmProvider
     {
+        protected override string ProviderDisplayName => Locales.LLMPROVIDERZHIPU.McsLocalized();
+
         private const string DefaultBaseUrl = "https://open.bigmodel.cn";
         private const string DefaultModel = "glm-4-flash";
 
@@ -25,7 +28,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = Locales.LLM_USER_TEXT_EMPTY.McsLocalized() };
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
@@ -41,7 +44,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var content = ExtractChatContentText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Zhipu 返回内容为空" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_EMPTY_CONTENT.McsLocalized(), ProviderDisplayName) };
             }
             return ParseIntentJson(content);
         }

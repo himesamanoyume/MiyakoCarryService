@@ -129,5 +129,66 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMPROVIDERQIANFAN          = "Mcs/LlmProviderQianfan";
         public const string LLMPROVIDERSPARK            = "Mcs/LlmProviderSpark";
         public const string LLMPROVIDERMINIMAX          = "Mcs/LlmProviderMiniMax";
+
+        // —— 通用 HTTP（LLM/STT 共用）——
+        public const string HTTP_REQUEST_TIMEOUT         = "Mcs/HttpRequestTimeout";
+        public const string HTTP_EXCEPTION               = "Mcs/HttpException";
+        public const string ERROR_NOT_IMPLEMENTED        = "Mcs/ErrorNotImplemented";
+
+        // —— LLM ——
+        public const string LLM_USER_TEXT_EMPTY          = "Mcs/LlmUserTextEmpty";
+        public const string LLM_EMPTY_CONTENT            = "Mcs/LlmEmptyContent";
+        public const string LLM_PING_NOT_SUPPORTED       = "Mcs/LlmPingNotSupported";
+        public const string LLM_PARSE_ERROR              = "Mcs/LlmParseError";
+        public const string LLM_MISSING_COMMAND          = "Mcs/LlmMissingCommand";
+        public const string LLM_EMPTY_RESPONSE           = "Mcs/LlmEmptyResponse";
+        public const string LLM_RETRY_FAILED             = "Mcs/LlmRetryFailed";
+        public const string LLM_APIKEY_MISSING           = "Mcs/LlmApiKeyMissing";
+        public const string LLM_BUSINESS_ERROR           = "Mcs/LlmBusinessError";
+        public const string LLM_PROVIDER_NOT_CONFIGURED  = "Mcs/LlmProviderNotConfigured";
+        public const string STT_PROVIDER_NOT_CONFIGURED  = "Mcs/SttProviderNotConfigured";
+
+        // —— STT ——
+        public const string STT_AUDIO_EMPTY              = "Mcs/SttAudioEmpty";
+        public const string STT_WAV_ENCODE_FAILED        = "Mcs/SttWavEncodeFailed";
+        public const string STT_RESPONSE_PARSE_FAILED    = "Mcs/SttResponseParseFailed";
+        public const string STT_RECOGNIZE_FAILED         = "Mcs/SttRecognizeFailed";
+        public const string STT_STATUS_ABNORMAL          = "Mcs/SttStatusAbnormal";
+        public const string STT_DECODE_FAILED            = "Mcs/SttDecodeFailed";
+        public const string STT_TOKEN_FAILED             = "Mcs/SttTokenFailed";
+        public const string STT_APIKEY_MISSING           = "Mcs/SttApiKeyMissing";
+        public const string UNKNOWN_ERROR                = "Mcs/UnknownError";
+        public const string UNKNOWN                      = "Mcs/Unknown";
+
+        // —— STT 厂商凭证提示 ——
+        public const string STT_XFYUN_REQUIRED           = "Mcs/SttXfyunRequired";
+        public const string STT_XFYUN_APPID              = "Mcs/SttXfyunAppId";
+        public const string STT_ALIYUN_REQUIRED          = "Mcs/SttAliyunRequired";
+        public const string STT_ALIYUN_APPID             = "Mcs/SttAliyunAppId";
+        public const string STT_ALIYUN_TOKEN             = "Mcs/SttAliyunToken";
+        public const string STT_BAIDU_REQUIRED           = "Mcs/SttBaiduRequired";
+        public const string STT_BAIDU_TOKEN              = "Mcs/SttBaiduToken";
+        public const string STT_VOLC_REQUIRED            = "Mcs/SttVolcRequired";
+        public const string STT_TENCENT_REQUIRED         = "Mcs/SttTencentRequired";
+
+        // —— VoiceMgr / 调试 UI ——
+        public const string VOICE_RECORDING              = "Mcs/VoiceRecording";
+        public const string VOICE_LISTENING_RESULT       = "Mcs/VoiceListeningResult";
+        public const string MIC_UNAVAILABLE              = "Mcs/MicUnavailable";
+        public const string NO_AUDIO_CAPTURED            = "Mcs/NoAudioCaptured";
+        public const string STT_FAILED                   = "Mcs/SttFailed";
+        public const string LLM_FAILED                   = "Mcs/LlmFailed";
+        public const string DISPATCHED_COUNT             = "Mcs/DispatchedCount";
+        public const string NO_MATCH_MEMBER              = "Mcs/NoMatchMember";
+        public const string DISPATCH_ERROR               = "Mcs/DispatchError";
+        public const string ERROR_PREFIX                 = "Mcs/ErrorPrefix";
+        public const string COMMAND_PREFIX               = "Mcs/CommandPrefix";
+        public const string COMMAND_WITH_OPTION          = "Mcs/CommandWithOption";
+        public const string TARGET_INDICES               = "Mcs/TargetIndices";
+        public const string TARGET_CODENAMES             = "Mcs/TargetCodeNames";
+        public const string ALL_MEMBERS                  = "Mcs/AllMembers";
+        public const string NO_RESPONSE                  = "Mcs/NoResponse";
+        public const string LLM_DEBUG_REQUESTING         = "Mcs/LlmDebugRequesting";
+        public const string LLM_DEBUG_ERROR              = "Mcs/LlmDebugError";
     }
 }

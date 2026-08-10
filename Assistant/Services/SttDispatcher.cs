@@ -4,13 +4,11 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Providers.Stt;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Services
 {
-    /// <summary>
-    /// STT 服务分发器。根据 <see cref="ESttProvider"/> 选择具体实现，
-    /// 配置项通过 <see cref="ProviderSettings"/> 统一传入。
-    /// </summary>
     internal sealed class SttDispatcher
     {
         private readonly ISttProvider _provider;
@@ -35,7 +33,7 @@ namespace MiyakoCarryService.Assistant.Services
         {
             if (_provider == null)
             {
-                return new SttResult { Error = "SttProvider 未配置或未启用" };
+                return new SttResult { Error = Locales.STT_PROVIDER_NOT_CONFIGURED.McsLocalized() };
             }
             return await _provider.TranscribeAsync(audio, settings, cancellationToken).ConfigureAwait(false);
         }

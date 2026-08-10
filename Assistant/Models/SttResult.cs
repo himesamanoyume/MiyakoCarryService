@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Assistant.Models
 {
-    public sealed class SttResult
+    public class SttResult
     {
         public string Text;
         public string DetectedLanguage;

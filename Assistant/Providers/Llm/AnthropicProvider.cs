@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -18,15 +19,17 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultModel = "claude-sonnet-4-20250514";
         private const string ApiVersion = "2023-06-01";
 
+        protected override string ProviderDisplayName => Locales.LLMPROVIDERANTHROPIC.McsLocalized();
+
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = Locales.LLM_USER_TEXT_EMPTY.McsLocalized() };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（Anthropic API Key）" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_APIKEY_MISSING.McsLocalized(), "Anthropic API Key") };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -82,7 +85,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var content = ExtractText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Anthropic 返回内容为空" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_EMPTY_CONTENT.McsLocalized(), ProviderDisplayName) };
             }
             return ParseIntentJson(content);
         }

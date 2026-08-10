@@ -509,7 +509,7 @@ namespace MiyakoCarryService.Assistant
         private static async Task RunLlmDebugTestAsync()
         {
             // 请求开始前先显示请求中状态，结果返回后覆盖
-            LlmDebugResult.Value = "正在请求";
+            LlmDebugResult.Value = Locales.LLM_DEBUG_REQUESTING.McsLocalized();
             try
             {
                 var settings = new ProviderSettings
@@ -532,7 +532,7 @@ namespace MiyakoCarryService.Assistant
             }
             catch (Exception ex)
             {
-                LlmDebugResult.Value = $"Error：{ex.Message}";
+                LlmDebugResult.Value = string.Format(Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
             }
         }
     }

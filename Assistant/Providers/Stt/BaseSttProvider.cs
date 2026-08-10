@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -31,7 +32,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
         public virtual Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new SttResult { Error = "此接口未实现" });
+            return Task.FromResult(new SttResult { Error = Locales.ERROR_NOT_IMPLEMENTED.McsLocalized() });
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         {
             if (audio == null || audio.LengthSamples == 0)
             {
-                return new SttResult { Error = "AudioSegment 为空" };
+                return new SttResult { Error = Locales.STT_AUDIO_EMPTY.McsLocalized() };
             }
             return null;
         }
@@ -63,7 +64,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             if (wavBytes.Length == 0)
             {
                 wavBytes = null;
-                error = "WAV 编码失败";
+                error = Locales.STT_WAV_ENCODE_FAILED.McsLocalized();
                 return false;
             }
 
@@ -95,7 +96,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             if (wavBytes.Length == 0)
             {
                 wavBytes = null;
-                error = "WAV 编码失败";
+                error = Locales.STT_WAV_ENCODE_FAILED.McsLocalized();
                 return false;
             }
 

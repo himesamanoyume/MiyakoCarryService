@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -18,11 +19,13 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         private const string DefaultBaseUrl = "https://api.deepseek.com";
         private const string DefaultModel = "deepseek-v4-flash";
 
+        protected override string ProviderDisplayName => Locales.LLMPROVIDEROPENAICOMPATIBLE.McsLocalized();
+
         public override async Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = Locales.LLM_USER_TEXT_EMPTY.McsLocalized() };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -80,21 +83,21 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     var content = ExtractChatContentText(result.ResponseText);
                     if (string.IsNullOrWhiteSpace(content))
                     {
-                        return new LlmIntent { Error = "OpenAI-Compat 返回内容为空" };
+                        return new LlmIntent { Error = string.Format(Locales.LLM_EMPTY_CONTENT.McsLocalized(), ProviderDisplayName) };
                     }
 
                     return ParseIntentJson(content);
                 }
 
-                return new LlmIntent { Error = "OpenAI-Compat 请求失败（重试后仍被拒绝）" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_RETRY_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             catch (OperationCanceledException)
             {
-                return new LlmIntent { Error = "OpenAI-Compat 请求超时" };
+                return new LlmIntent { Error = string.Format(Locales.HTTP_REQUEST_TIMEOUT.McsLocalized(), ProviderDisplayName) };
             }
             catch (Exception ex)
             {
-                return new LlmIntent { Error = $"OpenAI-Compat 异常：{ex.Message}" };
+                return new LlmIntent { Error = string.Format(Locales.HTTP_EXCEPTION.McsLocalized(), ProviderDisplayName, ex.Message) };
             }
         }
 
@@ -120,7 +123,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var content = ExtractChatContentText(result.ResponseText);
-            return string.IsNullOrWhiteSpace(content) ? "(空响应)" : content;
+            return string.IsNullOrWhiteSpace(content) ? Locales.LLM_EMPTY_RESPONSE.McsLocalized() : content;
         }
     }
 }

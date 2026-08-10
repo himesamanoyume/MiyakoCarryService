@@ -4,6 +4,8 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Providers.Llm;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Services
 {
@@ -35,7 +37,7 @@ namespace MiyakoCarryService.Assistant.Services
         {
             if (_provider == null)
             {
-                return new LlmIntent { Error = "LlmProvider 未配置或未启用" };
+                return new LlmIntent { Error = Locales.LLM_PROVIDER_NOT_CONFIGURED.McsLocalized() };
             }
             return await _provider.InterpretAsync(userText, settings, cancellationToken).ConfigureAwait(false);
         }
@@ -44,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Services
         {
             if (_provider == null)
             {
-                return "LlmProvider 未配置或未启用";
+                return Locales.LLM_PROVIDER_NOT_CONFIGURED.McsLocalized();
             }
             return await _provider.PingAsync(settings, cancellationToken).ConfigureAwait(false);
         }

@@ -1,6 +1,6 @@
 namespace MiyakoCarryService.Assistant.Models
 {
-    public sealed class AudioSegment
+    public class AudioSegment
     {
         public float[] Samples;
         public int SampleRate;

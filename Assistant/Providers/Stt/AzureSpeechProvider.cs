@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -14,13 +16,15 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class AzureSpeechProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERAZURESPEECH.McsLocalized();
+
         private const string DefaultBaseUrl = "https://eastasia.stt.speech.microsoft.com";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new SttResult { Error = "SttApiKey 未填写（Azure Subscription Key）" };
+                return new SttResult { Error = string.Format(Locales.STT_APIKEY_MISSING.McsLocalized(), "Azure Subscription Key") };
             }
             if (!TryPrepareWav(audio, out var wavBytes, out var prepareError))
             {
@@ -46,7 +50,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var json = ParseResponseJson(result);
             if (json == null)
             {
-                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var status = json.Value<string>("RecognitionStatus");
             if (string.Equals(status, "Success", StringComparison.OrdinalIgnoreCase))
@@ -58,7 +62,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 };
             }
 
-            return new SttResult { Error = $"Azure 识别状态异常：{status ?? "未知"}" };
+            return new SttResult { Error = string.Format(Locales.STT_STATUS_ABNORMAL.McsLocalized(), ProviderDisplayName, status ?? Locales.UNKNOWN.McsLocalized()) };
         }
     }
 }

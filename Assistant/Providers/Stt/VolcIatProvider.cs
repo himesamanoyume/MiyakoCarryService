@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -14,13 +16,15 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class VolcIatProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERVOLCIAT.McsLocalized();
+
         private const string DefaultBaseUrl = "https://openspeech.bytedance.com";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
-                return new SttResult { Error = "火山需填写 SttApiKey（AppID）与 SttApiSecret（AccessToken）" };
+                return new SttResult { Error = Locales.STT_VOLC_REQUIRED.McsLocalized() };
             }
             if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
@@ -43,12 +47,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var json = ParseResponseJson(result);
             if (json == null)
             {
-                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var code = json.Value<int>("code");
             if (code != 0)
             {
-                return new SttResult { Error = $"火山识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
+                return new SttResult { Error = $"火山识别失败 {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
             var resultBase64 = json.Value<string>("result");
@@ -63,7 +67,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             catch (Exception ex)
             {
-                return new SttResult { Error = $"火山结果解码失败：{ex.Message}" };
+                return new SttResult { Error = string.Format(Locales.STT_DECODE_FAILED.McsLocalized(), ProviderDisplayName, ex.Message) };
             }
         }
 

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -15,13 +16,15 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class BaiduAsrProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERBAIDUASR.McsLocalized();
+
         private const string DefaultBaseUrl = "https://vop.baidubce.com";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
-                return new SttResult { Error = "百度识别需填写 SttApiKey（client_id）与 SttApiSecret（client_secret）" };
+                return new SttResult { Error = Locales.STT_BAIDU_REQUIRED.McsLocalized() };
             }
             if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
@@ -38,7 +41,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var token = await FetchAccessTokenAsync(client, settings, tokenCts.Token).ConfigureAwait(false);
                 if (token == null)
                 {
-                    return new SttResult { Error = "百度 access_token 换取失败（请检查 ApiKey/ApiSecret）" };
+                    return new SttResult { Error = Locales.STT_BAIDU_TOKEN.McsLocalized() };
                 }
 
                 // 2. 一句话识别
@@ -62,12 +65,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var json = ParseResponseJson(result);
                 if (json == null)
                 {
-                    return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                    return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
                 }
                 var errNo = json.Value<int>("err_no");
                 if (errNo != 0)
                 {
-                    return new SttResult { Error = $"百度识别失败 {errNo}: {json.Value<string>("err_msg") ?? "未知错误"}" };
+                    return new SttResult { Error = $"百度识别失败 {errNo}: {json.Value<string>("err_msg") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
                 }
                 var text = json["result"]?[0]?.ToString() ?? string.Empty;
                 return new SttResult { Text = text, DetectedLanguage = settings.Language };

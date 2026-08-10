@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -14,6 +15,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// </summary>
     public sealed class SparkProvider : BaseLlmProvider
     {
+        protected override string ProviderDisplayName => Locales.LLMPROVIDERSPARK.McsLocalized();
+
         private const string DefaultBaseUrl = "https://spark-api-open.xf-yun.com";
         private const string DefaultModel = "generalv3.5";
 
@@ -21,11 +24,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = Locales.LLM_USER_TEXT_EMPTY.McsLocalized() };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（星火 APIKey）" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_APIKEY_MISSING.McsLocalized(), "星火 APIKey") };
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
@@ -42,7 +45,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var content = ExtractChatContentText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Spark 返回内容为空" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_EMPTY_CONTENT.McsLocalized(), ProviderDisplayName) };
             }
             return ParseIntentJson(content);
         }

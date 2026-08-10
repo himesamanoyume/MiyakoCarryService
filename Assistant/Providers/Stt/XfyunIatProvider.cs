@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -16,17 +18,19 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class XfyunIatProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERXFYUNIAT.McsLocalized();
+
         private const string DefaultBaseUrl = "https://iat-api.xfyun.cn";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
-                return new SttResult { Error = "讯飞需填写 SttApiKey（apiKey）与 SttApiSecret（apiSecret）" };
+                return new SttResult { Error = Locales.STT_XFYUN_REQUIRED.McsLocalized() };
             }
             if (string.IsNullOrEmpty(settings.ModelId))
             {
-                return new SttResult { Error = "讯飞需在 SttModelId 中填写 app_id" };
+                return new SttResult { Error = Locales.STT_XFYUN_APPID.McsLocalized() };
             }
             if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
@@ -73,12 +77,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var json = ParseResponseJson(result);
             if (json == null)
             {
-                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var code = json.Value<int>("code");
             if (code != 0)
             {
-                return new SttResult { Error = $"讯飞识别失败 {code}: {json.Value<string>("message") ?? "未知错误"}" };
+                return new SttResult { Error = $"讯飞识别失败 {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
             var sb = new StringBuilder();

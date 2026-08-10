@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -14,13 +16,15 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class TencentAsrProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERTENCENTASR.McsLocalized();
+
         private const string DefaultBaseUrl = "https://asr.tencentcloudapi.com";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
-                return new SttResult { Error = "腾讯云需填写 SttApiKey（SecretId）与 SttApiSecret（SecretKey）" };
+                return new SttResult { Error = Locales.STT_TENCENT_REQUIRED.McsLocalized() };
             }
             if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
@@ -67,7 +71,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var json = ParseResponseJson(result);
             if (json == null)
             {
-                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var error = json["Response"]?["Error"];
             if (error != null)

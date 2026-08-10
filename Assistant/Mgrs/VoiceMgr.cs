@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Assistant.Mgrs
 {
-    public sealed class VoiceMgr : BaseMgr
+    public class VoiceMgr : BaseMgr
     {
         private AudioCaptureService _capture;
         private VadService _vadService;
@@ -259,7 +259,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     // STT 调试模式：触发阈值确认语音，正式进入录音
                     if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                     {
-                        MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
+                        MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = Utils.Locales.VOICE_RECORDING.McsLocalized();
                     }
                 }
             }
@@ -304,17 +304,17 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
                 {
                     MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = string.IsNullOrEmpty(_debugLastResult)
-                        ? "正在监听"
-                        : $"正在监听：{_debugLastResult}";
+                        ? Utils.Locales.VOICELISTENING.McsLocalized()
+                        : string.Format(Utils.Locales.VOICE_LISTENING_RESULT.McsLocalized(), _debugLastResult);
                 }
                 else
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = "正在录音";
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = Utils.Locales.VOICE_RECORDING.McsLocalized();
                 }
             }
             if (!_capture.Begin())
             {
-                Notification("麦克风不可用或被占用");
+                Notification(Utils.Locales.MIC_UNAVAILABLE.McsLocalized());
                 return;
             }
             // PTT：按下即累积（无预卷需求）；FreeTalk 保持未武装，待语音确认后由 Arm() 置位
@@ -357,7 +357,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 // STT 调试模式：未捕获到音频时给出提示，避免"正在录音"状态卡死
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    SetDebugText("未捕获到音频");
+                    SetDebugText(Utils.Locales.NO_AUDIO_CAPTURED.McsLocalized());
                 }
                 _voiceState = EVoiceState.Idle;
                 return;
@@ -477,12 +477,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT 异常：{ex}");
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
-                    SetDebugText($"STT 异常：{ex.Message}");
+                    SetDebugText(string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message));
                     _voiceState = EVoiceState.Idle;
                     return;
                 }
                 _pendingTranscribedText = string.Empty;
-                _pendingIntent = new LlmIntent { Error = $"STT 异常：{ex.Message}" };
+                _pendingIntent = new LlmIntent { Error = string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message) };
                 _voiceState = EVoiceState.Dispatching;
                 return;
             }
@@ -538,7 +538,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 异常：{ex}");
-                _pendingIntent = new LlmIntent { Error = $"LLM 异常：{ex.Message}" };
+                _pendingIntent = new LlmIntent { Error = string.Format(Utils.Locales.LLM_FAILED.McsLocalized(), ex.Message) };
                 _voiceState = EVoiceState.Dispatching;
                 return;
             }
@@ -579,13 +579,13 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     feedback = dispatched < 0
                         ? Utils.Locales.VOICEAIMATTARGET.McsLocalized()
                         : dispatched > 0
-                            ? $"已下发 {dispatched} 名护航：{localizedCommand}"
-                            : $"无匹配护航成员：{localizedCommand}";
+                            ? string.Format(Utils.Locales.DISPATCHED_COUNT.McsLocalized(), dispatched, localizedCommand)
+                            : string.Format(Utils.Locales.NO_MATCH_MEMBER.McsLocalized(), localizedCommand);
                 }
                 catch (Exception ex)
                 {
                     MiyakoCarryServiceAssistantPlugin.Logger.LogError($"BindAndDispatch 异常：{ex}");
-                    feedback = $"派发异常：{ex.Message}";
+                    feedback = string.Format(Utils.Locales.DISPATCH_ERROR.McsLocalized(), ex.Message);
                 }
             }
             else
@@ -617,7 +617,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
             {
                 _debugLastResult = text;
-                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = $"正在监听：{text}";
+                MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = string.Format(Utils.Locales.VOICE_LISTENING_RESULT.McsLocalized(), text);
             }
             else
             {
@@ -648,7 +648,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 调试识别异常：{ex}");
-                MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = $"错误：{ex.Message}";
+                MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = string.Format(Utils.Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
             }
         }
 
@@ -702,7 +702,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 // 识别结果只允许指令：LLM 未识别统一显示，技术错误保留原文便于排查
                 return intent != null && intent.Error == LlmIntent.NotRecognized
                     ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized()
-                    : $"错误：{intent?.Error ?? "null"}";
+                    : string.Format(Utils.Locales.ERROR_PREFIX.McsLocalized(), intent?.Error ?? "null");
             }
             if (!string.IsNullOrEmpty(intent.CommandName))
             {
@@ -717,32 +717,32 @@ namespace MiyakoCarryService.Assistant.Mgrs
                         var optionName = string.IsNullOrEmpty(option.TargetName)
                             ? option.Name
                             : $"{option.Name}（{option.TargetName}）";
-                        return $"指令：{optionName}";
+                        return string.Format(Utils.Locales.COMMAND_PREFIX.McsLocalized(), optionName);
                     }
-                    return $"指令：{Utils.Tools.GetLocalizedNames(intent.CommandName)}（选项 {intent.OptionIndex}）";
+                    return string.Format(Utils.Locales.COMMAND_WITH_OPTION.McsLocalized(), Utils.Tools.GetLocalizedNames(intent.CommandName), intent.OptionIndex);
                 }
 
                 string detail = string.Empty;
                 if (intent.TargetIndices is { Count: > 0 })
                 {
-                    detail = $"（成员 {string.Join("、", intent.TargetIndices)}）";
+                    detail = string.Format(Utils.Locales.TARGET_INDICES.McsLocalized(), string.Join("、", intent.TargetIndices));
                 }
                 else if (intent.TargetCodeNames is { Count: > 0 })
                 {
-                    detail = $"（代号 {string.Join("、", intent.TargetCodeNames)}）";
+                    detail = string.Format(Utils.Locales.TARGET_CODENAMES.McsLocalized(), string.Join("、", intent.TargetCodeNames));
                 }
                 else
                 {
                     switch (intent.Selector)
                     {
                         case EIntentTargetSelector.All:
-                            detail = "（全员）";
+                            detail = Utils.Locales.ALL_MEMBERS.McsLocalized();
                             break;
                         case EIntentTargetSelector.ByIndex:
-                            detail = $"（成员 {intent.TargetIndex}）";
+                            detail = string.Format(Utils.Locales.TARGET_INDICES.McsLocalized(), intent.TargetIndex);
                             break;
                         case EIntentTargetSelector.ByName:
-                            detail = $"（代号 {intent.TargetCodeName}）";
+                            detail = string.Format(Utils.Locales.TARGET_CODENAMES.McsLocalized(), intent.TargetCodeName);
                             break;
                     }
                 }
@@ -751,9 +751,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     detail += $"（{intent.AimingBodyPart}）";
                 }
                 // 显示本地化权威指令名（TEAM* 系列），与提示词 glossary 同源
-                return $"指令：{Utils.Tools.GetLocalizedNames(intent.CommandName)}{detail}";
+                return string.Format(Utils.Locales.COMMAND_PREFIX.McsLocalized(), Utils.Tools.GetLocalizedNames(intent.CommandName) + detail);
             }
-            return "无响应";
+            return Utils.Locales.NO_RESPONSE.McsLocalized();
         }
 
         private void Notification(string message)

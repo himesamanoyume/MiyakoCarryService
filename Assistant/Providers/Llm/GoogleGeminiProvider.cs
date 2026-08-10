@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -15,6 +16,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     /// </summary>
     public sealed class GoogleGeminiProvider : BaseLlmProvider
     {
+        protected override string ProviderDisplayName => Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized();
+
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
         private const string DefaultModel = "gemini-2.0-flash";
 
@@ -22,11 +25,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = Locales.LLM_USER_TEXT_EMPTY.McsLocalized() };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（Gemini API Key）" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_APIKEY_MISSING.McsLocalized(), "Gemini API Key") };
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
@@ -51,7 +54,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var content = ExtractText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Gemini 返回内容为空" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_EMPTY_CONTENT.McsLocalized(), ProviderDisplayName) };
             }
             return ParseIntentJson(content);
         }

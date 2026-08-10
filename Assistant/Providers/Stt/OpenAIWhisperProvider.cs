@@ -4,6 +4,8 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -13,6 +15,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class OpenAIWhisperProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDEROPENAIWHISPER.McsLocalized();
+
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (!TryPrepareWav(audio, out var wavBytes, out var prepareError))
@@ -60,7 +64,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var json = ParseResponseJson(result);
                 if (json == null)
                 {
-                    return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                    return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
                 }
                 return new SttResult
                 {
@@ -70,11 +74,11 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             catch (OperationCanceledException)
             {
-                return new SttResult { Error = "Whisper 请求超时" };
+                return new SttResult { Error = string.Format(Locales.HTTP_REQUEST_TIMEOUT.McsLocalized(), ProviderDisplayName) };
             }
             catch (Exception ex)
             {
-                return new SttResult { Error = $"Whisper 异常：{ex.Message}" };
+                return new SttResult { Error = string.Format(Locales.HTTP_EXCEPTION.McsLocalized(), ProviderDisplayName, ex.Message) };
             }
             finally
             {

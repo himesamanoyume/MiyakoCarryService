@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
@@ -14,12 +16,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
     {
         public virtual Task<LlmIntent> InterpretAsync(string userText, ProviderSettings settings, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new LlmIntent { Error = "此接口未实现" });
+            return Task.FromResult(new LlmIntent { Error = Locales.ERROR_NOT_IMPLEMENTED.McsLocalized() });
         }
 
         public virtual Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
-            return Task.FromResult("该服务商不支持 Ping 测试");
+            return Task.FromResult(Locales.LLM_PING_NOT_SUPPORTED.McsLocalized());
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 var commandName = json.Value<string>("command");
                 if (string.IsNullOrWhiteSpace(commandName))
                 {
-                    return new LlmIntent { Error = "OpenAI-Compat 响应缺少 command 字段" };
+                    return new LlmIntent { Error = string.Format(Locales.LLM_MISSING_COMMAND.McsLocalized(), ProviderDisplayName) };
                 }
 
                 var intent = new LlmIntent { CommandName = commandName };
@@ -181,7 +183,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
             catch (Exception ex)
             {
-                return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
+                return new LlmIntent { Error = string.Format(Locales.LLM_PARSE_ERROR.McsLocalized(), ProviderDisplayName, ex.Message, SafeTrim(content, 240)) };
             }
         }
 

@@ -3,7 +3,7 @@ using MiyakoCarryService.Assistant.Enums;
 
 namespace MiyakoCarryService.Assistant.Models
 {
-    public sealed class LlmIntent
+    public class LlmIntent
     {
         public const string NotRecognized = "not_recognized";
         public string CommandName;

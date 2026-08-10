@@ -3,6 +3,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -14,13 +16,15 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class GoogleSpeechProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERGOOGLESPEECH.McsLocalized();
+
         private const string DefaultBaseUrl = "https://speech.googleapis.com";
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new SttResult { Error = "SttApiKey 未填写（Google API Key）" };
+                return new SttResult { Error = string.Format(Locales.STT_APIKEY_MISSING.McsLocalized(), "Google API Key") };
             }
             if (!TryPrepareWav(audio, out var wavBytes, out var prepareError))
             {
@@ -54,7 +58,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var json = ParseResponseJson(result);
             if (json == null)
             {
-                return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var sb = new StringBuilder();
             if (json["results"] is JArray results)

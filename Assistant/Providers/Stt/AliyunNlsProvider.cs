@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
+using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
@@ -16,6 +17,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     /// </summary>
     public sealed class AliyunNlsProvider : BaseSttProvider
     {
+        protected override string ProviderDisplayName => Locales.STTPROVIDERALIYUNNLS.McsLocalized();
+
         private const string DefaultGateway = "https://nls-gateway-cn-shanghai.aliyuncs.com";
         private const string DefaultTokenApi = "https://nls-meta.cn-shanghai.aliyuncs.com";
 
@@ -23,11 +26,11 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
         {
             if (string.IsNullOrEmpty(settings?.ApiKey) || string.IsNullOrEmpty(settings.ApiSecret))
             {
-                return new SttResult { Error = "阿里 NLS 需填写 SttApiKey（AccessKeyId）、SttApiSecret（AccessKeySecret）与 SttModelId（appkey）" };
+                return new SttResult { Error = Locales.STT_ALIYUN_REQUIRED.McsLocalized() };
             }
             if (string.IsNullOrEmpty(settings.ModelId))
             {
-                return new SttResult { Error = "阿里 NLS 需在 SttModelId 中填写 appkey" };
+                return new SttResult { Error = Locales.STT_ALIYUN_APPID.McsLocalized() };
             }
             if (!TryPrepare16kWav(audio, out var wavBytes, out var prepareError))
             {
@@ -43,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var token = await FetchTokenAsync(client, settings, tokenCts.Token).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(token))
                 {
-                    return new SttResult { Error = "阿里 NLS token 换取失败（请检查 AccessKeyId/AccessKeySecret）" };
+                    return new SttResult { Error = Locales.STT_ALIYUN_TOKEN.McsLocalized() };
                 }
 
                 var endpoint = $"{gateway}/stream/v1/asr?appkey={Uri.EscapeDataString(settings.ModelId)}" +
@@ -63,12 +66,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var json = ParseResponseJson(result);
                 if (json == null)
                 {
-                    return new SttResult { Error = $"{ProviderTag} 异常：响应解析失败" };
+                    return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
                 }
                 var status = json.Value<int>("status");
                 if (status != 20000000)
                 {
-                    return new SttResult { Error = $"阿里识别失败 {status}: {json.Value<string>("message") ?? "未知错误"}" };
+                    return new SttResult { Error = $"阿里识别失败 {status}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
                 }
                 return new SttResult { Text = json.Value<string>("result") ?? string.Empty, DetectedLanguage = settings.Language };
             }
