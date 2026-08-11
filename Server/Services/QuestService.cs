@@ -255,11 +255,11 @@ namespace MiyakoCarryService.Server.Services
 
             if (questDescription.Fines > 0)
             {
-                questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETDESCRIPTION), questDescription.Fines);
+                questData.Description = serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETDESCRIPTION, new { Percent = questDescription.Fines });
             }
             else
             {
-                questData.Description = string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION), questDescription.Players, serverLocalisationService.GetText(questDescription.SpawnType.DisplayName), questDescription.CarryServiceLevel, questDescription.Duration, Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2));
+                questData.Description = serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERDESCRIPTION, new { Players = questDescription.Players, SpawnType = serverLocalisationService.GetText(questDescription.SpawnType.DisplayName), Level = questDescription.CarryServiceLevel, Duration = questDescription.Duration, PunishmentPercent = Math.Round(traderService.GetGlobalPunishmentMulti() * 100d, 2) });
             }
 
             questData.SuccessMessageText = questData

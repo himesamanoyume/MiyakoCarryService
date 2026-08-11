@@ -307,7 +307,7 @@ namespace MiyakoCarryService.Server.Services.Llm
                 sessionId,
                 TraderService.MiyakoTraderId,
                 MessageType.NpcTraderMessage,
-                string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERLLMERRORDETAIL), reason),
+                serverLocalisationService.GetText(Locales.MIYAKOTRADERLLMERRORDETAIL, new { Reason = reason }),
                 null);
         }
 

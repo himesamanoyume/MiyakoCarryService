@@ -58,20 +58,15 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
                 carryServicePriceDict.TryGetValue(5, out var carryServiceLevel5Price);
 
                 return [
-                    string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP1), 
-                        Command, 
-                        Command, 
-                        Command
-                        ), 
-                    string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP2), 
-                        (int)(carryServiceLevel1Price.Max * (1 + punishmentMulti)), 
-                        (int)(carryServiceLevel2Price.Max * (1 + punishmentMulti)), 
-                        (int)(carryServiceLevel3Price.Max * (1 + punishmentMulti)), 
-                        (int)(carryServiceLevel4Price.Max * (1 + punishmentMulti)), 
-                        (int)(carryServiceLevel5Price.Max * (1 + punishmentMulti))
-                        ),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP1, new { Command = Command }),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP2, new
+                    {
+                        Level1Price = (int)(carryServiceLevel1Price.Max * (1 + punishmentMulti)),
+                        Level2Price = (int)(carryServiceLevel2Price.Max * (1 + punishmentMulti)),
+                        Level3Price = (int)(carryServiceLevel3Price.Max * (1 + punishmentMulti)),
+                        Level4Price = (int)(carryServiceLevel4Price.Max * (1 + punishmentMulti)),
+                        Level5Price = (int)(carryServiceLevel5Price.Max * (1 + punishmentMulti))
+                    }),
                     serverLocalisationService.GetText(Locales.MIYAKOTRADERORDERCOMMANDHELP3) + sb.ToString(),
                     ];
             }

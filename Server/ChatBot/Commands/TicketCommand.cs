@@ -41,16 +41,11 @@ namespace MiyakoCarryService.Server.ChatBot.Commands
             get
             {
                 return [
-                    string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP1), 
-                        Command, 
-                        Command, 
-                        Command
-                        ), 
-                    string.Format(
-                        serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP2), 
-                        configService.GetMcsPluginConfig().ServerConfig.TicketPricePerPercent
-                )];
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP1, new { Command = Command }),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERTICKETCOMMANDHELP2, new
+                    {
+                        PricePerPercent = configService.GetMcsPluginConfig().ServerConfig.TicketPricePerPercent
+                    })];
             }
         }
 

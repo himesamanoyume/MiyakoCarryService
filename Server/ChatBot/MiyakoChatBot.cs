@@ -125,7 +125,7 @@ namespace MiyakoCarryService.Server.ChatBot
                     sessionId,
                     TraderService.MiyakoTraderId,
                     MessageType.NpcTraderMessage,
-                    string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERAVAILABLECOMMANDSPREFIX), chatCommand.CommandPrefix),
+                    serverLocalisationService.GetText(Locales.MIYAKOTRADERAVAILABLECOMMANDSPREFIX, new { CommandPrefix = chatCommand.CommandPrefix }),
                     null
                 );
 
@@ -139,7 +139,7 @@ namespace MiyakoCarryService.Server.ChatBot
                             sessionId,
                             TraderService.MiyakoTraderId,
                             MessageType.NpcTraderMessage,
-                            string.Format(serverLocalisationService.GetText(Locales.MIYAKOTRADERSUBCOMMAND), subCommand, commandHelp),
+                            serverLocalisationService.GetText(Locales.MIYAKOTRADERSUBCOMMAND, new { SubCommand = subCommand, Help = commandHelp }),
                             null
                         );
 

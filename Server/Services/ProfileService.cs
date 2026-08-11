@@ -87,13 +87,13 @@ namespace MiyakoCarryService.Server.Services
         public bool RemoveMcsBotPlayerProfile(MongoId mcsLeadPlayerId, MongoId mcsBotPlayerId)
         {
             var file = System.IO.Path.Combine(_profileFolderDir, mcsLeadPlayerId, $"{mcsBotPlayerId}.json");
-            logger.Error(string.Format(serverLocalisationService.GetText(Locales.CLEANINGUPOUTDATEDMCSPLAYERPROFILE), mcsBotPlayerId));
+            logger.Error(serverLocalisationService.GetText(Locales.CLEANINGUPOUTDATEDMCSPLAYERPROFILE, new { BotPlayerId = mcsBotPlayerId }));
             if (_profiles[mcsLeadPlayerId].ContainsKey(mcsBotPlayerId))
             {
                 _profiles[mcsLeadPlayerId].TryRemove(mcsBotPlayerId, out _);
                 if (!fileUtil.DeleteFile(file))
                 {
-                    logger.Error(string.Format(serverLocalisationService.GetText(Locales.CANNOTDELETEFILENOTFOUND), file));
+                    logger.Error(serverLocalisationService.GetText(Locales.CANNOTDELETEFILENOTFOUND, new { File = file }));
                 }
             }
 
@@ -403,7 +403,7 @@ namespace MiyakoCarryService.Server.Services
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
-                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
+                logger.Error(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD, new { AccountId = mcsAid }));
             }
 
             return GetMcsBotPlayerProfileByAccountId(mcsLeadPlayerId, intMcsAid);
@@ -443,7 +443,7 @@ namespace MiyakoCarryService.Server.Services
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
-                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
+                logger.Error(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD, new { AccountId = mcsAid }));
                 return false;
             }
 
@@ -474,7 +474,7 @@ namespace MiyakoCarryService.Server.Services
             var isInt = int.TryParse(mcsAid, out var intMcsAid);
             if (!isInt)
             {
-                logger.Error(string.Format(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD), mcsAid));
+                logger.Error(serverLocalisationService.GetText(Locales.ACCOUNTIDISINVAILD, new { AccountId = mcsAid }));
                 return false;
             }
 
@@ -551,7 +551,7 @@ namespace MiyakoCarryService.Server.Services
             }
             catch (Exception e)
             {
-                var msg = string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), botGenerationDetails.Role);
+                var msg = serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR, new { Role = botGenerationDetails.Role });
                 logger.Error(msg, e);
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(
@@ -574,7 +574,7 @@ namespace MiyakoCarryService.Server.Services
             }
             catch (Exception e)
             {
-                var msg = string.Format(serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR), clonedBotGenerationDetails.Role);
+                var msg = serverLocalisationService.GetText(Locales.GENERATEPROFILEERROR, new { Role = clonedBotGenerationDetails.Role });
                 logger.Error(msg, e);
 
                 mailSendService.SendLocalisedNpcMessageToPlayer(

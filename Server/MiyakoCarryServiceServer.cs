@@ -147,7 +147,7 @@ namespace MiyakoCarryService.Server
                             if (latestVersion.CompareTo(currentVersion) > 0)
                             {
                                 configService.UpdateLatestVersion(latestVersion);
-                                logger.Success(string.Format(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY), currentVersion, latestVersion));
+                                logger.Success(serverLocalisationService.GetText(Locales.NEWVERSIONNOTIFY, new { CurrentVersion = currentVersion, LatestVersion = latestVersion }));
                             }
                             break;
                         }
