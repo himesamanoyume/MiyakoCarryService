@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
             var modelId = string.IsNullOrEmpty(settings.ModelId) ? "deepseek-v4-flash" : settings.ModelId;
-            var maxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000;
+            var maxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107;
 
             try
             {

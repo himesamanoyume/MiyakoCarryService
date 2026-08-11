@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     new { role = "user", content = userText },
                 }),
                 ["temperature"] = temperature,
-                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 3000,
+                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 10107,
             };
         }
 

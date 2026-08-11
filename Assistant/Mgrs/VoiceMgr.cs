@@ -8,7 +8,6 @@ using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Events;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Services;
-using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
@@ -574,7 +573,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 try
                 {
-                    dispatched = IntentBinder.BindAndDispatch(intent);
+                    dispatched = Utils.Tools.BindAndDispatch(intent);
                     var localizedCommand = Utils.Tools.GetLocalizedNames(intent.CommandName);
                     feedback = dispatched < 0
                         ? Utils.Locales.VOICEAIMATTARGET.McsLocalized()

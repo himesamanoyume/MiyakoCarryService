@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 ["model"] = model,
                 ["messages"] = messages,
                 ["temperature"] = temperature,
-                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 3000,
+                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 10107,
             };
         }
 

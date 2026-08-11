@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var body = new JObject
             {
                 ["model"] = model,
-                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
+                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 ["system"] = systemPrompt,
                 ["messages"] = JArray.FromObject(new[]
                 {

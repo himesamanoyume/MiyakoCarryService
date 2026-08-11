@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 ["generationConfig"] = new JObject
                 {
                     ["temperature"] = settings.Temperature,
-                    ["maxOutputTokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
+                    ["maxOutputTokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
 

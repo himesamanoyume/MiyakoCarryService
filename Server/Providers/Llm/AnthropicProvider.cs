@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var body = new JsonObject
             {
                 ["model"] = model,
-                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
+                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 ["system"] = settings.SystemPrompt ?? "",
                 ["messages"] = JsonSerializer.SerializeToNode(new[]
                 {

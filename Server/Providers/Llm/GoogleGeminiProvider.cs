@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 ["generationConfig"] = JsonSerializer.SerializeToNode(new
                 {
                     temperature = settings.Temperature,
-                    maxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
+                    maxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 }),
             };
 

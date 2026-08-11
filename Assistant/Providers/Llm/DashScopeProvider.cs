@@ -43,7 +43,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 ["parameters"] = new JObject
                 {
                     ["temperature"] = settings.Temperature,
-                    ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 3000,
+                    ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
 
