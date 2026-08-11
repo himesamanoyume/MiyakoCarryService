@@ -19,9 +19,6 @@ using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Services.Llm
 {
-    /// <summary>
-    /// 服务端 LLM 商人对话分发器。玩家在与宫子商人对话中输入任意自然语言文本时被调用
-    /// </summary>
     [Injectable(InjectionType.Singleton)]
     public class LlmDispatcherService(
         ConfigService configService,
@@ -33,6 +30,7 @@ namespace MiyakoCarryService.Server.Services.Llm
         DialogueHelper dialogueHelper,
         LocaleService localeService,
         TraderService traderService,
+        IEnumerable<BaseLlmProvider> llmProviders,
         ISptLogger<LlmDispatcherService> logger
     )
     {
@@ -43,9 +41,6 @@ namespace MiyakoCarryService.Server.Services.Llm
         private int _gateCapacity = DefaultMaxConcurrent;
         private readonly object _gateLock = new();
 
-        /// <summary>
-        /// 尝试用 LLM 解释并处理用户消息。返回是否被处理（true 时由调用方返回 <c>request.DialogId</c>）。
-        /// </summary>
         public async Task<LlmDispatchResult> TryDispatchAsync(MongoId sessionId, string text)
         {
             var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
@@ -55,7 +50,6 @@ namespace MiyakoCarryService.Server.Services.Llm
                 return LlmDispatchResult.NotHandled();
             }
 
-            // 限流：每分钟 LlmMaxMessagesPerMinute 条
             var maxPerMinute = serverConfig.TraderLlmMaxMessagesPerMinute > 0 ? serverConfig.TraderLlmMaxMessagesPerMinute : 10;
             var bucket = _bucketsPerSession.GetOrAdd(sessionId, _ => new RateBucket(maxPerMinute));
             if (!bucket.TryConsume())
@@ -69,7 +63,6 @@ namespace MiyakoCarryService.Server.Services.Llm
                 return LlmDispatchResult.Handled();
             }
 
-            // 发送 "interpreting" 提示
             mailSendService.SendLocalisedNpcMessageToPlayer(
                 sessionId,
                 TraderService.MiyakoTraderId,
@@ -102,12 +95,8 @@ namespace MiyakoCarryService.Server.Services.Llm
                 return LlmDispatchResult.Handled();
             }
 
-            // 按 HttpProxyHost/HttpProxyPort 应用代理（幂等，仅在配置变化时重建）
             provider.ApplyProxy(serverConfig.HttpProxyHost, serverConfig.HttpProxyPort);
 
-            // 全局并发闸门：限制同时最多 TraderLlmMaxConcurrent 个 LLM 请求在途（保护上游 API/代理）。
-            // 到达上限的请求在 SemaphoreSlim 内部排队，任一在途请求完成（Release）即自动放行队首；
-            // 排队超过 GateWaitTimeout 仍未轮到时，给玩家"繁忙"提示并放弃本次请求（Handled 兜底）。
             var gate = EnsureGate(serverConfig.TraderLlmMaxConcurrent);
             var entered = await gate.WaitAsync(GateWaitTimeout, CancellationToken.None).ConfigureAwait(false);
             if (!entered)
@@ -306,9 +295,6 @@ namespace MiyakoCarryService.Server.Services.Llm
                 && ticket.Percent <= Tools.MaxTicketPercent;
         }
 
-        /// <summary>
-        /// 向玩家发送 AI 错误通知并附带具体错误原因，避免只回复笼统的"AI 不可用"。
-        /// </summary>
         private void SendLlmErrorDetail(MongoId sessionId, string reason)
         {
             const int maxReasonLength = 300;
@@ -325,11 +311,6 @@ namespace MiyakoCarryService.Server.Services.Llm
                 null);
         }
 
-        /// <summary>
-        /// 从玩家与宫子商人的聊天记录中构建 LLM 上下文。
-        /// 包含玩家消息（老板）、店长回复以及 <c>Mcs/*</c> 事件通知（订单/罚单创建等，以英文解析），
-        /// 并附加"仅回应当前消息"的指令，保证对话连贯。条数由 <c>LlmMaxHistoryMessages</c> 控制，0 表示关闭。
-        /// </summary>
         private string BuildHistoryContext(MongoId sessionId, string currentText)
         {
             const int maxMessageLength = 300;
@@ -445,9 +426,6 @@ namespace MiyakoCarryService.Server.Services.Llm
             return sb.ToString();
         }
 
-        /// <summary>
-        /// 构建当前护航列表（昵称 + Aid + 订单状态/级别/时长），供 LLM 识别"续订/结算哪个护航"。
-        /// </summary>
         private string BuildSquadsHelp(MongoId sessionId)
         {
             try
@@ -473,10 +451,10 @@ namespace MiyakoCarryService.Server.Services.Llm
                             continue;
                         }
                         sb.Append("- ").Append(profile.ProfileInfo.Username)
-                          .Append(" | aid: ").Append(profile.ProfileInfo.Aid)
-                          .Append(" | status: ").Append(order.Status)
-                          .Append(" | level: ").Append(order.CarryServiceLevel)
-                          .Append(" | duration: ").Append(order.Duration).AppendLine("h");
+                            .Append(" | aid: ").Append(profile.ProfileInfo.Aid)
+                            .Append(" | status: ").Append(order.Status)
+                            .Append(" | level: ").Append(order.CarryServiceLevel)
+                            .Append(" | duration: ").Append(order.Duration).AppendLine("h");
                     }
                 }
                 return sb.Length > 0 ? sb.ToString() : null;
@@ -532,23 +510,17 @@ namespace MiyakoCarryService.Server.Services.Llm
             return null;
         }
 
-        /// <summary>
-        /// 服务端启动时的 LLM 连通性测试：当 <c>TraderLlmEnabled</c> 与 <c>TraderLlmStartupTest</c> 均开启时自动执行一次，
-        /// 成功/失败均输出日志（失败附带原因）。使用最小化 system prompt，token 成本极低。
-        /// </summary>
         public async Task TestConnectionAsync()
         {
             var serverConfig = configService.GetMcsPluginConfig().ServerConfig;
 
             if (!serverConfig.TraderLlmStartupTest)
             {
-                logger.Info("LLM 启动测试跳过：TraderLlmStartupTest 未开启");
                 return;
             }
 
             if (!serverConfig.TraderLlmEnabled)
             {
-                logger.Info("LLM 启动测试跳过：TraderLlmEnabled 未开启");
                 return;
             }
 
@@ -593,23 +565,18 @@ namespace MiyakoCarryService.Server.Services.Llm
         {
             return providerName switch
             {
-                "OpenAICompatible" => new OpenAICompatibleProvider(),
-                "Anthropic" => new AnthropicProvider(),
-                "GoogleGemini" => new GoogleGeminiProvider(),
-                "DashScope" => new DashScopeProvider(),
-                "Zhipu" => new ZhipuProvider(),
-                "Qianfan" => new QianfanProvider(),
-                "Spark" => new SparkProvider(),
-                "MiniMax" => new MiniMaxProvider(),
+                "OpenAICompatible" => llmProviders.FirstOrDefault(p => p is OpenAICompatibleProvider),
+                "Anthropic" => llmProviders.FirstOrDefault(p => p is AnthropicProvider),
+                "GoogleGemini" => llmProviders.FirstOrDefault(p => p is GoogleGeminiProvider),
+                "DashScope" => llmProviders.FirstOrDefault(p => p is DashScopeProvider),
+                "Zhipu" => llmProviders.FirstOrDefault(p => p is ZhipuProvider),
+                "Qianfan" => llmProviders.FirstOrDefault(p => p is QianfanProvider),
+                "Spark" => llmProviders.FirstOrDefault(p => p is SparkProvider),
+                "MiniMax" => llmProviders.FirstOrDefault(p => p is MiniMaxProvider),
                 _ => null,
             };
         }
 
-        /// <summary>
-        /// 确保并发闸门容量与配置 TraderLlmMaxConcurrent 一致；配置变化时（lock 内）重建闸门。
-        /// 非法值（&lt;=0）回退默认 <see cref="DefaultMaxConcurrent"/>。
-        /// 注意：重建瞬间挂在旧闸门上的等待者不再获得许可，会等到排队超时被兜底（可接受）。
-        /// </summary>
         private SemaphoreSlim EnsureGate(int maxConcurrent)
         {
             if (maxConcurrent <= 0)

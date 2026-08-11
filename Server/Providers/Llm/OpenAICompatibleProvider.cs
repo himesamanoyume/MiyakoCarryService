@@ -5,20 +5,26 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// 服务端 OpenAI 兼容 Chat Completions 客户端，覆盖 OpenAI / DeepSeek / Moonshot / Together /
-    /// vLLM / Ollama / LM Studio / LocalAI 等。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class OpenAICompatibleProvider : BaseLlmProvider
     {
+        public OpenAICompatibleProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDEROPENAICOMPATIBLE);
+
         public override async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.deepseek.com" : settings.BaseUrl.TrimEnd('/');
@@ -27,10 +33,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
             try
             {
-                // 优先携带 response_format=json_object 以稳定 JSON 输出；
-                // 部分 OpenAI 兼容端点（如 OpenCode Zen 的 DeepSeek V4）不支持该参数，会返回 4xx 且错误含
-                // "not supported" / "json_object" / "response_format" 等字样，此时去掉该参数回退重试一次。
-                // 思考强度 reasoning_effort 同理：default/空不传，不支持的端点去掉后重试。
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var useJsonObject = attempt == 0;
@@ -60,7 +62,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     var result = await PostJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,
                         request =>
                         {
-                            // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
                             if (!string.IsNullOrEmpty(settings.ApiKey))
                             {
                                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
@@ -69,7 +70,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
                     if (!result.IsSuccess)
                     {
-                        // 不支持的端点（错误含 not supported/json_object/response_format/reasoning）去掉可选参数重试一次
                         var unsupported = result.HttpStatus is 400 or 401 or 403 or 422
                             && (result.ErrorBody?.Contains("not supported", StringComparison.OrdinalIgnoreCase) == true
                                 || result.ErrorBody?.Contains("json_object", StringComparison.OrdinalIgnoreCase) == true
@@ -87,21 +87,21 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     var content = json?["choices"]?[0]?["message"]?["content"]?.ToString();
                     if (string.IsNullOrWhiteSpace(content))
                     {
-                        return new LlmIntent { Error = "OpenAI-Compat 返回内容为空" };
+                        return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
                     }
 
                     return ParseIntentJson(content);
                 }
 
-                return new LlmIntent { Error = "OpenAI-Compat 请求失败（重试后仍被拒绝）" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_RETRY_FAILED, new { ProviderName = ProviderDisplayName }) };
             }
             catch (OperationCanceledException)
             {
-                return new LlmIntent { Error = "OpenAI-Compat 请求超时" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.HTTP_REQUEST_TIMEOUT, new { ProviderName = ProviderDisplayName }) };
             }
             catch (Exception ex)
             {
-                return new LlmIntent { Error = $"OpenAI-Compat 异常：{ex.Message}" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.HTTP_EXCEPTION, new { ProviderName = ProviderDisplayName, Detail = ex.Message }) };
             }
         }
     }

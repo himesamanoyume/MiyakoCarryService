@@ -1,21 +1,25 @@
 using System;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// Google Gemini <c>generateContent</c> REST：
-    /// <c>POST /v1beta/models/{model}:generateContent?key={ApiKey}</c>。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class GoogleGeminiProvider : BaseLlmProvider
     {
+        public GoogleGeminiProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDERGOOGLEGEMINI);
+
         private const string DefaultBaseUrl = "https://generativelanguage.googleapis.com";
         private const string DefaultModel = "gemini-2.0-flash";
 
@@ -23,11 +27,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（Gemini API Key）" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_APIKEY_MISSING, new { ProviderKey = "Gemini API Key" }) };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -54,7 +58,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var content = ExtractText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Gemini 返回内容为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
         }

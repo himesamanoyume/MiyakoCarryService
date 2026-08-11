@@ -4,16 +4,21 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// 阿里云 DashScope 通义千问 Chat Completions：
-    /// <c>POST /api/v1/services/aigc/text-generation/generation</c>，<c>Authorization: Bearer</c> 鉴权。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class DashScopeProvider : BaseLlmProvider
     {
+        public DashScopeProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDERDASHSCOPE);
+
         private const string DefaultBaseUrl = "https://dashscope.aliyuncs.com";
         private const string DefaultModel = "qwen-plus";
 
@@ -21,11 +26,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（DashScope API Key）" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_APIKEY_MISSING, new { ProviderKey = "DashScope API Key" }) };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -59,7 +64,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var content = ExtractText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "DashScope 返回内容为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
         }

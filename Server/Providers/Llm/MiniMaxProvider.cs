@@ -3,16 +3,21 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// MiniMax v2 Chat Completions：<c>POST /v2/text/chat_completions</c>，Bearer ApiKey 鉴权。
-    /// 输出 token 上限用 <c>tokens_to_generate</c>；错误信息在 <c>base_resp</c>。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class MiniMaxProvider : BaseLlmProvider
     {
+        public MiniMaxProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDERMINIMAX);
+
         private const string DefaultBaseUrl = "https://api.minimax.chat";
         private const string DefaultModel = "MiniMax-Text-01";
 
@@ -20,11 +25,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（MiniMax API Key）" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_APIKEY_MISSING, new { ProviderKey = "MiniMax API Key" }) };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -48,7 +53,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var content = ExtractChatContentText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "MiniMax 返回内容为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
         }

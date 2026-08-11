@@ -7,16 +7,21 @@ using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// 智谱 GLM Chat Completions：<c>POST /api/paas/v4/chat/completions</c>。
-    /// 鉴权为 JWT(HS256)：ApiKey 可填完整 "{id}.{secret}"，或 ApiKey=id + ApiSecret=secret。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class ZhipuProvider : BaseLlmProvider
     {
+        public ZhipuProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDERZHIPU);
+
         private const string DefaultBaseUrl = "https://open.bigmodel.cn";
         private const string DefaultModel = "glm-4-flash";
 
@@ -24,7 +29,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
 
             var body = BuildChatCompletionsBody(DefaultModel, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens);
@@ -38,7 +43,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var content = ExtractChatContentText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Zhipu 返回内容为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
         }

@@ -1,20 +1,22 @@
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// 讯飞星火 OpenAI 兼容 HTTP 端点：<c>POST /v1/chat/completions</c>。
-    /// 鉴权：Bearer 为星火 APIKey（新版形如 "{apikey}:{apisecret}"）；若 ApiSecret 已单独填写则拼接 "{ApiKey}:{ApiSecret}"。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
+    [Injectable(InjectionType.Singleton)]
     public sealed class SparkProvider : BaseLlmProvider
     {
+        public SparkProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
+        protected override string ProviderDisplayName => _serverLocalisationService.GetText(Locales.LLMPROVIDERSPARK);
+
         private const string DefaultBaseUrl = "https://spark-api-open.xf-yun.com";
         private const string DefaultModel = "generalv3.5";
 
@@ -22,11 +24,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             if (string.IsNullOrWhiteSpace(userText))
             {
-                return new LlmIntent { Error = "用户文本为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
             if (string.IsNullOrEmpty(settings?.ApiKey))
             {
-                return new LlmIntent { Error = "LlmApiKey 未填写（星火 APIKey）" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_APIKEY_MISSING, new { ProviderKey = "Spark APIKey" }) };
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -44,7 +46,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var content = ExtractChatContentText(result.ResponseText);
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new LlmIntent { Error = "Spark 返回内容为空" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
         }

@@ -5,25 +5,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
-using MiyakoCarryService.Server.Providers;
+using MiyakoCarryService.Server.Utils;
+using SPTarkov.Server.Core.Services.Locales;
 
 namespace MiyakoCarryService.Server.Providers.Llm
 {
-    /// <summary>
-    /// 服务端 LLM 服务商适配器基类。所有厂商共享同一份 <see cref="LlmProviderSettings"/> 配置项。
-    /// </summary>
     public abstract class BaseLlmProvider : BaseProvider, ILlmProvider
     {
+        protected BaseLlmProvider(ServerLocalisationService serverLocalisation) : base(serverLocalisation)
+        {
+        }
+
         public virtual async Task<LlmIntent> InterpretAsync(string userText, LlmProviderSettings settings, CancellationToken cancellationToken)
         {
             await Task.Yield();
-            return new LlmIntent { Error = "此接口未实现" };
+            return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.ERROR_NOT_IMPLEMENTED) };
         }
 
-        /// <summary>
-        /// 提取 OpenAI 兼容响应中 <c>choices[0].message.content</c> 的文本；
-        /// 解析失败或内容为空时返回 null。
-        /// </summary>
         protected string ExtractChatContentText(string responseString)
         {
             try
@@ -37,10 +35,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
         }
 
-        /// <summary>
-        /// 构造 OpenAI 兼容 Chat Completions 请求体（model/messages/temperature/max_tokens）。
-        /// <paramref name="maxTokensFieldName"/> 可定制输出 token 上限字段名（如 MiniMax 的 tokens_to_generate）。
-        /// </summary>
         protected JsonObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
         {
             return new JsonObject
@@ -56,10 +50,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
             };
         }
 
-        /// <summary>
-        /// 提取厂商响应中的模型文本（各厂商响应结构不同，由子类 override）。
-        /// 解析失败或内容为空时返回 null。
-        /// </summary>
         public virtual string ExtractText(string responseString)
         {
             throw new NotImplementedException();
@@ -123,11 +113,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     };
                 }
 
-                return new LlmIntent { Error = "OpenAI-Compat 响应缺少 order/ticket/renew/settle/replyText 字段" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_MISSING_FIELD, new { ProviderName = ProviderDisplayName }) };
             }
             catch (Exception ex)
             {
-                return new LlmIntent { Error = $"OpenAI-Compat 解析失败：{ex.Message}；原文：{SafeTrim(content, 240)}" };
+                return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_PARSE_ERROR, new { ProviderName = ProviderDisplayName, Detail = ex.Message, Raw = SafeTrim(content, 240) }) };
             }
         }
     }
