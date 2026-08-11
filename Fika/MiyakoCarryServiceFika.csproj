@@ -13,7 +13,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>1.1.0.5</Version>
+    <Version>1.1.0.6</Version>
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
@@ -47,7 +47,7 @@
     <Reference Include="UnityEngine.InputLegacyModule" HintPath="..\Ref\UnityEngine.InputLegacyModule.dll" Private="false" />
     <Reference Include="UnityEngine.TextRenderingModule" HintPath="..\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="..\Ref\UnityEngine.UI.dll" Private="false" />
-    <Reference Include="Fika.Core" HintPath="..\Ref\Fika.Core-2.4.0.dll" Private="false" />
+    <Reference Include="Fika.Core" HintPath="..\Ref\Fika.Core-2.4.1.dll" Private="false" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Himesamanoyume.MiyakoCarryServiceClient">
