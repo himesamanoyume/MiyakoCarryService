@@ -240,9 +240,29 @@ Maximum replies per minute from the Miyako trader's AI (rate limit). Defaults to
 
 Number of recent chat messages carried as context for the Miyako trader's AI, keeping the conversation coherent; set to 0 to disable. Defaults to 20.
 
+- **TraderLlmApiSecret**
+
+Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. Defaults to empty.
+
+- **TraderLlmReasoningEffort**
+
+Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. Defaults to low.
+
+- **TraderLlmMaxConcurrent**
+
+Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. Defaults to 16.
+
+- **HttpProxyHost**
+
+HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. Defaults to empty.
+
+- **HttpProxyPort**
+
+HTTP proxy port (paired with HttpProxyHost). Defaults to empty.
+
 ## Features
 
-### Basic
+### A. Basic
 
 - **Enable Looting**
 
@@ -282,7 +302,7 @@ When enabled, if a `McsBotPlayer` dies in formation, the empty position is fille
 
 *When Fika is installed, adjusting settings in raid will automatically sync to the host, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
-### Command
+### B. Command
 
 #### MemberCommand
 
@@ -420,7 +440,7 @@ Apply saved formation preset immediately.
 
 *The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
 
-### Player
+### C. Player
 
 - **Teammate Highlight**
 

@@ -97,7 +97,7 @@ try {
         }
     }
     Write-Host "Draft Page   : $($releaseRes.html_url)"
-    Write-Host "Forge Page   : https://forge.sp-tarkov.com/mod/2709/miyako-carry-service"
+    Write-Host "Forge Page   : https://sp-mod.com/mod/2709/miyako-carry-service"
     Write-Host "`========================================" -ForegroundColor Cyan
 
 } catch {

@@ -942,7 +942,7 @@
                     <div class="right">
                         <div class="jinsom-bbs-single-content">
 <div>
-    <p><span style="font-size: 30px;"><b>宫子护航店</b></span><br><span style="font-size: 20px;">宫子护航店 (MiyakoCarryService) 是一个生成AI队友的模组。</span><br><br><img src="https://img.shields.io/github/v/release/himesamanoyume/MiyakoCarryService?style=flat-square&logo=github&labelColor=40405f&color=66ccff" />&nbsp;<img src="https://img.shields.io/github/downloads/himesamanoyume/MiyakoCarryService/total?style=flat-square&logo=github&labelColor=40405f&color=66ccff"/><br><a href="https://forge-alt.katrinfoxvr.com/mods/miyako-carry-service" target="_blank">Forge Alt</a>  | <a href="https://github.com/himesamanoyume/MiyakoCarryService" target="_blank">Github</a> | <a href="https://forge.sp-tarkov.com/mod/2709/miyako-carry-service" target="_blank"><ruby>SPT Forge<rt class="katakana-terminator-rt" data-rt="See you next time" style="font-size: 75%;text-align: start;text-indent: 0;line-height: normal;"></ruby></ruby></a></p>
+    <p><span style="font-size: 30px;"><b>宫子护航店</b></span><br><span style="font-size: 20px;">宫子护航店 (MiyakoCarryService) 是一个生成AI队友的模组。</span><br><br><img src="https://img.shields.io/github/v/release/himesamanoyume/MiyakoCarryService?style=flat-square&logo=github&labelColor=40405f&color=66ccff" />&nbsp;<img src="https://img.shields.io/github/downloads/himesamanoyume/MiyakoCarryService/total?style=flat-square&logo=github&labelColor=40405f&color=66ccff"/><br><a href="https://sp-mod.com/mod/2709/miyako-carry-service" target="_blank">SPT Forge</a> | <a href="https://github.com/himesamanoyume/MiyakoCarryService" target="_blank">Github</a></p>
     <hr/>
     <p><span style="font-size: 25px;"><strong>食用方式</strong></span></p>
     <img src="https://ods5.oddba.cn/user_files/23687/bbs/35529095_1776484381.png"/>
@@ -1003,8 +1003,11 @@
             <p>官方提供中/英/俄三种本地化语言，其他语言皆显示英文。 <span style="color: rgb(192, 0, 0);">但需要确保您已正确安装MiyakoCarryServiceServer，否则无法加载本地化。</span></p>
         </li>
         <li>
-            <p>服务端配置项（需要先安装Mcs后启动一次服务端生成配置文件）</p>
+            <p>本体 服务端（需要先安装Mcs后启动一次服务端生成配置文件）</p>
         </li>
+    </ol>
+    <details>
+        <summary id="summary"><span><strong>服务端配置项</strong></span></summary>
         <table style="margin: 15px; width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
@@ -1054,7 +1057,7 @@
                 </tr>
                 <tr>
                     <td>TraderLlmEnabled</td>
-                    <td>是否启用宫子商人的AI对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言进行下单、下发罚单。</td>
+                    <td>是否启用宫子商人的AI对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言进行下单、下发罚单、结算和续订。</td>
                     <td>false</td>
                 </tr>
                 <tr>
@@ -1112,20 +1115,45 @@
                     <td>宫子商人AI对话中携带的最近聊天记录条数，用于保持对话连贯；设为0关闭。</td>
                     <td>20 条</td>
                 </tr>
+                <tr>
+                    <td>TraderLlmApiSecret</td>
+                    <td>商人 AI 服务商的第二密钥（Secret/Token），双密钥服务商需要时填写</td>
+                    <td>空</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmReasoningEffort</td>
+                    <td>商人 AI 的思考强度：default / low / medium / high / max；default 或空表示不传参，模型不支持时自动降级。</td>
+                    <td>low</td>
+                </tr>
+                <tr>
+                    <td>TraderLlmMaxConcurrent</td>
+                    <td>商人 LLM 全局并发请求上限。达到上限后请求排队，任一完成自动放行队首，保护上游 API 与代理。</td>
+                    <td>16</td>
+                </tr>
+                <tr>
+                    <td>HTTP 代理地址</td>
+                    <td>HTTP 代理主机（LLM/STT 等云端请求经代理转发时填写）。</td>
+                    <td>空</td>
+                </tr>
+                <tr>
+                    <td>HTTP 代理端口</td>
+                    <td>HTTP 代理端口（与 HttpProxyHost 配合使用）。</td>
+                    <td>空</td>
+                </tr>
             </tbody>
         </table>
-    </ol>
+    </details>
     <p>
         <br />
     </p>
     <p>
-        <span style="font-size: 25px;"><strong>客户端</strong></span>
+        <span style="font-size: 25px;"><strong>本体</strong></span>
     </p>
     <p>
         <br />
     </p>
     <details>
-        <summary id="summary"><span style="font-size: 18px;"><strong>基础功能</strong></span></summary>
+        <summary id="summary"><span style="font-size: 18px;"><strong>A. 基础</strong></span></summary>
         <table style="margin: 15px;
             width: auto !important;">
             <tbody>
@@ -1174,7 +1202,7 @@
     </details>
     &nbsp;&nbsp;
     <details>
-        <summary id="summary"><span style="font-size: 18px;"><strong>指令功能</strong></span></summary>
+        <summary id="summary"><span style="font-size: 18px;"><strong>B. 指令</strong></span></summary>
         <table style="margin: 15px;
             width: auto !important;">
             <tbody>
@@ -1309,7 +1337,7 @@
     </details>
     &nbsp;&nbsp;
     <details>
-        <summary id="summary"><span style="font-size: 18px;"><strong>玩家功能</strong></span></summary>
+        <summary id="summary"><span style="font-size: 18px;"><strong>C. 玩家</strong></span></summary>
         <table style="margin: 15px; width: auto !important;">
             <tbody>
                 <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
@@ -1336,6 +1364,142 @@
         </table>
     </details>
     &nbsp;&nbsp;
+    <p>
+        <span style="font-size: 25px;"><strong>助手插件 (Assistant Addon)</strong></span>
+    </p>
+    <p>
+        <br />
+    </p>
+    <details>
+        <summary id="summary"><span style="font-size: 18px;"><strong>D. 助手</strong></span></summary>
+        <table style="margin: 15px; width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>启用语音</td>
+                    <td>启用助手语音指令识别（STT + LLM）。开启后可通过语音指挥护航。</td>
+                </tr>
+                    <td>语音触发模式</td>
+                    <td>触发方式：按键说话；自由发言 通过 VAD 自动录音无需按键。</td>
+                </tr>
+                    <td>语音按键</td>
+                    <td>触发 按键说话 模式的按键。自由发言 模式下忽略此项。</td>
+                </tr>
+                    <td>最长录音秒数</td>
+                    <td>单次录音最长秒数，超过此长度将被截断。</td>
+                </tr>
+                    <td>自由发言音量阈值</td>
+                    <td>自由发言 模式下触发语音开始的 RMS 能量阈值。若轻声被忽略请调低。</td>
+                </tr>
+                    <td>自由发言静音秒数</td>
+                    <td>自由发言 模式下结束录音所需的静音时长。</td>
+                </tr>
+                    <td>语音反馈字幕</td>
+                    <td>每次语音指令下发后是否在游戏内显示通知。</td>
+                </tr>
+                    <td>录音设备</td>
+                    <td>选择用于语音识别的录音设备；Default 表示系统默认设备。若列表为空请在系统设置中检查麦克风设备。</td>
+                </tr>
+                    <td>语音转文字(STT) 服务商</td>
+                    <td>云端语音转文字(STT)服务商</td>
+                </tr>
+                    <td>语音转文字(STT) API Key</td>
+                    <td>所选语音转文字(STT)服务商的 API Key。</td>
+                </tr>
+                    <td>语音转文字(STT) Secret</td>
+                    <td>双密钥服务商（讯飞/腾讯/百度/火山/阿里）的第二个密钥（Secret/Token），单密钥服务商留空。</td>
+                </tr>
+                    <td>语音转文字(STT) Base URL</td>
+                    <td>可选自定义语音转文字(STT) Base URL（覆盖服务商默认值）。</td>
+                </tr>
+                    <td>语音转文字(STT) 模型</td>
+                    <td>可选自定义语音转文字(STT) 模型名（服务商相关），留空使用默认。</td>
+                </tr>
+                    <td>语音转文字(STT) 语种</td>
+                    <td>语音转文字的语种提示（BCP-47，如 zh-CN、en-US、ja-JP）。</td>
+                </tr>
+                    <td>语音转文字(STT) 超时秒数</td>
+                    <td>每次语音转文字请求的超时秒数。</td>
+                </tr>
+                    <td>大语言模型(LLM) 服务商</td>
+                    <td>云端大语言模型(LLM)服务商。OpenAI兼容 覆盖 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等</td>
+                </tr>
+                    <td>大语言模型(LLM) API Key</td>
+                    <td>所选大语言模型(LLM)服务商的 API Key。</td>
+                </tr>
+                    <td>大语言模型(LLM) Secret</td>
+                    <td>双密钥服务商的第二密钥（Secret/Token）；单密钥服务商可留空。</td>
+                </tr>
+                    <td>大语言模型(LLM) Base URL</td>
+                    <td>可选自定义大语言模型(LLM) Base URL（仅对 OpenAI兼容 服务商生效，覆盖服务商默认值）。</td>
+                </tr>
+                    <td>大语言模型(LLM) 模型</td>
+                    <td>大语言模型(LLM) 模型名。服务商相关；OpenAI兼容 默认 deepseek-v4-flash。</td>
+                </tr>
+                    <td>大语言模型(LLM) 系统提示词</td>
+                    <td>可选自定义系统提示词，将拼接在语音指令模板前。</td>
+                </tr>
+                    <td>大语言模型(LLM) 采样温度</td>
+                    <td>大语言模型(LLM) 采样温度，范围 0到2。值越低结果越确定。</td>
+                </tr>
+                    <td>大语言模型(LLM) 最大 Tokens</td>
+                    <td>大语言模型(LLM) 单次最大 Tokens 输出，影响成本与延迟。</td>
+                </tr>
+                    <td>大语言模型(LLM) 超时秒数</td>
+                    <td>每次大语言模型(LLM)请求的超时秒数。</td>
+                </tr>
+                    <td>大语言模型(LLM) 思考强度</td>
+                    <td>LLM 思考强度（reasoning effort）。仅提供选项，此模型是否支持需根据实际情况而定；default 表示不传该参数，不支持的模型通常忽略该参数。</td>
+                </tr>
+                    <td>HTTP 代理地址</td>
+                    <td>LLM/STT 请求使用的 HTTP 代理主机名或 IP（如 127.0.0.1）；留空表示直连。配置后所有请求（含本地地址）均经代理转发。</td>
+                </tr>
+                    <td>HTTP 代理端口</td>
+                    <td>HTTP 代理端口（如 7890）；需与代理地址同时配置，留空表示直连。</td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+    &nbsp;&nbsp;
+    <details>
+        <summary id="summary"><span style="font-size: 18px;"><strong>Z. 调试</strong></span></summary>
+        <table style="margin: 15px; width: auto !important;">
+            <tbody>
+                <tr class="firstRow" style="box-shadow: 0 5px 0 0 #ddd inset;">
+                    <td>语音转文字(STT) 调试开关</td>
+                    <td>开启后使用当前配置进行录音并转写，转写文本会覆盖显示在 语音转文字(STT) 调试文本中。</td>
+                </tr>
+                <tr>
+                    <td>语音转文字(STT) 调试文本</td>
+                    <td>最近一次录音的转写结果。</td>
+                </tr>
+                <tr>
+                    <td>自由发言监听状态</td>
+                    <td>实时显示自由发言的语音检测状态（rms 能量 / 是否在说话 / 静音累计时长）</td>
+                </tr>
+                <tr>
+                    <td>大语言模型(LLM) 发送测试</td>
+                    <td>发送 STT 调试文本到 大语言模型(LLM) 进行测试，回复或报错信息会覆盖显示在 大语言模型(LLM) 返回结果中。</td>
+                </tr>
+                <tr>
+                    <td>大语言模型(LLM) 返回结果</td>
+                    <td>最近一次 大语言模型(LLM) 测试的回复或错误信息。</td>
+                </tr>
+                <tr>
+                    <td>调试识别指令</td>
+                    <td>开启后，在 STT 调试模式下转写完成后自动调用 大语言模型(LLM) 进行指令识别测试，识别结果显示在『识别指令结果』中。</td>
+                </tr>
+                <tr>
+                    <td>识别指令结果</td>
+                    <td>最近一次自动指令识别的结果，显示 大语言模型(LLM) 实际将会调用的指令情况。</td>
+                </tr>
+                <tr>
+                    <td>播放录音</td>
+                    <td>播放最近一次语音录制的内容（DEBUG 回放，需先有一次成功的录音）</td>
+                </tr>
+            </tbody>
+        </table>
+    </details>
+    <hr style="background-color: var(--font-color); margin: 40px auto; max-width: 150px; width: 30%; height: 2px; opacity: .55; border: 0; box-sizing: content-box; overflow: visible;" />
     <details>
         <summary id="summary"><span style="font-size: 18px;"><strong>具体功能说明</strong></span></summary>
         &nbsp;&nbsp;
@@ -1522,21 +1686,10 @@
     &nbsp;&nbsp;
     <p>也可以来Discord，通常最新抢先测试版都会先发布至Discord进行测试，也方便反馈交流，Discord链接：<a href="https://discord.gg/UJy8pYbZHs" target="_blank">https://discord.gg/UJy8pYbZHs</a></p>
     &nbsp;&nbsp;
-    <p>当前不再提供附件下载，只推荐去<a href="https://forge.sp-tarkov.com/mod/2709/miyako-carry-service" target="_blank">SPT Forge</a>上下载，每次更新都要两头跑太累了，去Forge上下载还能给我涨涨下载量</p>
+    <p>当前不再提供附件下载，只推荐去<a href="https://sp-mod.com/mod/2709/miyako-carry-service" target="_blank">SPT Forge</a>上下载，每次更新都要两头跑太累了，去Forge上下载还能给我涨涨下载量</p>
     &nbsp;&nbsp;
     <p>对于无外网环境的用户，你可以通过复制点击Forge下载时获得到的附件链接，然后到<a href="https://ghproxy.link/" target="_blank">镜像下载地址发布站</a>里找一个可用的域名，点进去以后把下载链接输入进去，就可以下载了</p>
     &nbsp;&nbsp;
-    <p><span style="font-size: 20px; color: rgb(192, 0, 0);">考虑到Forge即将停运，目前建议是直接到Github此项目的仓库中下载，上述的无外网下载方式依然有效（因为你从Forge得到的链接本身其实就是Github下载链接），如果你连Github都打开不开的话，那就把Mod本体链接，Fika插件链接中的版本号改成对应的版本号即可</span></p>
-    <ul style="list-style-type: disc;">
-        <li>
-            <p>https://github.com/himesamanoyume/MiyakoCarryService/releases/download/v{版本号}/MiyakoCarryService-{版本号}.zip</p>
-        </li>
-        <li>
-            <p>https://github.com/himesamanoyume/MiyakoCarryService/releases/download/v{版本号}/MiyakoCarryServiceFika-{版本号}.zip</p>
-        </li>
-    </ul>
-    <p>示例: https://github.com/himesamanoyume/MiyakoCarryService/releases/download/v1.14.51.4/MiyakoCarryService-1.14.51.4.zip</p>
-    <p>为了应对Forge的停运，有人做了Forge的归档网站，<a href="https://forge-alt.katrinfoxvr.com/" target="_blank">Forge Alt</a>，所以之后你仍然可以从这个地方找到Forge关停前已发布在上面的所有Mod，但大概率这个网站无法在Forge停运后允许发布新的Mod、以及Mod发布新的版本，这个网站最大的作用是让你能够方便地找到每一个Mod的开源仓库，你只能在那里更新Mod了</p>
 </div>
 <style>
     .jinsom-bbs-single-box .right {

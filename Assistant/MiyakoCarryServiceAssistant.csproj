@@ -17,7 +17,7 @@
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright>
     <Version>1.1.0.6</Version>
     <AssemblyTitle>MiyakoCarryServiceAssistant</AssemblyTitle>
-    <Trademark>https://github.com/himesamanoyume/MiyakoCarryService</Trademark>
+    <Trademark>https://sp-mod.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Assistant</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

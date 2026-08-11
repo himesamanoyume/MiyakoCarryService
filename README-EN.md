@@ -160,7 +160,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 7. After ensuring the JSON format is correct and the data is filled in correctly, restart the server. At this time, use the help command in the MESSENGER interface with the Miyako trader, and all types will be displayed in the list of available types.
 8. If an exception occurs when generating the customized type, you will receive an error reminder in server log and it will change to generate the default pmc type `McsBotPlayer`. At this time, you need to check whether the customized type you filled in is incorrect.
 
-## Config
+## Server Config
 
 | Option | Description | Default |
 | --- | --- | --- |
@@ -176,18 +176,23 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `TraderLlmStartupTest` | Whether to run one LLM connectivity test on server startup; set to `false` after the setup is confirmed to avoid repeated cost. | `true` |
 | `TraderLlmProvider` | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
 | `TraderLlmApiKey` | API key for the Miyako trader's AI provider. | empty |
+| `TraderLlmApiSecret` | Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. | empty |
 | `TraderLlmBaseUrl` | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
 | `TraderLlmModelId` | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
 | `TraderLlmSystemPrompt` | Optional custom system prompt prepended to the default prompt. | empty |
 | `TraderLlmTemperature` | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
 | `TraderLlmMaxTokens` | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
 | `TraderLlmTimeoutSec` | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
+| `TraderLlmReasoningEffort` | Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. | `low` |
 | `TraderLlmMaxMessagesPerMinute` | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
 | `TraderLlmMaxHistoryMessages` | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
+| `TraderLlmMaxConcurrent` | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
+| `HttpProxyHost` | HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. | empty |
+| `HttpProxyPort` | HTTP proxy port (paired with `HttpProxyHost`). | empty |
 
 ## Features
 
-### Basic
+### A. Basic
 
 | Feature | Description |
 | --- | --- |
@@ -204,7 +209,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 > When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
-### Command
+### B. Command
 
 #### MemberCommand
 
@@ -246,7 +251,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 > The command system also works normally during Fika multiplayer, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
-### Player
+### C. Player
 
 | Setting | Description |
 | --- | --- |
@@ -255,6 +260,53 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | `Teammate Highlight Color` | Highlight color configuration. |
 | `Enable Mcs Subtitles` | Whether to use subtitles to display `McsBotPlayer` reports. |
 | `Show Brevity Code` | Use brevity codes to replace the original nicknames for display. |
+
+## Assistant Addon
+
+### D. Assistant
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `VoiceEnabled` | Enable Assistant voice command recognition (STT + LLM). Required to use voice control over AI escorts. | `false` |
+| `VoiceTriggerMode` | Trigger mode: PushToTalk holds a key to talk; FreeTalk auto-records via VAD without key. | `PushToTalk` |
+| `VoiceHotKey` | Hotkey for PushToTalk mode. Ignored under FreeTalk. | `Empty` |
+| `VoiceCaptureMaxSeconds` | Maximum single recording length in seconds. Long phrases are cut at this limit. | `15f` |
+| `VoiceVadEnergyThreshold` | RMS energy threshold that triggers speech start in FreeTalk. Lower if whispers are ignored. | `0.01f` |
+| `VoiceVadSilenceSeconds` | Silence duration to end the recording in FreeTalk. | `1f` |
+| `VoiceFeedbackSubtitles` | Show in-game notification after each voice command is dispatched. | `true` |
+| `RecordDevice` | Select the recording device used for voice recognition; Default means the system default device. If the list is empty, check your microphone devices in system settings. | `"Default"` |
+| `SttProvider` | Cloud Speech-to-Text provider | `OpenAIWhisper` |
+| `SttApiKey` | API key for the chosen STT provider. | `Empty` |
+| `SttApiSecret` | Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun); leave empty for single-key providers. | `Empty` |
+| `SttBaseUrl` | Optional custom STT base URL (overrides per-provider default). | `Empty` |
+| `SttModelId` | Optional STT model name (provider-specific). Leave blank for default. | `Empty` |
+| `SttLanguage` | Hint language code in BCP-47 (e.g. zh-CN, en-US, ja-JP) for STT. | `Empty` |
+| `SttTimeoutSec` | Per-request STT timeout in seconds. | `15` |
+| `LlmProvider` | Cloud LLM provider; OpenAI-Compatible covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc. | `OpenAICompatible` |
+| `LlmApiKey` | API key for the chosen LLM provider. | `Empty` |
+| `LlmApiSecret` | Second key (secret/token) for two-key providers; leave empty for single-key providers. | `Empty` |
+| `LlmBaseUrl` | Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible). | `Empty` |
+| `LlmModelId` | LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible. | `"deepseek-v4-flash"` |
+| `LlmSystemPrompt` | Optional custom system prompt prepended to Assistant's voice-command instruction template. | `Empty` |
+| `LlmTemperature` | LLM sampling temperature, 0..2. Lower is more deterministic. | `0.2` |
+| `LlmMaxTokens` | Maximum tokens LLM may emit. Affects cost/latency. | `10107` |
+| `LlmTimeoutSec` | Per-request LLM timeout in seconds. | `15` |
+| `LlmReasoningEffort` | LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it. | `"low"` |
+| `HttpProxyHost` | HTTP proxy hostname or IP used by LLM/STT requests (e.g. 127.0.0.1); empty means direct connection. When configured, all requests (including local addresses) go through the proxy. | `Empty` |
+| `HttpProxyPort` | HTTP proxy port (e.g. 7890); must be configured together with the proxy host, empty means direct connection. | `Empty` |
+
+### Z. Debug
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `SttDebugEnabled` | When enabled, records and transcribes using the current configuration; the transcribed text overwrites the STT debug text field. | `false` |
+| `SttDebugText` | The latest transcription result of a recording. | `Empty` |
+| `VoiceDebugVadText` | Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only. | `Empty` |
+| `LlmDebugSend` | Sends the STT debug text to the LLM for testing; the reply or error overwrites the LLM result field. | `false` |
+| `LlmDebugResult` | The latest reply or error message of an LLM test. | `Empty` |
+| `LlmDebugAutoEnabled` | When enabled, after STT transcription in debug mode, automatically calls the LLM for command recognition testing; the result is shown in 'Command Recognition Result'. | `false` |
+| `LlmDebugAutoResult` | The latest automatic command recognition result, showing what command the LLM would actually call. | `Empty` |
+| `VoiceDebugPlay` | Play back the most recent voice recording (debug playback; requires a successful recording first) | `false` |
 
 ## Language
 
