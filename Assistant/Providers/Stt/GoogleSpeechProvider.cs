@@ -9,11 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// Google Cloud Speech-to-Text REST 一句话识别：
-    /// <c>POST /v1/speech:recognize?key={ApiKey}</c>，JSON 携带 LINEAR16 base64 音频。
-    /// BaseUrl 留空用官方端点，可覆盖为自建代理/中转。
-    /// </summary>
     public sealed class GoogleSpeechProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERGOOGLESPEECH.McsLocalized();

@@ -63,7 +63,7 @@
     "Mcs/VoiceTriggerModePushToTalk": "Push To Talk",
     "Mcs/VoiceTriggerModeFreeTalk": "Free Talk",
     "Mcs/SttProviderNone": "None",
-    "Mcs/SttProviderOpenAIWhisper": "OpenAI Compatible",
+    "Mcs/SttProviderOpenAICompatible": "OpenAI Compatible",
     "Mcs/SttProviderAzureSpeech": "Azure Speech",
     "Mcs/SttProviderGoogleSpeech": "Google Cloud Speech",
     "Mcs/SttProviderAliyunNls": "Aliyun NLS",

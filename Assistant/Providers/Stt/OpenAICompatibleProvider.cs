@@ -9,13 +9,9 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// OpenAI Whisper / 任何兼容 <c>/v1/audio/transcriptions</c> 的服务商（如 Groq Whisper、Deepgram 兼容端点等）。
-    /// 多部分表单上传 WAV，预期 JSON 响应 <c>{"text":"..."}</c>。
-    /// </summary>
-    public sealed class OpenAIWhisperProvider : BaseSttProvider
+    public sealed class OpenAICompatibleProvider : BaseSttProvider
     {
-        protected override string ProviderDisplayName => Locales.STTPROVIDEROPENAIWHISPER.McsLocalized();
+        protected override string ProviderDisplayName => Locales.SttProviderOpenAICompatible.McsLocalized();
 
         public override async Task<SttResult> TranscribeAsync(AudioSegment audio, ProviderSettings settings, CancellationToken cancellationToken)
         {
@@ -26,7 +22,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
-            // 兼容 BaseUrl 已填写完整 /audio/transcriptions 端点的情况（如本地服务），避免重复拼接
             var endpoint = baseUrl.EndsWith("/audio/transcriptions", StringComparison.OrdinalIgnoreCase)
                 ? baseUrl
                 : $"{baseUrl}/audio/transcriptions";
@@ -49,7 +44,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 {
                     Content = form,
                 };
-                // 本地端点无需 ApiKey，为空时不附加 Authorization
                 if (!string.IsNullOrEmpty(settings.ApiKey))
                 {
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
@@ -82,8 +76,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
             finally
             {
-                // Mono 的 MultipartContent.Dispose 存在 NRE 缺陷（请求成功后释放 multipart 表单时崩溃），
-                // 释放统一 try/catch 兜住，避免异常吞掉转写结果
                 try
                 {
                     request?.Dispose();

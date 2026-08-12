@@ -2,7 +2,7 @@ namespace MiyakoCarryService.Assistant.Enums
 {
     public enum ESttProvider
     {
-        OpenAIWhisper,
+        OpenAICompatible,
         AzureSpeech,
         GoogleSpeech,
         AliyunNls,

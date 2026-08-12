@@ -12,12 +12,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 {
     public abstract class BaseSttProvider : BaseProvider, ISttProvider
     {
-        /// <summary>多数 STT 服务商强制要求的采样率。</summary>
         protected const int RequiredRate = 16000;
 
-        /// <summary>
-        /// 将响应原文解析为 JSON。响应非合法 JSON 时返回 null（视为该厂商异常，错误文案统一为 "{Tag} 异常：响应解析失败"）。
-        /// </summary>
         protected JObject ParseResponseJson(PostResponse result)
         {
             try
@@ -35,9 +31,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             return Task.FromResult(new SttResult { Error = Locales.ERROR_NOT_IMPLEMENTED.McsLocalized() });
         }
 
-        /// <summary>
-        /// 校验音频段非空。通过返回 null；失败返回携带错误信息的 <see cref="SttResult"/>。
-        /// </summary>
         protected SttResult ValidateAudio(AudioSegment audio)
         {
             if (audio == null || audio.LengthSamples == 0)
@@ -47,9 +40,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             return null;
         }
 
-        /// <summary>
-        /// 按音频原始采样率/声道编码为 WAV。
-        /// </summary>
         protected bool TryPrepareWav(AudioSegment audio, out byte[] wavBytes, out string error)
         {
             var invalid = ValidateAudio(audio);
@@ -72,9 +62,6 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             return true;
         }
 
-        /// <summary>
-        /// 强制 16kHz 单声道：采样率不一致时先线性重采样，再编码为 WAV。
-        /// </summary>
         protected bool TryPrepare16kWav(AudioSegment audio, out byte[] wavBytes, out string error)
         {
             var invalid = ValidateAudio(audio);

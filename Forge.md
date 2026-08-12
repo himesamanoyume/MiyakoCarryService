@@ -1,7 +1,5 @@
 This mod will check for updates online.
 
-### SPT, see you next time
-
 [Ko-Fi](https://ko-fi.com/himesamanoyume) | [Ifdian](https://ifdian.net/a/himesamanoyume)
 
 # {.tabset}
@@ -158,305 +156,110 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 7. After ensuring the JSON format is correct and the data is filled in correctly, restart the server. At this time, use the help command in the MESSENGER interface with the Miyako trader, and all types will be displayed in the list of available types.
 8. If an exception occurs when generating the customized type, you will receive an error reminder in server log and it will change to generate the default pmc type `McsBotPlayer`. At this time, you need to check whether the customized type you filled in is incorrect.
 
-## Config
+## Server Config
 
-- **BalanceRestriction**
-
-Balance restriction. Defaults to false. When enabled, the open `McsBotPlayer` inventory command becomes unavailable, and all items a `McsBotPlayer` brings into the raid are given the `Curse of Vanishing` enchantment — when the `McsBotPlayer` dies, the items they brought in will immediately vanish no matter where they are.
-
-- **CheckUpdate**
-
-Whether to check for version updates online. Defaults to true.
-
-- **CheckIfdian**
-
-Whether to check for sponsor list updates. Defaults to true.
-
-- **TicketPricePerPercent**
-
-Ticket price per percent. Used to price the fine paid when applying for a ticket to remove the price-increase punishment, in roubles per percent. Defaults to 300000 roubles per percent.
-
-- **PunishmentMultiMax**
-
-Maximum price-increase punishment. Expressed as a multiplier, defaults to 1 (i.e. 100%). For example, a value of 5 sets the maximum price-increase punishment to 500%.
-
-- **OrderPendingPaymentTime**
-
-Order pending payment time. The expiration time of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket. In seconds, defaults to 900 seconds (i.e. 15 minutes).
-
-- **CompensationPrice**
-
-Compensation price. Paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`. In roubles, defaults to 300000 roubles.
-
-- **CarryServiceLevelPrice**
-
-Carry service level base price. There are 5 levels in total, in roubles, with an upper and lower bound set for each level.
-
-- **TraderLlmEnabled**
-
-Whether to enable the Miyako trader's AI chat (LLM). Defaults to false. When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk.
-
-- **TraderLlmStartupTest**
-
-Whether to run one LLM connectivity test on server startup. Defaults to true. Set to `false` after the setup is confirmed to avoid repeated cost.
-
-- **TraderLlmProvider**
-
-AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. Defaults to `OpenAICompatible`.
-
-- **TraderLlmApiKey**
-
-API key for the Miyako trader's AI provider. Defaults to empty.
-
-- **TraderLlmBaseUrl**
-
-Optional custom base URL for the Miyako trader's AI (overrides the provider default). Defaults to empty.
-
-- **TraderLlmModelId**
-
-Model name for the Miyako trader's AI, provider-specific. Defaults to `deepseek-v4-flash`.
-
-- **TraderLlmSystemPrompt**
-
-Optional custom system prompt prepended to the default prompt. Defaults to empty.
-
-- **TraderLlmTemperature**
-
-Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. Defaults to 0.2.
-
-- **TraderLlmMaxTokens**
-
-Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. Defaults to 3000.
-
-- **TraderLlmTimeoutSec**
-
-Per-request timeout in seconds for the Miyako trader's AI. Defaults to 15.
-
-- **TraderLlmMaxMessagesPerMinute**
-
-Maximum replies per minute from the Miyako trader's AI (rate limit). Defaults to 10.
-
-- **TraderLlmMaxHistoryMessages**
-
-Number of recent chat messages carried as context for the Miyako trader's AI, keeping the conversation coherent; set to 0 to disable. Defaults to 20.
-
-- **TraderLlmApiSecret**
-
-Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. Defaults to empty.
-
-- **TraderLlmReasoningEffort**
-
-Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. Defaults to low.
-
-- **TraderLlmMaxConcurrent**
-
-Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. Defaults to 16.
-
-- **HttpProxyHost**
-
-HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. Defaults to empty.
-
-- **HttpProxyPort**
-
-HTTP proxy port (paired with HttpProxyHost). Defaults to empty.
+| Option | Description | Default |
+| --- | --- | --- |
+| BalanceRestriction | When enabled, the `OPEN INVENTORY` command for `McsBotPlayer` becomes unavailable, and all items brought into the raid receive the `Curse of Vanishing` enchantment. If the `McsBotPlayer` dies, those items vanish immediately regardless of position. | `false` |
+| CheckUpdate | Whether to check for version updates online. | `true` |
+| CheckIfdian | Whether to check for sponsor list updates. | `true` |
+| TicketPricePerPercent | Per-percent ticket price used to calculate the fine paid to remove the price-increase penalty, in roubles per percent. | `300000` roubles per percent |
+| PunishmentMultiMax | Maximum price-increase penalty multiplier. | `1` (i.e. `100%`) |
+| OrderPendingPaymentTime | The pending duration of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket, in seconds. | `900` seconds (15 minutes) |
+| CompensationPrice | Compensation paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`, in roubles. | `300000` roubles |
+| CarryServiceLevelPrice | Base carry-service pricing for 5 levels, with minimum and maximum bounds for each level. | Determined by level range |
+| TraderLlmEnabled | Whether to enable the Miyako trader's AI chat (LLM). When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk. | `false` |
+| TraderLlmStartupTest | Whether to run one LLM connectivity test on server startup; set to `false` after the setup is confirmed to avoid repeated cost. | `true` |
+| TraderLlmProvider | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
+| TraderLlmApiKey | API key for the Miyako trader's AI provider. | empty |
+| TraderLlmApiSecret | Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. | empty |
+| TraderLlmBaseUrl | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
+| TraderLlmModelId | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
+| TraderLlmSystemPrompt | Optional custom system prompt prepended to the default prompt. | empty |
+| TraderLlmTemperature | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
+| TraderLlmMaxTokens | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
+| TraderLlmTimeoutSec | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
+| TraderLlmReasoningEffort | Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. | `low` |
+| TraderLlmMaxMessagesPerMinute | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
+| TraderLlmMaxHistoryMessages | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
+| TraderLlmMaxConcurrent | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
+| HttpProxyHost | HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. | empty |
+| HttpProxyPort | HTTP proxy port (paired with `HttpProxyHost`). | empty |
 
 ## Features
 
 ### A. Basic
 
-- **Enable Looting**
+| Feature | Description |
+| --- | --- |
+| Enable Looting | Whether `McsBotPlayer` will attempt to loot items while not currently in combat. |
+| Price Threshold | Loot below this price will be ignored. |
+| Loot Name Keyword | Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords may be separated by `\|\|`，`,`，`，`. |
+| Loot Keyword Items | Whether `McsBotPlayer` will attempt to loot keyword-matched items. |
+| Blocked Item Types | Supports select all / deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`. |
+| Enable Keep Formation | Whether to determine `McsBotPlayer` positions based on the formation matrix configuration. |
+| Formation Matrix | Used to configure the position of each `McsBotPlayer`. `★` represents your position, and the area above `★` indicates your facing direction. |
+| Formation Spacing | The spacing between formation members. |
+| Formation Sequential Fill | When enabled, if a `McsBotPlayer` dies in formation, the next squad member fills the empty slot in brevity-code order. |
+| Save Formation Preset Hotkey | Saves the current formation preset and binds a hotkey. |
 
-If `McsBotPlayer` is not currently in combat, whether it will attempt to loot items.
-
-- **Price Threshold**
-
-Loot below this price will be ignored.
-
-- **Loot Name Keyword**
-
-Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords can be separated using “||”, “,” or “，”.
-
-- **Loot Keyword Items**
-
-Whether `McsBotPlayer` will attempt to loot keyword items
-
-- **Blocked Item Types**
-
-Supports select all, deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`
-
-- **Enable Keep Formation**
-
-Whether to determine `McsBotPlayer` positions based on formation matrix configuration
-
-- **Formation Matrix**
-
-Used to configure the position of each `McsBotPlayer`. “★” represents your position. The top of “★” is your look direction
-
-- **Formation Spacing**
-
-- **Formation Sequential Fill**
-
-When enabled, if a `McsBotPlayer` dies in formation, the empty position is filled by the next squad member in brevity code order
-
-- **Save Formation Preset Hotkey**
-
-*When Fika is installed, adjusting settings in raid will automatically sync to the host, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
+> When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
 ### B. Command
 
+| Feature | Description |
+| --- | --- |
+| Command HotKey | Command Menu Hotkey. |
+
 #### MemberCommand
 
-- **Report Enemy Position**
-
-If `McsBotPlayer` is currently in combat, command `McsBotPlayer` to report known enemy positions.
-
-- **Report Self Status**
-
-Command `McsBotPlayer` to report own health and supply status.
-
-- **On Your Own**
-
-Command `McsBotPlayer` to act independently.
-
-- **Regroup**
-
-Command `McsBotPlayer` to stop all actions and regroup.
-
-- **Follow Me**
-
-Command `McsBotPlayer` to follow the `McsLeadPlayer`. In this state, `McsBotPlayer` will not proactively attack enemies or loot.
-
-- **Exclude / Takeover**
-
-Exclude command will prevent `McsBotPlayer` from receiving team commands; Take Over command will restore team command control over `McsBotPlayer`.
-
-- **Go To**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to go to a specified location.
-
-- **Hold Position**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to stay in place.
-
-- **Force Teleport**
-
-Clear `McsBotPlayer`'s aggro and attempt to teleport them to current location.
-
-- **Open Inventory**
-
-Remotely open `McsBotPlayer`'s inventory remotely, used to transfer loot they have picked up.
-
-- **Change Aiming Body Part Type**
-
-Command `McsBotPlayer` to change preferred combat aiming body part.
-
-- **Escort**
-- - **Quest Escort**
-- - **Exfil Escort**
-- - **Transit Escort**
-- - **Switch Escort**
-- - **Stationary Weapon Escort**
-- - **BTR Escort**
-- - **Airdrop Escort**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to escort to the designated location.
-
-- **Proxy Action**
-- - **Quest Proxy Action**
-- - **Door Proxy Action**
-- - **Loot Proxy Action**
-- - **Switch Proxy Action**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` proxy to execute action.
-
-- **Drop Target Loot**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to drop the target loot picked up during the raid.
-
-- **Clear Area**
-
-If `McsBotPlayer` is not currently in combat, command `McsBotPlayer` to clear the surrounding area of a specified location.
+| Command | Description |
+| --- | --- |
+| Report Enemy Position | If `McsBotPlayer` is currently in combat, command it to report known enemy positions. |
+| Report Self Status | Command `McsBotPlayer` to report its own health and supply status. |
+| On Your Own | Command `McsBotPlayer` to act independently. |
+| Regroup | Command `McsBotPlayer` to stop all actions and regroup. |
+| Follow Me | Command `McsBotPlayer` to follow the `McsLeadPlayer`. In this state, it will not proactively attack enemies or loot. |
+| Exclude / Takeover | `Exclude` prevents `McsBotPlayer` from receiving team commands, while `Take Over` restores team-command control. |
+| Go To | If `McsBotPlayer` is not currently in combat, command it to go to a specified location. |
+| Hold Position | If `McsBotPlayer` is not currently in combat, command it to stay in place. |
+| Force Teleport | Clears `McsBotPlayer` aggro and attempts to teleport it to the current location. |
+| Open Inventory | Remotely opens the `McsBotPlayer` inventory to transfer picked-up loot. |
+| Change Aiming Body Part Type | Commands `McsBotPlayer` to change its preferred combat aiming body part. |
+| Escort | If `McsBotPlayer` is not currently in combat, command it to escort to the designated location. Sub-items include `Quest Escort`, `Exfil Escort`, `Transit Escort`, `Switch Escort`, `Stationary Weapon Escort`, `BTR Escort`, and `Airdrop Escort`. |
+| Proxy Action | If `McsBotPlayer` is not currently in combat, command it to proxy-execute the related action. Sub-items include `Quest Proxy Action`, `Door Proxy Action`, `Loot Proxy Action`, and `Switch Proxy Action`. |
+| Drop Target Loot | If `McsBotPlayer` is not currently in combat, command it to drop the target loot picked up during the raid. |
+| Clear Area | If `McsBotPlayer` is not currently in combat, command it to clear the surrounding area of a specified location. |
 
 #### TeamCommand
 
-- **Team Report Enemy Position**
+| Command | Description |
+| --- | --- |
+| Team Report Enemy Position | If there are `McsBotPlayers` in the team currently in combat, command them to report known enemy positions. |
+| Team Report Self Status | Command `McsBotPlayers` to report their own health and supply status. |
+| Team On Your Own | Command `McsBotPlayers` to act independently. |
+| Team Regroup | Command all `McsBotPlayers` to stop all actions and regroup. |
+| Team Follow Me | Command all `McsBotPlayers` to follow the `McsLeadPlayer`. In this state, they will not proactively attack enemies or loot. |
+| Team Go To | If there are `McsBotPlayers` in the team not currently in combat, command them to go to a specified location. |
+| Team Hold Position | If there are `McsBotPlayers` in the team not currently in combat, command them to stay in place. |
+| Team Force Teleport | Clears aggro for all team `McsBotPlayers` and attempts to teleport them to the current location. |
+| Team Change Aiming Body Part Type | Command `McsBotPlayers` to change their preferred combat aiming body part. |
+| Team Escort | If there are `McsBotPlayers` in the team not currently in combat, command them to escort to the designated location. Sub-items include `Team Quest Escort`, `Team Exfil Escort`, `Team Transit Escort`, `Team Switch Escort`, `Team Stationary Weapon Escort`, `Team BTR Escort`, and `Team Airdrop Escort`. |
+| Team Drop Target Loot | If there are `McsBotPlayers` in the team not currently in combat, command them to drop the target loot picked up during the raid. |
+| Team Clear Area | If there are `McsBotPlayers` in the team not currently in combat, command them to clear the surrounding area of a specified location. |
+| Change Formation | Apply the saved formation preset immediately. |
 
-If there are `McsBotPlayers` in the team currently in combat, command `McsBotPlayers` to report known enemy positions.
-
-- **Team Report Self Status**
-
-Command `McsBotPlayers` to report own health and supply status.
-
-- **Team On Your Own**
-
-Command `McsBotPlayers` to act independently.
-
-- **Team Regroup**
-
-Command all `McsBotPlayers` to stop all actions and regroup.
-
-- **Team Follow Me**
-
-Command all `McsBotPlayers` to follow the `McsLeadPlayer`. In this state, they will not proactively attack enemies or loot.
-
-- **Team Go To**
-
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to go to a specified location.
-
-- **Team Hold Position**
-
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to stay in place.
-
-- **Team Force Teleport**
-
-Clear aggro for all team `McsBotPlayers` and attempt to teleport all of them to current location.
-
-- **Team Change Aiming Body Part Type**
-
-Command `McsBotPlayers` to change preferred combat aiming body part.
-
-- **Team Escort**
-- - **Team Quest Escort**
-- - **Team Exfil Escort**
-- - **Team Transit Escort**
-- - **Team Switch Escort**
-- - **Team Stationary Weapon Escort**
-- - **Team BTR Escort**
-- - **Team Airdrop Escort**
-
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to escort to the designated location.
-
-- **Team Drop Target Loot**
-
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to drop the target loot picked up during the raid.
-
-- **Team Clear Area**
-
-If there are `McsBotPlayers` in the team not currently in combat, command `McsBotPlayers` to clear the surrounding area of a specified location.
-
-- **Change Formation**
-
-Apply saved formation preset immediately.
-
-*The command system also works normally during Fika multiplayer, but this requires you to have the [MiyakoCarryServiceFika](https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon) addon installed first.*
+> The command system also works normally during Fika multiplayer, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
 ### C. Player
 
-- **Teammate Highlight**
-
-Whether to highlight all `McsBotPlayer` characters in raid.
-
-- **Teammate Highlight Hotkey**
-
-- **Teammate Highlight Color**
-
-- **Enable Mcs Subtitles**
-
-Whether to use subtitles to display `McsBotPlayer` reports.
-
-- **Show Brevity Code**
-
-Use brevity codes to replace original nicknames for display.
+| Setting | Description |
+| --- | --- |
+| Teammate Highlight | Whether to highlight all `McsBotPlayer` characters in raid. |
+| Teammate Highlight Hotkey | Hotkey configuration for teammate highlighting. |
+| Teammate Highlight Color | Highlight color configuration. |
+| Enable Mcs Subtitles | Whether to use subtitles to display `McsBotPlayer` reports. |
+| Show Brevity Code | Use brevity codes to replace the original nicknames for display. |
 
 ## Language
 

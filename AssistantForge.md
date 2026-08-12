@@ -38,7 +38,7 @@ Select the recording device used for voice recognition; Default means the system
 
 - **SttProvider**
 
-Cloud Speech-to-Text provider Defaults to OpenAIWhisper.
+Cloud Speech-to-Text provider Defaults to OpenAICompatible.
 
 - **SttApiKey**
 

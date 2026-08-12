@@ -190,14 +190,14 @@ namespace MiyakoCarryService.Assistant
             SttProvider = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.STTPROVIDER_KEY,
-                ESttProvider.OpenAIWhisper,
+                ESttProvider.OpenAICompatible,
                 Locales.STTPROVIDER_DESCRIPTION,
                 customAttributes: new ConfigurationManagerAttributes
                 {
                     CustomDrawer = static entry => McsConfigApi.CustomDrawer(entry,
                         new Dictionary<ESttProvider, string>
                         {
-                            { ESttProvider.OpenAIWhisper, Locales.STTPROVIDEROPENAIWHISPER.McsLocalized() },
+                            { ESttProvider.OpenAICompatible, Locales.SttProviderOpenAICompatible.McsLocalized() },
                             { ESttProvider.AzureSpeech, Locales.STTPROVIDERAZURESPEECH.McsLocalized() },
                             { ESttProvider.GoogleSpeech, Locales.STTPROVIDERGOOGLESPEECH.McsLocalized() },
                             { ESttProvider.AliyunNls, Locales.STTPROVIDERALIYUNNLS.McsLocalized() },

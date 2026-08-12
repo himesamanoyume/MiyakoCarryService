@@ -11,11 +11,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// 讯飞 一句话识别 REST：<c>POST https://iat-api.xfyun.cn/v2/iat</c>。
-    /// 鉴权：HMAC-SHA256 生成 authorization 头（ApiKey=apiKey，ApiSecret=apiSecret，ModelId=app_id）。
-    /// 强制 16kHz；响应文本在 data.result.rg[].v（base64）中按序拼接。
-    /// </summary>
     public sealed class XfyunIatProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERXFYUNIAT.McsLocalized();

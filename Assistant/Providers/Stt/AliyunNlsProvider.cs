@@ -9,12 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// 阿里云 NLS REST 一句话识别：
-    /// 先用 AccessKey 换取 NLS token（<c>nls-meta</c> 的 token 接口），再 POST <c>stream/v1/asr</c>。
-    /// ApiKey = AccessKeyId，ApiSecret = AccessKeySecret，ModelId = appkey。
-    /// 强制 16kHz。BaseUrl 可覆盖网关域名（默认上海）。
-    /// </summary>
     public sealed class AliyunNlsProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERALIYUNNLS.McsLocalized();

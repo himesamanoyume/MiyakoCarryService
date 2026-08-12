@@ -9,11 +9,6 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// 火山引擎 一句话识别 REST：<c>POST /api/v1/auc/get_one_sentence_recognition</c>。
-    /// 鉴权：query 携带 appid/token/signature/ts，signature = MD5("appid={appid}&token={token}&ts={ts}")。
-    /// ApiKey = AppID，ApiSecret = AccessToken。强制 16kHz，raw 音频上传，响应 result 为 base64 文本。
-    /// </summary>
     public sealed class VolcIatProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERVOLCIAT.McsLocalized();

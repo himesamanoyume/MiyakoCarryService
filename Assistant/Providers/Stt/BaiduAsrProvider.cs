@@ -9,11 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// 百度智能云 短语音识别一句话 REST：
-    /// 先用 client_credentials 换取 access_token，再 POST <c>/server_api</c> 提交 base64 WAV（强制 16kHz）。
-    /// ApiKey = client_id，ApiSecret = client_secret。
-    /// </summary>
     public sealed class BaiduAsrProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERBAIDUASR.McsLocalized();

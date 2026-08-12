@@ -166,31 +166,31 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 | Option | Description | Default |
 | --- | --- | --- |
-| `BalanceRestriction` | When enabled, the `OPEN INVENTORY` command for `McsBotPlayer` becomes unavailable, and all items brought into the raid receive the `Curse of Vanishing` enchantment. If the `McsBotPlayer` dies, those items vanish immediately regardless of position. | `false` |
-| `CheckUpdate` | Whether to check for version updates online. | `true` |
-| `CheckIfdian` | Whether to check for sponsor list updates. | `true` |
-| `TicketPricePerPercent` | Per-percent ticket price used to calculate the fine paid to remove the price-increase penalty, in roubles per percent. | `300000` roubles per percent |
-| `PunishmentMultiMax` | Maximum price-increase penalty multiplier. | `1` (i.e. `100%`) |
-| `OrderPendingPaymentTime` | The pending duration of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket, in seconds. | `900` seconds (15 minutes) |
-| `CompensationPrice` | Compensation paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`, in roubles. | `300000` roubles |
-| `CarryServiceLevelPrice` | Base carry-service pricing for 5 levels, with minimum and maximum bounds for each level. | Determined by level range |
-| `TraderLlmEnabled` | Whether to enable the Miyako trader's AI chat (LLM). When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk. | `false` |
-| `TraderLlmStartupTest` | Whether to run one LLM connectivity test on server startup; set to `false` after the setup is confirmed to avoid repeated cost. | `true` |
-| `TraderLlmProvider` | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
-| `TraderLlmApiKey` | API key for the Miyako trader's AI provider. | empty |
-| `TraderLlmBaseUrl` | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
-| `TraderLlmModelId` | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
-| `TraderLlmSystemPrompt` | Optional custom system prompt prepended to the default prompt. | empty |
-| `TraderLlmTemperature` | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
-| `TraderLlmMaxTokens` | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
-| `TraderLlmTimeoutSec` | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
-| `TraderLlmMaxMessagesPerMinute` | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
-| `TraderLlmMaxHistoryMessages` | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
-| `TraderLlmApiSecret` | Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. | empty |
-| `TraderLlmReasoningEffort` | Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. | `low` |
-| `TraderLlmMaxConcurrent` | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
-| `HttpProxyHost` | HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. | empty |
-| `HttpProxyPort` | HTTP proxy port (paired with `HttpProxyHost`). | empty |
+| BalanceRestriction | When enabled, the `OPEN INVENTORY` command for `McsBotPlayer` becomes unavailable, and all items brought into the raid receive the `Curse of Vanishing` enchantment. If the `McsBotPlayer` dies, those items vanish immediately regardless of position. | `false` |
+| CheckUpdate | Whether to check for version updates online. | `true` |
+| CheckIfdian | Whether to check for sponsor list updates. | `true` |
+| TicketPricePerPercent | Per-percent ticket price used to calculate the fine paid to remove the price-increase penalty, in roubles per percent. | `300000` roubles per percent |
+| PunishmentMultiMax | Maximum price-increase penalty multiplier. | `1` (i.e. `100%`) |
+| OrderPendingPaymentTime | The pending duration of the action task provided by the Miyako trader when ordering a `McsBotPlayer` or issuing a ticket, in seconds. | `900` seconds (15 minutes) |
+| CompensationPrice | Compensation paid when a `McsBotPlayer` accidentally kills the `McsLeadPlayer`, in roubles. | `300000` roubles |
+| CarryServiceLevelPrice | Base carry-service pricing for 5 levels, with minimum and maximum bounds for each level. | Determined by level range |
+| TraderLlmEnabled | Whether to enable the Miyako trader's AI chat (LLM). When enabled, chatting with the Miyako trader supports natural-language ordering, tickets and small talk. | `false` |
+| TraderLlmStartupTest | Whether to run one LLM connectivity test on server startup; set to `false` after the setup is confirmed to avoid repeated cost. | `true` |
+| TraderLlmProvider | AI provider for the Miyako trader: `OpenAICompatible` (covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc.), `Anthropic`, `GoogleGemini`, `DashScope`, `Zhipu`, `Qianfan`, `Spark`, `MiniMax`. | `OpenAICompatible` |
+| TraderLlmApiKey | API key for the Miyako trader's AI provider. | empty |
+| TraderLlmApiSecret | Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. | empty |
+| TraderLlmBaseUrl | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
+| TraderLlmModelId | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
+| TraderLlmSystemPrompt | Optional custom system prompt prepended to the default prompt. | empty |
+| TraderLlmTemperature | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
+| TraderLlmMaxTokens | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
+| TraderLlmTimeoutSec | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
+| TraderLlmReasoningEffort | Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. | `low` |
+| TraderLlmMaxMessagesPerMinute | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
+| TraderLlmMaxHistoryMessages | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
+| TraderLlmMaxConcurrent | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
+| HttpProxyHost | HTTP proxy host used when routing cloud requests (LLM/STT etc.) through a proxy. | empty |
+| HttpProxyPort | HTTP proxy port (paired with `HttpProxyHost`). | empty |
 
 ## Features
 
@@ -198,58 +198,62 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 | Feature | Description |
 | --- | --- |
-| `Enable Looting` | Whether `McsBotPlayer` will attempt to loot items while not currently in combat. |
-| `Price Threshold` | Loot below this price will be ignored. |
-| `Loot Name Keyword` | Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords may be separated by `\|\|`，`,`，`，`. |
-| `Loot Keyword Items` | Whether `McsBotPlayer` will attempt to loot keyword-matched items. |
-| `Blocked Item Types` | Supports select all / deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`. |
-| `Enable Keep Formation` | Whether to determine `McsBotPlayer` positions based on the formation matrix configuration. |
-| `Formation Matrix` | Used to configure the position of each `McsBotPlayer`. `★` represents your position, and the area above `★` indicates your facing direction. |
-| `Formation Spacing` | The spacing between formation members. |
-| `Formation Sequential Fill` | When enabled, if a `McsBotPlayer` dies in formation, the next squad member fills the empty slot in brevity-code order. |
-| `Save Formation Preset Hotkey` | Saves the current formation preset and binds a hotkey. |
+| Enable Looting | Whether `McsBotPlayer` will attempt to loot items while not currently in combat. |
+| Price Threshold | Loot below this price will be ignored. |
+| Loot Name Keyword | Keywords are substrings contained in an item's full or abbreviated name. Multiple keywords may be separated by `\|\|`，`,`，`，`. |
+| Loot Keyword Items | Whether `McsBotPlayer` will attempt to loot keyword-matched items. |
+| Blocked Item Types | Supports select all / deselect all: `Ammo`, `Barter`, `Info`, `Container`, `Food`, `Backpack`, `Goggles`, `Pocket`, `Tactical Vest`, `Armor`, `Grenade`, `Headphone`, `Keys`, `Knife`, `Magazine`, `Meds`, `Mod`, `Special`, `Weapon`, `Other`. |
+| Enable Keep Formation | Whether to determine `McsBotPlayer` positions based on the formation matrix configuration. |
+| Formation Matrix | Used to configure the position of each `McsBotPlayer`. `★` represents your position, and the area above `★` indicates your facing direction. |
+| Formation Spacing | The spacing between formation members. |
+| Formation Sequential Fill | When enabled, if a `McsBotPlayer` dies in formation, the next squad member fills the empty slot in brevity-code order. |
+| Save Formation Preset Hotkey | Saves the current formation preset and binds a hotkey. |
 
 > When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
 ### B. Command
 
+| Feature | Description |
+| --- | --- |
+| Command HotKey | Command Menu Hotkey. |
+
 #### MemberCommand
 
 | Command | Description |
 | --- | --- |
-| `Report Enemy Position` | If `McsBotPlayer` is currently in combat, command it to report known enemy positions. |
-| `Report Self Status` | Command `McsBotPlayer` to report its own health and supply status. |
-| `On Your Own` | Command `McsBotPlayer` to act independently. |
-| `Regroup` | Command `McsBotPlayer` to stop all actions and regroup. |
-| `Follow Me` | Command `McsBotPlayer` to follow the `McsLeadPlayer`. In this state, it will not proactively attack enemies or loot. |
-| `Exclude / Takeover` | `Exclude` prevents `McsBotPlayer` from receiving team commands, while `Take Over` restores team-command control. |
-| `Go To` | If `McsBotPlayer` is not currently in combat, command it to go to a specified location. |
-| `Hold Position` | If `McsBotPlayer` is not currently in combat, command it to stay in place. |
-| `Force Teleport` | Clears `McsBotPlayer` aggro and attempts to teleport it to the current location. |
-| `Open Inventory` | Remotely opens the `McsBotPlayer` inventory to transfer picked-up loot. |
-| `Change Aiming Body Part Type` | Commands `McsBotPlayer` to change its preferred combat aiming body part. |
-| `Escort` | If `McsBotPlayer` is not currently in combat, command it to escort to the designated location. Sub-items include `Quest Escort`, `Exfil Escort`, `Transit Escort`, `Switch Escort`, `Stationary Weapon Escort`, `BTR Escort`, and `Airdrop Escort`. |
-| `Proxy Action` | If `McsBotPlayer` is not currently in combat, command it to proxy-execute the related action. Sub-items include `Quest Proxy Action`, `Door Proxy Action`, `Loot Proxy Action`, and `Switch Proxy Action`. |
-| `Drop Target Loot` | If `McsBotPlayer` is not currently in combat, command it to drop the target loot picked up during the raid. |
-| `Clear Area` | If `McsBotPlayer` is not currently in combat, command it to clear the surrounding area of a specified location. |
+| Report Enemy Position | If `McsBotPlayer` is currently in combat, command it to report known enemy positions. |
+| Report Self Status | Command `McsBotPlayer` to report its own health and supply status. |
+| On Your Own | Command `McsBotPlayer` to act independently. |
+| Regroup | Command `McsBotPlayer` to stop all actions and regroup. |
+| Follow Me | Command `McsBotPlayer` to follow the `McsLeadPlayer`. In this state, it will not proactively attack enemies or loot. |
+| Exclude / Takeover | `Exclude` prevents `McsBotPlayer` from receiving team commands, while `Take Over` restores team-command control. |
+| Go To | If `McsBotPlayer` is not currently in combat, command it to go to a specified location. |
+| Hold Position | If `McsBotPlayer` is not currently in combat, command it to stay in place. |
+| Force Teleport | Clears `McsBotPlayer` aggro and attempts to teleport it to the current location. |
+| Open Inventory | Remotely opens the `McsBotPlayer` inventory to transfer picked-up loot. |
+| Change Aiming Body Part Type | Commands `McsBotPlayer` to change its preferred combat aiming body part. |
+| Escort | If `McsBotPlayer` is not currently in combat, command it to escort to the designated location. Sub-items include `Quest Escort`, `Exfil Escort`, `Transit Escort`, `Switch Escort`, `Stationary Weapon Escort`, `BTR Escort`, and `Airdrop Escort`. |
+| Proxy Action | If `McsBotPlayer` is not currently in combat, command it to proxy-execute the related action. Sub-items include `Quest Proxy Action`, `Door Proxy Action`, `Loot Proxy Action`, and `Switch Proxy Action`. |
+| Drop Target Loot | If `McsBotPlayer` is not currently in combat, command it to drop the target loot picked up during the raid. |
+| Clear Area | If `McsBotPlayer` is not currently in combat, command it to clear the surrounding area of a specified location. |
 
 #### TeamCommand
 
 | Command | Description |
 | --- | --- |
-| `Team Report Enemy Position` | If there are `McsBotPlayers` in the team currently in combat, command them to report known enemy positions. |
-| `Team Report Self Status` | Command `McsBotPlayers` to report their own health and supply status. |
-| `Team On Your Own` | Command `McsBotPlayers` to act independently. |
-| `Team Regroup` | Command all `McsBotPlayers` to stop all actions and regroup. |
-| `Team Follow Me` | Command all `McsBotPlayers` to follow the `McsLeadPlayer`. In this state, they will not proactively attack enemies or loot. |
-| `Team Go To` | If there are `McsBotPlayers` in the team not currently in combat, command them to go to a specified location. |
-| `Team Hold Position` | If there are `McsBotPlayers` in the team not currently in combat, command them to stay in place. |
-| `Team Force Teleport` | Clears aggro for all team `McsBotPlayers` and attempts to teleport them to the current location. |
-| `Team Change Aiming Body Part Type` | Command `McsBotPlayers` to change their preferred combat aiming body part. |
-| `Team Escort` | If there are `McsBotPlayers` in the team not currently in combat, command them to escort to the designated location. Sub-items include `Team Quest Escort`, `Team Exfil Escort`, `Team Transit Escort`, `Team Switch Escort`, `Team Stationary Weapon Escort`, `Team BTR Escort`, and `Team Airdrop Escort`. |
-| `Team Drop Target Loot` | If there are `McsBotPlayers` in the team not currently in combat, command them to drop the target loot picked up during the raid. |
-| `Team Clear Area` | If there are `McsBotPlayers` in the team not currently in combat, command them to clear the surrounding area of a specified location. |
-| `Change Formation` | Apply the saved formation preset immediately. |
+| Team Report Enemy Position | If there are `McsBotPlayers` in the team currently in combat, command them to report known enemy positions. |
+| Team Report Self Status | Command `McsBotPlayers` to report their own health and supply status. |
+| Team On Your Own | Command `McsBotPlayers` to act independently. |
+| Team Regroup | Command all `McsBotPlayers` to stop all actions and regroup. |
+| Team Follow Me | Command all `McsBotPlayers` to follow the `McsLeadPlayer`. In this state, they will not proactively attack enemies or loot. |
+| Team Go To | If there are `McsBotPlayers` in the team not currently in combat, command them to go to a specified location. |
+| Team Hold Position | If there are `McsBotPlayers` in the team not currently in combat, command them to stay in place. |
+| Team Force Teleport | Clears aggro for all team `McsBotPlayers` and attempts to teleport them to the current location. |
+| Team Change Aiming Body Part Type | Command `McsBotPlayers` to change their preferred combat aiming body part. |
+| Team Escort | If there are `McsBotPlayers` in the team not currently in combat, command them to escort to the designated location. Sub-items include `Team Quest Escort`, `Team Exfil Escort`, `Team Transit Escort`, `Team Switch Escort`, `Team Stationary Weapon Escort`, `Team BTR Escort`, and `Team Airdrop Escort`. |
+| Team Drop Target Loot | If there are `McsBotPlayers` in the team not currently in combat, command them to drop the target loot picked up during the raid. |
+| Team Clear Area | If there are `McsBotPlayers` in the team not currently in combat, command them to clear the surrounding area of a specified location. |
+| Change Formation | Apply the saved formation preset immediately. |
 
 > The command system also works normally during Fika multiplayer, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
@@ -257,58 +261,58 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 
 | Setting | Description |
 | --- | --- |
-| `Teammate Highlight` | Whether to highlight all `McsBotPlayer` characters in raid. |
-| `Teammate Highlight Hotkey` | Hotkey configuration for teammate highlighting. |
-| `Teammate Highlight Color` | Highlight color configuration. |
-| `Enable Mcs Subtitles` | Whether to use subtitles to display `McsBotPlayer` reports. |
-| `Show Brevity Code` | Use brevity codes to replace the original nicknames for display. |
+| Teammate Highlight | Whether to highlight all `McsBotPlayer` characters in raid. |
+| Teammate Highlight Hotkey | Hotkey configuration for teammate highlighting. |
+| Teammate Highlight Color | Highlight color configuration. |
+| Enable Mcs Subtitles | Whether to use subtitles to display `McsBotPlayer` reports. |
+| Show Brevity Code | Use brevity codes to replace the original nicknames for display. |
 
 ## Assistant Addon
 
 ### D. Assistant
 
-| Option | Description | Default |
-| --- | --- | --- |
-| `VoiceEnabled` | Enable Assistant voice command recognition (STT + LLM). Required to use voice control over AI escorts. | `false` |
-| `VoiceTriggerMode` | Trigger mode: PushToTalk holds a key to talk; FreeTalk auto-records via VAD without key. | `PushToTalk` |
-| `VoiceHotKey` | Hotkey for PushToTalk mode. Ignored under FreeTalk. | `Empty` |
-| `VoiceCaptureMaxSeconds` | Maximum single recording length in seconds. Long phrases are cut at this limit. | `15f` |
-| `VoiceVadEnergyThreshold` | RMS energy threshold that triggers speech start in FreeTalk. Lower if whispers are ignored. | `0.01f` |
-| `VoiceVadSilenceSeconds` | Silence duration to end the recording in FreeTalk. | `1f` |
-| `VoiceFeedbackSubtitles` | Show in-game notification after each voice command is dispatched. | `true` |
-| `RecordDevice` | Select the recording device used for voice recognition; Default means the system default device. If the list is empty, check your microphone devices in system settings. | `"Default"` |
-| `SttProvider` | Cloud Speech-to-Text provider | `OpenAIWhisper` |
-| `SttApiKey` | API key for the chosen STT provider. | `Empty` |
-| `SttApiSecret` | Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun); leave empty for single-key providers. | `Empty` |
-| `SttBaseUrl` | Optional custom STT base URL (overrides per-provider default). | `Empty` |
-| `SttModelId` | Optional STT model name (provider-specific). Leave blank for default. | `Empty` |
-| `SttLanguage` | Hint language code in BCP-47 (e.g. zh-CN, en-US, ja-JP) for STT. | `Empty` |
-| `SttTimeoutSec` | Per-request STT timeout in seconds. | `15` |
-| `LlmProvider` | Cloud LLM provider; OpenAI-Compatible covers OpenAI / DeepSeek / Moonshot / Ollama / vLLM etc. | `OpenAICompatible` |
-| `LlmApiKey` | API key for the chosen LLM provider. | `Empty` |
-| `LlmApiSecret` | Second key (secret/token) for two-key providers; leave empty for single-key providers. | `Empty` |
-| `LlmBaseUrl` | Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible). | `Empty` |
-| `LlmModelId` | LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible. | `"deepseek-v4-flash"` |
-| `LlmSystemPrompt` | Optional custom system prompt prepended to Assistant's voice-command instruction template. | `Empty` |
-| `LlmTemperature` | LLM sampling temperature, 0..2. Lower is more deterministic. | `0.2` |
-| `LlmMaxTokens` | Maximum tokens LLM may emit. Affects cost/latency. | `10107` |
-| `LlmTimeoutSec` | Per-request LLM timeout in seconds. | `15` |
-| `LlmReasoningEffort` | LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it. | `"low"` |
-| `HttpProxyHost` | HTTP proxy hostname or IP used by LLM/STT requests (e.g. 127.0.0.1); empty means direct connection. When configured, all requests (including local addresses) go through the proxy. | `Empty` |
-| `HttpProxyPort` | HTTP proxy port (e.g. 7890); must be configured together with the proxy host, empty means direct connection. | `Empty` |
+| Option | Description |
+| --- | --- |
+| Voice Enabled | Enable Assistant voice command recognition (STT + LLM). Required to use voice control over AI escorts. |
+| Voice Trigger Mode | Trigger mode: PushToTalk holds a key to talk; FreeTalk auto-records via VAD without key. |
+| Voice HotKey | Hotkey for PushToTalk mode. Ignored under FreeTalk. |
+| Voice Capture Max Seconds | Maximum single recording length in seconds. Long phrases are cut at this limit. |
+| Voice Vad Energy Threshold | RMS energy threshold that triggers speech start in FreeTalk. Lower if whispers are ignored. |
+| Voice Vad Silence Seconds | Silence duration to end the recording in FreeTalk. |
+| Voice Feedback Subtitles | Show in-game notification after each voice command is dispatched. |
+| Record Device | Select the recording device used for voice recognition; Default means the system default device. If the list is empty, check your microphone devices in system settings. |
+| Stt Provider | Cloud Speech-to-Text provider |
+| Stt ApiKey | API key for the chosen STT provider. |
+| Stt ApiSecret | Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun); leave empty for single-key providers. |
+| Stt BaseUrl | Optional custom STT base URL (overrides per-provider default). |
+| Stt ModelId | Optional STT model name (provider-specific). Leave blank for default. |
+| Stt Language | Hint language code in BCP-47 (e.g. zh-CN, en-US, ja-JP) for STT. |
+| Stt TimeoutSec | Per-request STT timeout in seconds. |
+| Llm Provider | Cloud LLM provider. |
+| Llm ApiKey | API key for the chosen LLM provider. |
+| Llm ApiSecret | Second key (secret/token) for two-key providers; leave empty for single-key providers. |
+| Llm BaseUrl | Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible). |
+| Llm ModelId | LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible. |
+| Llm System Prompt | Optional custom system prompt prepended to Assistant's voice-command instruction template. |
+| Llm Temperature | LLM sampling temperature, 0..2. Lower is more deterministic. |
+| Llm Max Tokens | Maximum tokens LLM may emit. Affects cost/latency. |
+| Llm Timeout Sec | Per-request LLM timeout in seconds. |
+| Llm Reasoning Effort | LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it. |
+| Http Proxy Host | HTTP proxy hostname or IP used by LLM/STT requests (e.g. 127.0.0.1); empty means direct connection. When configured, all requests (including local addresses) go through the proxy. |
+| Http Proxy Port | HTTP proxy port (e.g. 7890); must be configured together with the proxy host, empty means direct connection. |
 
 ### Z. Debug
 
-| Option | Description | Default |
-| --- | --- | --- |
-| `SttDebugEnabled` | When enabled, records and transcribes using the current configuration; the transcribed text overwrites the STT debug text field. | `false` |
-| `SttDebugText` | The latest transcription result of a recording. | `Empty` |
-| `VoiceDebugVadText` | Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only. | `Empty` |
-| `LlmDebugSend` | Sends the STT debug text to the LLM for testing; the reply or error overwrites the LLM result field. | `false` |
-| `LlmDebugResult` | The latest reply or error message of an LLM test. | `Empty` |
-| `LlmDebugAutoEnabled` | When enabled, after STT transcription in debug mode, automatically calls the LLM for command recognition testing; the result is shown in 'Command Recognition Result'. | `false` |
-| `LlmDebugAutoResult` | The latest automatic command recognition result, showing what command the LLM would actually call. | `Empty` |
-| `VoiceDebugPlay` | Play back the most recent voice recording (debug playback; requires a successful recording first) | `false` |
+| Option | Description |
+| --- | --- |
+| Stt Debug Enabled | When enabled, records and transcribes using the current configuration; the transcribed text overwrites the STT debug text field. |
+| Stt Debug Text | The latest transcription result of a recording. |
+| Voice Debug Vad Text | Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only. |
+| Llm Debug Send | Sends the STT debug text to the LLM for testing; the reply or error overwrites the LLM result field. |
+| Llm Debug Result | The latest reply or error message of an LLM test. |
+| Llm Debug Auto Enabled | When enabled, after STT transcription in debug mode, automatically calls the LLM for command recognition testing; the result is shown in 'Command Recognition Result'. |
+| Llm Debug Auto Result | The latest automatic command recognition result, showing what command the LLM would actually call. |
+| Voice Debug Play | Play back the most recent voice recording (debug playback; requires a successful recording first) |
 
 ## Language
 

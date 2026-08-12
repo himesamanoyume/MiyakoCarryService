@@ -8,12 +8,6 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// Azure Speech Service 一句话识别 REST：
-    /// 端点 <c>https://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1</c>，
-    /// 以 <c>Ocp-Apim-Subscription-Key</c> 鉴权，WAV 二进制直接上传。
-    /// BaseUrl 留空时提示填写（订阅区域未知，无法推断默认区域）。
-    /// </summary>
     public sealed class AzureSpeechProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERAZURESPEECH.McsLocalized();

@@ -10,10 +10,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
-    /// <summary>
-    /// 腾讯云 ASR 一句话识别（SentenceRecognition，TC3-HMAC-SHA256 签名）。
-    /// SecretId = ApiKey，SecretKey = ApiSecret。强制 16kHz WAV，base64 提交。
-    /// </summary>
     public sealed class TencentAsrProvider : BaseSttProvider
     {
         protected override string ProviderDisplayName => Locales.STTPROVIDERTENCENTASR.McsLocalized();

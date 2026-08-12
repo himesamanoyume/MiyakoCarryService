@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Assistant.Services
         {
             _provider = type switch
             {
-                ESttProvider.OpenAIWhisper => new OpenAIWhisperProvider(),
+                ESttProvider.OpenAICompatible => new OpenAICompatibleProvider(),
                 ESttProvider.AzureSpeech => new AzureSpeechProvider(),
                 ESttProvider.GoogleSpeech => new GoogleSpeechProvider(),
                 ESttProvider.AliyunNls => new AliyunNlsProvider(),
