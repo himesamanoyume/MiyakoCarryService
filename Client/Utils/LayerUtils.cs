@@ -227,6 +227,50 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
+        public static void McsRemoveNonKeepLayers(BotOwner botOwner, IEnumerable<string> explicitKeepLayerNames)
+        {
+            if (botOwner == null || botOwner.Brain?.BaseBrain == null)
+            {
+                return;
+            }
+
+            var keepNames = new HashSet<string>(explicitKeepLayerNames ?? Array.Empty<string>());
+            if (_customLayerMaps != null)
+            {
+                foreach (var customLayerType in _customLayerMaps.Keys)
+                {
+                    keepNames.Add(customLayerType.Name);
+                }
+            }
+
+            foreach (var layerName in GetBrainLayerNames(botOwner))
+            {
+                if (keepNames.Contains(layerName))
+                {
+                    continue;
+                }
+                McsRemoveLayer(botOwner, layerName);
+            }
+        }
+
+        public static void McsRestoreAllExcludedLayers(BotOwner botOwner)
+        {
+            if (botOwner == null || botOwner.Brain?.BaseBrain == null)
+            {
+                return;
+            }
+
+            if (!_excludedLayers.TryGetValue(botOwner.ProfileId, out var excluded))
+            {
+                return;
+            }
+
+            foreach (var layerName in excluded.Keys.ToList())
+            {
+                McsRestoreLayer(botOwner, layerName);
+            }
+        }
+
         public static bool McsHasLayer(BotOwner botOwner, string layerName)
         {
             return botOwner != null && GetBrainLayerNames(botOwner).Contains(layerName);

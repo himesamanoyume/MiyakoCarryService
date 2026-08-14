@@ -129,7 +129,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                LayerUtils.McsRestoreLayers(mcsBotPlayer.AIData.BotOwner, Classification.RemoveLayerNames);
+                LayerUtils.McsRestoreAllExcludedLayers(mcsBotPlayer.AIData.BotOwner);
 
                 var customLayerMaps = LayerUtils.GetCustomLayerMaps();
                 foreach ((var customLayerType, var priority) in customLayerMaps)
@@ -141,7 +141,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void InjectLayers(BaseBrain baseBrain)
         {
-            LayerUtils.McsRemoveLayers(baseBrain._owner, Classification.RemoveLayerNames);
+            LayerUtils.McsRemoveNonKeepLayers(baseBrain._owner, Classification.KeepLayerNames);
 
             var customLayerMaps = LayerUtils.GetCustomLayerMaps();
             foreach ((var customLayerType, var priority) in customLayerMaps)
