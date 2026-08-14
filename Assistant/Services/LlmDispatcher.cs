@@ -9,10 +9,6 @@ using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Assistant.Services
 {
-    /// <summary>
-    /// LLM 服务分发器。根据 <see cref="ELlmProvider"/> 选择具体实现，
-    /// 配置项通过 <see cref="ProviderSettings"/> 统一传入。
-    /// </summary>
     internal sealed class LlmDispatcher
     {
         private readonly ILlmProvider _provider;

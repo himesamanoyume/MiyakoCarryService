@@ -9,11 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// Google Gemini <c>generateContent</c> REST：
-    /// <c>POST /v1beta/models/{model}:generateContent?key={ApiKey}</c>。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class GoogleGeminiProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERGOOGLEGEMINI.McsLocalized();

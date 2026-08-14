@@ -63,7 +63,9 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                     request.Headers.Add("Authorization", authorization);
                     request.Headers.Add("Date", date);
                 },
-                truncateLen: 240);
+                truncateLen: 240
+            );
+
             if (!result.IsSuccess)
             {
                 return new SttResult { Error = result.Error };
@@ -77,7 +79,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var code = json.Value<int>("code");
             if (code != 0)
             {
-                return new SttResult { Error = $"讯飞识别失败 {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                return new SttResult { Error = $"Error {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
             var sb = new StringBuilder();
@@ -96,6 +98,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                     }
                     catch
                     {
+                        
                     }
                 }
             }

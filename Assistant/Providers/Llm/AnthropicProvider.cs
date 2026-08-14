@@ -9,10 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// Anthropic Claude Messages API <c>/v1/messages</c>。
-    /// 鉴权：<c>x-api-key</c> + <c>anthropic-version</c> 头。意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class AnthropicProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://api.anthropic.com";
@@ -118,11 +114,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     }
                     return sb.ToString();
                 }
+                return null;
             }
             catch
             {
+                return null;
             }
-            return null;
         }
     }
 }

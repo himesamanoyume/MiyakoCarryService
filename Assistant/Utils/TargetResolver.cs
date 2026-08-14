@@ -26,7 +26,10 @@ namespace MiyakoCarryService.Assistant.Utils
         /// </summary>
         public static ResolvedTarget ResolveForPlayer(Player player, float maxDistance = 1000f)
         {
-            if (player == null) { return null; }
+            if (player == null)
+            {
+                return null;
+            }
 
             // 复刻 MCS 菜单流程的 Resolver：直接用玩家 InteractionRay 投射，命中即取 hit.point。
             if (Physics.Raycast(player.InteractionRay, out var hit, maxDistance, LayersMaskController.HighPolyWithTerrainMask))
@@ -38,12 +41,6 @@ namespace MiyakoCarryService.Assistant.Utils
             return new ResolvedTarget { Position = fwdPos, TargetId = null };
         }
 
-        /// <summary>
-        /// 代理开门/代理拾取战利品的"选项显示状态"判定（复刻 GetActionsClassPatches 的条件）：
-        /// <c>InteractionProxyAction</c> 要求准星命中 <see cref="EDoorState.Locked"/> 的门；
-        /// <c>LootProxyAction</c> 要求命中非尸体的 LootItem。
-        /// 条件不满足时返回 null（调用方应提示"请对准目标"）。
-        /// </summary>
         public static ResolvedTarget ResolveProxyTarget(Player player, string commandType, float maxDistance = 1000f)
         {
             if (player == null)
@@ -62,9 +59,7 @@ namespace MiyakoCarryService.Assistant.Utils
                 if (door != null && door.DoorState == EDoorState.Locked)
                 {
                     var doorData = door.GetData();
-                    return doorData != null
-                        ? new ResolvedTarget { Position = hit.point, TargetId = doorData.Id() }
-                        : null;
+                    return doorData != null ? new ResolvedTarget { Position = hit.point, TargetId = doorData.Id() } : null;
                 }
                 return null;
             }
@@ -82,7 +77,6 @@ namespace MiyakoCarryService.Assistant.Utils
                 return null;
             }
 
-            // 其他代理类：退化为命中点（无目标 Id）
             return new ResolvedTarget { Position = hit.point, TargetId = null };
         }
     }

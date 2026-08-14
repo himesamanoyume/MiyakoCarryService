@@ -12,11 +12,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// 智谱 GLM Chat Completions：<c>POST /api/paas/v4/chat/completions</c>。
-    /// 鉴权为 JWT(HS256)：ApiKey 可填完整 "{id}.{secret}"，或 ApiKey=id + ApiSecret=secret。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class ZhipuProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERZHIPU.McsLocalized();

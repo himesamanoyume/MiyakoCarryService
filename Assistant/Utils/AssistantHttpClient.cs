@@ -4,9 +4,6 @@ using System.Net.Http;
 
 namespace MiyakoCarryService.Assistant.Utils
 {
-    /// <summary>
-    /// 复用的 HttpClient 单源。所有 STT/LLM 服务商实现共用该实例，便于统一超时与限流设置。
-    /// </summary>
     internal static class AssistantHttpClient
     {
         private static HttpClient _shared;
@@ -57,7 +54,7 @@ namespace MiyakoCarryService.Assistant.Utils
             var effectiveHost = useProxy ? host : string.Empty;
             var effectivePort = useProxy ? parsedPort.ToString() : string.Empty;
 
-            if (_shared == null)
+            if (Shared == null)
             {
                 return;
             }
@@ -70,7 +67,7 @@ namespace MiyakoCarryService.Assistant.Utils
             _appliedProxyHost = effectiveHost;
             _appliedProxyPort = effectivePort;
 
-            var old = _shared;
+            var old = Shared;
             _shared = CreateClient(useProxy);
             _shared.DefaultRequestHeaders.ConnectionClose = false;
             _shared.DefaultRequestHeaders.ExpectContinue = false;
@@ -87,7 +84,7 @@ namespace MiyakoCarryService.Assistant.Utils
         public static HttpClient WithTimeout()
         {
             ApplyProxy();
-            return _shared;
+            return Shared;
         }
     }
 }

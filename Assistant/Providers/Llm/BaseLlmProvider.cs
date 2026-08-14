@@ -24,10 +24,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return Task.FromResult(Locales.LLM_PING_NOT_SUPPORTED.McsLocalized());
         }
 
-        /// <summary>
-        /// 提取 OpenAI 兼容响应中 <c>choices[0].message.content</c> 的文本；
-        /// 解析失败或内容为空时返回 null。
-        /// </summary>
         protected string ExtractChatContentText(string responseString)
         {
             try
@@ -41,10 +37,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        /// <summary>
-        /// 构造 OpenAI 兼容 Chat Completions 请求体（model/messages/temperature/max_tokens）。
-        /// <paramref name="maxTokensFieldName"/> 可定制输出 token 上限字段名（如 MiniMax 的 tokens_to_generate）。
-        /// </summary>
         protected JObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
         {
             var messages = new JArray

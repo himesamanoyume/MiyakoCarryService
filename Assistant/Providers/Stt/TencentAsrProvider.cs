@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var error = json["Response"]?["Error"];
             if (error != null)
             {
-                return new SttResult { Error = $"腾讯云识别失败 {error["Code"]}: {error["Message"]}" };
+                return new SttResult { Error = $"Error {error["Code"]}: {error["Message"]}" };
             }
             return new SttResult
             {

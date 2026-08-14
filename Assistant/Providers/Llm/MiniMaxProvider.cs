@@ -8,11 +8,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// MiniMax v2 Chat Completions：<c>POST /v2/text/chat_completions</c>，Bearer ApiKey 鉴权。
-    /// 输出 token 上限用 <c>tokens_to_generate</c>；错误信息在 <c>base_resp</c>。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class MiniMaxProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERMINIMAX.McsLocalized();
@@ -42,7 +37,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 return new LlmIntent { Error = result.Error };
             }
 
-            // v2 业务错误：base_resp.status_code != 0
             var businessError = CheckBusinessError(result.ResponseText);
             if (businessError != null)
             {
@@ -85,14 +79,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                 if (statusCode != 0)
                 {
                     var statusMsg = json["base_resp"]?["status_msg"]?.ToString() ?? string.Empty;
-                    return $"MiniMax 业务错误 {statusCode}: {SafeTrim(statusMsg, 240)}";
+                    return $"MiniMax Error {statusCode}: {SafeTrim(statusMsg, 240)}";
                 }
+                return null;
             }
             catch
             {
-                // 响应非合法 JSON：交由 ParseIntentJson 输出解析错误
+                return null;
             }
-            return null;
         }
     }
 }

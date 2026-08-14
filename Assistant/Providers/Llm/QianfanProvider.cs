@@ -8,10 +8,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// 百度千帆 OpenAI 兼容 v2 端点：<c>POST /v2/chat/completions</c>，Bearer ApiKey 鉴权。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class QianfanProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERQIANFAN.McsLocalized();

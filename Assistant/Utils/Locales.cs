@@ -148,7 +148,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLM_PROVIDER_NOT_CONFIGURED  = "Mcs/LlmProviderNotConfigured";
         public const string STT_PROVIDER_NOT_CONFIGURED  = "Mcs/SttProviderNotConfigured";
 
-        // —— STT ——
         public const string STT_AUDIO_EMPTY              = "Mcs/SttAudioEmpty";
         public const string STT_WAV_ENCODE_FAILED        = "Mcs/SttWavEncodeFailed";
         public const string STT_RESPONSE_PARSE_FAILED    = "Mcs/SttResponseParseFailed";
@@ -160,7 +159,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string UNKNOWN_ERROR                = "Mcs/UnknownError";
         public const string UNKNOWN                      = "Mcs/Unknown";
 
-        // —— STT 厂商凭证提示 ——
         public const string STT_XFYUN_REQUIRED           = "Mcs/SttXfyunRequired";
         public const string STT_XFYUN_APPID              = "Mcs/SttXfyunAppId";
         public const string STT_ALIYUN_REQUIRED          = "Mcs/SttAliyunRequired";
@@ -171,7 +169,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string STT_VOLC_REQUIRED            = "Mcs/SttVolcRequired";
         public const string STT_TENCENT_REQUIRED         = "Mcs/SttTencentRequired";
 
-        // —— VoiceMgr / 调试 UI ——
         public const string VOICE_RECORDING              = "Mcs/VoiceRecording";
         public const string VOICE_LISTENING_RESULT       = "Mcs/VoiceListeningResult";
         public const string MIC_UNAVAILABLE              = "Mcs/MicUnavailable";

@@ -9,11 +9,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// OpenAI 兼容 Chat Completions 客户端。同时覆盖：
-    /// OpenAI / DeepSeek / Moonshot / Together / vLLM / Ollama / LM Studio / LocalAI 等。
-    /// 通过 <c>BaseUrl</c> 切换端点，配置项统一为 <c>ApiKey / BaseUrl / Model / SystemPrompt / Temperature / MaxTokens / TimeoutSec</c>。
-    /// </summary>
     public sealed class OpenAICompatibleProvider : BaseLlmProvider
     {
         private const string DefaultBaseUrl = "https://api.deepseek.com";
@@ -34,16 +29,10 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
             try
             {
-                // 优先携带 response_format=json_object 以稳定 JSON 输出；
-                // 部分 OpenAI 兼容端点（如 OpenCode Zen 的 DeepSeek V4）不支持该参数，会返回 4xx 且错误含
-                // "not supported" / "json_object" / "response_format" 等字样，此时去掉该参数回退重试一次。
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var useJsonObject = attempt == 0;
-                    // 思考强度：default/空不传；不支持的端点报 400 且错误含 reasoning/not supported 时去掉重试
-                    var useReasoningEffort = attempt == 0
-                        && !string.IsNullOrEmpty(settings.ReasoningEffort)
-                        && settings.ReasoningEffort != "default";
+                    var useReasoningEffort = attempt == 0 && !string.IsNullOrEmpty(settings.ReasoningEffort) && settings.ReasoningEffort != "default";
                     var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
                     if (useReasoningEffort)
                     {
@@ -57,7 +46,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     var result = await SendJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,
                         request =>
                         {
-                            // 本地端点（Ollama/LM Studio 等）无需 ApiKey，为空时不附加 Authorization
                             if (!string.IsNullOrEmpty(settings.ApiKey))
                             {
                                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
@@ -66,7 +54,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
                     if (!result.IsSuccess)
                     {
-                        // 不支持的端点（错误含 not supported/json_object/response_format/reasoning）去掉可选参数重试一次
                         var unsupported = result.HttpStatus is 400 or 401 or 403 or 422
                             && (result.ErrorBody?.Contains("not supported", StringComparison.OrdinalIgnoreCase) == true
                                 || result.ErrorBody?.Contains("json_object", StringComparison.OrdinalIgnoreCase) == true
@@ -106,7 +93,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
-            // 最小化连通性测试：不做指令解析，仅取模型回复原文
             var body = BuildChatCompletionsBody(model, "You are a connectivity test. Reply with exactly: pong", "ping", 0d, 64);
 
             var result = await SendJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,

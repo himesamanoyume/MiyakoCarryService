@@ -22,9 +22,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? "https://api.openai.com/v1" : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? "whisper-1" : settings.ModelId;
-            var endpoint = baseUrl.EndsWith("/audio/transcriptions", StringComparison.OrdinalIgnoreCase)
-                ? baseUrl
-                : $"{baseUrl}/audio/transcriptions";
+            var endpoint = baseUrl.EndsWith("/audio/transcriptions", StringComparison.OrdinalIgnoreCase) ? baseUrl : $"{baseUrl}/audio/transcriptions";
 
             var form = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(wavBytes);

@@ -8,11 +8,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// 讯飞星火 OpenAI 兼容 HTTP 端点：<c>POST /v1/chat/completions</c>。
-    /// 鉴权：Bearer 为星火 APIKey（新版形如 "{apikey}:{apisecret}"）；若 ApiSecret 已单独填写则拼接 "{ApiKey}:{ApiSecret}"。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class SparkProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERSPARK.McsLocalized();

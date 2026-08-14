@@ -56,29 +56,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         public override void OnMgrDestroy()
         {
-            try
-            {
-                _processingCts?.Cancel();
-            }
-            catch
-            {
-
-            }
-            try
-            {
-                _capture.Stop();
-            }
-            catch
-            {
-
-            }
             base.OnMgrDestroy();
+            _processingCts?.Cancel();
+            _capture.Stop();
         }
 
-        /// <summary>
-        /// 战局开始：菜单场景启动的麦克风会话在跨场景（Unity 音频系统重置）后可能停止写入，
-        /// 重建会话并复位全部语音状态，保证战局内录音正常。
-        /// </summary>
         public override void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             base.OnGameWorldStarted(@event);
@@ -91,9 +73,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _voiceState = EVoiceState.Idle;
         }
 
-        /// <summary>
-        /// 战局结束回到菜单：同样重建会话并复位状态，保证菜单调试与下次进战局时会话干净。
-        /// </summary>
         public override void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             base.OnGameWorldEnded(@event);
@@ -106,8 +85,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         void Update()
         {
-            // 配置项可被玩家在 ConfigurationManager 中实时修改；仅当参数变化时重建 VAD，
-            // 避免每帧重建导致自适应噪音地板状态丢失
             var energyThreshold = MiyakoCarryServiceAssistantPlugin.VoiceVadEnergyThreshold.Value;
             var silenceSeconds = MiyakoCarryServiceAssistantPlugin.VoiceVadSilenceSeconds.Value;
             if (Math.Abs(_vadService.EnergyThreshold - energyThreshold) > 0.0001f || Math.Abs(_vadService.SilenceSeconds - silenceSeconds) > 0.0001f)
@@ -119,7 +96,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 });
             }
 
-            // 服务商可被玩家在 ConfigurationManager 中实时修改；变化时重建分发器
             var sttProvider = MiyakoCarryServiceAssistantPlugin.SttProvider.Value;
             if (_sttProvider != sttProvider)
             {
@@ -133,18 +109,15 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 _llmProvider = llmProvider;
             }
 
-            // 主线程消费异步结果
             if (_voiceState == EVoiceState.Dispatching && _pendingIntent != null)
             {
                 ConsumePendingIntent();
             }
 
-            // 正常语音管线：需要 VoiceEnabled 且处于战局
             if (!MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !GameLoop.Instance.IsVaildGameWorld))
             {
                 if (_capturing)
                 {
-                    // 门控关闭：丢弃当前段并同步复位状态（麦克风会话保持，避免 End→Start 循环失败）
                     _capture.Abort();
                     _capturing = false;
                     _speechStarted = false;
@@ -154,12 +127,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // 每帧轮询麦克风：样本始终喂入滚动预卷；是否累积到段缓冲由 AudioCaptureService
-            // 内部 _armed 决定（PTT 开始即置位；FreeTalk 语音确认后置位），不录音时为无操作
             _capture.Poll();
 
-            // STT 调试模式：战局内外均可录音（菜单/藏身处也能测试麦克风与转写），
-            // 不再受 inRaid 限制，继续按当前触发模式流程执行
             switch (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value)
             {
                 case EVoiceTriggerMode.PushToTalk:
@@ -202,7 +171,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // 周期性采样窗口检测 RMS
             if (Time.unscaledTime < _nextWindowAt)
             {
                 return;
@@ -214,8 +182,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 return;
             }
-            // 使用与录音一致的设备位置（AudioCaptureService 内部缓存设备名），
-            // 避免非默认设备时 VAD 窗口位置查询指向未录音的设备
+
             int currentPos = _capture.CurrentPosition;
             if (currentPos <= 0)
             {
@@ -235,27 +202,21 @@ namespace MiyakoCarryService.Assistant.Mgrs
             clip.GetData(window, currentPos - windowSize);
 
             float rms = _vadService.ComputeRms(window);
-            // 用本窗 RMS 更新自适应噪音地板（语音窗自动排除），再判定语音
             _vadService.UpdateNoiseFloor(rms);
 
-            // STT 调试模式：逐窗输出 VAD 现场值到调试只读文本（实时刷新，便于实测底噪并精调阈值）
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
-                MiyakoCarryServiceAssistantPlugin.VoiceDebugVadText.Value =
-                    $"rms={rms:F4} speech={_vadService.IsSpeech(rms)} silence={Time.unscaledTime - _lastSpeechAt:F2}s";
+                MiyakoCarryServiceAssistantPlugin.VoiceDebugVadText.Value = $"rms={rms:F4} speech={_vadService.IsSpeech(rms)} silence={Time.unscaledTime - _lastSpeechAt:F2}s";
             }
 
             if (_vadService.IsSpeech(rms))
             {
                 _lastSpeechAt = Time.unscaledTime;
                 _speechConfirmCount++;
-                // 连续 2 窗（100ms）确认语音后才置位并武装累积：段起点取内部预卷（含语音起音），
-                // 避免截断第一个字，同时丢弃确认前的待机空白与噪音误触发
                 if (!_speechStarted && _speechConfirmCount >= 2)
                 {
                     _speechStarted = true;
                     _capture.Arm();
-                    // STT 调试模式：触发阈值确认语音，正式进入录音
                     if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                     {
                         MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = Utils.Locales.VOICE_RECORDING.McsLocalized();
@@ -274,13 +235,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 {
                     if (_speechStarted)
                     {
-                        // 说话中/刚说完超时：正常结束并发送
                         _speechStarted = false;
                         EndCapture();
                     }
                     else
                     {
-                        // 全程无语音：丢弃累积、重同步游标并重置段计时，继续监听，绝不触发 STT
                         _capture.Reset();
                         _captureStartedAt = Time.unscaledTime;
                         _lastSpeechAt = Time.unscaledTime;
@@ -296,15 +255,12 @@ namespace MiyakoCarryService.Assistant.Mgrs
             {
                 return;
             }
-            // STT 调试模式：PTT 按下即"正在录音"；FreeTalk 处于监听态（无结果时"正在监听"，
-            // 有上次结果时"正在监听：结果"），待语音确认后置"正在录音"
+
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
                 if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
                 {
-                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = string.IsNullOrEmpty(_debugLastResult)
-                        ? Utils.Locales.VOICELISTENING.McsLocalized()
-                        : string.Format(Utils.Locales.VOICE_LISTENING_RESULT.McsLocalized(), _debugLastResult);
+                    MiyakoCarryServiceAssistantPlugin.SttDebugText.Value = string.IsNullOrEmpty(_debugLastResult) ? Utils.Locales.VOICELISTENING.McsLocalized() : string.Format(Utils.Locales.VOICE_LISTENING_RESULT.McsLocalized(), _debugLastResult);
                 }
                 else
                 {
@@ -316,7 +272,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 Notification(Utils.Locales.MIC_UNAVAILABLE.McsLocalized());
                 return;
             }
-            // PTT：按下即累积（无预卷需求）；FreeTalk 保持未武装，待语音确认后由 Arm() 置位
+
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.PushToTalk)
             {
                 _capture.Arm();
@@ -338,11 +294,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
             var samples = _capture.End();
             _capturing = false;
 
-            // 自由说话：只裁剪到"静音秒数一半"的尾巴——既不让静音过长，也不说完话立即截断
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
             {
                 samples = TrimTrailingSilence(samples);
-                // 最短时长兜底：异常残留的极短/空音频不发 STT
                 if (samples.Length < (int)(_capture.SampleRate * MinFreeTalkSpeechSeconds))
                 {
                     samples = Array.Empty<float>();
@@ -353,7 +307,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             if (samples == null || samples.Length == 0)
             {
-                // STT 调试模式：未捕获到音频时给出提示，避免"正在录音"状态卡死
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
                     SetDebugText(Utils.Locales.NO_AUDIO_CAPTURED.McsLocalized());
@@ -362,41 +315,28 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // 保存最近一次录音，供 DEBUG 区"播放录音"按钮回放
             MiyakoCarryServiceAssistantPlugin.LastVoiceSamples = samples;
             MiyakoCarryServiceAssistantPlugin.LastVoiceSampleRate = _capture.SampleRate;
             MiyakoCarryServiceAssistantPlugin.LastVoiceChannels = _capture.Channels;
 
-            try
-            {
-                _processingCts?.Cancel();
-            }
-            catch
-            {
-
-            }
+            _processingCts?.Cancel();
             _processingCts = new CancellationTokenSource();
             _ = ProcessCaptureAsync(samples, _processingCts.Token);
         }
 
-        /// <summary>
-        /// 裁剪 FreeTalk 录音尾部的静音（按 VAD 能量阈值以窗口为单位从末尾回退），
-        /// 保留最后一个语音窗口之后"静音秒数一半"的尾巴：静音不会太长，也不会说完话立即被截断。
-        /// </summary>
         private float[] TrimTrailingSilence(float[] samples)
         {
             if (samples == null || samples.Length == 0)
             {
                 return samples;
             }
-            int window = (int)(_capture.SampleRate * _windowPeriodSeconds);
+            var window = (int)(_capture.SampleRate * _windowPeriodSeconds);
             if (window <= 0 || samples.Length < window)
             {
                 return samples;
             }
 
-            // 从末尾回退，找到最后一个语音窗口的结束位置
-            int speechEnd = samples.Length;
+            var speechEnd = samples.Length;
             while (speechEnd >= window)
             {
                 var win = new float[window];
@@ -413,9 +353,8 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return Array.Empty<float>();
             }
 
-            // 保留 speechEnd 之后"静音秒数一半"的尾巴，其余裁掉
-            int keepTail = (int)(_capture.SampleRate * _vadService.SilenceSeconds * 0.5f);
-            int keep = Math.Min(samples.Length, speechEnd + Math.Max(0, keepTail));
+            var keepTail = (int)(_capture.SampleRate * _vadService.SilenceSeconds * 0.5f);
+            var keep = Math.Min(samples.Length, speechEnd + Math.Max(0, keepTail));
             if (keep <= 0)
             {
                 return Array.Empty<float>();
@@ -473,7 +412,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT 异常：{ex}");
+                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT Exception：{ex}");
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
                     SetDebugText(string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message));
@@ -500,7 +439,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 return;
             }
 
-            // STT 调试模式：转写文本覆盖写入调试字段；开启"调试识别指令"时自动调用 LLM 识别（只识别不派发）
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
                 SetDebugText(stt.Text);
@@ -515,7 +453,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             _voiceState = EVoiceState.Interpreting;
             _pendingTranscribedText = stt.Text;
 
-            // 代理/护送类指令：注入"指令菜单选项"（编号+本地化名+距离提示），LLM 据此返回 optionIndex
             var llmText = stt.Text;
             var optionsPrompt = BuildVoiceOptionsPrompt();
             if (!string.IsNullOrEmpty(optionsPrompt))
@@ -526,7 +463,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             LlmIntent intent;
             try
             {
-                // 调试辅助：打印实际发送的完整提示词（System Prompt + User Text），便于核对与优化
                 // MiyakoCarryServiceAssistantPlugin.Logger.LogWarning("\n=== LLM System Prompt ===\n" + Utils.Tools.BuildSystemPrompt(llmSettings.SystemPrompt) + "\n=== LLM User Text ===\n" + llmText);
                 intent = await _llmDispatcher.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
@@ -536,7 +472,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 异常：{ex}");
+                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM Exception：{ex}");
                 _pendingIntent = new LlmIntent { Error = string.Format(Utils.Locales.LLM_FAILED.McsLocalized(), ex.Message) };
                 _voiceState = EVoiceState.Dispatching;
                 return;
@@ -564,7 +500,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             if (intent.IsError)
             {
-                // 识别结果只允许指令：LLM 未识别统一提示，技术错误保留原文便于排查
                 feedback = intent.Error == LlmIntent.NotRecognized
                     ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized()
                     : intent.Error;
@@ -577,13 +512,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
                     var localizedCommand = Utils.Tools.GetLocalizedNames(intent.CommandName);
                     feedback = dispatched < 0
                         ? Utils.Locales.VOICEAIMATTARGET.McsLocalized()
-                        : dispatched > 0
-                            ? string.Format(Utils.Locales.DISPATCHED_COUNT.McsLocalized(), dispatched, localizedCommand)
-                            : string.Format(Utils.Locales.NO_MATCH_MEMBER.McsLocalized(), localizedCommand);
+                        : (dispatched > 0 ? string.Format(Utils.Locales.DISPATCHED_COUNT.McsLocalized(), dispatched, localizedCommand) : string.Format(Utils.Locales.NO_MATCH_MEMBER.McsLocalized(), localizedCommand));
                 }
                 catch (Exception ex)
                 {
-                    MiyakoCarryServiceAssistantPlugin.Logger.LogError($"BindAndDispatch 异常：{ex}");
+                    MiyakoCarryServiceAssistantPlugin.Logger.LogError($"BindAndDispatch Exception：{ex}");
                     feedback = string.Format(Utils.Locales.DISPATCH_ERROR.McsLocalized(), ex.Message);
                 }
             }
@@ -607,10 +540,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
         }
 
-        /// <summary>
-        /// STT 调试模式文本输出：FreeTalk 持久化上次结果并显示"正在监听：结果"，
-        /// PTT 直接显示原文本（现行为不变）。
-        /// </summary>
         private void SetDebugText(string text)
         {
             if (MiyakoCarryServiceAssistantPlugin.VoiceTriggerMode.Value == EVoiceTriggerMode.FreeTalk)
@@ -624,10 +553,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
         }
 
-        /// <summary>
-        /// 调试识别指令：用当前 LLM 配置解析转写文本，把实际将会调用的指令情况写入
-        /// "识别指令结果"（只识别，不派发）。与正常管线一样注入代理/护送菜单选项。
-        /// </summary>
         private async System.Threading.Tasks.Task RunDebugCommandTestAsync(string text, ProviderSettings llmSettings, CancellationToken ct)
         {
             try
@@ -643,49 +568,36 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (OperationCanceledException)
             {
+                
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM 调试识别异常：{ex}");
+                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM Exception：{ex}");
                 MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = string.Format(Utils.Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
             }
         }
 
-        /// <summary>
-        /// 构建"指令菜单选项"提示段（代理/护送类）：枚举当前战局菜单子选项，编号+本地化名+距离提示，
-        /// 供 LLM 通过 optionIndex 选择目标。战局外/失败/无选项时返回 null（不注入）。
-        /// </summary>
         private string BuildVoiceOptionsPrompt()
         {
-            try
+            if (!GameLoop.Instance.IsVaildGameWorld)
             {
-                if (!GameLoop.Instance.IsVaildGameWorld)
-                {
-                    return null;
-                }
-                var options = McsCommandApi.GetVoiceMenuOptions();
-                if (options.Count == 0)
-                {
-                    return null;
-                }
-
-                var sb = new StringBuilder();
-                sb.AppendLine("[Command options (numbered list) - ONLY relevant for InteractionProxyAction / QuestProxyAction / StationaryWeaponProxyAction / EscortWorld commands. If the player's phrase refers to one of these options (by its name, distance or description), return its optionIndex (1-based); otherwise set optionIndex to null. Do not mention this list otherwise.]");
-                for (int i = 0; i < options.Count; i++)
-                {
-                    var option = options[i];
-                    var display = string.IsNullOrEmpty(option.TargetName)
-                        ? option.Name
-                        : $"{option.Name}（{option.TargetName}）";
-                    sb.AppendLine($"{i + 1}. {display}");
-                }
-                return sb.ToString();
-            }
-            catch (Exception ex)
-            {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogWarning($"构建语音选项提示失败：{ex.Message}");
                 return null;
             }
+            var options = McsCommandApi.GetVoiceMenuOptions();
+            if (options.Count == 0)
+            {
+                return null;
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("[Command options (numbered list) - ONLY relevant for InteractionProxyAction / QuestProxyAction / StationaryWeaponProxyAction / EscortWorld commands. If the player's phrase refers to one of these options (by its name, distance or description), return its optionIndex (1-based); otherwise set optionIndex to null. Do not mention this list otherwise.]");
+            for (int i = 0; i < options.Count; i++)
+            {
+                var option = options[i];
+                var display = string.IsNullOrEmpty(option.TargetName) ? option.Name : $"{option.Name}（{option.TargetName}）";
+                sb.AppendLine($"{i + 1}. {display}");
+            }
+            return sb.ToString();
         }
 
         private bool IsOptionCommand(string commandType)
@@ -693,19 +605,14 @@ namespace MiyakoCarryService.Assistant.Mgrs
             return commandType is "InteractionProxyAction" or "QuestProxyAction" or "StationaryWeaponProxyAction" or "EscortWorld";
         }
 
-        /// <summary>格式化 LLM 指令识别结果：未识别 / 技术错误 / 指令名+目标详情 / 无响应。</summary>
         private string FormatDebugIntent(LlmIntent intent)
         {
             if (intent == null || intent.IsError)
             {
-                // 识别结果只允许指令：LLM 未识别统一显示，技术错误保留原文便于排查
-                return intent != null && intent.Error == LlmIntent.NotRecognized
-                    ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized()
-                    : string.Format(Utils.Locales.ERROR_PREFIX.McsLocalized(), intent?.Error ?? "null");
+                return intent != null && intent.Error == LlmIntent.NotRecognized ? Utils.Locales.VOICENOTRECOGNIZED.McsLocalized() : string.Format(Utils.Locales.ERROR_PREFIX.McsLocalized(), intent?.Error ?? "null");
             }
             if (!string.IsNullOrEmpty(intent.CommandName))
             {
-                // 代理/护送类且选择了菜单选项：直接显示所选选项名（含距离提示）
                 if (intent.OptionIndex.HasValue && IsOptionCommand(intent.CommandName))
                 {
                     var options = McsCommandApi.GetVoiceMenuOptions();
@@ -749,7 +656,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 {
                     detail += $"（{intent.AimingBodyPart}）";
                 }
-                // 显示本地化权威指令名（TEAM* 系列），与提示词 glossary 同源
                 return string.Format(Utils.Locales.COMMAND_PREFIX.McsLocalized(), Utils.Tools.GetLocalizedNames(intent.CommandName) + detail);
             }
             return Utils.Locales.NO_RESPONSE.McsLocalized();
@@ -757,16 +663,9 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
         private void Notification(string message)
         {
-            try
+            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance != null)
             {
-                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance != null)
-                {
-                    NotificationManager.DisplayMessageNotification(message);
-                }
-            }
-            catch
-            {
-
+                NotificationManager.DisplayMessageNotification(message);
             }
         }
     }

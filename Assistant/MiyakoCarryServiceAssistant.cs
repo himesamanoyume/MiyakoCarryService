@@ -502,13 +502,8 @@ namespace MiyakoCarryService.Assistant
             GUILayout.Label((string)entry.BoxedValue ?? "", _debugReadonlyStyle);
         }
 
-        /// <summary>
-        /// 使用当前 LLM 配置发送连通性测试（最小化请求，成功时回复应为 "pong"），
-        /// 回复或报错信息覆盖写入 LLM 返回结果。不做指令识别。
-        /// </summary>
         private static async Task RunLlmDebugTestAsync()
         {
-            // 请求开始前先显示请求中状态，结果返回后覆盖
             LlmDebugResult.Value = Locales.LLM_DEBUG_REQUESTING.McsLocalized();
             try
             {

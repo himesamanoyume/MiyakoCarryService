@@ -29,8 +29,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var signature = Md5($"appid={settings.ApiKey}&token={settings.ApiSecret}&ts={ts}");
-            var endpoint = $"{baseUrl}/api/v1/auc/get_one_sentence_recognition" +
-                $"?appid={Uri.EscapeDataString(settings.ApiKey)}&token={Uri.EscapeDataString(settings.ApiSecret)}&signature={signature}&ts={ts}";
+            var endpoint = $"{baseUrl}/api/v1/auc/get_one_sentence_recognition" + $"?appid={Uri.EscapeDataString(settings.ApiKey)}&token={Uri.EscapeDataString(settings.ApiSecret)}&signature={signature}&ts={ts}";
 
             var result = await SendRawAsync(endpoint, wavBytes, "application/octet-stream", settings, cancellationToken,
                 truncateLen: 240);
@@ -47,7 +46,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var code = json.Value<int>("code");
             if (code != 0)
             {
-                return new SttResult { Error = $"火山识别失败 {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                return new SttResult { Error = $"Error {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
             var resultBase64 = json.Value<string>("result");

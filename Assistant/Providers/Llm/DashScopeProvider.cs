@@ -8,11 +8,6 @@ using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
-    /// <summary>
-    /// 阿里云 DashScope 通义千问 Chat Completions：
-    /// <c>POST /api/v1/services/aigc/text-generation/generation</c>，<c>Authorization: Bearer</c> 鉴权。
-    /// 意图解析复用 OpenAI 兼容的 JSON schema。
-    /// </summary>
     public sealed class DashScopeProvider : BaseLlmProvider
     {
         protected override string ProviderDisplayName => Locales.LLMPROVIDERDASHSCOPE.McsLocalized();
@@ -32,9 +27,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
-            var messages = new JArray();
-            messages.Add(new JObject { ["role"] = "system", ["content"] = systemPrompt });
-            messages.Add(new JObject { ["role"] = "user", ["content"] = userText });
+            var messages = new JArray
+            {
+                new JObject { ["role"] = "system", ["content"] = systemPrompt },
+                new JObject { ["role"] = "user", ["content"] = userText }
+            };
 
             var body = new JObject
             {

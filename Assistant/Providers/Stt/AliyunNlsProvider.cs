@@ -65,7 +65,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 var status = json.Value<int>("status");
                 if (status != 20000000)
                 {
-                    return new SttResult { Error = $"阿里识别失败 {status}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                    return new SttResult { Error = $"Error {status}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
                 }
                 return new SttResult { Text = json.Value<string>("result") ?? string.Empty, DetectedLanguage = settings.Language };
             }
