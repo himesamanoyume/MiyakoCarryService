@@ -1,8 +1,4 @@
 using EFT;
-using EFT.Interactive;
-using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Enums;
-using MiyakoCarryService.Client.Extensions;
 using UnityEngine;
 
 namespace MiyakoCarryService.Assistant.Utils
@@ -39,45 +35,6 @@ namespace MiyakoCarryService.Assistant.Utils
 
             var fwdPos = player.Position + player.InteractionRay.direction * Mathf.Min(maxDistance, 64f);
             return new ResolvedTarget { Position = fwdPos, TargetId = null };
-        }
-
-        public static ResolvedTarget ResolveProxyTarget(Player player, string commandType, float maxDistance = 1000f)
-        {
-            if (player == null)
-            {
-                return null;
-            }
-
-            if (!Physics.Raycast(player.InteractionRay, out var hit, maxDistance, LayersMaskController.HighPolyWithTerrainMask))
-            {
-                return null;
-            }
-
-            if (commandType == ECommandType.InteractionProxyAction.ToString())
-            {
-                var door = hit.collider.GetComponentInParent<Door>();
-                if (door != null && door.DoorState == EDoorState.Locked)
-                {
-                    var doorData = door.GetData();
-                    return doorData != null ? new ResolvedTarget { Position = hit.point, TargetId = doorData.Id() } : null;
-                }
-                return null;
-            }
-
-            if (commandType == ECommandType.LootProxyAction.ToString())
-            {
-                var lootItem = hit.collider.GetComponentInParent<LootItem>();
-                if (lootItem != null && !(lootItem is Corpse))
-                {
-                    if (lootItem.Item.GetData() is LootData lootData)
-                    {
-                        return new ResolvedTarget { Position = hit.point, TargetId = lootData.Item.Id };
-                    }
-                }
-                return null;
-            }
-
-            return new ResolvedTarget { Position = hit.point, TargetId = null };
         }
     }
 }

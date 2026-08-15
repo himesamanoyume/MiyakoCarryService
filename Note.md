@@ -23,8 +23,7 @@
 
 ## TODO
 
-- ~~`VoiceFeedbackSubtitles`应该改为通知，而不是字幕~~
-- 语音代理拾取不成功
+- null
 
 ## 更新日志
 

@@ -35,8 +35,7 @@ namespace MiyakoCarryService.Assistant.Utils
             { ECommandType.Teleport.ToString(),                    [ClientLocales.FORCETELEPORTCOMMAND_NAME] },
             { ECommandType.AimingBodyPart.ToString(),              [ClientLocales.CHANGEAIMINGBODYPARTTYPECOMMAND_NAME] },
             { ECommandType.QuestProxyAction.ToString(),            [ClientLocales.QUESTPROXYCOMMAND_NAME] },
-            { ECommandType.LootProxyAction.ToString(),             [ClientLocales.LOOTPROXYCOMMAND_NAME] },
-            { ECommandType.InteractionProxyAction.ToString(),      [ClientLocales.SWITCHPROXYCOMMAND_NAME, ClientLocales.DOORPROXYCOMMAND_NAME] },
+            { ECommandType.InteractionProxyAction.ToString(),      [ClientLocales.SWITCHPROXYCOMMAND_NAME] },
             { ECommandType.StationaryWeaponProxyAction.ToString(), [ClientLocales.STATIONARYWEAPONPROXYCOMMAND_NAME] },
             { ECommandType.DropTargetLoot.ToString(),              [ClientLocales.DROPTARGETLOOTCOMMAND_NAME] },
         };
@@ -60,7 +59,6 @@ namespace MiyakoCarryService.Assistant.Utils
             ECommandType.Teleport.ToString(),
             ECommandType.AimingBodyPart.ToString(),
             ECommandType.QuestProxyAction.ToString(),
-            ECommandType.LootProxyAction.ToString(),
             ECommandType.InteractionProxyAction.ToString(),
             ECommandType.StationaryWeaponProxyAction.ToString(),
             ECommandType.DropTargetLoot.ToString(),
@@ -79,7 +77,6 @@ namespace MiyakoCarryService.Assistant.Utils
         public static readonly HashSet<string> CommandsNeedTargetId = new()
         {
             ECommandType.QuestProxyAction.ToString(),
-            ECommandType.LootProxyAction.ToString(),
             ECommandType.InteractionProxyAction.ToString(),
             ECommandType.StationaryWeaponProxyAction.ToString(),
             ECommandType.DropTargetLoot.ToString(),

@@ -133,8 +133,8 @@ namespace MiyakoCarryService.Assistant.Utils
             sb.AppendLine();
 
             sb.AppendLine("Proxy commands special handling:");
-            sb.AppendLine(" - Prefer the concrete sub-command when the player's intent is specific: QuestProxyAction (quest), LootProxyAction (loot), StationaryWeaponProxyAction (stationary weapon).");
-            sb.AppendLine(" - For switch/door and other generic interactable proxying, use InteractionProxyAction; the player must be looking at the target object and the backend resolves it.");
+            sb.AppendLine(" - Prefer the concrete sub-command when the player's intent is specific: QuestProxyAction (quest), StationaryWeaponProxyAction (stationary weapon).");
+            sb.AppendLine(" - For switch and other generic interactable proxying, use InteractionProxyAction; the player must select the target from the \"Command options\" list appended to the user message (return its optionIndex).");
             sb.AppendLine(" - Never emit EndProxyAction — it is a system callback, not a player command.");
             sb.AppendLine();
 
@@ -217,15 +217,9 @@ namespace MiyakoCarryService.Assistant.Utils
                     position = options[idx].Position;
                     targetId = options[idx].TargetId;
                 }
-                else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString() || intent.CommandName == ECommandType.LootProxyAction.ToString())
+                else if (intent.CommandName == ECommandType.InteractionProxyAction.ToString())
                 {
-                    var resolved = TargetResolver.ResolveProxyTarget(mainPlayer, intent.CommandName);
-                    if (resolved == null)
-                    {
-                        return -1;
-                    }
-                    position = resolved.Position;
-                    targetId = resolved.TargetId;
+                    return -1;
                 }
                 else
                 {
