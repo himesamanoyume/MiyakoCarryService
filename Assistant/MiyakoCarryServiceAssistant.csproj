@@ -15,7 +15,7 @@
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
     <AssemblyProduct>MiyakoCarryServiceAssistant</AssemblyProduct>
     <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright>
-    <Version>1.1.0.6</Version>
+    <Version>1.1.1.0</Version>
     <AssemblyTitle>MiyakoCarryServiceAssistant</AssemblyTitle>
     <Trademark>https://sp-mod.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Assistant</RootNamespace>
