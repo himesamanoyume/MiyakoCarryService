@@ -45,7 +45,7 @@ namespace MiyakoCarryService.Assistant
         public static ConfigEntry<float> VoiceCaptureMaxSeconds;
         public static ConfigEntry<float> VoiceVadEnergyThreshold;
         public static ConfigEntry<float> VoiceVadSilenceSeconds;
-        public static ConfigEntry<bool> VoiceFeedbackSubtitles;
+        public static ConfigEntry<bool> VoiceFeedbackNotification;
         public static ConfigEntry<string> RecordDevice;
         public static ConfigEntry<string> HttpProxyHost;
         public static ConfigEntry<string> HttpProxyPort;
@@ -166,11 +166,11 @@ namespace MiyakoCarryService.Assistant
                 new AcceptableValueRange<float>(0.5f, 5f)
             );
 
-            VoiceFeedbackSubtitles = McsConfigApi.RegisterConfig(
+            VoiceFeedbackNotification = McsConfigApi.RegisterConfig(
                 section, order,
-                Locales.VOICEFEEDBACKSUBTITLES_KEY,
+                Locales.VOICEFEEDBACKNOTIFICATION_KEY,
                 true,
-                Locales.VOICEFEEDBACKSUBTITLES_DESCRIPTION
+                Locales.VOICEFEEDBACKNOTIFICATION_DESCRIPTION
             );
 
             var recordDevices = new List<string> { "Default" };

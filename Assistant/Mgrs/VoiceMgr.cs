@@ -534,7 +534,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 FeedbackMessage = feedback,
             });
 
-            if (MiyakoCarryServiceAssistantPlugin.VoiceFeedbackSubtitles.Value && !string.IsNullOrEmpty(feedback))
+            if (MiyakoCarryServiceAssistantPlugin.VoiceFeedbackNotification.Value && !string.IsNullOrEmpty(feedback))
             {
                 Notification(feedback);
             }

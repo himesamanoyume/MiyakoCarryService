@@ -28,7 +28,7 @@ RMS energy threshold that triggers speech start in FreeTalk. Lower if whispers a
 
 Silence duration to end the recording in FreeTalk. Defaults to 1f.
 
-- **VoiceFeedbackSubtitles**
+- **VoiceFeedbackNotification**
 
 Show in-game notification after each voice command is dispatched. Defaults to true.
 

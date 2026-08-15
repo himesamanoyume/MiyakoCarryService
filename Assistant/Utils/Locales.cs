@@ -22,8 +22,8 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string VOICEVADSILENCESECONDS_KEY          = "Mcs/VoiceVadSilenceSeconds Key";
         public const string VOICEVADSILENCESECONDS_DESCRIPTION   = "Mcs/VoiceVadSilenceSeconds Description";
 
-        public const string VOICEFEEDBACKSUBTITLES_KEY           = "Mcs/VoiceFeedbackSubtitles Key";
-        public const string VOICEFEEDBACKSUBTITLES_DESCRIPTION    = "Mcs/VoiceFeedbackSubtitles Description";
+        public const string VOICEFEEDBACKNOTIFICATION_KEY           = "Mcs/VoiceFeedbackNotification Key";
+        public const string VOICEFEEDBACKNOTIFICATION_DESCRIPTION    = "Mcs/VoiceFeedbackNotification Description";
 
         public const string RECORDDEVICE_KEY         = "Mcs/RecordDevice Key";
         public const string RECORDDEVICE_DESCRIPTION = "Mcs/RecordDevice Description";
