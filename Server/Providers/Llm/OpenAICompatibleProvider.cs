@@ -36,9 +36,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
                     var useJsonObject = attempt == 0;
-                    var useReasoningEffort = attempt == 0
-                        && !string.IsNullOrEmpty(settings.ReasoningEffort)
-                        && settings.ReasoningEffort != "default";
+                    var useReasoningEffort = attempt == 0 && !string.IsNullOrEmpty(settings.ReasoningEffort) && settings.ReasoningEffort != "default";
                     var body = new JsonObject
                     {
                         ["model"] = modelId,

@@ -173,7 +173,7 @@ namespace MiyakoCarryService.Assistant
                 Locales.VOICEFEEDBACKNOTIFICATION_DESCRIPTION
             );
 
-            var recordDevices = new List<string> { "Default" };
+            List<string> recordDevices = ["Default"];
             if (Microphone.devices != null)
             {
                 recordDevices.AddRange(Microphone.devices);

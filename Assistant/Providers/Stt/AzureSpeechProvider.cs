@@ -26,8 +26,7 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             }
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
-            var endpoint = $"{baseUrl}/speech/recognition/conversation/cognitiveservices/v1" +
-                $"?language={Uri.EscapeDataString(string.IsNullOrEmpty(settings.Language) ? "zh-CN" : settings.Language)}&format=simple";
+            var endpoint = $"{baseUrl}/speech/recognition/conversation/cognitiveservices/v1" + $"?language={Uri.EscapeDataString(string.IsNullOrEmpty(settings.Language) ? "zh-CN" : settings.Language)}&format=simple";
 
             var result = await SendRawAsync(endpoint, wavBytes, "audio/wav", settings, cancellationToken,
                 request =>

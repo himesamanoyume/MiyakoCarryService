@@ -35,8 +35,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var body = BuildChatCompletionsBody(model, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens);
 
-            var result = await PostJsonAsync($"{baseUrl}/v2/chat/completions", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
+            var result = await PostJsonAsync($"{baseUrl}/v2/chat/completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
             if (!result.IsSuccess)
             {
                 return new LlmIntent { Error = result.Error };

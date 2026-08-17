@@ -58,16 +58,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             try
             {
                 var json = JObject.Parse(content);
-                // 识别结果只允许是指令：LLM 返回 replyText/error 一律视为未识别
-                if (json["replyText"] is JToken replyToken
-                    && replyToken.Type != JTokenType.Null
-                    && !string.IsNullOrWhiteSpace(replyToken.ToString()))
+                if (json["replyText"] is JToken replyToken && replyToken.Type != JTokenType.Null && !string.IsNullOrWhiteSpace(replyToken.ToString()))
                 {
                     return new LlmIntent { Error = LlmIntent.NotRecognized };
                 }
-                if (json["error"] is JToken errToken
-                    && errToken.Type != JTokenType.Null
-                    && !string.IsNullOrWhiteSpace(errToken.ToString()))
+                if (json["error"] is JToken errToken && errToken.Type != JTokenType.Null && !string.IsNullOrWhiteSpace(errToken.ToString()))
                 {
                     return new LlmIntent { Error = LlmIntent.NotRecognized };
                 }
@@ -97,7 +92,6 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     }
                 }
 
-                // 多目标：targetIndices / targetCodeNames 数组（优先于单值字段）
                 if (json["targetIndices"] is JToken idxArrToken && idxArrToken.Type == JTokenType.Array)
                 {
                     var indices = new List<int>();

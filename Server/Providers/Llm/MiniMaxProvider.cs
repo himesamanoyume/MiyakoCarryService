@@ -43,7 +43,6 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 return new LlmIntent { Error = result.Error };
             }
 
-            // v2 业务错误：base_resp.status_code != 0
             var businessError = CheckBusinessError(result.ResponseText);
             if (businessError != null)
             {
@@ -72,7 +71,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
             catch
             {
-                // 响应非合法 JSON：交由 ParseIntentJson 输出解析错误
+                
             }
             return null;
         }
