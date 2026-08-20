@@ -1,30 +1,37 @@
 
+using System;
 using System.Reflection;
-using Comfort.Common;
+using System.Threading;
+using System.Threading.Tasks;
+using ChatShared;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
 {
     /// <summary>
-    /// 发送任何给宫子商人的消息时，主动请求刷新任务
+    /// 收到宫子商人的下单/罚单成功模板消息时，主动请求刷新任务
     /// </summary>
-    public sealed class ChatSendMessagePatch : ModulePatch
+    public sealed class MessageReceivedHandlerPatch : ModulePatch
     {
         private static CancellationTokenSource _questRefreshCts;
 
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ClientBackendSession), nameof(ClientBackendSession.ChatSendMessage));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SocialNetwork), nameof(SocialNetwork.MessageReceivedHandler));
 
         [PatchPostfix]
-        public static void Postfix(string id, int type, string text, string replyTo, Callback<string> callback)
+        public static void Postfix(DialogueChatMessage message, string dialogueId)
         {
-            if (id != MiyakoCarryServicePlugin.MiyakoTraderId)
+            if (dialogueId != MiyakoCarryServicePlugin.MiyakoTraderId)
+            {
+                return;
+            }
+
+            var templateId = message?.templateId;
+            if (templateId != Locales.MIYAKOTRADERORDERNEWQUEST && templateId != Locales.MIYAKOTRADERTICKETNEWQUEST)
             {
                 return;
             }

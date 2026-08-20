@@ -204,6 +204,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string SETTLEMCSORDERREFUSE = "Mcs/SettleMcsOrderRefuse";
         public const string RENEWMCSORDER = "Mcs/RenewMcsOrder";
         public const string MIYAKOTRADERORDERNEWQUEST = "Mcs/MiyakoTraderOrderNewQuest";
+        public const string MIYAKOTRADERTICKETNEWQUEST = "Mcs/MiyakoTraderTicketNewQuest";
         public const string RENEWMCSORDERREFUSE = "Mcs/RenewMcsOrderRefuse";
         public const string ENABLEKEEPFORMATION_KEY = "Mcs/EnableKeepFormation Key";
         public const string ENABLEKEEPFORMATION_DESCRIPTION = "Mcs/EnableKeepFormation Description";

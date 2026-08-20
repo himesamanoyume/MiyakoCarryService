@@ -201,7 +201,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new MenuTaskBarAwakePatch());
             _patches.Add(new NewNewsCountPatch());
             _patches.Add(new SetGoalEnemyPatch());
-            _patches.Add(new ChatSendMessagePatch());
+            _patches.Add(new MessageReceivedHandlerPatch());
             _patches.Add(new LocalQuestControllerClassPatch());
             _patches.Add(new GetContextInteractionsPatch());
             _patches.Add(new ContextInteractionsClassPatch());
