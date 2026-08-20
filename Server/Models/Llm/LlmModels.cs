@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Server.Models.Llm
         public double Temperature = 0.2;
         public int MaxTokens = 3000;
         public int TimeoutSec = 15;
-        public string ReasoningEffort = "low";
+        public string ReasoningEffort = "none";
     }
 
     public sealed class LlmIntent

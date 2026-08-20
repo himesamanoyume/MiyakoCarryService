@@ -57,12 +57,17 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
                     if (!result.IsSuccess)
                     {
-                        var unsupported = result.HttpStatus is 400 or 401 or 403 or 422
+                        if (result.ErrorBody?.Contains("reasoning", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            return new LlmIntent { Error = result.Error };
+                        }
+
+                        var formatUnsupported = result.HttpStatus is 400 or 401 or 403 or 422
                             && (result.ErrorBody?.Contains("not supported", StringComparison.OrdinalIgnoreCase) == true
                                 || result.ErrorBody?.Contains("json_object", StringComparison.OrdinalIgnoreCase) == true
-                                || result.ErrorBody?.Contains("response_format", StringComparison.OrdinalIgnoreCase) == true
-                                || result.ErrorBody?.Contains("reasoning", StringComparison.OrdinalIgnoreCase) == true);
-                        if (attempt == 0 && unsupported)
+                                || result.ErrorBody?.Contains("response_format", StringComparison.OrdinalIgnoreCase) == true);
+
+                        if (attempt == 0 && formatUnsupported)
                         {
                             continue;
                         }

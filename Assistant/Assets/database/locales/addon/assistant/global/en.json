@@ -95,7 +95,7 @@
     "Mcs/VoiceDebugVadText Key": "FreeTalk VAD Status",
     "Mcs/VoiceDebugVadText Description": "Live speech detection status for FreeTalk (RMS energy / speech flag / silence timer). Read-only.",
     "Mcs/LlmReasoningEffort Key": "LLM Reasoning Effort",
-    "Mcs/LlmReasoningEffort Description": "LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it.",
+    "Mcs/LlmReasoningEffort Description": "LLM reasoning effort: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default omits the parameter; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. Options are provided only; whether this model supports it depends on the actual endpoint.",
     "Mcs/SttApiSecret Key": "STT Secret",
     "Mcs/SttApiSecret Description": "Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun); leave empty for single-key providers. ",
     "Mcs/LlmApiSecret Key": "LLM Secret",

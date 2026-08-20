@@ -119,7 +119,7 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
         public int TraderLlmTimeoutSec { get; set; } = 15;
 
         [JsonPropertyName("TraderLlmReasoningEffort")]
-        public string TraderLlmReasoningEffort { get; set; } = "low";
+        public string TraderLlmReasoningEffort { get; set; } = "none";
 
         [JsonPropertyName("TraderLlmMaxMessagesPerMinute")]
         public int TraderLlmMaxMessagesPerMinute { get; set; } = 10;

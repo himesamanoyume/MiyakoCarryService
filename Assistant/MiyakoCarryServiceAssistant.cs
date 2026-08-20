@@ -338,9 +338,9 @@ namespace MiyakoCarryService.Assistant
             LlmReasoningEffort = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMREASONINGEFFORT_KEY,
-                "low",
+                "none",
                 Locales.LLMREASONINGEFFORT_DESCRIPTION,
-                new AcceptableValueList<string>(["default", "low", "medium", "high", "max"])
+                new AcceptableValueList<string>(["none", "default", "low", "medium", "high", "max"])
             );
 
             HttpProxyHost = McsConfigApi.RegisterConfig(
