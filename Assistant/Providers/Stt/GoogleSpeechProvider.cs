@@ -1,11 +1,12 @@
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -29,17 +30,17 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var endpoint = $"{baseUrl}/v1/speech:recognize?key={Uri.EscapeDataString(settings.ApiKey)}";
 
-            var body = new JObject
+            var body = new GoogleSpeechRequest
             {
-                ["config"] = new JObject
+                Config = new GoogleSpeechConfig
                 {
-                    ["encoding"] = "LINEAR16",
-                    ["sampleRateHertz"] = audio.SampleRate,
-                    ["languageCode"] = string.IsNullOrEmpty(settings.Language) ? "zh-CN" : settings.Language,
+                    Encoding = "LINEAR16",
+                    SampleRateHertz = audio.SampleRate,
+                    LanguageCode = string.IsNullOrEmpty(settings.Language) ? "zh-CN" : settings.Language,
                 },
-                ["audio"] = new JObject
+                Audio = new GoogleSpeechAudio
                 {
-                    ["content"] = Convert.ToBase64String(wavBytes),
+                    Content = Convert.ToBase64String(wavBytes),
                 },
             };
 
@@ -50,17 +51,17 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = result.Error };
             }
 
-            var json = ParseResponseJson(result);
-            if (json == null)
+            var response = ParseResponseJson<GoogleSpeechResponse>(result);
+            if (response == null)
             {
                 return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
             var sb = new StringBuilder();
-            if (json["results"] is JArray results)
+            if (response.Results is { Count: > 0 })
             {
-                foreach (var item in results)
+                foreach (var item in response.Results)
                 {
-                    var transcript = item?["alternatives"]?[0]?["transcript"]?.ToString();
+                    var transcript = item?.Alternatives?.FirstOrDefault()?.Transcript;
                     if (!string.IsNullOrWhiteSpace(transcript))
                     {
                         if (sb.Length > 0)

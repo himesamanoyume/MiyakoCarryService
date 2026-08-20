@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
 
@@ -40,17 +41,17 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = result.Error };
             }
 
-            var json = ParseResponseJson(result);
-            if (json == null)
+            var response = ParseResponseJson<AzureSpeechResponse>(result);
+            if (response == null)
             {
                 return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
-            var status = json.Value<string>("RecognitionStatus");
+            var status = response.RecognitionStatus;
             if (string.Equals(status, "Success", StringComparison.OrdinalIgnoreCase))
             {
                 return new SttResult
                 {
-                    Text = json.Value<string>("DisplayText") ?? string.Empty,
+                    Text = response.DisplayText ?? string.Empty,
                     DetectedLanguage = settings.Language,
                 };
             }

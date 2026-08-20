@@ -3,9 +3,9 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -31,16 +31,16 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
-                    var useJsonObject = attempt == 0;
+                    var useResponseFormat = attempt == 0;
                     var useReasoningEffort = attempt == 0 && !string.IsNullOrEmpty(settings.ReasoningEffort) && settings.ReasoningEffort != "default";
                     var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
                     if (useReasoningEffort)
                     {
-                        body["reasoning_effort"] = settings.ReasoningEffort;
+                        body.ReasoningEffort = settings.ReasoningEffort;
                     }
-                    if (useJsonObject)
+                    if (useResponseFormat)
                     {
-                        body["response_format"] = JObject.FromObject(new { type = "json_object" });
+                        body.ResponseFormat = new OpenAiResponseFormat { Type = "json_object" };
                     }
 
                     var result = await SendJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,

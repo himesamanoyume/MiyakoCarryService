@@ -130,12 +130,10 @@ namespace MiyakoCarryService.Assistant.Utils
         public const string LLMPROVIDERSPARK            = "Mcs/LlmProviderSpark";
         public const string LLMPROVIDERMINIMAX          = "Mcs/LlmProviderMiniMax";
 
-        // —— 通用 HTTP（LLM/STT 共用）——
         public const string HTTP_REQUEST_TIMEOUT         = "Mcs/HttpRequestTimeout";
         public const string HTTP_EXCEPTION               = "Mcs/HttpException";
         public const string ERROR_NOT_IMPLEMENTED        = "Mcs/ErrorNotImplemented";
 
-        // —— LLM ——
         public const string LLM_USER_TEXT_EMPTY          = "Mcs/LlmUserTextEmpty";
         public const string LLM_EMPTY_CONTENT            = "Mcs/LlmEmptyContent";
         public const string LLM_PING_NOT_SUPPORTED       = "Mcs/LlmPingNotSupported";

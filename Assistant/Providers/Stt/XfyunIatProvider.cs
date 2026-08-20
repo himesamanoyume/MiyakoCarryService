@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -37,21 +37,21 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var date = DateTime.UtcNow.ToString("R");
             var authorization = BuildAuthorization(host, date, settings.ApiKey, settings.ApiSecret);
 
-            var body = new JObject
+            var body = new XfyunIatRequest
             {
-                ["common"] = new JObject { ["app_id"] = settings.ModelId },
-                ["business"] = new JObject
+                Common = new XfyunIatCommon { AppId = settings.ModelId },
+                Business = new XfyunIatBusiness
                 {
-                    ["aue"] = "raw",
-                    ["auf"] = $"audio/L16;rate={RequiredRate}",
-                    ["vad_eos"] = 3000,
-                    ["domain"] = "iat",
-                    ["language"] = string.IsNullOrEmpty(settings.Language) ? "zh_cn" : settings.Language,
+                    Aue = "raw",
+                    Auf = $"audio/L16;rate={RequiredRate}",
+                    VadEos = 3000,
+                    Domain = "iat",
+                    Language = string.IsNullOrEmpty(settings.Language) ? "zh_cn" : settings.Language,
                 },
-                ["data"] = new JObject
+                Data = new XfyunIatData
                 {
-                    ["audio"] = Convert.ToBase64String(wavBytes),
-                    ["sample_rate"] = RequiredRate,
+                    Audio = Convert.ToBase64String(wavBytes),
+                    SampleRate = RequiredRate,
                 },
             };
 
@@ -71,23 +71,23 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = result.Error };
             }
 
-            var json = ParseResponseJson(result);
-            if (json == null)
+            var response = ParseResponseJson<XfyunIatResponse>(result);
+            if (response == null)
             {
                 return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
-            var code = json.Value<int>("code");
+            var code = response.Code ?? 0;
             if (code != 0)
             {
-                return new SttResult { Error = $"Error {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                return new SttResult { Error = $"Error {code}: {response.Message ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
             var sb = new StringBuilder();
-            if (json["data"]?["result"]?["rg"] is JArray rg)
+            if (response.Data?.Result?.Rg is { Count: > 0 })
             {
-                foreach (var item in rg)
+                foreach (var item in response.Data.Result.Rg)
                 {
-                    var v = item?["v"]?.ToString();
+                    var v = item?.V;
                     if (string.IsNullOrEmpty(v))
                     {
                         continue;

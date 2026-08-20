@@ -2,9 +2,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -27,20 +28,21 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
-            var messages = new JArray
+            var body = new DashScopeGenerationRequest
             {
-                new JObject { ["role"] = "system", ["content"] = systemPrompt },
-                new JObject { ["role"] = "user", ["content"] = userText }
-            };
-
-            var body = new JObject
-            {
-                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
-                ["input"] = new JObject { ["messages"] = messages },
-                ["parameters"] = new JObject
+                Model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
+                Input = new DashScopeInput
                 {
-                    ["temperature"] = settings.Temperature,
-                    ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                    Messages =
+                    [
+                        new OpenAiChatMessage { Role = "system", Content = systemPrompt },
+                        new OpenAiChatMessage { Role = "user", Content = userText },
+                    ],
+                },
+                Parameters = new DashScopeParameters
+                {
+                    Temperature = settings.Temperature,
+                    MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
 
@@ -61,18 +63,18 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var body = new JObject
+            var body = new DashScopeGenerationRequest
             {
-                ["model"] = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
-                ["input"] = new JObject
+                Model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId,
+                Input = new DashScopeInput
                 {
-                    ["messages"] = JArray.FromObject(new[]
-                    {
-                        new { role = "system", content = "You are a connectivity test. Reply with exactly: pong" },
-                        new { role = "user", content = "ping" },
-                    }),
+                    Messages =
+                    [
+                        new OpenAiChatMessage { Role = "system", Content = "You are a connectivity test. Reply with exactly: pong" },
+                        new OpenAiChatMessage { Role = "user", Content = "ping" },
+                    ],
                 },
-                ["parameters"] = new JObject { ["temperature"] = 0d, ["max_tokens"] = 64 },
+                Parameters = new DashScopeParameters { Temperature = 0d, MaxTokens = 64 },
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -84,7 +86,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             return SendJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
         }
@@ -93,8 +95,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             try
             {
-                var json = JObject.Parse(responseString);
-                return json["output"]?["text"]?.ToString();
+                var response = JsonConvert.DeserializeObject<DashScopeGenerationResponse>(responseString);
+                return response?.Output?.Text;
             }
             catch
             {

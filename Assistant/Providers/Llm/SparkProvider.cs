@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -59,7 +58,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var bearer = string.IsNullOrEmpty(settings.ApiSecret) ? settings.ApiKey : $"{settings.ApiKey}:{settings.ApiSecret}";
             return SendJsonAsync($"{baseUrl}/v1/chat/completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer));

@@ -3,9 +3,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -28,14 +29,24 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
-            var body = new JObject
+            var body = new GeminiGenerateContentRequest
             {
-                ["system_instruction"] = new JObject { ["parts"] = JArray.FromObject(new[] { new { text = systemPrompt } }) },
-                ["contents"] = JArray.FromObject(new[] { new { role = "user", parts = new[] { new { text = userText } } } }),
-                ["generationConfig"] = new JObject
+                SystemInstruction = new GeminiPartList
                 {
-                    ["temperature"] = settings.Temperature,
-                    ["maxOutputTokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                    Parts = [new GeminiPart { Text = systemPrompt }],
+                },
+                Contents =
+                [
+                    new GeminiContent
+                    {
+                        Role = "user",
+                        Parts = [new GeminiPart { Text = userText }],
+                    },
+                ],
+                GenerationConfig = new GeminiGenerationConfig
+                {
+                    Temperature = settings.Temperature,
+                    MaxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
 
@@ -56,11 +67,21 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
         public override async Task<string> PingAsync(ProviderSettings settings, CancellationToken cancellationToken)
         {
-            var body = new JObject
+            var body = new GeminiGenerateContentRequest
             {
-                ["system_instruction"] = new JObject { ["parts"] = JArray.FromObject(new[] { new { text = "You are a connectivity test. Reply with exactly: pong" } }) },
-                ["contents"] = JArray.FromObject(new[] { new { role = "user", parts = new[] { new { text = "ping" } } } }),
-                ["generationConfig"] = new JObject { ["temperature"] = 0d, ["maxOutputTokens"] = 64 },
+                SystemInstruction = new GeminiPartList
+                {
+                    Parts = [new GeminiPart { Text = "You are a connectivity test. Reply with exactly: pong" }],
+                },
+                Contents =
+                [
+                    new GeminiContent
+                    {
+                        Role = "user",
+                        Parts = [new GeminiPart { Text = "ping" }],
+                    },
+                ],
+                GenerationConfig = new GeminiGenerationConfig { Temperature = 0d, MaxOutputTokens = 64 },
             };
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
@@ -72,7 +93,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
@@ -83,16 +104,22 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             try
             {
-                var json = JObject.Parse(responseString);
+                var response = JsonConvert.DeserializeObject<GeminiGenerateContentResponse>(responseString);
                 var sb = new StringBuilder();
-                if (json["candidates"]?[0]?["content"]?["parts"] is JArray parts)
+                if (response?.Candidates is { Count: > 0 })
                 {
-                    foreach (var part in parts)
+                    foreach (var candidate in response.Candidates)
                     {
-                        var text = part?["text"]?.ToString();
-                        if (!string.IsNullOrEmpty(text))
+                        if (candidate?.Content?.Parts is { Count: > 0 })
                         {
-                            sb.Append(text);
+                            foreach (var part in candidate.Content.Parts)
+                            {
+                                var text = part?.Text;
+                                if (!string.IsNullOrEmpty(text))
+                                {
+                                    sb.Append(text);
+                                }
+                            }
                         }
                     }
                 }

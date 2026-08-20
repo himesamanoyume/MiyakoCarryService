@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
 
@@ -38,18 +39,18 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = result.Error };
             }
 
-            var json = ParseResponseJson(result);
-            if (json == null)
+            var response = ParseResponseJson<VolcIatResponse>(result);
+            if (response == null)
             {
                 return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
-            var code = json.Value<int>("code");
+            var code = response.Code ?? 0;
             if (code != 0)
             {
-                return new SttResult { Error = $"Error {code}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                return new SttResult { Error = $"Error {code}: {response.Message ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
             }
 
-            var resultBase64 = json.Value<string>("result");
+            var resultBase64 = response.Result;
             if (string.IsNullOrEmpty(resultBase64))
             {
                 return new SttResult { Text = string.Empty, DetectedLanguage = settings.Language };

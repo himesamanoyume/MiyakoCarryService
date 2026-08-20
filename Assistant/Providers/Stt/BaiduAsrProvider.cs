@@ -1,11 +1,13 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -40,14 +42,14 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 }
 
                 // 2. 一句话识别
-                var body = new JObject
+                var body = new BaiduAsrRequest
                 {
-                    ["format"] = "wav",
-                    ["rate"] = RequiredRate,
-                    ["channel"] = 1,
-                    ["cuid"] = "miyako-carry-service",
-                    ["token"] = token,
-                    ["speech"] = Convert.ToBase64String(wavBytes),
+                    Format = "wav",
+                    Rate = RequiredRate,
+                    Channel = 1,
+                    Cuid = "miyako-carry-service",
+                    Token = token,
+                    Speech = Convert.ToBase64String(wavBytes),
                 };
 
                 var result = await SendJsonAsync($"{baseUrl}/server_api", body, settings, cancellationToken,
@@ -57,17 +59,17 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                     return new SttResult { Error = result.Error };
                 }
 
-                var json = ParseResponseJson(result);
-                if (json == null)
+                var response = ParseResponseJson<BaiduAsrResponse>(result);
+                if (response == null)
                 {
                     return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
                 }
-                var errNo = json.Value<int>("err_no");
+                var errNo = response.ErrNo ?? 0;
                 if (errNo != 0)
                 {
-                    return new SttResult { Error = $"百度识别失败 {errNo}: {json.Value<string>("err_msg") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                    return new SttResult { Error = $"百度识别失败 {errNo}: {response.ErrMsg ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
                 }
-                var text = json["result"]?[0]?.ToString() ?? string.Empty;
+                var text = response.Result?.FirstOrDefault() ?? string.Empty;
                 return new SttResult { Text = text, DetectedLanguage = settings.Language };
             }
         }
@@ -85,8 +87,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 {
                     return null;
                 }
-                var json = JObject.Parse(responseString);
-                var token = json.Value<string>("access_token");
+                var json = JsonConvert.DeserializeObject<BaiduTokenResponse>(responseString);
+                var token = json?.AccessToken;
                 return string.IsNullOrEmpty(token) ? null : token;
             }
             catch

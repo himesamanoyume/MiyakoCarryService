@@ -1,12 +1,13 @@
 
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -14,11 +15,12 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
     {
         protected const int RequiredRate = 16000;
 
-        protected JObject ParseResponseJson(PostResponse result)
+        protected TResponse ParseResponseJson<TResponse>(PostResponse result)
+            where TResponse : class
         {
             try
             {
-                return JObject.Parse(result.ResponseText);
+                return JsonConvert.DeserializeObject<TResponse>(result.ResponseText);
             }
             catch
             {

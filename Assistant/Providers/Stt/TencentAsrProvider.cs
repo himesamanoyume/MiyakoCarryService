@@ -4,9 +4,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -30,19 +31,19 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var host = new Uri(baseUrl).Host;
 
-            var body = new JObject
+            var body = new TencentAsrRequest
             {
-                ["ProjectId"] = 0,
-                ["SubServiceType"] = "short",
-                ["EngSerViceType"] = "16k_zh",
-                ["SourceType"] = 1,
-                ["VoiceFormat"] = "wav",
-                ["Data"] = Convert.ToBase64String(wavBytes),
-                ["FilterDirty"] = 0,
-                ["FilterModal"] = 0,
-                ["ConvertNumMode"] = 1,
+                ProjectId = 0,
+                SubServiceType = "short",
+                EngSerViceType = "16k_zh",
+                SourceType = 1,
+                VoiceFormat = "wav",
+                Data = Convert.ToBase64String(wavBytes),
+                FilterDirty = 0,
+                FilterModal = 0,
+                ConvertNumMode = 1,
             };
-            var bodyString = body.ToString();
+            var bodyString = JsonConvert.SerializeObject(body, JsonSettings);
 
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var date = DateTime.UtcNow.ToString("yyyy-MM-dd");
@@ -64,19 +65,19 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 return new SttResult { Error = result.Error };
             }
 
-            var json = ParseResponseJson(result);
-            if (json == null)
+            var response = ParseResponseJson<TencentAsrResponse>(result);
+            if (response == null)
             {
                 return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
             }
-            var error = json["Response"]?["Error"];
+            var error = response.Response?.Error;
             if (error != null)
             {
-                return new SttResult { Error = $"Error {error["Code"]}: {error["Message"]}" };
+                return new SttResult { Error = $"Error {error.Code}: {error.Message}" };
             }
             return new SttResult
             {
-                Text = json["Response"]?["Result"]?.ToString() ?? string.Empty,
+                Text = response.Response?.Result ?? string.Empty,
                 DetectedLanguage = settings.Language,
             };
         }

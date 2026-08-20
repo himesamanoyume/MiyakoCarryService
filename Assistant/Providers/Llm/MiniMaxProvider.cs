@@ -2,9 +2,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -65,7 +66,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractChatContentText(result.ResponseText) ?? result.ResponseText;
         }
 
-        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             return SendJsonAsync($"{baseUrl}/v2/text/chat_completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
         }
@@ -74,11 +75,11 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             try
             {
-                var json = JObject.Parse(responseString);
-                var statusCode = json["base_resp"]?["status_code"]?.Value<int>() ?? 0;
+                var response = JsonConvert.DeserializeObject<OpenAiChatResponse>(responseString);
+                var statusCode = response?.BaseResp?.StatusCode ?? 0;
                 if (statusCode != 0)
                 {
-                    var statusMsg = json["base_resp"]?["status_msg"]?.ToString() ?? string.Empty;
+                    var statusMsg = response?.BaseResp?.StatusMsg ?? string.Empty;
                     return $"MiniMax Error {statusCode}: {SafeTrim(statusMsg, 240)}";
                 }
                 return null;

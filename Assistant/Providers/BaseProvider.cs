@@ -9,7 +9,6 @@ using MiyakoCarryService.Assistant.Models;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace MiyakoCarryService.Assistant.Providers
 {
@@ -55,9 +54,18 @@ namespace MiyakoCarryService.Assistant.Providers
             return cts;
         }
 
-        protected async Task<PostResponse> SendJsonAsync(
+        /// <summary>
+        /// DTO 序列化设置：忽略未赋值的可空字段。
+        /// </summary>
+        protected static readonly JsonSerializerSettings JsonSettings = new()
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.None,
+        };
+
+        protected async Task<PostResponse> SendJsonAsync<TBody>(
             string endpoint,
-            JObject body,
+            TBody body,
             ProviderSettings settings,
             CancellationToken cancellationToken,
             Action<HttpRequestMessage> configureRequest = null,
@@ -65,7 +73,7 @@ namespace MiyakoCarryService.Assistant.Providers
         {
             var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
-                Content = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json"),
+                Content = new StringContent(JsonConvert.SerializeObject(body, JsonSettings), Encoding.UTF8, "application/json"),
             };
             return await SendAsync(request, settings, cancellationToken, configureRequest, truncateLen).ConfigureAwait(false);
         }

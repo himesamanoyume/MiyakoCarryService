@@ -3,9 +3,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Stt
 {
@@ -57,17 +58,17 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                     return new SttResult { Error = result.Error };
                 }
 
-                var json = ParseResponseJson(result);
-                if (json == null)
+                var response = ParseResponseJson<AliyunNlsResponse>(result);
+                if (response == null)
                 {
                     return new SttResult { Error = string.Format(Locales.STT_RESPONSE_PARSE_FAILED.McsLocalized(), ProviderDisplayName) };
                 }
-                var status = json.Value<int>("status");
+                var status = response.Status ?? 0;
                 if (status != 20000000)
                 {
-                    return new SttResult { Error = $"Error {status}: {json.Value<string>("message") ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
+                    return new SttResult { Error = $"Error {status}: {response.Message ?? Locales.UNKNOWN_ERROR.McsLocalized()}" };
                 }
-                return new SttResult { Text = json.Value<string>("result") ?? string.Empty, DetectedLanguage = settings.Language };
+                return new SttResult { Text = response.Result ?? string.Empty, DetectedLanguage = settings.Language };
             }
         }
 
@@ -83,8 +84,8 @@ namespace MiyakoCarryService.Assistant.Providers.Stt
                 {
                     return null;
                 }
-                var json = JObject.Parse(responseString);
-                return json["Token"]?["Id"]?.ToString();
+                var tokenResponse = JsonConvert.DeserializeObject<AliyunTokenResponse>(responseString);
+                return tokenResponse?.Token?.Id;
             }
             catch
             {

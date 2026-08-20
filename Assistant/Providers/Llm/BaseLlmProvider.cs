@@ -1,14 +1,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Interfaces;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -28,8 +30,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             try
             {
-                var json = JObject.Parse(responseString);
-                return json["choices"]?[0]?["message"]?["content"]?.ToString();
+                var response = JsonConvert.DeserializeObject<OpenAiChatResponse>(responseString);
+                return response?.Choices?.FirstOrDefault()?.Message?.Content;
             }
             catch
             {
@@ -37,73 +39,69 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        protected JObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        protected OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
         {
-            var messages = new JArray
+            var request = new OpenAiChatRequest
             {
-                new JObject { ["role"] = "system", ["content"] = systemPrompt },
-                new JObject { ["role"] = "user", ["content"] = userText },
+                Model = model,
+                Messages =
+                [
+                    new OpenAiChatMessage { Role = "system", Content = systemPrompt ?? "" },
+                    new OpenAiChatMessage { Role = "user", Content = userText },
+                ],
+                Temperature = temperature,
             };
-            return new JObject
+            if (maxTokensFieldName == "tokens_to_generate")
             {
-                ["model"] = model,
-                ["messages"] = messages,
-                ["temperature"] = temperature,
-                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 10107,
-            };
+                request.TokensToGenerate = maxTokens > 0 ? maxTokens : 10107;
+            }
+            else
+            {
+                request.MaxTokens = maxTokens > 0 ? maxTokens : 10107;
+            }
+            return request;
         }
 
         public LlmIntent ParseIntentJson(string content)
         {
             try
             {
-                var json = JObject.Parse(content);
-                if (json["replyText"] is JToken replyToken && replyToken.Type != JTokenType.Null && !string.IsNullOrWhiteSpace(replyToken.ToString()))
+                var json = JsonConvert.DeserializeObject<LlmIntentJson>(content);
+                if (json == null)
                 {
-                    return new LlmIntent { Error = LlmIntent.NotRecognized };
+                    return new LlmIntent { Error = string.Format(Locales.LLM_PARSE_ERROR.McsLocalized(), ProviderDisplayName, "null", SafeTrim(content, 240)) };
                 }
-                if (json["error"] is JToken errToken && errToken.Type != JTokenType.Null && !string.IsNullOrWhiteSpace(errToken.ToString()))
+
+                if (!string.IsNullOrWhiteSpace(json.ReplyText) || !string.IsNullOrWhiteSpace(json.Error))
                 {
                     return new LlmIntent { Error = LlmIntent.NotRecognized };
                 }
 
-                var commandName = json.Value<string>("command");
+                var commandName = json.Command;
                 if (string.IsNullOrWhiteSpace(commandName))
                 {
                     return new LlmIntent { Error = string.Format(Locales.LLM_MISSING_COMMAND.McsLocalized(), ProviderDisplayName) };
                 }
 
                 var intent = new LlmIntent { CommandName = commandName };
-                var selectorStr = json.Value<string>("selector");
-                if (Enum.TryParse<EIntentTargetSelector>(selectorStr, ignoreCase: true, out var selector))
+                if (Enum.TryParse<EIntentTargetSelector>(json.Selector, ignoreCase: true, out var selector))
                 {
                     intent.Selector = selector;
                 }
 
-                if (json["targetIndex"] is JToken idxToken && idxToken.Type != JTokenType.Null)
+                if (TryParseInt(json.TargetIndex, out var targetIndex))
                 {
-                    if (idxToken.Type == JTokenType.Integer)
-                    {
-                        intent.TargetIndex = idxToken.Value<int>();
-                    }
-                    else if (int.TryParse(idxToken.ToString(), out var parsedIdx))
-                    {
-                        intent.TargetIndex = parsedIdx;
-                    }
+                    intent.TargetIndex = targetIndex;
                 }
 
-                if (json["targetIndices"] is JToken idxArrToken && idxArrToken.Type == JTokenType.Array)
+                if (json.TargetIndices is { Count: > 0 })
                 {
                     var indices = new List<int>();
-                    foreach (var item in idxArrToken)
+                    foreach (var item in json.TargetIndices)
                     {
-                        if (item.Type == JTokenType.Integer)
+                        if (TryParseInt(item, out var parsedIndex))
                         {
-                            indices.Add(item.Value<int>());
-                        }
-                        else if (int.TryParse(item.ToString(), out var parsedArrIdx))
-                        {
-                            indices.Add(parsedArrIdx);
+                            indices.Add(parsedIndex);
                         }
                     }
                     if (indices.Count > 0)
@@ -112,15 +110,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     }
                 }
 
-                if (json["targetCodeNames"] is JToken codeArrToken && codeArrToken.Type == JTokenType.Array)
+                if (json.TargetCodeNames is { Count: > 0 })
                 {
                     var codeNames = new List<string>();
-                    foreach (var item in codeArrToken)
+                    foreach (var item in json.TargetCodeNames)
                     {
-                        var s = item.ToString();
-                        if (!string.IsNullOrWhiteSpace(s))
+                        if (!string.IsNullOrWhiteSpace(item))
                         {
-                            codeNames.Add(s);
+                            codeNames.Add(item);
                         }
                     }
                     if (codeNames.Count > 0)
@@ -129,10 +126,9 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     }
                 }
 
-                var codeToken = json["targetCodeName"];
-                if (codeToken != null && codeToken.Type != JTokenType.Null)
+                if (!string.IsNullOrWhiteSpace(json.TargetCodeName))
                 {
-                    intent.TargetCodeName = codeToken.ToString();
+                    intent.TargetCodeName = json.TargetCodeName;
                     if (intent.Selector == EIntentTargetSelector.Unspecified && !string.IsNullOrEmpty(intent.TargetCodeName))
                     {
                         intent.Selector = EIntentTargetSelector.ByName;
@@ -148,21 +144,14 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                             : EIntentTargetSelector.All;
                 }
 
-                if (json["aimingBodyPart"] is JToken bodyToken && bodyToken.Type != JTokenType.Null)
+                if (!string.IsNullOrWhiteSpace(json.AimingBodyPart))
                 {
-                    intent.AimingBodyPart = bodyToken.ToString();
+                    intent.AimingBodyPart = json.AimingBodyPart;
                 }
 
-                if (json["optionIndex"] is JToken optToken && optToken.Type != JTokenType.Null)
+                if (TryParseInt(json.OptionIndex, out var optionIndex))
                 {
-                    if (optToken.Type == JTokenType.Integer)
-                    {
-                        intent.OptionIndex = optToken.Value<int>();
-                    }
-                    else if (int.TryParse(optToken.ToString(), out var parsedOpt))
-                    {
-                        intent.OptionIndex = parsedOpt;
-                    }
+                    intent.OptionIndex = optionIndex;
                 }
 
                 return intent;
@@ -173,7 +162,12 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        public virtual Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private static bool TryParseInt(string s, out int value)
+        {
+            return int.TryParse(s, out value);
+        }
+
+        public virtual Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

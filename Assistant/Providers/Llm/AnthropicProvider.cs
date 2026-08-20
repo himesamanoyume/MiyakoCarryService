@@ -3,9 +3,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Assistant.Models;
+using MiyakoCarryService.Assistant.Models.Providers;
 using MiyakoCarryService.Assistant.Utils;
 using MiyakoCarryService.Client.Extensions;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace MiyakoCarryService.Assistant.Providers.Llm
 {
@@ -32,15 +33,22 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
 
-            var body = new JObject
+            var body = new AnthropicMessagesRequest
             {
-                ["model"] = model,
-                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
-                ["system"] = systemPrompt,
-                ["messages"] = JArray.FromObject(new[]
-                {
-                    new { role = "user", content = new[] { new { type = "text", text = userText } } },
-                }),
+                Model = model,
+                MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                System = systemPrompt,
+                Messages =
+                [
+                    new AnthropicMessage
+                    {
+                        Role = "user",
+                        Content =
+                        [
+                            new AnthropicTextContent { Type = "text", Text = userText },
+                        ],
+                    },
+                ],
             };
 
             return await SendAndParseAsync(baseUrl, body, settings, cancellationToken);
@@ -51,15 +59,22 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
-            var body = new JObject
+            var body = new AnthropicMessagesRequest
             {
-                ["model"] = model,
-                ["max_tokens"] = 64,
-                ["system"] = "You are a connectivity test. Reply with exactly: pong",
-                ["messages"] = JArray.FromObject(new[]
-                {
-                    new { role = "user", content = new[] { new { type = "text", text = "ping" } } },
-                }),
+                Model = model,
+                MaxTokens = 64,
+                System = "You are a connectivity test. Reply with exactly: pong",
+                Messages =
+                [
+                    new AnthropicMessage
+                    {
+                        Role = "user",
+                        Content =
+                        [
+                            new AnthropicTextContent { Type = "text", Text = "ping" },
+                        ],
+                    },
+                ],
             };
 
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);
@@ -70,7 +85,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ExtractText(result.ResponseText) ?? result.ResponseText;
         }
 
-        private async Task<LlmIntent> SendAndParseAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        private async Task<LlmIntent> SendAndParseAsync(string baseUrl, AnthropicMessagesRequest body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);
             if (!result.IsSuccess)
@@ -86,7 +101,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             return ParseIntentJson(content);
         }
 
-        public override Task<PostResponse> PostAsync(string baseUrl, JObject body, ProviderSettings settings, CancellationToken cancellationToken)
+        public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             return SendJsonAsync($"{baseUrl}/v1/messages", body, settings, cancellationToken,
                 request =>
@@ -101,15 +116,15 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         {
             try
             {
-                var json = JObject.Parse(responseString);
-                if (json["content"] is JArray content)
+                var response = JsonConvert.DeserializeObject<AnthropicMessagesResponse>(responseString);
+                if (response?.Content is { Count: > 0 })
                 {
                     var sb = new StringBuilder();
-                    foreach (var item in content)
+                    foreach (var item in response.Content)
                     {
-                        if (item?["type"]?.ToString() == "text")
+                        if (item?.Type == "text")
                         {
-                            sb.Append(item["text"]?.ToString());
+                            sb.Append(item.Text);
                         }
                     }
                     return sb.ToString();
