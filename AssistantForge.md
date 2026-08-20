@@ -102,7 +102,7 @@ Per-request LLM timeout in seconds. Defaults to 15.
 
 - **LlmReasoningEffort**
 
-LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it. Defaults to "low".
+LLM reasoning effort: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default omits the parameter; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. Defaults to "none".
 
 - **HttpProxyHost**
 

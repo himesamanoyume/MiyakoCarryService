@@ -168,7 +168,7 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | CheckIfdian | 是否检查赞助者列表更新。 | `true` |
 | TicketPricePerPercent | 用于计算申请罚单移除涨价惩罚时所支付罚金的单价，单位为卢布/百分比。 | `300000` 卢布/百分比 |
 | PunishmentMultiMax | 最大涨价惩罚倍数。 | `1`（即 `100%`） |
-| OrderPendingPaymentTime | 通过 宫子 商人下单 `护航` 或发放补票时，行动任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
+| OrderPendingPaymentTime | 通过 宫子商人 下单 `护航` 或发放补票时，行动任务的有效等待时间，单位为秒。 | `900` 秒（15 分钟） |
 | CompensationPrice | 当 `护航` 意外击杀 `老板` 时的补偿金额，单位为卢布。 | `300000` 卢布 |
 | CarryServiceLevelPrice | 护航等级基础定价，共 5 个等级，每个等级都设有上下限。 | 由等级区间决定 |
 | TraderLlmEnabled | 是否启用宫子商人的 AI 对话功能（大语言模型）。启用后，与宫子商人聊天时将支持自然语言下单、下发罚单。 | `false` |
@@ -183,9 +183,9 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | TraderLlmTimeoutSec | 宫子商人 AI 单次请求的超时秒数。 | `15` |
 | TraderLlmMaxMessagesPerMinute | 宫子商人 AI 每分钟最大回复条数（限流）。 | `10` |
 | TraderLlmMaxHistoryMessages | 宫子商人 AI 对话中携带的最近聊天记录条数，用于保持对话连贯；设为 `0` 关闭。 | `20` |
-| TraderLlmApiSecret | 商人 AI 服务商的第二密钥（Secret/Token）。智谱（ApiKey=id + ApiSecret=secret）、星火（拼接 ApiKey:ApiSecret）等双密钥服务商需要时填写；使用一体式 ApiKey 可留空。 | 空 |
-| TraderLlmReasoningEffort | 商人 AI 的思考强度：default / low / medium / high / max；default 或空表示不传参，模型不支持时自动降级。 | `low` |
-| TraderLlmMaxConcurrent | 商人 LLM 全局并发请求上限。达到上限后请求排队，任一完成自动放行队首，保护上游 API 与代理。 | `16` |
+| TraderLlmApiSecret | 宫子商人 AI 服务商的第二密钥（Secret/Token）。智谱（ApiKey=id + ApiSecret=secret）、星火（拼接 ApiKey:ApiSecret）等双密钥服务商需要时填写；使用一体式 ApiKey 可留空。 | 空 |
+| TraderLlmReasoningEffort | 宫子商人 AI 的思考强度：none / default / low / medium / high / max；none 原样传递该值，尝试让支持该值的模型进入不思考的快速模式，default 或空表示不传参；其余值按字面传递。reasoning_effort 不被支持时直接报错，不再自动降级重试。 | `none` |
+| TraderLlmMaxConcurrent | 宫子商人 LLM 全局并发请求上限。达到上限后请求排队，任一完成自动放行队首，保护上游 API 与代理。 | `16` |
 | HTTP 代理地址 | HTTP 代理主机（LLM/STT 等云端请求经代理转发时填写）。 | 空 |
 | HTTP 代理端口 | HTTP 代理端口（与 `HttpProxyHost` 配合使用）。 | 空 |
 
@@ -294,7 +294,7 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | 大语言模型(LLM) 采样温度 | 大语言模型(LLM) 采样温度，范围 0到2。值越低结果越确定。 |
 | 大语言模型(LLM) 最大 Tokens | 大语言模型(LLM) 单次最大 Tokens 输出，影响成本与延迟。 |
 | 大语言模型(LLM) 超时秒数 | 每次大语言模型(LLM)请求的超时秒数。 |
-| 大语言模型(LLM) 思考强度 | LLM 思考强度（reasoning effort）：default / low / medium / high / max。仅提供选项，此模型是否支持需根据实际情况而定；default 表示不传该参数，不支持的模型通常忽略该参数。 |
+| 大语言模型(LLM) 思考强度 | LLM 思考强度（reasoning effort）：none / default / low / medium / high / max。none 会原样传递该值，尝试让支持该值的模型进入不思考的快速模式；default 表示不传该参数；其余值按字面传递。reasoning_effort 不被支持时将直接报错，不再自动降级重试。 |
 | HTTP 代理地址 | LLM/STT 请求使用的 HTTP 代理主机名或 IP（如 127.0.0.1）；留空表示直连。配置后所有请求（含本地地址）均经代理转发。 |
 | HTTP 代理端口 | HTTP 代理端口（如 7890）；需与代理地址同时配置，留空表示直连。 |
 

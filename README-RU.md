@@ -185,7 +185,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | TraderLlmTemperature | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
 | TraderLlmMaxTokens | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
 | TraderLlmTimeoutSec | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
-| TraderLlmReasoningEffort | Reasoning effort of the Miyako trader's AI: default / low / medium / high / max; default or empty means the parameter is not sent, and it degrades automatically when unsupported. | `low` |
+| TraderLlmReasoningEffort | Reasoning effort of the Miyako trader's AI: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default or empty means the parameter is not sent; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. | `none` |
 | TraderLlmMaxMessagesPerMinute | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
 | TraderLlmMaxHistoryMessages | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
 | TraderLlmMaxConcurrent | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
@@ -297,7 +297,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | Llm Temperature | LLM sampling temperature, 0..2. Lower is more deterministic. |
 | Llm Max Tokens | Maximum tokens LLM may emit. Affects cost/latency. |
 | Llm Timeout Sec | Per-request LLM timeout in seconds. |
-| Llm Reasoning Effort | LLM reasoning effort: default / low / medium / high / max. Options are provided only; whether this model supports it depends on the actual endpoint. default omits the parameter; unsupported models usually ignore it. |
+| Llm Reasoning Effort | LLM reasoning effort: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default omits the parameter; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. |
 | Http Proxy Host | HTTP proxy hostname or IP used by LLM/STT requests (e.g. 127.0.0.1); empty means direct connection. When configured, all requests (including local addresses) go through the proxy. |
 | Http Proxy Port | HTTP proxy port (e.g. 7890); must be configured together with the proxy host, empty means direct connection. |
 
