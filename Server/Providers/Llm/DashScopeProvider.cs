@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Services.Locales;
@@ -36,22 +36,22 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
-            var body = new JsonObject
+            var body = new DashScopeGenerationRequest
             {
-                ["model"] = model,
-                ["input"] = JsonSerializer.SerializeToNode(new
+                Model = model,
+                Input = new DashScopeInput
                 {
-                    messages = new[]
-                    {
-                        new { role = "system", content = settings.SystemPrompt ?? "" },
-                        new { role = "user", content = userText },
-                    },
-                }),
-                ["parameters"] = JsonSerializer.SerializeToNode(new
+                    Messages =
+                    [
+                        new OpenAiChatMessage { Role = "system", Content = settings.SystemPrompt ?? "" },
+                        new OpenAiChatMessage { Role = "user", Content = userText },
+                    ],
+                },
+                Parameters = new DashScopeParameters
                 {
-                    temperature = settings.Temperature,
-                    max_tokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
-                }),
+                    Temperature = settings.Temperature,
+                    MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                },
             };
 
             var result = await PostJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken,
@@ -73,8 +73,8 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(responseString);
-                return node?["output"]?["text"]?.ToString();
+                var response = JsonSerializer.Deserialize<DashScopeGenerationResponse>(responseString);
+                return response?.Output?.Text;
             }
             catch
             {

@@ -1,10 +1,10 @@
 using System;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Services.Locales;
@@ -37,15 +37,25 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
-            var body = new JsonObject
+            var body = new GeminiGenerateContentRequest
             {
-                ["system_instruction"] = JsonSerializer.SerializeToNode(new { parts = new[] { new { text = settings.SystemPrompt ?? "" } } }),
-                ["contents"] = JsonSerializer.SerializeToNode(new[] { new { role = "user", parts = new[] { new { text = userText } } } }),
-                ["generationConfig"] = JsonSerializer.SerializeToNode(new
+                SystemInstruction = new GeminiPartList
                 {
-                    temperature = settings.Temperature,
-                    maxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
-                }),
+                    Parts = [new GeminiPart { Text = settings.SystemPrompt ?? "" }],
+                },
+                Contents =
+                [
+                    new GeminiContent
+                    {
+                        Role = "user",
+                        Parts = [new GeminiPart { Text = userText }],
+                    },
+                ],
+                GenerationConfig = new GeminiGenerationConfig
+                {
+                    Temperature = settings.Temperature,
+                    MaxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                },
             };
 
             var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
@@ -67,16 +77,22 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(responseString);
+                var response = JsonSerializer.Deserialize<GeminiGenerateContentResponse>(responseString);
                 var sb = new StringBuilder();
-                if (node?["candidates"]?[0]?["content"]?["parts"] is JsonArray parts)
+                if (response?.Candidates is { Count: > 0 })
                 {
-                    foreach (var part in parts)
+                    foreach (var candidate in response.Candidates)
                     {
-                        var text = part?["text"]?.ToString();
-                        if (!string.IsNullOrEmpty(text))
+                        if (candidate?.Content?.Parts is { Count: > 0 })
                         {
-                            sb.Append(text);
+                            foreach (var part in candidate.Content.Parts)
+                            {
+                                var text = part?.Text;
+                                if (!string.IsNullOrEmpty(text))
+                                {
+                                    sb.Append(text);
+                                }
+                            }
                         }
                     }
                 }

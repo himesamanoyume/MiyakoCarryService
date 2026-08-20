@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
@@ -48,7 +47,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             return ParseIntentJson(content);
         }
 
-        public Task<PostResponse> PostAsync(JsonObject body, LlmProviderSettings settings, CancellationToken cancellationToken)
+        public Task<PostResponse> PostAsync<TBody>(TBody body, LlmProviderSettings settings, CancellationToken cancellationToken)
         {
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var jwt = BuildJwt(settings);

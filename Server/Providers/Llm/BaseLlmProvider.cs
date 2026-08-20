@@ -1,10 +1,11 @@
 using System;
+using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
+using ProviderModels = MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services.Locales;
 
@@ -26,8 +27,8 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(responseString);
-                return node?["choices"]?[0]?["message"]?["content"]?.ToString();
+                var response = JsonSerializer.Deserialize<ProviderModels.OpenAiChatResponse>(responseString);
+                return response?.Choices?.FirstOrDefault()?.Message?.Content;
             }
             catch
             {
@@ -35,19 +36,27 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
         }
 
-        protected JsonObject BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        protected ProviderModels.OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
         {
-            return new JsonObject
+            var request = new ProviderModels.OpenAiChatRequest
             {
-                ["model"] = model,
-                ["messages"] = JsonSerializer.SerializeToNode(new[]
-                {
-                    new { role = "system", content = systemPrompt ?? "" },
-                    new { role = "user", content = userText },
-                }),
-                ["temperature"] = temperature,
-                [maxTokensFieldName] = maxTokens > 0 ? maxTokens : 10107,
+                Model = model,
+                Messages =
+                [
+                    new ProviderModels.OpenAiChatMessage { Role = "system", Content = systemPrompt ?? "" },
+                    new ProviderModels.OpenAiChatMessage { Role = "user", Content = userText },
+                ],
+                Temperature = temperature,
             };
+            if (maxTokensFieldName == "tokens_to_generate")
+            {
+                request.TokensToGenerate = maxTokens > 0 ? maxTokens : 10107;
+            }
+            else
+            {
+                request.MaxTokens = maxTokens > 0 ? maxTokens : 10107;
+            }
+            return request;
         }
 
         public virtual string ExtractText(string responseString)
@@ -59,57 +68,52 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(content);
-                if (node?["replyText"] is JsonNode reply && reply.GetValueKind() != JsonValueKind.Null)
+                var json = JsonSerializer.Deserialize<ProviderModels.McsChatIntent>(content);
+                if (json == null)
                 {
-                    var replyText = reply.ToString();
-                    if (!string.IsNullOrWhiteSpace(replyText))
-                    {
-                        return new LlmIntent { ReplyText = replyText };
-                    }
+                    return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_MISSING_FIELD, new { ProviderName = ProviderDisplayName }) };
                 }
 
-                if (node?["order"] is JsonNode orderNode)
+                if (!string.IsNullOrEmpty(json.ReplyText))
                 {
-                    var players = orderNode["players"]?.GetValue<int>() ?? 0;
-                    var spawnTypeIndex = orderNode["spawnTypeIndex"]?.GetValue<int>() ?? 0;
-                    var level = orderNode["level"]?.GetValue<int>() ?? 0;
-                    var duration = orderNode["duration"]?.GetValue<int>() ?? 0;
+                    return new LlmIntent { ReplyText = json.ReplyText };
+                }
 
+                if (json.Order != null)
+                {
                     return new LlmIntent
                     {
                         Order = new OrderIntent
                         {
-                            Players = players,
-                            SpawnTypeIndex = spawnTypeIndex,
-                            Level = level,
-                            Duration = duration,
+                            Players = json.Order.Players ?? 0,
+                            SpawnTypeIndex = json.Order.SpawnTypeIndex ?? 0,
+                            Level = json.Order.Level ?? 0,
+                            Duration = json.Order.Duration ?? 0,
                         },
                     };
                 }
 
-                if (node?["ticket"] is JsonNode ticketNode)
+                if (json.Ticket != null)
                 {
-                    var percent = ticketNode["percent"]?.GetValue<int>() ?? 0;
                     return new LlmIntent
                     {
-                        Ticket = new TicketIntent { Percent = percent },
+                        Ticket = new TicketIntent { Percent = json.Ticket.Percent ?? 0 },
                     };
                 }
 
-                if (node?["renew"] is JsonNode renewNode)
+                if (json.Renew != null)
                 {
                     return new LlmIntent
                     {
-                        Renew = new RenewIntent { Target = renewNode["target"]?.ToString() ?? string.Empty },
+                        Renew = new RenewIntent { Target = json.Renew.Target ?? string.Empty },
                     };
                 }
 
-                if (node?["settle"] is JsonNode settleNode)
+                if (json.Settle != null)
                 {
                     return new LlmIntent
                     {
-                        Settle = new SettleIntent { Target = settleNode["target"]?.ToString() ?? string.Empty },
+                        Settle = new SettleIntent { Target = json.Settle.Target ?? string.Empty },
                     };
                 }
 

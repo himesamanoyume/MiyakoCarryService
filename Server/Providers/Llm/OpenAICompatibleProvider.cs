@@ -1,10 +1,9 @@
 using System;
 using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Services.Locales;
@@ -35,26 +34,16 @@ namespace MiyakoCarryService.Server.Providers.Llm
             {
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
-                    var useJsonObject = attempt == 0;
+                    var useResponseFormat = attempt == 0;
                     var useReasoningEffort = attempt == 0 && !string.IsNullOrEmpty(settings.ReasoningEffort) && settings.ReasoningEffort != "default";
-                    var body = new JsonObject
-                    {
-                        ["model"] = modelId,
-                        ["messages"] = JsonSerializer.SerializeToNode(new[]
-                        {
-                            new { role = "system", content = settings.SystemPrompt ?? "" },
-                            new { role = "user", content = userText },
-                        }),
-                        ["temperature"] = settings.Temperature,
-                        ["max_tokens"] = maxTokens,
-                    };
+                    var body = BuildChatCompletionsBody(modelId, settings.SystemPrompt, userText, settings.Temperature, maxTokens);
                     if (useReasoningEffort)
                     {
-                        body["reasoning_effort"] = settings.ReasoningEffort;
+                        body.ReasoningEffort = settings.ReasoningEffort;
                     }
-                    if (useJsonObject)
+                    if (useResponseFormat)
                     {
-                        body["response_format"] = JsonSerializer.SerializeToNode(new { type = "json_object" });
+                        body.ResponseFormat = new OpenAiResponseFormat { Type = "json_object" };
                     }
 
                     var result = await PostJsonAsync($"{baseUrl}/chat/completions", body, settings, cancellationToken,
@@ -81,8 +70,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                         return new LlmIntent { Error = result.Error };
                     }
 
-                    var json = JsonNode.Parse(result.ResponseText);
-                    var content = json?["choices"]?[0]?["message"]?["content"]?.ToString();
+                    var content = ExtractChatContentText(result.ResponseText);
                     if (string.IsNullOrWhiteSpace(content))
                     {
                         return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };

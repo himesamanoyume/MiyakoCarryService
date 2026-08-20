@@ -1,10 +1,10 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Services.Locales;
@@ -39,15 +39,22 @@ namespace MiyakoCarryService.Server.Providers.Llm
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
 
-            var body = new JsonObject
+            var body = new AnthropicMessagesRequest
             {
-                ["model"] = model,
-                ["max_tokens"] = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
-                ["system"] = settings.SystemPrompt ?? "",
-                ["messages"] = JsonSerializer.SerializeToNode(new[]
-                {
-                    new { role = "user", content = new[] { new { type = "text", text = userText } } },
-                }),
+                Model = model,
+                MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
+                System = settings.SystemPrompt ?? "",
+                Messages =
+                [
+                    new AnthropicMessage
+                    {
+                        Role = "user",
+                        Content =
+                        [
+                            new AnthropicTextContent { Type = "text", Text = userText },
+                        ],
+                    },
+                ],
             };
 
             var result = await PostJsonAsync($"{baseUrl}/v1/messages", body, settings, cancellationToken,
@@ -74,15 +81,15 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(responseString);
-                if (node?["content"] is JsonArray content)
+                var response = JsonSerializer.Deserialize<AnthropicMessagesResponse>(responseString);
+                if (response?.Content is { Count: > 0 })
                 {
                     var sb = new StringBuilder();
-                    foreach (var item in content)
+                    foreach (var item in response.Content)
                     {
-                        if (item?["type"]?.ToString() == "text")
+                        if (item?.Type == "text")
                         {
-                            sb.Append(item["text"]?.ToString());
+                            sb.Append(item.Text);
                         }
                     }
                     return sb.ToString();

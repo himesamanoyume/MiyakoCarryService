@@ -1,7 +1,8 @@
 using System;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json.Nodes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
@@ -105,9 +106,18 @@ namespace MiyakoCarryService.Server.Providers
             return cts;
         }
 
-        protected async Task<PostResponse> PostJsonAsync(
+        /// <summary>
+        /// DTO 序列化设置：忽略未赋值的可空字段。
+        /// </summary>
+        protected static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false,
+        };
+
+        protected async Task<PostResponse> PostJsonAsync<TBody>(
             string endpoint,
-            JsonObject body,
+            TBody body,
             LlmProviderSettings settings,
             CancellationToken cancellationToken,
             Action<HttpRequestMessage> configureRequest = null)
@@ -118,7 +128,7 @@ namespace MiyakoCarryService.Server.Providers
             {
                 using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
                 {
-                    Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
+                    Content = new StringContent(JsonSerializer.Serialize(body, JsonOptions), Encoding.UTF8, "application/json"),
                 };
                 configureRequest?.Invoke(request);
 

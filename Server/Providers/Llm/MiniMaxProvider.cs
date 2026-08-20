@@ -1,8 +1,9 @@
 using System.Net.Http.Headers;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Models.Llm;
+using MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Services.Locales;
@@ -61,11 +62,11 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var node = JsonNode.Parse(responseString);
-                var statusCode = node?["base_resp"]?["status_code"]?.GetValue<int>() ?? 0;
+                var response = JsonSerializer.Deserialize<OpenAiChatResponse>(responseString);
+                var statusCode = response?.BaseResp?.StatusCode ?? 0;
                 if (statusCode != 0)
                 {
-                    var statusMsg = node?["base_resp"]?["status_msg"]?.ToString() ?? string.Empty;
+                    var statusMsg = response?.BaseResp?.StatusMsg ?? string.Empty;
                     return $"MiniMax 业务错误 {statusCode}: {SafeTrim(statusMsg, 240)}";
                 }
             }
