@@ -53,6 +53,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
+            ApplyDashScopeThinking(body, settings.ReasoningEffort);
 
             var result = await PostJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken,
                 request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
@@ -67,6 +68,16 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
+        }
+
+        private void ApplyDashScopeThinking(DashScopeGenerationRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+
+            request.Parameters.EnableThinking = reasoningEffort != "none";
         }
 
         public override string ExtractText(string responseString)

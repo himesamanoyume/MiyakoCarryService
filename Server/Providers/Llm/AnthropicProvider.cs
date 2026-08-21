@@ -56,6 +56,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     },
                 ],
             };
+            ApplyAnthropicThinking(body, settings.ReasoningEffort);
 
             var result = await PostJsonAsync($"{baseUrl}/v1/messages", body, settings, cancellationToken,
                 request =>
@@ -75,6 +76,29 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
+        }
+
+        private void ApplyAnthropicThinking(AnthropicMessagesRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default" || reasoningEffort == "none")
+            {
+                return;
+            }
+
+            var budget = reasoningEffort switch
+            {
+                "low" => 2048,
+                "medium" => 4096,
+                "high" => 8192,
+                "max" => 32000,
+                _ => 8192,
+            };
+
+            request.Thinking = new AnthropicThinking
+            {
+                Type = "enabled",
+                BudgetTokens = budget,
+            };
         }
 
         public override string ExtractText(string responseString)

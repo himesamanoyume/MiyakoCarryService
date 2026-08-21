@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
         }
 
-        protected ProviderModels.OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        protected ProviderModels.OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens", string reasoningEffort = null)
         {
             var request = new ProviderModels.OpenAiChatRequest
             {
@@ -56,7 +56,22 @@ namespace MiyakoCarryService.Server.Providers.Llm
             {
                 request.MaxTokens = maxTokens > 0 ? maxTokens : 10107;
             }
+            ApplyOpenAiReasoning(request, reasoningEffort);
             return request;
+        }
+
+        protected void ApplyOpenAiReasoning(ProviderModels.OpenAiChatRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+            if (reasoningEffort == "none")
+            {
+                request.Thinking = new ProviderModels.OpenAiThinking { Type = "disabled" };
+                return;
+            }
+            request.ReasoningEffort = reasoningEffort;
         }
 
         public virtual string ExtractText(string responseString)

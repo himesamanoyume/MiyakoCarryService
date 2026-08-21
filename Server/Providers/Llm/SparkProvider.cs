@@ -33,11 +33,10 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
-            var body = BuildChatCompletionsBody(model, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens);
+            var body = BuildChatCompletionsBody(model, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens, reasoningEffort: settings.ReasoningEffort);
             var bearer = string.IsNullOrEmpty(settings.ApiSecret) ? settings.ApiKey : $"{settings.ApiKey}:{settings.ApiSecret}";
 
-            var result = await PostJsonAsync($"{baseUrl}/v1/chat/completions", body, settings, cancellationToken,
-                request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer));
+            var result = await PostJsonAsync($"{baseUrl}/v1/chat/completions", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearer));
             if (!result.IsSuccess)
             {
                 return new LlmIntent { Error = result.Error };

@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
-            var body = BuildChatCompletionsBody(model, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens, maxTokensFieldName: "tokens_to_generate");
+            var body = BuildChatCompletionsBody(model, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens, maxTokensFieldName: "tokens_to_generate", reasoningEffort: settings.ReasoningEffort);
 
             var result = await PostJsonAsync($"{baseUrl}/v2/text/chat_completions", body, settings, cancellationToken,
                 request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));

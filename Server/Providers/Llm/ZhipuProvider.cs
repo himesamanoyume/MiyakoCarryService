@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_USER_TEXT_EMPTY) };
             }
 
-            var body = BuildChatCompletionsBody(DefaultModel, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens);
+            var body = BuildChatCompletionsBody(DefaultModel, settings.SystemPrompt, userText, settings.Temperature, settings.MaxTokens, reasoningEffort: settings.ReasoningEffort);
 
             var result = await PostAsync(body, settings, cancellationToken);
             if (!result.IsSuccess)
@@ -56,7 +56,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt));
         }
 
-        private static string BuildJwt(LlmProviderSettings settings)
+        private string BuildJwt(LlmProviderSettings settings)
         {
             var apiKey = settings?.ApiKey ?? string.Empty;
             var apiSecret = settings?.ApiSecret ?? string.Empty;
@@ -89,7 +89,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             return $"{signingInput}.{Base64Url(signature)}";
         }
 
-        private static string Base64Url(byte[] data)
+        private string Base64Url(byte[] data)
         {
             return Convert.ToBase64String(data).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         }

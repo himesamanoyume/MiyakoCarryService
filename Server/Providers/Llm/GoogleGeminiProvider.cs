@@ -57,6 +57,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
                     MaxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
+            ApplyGeminiThinking(body, settings.ReasoningEffort);
 
             var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
             var result = await PostJsonAsync(endpoint, body, settings, cancellationToken);
@@ -71,6 +72,29 @@ namespace MiyakoCarryService.Server.Providers.Llm
                 return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_EMPTY_CONTENT, new { ProviderName = ProviderDisplayName }) };
             }
             return ParseIntentJson(content);
+        }
+
+        private void ApplyGeminiThinking(GeminiGenerateContentRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+
+            var budget = reasoningEffort switch
+            {
+                "none" => 0,
+                "low" => 1024,
+                "medium" => 4096,
+                "high" => 8192,
+                "max" => 16384,
+                _ => 8192,
+            };
+
+            request.GenerationConfig.ThinkingConfig = new GeminiThinkingConfig
+            {
+                ThinkingBudget = budget,
+            };
         }
 
         public override string ExtractText(string responseString)

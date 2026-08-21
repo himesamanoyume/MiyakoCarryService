@@ -23,8 +23,17 @@ namespace MiyakoCarryService.Server.Models.Providers
         [JsonPropertyName("reasoning_effort")]
         public string ReasoningEffort { get; set; }
 
+        [JsonPropertyName("thinking")]
+        public OpenAiThinking Thinking { get; set; }
+
         [JsonPropertyName("response_format")]
         public OpenAiResponseFormat ResponseFormat { get; set; }
+    }
+
+    public sealed record OpenAiThinking
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
     }
 
     public sealed record OpenAiChatMessage
@@ -55,6 +64,18 @@ namespace MiyakoCarryService.Server.Models.Providers
 
         [JsonPropertyName("messages")]
         public List<AnthropicMessage> Messages { get; set; }
+
+        [JsonPropertyName("thinking")]
+        public AnthropicThinking Thinking { get; set; }
+    }
+
+    public sealed record AnthropicThinking
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("budget_tokens")]
+        public int? BudgetTokens { get; set; }
     }
 
     public sealed record AnthropicMessage
@@ -100,6 +121,9 @@ namespace MiyakoCarryService.Server.Models.Providers
 
         [JsonPropertyName("max_tokens")]
         public int? MaxTokens { get; set; }
+
+        [JsonPropertyName("enable_thinking")]
+        public bool? EnableThinking { get; set; }
     }
 
     public sealed record GeminiGenerateContentRequest
@@ -142,5 +166,14 @@ namespace MiyakoCarryService.Server.Models.Providers
 
         [JsonPropertyName("maxOutputTokens")]
         public int? MaxOutputTokens { get; set; }
+
+        [JsonPropertyName("thinkingConfig")]
+        public GeminiThinkingConfig ThinkingConfig { get; set; }
+    }
+
+    public sealed record GeminiThinkingConfig
+    {
+        [JsonPropertyName("thinkingBudget")]
+        public int? ThinkingBudget { get; set; }
     }
 }
