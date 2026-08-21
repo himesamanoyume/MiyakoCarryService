@@ -45,6 +45,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     MaxTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
+            ApplyDashScopeThinking(body, settings.ReasoningEffort);
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);
@@ -89,6 +90,16 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
         public override Task<PostResponse> PostAsync(string baseUrl, object body, ProviderSettings settings, CancellationToken cancellationToken)
         {
             return SendJsonAsync($"{baseUrl}/api/v1/services/aigc/text-generation/generation", body, settings, cancellationToken, request => request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey));
+        }
+
+        private void ApplyDashScopeThinking(DashScopeGenerationRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+
+            request.Parameters.EnableThinking = reasoningEffort != "none";
         }
 
         private string ExtractText(string responseString)

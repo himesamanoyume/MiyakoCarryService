@@ -29,7 +29,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
-            var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens, maxTokensFieldName: "tokens_to_generate");
+            var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens, maxTokensFieldName: "tokens_to_generate", reasoningEffort: settings.ReasoningEffort);
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);

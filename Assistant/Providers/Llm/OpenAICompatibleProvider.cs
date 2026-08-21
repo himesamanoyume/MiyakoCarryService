@@ -36,7 +36,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     var body = BuildChatCompletionsBody(model, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
                     if (useReasoningEffort)
                     {
-                        body.ReasoningEffort = settings.ReasoningEffort;
+                        ApplyOpenAiReasoning(body, settings.ReasoningEffort);
                     }
                     if (useResponseFormat)
                     {
@@ -54,7 +54,8 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
 
                     if (!result.IsSuccess)
                     {
-                        if (result.ErrorBody?.Contains("reasoning", StringComparison.OrdinalIgnoreCase) == true)
+                        if (result.ErrorBody?.Contains("reasoning", StringComparison.OrdinalIgnoreCase) == true
+                            || result.ErrorBody?.Contains("thinking", StringComparison.OrdinalIgnoreCase) == true)
                         {
                             return new LlmIntent { Error = result.Error };
                         }

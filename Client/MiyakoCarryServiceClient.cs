@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
 using MiyakoCarryService.Client.Patches.RefreshQuests;

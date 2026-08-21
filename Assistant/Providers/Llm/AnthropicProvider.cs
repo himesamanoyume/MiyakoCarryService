@@ -50,6 +50,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     },
                 ],
             };
+            ApplyAnthropicThinking(body, settings.ReasoningEffort);
 
             return await SendAndParseAsync(baseUrl, body, settings, cancellationToken);
         }
@@ -110,6 +111,29 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     request.Headers.Add("x-api-key", settings.ApiKey);
                     request.Headers.Add("anthropic-version", ApiVersion);
                 });
+        }
+
+        private void ApplyAnthropicThinking(AnthropicMessagesRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default" || reasoningEffort == "none")
+            {
+                return;
+            }
+
+            var budget = reasoningEffort switch
+            {
+                "low" => 2048,
+                "medium" => 4096,
+                "high" => 8192,
+                "max" => 32000,
+                _ => 8192,
+            };
+
+            request.Thinking = new AnthropicThinking
+            {
+                Type = "enabled",
+                BudgetTokens = budget,
+            };
         }
 
         private string ExtractText(string responseString)

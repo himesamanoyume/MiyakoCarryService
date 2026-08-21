@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
 
             var systemPrompt = Tools.BuildSystemPrompt(settings.SystemPrompt);
-            var body = BuildChatCompletionsBody(DefaultModel, systemPrompt, userText, settings.Temperature, settings.MaxTokens);
+            var body = BuildChatCompletionsBody(DefaultModel, systemPrompt, userText, settings.Temperature, settings.MaxTokens, reasoningEffort: settings.ReasoningEffort);
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);

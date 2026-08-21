@@ -23,8 +23,17 @@ namespace MiyakoCarryService.Assistant.Models.Providers
         [JsonProperty("reasoning_effort")]
         public string ReasoningEffort { get; set; }
 
+        [JsonProperty("thinking")]
+        public OpenAiThinking Thinking { get; set; }
+
         [JsonProperty("response_format")]
         public OpenAiResponseFormat ResponseFormat { get; set; }
+    }
+
+    public sealed class OpenAiThinking
+    {
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 
     public sealed class OpenAiChatMessage
@@ -58,6 +67,18 @@ namespace MiyakoCarryService.Assistant.Models.Providers
 
         [JsonProperty("messages")]
         public List<AnthropicMessage> Messages { get; set; }
+
+        [JsonProperty("thinking")]
+        public AnthropicThinking Thinking { get; set; }
+    }
+
+    public sealed class AnthropicThinking
+    {
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("budget_tokens")]
+        public int? BudgetTokens { get; set; }
     }
 
     public sealed class AnthropicMessage
@@ -106,6 +127,9 @@ namespace MiyakoCarryService.Assistant.Models.Providers
 
         [JsonProperty("max_tokens")]
         public int? MaxTokens { get; set; }
+
+        [JsonProperty("enable_thinking")]
+        public bool? EnableThinking { get; set; }
     }
 
     /// <summary>
@@ -151,5 +175,14 @@ namespace MiyakoCarryService.Assistant.Models.Providers
 
         [JsonProperty("maxOutputTokens")]
         public int? MaxOutputTokens { get; set; }
+
+        [JsonProperty("thinkingConfig")]
+        public GeminiThinkingConfig ThinkingConfig { get; set; }
+    }
+
+    public sealed class GeminiThinkingConfig
+    {
+        [JsonProperty("thinkingBudget")]
+        public int? ThinkingBudget { get; set; }
     }
 }

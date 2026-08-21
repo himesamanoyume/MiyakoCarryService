@@ -49,6 +49,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
                     MaxOutputTokens = settings.MaxTokens > 0 ? settings.MaxTokens : 10107,
                 },
             };
+            ApplyGeminiThinking(body, settings.ReasoningEffort);
 
             var baseUrl = string.IsNullOrEmpty(settings.BaseUrl) ? DefaultBaseUrl : settings.BaseUrl.TrimEnd('/');
             var result = await PostAsync(baseUrl, body, settings, cancellationToken);
@@ -98,6 +99,29 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             var model = string.IsNullOrEmpty(settings.ModelId) ? DefaultModel : settings.ModelId;
             var endpoint = $"{baseUrl}/v1beta/models/{Uri.EscapeDataString(model)}:generateContent?key={Uri.EscapeDataString(settings.ApiKey)}";
             return SendJsonAsync(endpoint, body, settings, cancellationToken);
+        }
+
+        private void ApplyGeminiThinking(GeminiGenerateContentRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+
+            var budget = reasoningEffort switch
+            {
+                "none" => 0,
+                "low" => 1024,
+                "medium" => 4096,
+                "high" => 8192,
+                "max" => 16384,
+                _ => 8192,
+            };
+
+            request.GenerationConfig.ThinkingConfig = new GeminiThinkingConfig
+            {
+                ThinkingBudget = budget,
+            };
         }
 
         private string ExtractText(string responseString)

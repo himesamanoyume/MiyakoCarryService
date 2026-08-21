@@ -39,7 +39,7 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             }
         }
 
-        protected OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens")
+        protected OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens", string reasoningEffort = null)
         {
             var request = new OpenAiChatRequest
             {
@@ -59,7 +59,22 @@ namespace MiyakoCarryService.Assistant.Providers.Llm
             {
                 request.MaxTokens = maxTokens > 0 ? maxTokens : 10107;
             }
+            ApplyOpenAiReasoning(request, reasoningEffort);
             return request;
+        }
+
+        protected void ApplyOpenAiReasoning(OpenAiChatRequest request, string reasoningEffort)
+        {
+            if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
+            {
+                return;
+            }
+            if (reasoningEffort == "none")
+            {
+                request.Thinking = new OpenAiThinking { Type = "disabled" };
+                return;
+            }
+            request.ReasoningEffort = reasoningEffort;
         }
 
         public LlmIntent ParseIntentJson(string content)
