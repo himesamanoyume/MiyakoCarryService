@@ -95,7 +95,7 @@
     "Mcs/VoiceDebugVadText Key": "自由发言监听状态",
     "Mcs/VoiceDebugVadText Description": "实时显示自由发言的语音检测状态（rms 能量 / 是否在说话 / 静音累计时长）",
     "Mcs/LlmReasoningEffort Key": "大语言模型(LLM) 思考强度",
-    "Mcs/LlmReasoningEffort Description": "LLM 思考模式（reasoning/thinking）：none / default / low / medium / high / max。none 关闭思考（快速模式）；default 不干预（模型默认）；low/medium/high/max 开启思考并按档位调节强度。按服务商自动映射到对应参数（OpenAI 兼容 thinking/reasoning_effort、Claude thinking、Gemini thinkingConfig、Qwen enable_thinking）。思考相关参数不被支持时将直接报错，不再自动降级重试。",
+    "Mcs/LlmReasoningEffort Description": "LLM 思考模式（reasoning/thinking）：none / default / low / medium / high / max。none 关闭思考（快速模式）；default 不干预（模型默认）；low/medium/high/max 开启思考并按档位调节强度。按服务商自动映射到对应参数（OpenAI 兼容 thinking/reasoning_effort、Claude thinking、Gemini thinkingConfig、Qwen enable_thinking）。思考相关参数不被支持时将直接报错，不会自动降级重试。",
     "Mcs/SttApiSecret Key": "语音转文字(STT) Secret",
     "Mcs/SttApiSecret Description": "双密钥服务商（讯飞/腾讯/百度/火山/阿里）的第二个密钥（Secret/Token），单密钥服务商留空。",
     "Mcs/LlmApiSecret Key": "大语言模型(LLM) Secret",

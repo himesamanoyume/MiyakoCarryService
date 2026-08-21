@@ -102,7 +102,7 @@ Per-request LLM timeout in seconds. Defaults to 15.
 
 - **LlmReasoningEffort**
 
-LLM reasoning effort: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default omits the parameter; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. Defaults to "none".
+LLM reasoning/thinking mode: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model's default behavior; low/medium/high/max enable thinking with increasing effort. Automatically mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking parameters report an error directly without any fallback retry. Defaults to "none".
 
 - **HttpProxyHost**
 

@@ -179,7 +179,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | TraderLlmTemperature | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
 | TraderLlmMaxTokens | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
 | TraderLlmTimeoutSec | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
-| TraderLlmReasoningEffort | Reasoning effort of the Miyako trader's AI: none / default / low / medium / high / max. none passes the value through to try enabling a no-thinking fast mode on models that support it; default or empty means the parameter is not sent; other values are passed literally. If reasoning_effort is not supported it reports an error directly instead of retrying without it. | `none` |
+| TraderLlmReasoningEffort | Reasoning/thinking mode of the Miyako trader's AI: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model default; low/medium/high/max enable thinking with increasing effort. Mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking params report an error directly. | `none` |
 | TraderLlmMaxMessagesPerMinute | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
 | TraderLlmMaxHistoryMessages | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
 | TraderLlmMaxConcurrent | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
