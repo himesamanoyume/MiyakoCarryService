@@ -77,6 +77,11 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
                 {
+                    if (index == -1)
+                    {
+                        index = TryRecalcMcsBotIndex(mcsBotPlayerId) ?? -1;
+                    }
+
                     var mcsLeadPlayer = IsHost ? GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayerId) : Singleton<GameWorld>.Instance.MainPlayer;
                     var sequentialIndex = GetSequentialIndex(mcsLeadPlayer.ProfileId, mcsBotPlayerId, index);
                     return sequentialIndex;
@@ -87,10 +92,41 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 if (_mcsBotPlayerIndexes.TryGetValue(mcsBotPlayerId, out var index))
                 {
+                    if (index == -1)
+                    {
+                        index = TryRecalcMcsBotIndex(mcsBotPlayerId) ?? -1;
+                    }
                     return index;
                 }
                 return -5;
             }
+        }
+
+        private int? TryRecalcMcsBotIndex(MongoID mcsBotPlayerId)
+        {
+            Player mcsLeadPlayer = null;
+            try
+            {
+                mcsLeadPlayer = IsHost ? GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayerId) : Singleton<GameWorld>.Instance.MainPlayer;
+            }
+            catch
+            {
+                return null;
+            }
+
+            if (mcsLeadPlayer == null || string.IsNullOrEmpty(mcsLeadPlayer.ProfileId))
+            {
+                return null;
+            }
+
+            var recalculated = CalcMcsBotIndex(mcsLeadPlayer.ProfileId, mcsBotPlayerId);
+            if (recalculated < 5)
+            {
+                return null;
+            }
+
+            _mcsBotPlayerIndexes.AddOrUpdate(mcsBotPlayerId, recalculated, (_, _) => recalculated);
+            return recalculated;
         }
 
         private int GetSequentialIndex(MongoID mcsLeadPlayerId, MongoID mcsBotPlayerId, int baseIndex)
