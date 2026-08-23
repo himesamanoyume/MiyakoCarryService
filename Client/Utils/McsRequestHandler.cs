@@ -182,8 +182,8 @@ namespace MiyakoCarryService.Client.Utils
         {
             try
             {
-                var response = GetJson<Dictionary<string, SPTServerModInfo>>("/launcher/v2/mods");
-                return response;
+                var response = GetJson<LauncherV2ModsResponse>("/launcher/v2/mods");
+                return response?.Response ?? new Dictionary<string, SPTServerModInfo>();
             }
             catch
             {
