@@ -92,6 +92,12 @@ namespace MiyakoCarryService.Client
 
         #endregion
 
+        #region EXPERIMENTAL
+
+        public static ConfigEntry<bool> UseUnifiedBrainLayer;
+
+        #endregion
+
         #region DEBUG
 
 #if DEBUG
@@ -386,6 +392,7 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC => Locales.BASIC,
                 EConfigType.COMMAND => Locales.COMMAND,
                 EConfigType.PLAYER => Locales.PLAYER,
+                EConfigType.EXPERIMENTAL => Locales.EXPERIMENTAL,
                 EConfigType.DEBUG or _ => Locales.DEBUG
             };
             return Register(configTypeText, (int)type, key, defaultValue, description, acceptableValues, customAttributes, needNotify, isHide);
@@ -559,6 +566,16 @@ namespace MiyakoCarryService.Client
                 Locales.SHOWBREVITYCODE_KEY,
                 true,
                 Locales.SHOWBREVITYCODE_DESCRIPTION
+            );
+
+            #endregion
+            #region EXPERIMENTAL
+
+            UseUnifiedBrainLayer = Register(
+                EConfigType.EXPERIMENTAL,
+                "启用统一大脑层",
+                true,
+                "为了实现护航更好的行为表现，推出实验性的统一大脑层来控制护航，有可能会带来更好的护航行为表现。此开关可随时切换，立即生效"
             );
 
             #endregion

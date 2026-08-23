@@ -16,6 +16,7 @@
     "Mcs/A.Basic": "A. Basic",
     "Mcs/B.Command": "B. Command",
     "Mcs/C.Player": "C. Player",
+    "Mcs/Y.Experimental": "Y. Experimental",
     "Mcs/Z.Debug": "Z. Debug",
     "Mcs/FunctionEnabled": "Enabled",
     "Mcs/FunctionDisabled": "Disabled",

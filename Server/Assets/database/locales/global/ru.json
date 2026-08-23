@@ -16,6 +16,7 @@
     "Mcs/A.Basic": "A. Базовые настройки",
     "Mcs/B.Command": "B. Меню приказов",
     "Mcs/C.Player": "C. Настройки наёмника",
+    "Mcs/Y.Experimental": "Y. Experimental",
     "Mcs/Z.Debug": "Z. Отладка",
     "Mcs/FunctionEnabled": "Включено",
     "Mcs/FunctionDisabled": "Выключено",

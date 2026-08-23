@@ -42,6 +42,7 @@ namespace MiyakoCarryService.Client.Mgrs
             LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 185);
             LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 186);
             LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 187);
+            LayerUtils.RegisterCustomLayer(typeof(McsBrainLayer), 200);
         }
 
         public override void OnRaidEnded()

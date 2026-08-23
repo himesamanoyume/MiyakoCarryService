@@ -5,6 +5,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string BASIC = "Mcs/A.Basic";
         public const string COMMAND = "Mcs/B.Command";
         public const string PLAYER = "Mcs/C.Player";
+        public const string EXPERIMENTAL = "Mcs/Y.Experimental";
         public const string DEBUG = "Mcs/Z.Debug";
         public const string ENABLELOOTING_KEY = "Mcs/EnableLooting Key";
         public const string ENABLELOOTING_DESCRIPTION = "Mcs/EnableLooting Description";
