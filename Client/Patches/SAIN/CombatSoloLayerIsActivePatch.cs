@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                 }
 
                 var state = _states.GetOrCreateValue(botOwner);
-                if (mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+                if (mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
                 {
                     state.SainAllowed = false;
                     __result = false;

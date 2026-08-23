@@ -456,9 +456,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (BotOwner.GoToSomePointData.IsCome())
             {
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
+                if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                 {
-                    McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    McsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                     BotOwner.TalkMsg(new McsMsg
                     {
                         PhraseTrigger = EPhraseTrigger.OnPosition
@@ -496,9 +496,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (Time.time - BotOwner.Mover._lastTimePosChanged > 6f)
                 {
-                    if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
+                    if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint) && BotOwner.Position.McsSqrDistance(McsBotPlayerData.TargetPos.Value) <= 2f * 2f)
                     {
-                        McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                        McsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                         BotOwner.TalkMsg(new McsMsg
                         {
                             PhraseTrigger = EPhraseTrigger.OnPosition
@@ -510,12 +510,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        public async Task DelaySetDecisions(float delaySeconds, string[] exclude = null, params string[] decisions)
+        public async Task DelaySetIntents(float delaySeconds, string[] exclude = null, params string[] intents)
         {
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
             if (McsBotPlayerData != null)
             {
-                McsBotPlayerData.SetDecision(exclude, decisions);
+                McsBotPlayerData.SetIntent(exclude, intents);
             }
         }
 
@@ -526,8 +526,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            var hasEscortToBtr = McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr);
-            var hasEscort = McsBotPlayerData.HasDecision(Decisions.ShouldEscort);
+            var hasEscortToBtr = McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr);
+            var hasEscort = McsBotPlayerData.HasIntent(Intents.ShouldEscort);
             var btrController = Singleton<GameWorld>.Instance.BtrController;
             if ((hasEscort && !McsBotPlayerData.TargetPos.HasValue) || (hasEscortToBtr && !btrController.Initiated()))
             {
@@ -537,12 +537,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var sqrDistance = hasEscort ? McsBotPlayerData.TargetPos.Value.McsSqrDistance(BotOwner.Position) : btrController.BtrView.GetBtrSide(1).GoInPoints().Item1.McsSqrDistance(BotOwner.Position);
             if (sqrDistance < 2f * 2f)
             {
-                McsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                McsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                 BotOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.OnPosition
                 });
-                TasksExtensions.HandleExceptions(DelaySetDecisions(3f, [Decisions.ShouldFollowMe, Decisions.ShouldGoToPoint, Decisions.ShouldEscort, Decisions.ShouldEscortToBtr, Decisions.ShouldKeepFormation]));
+                TasksExtensions.HandleExceptions(DelaySetIntents(3f, [Intents.ShouldFollowMe, Intents.ShouldGoToPoint, Intents.ShouldEscort, Intents.ShouldEscortToBtr, Intents.ShouldKeepFormation]));
                 return true;
             }
             else if (BotOwner.GoToSomePointData.IsCome())
@@ -1017,7 +1017,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
+            if (McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
             {
                 return true;
             }
@@ -1586,7 +1586,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     _currentMoveRetries = 0;
                     corners = null;
                     _lastCanRunResult = false;
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation]);
+                    mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                     return _lastCanRunResult;
@@ -1741,7 +1741,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.HasDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldQuestProxyAction]))
+            if (!McsBotPlayerData.HasIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldQuestProxyAction]))
             {
                 return true;
             }
@@ -1758,7 +1758,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var haveItemsToDrop = BotOwner.ExternalItemsController.HaveItemsToDrop();
             if (!haveItemsToDrop)
             {
-                McsBotPlayerData.RemoveDecision([Decisions.ShouldDropTargetLoot]);
+                McsBotPlayerData.RemoveIntent([Intents.ShouldDropTargetLoot]);
                 _nextLootingCheckTime = Time.time + ENTER_COMMON_LOOTING_COODDOWN * 2;
                 return true;
             }

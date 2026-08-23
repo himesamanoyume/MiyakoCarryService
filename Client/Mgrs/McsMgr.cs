@@ -412,11 +412,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
                             if (mcsBotPlayerConfig.EnableKeepFormation)
                             {
-                                mcsBotPlayerData.AddDecision(Decisions.ShouldKeepFormation);
+                                mcsBotPlayerData.AddIntent(Intents.ShouldKeepFormation);
                             }
                             else
                             {
-                                mcsBotPlayerData.RemoveDecision(Decisions.ShouldKeepFormation);
+                                mcsBotPlayerData.RemoveIntent(Intents.ShouldKeepFormation);
                             }
 
                             if (oldConfig.EnableKeepFormation != mcsBotPlayerConfig.EnableKeepFormation)

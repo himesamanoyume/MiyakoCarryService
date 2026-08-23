@@ -30,7 +30,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             var mcsBotPlayerData = __instance._owner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData != null && mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+            if (mcsBotPlayerData != null && mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
             {
                 withDropEnemy = false;
             }

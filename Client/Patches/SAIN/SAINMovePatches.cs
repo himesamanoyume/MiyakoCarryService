@@ -192,7 +192,7 @@ namespace MiyakoCarryService.Client.Patches.SAIN
             }
 
             var mcsBotPlayerConfig = mcsBotPlayerData.McsAILeadPlayer?.McsBotPlayerConfig;
-            var isKeepFormation = mcsBotPlayerData.HasDecision(Decisions.ShouldKeepFormation) && mcsBotPlayerConfig != null && mcsBotPlayerConfig.EnableKeepFormation;
+            var isKeepFormation = mcsBotPlayerData.HasIntent(Intents.ShouldKeepFormation) && mcsBotPlayerConfig != null && mcsBotPlayerConfig.EnableKeepFormation;
 
             if (isKeepFormation && sqrToTarget >= 64f)
             {

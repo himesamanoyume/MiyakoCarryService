@@ -116,22 +116,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 });
 
                 mcsBotPlayerData.IsTaskRunning = true;
-                if (mcsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction))
+                if (mcsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                     await QuestProxyActionReadyToStart();
                 }
-                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction))
+                else if (mcsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction))
                 {
                     BotOwner.SetPose(0f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                     await StartLooting();
                 }
-                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction))
+                else if (mcsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction))
                 {
                     BotOwner.SetPose(1f);
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldHoldPosition);
                     var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId);
                     if (interactableObjectData == null)
                     {
@@ -152,7 +152,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         InteractionCallback(mcsBotPlayerData);
                     }
                 }
-                else if (mcsBotPlayerData.HasDecision(Decisions.ShouldStationaryWeaponProxyAction))
+                else if (mcsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction))
                 {
                     var stationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(mcsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
                     if (stationaryWeaponData == null || stationaryWeaponData.StationaryWeapon == null)
@@ -173,7 +173,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                         stationary.SetTargetStationary(stationaryWeaponLink);
                     }
                     
-                    mcsBotPlayerData.SetDecision([Decisions.ShouldFollowMe, Decisions.ShouldKeepFormation], Decisions.ShouldUseStationaryWeapon, Decisions.ShouldHoldPosition);
+                    mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldUseStationaryWeapon, Intents.ShouldHoldPosition);
                     mcsBotPlayerData.TargetPos = null;
                 }
             }
@@ -192,7 +192,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         private void InteractionCallback(McsBotPlayerData mcsBotPlayerData)
         {
-            mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition, Decisions.ShouldUseStationaryWeapon, Decisions.ShouldStationaryWeaponProxyAction]);
+            mcsBotPlayerData.RemoveIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldHoldPosition, Intents.ShouldUseStationaryWeapon, Intents.ShouldStationaryWeaponProxyAction]);
             mcsBotPlayerData.TargetPos = null;
             mcsBotPlayerData.ProxyTargetId = null;
         }

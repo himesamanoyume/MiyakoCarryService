@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
-            if (mcsBotPlayerData == null || !mcsBotPlayerData.HasDecision(Decisions.ShouldUseStationaryWeapon))
+            if (mcsBotPlayerData == null || !mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
             {
                 return;
             }

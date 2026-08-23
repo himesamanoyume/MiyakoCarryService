@@ -66,7 +66,7 @@ namespace MiyakoCarryService.Client.Datas
                 var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
                 if (mcsBotPlayerData != null)
                 {
-                    mcsBotPlayerData.RemoveDecision([Decisions.ShouldInteractionProxyAction, Decisions.ShouldQuestProxyAction, Decisions.ShouldLootProxyAction, Decisions.ShouldHoldPosition]);
+                    mcsBotPlayerData.RemoveIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldHoldPosition]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
                 }

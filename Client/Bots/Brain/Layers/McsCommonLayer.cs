@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
                 }
 
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
+                if (McsBotPlayerData.HasIntent(Intents.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
                     if (_nextUpdatePosTime < time)
                     {
@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
 
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldGoToPoint))
+                if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
                 {
                     if (_nextUpdatePosTime < time)
                     {
@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
+                if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
                 {
                     if (needHeal)
                     {
@@ -129,7 +129,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasDecision(Decisions.ShouldFollowMe))
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
                 {
                     if (_nextUpdatePosTime < time)
                     {
@@ -215,9 +215,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData != null && McsBotPlayerData.HasDecision(Decisions.ShouldTeleport))
+            if (McsBotPlayerData != null && McsBotPlayerData.HasIntent(Intents.ShouldTeleport))
             {
-                McsBotPlayerData.RemoveDecision(Decisions.ShouldTeleport);
+                McsBotPlayerData.RemoveIntent(Intents.ShouldTeleport);
                 UpdateLeadNearMoveTarget(McsBotPlayerData.LeadPlayer.Position, out float nextTime);
                 if (_currentMoveTarget.HasValue)
                 {

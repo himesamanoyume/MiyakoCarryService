@@ -40,7 +40,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
                 }
 
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr))
+                if (McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
                 {
                     var btrController = Singleton<GameWorld>.Instance.BtrController;
                     var side = btrController.BtrView.GetBtrSide(1);
@@ -123,7 +123,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if ((McsBotPlayerData.HasDecision(Decisions.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue) || McsBotPlayerData.HasDecision(Decisions.ShouldEscortToBtr))
+            if ((McsBotPlayerData.HasIntent(Intents.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue) || McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
             {
                 return true;
             }

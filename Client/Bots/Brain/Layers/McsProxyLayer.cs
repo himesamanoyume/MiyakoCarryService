@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
                 }
 
-                if (McsBotPlayerData.HasDecision(Decisions.ShouldHoldPosition))
+                if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                 }
@@ -100,10 +100,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldQuestProxyAction) 
-                || McsBotPlayerData.HasDecision(Decisions.ShouldLootProxyAction) 
-                || McsBotPlayerData.HasDecision(Decisions.ShouldInteractionProxyAction)
-                || McsBotPlayerData.HasDecision(Decisions.ShouldStationaryWeaponProxyAction))
+            if (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction) 
+                || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction) 
+                || McsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction)
+                || McsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction))
             {
                 return true;
             }

@@ -1,7 +1,7 @@
 
 namespace MiyakoCarryService.Client.Utils
 {
-    public static class Decisions
+    public static class Intents
     {
         public const string ShouldTeleport = "Mcs.ShouldTeleport";
         public const string ShouldEscort = "Mcs.ShouldEscort";

@@ -117,7 +117,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             McsBotPlayerData.ClearAreaIndex = 0;
             McsBotPlayerData.ClearAreaLookAroundUntil = 0f;
             McsBotPlayerData.TargetPos = null;
-            McsBotPlayerData.RemoveDecision(Decisions.ShouldClearArea);
+            McsBotPlayerData.RemoveIntent(Intents.ShouldClearArea);
             BotOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Clear
@@ -153,7 +153,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (McsBotPlayerData.HasDecision(Decisions.ShouldClearArea) && McsBotPlayerData.ClearAreaPoints != null && McsBotPlayerData.ClearAreaPoints.Count > 0)
+            if (McsBotPlayerData.HasIntent(Intents.ShouldClearArea) && McsBotPlayerData.ClearAreaPoints != null && McsBotPlayerData.ClearAreaPoints.Count > 0)
             {
                 return true;
             }

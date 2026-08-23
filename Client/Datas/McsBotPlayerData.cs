@@ -44,7 +44,7 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         public bool IsTaskRunning = false;
-        private readonly HashSet<string> _decisions = new();
+        private readonly HashSet<string> _intents = new();
         private HashSet<LootData> _vanishingCurseLootItems = new();
         public bool IsMcsLayerActive = false;
         public bool IsBtrLeaving = false; 
@@ -52,7 +52,7 @@ namespace MiyakoCarryService.Client.Datas
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
 
-        public void SetDecision(string[] exclude = null, params string[] decisions)
+        public void SetIntent(string[] exclude = null, params string[] intents)
         {
             List<string> preserved = null;
             if (exclude != null)
@@ -60,20 +60,20 @@ namespace MiyakoCarryService.Client.Datas
                 preserved = new List<string>();
                 foreach (var e in exclude)
                 {
-                    if (_decisions.Contains(e))
+                    if (_intents.Contains(e))
                     {
                         preserved.Add(e);
                     }
                 }
             }
 
-            _decisions.Clear();
+            _intents.Clear();
 
-            if (decisions != null)
+            if (intents != null)
             {
-                foreach (var decision in decisions)
+                foreach (var intent in intents)
                 {
-                    _decisions.Add(decision);
+                    _intents.Add(intent);
                 }
             }
 
@@ -81,16 +81,16 @@ namespace MiyakoCarryService.Client.Datas
             {
                 foreach (var p in preserved)
                 {
-                    _decisions.Add(p);
+                    _intents.Add(p);
                 }
             }
         }
 
-        public bool HasDecision(params string[] decisions)
+        public bool HasIntent(params string[] intents)
         {
-            foreach (var decision in decisions)
+            foreach (var intent in intents)
             {
-                if (!_decisions.Contains(decision))
+                if (!_intents.Contains(intent))
                 {
                     return false;
                 }
@@ -98,19 +98,19 @@ namespace MiyakoCarryService.Client.Datas
             return true;
         }
 
-        public void AddDecision(params string[] decisions)
+        public void AddIntent(params string[] intents)
         {
-            foreach (var decision in decisions)
+            foreach (var intent in intents)
             {
-                _decisions.Add(decision);
+                _intents.Add(intent);
             }
         }
 
-        public void RemoveDecision(params string[] decisions)
+        public void RemoveIntent(params string[] intents)
         {
-            foreach (var decision in decisions)
+            foreach (var intent in intents)
             {
-                _decisions.Remove(decision);
+                _intents.Remove(intent);
             }
         }
 
@@ -123,11 +123,11 @@ namespace MiyakoCarryService.Client.Datas
             CollectVanishingCurseLootItems();
             if (mcsAILeadPlayer.McsBotPlayerConfig.EnableKeepFormation)
             {
-                AddDecision(Decisions.ShouldKeepFormation);
+                AddIntent(Intents.ShouldKeepFormation);
             }
             else
             {
-                RemoveDecision(Decisions.ShouldKeepFormation);
+                RemoveIntent(Intents.ShouldKeepFormation);
             }
         }
 
@@ -178,7 +178,7 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
-            if (HasDecision(Decisions.ShouldLootProxyAction))
+            if (HasIntent(Intents.ShouldLootProxyAction))
             {
                 return;
             }
