@@ -176,7 +176,7 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | TraderLlmProvider | 宫子商人 AI 使用的服务商：`OpenAICompatible`（兼容 OpenAI / DeepSeek / Moonshot / Ollama / vLLM 等）、`Anthropic`、`GoogleGemini`、`DashScope`、`Zhipu`、`Qianfan`、`Spark`、`MiniMax`。 | `OpenAICompatible` |
 | TraderLlmApiKey | 宫子商人 AI 服务商的 API Key。 | 空 |
 | TraderLlmBaseUrl | 可选自定义宫子商人 AI 的 Base URL（覆盖服务商默认值）。 | 空 |
-| TraderLlmModelId | 宫子商人 AI 的模型名，服务商相关。 | `deepseek-v4-flash` |
+| TraderLlmModelId | 宫子商人 AI 的模型名。 | empty |
 | TraderLlmSystemPrompt | 可选自定义系统提示词，将拼接在默认提示词之前。 | 空 |
 | TraderLlmTemperature | 宫子商人 AI 的采样温度，范围 0到2，值越低结果越确定。 | `0.2` |
 | TraderLlmMaxTokens | 宫子商人 AI 单次回复的最大 Tokens，影响回复长度与成本。 | `3000` |
@@ -184,7 +184,7 @@ _2. `护航` 的好友槽位在服务到期后会变得不可用。你可以选�
 | TraderLlmMaxMessagesPerMinute | 宫子商人 AI 每分钟最大回复条数（限流）。 | `10` |
 | TraderLlmMaxHistoryMessages | 宫子商人 AI 对话中携带的最近聊天记录条数，用于保持对话连贯；设为 `0` 关闭。 | `20` |
 | TraderLlmApiSecret | 宫子商人 AI 服务商的第二密钥（Secret/Token）。智谱（ApiKey=id + ApiSecret=secret）、星火（拼接 ApiKey:ApiSecret）等双密钥服务商需要时填写；使用一体式 ApiKey 可留空。 | 空 |
-| TraderLlmReasoningEffort | 宫子商人 AI 的思考模式（reasoning/thinking）：none / default / low / medium / high / max；none 关闭思考（快速模式），default 或空不干预（模型默认），low/medium/high/max 开启思考并按档位调节强度。按服务商自动映射对应参数（OpenAI 兼容 thinking/reasoning_effort、Claude thinking、Gemini thinkingConfig、Qwen enable_thinking）。思考相关参数不被支持时直接报错，不会自动降级重试。 | `none` |
+| TraderLlmReasoningEffort | 宫子商人 AI 的思考强度（reasoning/thinking）：none / default / low / medium / high / max；none 关闭思考（快速模式），default 或空不干预（模型默认），low/medium/high/max 开启思考并按档位调节强度。按服务商自动映射对应参数（OpenAI 兼容 thinking/reasoning_effort、Claude thinking、Gemini thinkingConfig、Qwen enable_thinking）。思考相关参数不被支持时直接报错，不会自动降级重试。 | `none` |
 | TraderLlmMaxConcurrent | 宫子商人 LLM 全局并发请求上限。达到上限后请求排队，任一完成自动放行队首，保护上游 API 与代理。 | `16` |
 | HTTP 代理地址 | HTTP 代理主机（LLM/STT 等云端请求经代理转发时填写）。 | 空 |
 | HTTP 代理端口 | HTTP 代理端口（与 `HttpProxyHost` 配合使用）。 | 空 |

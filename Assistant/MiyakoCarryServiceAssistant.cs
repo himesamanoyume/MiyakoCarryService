@@ -300,7 +300,7 @@ namespace MiyakoCarryService.Assistant
             LlmModelId = McsConfigApi.RegisterConfig(
                 section, order,
                 Locales.LLMMODELID_KEY,
-                "deepseek-v4-flash",
+                "",
                 Locales.LLMMODELID_DESCRIPTION
             );
 

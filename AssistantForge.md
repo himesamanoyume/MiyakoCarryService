@@ -50,7 +50,7 @@ Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun
 
 - **SttBaseUrl**
 
-Optional custom STT base URL (overrides per-provider default). Defaults to Empty.
+Optional custom STT base URL. Defaults to Empty.
 
 - **SttModelId**
 
@@ -74,15 +74,15 @@ API key for the chosen LLM provider. Defaults to Empty.
 
 - **LlmApiSecret**
 
- Defaults to Empty.
+Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. Defaults to Empty.
 
 - **LlmBaseUrl**
 
-Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible). Defaults to Empty.
+Optional custom LLM base URL. Defaults to Empty.
 
 - **LlmModelId**
 
-LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible. Defaults to "deepseek-v4-flash".
+LLM model name. Defaults to Empty.
 
 - **LlmSystemPrompt**
 
@@ -102,7 +102,7 @@ Per-request LLM timeout in seconds. Defaults to 15.
 
 - **LlmReasoningEffort**
 
-LLM reasoning/thinking mode: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model's default behavior; low/medium/high/max enable thinking with increasing effort. Automatically mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking parameters report an error directly without any fallback retry. Defaults to "none".
+LLM reasoning/thinking effort: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model's default behavior; low/medium/high/max enable thinking with increasing effort. Automatically mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking parameters report an error directly without any fallback retry. Defaults to "none".
 
 - **HttpProxyHost**
 

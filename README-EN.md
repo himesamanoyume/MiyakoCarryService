@@ -178,12 +178,12 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | TraderLlmApiKey | API key for the Miyako trader's AI provider. | empty |
 | TraderLlmApiSecret | Secondary key (Secret/Token) of the Miyako trader's AI provider. Required by two-key providers such as Zhipu (ApiKey=id + ApiSecret=secret) and Spark (ApiKey:ApiSecret); leave empty when using an all-in-one ApiKey. | empty |
 | TraderLlmBaseUrl | Optional custom base URL for the Miyako trader's AI (overrides the provider default). | empty |
-| TraderLlmModelId | Model name for the Miyako trader's AI, provider-specific. | `deepseek-v4-flash` |
+| TraderLlmModelId | Model name for the Miyako trader's AI. | empty |
 | TraderLlmSystemPrompt | Optional custom system prompt prepended to the default prompt. | empty |
 | TraderLlmTemperature | Sampling temperature for the Miyako trader's AI, 0..2; lower is more deterministic. | `0.2` |
 | TraderLlmMaxTokens | Maximum tokens per reply of the Miyako trader's AI; affects reply length and cost. | `3000` |
 | TraderLlmTimeoutSec | Per-request timeout in seconds for the Miyako trader's AI. | `15` |
-| TraderLlmReasoningEffort | Reasoning/thinking mode of the Miyako trader's AI: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model default; low/medium/high/max enable thinking with increasing effort. Mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking params report an error directly. | `none` |
+| TraderLlmReasoningEffort | Reasoning/thinking effort of the Miyako trader's AI: none / default / low / medium / high / max. none disables thinking (fast mode); default leaves the model default; low/medium/high/max enable thinking with increasing effort. Mapped per provider (OpenAI-compatible thinking/reasoning_effort, Claude thinking, Gemini thinkingConfig, Qwen enable_thinking). Unsupported thinking params report an error directly. | `none` |
 | TraderLlmMaxMessagesPerMinute | Maximum replies per minute from the Miyako trader's AI (rate limit). | `10` |
 | TraderLlmMaxHistoryMessages | Number of recent chat messages carried as context for the Miyako trader's AI; set `0` to disable. | `20` |
 | TraderLlmMaxConcurrent | Global concurrency limit for the Miyako trader's LLM requests. Excess requests queue up and are released as slots free up, protecting upstream APIs and proxies. | `16` |
@@ -282,14 +282,14 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | Stt Provider | Cloud Speech-to-Text provider |
 | Stt ApiKey | API key for the chosen STT provider. |
 | Stt ApiSecret | Second key (secret/token) for two-key providers (Xfyun/Tencent/Baidu/Volc/Aliyun); leave empty for single-key providers. |
-| Stt BaseUrl | Optional custom STT base URL (overrides per-provider default). |
+| Stt BaseUrl | Optional custom STT base URL. |
 | Stt ModelId | Optional STT model name (provider-specific). Leave blank for default. |
 | Stt Language | Hint language code in BCP-47 (e.g. zh-CN, en-US, ja-JP) for STT. |
 | Stt TimeoutSec | Per-request STT timeout in seconds. |
 | Llm Provider | Cloud LLM provider. |
 | Llm ApiKey | API key for the chosen LLM provider. |
 | Llm ApiSecret | Second key (secret/token) for two-key providers; leave empty for single-key providers. |
-| Llm BaseUrl | Optional custom LLM base URL (overrides per-provider default for OpenAI-Compatible). |
+| Llm BaseUrl | Optional custom LLM base URL. |
 | Llm ModelId | LLM model name. Provider-specific; default deepseek-v4-flash for OpenAI-Compatible. |
 | Llm System Prompt | Optional custom system prompt prepended to Assistant's voice-command instruction template. |
 | Llm Temperature | LLM sampling temperature, 0..2. Lower is more deterministic. |
