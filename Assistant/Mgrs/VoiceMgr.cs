@@ -371,6 +371,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
         private async System.Threading.Tasks.Task ProcessCaptureAsync(float[] samples, CancellationToken ct)
         {
             _voiceState = EVoiceState.Transcribing;
+            var debugOnly = MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && (!MiyakoCarryServiceAssistantPlugin.VoiceEnabled.Value || !GameLoop.Instance.IsVaildGameWorld);
             var segment = new AudioSegment
             {
                 Samples = samples,
@@ -416,9 +417,14 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
                     SetDebugText(string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message));
+                }
+
+                if (debugOnly)
+                {
                     _voiceState = EVoiceState.Idle;
                     return;
                 }
+
                 _pendingTranscribedText = string.Empty;
                 _pendingIntent = new LlmIntent { Error = string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message) };
                 _voiceState = EVoiceState.Dispatching;
@@ -430,9 +436,14 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
                     SetDebugText(stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized());
+                }
+
+                if (debugOnly)
+                {
                     _voiceState = EVoiceState.Idle;
                     return;
                 }
+
                 _pendingTranscribedText = stt?.Text ?? string.Empty;
                 _pendingIntent = new LlmIntent { Error = stt?.Error ?? Utils.Locales.VOICESTTFAILED.McsLocalized() };
                 _voiceState = EVoiceState.Dispatching;
@@ -442,11 +453,15 @@ namespace MiyakoCarryService.Assistant.Mgrs
             if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
             {
                 SetDebugText(stt.Text);
-                _voiceState = EVoiceState.Idle;
+            }
+
+            if (debugOnly)
+            {
                 if (MiyakoCarryServiceAssistantPlugin.LlmDebugAutoEnabled.Value)
                 {
                     _ = RunDebugCommandTestAsync(stt.Text, llmSettings, ct);
                 }
+                _voiceState = EVoiceState.Idle;
                 return;
             }
 
@@ -463,7 +478,6 @@ namespace MiyakoCarryService.Assistant.Mgrs
             LlmIntent intent;
             try
             {
-                // MiyakoCarryServiceAssistantPlugin.Logger.LogWarning("\n=== LLM System Prompt ===\n" + Utils.Tools.BuildSystemPrompt(llmSettings.SystemPrompt) + "\n=== LLM User Text ===\n" + llmText);
                 intent = await _llmDispatcher.InterpretAsync(llmText, llmSettings, ct).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
@@ -473,6 +487,10 @@ namespace MiyakoCarryService.Assistant.Mgrs
             catch (Exception ex)
             {
                 MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM Exception：{ex}");
+                if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && MiyakoCarryServiceAssistantPlugin.LlmDebugAutoEnabled.Value)
+                {
+                    MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = string.Format(Utils.Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
+                }
                 _pendingIntent = new LlmIntent { Error = string.Format(Utils.Locales.LLM_FAILED.McsLocalized(), ex.Message) };
                 _voiceState = EVoiceState.Dispatching;
                 return;
@@ -480,6 +498,11 @@ namespace MiyakoCarryService.Assistant.Mgrs
 
             _pendingIntent = intent;
             _voiceState = EVoiceState.Dispatching;
+
+            if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && MiyakoCarryServiceAssistantPlugin.LlmDebugAutoEnabled.Value)
+            {
+                MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = FormatDebugIntent(intent);
+            }
         }
 
         private void ConsumePendingIntent()
