@@ -23,6 +23,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public bool _deferToSain = false;
         public float _goToStationaryStuckTime = -999f;
         public float _lastSqrToOperator = float.MaxValue;
+        public float _lastCanShootTime = -999f;
+        private const float CAN_SHOOT_HOLD_TIME = 2f;
         private const float ARRIVE_DIST = 2.5f;
         private const float LOOK_AROUND_TIME = 2f;
         private const float STUCK_TIMEOUT = 8f;
@@ -87,8 +89,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 #region McsProxyLayer
 
-                if (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction) 
-                    || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction) 
+                if (CanShootNow())
+                {
+
+                }
+                else if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
+                {
+
+                }
+                else if (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction)
+                    || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction)
                     || McsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction)
                     || McsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction))
                 {
@@ -117,57 +127,73 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 #endregion
                 #region McsEscortLayer
 
-                if (McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
+                if (CanShootNow())
                 {
-                    var btrController = Singleton<GameWorld>.Instance.BtrController;
-                    var side = btrController.BtrView.GetBtrSide(1);
-                    if (side == null)
-                    {
-                        return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindBtrSide");
-                    }
 
-                    var doorPos = side.GoInPoints().Item1;
-                    if (_nextUpdatePosTime < time)
-                    {
-                        McsBotPlayerData.TargetPos = doorPos;
-                        UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
-                    }
-
-                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
                 }
-
-                if (McsBotPlayerData.TargetPos.HasValue)
+                else if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
-                    if (_nextUpdatePosTime < time)
-                    {
-                        UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
 
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                        return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
-                    }
-
-                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
                 }
                 else
                 {
-                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortPos");
+                    if (McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
+                    {
+                        var btrController = Singleton<GameWorld>.Instance.BtrController;
+                        var side = btrController.BtrView.GetBtrSide(1);
+                        if (side == null)
+                        {
+                            return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindBtrSide");
+                        }
+
+                        var doorPos = side.GoInPoints().Item1;
+                        if (_nextUpdatePosTime < time)
+                        {
+                            McsBotPlayerData.TargetPos = doorPos;
+                            UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                            _nextUpdatePosTime = time + nextTime;
+                        }
+
+                        if (_currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
+                        }
+
+                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
+                    }
+
+                    if (McsBotPlayerData.TargetPos.HasValue)
+                    {
+                        if (_nextUpdatePosTime < time)
+                        {
+                            UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                            _nextUpdatePosTime = time + nextTime;
+                        }
+
+                        if (_currentMoveTarget.HasValue)
+                        {
+                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
+                        }
+
+                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
+                    }
+                    else
+                    {
+                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortPos");
+                    }
                 }
 
                 #endregion
                 #region McsFightLayer
 
-                if (goalEnemy != null)
+                if (CanShootNow())
+                {
+                    _lastCanShootTime = time;
+                }
+
+                if (goalEnemy != null && time - _lastCanShootTime <= CAN_SHOOT_HOLD_TIME)
                 {
                     if (!MiyakoCarryServicePlugin.SAINInstalled)
                     {
@@ -787,7 +813,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 #endregion
-                
+
                 return new Action(typeof(HoldPositionLogic), "Mcs:Default");
             }
             catch (Exception e)
