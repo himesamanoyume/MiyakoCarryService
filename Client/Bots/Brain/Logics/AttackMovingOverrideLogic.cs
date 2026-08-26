@@ -16,17 +16,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
-            DoorOpen();
-            _owner.SetTargetMoveSpeed(1f);
-            _owner.Sprint(false, false);
-            _owner.SetPose(1f);
-
             var goalEnemy = _owner.Memory.GoalEnemy;
             if (goalEnemy == null)
             {
                 return;
             }
 
+            if (goalEnemy.IsVisible)
+            {
+                base.UpdateNodeByBrain(data);
+                return;
+            }
+
+            DoorOpen();
+            _owner.SetTargetMoveSpeed(1f);
+            _owner.Sprint(false, false);
+            _owner.SetPose(1f);
             MoveTowardsEnemy(goalEnemy);
             AimingAndShoot(data);
         }
