@@ -44,10 +44,14 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
         public bool IsTaskRunning = false;
-        private readonly HashSet<string> _intents = new();
+        private HashSet<string> _intents = new();
         private HashSet<LootData> _vanishingCurseLootItems = new();
+        private const float EMERGENCY_NEED_CHECK_INTERVAL = 5f;
+        private float _nextEmergencyNeedCheckTime = 0f;
+        private ELootNeedType _cachedEmergencyLootNeed = ELootNeedType.None;
+        private HashSet<EDamageEffectType> _missingMedEffects = new();
         public bool IsMcsLayerActive = false;
-        public bool IsBtrLeaving = false; 
+        public bool IsBtrLeaving = false;
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
@@ -179,6 +183,12 @@ namespace MiyakoCarryService.Client.Datas
         public void SetLootingTarget(List<ItemData> itemDatas)
         {
             if (HasIntent(Intents.ShouldLootProxyAction))
+            {
+                return;
+            }
+
+            var emergencyLootNeed = GetEmergencyLootNeed();
+            if (emergencyLootNeed != ELootNeedType.None && TrySetEmergencyLootingTarget(itemDatas, emergencyLootNeed))
             {
                 return;
             }
@@ -317,6 +327,357 @@ namespace MiyakoCarryService.Client.Datas
                     item.McsRemoveItem();
                 }
             }
+        }
+
+        public ELootNeedType GetEmergencyLootNeed()
+        {
+            if (Time.time < _nextEmergencyNeedCheckTime)
+            {
+                return _cachedEmergencyLootNeed;
+            }
+
+            _nextEmergencyNeedCheckTime = Time.time + EMERGENCY_NEED_CHECK_INTERVAL;
+            _cachedEmergencyLootNeed = ELootNeedType.None;
+
+            var botOwner = BotOwner;
+            var player = Player;
+            if (botOwner == null || player == null)
+            {
+                return _cachedEmergencyLootNeed;
+            }
+
+            var weaponManager = botOwner.WeaponManager;
+            var inventoryController = player.InventoryController;
+            if (weaponManager == null || inventoryController == null)
+            {
+                return _cachedEmergencyLootNeed;
+            }
+
+            if (NeedMagazine(weaponManager.CurrentWeapon, inventoryController))
+            {
+                _cachedEmergencyLootNeed = ELootNeedType.Magazine;
+                return _cachedEmergencyLootNeed;
+            }
+
+            if (NeedAmmo(botOwner))
+            {
+                _cachedEmergencyLootNeed = ELootNeedType.Ammo;
+                return _cachedEmergencyLootNeed;
+            }
+
+            if (GetMissingMedEffects().Count > 0)
+            {
+                _cachedEmergencyLootNeed = ELootNeedType.Meds;
+                return _cachedEmergencyLootNeed;
+            }
+
+            return _cachedEmergencyLootNeed;
+        }
+
+        public bool HasEmergencyLootNeed()
+        {
+            return GetEmergencyLootNeed() != ELootNeedType.None;
+        }
+
+        private bool NeedMagazine(Weapon weapon, InventoryController inventoryController)
+        {
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot == null)
+            {
+                return false;
+            }
+
+            if (weapon.GetCurrentMagazine() != null)
+            {
+                return false;
+            }
+
+            var magazineList = new List<Magazine>();
+            inventoryController.GetReachableItemsOfTypeNonAlloc(magazineList);
+            foreach (var magazine in magazineList)
+            {
+                if (magazineSlot.CanAccept(magazine))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool NeedAmmo(BotOwner botOwner)
+        {
+            botOwner.CollectAmmoOrBackupAmmoCount(out var total);
+            return total <= 0;
+        }
+
+        public HashSet<EDamageEffectType> GetMissingMedEffects()
+        {
+            _missingMedEffects.Clear();
+            _missingMedEffects.Add(EDamageEffectType.Fracture);
+            _missingMedEffects.Add(EDamageEffectType.HeavyBleeding);
+            _missingMedEffects.Add(EDamageEffectType.LightBleeding);
+            _missingMedEffects.Add(EDamageEffectType.DestroyedPart);
+
+            var player = Player;
+            if (player == null)
+            {
+                return _missingMedEffects;
+            }
+
+            var medsList = new List<Meds>();
+            player.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, medsList);
+            foreach (var meds in medsList)
+            {
+                if (meds == null)
+                {
+                    continue;
+                }
+
+                var damageEffects = meds.HealthEffectsComponent?.DamageEffects;
+                if (damageEffects == null)
+                {
+                    continue;
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.Fracture) && !damageEffects.ContainsKey(EDamageEffectType.DestroyedPart))
+                {
+                    _missingMedEffects.Remove(EDamageEffectType.Fracture);
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.HeavyBleeding))
+                {
+                    _missingMedEffects.Remove(EDamageEffectType.HeavyBleeding);
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.LightBleeding))
+                {
+                    _missingMedEffects.Remove(EDamageEffectType.LightBleeding);
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.DestroyedPart))
+                {
+                    _missingMedEffects.Remove(EDamageEffectType.DestroyedPart);
+                }
+            }
+
+            return _missingMedEffects;
+        }
+
+        private bool TrySetEmergencyLootingTarget(List<ItemData> itemDatas, ELootNeedType needType)
+        {
+            if (itemDatas == null)
+            {
+                return false;
+            }
+
+            var botOwner = BotOwner;
+            if (botOwner == null)
+            {
+                return false;
+            }
+
+            var weapon = botOwner.WeaponManager?.CurrentWeapon;
+            if (weapon == null && needType != ELootNeedType.Meds)
+            {
+                return false;
+            }
+
+            var missingMedEffects = needType == ELootNeedType.Meds ? GetMissingMedEffects() : null;
+            var candidateLootDatas = new List<LootData>();
+            var coveredMedEffectCounts = new Dictionary<LootData, int>();
+
+            foreach (var itemData in itemDatas)
+            {
+                if (itemData is not LootData lootData)
+                {
+                    continue;
+                }
+
+                if (lootData.IsInSecureContainerItem)
+                {
+                    continue;
+                }
+
+                if (lootData.RootTransform == null)
+                {
+                    continue;
+                }
+
+                if (LootDataMgr.IsLockedLootingTarget(lootData))
+                {
+                    continue;
+                }
+
+                if (LootDataMgr.IsLockedLootingTargetRootTransform(lootData.RootTransform))
+                {
+                    continue;
+                }
+
+                if (!lootData.LootProps.TryGetValue(McsAILeadPlayer, out var lootProp))
+                {
+                    continue;
+                }
+
+                if (lootProp.IsLootOnColdown(botOwner))
+                {
+                    continue;
+                }
+
+                switch (needType)
+                {
+                    case ELootNeedType.Magazine:
+                        if (IsCompatibleMagazine(lootData, weapon))
+                        {
+                            candidateLootDatas.Add(lootData);
+                        }
+                        break;
+                    case ELootNeedType.Ammo:
+                        if (IsCompatibleAmmo(lootData, weapon))
+                        {
+                            candidateLootDatas.Add(lootData);
+                        }
+                        break;
+                    case ELootNeedType.Meds:
+                        {
+                            var coveredCount = GetCoveredMissingMedEffectCount(lootData, missingMedEffects);
+                            if (coveredCount > 0)
+                            {
+                                candidateLootDatas.Add(lootData);
+                                coveredMedEffectCounts[lootData] = coveredCount;
+                            }
+                            break;
+                        }
+                }
+            }
+
+            if (candidateLootDatas.Count == 0)
+            {
+                return false;
+            }
+
+            var botPos = botOwner.Position;
+            if (needType == ELootNeedType.Meds)
+            {
+                candidateLootDatas.Sort((a, b) =>
+                {
+                    var countCompare = coveredMedEffectCounts[b].CompareTo(coveredMedEffectCounts[a]);
+                    if (countCompare != 0)
+                    {
+                        return countCompare;
+                    }
+
+                    return a.RootTransform.position.McsSqrDistance(botPos).CompareTo(b.RootTransform.position.McsSqrDistance(botPos));
+                });
+            }
+            else if (needType == ELootNeedType.Magazine)
+            {
+                candidateLootDatas.Sort((a, b) =>
+                {
+                    var aHasAmmo = (a.Item as Magazine)?.Count > 0;
+                    var bHasAmmo = (b.Item as Magazine)?.Count > 0;
+                    if (aHasAmmo != bHasAmmo)
+                    {
+                        return aHasAmmo ? -1 : 1;
+                    }
+
+                    return a.RootTransform.position.McsSqrDistance(botPos).CompareTo(b.RootTransform.position.McsSqrDistance(botPos));
+                });
+            }
+            else
+            {
+                candidateLootDatas.Sort((a, b) => a.RootTransform.position.McsSqrDistance(botPos).CompareTo(b.RootTransform.position.McsSqrDistance(botPos)));
+            }
+
+            var targetLootData = candidateLootDatas.FirstOrDefault();
+            LootDataMgr.LockLootItemToTarget(targetLootData);
+            LootDataMgr.LockLootingTargetRootTransform(targetLootData.RootTransform);
+            LootingTarget = targetLootData;
+            return true;
+        }
+
+        private bool IsCompatibleMagazine(LootData lootData, Weapon weapon)
+        {
+            if (lootData.Item is not Magazine magazine)
+            {
+                return false;
+            }
+
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot == null)
+            {
+                return false;
+            }
+
+            return magazineSlot.CanAccept(magazine);
+        }
+
+        private bool IsCompatibleAmmo(LootData lootData, Weapon weapon)
+        {
+            if (lootData.Item is not Ammo ammo)
+            {
+                return false;
+            }
+
+            if (weapon.Chambers != null)
+            {
+                foreach (var chamber in weapon.Chambers)
+                {
+                    if (chamber != null && chamber.CanAccept(ammo))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            var currentMagazine = weapon.GetCurrentMagazine();
+            if (currentMagazine?.Cartridges?.Filters != null && currentMagazine.Cartridges.Filters.CheckItemFilter(ammo))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private int GetCoveredMissingMedEffectCount(LootData lootData, HashSet<EDamageEffectType> missingMedEffects)
+        {
+            if (lootData.Item is not Meds meds)
+            {
+                return 0;
+            }
+
+            var damageEffects = meds.HealthEffectsComponent?.DamageEffects;
+            if (damageEffects == null)
+            {
+                return 0;
+            }
+
+            var coveredCount = 0;
+            foreach (var missingEffect in missingMedEffects)
+            {
+                switch (missingEffect)
+                {
+                    case EDamageEffectType.Fracture:
+                        if (damageEffects.ContainsKey(EDamageEffectType.Fracture) && !damageEffects.ContainsKey(EDamageEffectType.DestroyedPart))
+                        {
+                            coveredCount++;
+                        }
+                        break;
+                    default:
+                        if (damageEffects.ContainsKey(missingEffect))
+                        {
+                            coveredCount++;
+                        }
+                        break;
+                }
+            }
+
+            return coveredCount;
         }
     }
 }

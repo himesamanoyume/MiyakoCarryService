@@ -663,7 +663,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
+                else if (_nextLootingCheckTime < time && (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting || McsBotPlayerData.HasEmergencyLootNeed()) && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
                 {
                     if (TryRefreshCommonTarget(McsBotPlayerData.LootingTarget.RootTransform.position, time))
                     {

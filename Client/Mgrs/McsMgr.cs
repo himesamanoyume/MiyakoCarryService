@@ -405,7 +405,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                         if (mcsBotPlayerData != null)
                         {
-                            if (!mcsBotPlayerConfig.EnableLooting)
+                            if (!mcsBotPlayerConfig.EnableLooting && !mcsBotPlayerData.HasEmergencyLootNeed())
                             {
                                 mcsBotPlayerData.IsLooting = false;
                             }
