@@ -40,7 +40,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var tooClose = false;
                 var needHeal = false;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
-                var canShoot = goalEnemy?.CanShoot;
+                var canShootNow = CanShootNow();
+                if (canShootNow)
+                {
+                    _lastCanShootTime = time;
+                }
 
                 #region McsAvoidDangerLayer
 
@@ -79,7 +83,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
                 }
 
-                // return new Action(typeof(HoldPositionLogic), "Mcs:NoDanger");
                 #endregion
 
                 if (McsBotPlayerData == null)
@@ -87,39 +90,40 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
                 }
 
+                var fightActive = goalEnemy != null && time - _lastCanShootTime <= CAN_SHOOT_HOLD_TIME;
+                needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
+                var isEnemyPosLost = IsEnemyPosLost();
+                mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
+                sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
+                tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
+
                 #region McsProxyLayer
 
-                if (CanShootNow())
+                if (!fightActive && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
-
-                }
-                else if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
-                {
-
-                }
-                else if (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction)
-                    || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction)
-                    || McsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction)
-                    || McsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction))
-                {
-
-                    if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                    if (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction)
+                        || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction)
+                        || McsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction)
+                        || McsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction))
                     {
-                        return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
-                    }
 
-                    if (McsBotPlayerData.TargetPos.HasValue)
-                    {
-                        if (_nextUpdatePosTime < time)
+                        if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
                         {
-                            UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                            _nextUpdatePosTime = time + nextTime;
+                            return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionForProxyAction");
                         }
 
-                        if (_currentMoveTarget.HasValue)
+                        if (McsBotPlayerData.TargetPos.HasValue)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                            return new Action(typeof(GoToExcuteProxyActionLogic), "Mcs:GoToExcuteProxyAction");
+                            if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
+                            {
+                                ApplyMovePoint();
+                                if (needHeal)
+                                {
+                                    RefreshStuckTimer();
+                                    return new Action(typeof(HealLogic), "Mcs:HealWhileProxy");
+                                }
+                                return new Action(typeof(GoToExcuteProxyActionLogic), "Mcs:GoToExcuteProxyAction");
+                            }
                         }
                     }
                 }
@@ -127,15 +131,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 #endregion
                 #region McsEscortLayer
 
-                if (CanShootNow())
-                {
-
-                }
-                else if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
-                {
-
-                }
-                else
+                if (!fightActive && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
                     if (McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
                     {
@@ -156,44 +152,142 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         if (_currentMoveTarget.HasValue)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            ApplyMovePoint();
+                            if (needHeal)
+                            {
+                                RefreshStuckTimer();
+                                return new Action(typeof(HealLogic), "Mcs:HealWhileEscort");
+                            }
                             return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
                         }
-
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
                     }
 
                     if (McsBotPlayerData.TargetPos.HasValue)
                     {
-                        if (_nextUpdatePosTime < time)
+                        if (TryRefreshEscortTarget(McsBotPlayerData.TargetPos, time))
                         {
-                            UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                            _nextUpdatePosTime = time + nextTime;
-                        }
-
-                        if (_currentMoveTarget.HasValue)
-                        {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            ApplyMovePoint();
+                            if (needHeal)
+                            {
+                                RefreshStuckTimer();
+                                return new Action(typeof(HealLogic), "Mcs:HealWhileEscort");
+                            }
                             return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToPoint");
                         }
+                    }
+                }
 
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortNearPath");
-                    }
-                    else
+                #endregion
+                #region StationaryWeapon
+
+                if (McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
+                {
+                    var stationary = BotOwner.WeaponManager.Stationary;
+                    if (_cachedProxyTargetId == null || _cachedStationaryWeaponData == null || McsBotPlayerData.ProxyTargetId != _cachedProxyTargetId)
                     {
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindEscortPos");
+                        _cachedProxyTargetId = McsBotPlayerData.ProxyTargetId;
+                        _cachedStationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
                     }
+
+                    var stationaryWeapon = _cachedStationaryWeaponData?.StationaryWeapon;
+                    var stationaryWeaponLink = _cachedStationaryWeaponData?.StationaryWeaponLink;
+
+                    if (_cachedProxyTargetId != null && stationaryWeapon != null && stationaryWeaponLink != null)
+                    {
+                        var operatorPos = stationaryWeapon.OperatorPosition;
+                        var sqrToOperator = BotOwner.Position.McsSqrDistance(operatorPos);
+
+                        if (needHeal && isEnemyPosLost)
+                        {
+                            if (stationary.CurLink != null && stationary.Taken)
+                            {
+                                stationary.DropCurWeapon(false, true);
+                            }
+                            RefreshStuckTimer();
+                            return new Action(typeof(StationaryHealLogic), "Mcs:StationaryHealing");
+                        }
+
+                        if (stationary.CurLink == null)
+                        {
+                            stationary.SetTargetStationary(stationaryWeaponLink);
+                        }
+
+                        TryRefreshCommonTarget(operatorPos, time);
+
+                        if (sqrToOperator >= 1.5f && _currentMoveTarget.HasValue)
+                        {
+                            if (sqrToOperator < _lastSqrToOperator - 0.5f)
+                            {
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = sqrToOperator;
+                            }
+                            else if (_goToStationaryStuckTime <= 0f || _goToStationaryStuckTime > time)
+                            {
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = sqrToOperator;
+                            }
+
+                            if (sqrToOperator < 9f && time - _goToStationaryStuckTime > 8f)
+                            {
+                                BotOwner.StopMove();
+                                BotOwner.Mover.AllowTeleport();
+                                BotOwner.GetPlayer.Teleport(operatorPos, true);
+                                BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
+                                BotOwner.Mover._lastGoodCastPointTime = time;
+                                BotOwner.Mover._prevPosLinkedTime = 0f;
+                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
+                                BotOwner.Mover.RecalcWay();
+                                BotOwner.Mover.Pause = true;
+
+                                _goToStationaryStuckTime = time;
+                                _lastSqrToOperator = float.MaxValue;
+                                RefreshStuckTimer();
+
+                                if (stationary.CurLink == null)
+                                {
+                                    stationary.SetTargetStationary(stationaryWeaponLink);
+                                }
+                                return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                            }
+
+                            ApplyMovePoint();
+                            return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
+                        }
+                        else
+                        {
+                            _goToStationaryStuckTime = -999f;
+                            _lastSqrToOperator = float.MaxValue;
+                        }
+
+                        var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
+
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
+                        {
+                            BotOwner.ShootData.EndShoot();
+                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                        }
+
+                        if (goalEnemy == null)
+                        {
+                            ScanSector(stationaryWeaponLink);
+                        }
+                    }
+                }
+                else
+                {
+                    _goToStationaryStuckTime = -999f;
+                    _lastSqrToOperator = float.MaxValue;
+                }
+
+                if (McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon) && goalEnemy == null)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
                 }
 
                 #endregion
                 #region McsFightLayer
 
-                if (CanShootNow())
-                {
-                    _lastCanShootTime = time;
-                }
-
-                if (goalEnemy != null && time - _lastCanShootTime <= CAN_SHOOT_HOLD_TIME)
+                if (fightActive)
                 {
                     if (!MiyakoCarryServicePlugin.SAINInstalled)
                     {
@@ -215,114 +309,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         goalEnemy = BotOwner.Memory.GoalEnemy;
                     }
-
-                    needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
-                    var isEnemyPosLost = IsEnemyPosLost();
-
-                    if (McsBotPlayerData != null && McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
-                    {
-                        var stationary = BotOwner.WeaponManager.Stationary;
-                        if (_cachedProxyTargetId == null || _cachedStationaryWeaponData == null || McsBotPlayerData.ProxyTargetId != _cachedProxyTargetId)
-                        {
-                            _cachedProxyTargetId = McsBotPlayerData.ProxyTargetId;
-                            _cachedStationaryWeaponData = Singleton<GameWorld>.Instance.FindInteractableObjectData(McsBotPlayerData.ProxyTargetId) as StationaryWeaponData;
-                        }
-
-                        var stationaryWeapon = _cachedStationaryWeaponData?.StationaryWeapon;
-                        var stationaryWeaponLink = _cachedStationaryWeaponData?.StationaryWeaponLink;
-
-                        if (_cachedProxyTargetId != null && stationaryWeapon != null && stationaryWeaponLink != null)
-                        {
-                            var operatorPos = stationaryWeapon.OperatorPosition;
-                            var sqrToOperator = BotOwner.Position.McsSqrDistance(operatorPos);
-
-                            if (needHeal && isEnemyPosLost)
-                            {
-                                if (stationary.CurLink != null && stationary.Taken)
-                                {
-                                    stationary.DropCurWeapon(false, true);
-                                }
-                                RefreshStuckTimer();
-                                return new Action(typeof(StationaryHealLogic), "Mcs:StationaryHealing");
-                            }
-
-                            if (stationary.CurLink == null)
-                            {
-                                stationary.SetTargetStationary(stationaryWeaponLink);
-                            }
-
-                            if (_nextUpdatePosTime < time)
-                            {
-                                UpdateCommonMoveTarget(operatorPos, out float nextTime);
-                                _nextUpdatePosTime = time + nextTime;
-                            }
-
-                            if (sqrToOperator >= 1.5f && _currentMoveTarget.HasValue)
-                            {
-                                if (sqrToOperator < _lastSqrToOperator - 0.5f)
-                                {
-                                    _goToStationaryStuckTime = time;
-                                    _lastSqrToOperator = sqrToOperator;
-                                }
-                                else if (_goToStationaryStuckTime <= 0f || _goToStationaryStuckTime > time)
-                                {
-                                    _goToStationaryStuckTime = time;
-                                    _lastSqrToOperator = sqrToOperator;
-                                }
-
-                                if (sqrToOperator < 9f && time - _goToStationaryStuckTime > 8f)
-                                {
-                                    BotOwner.StopMove();
-                                    BotOwner.Mover.AllowTeleport();
-                                    BotOwner.GetPlayer.Teleport(operatorPos, true);
-                                    BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
-                                    BotOwner.Mover._lastGoodCastPointTime = time;
-                                    BotOwner.Mover._prevPosLinkedTime = 0f;
-                                    BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
-                                    BotOwner.Mover.RecalcWay();
-                                    BotOwner.Mover.Pause = true;
-
-                                    _goToStationaryStuckTime = time;
-                                    _lastSqrToOperator = float.MaxValue;
-                                    RefreshStuckTimer();
-
-                                    if (stationary.CurLink == null)
-                                    {
-                                        stationary.SetTargetStationary(stationaryWeaponLink);
-                                    }
-                                    return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
-                                }
-
-                                BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                                return new Action(typeof(GoToPointLogic), "Mcs:GoToStationaryPos");
-                            }
-                            else
-                            {
-                                _goToStationaryStuckTime = -999f;
-                                _lastSqrToOperator = float.MaxValue;
-                            }
-
-                            var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
-
-                            if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
-                            {
-                                BotOwner.ShootData.EndShoot();
-                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
-                            }
-
-                            if (goalEnemy == null)
-                            {
-                                ScanSector(stationaryWeaponLink);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _goToStationaryStuckTime = -999f;
-                        _lastSqrToOperator = float.MaxValue;
-                    }
-
-                    // if (goalEnemy == null) { return new Action(typeof(HoldPositionLogic), "Mcs:!HaveEnemy"); }
 
                     var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
                     if (haveBullets.Value && IsShootFromCoverConditionAllFine())
@@ -370,14 +356,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                         if (mcsLeadPlayerPos == null)
                         {
                             return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
                         }
 
                         var safeFire = false;
-                        if (canShoot.Value)
+                        if (canShootNow)
                         {
                             var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
                             safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
@@ -402,15 +387,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
                                     {
-                                        if (_nextUpdatePosTime < time)
+                                        if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
                                         {
-                                            UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                                            _nextUpdatePosTime = time + nextTime;
-                                        }
-
-                                        if (_currentMoveTarget.HasValue)
-                                        {
-                                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                            ApplyMovePoint();
                                             return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                                         }
                                         else
@@ -430,22 +409,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     }
                                 }
 
-                                sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                                tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
-
-                                if (_nextUpdatePosTime < time)
-                                {
-                                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                                    _nextUpdatePosTime = time + nextTime;
-                                }
+                                TryRefreshLeadTarget(mcsLeadPlayerPos, time);
 
                                 if (needHeal && isEnemyPosLost)
                                 {
                                     RefreshStuckTimer();
-                                    if (_currentMoveTarget.HasValue)
-                                    {
-                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                                    }
+                                    ApplyMovePoint();
                                     return new Action(typeof(HealLogic), "Mcs:FightHealing2");
                                 }
 
@@ -453,11 +422,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     if (_currentMoveTarget.HasValue)
                                     {
-                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        ApplyMovePoint();
                                         return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "Mcs:TooFar");
                                     }
-
-                                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath1");
                                 }
                                 else
                                 {
@@ -466,11 +433,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         _nextPatrolTime = time + 4f;
                                         if (_currentMoveTarget.HasValue)
                                         {
-                                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                            ApplyMovePoint();
                                             return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                         }
-
-                                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath2");
                                     }
                                     else
                                     {
@@ -479,7 +444,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                             RefreshStuckTimer();
                                             return new Action(typeof(HealLogic), "Mcs:FightHealing3");
                                         }
-                                        // return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                     }
                                 }
                             }
@@ -496,15 +460,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 {
                                     if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
                                     {
-                                        if (_nextUpdatePosTime < time)
+                                        if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
                                         {
-                                            UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                                            _nextUpdatePosTime = time + nextTime;
-                                        }
-
-                                        if (_currentMoveTarget.HasValue)
-                                        {
-                                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                            ApplyMovePoint();
                                             return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                                         }
                                         else
@@ -524,33 +482,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     }
                                 }
 
-                                if (_nextUpdatePosTime < time)
-                                {
-                                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                                    _nextUpdatePosTime = time + nextTime;
-                                }
+                                TryRefreshLeadTarget(mcsLeadPlayerPos, time);
 
                                 if (needHeal && isEnemyPosLost)
                                 {
                                     RefreshStuckTimer();
-                                    if (_currentMoveTarget.HasValue)
-                                    {
-                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                                    }
+                                    ApplyMovePoint();
                                     return new Action(typeof(HealLogic), "Mcs:FightHealing5");
                                 }
 
-                                sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                                tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
                                 if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
                                 {
                                     if (_currentMoveTarget.HasValue)
                                     {
-                                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                        ApplyMovePoint();
                                         return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "Mcs:TooFar");
                                     }
-
-                                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath3");
                                 }
                                 else
                                 {
@@ -559,11 +506,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                         _nextPatrolTime = time + 4f;
                                         if (_currentMoveTarget.HasValue)
                                         {
-                                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                                            ApplyMovePoint();
                                             return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                                         }
-
-                                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath4");
                                     }
                                     else
                                     {
@@ -572,7 +517,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                             RefreshStuckTimer();
                                             return new Action(typeof(HealLogic), "Mcs:FightHealing6");
                                         }
-                                        // return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                                     }
                                 }
                             }
@@ -590,8 +534,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         return new Action(typeof(GoToExfiltrationPointLogic), "Mcs:GotoExit");
                     }
                 }
-
-                // return new Action(typeof(HoldPositionLogic), "Mcs:HoldExf");
 
                 #endregion
                 #region McsClearAreaLayer
@@ -644,15 +586,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         McsBotPlayerData.TargetPos = targetPos;
                     }
 
-                    if (_nextUpdatePosTime < time)
+                    if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
                     {
-                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        ApplyMovePoint();
                         return new Action(typeof(GoToPointLogic), "Mcs:ClearAreaGoToPoint");
                     }
                 }
@@ -660,7 +596,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 #endregion
                 #region McsCommonLayer
 
-                mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
                 if (mcsLeadPlayerPos == null)
                 {
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
@@ -668,43 +603,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (McsBotPlayerData.HasIntent(Intents.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
-                    if (_nextUpdatePosTime < time)
+                    if (TryRefreshLeadTarget(mcsLeadPlayerPos, time))
                     {
-                        UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        ApplyMovePoint();
                         return new Action(typeof(DropTargetLootLogic), "Mcs:DropTargetLootCommand");
-                    }
-                    else
-                    {
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:GoToPointCommandTargetPosNotFound");
                     }
                 }
 
                 if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
                 {
-                    if (_nextUpdatePosTime < time)
+                    if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
                     {
-                        UpdateCommonMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        ApplyMovePoint();
                         return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
-                    }
-                    else
-                    {
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:GoToPointCommandTargetPosNotFound");
                     }
                 }
 
-                needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
                 {
                     if (needHeal)
@@ -740,17 +654,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (needHeal)
                 {
-                    if (_nextUpdatePosTime < time)
-                    {
-                        UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
+                    TryRefreshLeadTarget(mcsLeadPlayerPos, time);
                     RefreshStuckTimer();
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-                    }
+                    ApplyMovePoint();
                     return new Action(typeof(HealLogic), "Mcs:CommonHealing2");
                 }
                 else if (TryGetBtrFollowAction(time, out var btrAction))
@@ -759,40 +665,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
                 else if (_nextLootingCheckTime < time && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
                 {
-                    if (_nextUpdatePosTime < time)
+                    if (TryRefreshCommonTarget(McsBotPlayerData.LootingTarget.RootTransform.position, time))
                     {
-                        UpdateCommonMoveTarget(McsBotPlayerData.LootingTarget.RootTransform.position, out float nextTime);
-                        _nextUpdatePosTime = time + nextTime;
-                    }
-
-                    if (_currentMoveTarget.HasValue)
-                    {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        ApplyMovePoint();
                         return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
                     }
-                    else
-                    {
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:GoToLootTargetPosNotFound");
-                    }
                 }
 
-                if (_nextUpdatePosTime < time)
-                {
-                    UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
-                    _nextUpdatePosTime = time + nextTime;
-                }
+                TryRefreshLeadTarget(mcsLeadPlayerPos, time);
 
-                sqrDistance = BotOwner.Position.McsSqrDistance(mcsLeadPlayerPos);
-                tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
                 if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
                 {
                     if (_currentMoveTarget.HasValue)
                     {
-                        BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                        ApplyMovePoint();
                         return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "Mcs:TooFar");
                     }
-
-                    // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath1");
                 }
                 else
                 {
@@ -801,14 +689,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         _nextPatrolTime = time + 8f;
                         if (_currentMoveTarget.HasValue)
                         {
-                            BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+                            ApplyMovePoint();
                             return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
                         }
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindPath2");
-                    }
-                    else
-                    {
-                        // return new Action(typeof(HoldPositionLogic), "Mcs:HoldPosition");
                     }
                 }
 
@@ -823,13 +706,54 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
+        #region 移动目标刷新辅助（原内联刷新块的行为等价封装）
+
+        private bool TryRefreshCommonTarget(Vector3? targetPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateCommonMoveTarget(targetPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        private bool TryRefreshEscortTarget(Vector3? escortPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateEscortMoveTarget(escortPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        private bool TryRefreshLeadTarget(Vector3? leadPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateLeadNearMoveTarget(leadPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        private void ApplyMovePoint()
+        {
+            if (_currentMoveTarget.HasValue)
+            {
+                BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+            }
+        }
+
+        #endregion
+
         public override bool IsActive()
         {
             if (!MiyakoCarryServicePlugin.UseUnifiedBrainLayer.Value)
             {
                 return false;
             }
-
             if (!IsMcsBotPlayer)
             {
                 return false;
@@ -843,6 +767,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 #endif
 
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
+
+            // 固定武器操控不让渡SAIN（原McsFightLayer.IsActive语义）
+            if (mcsBotPlayerData != null && mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
+            {
+                return true;
+            }
 
             if (BotOwner.Memory.HaveEnemy)
             {
