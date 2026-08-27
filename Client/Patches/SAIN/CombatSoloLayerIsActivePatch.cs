@@ -73,6 +73,13 @@ namespace MiyakoCarryService.Client.Patches.SAIN
 
                 if (!state.SainAllowed)
                 {
+                    var sainBot = SAINUtils.GetSAINBot(botOwner);
+                    var botActivation = SAINUtils.GetBotActivation(sainBot);
+                    if (botActivation != null)
+                    {
+                        SAINUtils.SetActiveLayerNone(botActivation);
+                    }
+
                     __result = false;
                     return false;
                 }

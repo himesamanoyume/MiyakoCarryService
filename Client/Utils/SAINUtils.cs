@@ -21,12 +21,14 @@ namespace MiyakoCarryService.Client.Utils
         public const float ExitSainSqr = ExitSainDist * ExitSainDist;
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
-        public static readonly Type PlayerComponentType = Type.GetType("SAIN.Components.PlayerComponent, SAIN");
+        public static readonly Type PlayerComponentType = Type.GetType("SAIN.Components.PlayerComponentSpace.PlayerComponent, SAIN") ?? Type.GetType("SAIN.Components.PlayerComponent, SAIN");
         public static readonly Type SainMoverType = Type.GetType("SAIN.SAINComponent.Classes.Mover.SAINMoverClass, SAIN");
         public static readonly Type DogFightType = Type.GetType("SAIN.SAINComponent.Classes.Mover.DogFight, SAIN");
         public static readonly Type SAINEnableClassType = Type.GetType("SAIN.SAINEnableClass, SAIN");
+        public static readonly MethodInfo GetSAINMethod = AccessTools.Method(SAINEnableClassType, "GetSAIN");
         private static readonly Type _sainBotComponentType = GetSAINMethod?.GetParameters().ElementAtOrDefault(1)?.ParameterType?.GetElementType();
         private static readonly Type _botActivationType = _sainBotComponentType?.GetProperty("BotActivation")?.PropertyType ?? _sainBotComponentType?.GetField("BotActivation")?.FieldType;
+        public static readonly Type SAINActivationClassType = _botActivationType;
 
         public static readonly MethodInfo SetTargetMoveDirectionMethod = AccessTools.Method(Type.GetType("SAIN.Classes.PlayerMovementController, SAIN"), "SetTargetMoveDirection");
         public static readonly MethodInfo RunToPointMethod = AccessTools.Method(SainMoverType, "RunToPoint");
@@ -35,16 +37,16 @@ namespace MiyakoCarryService.Client.Utils
         public static readonly MethodInfo WalkToPointByWayMethod = AccessTools.Method(SainMoverType, "WalkToPointByWay");
         public static readonly MethodInfo ManualUpdateMethod = AccessTools.Method(SainMoverType, "ManualUpdate");
         public static readonly MethodInfo DogFightMoveMethod = AccessTools.Method(DogFightType, "DogFightMove");
-        public static readonly MethodInfo GetSAINMethod = AccessTools.Method(SAINEnableClassType, "GetSAIN");
 
-        private static readonly Action<object, int> _activeLayerSetter = BuildInstanceIntSetter(_botActivationType, "ActiveLayer");
+        private static readonly Action<object, int> _activeLayerSetter = BuildSetActiveLayerInvoker();
         private static readonly Action<object> _manualUpdateInvoker = BuildVoidMethodInvoker(_botActivationType, "ManualUpdate");
         private static readonly Action<object, Vector3, bool, float, bool> _walkToPointInvoker = BuildWalkToPointInvoker();
-        private static readonly Action<object, Vector3, bool, float, bool> _runToPointInvoker = BuildRunToPointInvoker();
+        private static readonly Action<object, Vector3, bool, float, int, bool> _runToPointInvoker = BuildRunToPointInvoker();
 
         private static readonly Func<object, object> _moverBotGetter = BuildInstanceGetter(SainMoverType, "Bot");
         private static readonly Func<object, BotOwner> _botComponentBotOwnerGetter = BuildBotOwnerGetter(SainMoverType?.GetProperty("Bot")?.PropertyType ?? SainMoverType?.GetField("Bot")?.FieldType);
         private static readonly Func<object, BotOwner> _playerComponentBotOwnerGetter = BuildBotOwnerGetter(PlayerComponentType);
+        private static readonly Func<object, BotOwner> _activationBotOwnerGetter = BuildBotOwnerGetter(_botActivationType);
         private static readonly Func<object, object> _botActivationGetter = BuildInstanceGetter(_sainBotComponentType, "BotActivation");
         private static readonly Func<object, bool> _moverMovingGetter = BuildBoolGetter(SainMoverType, "Moving");
         private static readonly Func<object, BotOwner> _dogFightBotOwnerGetter = BuildBotOwnerGetter(DogFightType);
@@ -168,27 +170,30 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        private static Action<object, int> BuildInstanceIntSetter(Type type, string member)
+        private static Action<object, int> BuildSetActiveLayerInvoker()
         {
-            if (type == null)
+            if (_botActivationType == null)
             {
                 return null;
             }
 
             try
             {
+                var setActiveLayerMethod = AccessTools.Method(_botActivationType, "SetActiveLayer");
+                if (setActiveLayerMethod == null)
+                {
+                    return null;
+                }
+
                 var instance = Expression.Parameter(typeof(object), "o");
                 var value = Expression.Parameter(typeof(int), "v");
 
-                var prop = type.GetProperty(member);
-                var field = prop == null ? type.GetField(member) : null;
-                var memberType = prop != null ? prop.PropertyType : field.FieldType;
+                var target = Expression.Convert(instance, _botActivationType);
+                var esainLayerType = setActiveLayerMethod.GetParameters()[0].ParameterType;
+                var enumValue = Expression.Convert(value, esainLayerType);
 
-                var target = Expression.Convert(instance, type);
-                var memberAccess = prop != null ? Expression.Property(target, prop) : Expression.Field(target, field);
-
-                var assign = Expression.Assign(memberAccess, Expression.Convert(value, memberType));
-                return Expression.Lambda<Action<object, int>>(assign, instance, value).Compile();
+                var call = Expression.Call(target, setActiveLayerMethod, enumValue);
+                return Expression.Lambda<Action<object, int>>(call, instance, value).Compile();
             }
             catch (Exception e)
             {
@@ -290,7 +295,7 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        private static Action<object, Vector3, bool, float, bool> BuildRunToPointInvoker()
+        private static Action<object, Vector3, bool, float, int, bool> BuildRunToPointInvoker()
         {
             if (RunToPointMethod == null)
             {
@@ -303,10 +308,14 @@ namespace MiyakoCarryService.Client.Utils
                 var point = Expression.Parameter(typeof(Vector3), "point");
                 var mustHaveCompletePath = Expression.Parameter(typeof(bool), "mustHaveCompletePath");
                 var reachDist = Expression.Parameter(typeof(float), "reachDist");
+                var urgency = Expression.Parameter(typeof(int), "urgency");
                 var checkSameWay = Expression.Parameter(typeof(bool), "checkSameWay");
 
-                var call = Expression.Call(Expression.Convert(instance, SainMoverType), RunToPointMethod, point, mustHaveCompletePath, reachDist, checkSameWay);
-                return Expression.Lambda<Action<object, Vector3, bool, float, bool>>(call, instance, point, mustHaveCompletePath, reachDist, checkSameWay).Compile();
+                var esprintUrgencyType = RunToPointMethod.GetParameters()[3].ParameterType;
+                var urgencyValue = Expression.Convert(urgency, esprintUrgencyType);
+
+                var call = Expression.Call(Expression.Convert(instance, SainMoverType), RunToPointMethod, point, mustHaveCompletePath, reachDist, urgencyValue, checkSameWay);
+                return Expression.Lambda<Action<object, Vector3, bool, float, int, bool>>(call, instance, point, mustHaveCompletePath, reachDist, urgency, checkSameWay).Compile();
             }
             catch (Exception e)
             {
@@ -390,34 +399,99 @@ namespace MiyakoCarryService.Client.Utils
             return true;
         }
 
-        public static void ResetSAINLayer(BotOwner botOwner)
+        public static object GetSAINBot(BotOwner botOwner)
         {
             if (GetSAINMethod == null || botOwner == null)
             {
-                return;
+                return null;
             }
 
-            var parameters = new object[] { botOwner.ProfileId, null };
-            GetSAINMethod.Invoke(null, parameters);
-            var sainBot = parameters[1];
+            try
+            {
+                var parameters = new object[] { botOwner.ProfileId, null };
+                GetSAINMethod.Invoke(null, parameters);
+                return parameters[1];
+            }
+            catch (Exception e)
+            {
+                MiyakoCarryServicePlugin.Logger.LogError(e);
+                return null;
+            }
+        }
+
+        public static object GetBotActivation(object sainBot)
+        {
+            if (sainBot == null)
+            {
+                return null;
+            }
+
+            return _botActivationGetter?.Invoke(sainBot);
+        }
+
+        public static void SetActiveLayerNone(object botActivation)
+        {
+            _activeLayerSetter?.Invoke(botActivation, 0);
+        }
+
+        public static BotOwner GetActivationBotOwner(object botActivation)
+        {
+            if (botActivation == null)
+            {
+                return null;
+            }
+
+            return _activationBotOwnerGetter?.Invoke(botActivation);
+        }
+
+        public static bool IsMcsActivation(object botActivation)
+        {
+            if (botActivation == null)
+            {
+                return false;
+            }
+
+            var botOwner = GetActivationBotOwner(botActivation);
+            if (botOwner == null)
+            {
+                return false;
+            }
+
+            if (!McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
+            {
+                return false;
+            }
+
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData == null)
+            {
+                return false;
+            }
+
+            return mcsBotPlayerData.IsMcsLayerActive;
+        }
+
+        public static void ResetSAINLayer(BotOwner botOwner)
+        {
+            var sainBot = GetSAINBot(botOwner);
             if (sainBot == null)
             {
                 return;
             }
 
-            var botActivation = _botActivationGetter?.Invoke(sainBot);
+            var botActivation = GetBotActivation(sainBot);
             if (botActivation == null)
             {
                 return;
             }
 
-            _activeLayerSetter?.Invoke(botActivation, 0); // ESAINLayer.None = 0  
+            SetActiveLayerNone(botActivation);
             _manualUpdateInvoker?.Invoke(botActivation);
         }
 
         public static void RunToPoint(object mover, Vector3 point)
         {
-            _runToPointInvoker?.Invoke(mover, point, false, -1f, true);
+            _runToPointInvoker?.Invoke(mover, point, false, -1f, 1, true);
         }
     }
 }
