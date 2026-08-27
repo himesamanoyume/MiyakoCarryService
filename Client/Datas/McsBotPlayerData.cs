@@ -188,7 +188,13 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             var emergencyLootNeed = GetEmergencyLootNeed();
-            if (emergencyLootNeed != ELootNeedType.None && TrySetEmergencyLootingTarget(itemDatas, emergencyLootNeed))
+            if (emergencyLootNeed != ELootNeedType.None)
+            {
+                TrySetEmergencyLootingTarget(itemDatas, emergencyLootNeed);
+                return;
+            }
+
+            if (!McsAILeadPlayer.McsBotPlayerConfig.EnableLooting)
             {
                 return;
             }

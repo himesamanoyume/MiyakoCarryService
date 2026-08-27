@@ -162,7 +162,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                     }
 
-                    if (McsBotPlayerData.TargetPos.HasValue)
+                    if ((McsBotPlayerData.HasIntent(Intents.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue) || McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
                     {
                         if (TryRefreshEscortTarget(McsBotPlayerData.TargetPos, time))
                         {
@@ -663,12 +663,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && (McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting || McsBotPlayerData.HasEmergencyLootNeed()) && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
                 {
-                    if (TryRefreshCommonTarget(McsBotPlayerData.LootingTarget.RootTransform.position, time))
+                    var enableLooting = McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting;
+                    var hasEmergencyLootNeed = McsBotPlayerData.HasEmergencyLootNeed();
+
+                    if (!enableLooting && !hasEmergencyLootNeed)
                     {
-                        ApplyMovePoint();
-                        return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                        McsBotPlayerData.IsLooting = false;
+                    }
+                    else
+                    {
+                        if (TryRefreshCommonTarget(McsBotPlayerData.LootingTarget.RootTransform.position, time))
+                        {
+                            ApplyMovePoint();
+                            return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                        }
                     }
                 }
 
