@@ -339,7 +339,7 @@ namespace MiyakoCarryService.Client.Utils
             {
                 return false;
             }
-            return mcsBotPlayerData.HasIntent(Intents.ShouldHoldPosition) || mcsBotPlayerData.HasIntent(Intents.ShouldKeepFormation) || mcsBotPlayerData.HasIntent(Intents.ShouldFollowMe);
+            return mcsBotPlayerData.HasIntent(Intents.ShouldHoldPosition);
         }
 
         public static bool ShouldRedirect(BotOwner botOwner, out McsBotPlayerData mcsBotPlayerData)
