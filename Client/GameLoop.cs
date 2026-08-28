@@ -801,6 +801,8 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.SHOOT_INSTEAD_DOG_FIGHT = 0f;
             settings.FileSettings.Mind.MIN_DAMAGE_SCARE = 10f;
             settings.FileSettings.Mind.AVOID_BTR_RADIUS_SQR = 1f;
+            settings.FileSettings.Mind.GRENADE_DAMAGE_IGNORE = false;
+            settings.FileSettings.Mind.IGNORE_DANGER_PLACES = false;
 
             settings.FileSettings.Patrol.PICKUP_ITEMS_TO_BACKPACK_OR_CONTAINER = true;
             settings.FileSettings.Patrol.CHANCE_TO_PLAY_VOICE_WHEN_CLOSE = 50f;

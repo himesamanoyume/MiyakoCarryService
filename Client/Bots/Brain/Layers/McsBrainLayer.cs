@@ -63,7 +63,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(RunAwayArtilleryLogic), "Mcs:RunAwayArtillery");
                 }
 
-                if (BotOwner.BewareGrenade.ShallRunAway())
+                if (BotOwner.BewareGrenade.McsShallRunAway())
                 {
                     return new Action(typeof(RunAwayGrenadeLogic), "Mcs:RunAwayGrenade");
                 }
