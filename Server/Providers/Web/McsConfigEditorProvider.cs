@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using MiyakoCarryService.Server.Models.Eft.Common.Tables;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Web.Models.Configs;
@@ -26,11 +29,22 @@ public class McsConfigEditorProvider : IConfigEditorConfigProvider
             Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "mcsconfig.jsonc")
         );
 
-        yield return ConfigEditorConfigRegistration.Create(
-            "top.himesamanoyume.miyakocarryservice.spawntype",
-            "Mcs Spawn Types",
-            _configService.GetSpawnTypes().Values,
-            Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "spawntype.json")
-        );
+        yield return new ConfigEditorConfigRegistration
+        {
+            Id = "top.himesamanoyume.miyakocarryservice.spawntype",
+            DisplayName = "Mcs Spawn Types",
+            RuntimeConfig = _configService.GetSpawnTypes()
+                .OrderBy(kvp => kvp.Key)
+                .Where(kvp => kvp.Key != 0)
+                .Select(kvp => kvp.Value)
+                .ToList(),
+            RuntimeType = typeof(List<SpawnType>),
+            FilePath = Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "spawntype.json"),
+            ApplyToRuntimeAsync = (config, _) =>
+            {
+                _configService.ApplySpawnTypes((List<SpawnType>)config);
+                return ValueTask.CompletedTask;
+            }
+        };
     }
 }

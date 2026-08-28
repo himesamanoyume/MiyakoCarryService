@@ -351,6 +351,20 @@ public class ConfigService(
         await LoadSpawnTypeConfig();
     }
 
+    public void ApplySpawnTypes(List<SpawnType> spawnTypes)
+    {
+        var list = new List<SpawnType> { GenerateCommonSpawnType(false) };
+        list.AddRange(spawnTypes);
+
+        var newSpawnTypes = new ConcurrentDictionary<int, SpawnType>();
+        for (int i = 0; i < list.Count; i++)
+        {
+            newSpawnTypes.TryAdd(i, list[i]);
+        }
+
+        _spawnTypes = newSpawnTypes;
+    }
+
     public McsPluginConfig GetMcsPluginConfig()
     {
         return _mcsPluginConfig;
