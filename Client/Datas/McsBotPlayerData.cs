@@ -47,6 +47,9 @@ namespace MiyakoCarryService.Client.Datas
         private HashSet<string> _intents = new();
         private HashSet<LootData> _vanishingCurseLootItems = new();
         private const float EMERGENCY_NEED_CHECK_INTERVAL = 5f;
+        private const float AMMO_SUFFICIENT_MULTIPLIER = 3f;
+        private const int DEFAULT_MAG_CAPACITY = 30;
+        private const int REQUIRED_MAG_COUNT = 3;
         private float _nextEmergencyNeedCheckTime = 0f;
         private ELootNeedType _cachedEmergencyLootNeed = ELootNeedType.None;
         private HashSet<EDamageEffectType> _missingMedEffects = new();
@@ -190,7 +193,22 @@ namespace MiyakoCarryService.Client.Datas
             var emergencyLootNeed = GetEmergencyLootNeed();
             if (emergencyLootNeed != ELootNeedType.None)
             {
-                TrySetEmergencyLootingTarget(itemDatas, emergencyLootNeed);
+                if (TrySetEmergencyLootingTarget(itemDatas, emergencyLootNeed))
+                {
+                    return;
+                }
+
+                var botOwner = BotOwner;
+                if (emergencyLootNeed != ELootNeedType.Ammo && botOwner != null && NeedAmmo(botOwner) && TrySetEmergencyLootingTarget(itemDatas, ELootNeedType.Ammo))
+                {
+                    return;
+                }
+
+                if (emergencyLootNeed != ELootNeedType.Meds && GetMissingMedEffects().Count > 0 && TrySetEmergencyLootingTarget(itemDatas, ELootNeedType.Meds))
+                {
+                    return;
+                }
+
                 return;
             }
 
@@ -398,28 +416,130 @@ namespace MiyakoCarryService.Client.Datas
                 return false;
             }
 
-            if (weapon.GetCurrentMagazine() != null)
+            if (weapon.ReloadMode == Weapon.EReloadMode.InternalMagazine)
             {
                 return false;
             }
 
+            var compatibleMagCount = 0;
+            if (weapon.GetCurrentMagazine() != null)
+            {
+                compatibleMagCount++;
+            }
+
             var magazineList = new List<Magazine>();
-            inventoryController.GetReachableItemsOfTypeNonAlloc(magazineList);
+            inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, magazineList, null, null);
             foreach (var magazine in magazineList)
             {
                 if (magazineSlot.CanAccept(magazine))
                 {
-                    return false;
+                    compatibleMagCount++;
                 }
             }
 
-            return true;
+            return compatibleMagCount < REQUIRED_MAG_COUNT;
         }
 
         private bool NeedAmmo(BotOwner botOwner)
         {
-            botOwner.CollectAmmoOrBackupAmmoCount(out var total);
-            return total <= 0;
+            var totalAmmo = CollectAllAmmoCount(botOwner);
+            if (totalAmmo <= 0)
+            {
+                return true;
+            }
+
+            var weapon = botOwner.WeaponManager?.CurrentWeapon;
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            var magCapacity = GetMagCapacity(weapon, botOwner);
+            if (magCapacity <= 0)
+            {
+                return false;
+            }
+
+            return totalAmmo < magCapacity * AMMO_SUFFICIENT_MULTIPLIER;
+        }
+
+        private int CollectAllAmmoCount(BotOwner botOwner)
+        {
+            var total = 0;
+            var player = botOwner.GetPlayer;
+            if (player == null)
+            {
+                return total;
+            }
+
+            var inventoryController = player.InventoryController;
+
+            var allAmmoList = new List<Ammo>();
+            inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allAmmoList, null, null);
+            foreach (var ammo in allAmmoList)
+            {
+                if (ammo != null && ammo.StackObjectsCount > 0)
+                {
+                    total += ammo.StackObjectsCount;
+                }
+            }
+
+            var allMagList = new List<Magazine>();
+            inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allMagList, null, null);
+            foreach (var magazine in allMagList)
+            {
+                if (magazine != null)
+                {
+                    total += magazine.Count;
+                }
+            }
+
+            var equipment = inventoryController.Inventory.Equipment;
+            foreach (var slot in new[] { EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster })
+            {
+                if (equipment.GetSlot(slot).ContainedItem is Weapon weapon)
+                {
+                    total += weapon.GetCurrentMagazine()?.Count ?? 0;
+                    total += weapon.ChamberAmmoCount;
+                }
+            }
+
+            return total;
+        }
+
+        private int GetMagCapacity(Weapon weapon, BotOwner botOwner)
+        {
+            var currentMagazine = weapon.GetCurrentMagazine();
+            if (currentMagazine != null && currentMagazine.MaxCount > 0)
+            {
+                return currentMagazine.MaxCount;
+            }
+
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot != null)
+            {
+                var player = botOwner.GetPlayer;
+                if (player != null)
+                {
+                    var allMagList = new List<Magazine>();
+                    player.InventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allMagList, null, null);
+                    var maxCapacity = 0;
+                    foreach (var magazine in allMagList)
+                    {
+                        if (magazine != null && magazineSlot.CanAccept(magazine) && magazine.MaxCount > maxCapacity)
+                        {
+                            maxCapacity = magazine.MaxCount;
+                        }
+                    }
+
+                    if (maxCapacity > 0)
+                    {
+                        return maxCapacity;
+                    }
+                }
+            }
+
+            return DEFAULT_MAG_CAPACITY;
         }
 
         public HashSet<EDamageEffectType> GetMissingMedEffects()
