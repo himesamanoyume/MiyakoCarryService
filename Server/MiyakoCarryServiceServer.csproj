@@ -14,14 +14,19 @@
     <AssemblyTitle>MiyakoCarryServiceServer</AssemblyTitle>  
     <Version>1.1.1.5</Version>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <DisableBuildCompression>true</DisableBuildCompression>
     <Trademark>https://sp-mod.com/mod/2709/miyako-carry-service</Trademark>
     <RootNamespace>MiyakoCarryService.Server</RootNamespace>
     <NoWarn>CS0618;CS8632;CS9107</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-      <Content Include="Assets\**">
+    <Content Include="Assets\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
+    </Content>
+    <Content Include="wwwroot\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Web\**\*.razor" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SPTushonka.Common" Version="4.1.2" />
@@ -36,7 +41,10 @@
     <Exec Command="mkdir &quot;$(BuildMiyakoCarryServicePath)&quot;" Condition="!Exists('$(BuildMiyakoCarryServicePath)')" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMiyakoCarryServicePath)\$(TargetFileName)&quot;" />
     <Exec Command="if exist &quot;$(BuildMiyakoCarryServicePath)\Assets&quot; rd /s /q &quot;$(BuildMiyakoCarryServicePath)\Assets&quot;" />
+    <Exec Command="if exist &quot;$(BuildMiyakoCarryServicePath)\wwwroot&quot; rd /s /q &quot;$(BuildMiyakoCarryServicePath)\wwwroot&quot;" />
     <Exec Command="xcopy &quot;$(TargetDir)Assets\*.*&quot; &quot;$(BuildMiyakoCarryServicePath)\Assets\&quot; /E /I /Y" />
     <Exec Command="xcopy &quot;$(TargetDir)Assets\*.*&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\Assets\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(TargetDir)wwwroot\*.*&quot; &quot;$(BuildMiyakoCarryServicePath)\wwwroot\&quot; /E /I /Y" />
+    <Exec Command="xcopy &quot;$(TargetDir)wwwroot\*.*&quot; &quot;$(DevGamePluginsMiyakoCarryServicePath)\wwwroot\&quot; /E /I /Y" />
   </Target> 
 </Project>

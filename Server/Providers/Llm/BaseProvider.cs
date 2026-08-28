@@ -9,7 +9,7 @@ using MiyakoCarryService.Server.Models.Llm;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services.Locales;
 
-namespace MiyakoCarryService.Server.Providers
+namespace MiyakoCarryService.Server.Providers.Llm
 {
     public abstract class BaseProvider
     {

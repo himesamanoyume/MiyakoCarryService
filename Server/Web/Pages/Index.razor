@@ -1,0 +1,17 @@
+@page "/mcs/index"
+@rendermode InteractiveServer
+@attribute [Authorize(Policy = "Administrator")]
+
+<h3>Miyako Carry Service</h3>
+
+<p>Current count: @count</p>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int count = 0;
+
+    private void IncrementCount()
+    {
+        count++;
+    }
+}

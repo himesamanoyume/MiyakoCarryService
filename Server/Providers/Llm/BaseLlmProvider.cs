@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MiyakoCarryService.Server.Interfaces;
 using MiyakoCarryService.Server.Models.Llm;
-using ProviderModels = MiyakoCarryService.Server.Models.Providers;
 using MiyakoCarryService.Server.Utils;
 using SPTarkov.Server.Core.Services.Locales;
 
@@ -27,7 +26,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var response = JsonSerializer.Deserialize<ProviderModels.OpenAiChatResponse>(responseString);
+                var response = JsonSerializer.Deserialize<Models.Providers.OpenAiChatResponse>(responseString);
                 return response?.Choices?.FirstOrDefault()?.Message?.Content;
             }
             catch
@@ -36,15 +35,15 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
         }
 
-        protected ProviderModels.OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens", string reasoningEffort = null)
+        protected Models.Providers.OpenAiChatRequest BuildChatCompletionsBody(string model, string systemPrompt, string userText, double temperature, int maxTokens, string maxTokensFieldName = "max_tokens", string reasoningEffort = null)
         {
-            var request = new ProviderModels.OpenAiChatRequest
+            var request = new Models.Providers.OpenAiChatRequest
             {
                 Model = model,
                 Messages =
                 [
-                    new ProviderModels.OpenAiChatMessage { Role = "system", Content = systemPrompt ?? "" },
-                    new ProviderModels.OpenAiChatMessage { Role = "user", Content = userText },
+                    new Models.Providers.OpenAiChatMessage { Role = "system", Content = systemPrompt ?? "" },
+                    new Models.Providers.OpenAiChatMessage { Role = "user", Content = userText },
                 ],
                 Temperature = temperature,
             };
@@ -60,7 +59,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             return request;
         }
 
-        protected void ApplyOpenAiReasoning(ProviderModels.OpenAiChatRequest request, string reasoningEffort)
+        protected void ApplyOpenAiReasoning(Models.Providers.OpenAiChatRequest request, string reasoningEffort)
         {
             if (string.IsNullOrEmpty(reasoningEffort) || reasoningEffort == "default")
             {
@@ -68,7 +67,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
             }
             if (reasoningEffort == "none")
             {
-                request.Thinking = new ProviderModels.OpenAiThinking { Type = "disabled" };
+                request.Thinking = new Models.Providers.OpenAiThinking { Type = "disabled" };
                 return;
             }
             request.ReasoningEffort = reasoningEffort;
@@ -83,7 +82,7 @@ namespace MiyakoCarryService.Server.Providers.Llm
         {
             try
             {
-                var json = JsonSerializer.Deserialize<ProviderModels.McsChatIntent>(content);
+                var json = JsonSerializer.Deserialize<Models.Providers.McsChatIntent>(content);
                 if (json == null)
                 {
                     return new LlmIntent { Error = _serverLocalisationService.GetText(Locales.LLM_MISSING_FIELD, new { ProviderName = ProviderDisplayName }) };
