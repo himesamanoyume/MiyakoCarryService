@@ -574,9 +574,9 @@ namespace MiyakoCarryService.Client
 
             UseUnifiedBrainLayer = Register(
                 EConfigType.EXPERIMENTAL,
-                "启用统一大脑层",
+                Locales.USEUNIFIEDBRAINLAYER_KEY,
                 true,
-                "为了实现护航更好的行为表现，推出实验性的统一大脑层来控制护航，有可能会带来更好的护航行为表现。此开关可随时切换，立即生效"
+                Locales.USEUNIFIEDBRAINLAYER_DESCRIPTION
             );
 
             #endregion

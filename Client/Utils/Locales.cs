@@ -242,5 +242,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMAIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/TeamAirdropEscortCommand TargetName";
         public const string EXCLUDEORTAKEOVERCOMMAND_NAME = "Mcs/ExcludeOrTakeOverCommand Name";
         public const string EXCLUDEORTAKEOVERCOMMAND_TARGETNAME = "Mcs/ExcludeOrTakeOverCommand TargetName";
+        public const string USEUNIFIEDBRAINLAYER_KEY = "Mcs/UseUnifiedBrainLayer Key";
+        public const string USEUNIFIEDBRAINLAYER_DESCRIPTION = "Mcs/UseUnifiedBrainLayer Description";
     }
 }

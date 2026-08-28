@@ -268,5 +268,7 @@
     "Mcs/MiyakoTraderOrderNotFound": "Escort not found; please confirm its nickname or account ID",
     "Mcs/MiyakoTraderRenewSuccess": "Order renewed for that escort; complete the new payment quest to activate",
     "Mcs/MiyakoTraderSettleSuccess": "Order settled; related escort data has been deleted",
-    "Mcs/MiyakoTraderOperationFailed": "Operation failed (order may not be expired or not fully paid)"
+    "Mcs/MiyakoTraderOperationFailed": "Operation failed (order may not be expired or not fully paid)",
+    "Mcs/UseUnifiedBrainLayer Key": "Enable Unified Brain Layer",
+    "Mcs/UseUnifiedBrainLayer Description": "An experimental unified brain layer is introduced to control carry service players for better behavior. It may bring better carry service behavior. This switch can be toggled at any time and takes effect immediately"
 }
