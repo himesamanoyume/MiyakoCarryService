@@ -760,10 +760,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsActive()
         {
-            if (!MiyakoCarryServicePlugin.UseUnifiedBrainLayer.Value)
-            {
-                return false;
-            }
             if (!IsMcsBotPlayer)
             {
                 return false;

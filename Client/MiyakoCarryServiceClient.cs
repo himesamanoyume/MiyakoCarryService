@@ -92,12 +92,6 @@ namespace MiyakoCarryService.Client
 
         #endregion
 
-        #region EXPERIMENTAL
-
-        public static ConfigEntry<bool> UseUnifiedBrainLayer;
-
-        #endregion
-
         #region DEBUG
 
 #if DEBUG
@@ -567,16 +561,6 @@ namespace MiyakoCarryService.Client
                 Locales.SHOWBREVITYCODE_KEY,
                 true,
                 Locales.SHOWBREVITYCODE_DESCRIPTION
-            );
-
-            #endregion
-            #region EXPERIMENTAL
-
-            UseUnifiedBrainLayer = Register(
-                EConfigType.EXPERIMENTAL,
-                Locales.USEUNIFIEDBRAINLAYER_KEY,
-                true,
-                Locales.USEUNIFIEDBRAINLAYER_DESCRIPTION
             );
 
             #endregion

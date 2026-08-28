@@ -268,7 +268,5 @@
     "Mcs/MiyakoTraderOrderNotFound": "未找到指定的护航，请确认其昵称或账号 ID",
     "Mcs/MiyakoTraderRenewSuccess": "已为该护航续订订单，完成支付任务后生效",
     "Mcs/MiyakoTraderSettleSuccess": "已结算该护航的订单，相关数据已删除",
-    "Mcs/MiyakoTraderOperationFailed": "操作失败（订单可能未过期或未完成支付）",
-    "Mcs/UseUnifiedBrainLayer Key": "启用统一大脑层",
-    "Mcs/UseUnifiedBrainLayer Description": "为了实现护航更好的行为表现，推出实验性的统一大脑层来控制护航，有可能会带来更好的护航行为表现。此开关可随时切换，立即生效"
+    "Mcs/MiyakoTraderOperationFailed": "操作失败（订单可能未过期或未完成支付）"
 }
