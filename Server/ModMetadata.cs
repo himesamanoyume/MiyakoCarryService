@@ -24,8 +24,11 @@ namespace MiyakoCarryService.Server
         public string ModGuid { get; init; } = "top.himesamanoyume.miyakocarryservice";
         public System.Version ClientVersion { get; init; } = new(CurrentVersion);
         public bool HasPrepatcher { get; init; }
-        public string WWWRootUrl { get; init; } = "MiyakoCarryServiceServer";
-        public string HomePage { get; init; } = "/mcs/index";
-        public string HomePageDescription { get; init; } = "Edit spawn types and server settings for MiyakoCarryService.";
+        public string WWWRootUrl { get; init; }
+        public string HomePage { get; init; }
+        public string HomePageDescription { get; init; }
+        // public string WWWRootUrl { get; init; } = "MiyakoCarryServiceServer";
+        // public string HomePage { get; init; } = "/mcs/index";
+        // public string HomePageDescription { get; init; } = "";
     }
 }

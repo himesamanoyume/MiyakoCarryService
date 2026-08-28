@@ -23,14 +23,13 @@ public class McsConfigEditorProvider : IConfigEditorConfigProvider
             "top.himesamanoyume.miyakocarryservice.mcsconfig",
             "Mcs Config",
             _configService.GetMcsPluginConfig(),
-            filePath: Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "mcsconfig.jsonc")
+            Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "mcsconfig.jsonc")
         );
 
-        var spawnTypes = _configService.GetSpawnTypes().Values;
         yield return ConfigEditorConfigRegistration.Create(
             "top.himesamanoyume.miyakocarryservice.spawntype",
-            "Spawn Types",
-            spawnTypes,
+            "Mcs Spawn Types",
+            _configService.GetSpawnTypes().Values,
             Path.Combine("user", "mods", "MiyakoCarryServiceServer", "Assets", "configs", "spawntype.json")
         );
     }
