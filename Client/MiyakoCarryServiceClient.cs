@@ -73,6 +73,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> FormationSequentialFill;
         public static ConfigEntry<KeyboardShortcut> SaveFormationPresetHotKey;
         public static ConfigEntry<string> FormationPresets;
+        public static ConfigEntry<bool> PhrasesSilent;
 
         #endregion
 
@@ -363,6 +364,7 @@ namespace MiyakoCarryService.Client
                         EnableKeepFormation = EnableKeepFormation.Value,
                         FormationSpacing = FormationSpacing.Value,
                         FormationSequentialFill = FormationSequentialFill.Value,
+                        PhrasesSilent = PhrasesSilent.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -511,6 +513,13 @@ namespace MiyakoCarryService.Client
                 EConfigType.BASIC,
                 Locales.SAVEFORMATIONPRESETHOTKEY_KEY,
                 new KeyboardShortcut()
+            );
+
+            PhrasesSilent = Register(
+                EConfigType.BASIC,
+                Locales.PHRASESSILENT_KEY,
+                false,
+                Locales.PHRASESSILENT_DESCRIPTION
             );
 
             FormationPresets = Register(

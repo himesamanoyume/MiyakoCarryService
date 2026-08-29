@@ -125,7 +125,10 @@ namespace MiyakoCarryService.Client.Mgrs
                 var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
                 if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
                 {
-                    mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
+                    if (!ShouldSilencePhrases(mcsLeadPlayer))
+                    {
+                        mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
+                    }
                     ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
                 }
                 else
@@ -140,9 +143,21 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
+                if (!ShouldSilencePhrases(mcsLeadPlayer))
+                {
+                    mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
+                }
                 ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
             }
+        }
+
+        private bool ShouldSilencePhrases(Player mcsLeadPlayer)
+        {
+            if (McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayer.ProfileId, out var mcsBotPlayerConfig))
+            {
+                return mcsBotPlayerConfig.PhrasesSilent;
+            }
+            return MiyakoCarryServicePlugin.PhrasesSilent.Value;
         }
 
         public string HandleOnFirstContact(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)

@@ -508,6 +508,7 @@ namespace MiyakoCarryService.Client
                         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
                         FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
+                        PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
                     };
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }

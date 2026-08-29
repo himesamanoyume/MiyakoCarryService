@@ -10,5 +10,6 @@ namespace MiyakoCarryService.Client.Models
         public bool EnableKeepFormation;
         public float FormationSpacing;
         public bool FormationSequentialFill;
+        public bool PhrasesSilent;
     }
 }

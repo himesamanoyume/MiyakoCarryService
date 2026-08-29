@@ -36,7 +36,8 @@ namespace MiyakoCarryService.Client.Patches.Events
                     FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                     FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
                     FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
-				}));
+                    PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
+                }));
                 GroupPlayers = ___MatchmakerPlayersController.GroupPlayers;
 			}
 			CurrentType = raidSettings.Side;

@@ -222,6 +222,8 @@ namespace MiyakoCarryService.Client.Utils
         public const string CHANGEFORMATIONCOMMAND_TARGETNAME = "Mcs/ChangeFormationCommand TargetName";
         public const string SHOWBREVITYCODE_KEY = "Mcs/ShowBrevityCode Key";
         public const string SHOWBREVITYCODE_DESCRIPTION = "Mcs/ShowBrevityCode Description";
+        public const string PHRASESSILENT_KEY = "Mcs/PhrasesSilent Key";
+        public const string PHRASESSILENT_DESCRIPTION = "Mcs/PhrasesSilent Description";
         public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/TeamStationaryWeaponEscortCommand Name";
         public const string TEAMSTATIONARYWEAPONESCORTCOMMAND_TARGETNAME = "Mcs/TeamStationaryWeaponEscortCommand TargetName";
         public const string STATIONARYWEAPONESCORTCOMMAND_NAME = "Mcs/StationaryWeaponEscortCommand Name";

@@ -38,6 +38,9 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "FormationSequentialFill")]
         public bool FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value;
 
+        [DataMember(Name = "PhrasesSilent")]
+        public bool PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value;
+
         [DataMember(Name = "Extensions")]
         public Dictionary<string, McsValue> Extensions = new();
     }

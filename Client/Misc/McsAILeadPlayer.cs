@@ -33,6 +33,7 @@ namespace MiyakoCarryService.Client.Misc
                         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
                         FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
+                        PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
                     };
                     McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                     return mcsBotPlayerConfig;

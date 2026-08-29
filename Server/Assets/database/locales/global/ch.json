@@ -228,6 +228,8 @@
     "Mcs/FormationSpacing Key": "队形间距",
     "Mcs/FormationSequentialFill Key": "队形顺序补位",
     "Mcs/FormationSequentialFill Description": "当开启时若队形中有护航死亡，则按照代号顺序补上空缺",
+    "Mcs/PhrasesSilent Key": "短语沉默",
+    "Mcs/PhrasesSilent Description": "开启后，护航只显示字幕，不会发出声音",
     "Mcs/SaveFormationPresetHotKey Key": "保存队形预设快捷键",
     "Mcs/SaveFormationPreset": "已保存队形矩阵预设",
     "Mcs/DeleteFormation": "删除",
