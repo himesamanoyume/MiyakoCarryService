@@ -40,6 +40,9 @@ namespace MiyakoCarryService.Fika.Packets
                     case EMcsValueType.Float:
                         v.FloatValue = reader.GetFloat();
                         break;
+                    case EMcsValueType.Double:
+                        v.DoubleValue = reader.GetDouble();
+                        break;
                     case EMcsValueType.String:
                         v.StringValue = reader.GetString();
                         break;
@@ -71,6 +74,9 @@ namespace MiyakoCarryService.Fika.Packets
                         break;
                     case EMcsValueType.Float:
                         writer.Put(kv.Value.FloatValue);
+                        break;
+                    case EMcsValueType.Double:
+                        writer.Put(kv.Value.DoubleValue);
                         break;
                     case EMcsValueType.String:
                         writer.Put(kv.Value.StringValue, 0);

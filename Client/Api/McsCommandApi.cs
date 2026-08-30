@@ -127,8 +127,7 @@ namespace MiyakoCarryService.Client.Api
         }
 
         /// <summary>
-        /// 取护航成员的权威编号（与玩家所见 RabbitN 一致，由 <see cref="McsMgr.GetMcsBotPlayerIndex"/> 计算）。
-        /// 语音"N号"按此编号匹配护航，避免与存活列表位置错位。
+        /// 获取护航成员的权威代号，语音"N号"按此编号匹配护航，避免与存活列表位置错位。
         /// </summary>
         public static int GetMcsBotPlayerIndex(Player member)
         {

@@ -70,6 +70,11 @@ namespace MiyakoCarryService.Client.Utils
                         Type = EMcsValueType.Float,
                         FloatValue = f
                     },
+                double d => new McsValue
+                    {
+                        Type = EMcsValueType.Double,
+                        DoubleValue = d
+                    },
                 string s => new McsValue
                     {
                         Type = EMcsValueType.String,
@@ -107,6 +112,11 @@ namespace MiyakoCarryService.Client.Utils
             if (t == typeof(float))
             {
                 return (T)(object)v.FloatValue;
+            }
+
+            if (t == typeof(double))
+            {
+                return (T)(object)v.DoubleValue;
             }
 
             if (t == typeof(string))

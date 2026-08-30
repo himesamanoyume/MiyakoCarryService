@@ -6,6 +6,7 @@ namespace MiyakoCarryService.Client.Enums
         Int, 
         Long, 
         Float, 
+        Double,
         String, 
         Enum
     }

@@ -8,6 +8,7 @@ namespace MiyakoCarryService.Client.Models
         public EMcsValueType Type;
         public bool BoolValue;
         public long IntValue;
+        public double DoubleValue;
         public float FloatValue;
         public string StringValue;
     }
