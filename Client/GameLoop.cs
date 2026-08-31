@@ -720,6 +720,7 @@ namespace MiyakoCarryService.Client
         public BotSettings SetBotSettings(BotDifficulty botDifficulty, WildSpawnType wildSpawnType, BotOwner botOwner, Player leadPlayer)
         {
             var settings = Singleton<BotSettingsController>.Instance.GetSettings(botDifficulty, wildSpawnType, false);
+            var carryServiceLevel = BotSettingUtils.GetCarryServiceLevel(botOwner.GetPlayer.Profile.Info.Level);
 
             var notScav = leadPlayer.Side != EPlayerSide.Savage;
 
@@ -736,12 +737,12 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
             settings.FileSettings.Move.DIST_SPRINT_GO_TO_SOME_POINT = 2f;
 
-            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = 0.9999f;
+            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = BotSettingUtils.ApplyBoostUp(0.9999f, settings.FileSettings.Mind.PART_PERCENT_TO_HEAL, carryServiceLevel);
             settings.FileSettings.Mind.DIST_TO_STOP_RUN_ENEMY = 15f;
-            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = 30f;
-            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = 20f;
-            settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = 100f;
-            settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 50f;
+            settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = BotSettingUtils.ApplyBoostUp(30f, settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC, carryServiceLevel);
+            settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = BotSettingUtils.ApplyBoostUp(20f, settings.FileSettings.Mind.TIME_TO_FIND_ENEMY, carryServiceLevel);
+            settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = BotSettingUtils.ApplyBoostUp(100f, settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100, carryServiceLevel);
+            settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = BotSettingUtils.ApplyWeakenUp(50f, settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100, carryServiceLevel);
 
             settings.FileSettings.Mind.CAN_TALK = true;
             settings.FileSettings.Mind.TALK_WITH_QUERY = true;
@@ -774,7 +775,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY = 1f;
             settings.FileSettings.Mind.GROUP_EXACTLY_PHRASE_DELAY_MAX = 1f;
             settings.FileSettings.Mind.CHANCE_FUCK_YOU_ON_CONTACT_100 = 0f;
-            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = 180f;
+            settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG = BotSettingUtils.ApplyBoostUp(180f, settings.FileSettings.Mind.ENEMY_LOOK_AT_ME_ANG, carryServiceLevel);
             settings.FileSettings.Mind.REVENGE_TO_GROUP = false;
             settings.FileSettings.Mind.IGNORE_TRAP = false;
             settings.FileSettings.Mind.CHANCE_TO_IGNORE_TRIPWIRE = 0f;
@@ -796,12 +797,12 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.WARN_BOT_TYPES = [];
             settings.FileSettings.Mind.REVENGE_BOT_TYPES = [];
 
-            settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST = 30f;
-            settings.FileSettings.Mind.DIST_TO_ENEMY_SPOTTED_ON_HIT = 200f;
+            settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST = BotSettingUtils.ApplyBoostUp(30f, settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST, carryServiceLevel);
+            settings.FileSettings.Mind.DIST_TO_ENEMY_SPOTTED_ON_HIT = BotSettingUtils.ApplyBoostUp(200f, settings.FileSettings.Mind.DIST_TO_ENEMY_SPOTTED_ON_HIT, carryServiceLevel);
             settings.FileSettings.Mind.DOG_FIGHT_IN = 0f;
             settings.FileSettings.Mind.DOG_FIGHT_OUT = 0f;
             settings.FileSettings.Mind.SHOOT_INSTEAD_DOG_FIGHT = 0f;
-            settings.FileSettings.Mind.MIN_DAMAGE_SCARE = 10f;
+            settings.FileSettings.Mind.MIN_DAMAGE_SCARE = BotSettingUtils.ApplyBoostUp(10f, settings.FileSettings.Mind.MIN_DAMAGE_SCARE, carryServiceLevel);
             settings.FileSettings.Mind.AVOID_BTR_RADIUS_SQR = 1f;
             settings.FileSettings.Mind.GRENADE_DAMAGE_IGNORE = false;
             settings.FileSettings.Mind.IGNORE_DANGER_PLACES = false;
@@ -833,31 +834,21 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Cover.SPOTTED_GRENADE_TIME = 7f;
             settings.FileSettings.Cover.SIT_DOWN_WHEN_HOLDING = false;
 
-            var botDifficultyInt = (int)botDifficulty + 1;
-            var aimingDifficultyMultiplier = botDifficulty switch
-            {
-                BotDifficulty.easy => 1.0f,
-                BotDifficulty.normal => 0.75f,
-                BotDifficulty.hard => 0.5f,
-                BotDifficulty.impossible => 0.25f,
-                _ => 1.0f
-            };
-
             settings.FileSettings.Core.CanGrenade = true;
             settings.FileSettings.Core.CanRun = true;
-            settings.FileSettings.Core.VisibleDistance = 400f + 20f * botDifficultyInt;
+            settings.FileSettings.Core.VisibleDistance = BotSettingUtils.ApplyBoostUp(480f, settings.FileSettings.Core.VisibleDistance, carryServiceLevel);
 
             settings.FileSettings.Aiming.MAX_AIM_PRECICING = 60f;
-            settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.BOTTOM_COEF = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.MAX_AIM_TIME = 0.05f;
-            settings.FileSettings.Aiming.COEF_FROM_COVER = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.HARD_AIM = 0.05f;
+            settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.MAX_AIMING_UPGRADE_BY_TIME, carryServiceLevel);
+            settings.FileSettings.Aiming.BOTTOM_COEF = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.BOTTOM_COEF, carryServiceLevel);
+            settings.FileSettings.Aiming.MAX_AIM_TIME = BotSettingUtils.ApplyWeakenUp(0.05f, settings.FileSettings.Aiming.MAX_AIM_TIME, carryServiceLevel);
+            settings.FileSettings.Aiming.COEF_FROM_COVER = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.COEF_FROM_COVER, carryServiceLevel);
+            settings.FileSettings.Aiming.HARD_AIM = BotSettingUtils.ApplyWeakenUp(0.05f, settings.FileSettings.Aiming.HARD_AIM, carryServiceLevel);
             settings.FileSettings.Aiming.HARD_AIM_CHANCE_100 = 100;
             settings.FileSettings.Aiming.PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
-            settings.FileSettings.Aiming.PANIC_COEF = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.PANIC_ACCURATY_COEF = 1f;
+            settings.FileSettings.Aiming.PANIC_COEF = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.PANIC_COEF, carryServiceLevel);
+            settings.FileSettings.Aiming.PANIC_ACCURATY_COEF = BotSettingUtils.ApplyWeakenUp(1f, settings.FileSettings.Aiming.PANIC_ACCURATY_COEF, carryServiceLevel);
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 0f;
             settings.FileSettings.Aiming.MIN_TIME_DISCARD_AIM_SEC = 0f;
             settings.FileSettings.Aiming.MAX_TIME_DISCARD_AIM_SEC = 0f;
@@ -866,11 +857,11 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.BASE_HIT_AFFECTION_MAX_ANG = 0f;
             settings.FileSettings.Aiming.SCATTERING_HAVE_DAMAGE_COEF = 0f;
             settings.FileSettings.Aiming.XZ_COEF = 0f;
-            settings.FileSettings.Aiming.SCATTERING_DIST_MODIF = 0.1f;
-            settings.FileSettings.Aiming.SCATTERING_DIST_MODIF_CLOSE = 0.1f;
-            settings.FileSettings.Aiming.BASE_SHIEF = 0.1f;
-            settings.FileSettings.Aiming.COEF_IF_MOVE = 1f * aimingDifficultyMultiplier;
-            settings.FileSettings.Aiming.TIME_COEF_IF_MOVE = 1f;
+            settings.FileSettings.Aiming.SCATTERING_DIST_MODIF = BotSettingUtils.ApplyWeakenUp(0.1f, settings.FileSettings.Aiming.SCATTERING_DIST_MODIF, carryServiceLevel);
+            settings.FileSettings.Aiming.SCATTERING_DIST_MODIF_CLOSE = BotSettingUtils.ApplyWeakenUp(0.1f, settings.FileSettings.Aiming.SCATTERING_DIST_MODIF_CLOSE, carryServiceLevel);
+            settings.FileSettings.Aiming.BASE_SHIEF = BotSettingUtils.ApplyWeakenUp(0.1f, settings.FileSettings.Aiming.BASE_SHIEF, carryServiceLevel);
+            settings.FileSettings.Aiming.COEF_IF_MOVE = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.COEF_IF_MOVE, carryServiceLevel);
+            settings.FileSettings.Aiming.TIME_COEF_IF_MOVE = BotSettingUtils.ApplyWeakenUp(1f, settings.FileSettings.Aiming.TIME_COEF_IF_MOVE, carryServiceLevel);
             settings.FileSettings.Aiming.BOT_MOVE_IF_DELTA = 0.01f;
             settings.FileSettings.Aiming.AIMING_TYPE = 6;
             settings.FileSettings.Aiming.DIST_TO_SHOOT_TO_CENTER = 0f;
@@ -880,61 +871,61 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.FIRST_CONTACT_ADD_CHANCE_100 = 0f;
             settings.FileSettings.Aiming.MISS_FIRST_SOOTS = 0;
             settings.FileSettings.Aiming.MISS_ON_START = 0;
-            settings.FileSettings.Aiming.MISS_DIST = 500f;
+            settings.FileSettings.Aiming.MISS_DIST = BotSettingUtils.ApplyBoostUp(500f, settings.FileSettings.Aiming.MISS_DIST, carryServiceLevel);
             settings.FileSettings.Aiming.NEXT_SHOT_MISS_CHANCE_100 = 0f;
             settings.FileSettings.Aiming.NEXT_SHOT_MISS_Y_OFFSET = 1f;
             settings.FileSettings.Aiming.SHPERE_FRIENDY_FIRE_SIZE = 0.5f;
             settings.FileSettings.Aiming.WEAPON_ROOT_OFFSET = 0.35f;
             settings.FileSettings.Aiming.DANGER_UP_POINT = 0.1f;
             settings.FileSettings.Aiming.OFFSET_RECAL_ANYWAY_TIME = 1f;
-            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = 5f;
+            settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME = BotSettingUtils.ApplyWeakenUp(5f, settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME, carryServiceLevel);
             settings.FileSettings.Aiming.ANYTIME_LIGHT_WHEN_AIM_100 = 100f;
             settings.FileSettings.Aiming.BAD_SHOOTS_MAX = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_MIN = 0;
             settings.FileSettings.Aiming.BAD_SHOOTS_OFFSET = 0;
 
-            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = 400f + 20f * botDifficultyInt;
+            settings.FileSettings.Look.MINIMUM_VISIBLE_DIST = BotSettingUtils.ApplyBoostUp(480f, settings.FileSettings.Look.MINIMUM_VISIBLE_DIST, carryServiceLevel);
             settings.FileSettings.Look.CAN_USE_LIGHT = false;
             settings.FileSettings.Look.NIGHT_VISION_ON = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_OFF = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.NIGHT_VISION_DIST = settings.FileSettings.Look.MINIMUM_VISIBLE_DIST;
             settings.FileSettings.Look.FULL_SECTOR_VIEW = true;
-            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = 180f;
-            settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = 5f;
-            settings.FileSettings.Look.LightOnVisionDistance = 5f;
-            settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = 25f;
-            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = 180f;
-            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = 100f;
-            settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = 1.5f;
-            settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = 2f;
+            settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION = BotSettingUtils.ApplyBoostUp(180f, settings.FileSettings.Look.VISIBLE_ANG_NIGHTVISION, carryServiceLevel);
+            settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT = BotSettingUtils.ApplyBoostUp(5f, settings.FileSettings.Look.LOOK_THROUGH_PERIOD_BY_HIT, carryServiceLevel);
+            settings.FileSettings.Look.LightOnVisionDistance = BotSettingUtils.ApplyBoostUp(5f, settings.FileSettings.Look.LightOnVisionDistance, carryServiceLevel);
+            settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC = BotSettingUtils.ApplyBoostUp(25f, settings.FileSettings.Look.LOOK_LAST_POSENEMY_IF_NO_DANGER_SEC, carryServiceLevel);
+            settings.FileSettings.Look.VISIBLE_ANG_LIGHT = BotSettingUtils.ApplyBoostUp(180f, settings.FileSettings.Look.VISIBLE_ANG_LIGHT, carryServiceLevel);
+            settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT = BotSettingUtils.ApplyBoostUp(100f, settings.FileSettings.Look.VISIBLE_DISNACE_WITH_LIGHT, carryServiceLevel);
+            settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR = BotSettingUtils.ApplyBoostUp(1.5f, settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR, carryServiceLevel);
+            settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN = BotSettingUtils.ApplyBoostUp(2f, settings.FileSettings.Look.GOAL_TO_FULL_DISSAPEAR_GREEN, carryServiceLevel);
             settings.FileSettings.Look.LOOK_THROUGH_GRASS = false;
-            settings.FileSettings.Look.DIST_REPEATED_SEEN = 50.0f;
-            settings.FileSettings.Look.MAX_VISION_GRASS_METERS = 3f;
-            settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = 3f;
-            settings.FileSettings.Look.NO_GREEN_DIST = 20.0f;
-            settings.FileSettings.Look.NO_GRASS_DIST = 20.0f;
+            settings.FileSettings.Look.DIST_REPEATED_SEEN = BotSettingUtils.ApplyBoostUp(50f, (float)settings.FileSettings.Look.DIST_REPEATED_SEEN, carryServiceLevel);
+            settings.FileSettings.Look.MAX_VISION_GRASS_METERS = BotSettingUtils.ApplyBoostUp(3f, settings.FileSettings.Look.MAX_VISION_GRASS_METERS, carryServiceLevel);
+            settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE = BotSettingUtils.ApplyBoostUp(3f, settings.FileSettings.Look.MAX_VISION_GRASS_METERS_FLARE, carryServiceLevel);
+            settings.FileSettings.Look.NO_GREEN_DIST = BotSettingUtils.ApplyBoostUp(20f, settings.FileSettings.Look.NO_GREEN_DIST, carryServiceLevel);
+            settings.FileSettings.Look.NO_GRASS_DIST = BotSettingUtils.ApplyBoostUp(20f, settings.FileSettings.Look.NO_GRASS_DIST, carryServiceLevel);
             settings.FileSettings.Look.CHECK_HEAD_ANY_DIST = true;
             settings.FileSettings.Look.MIDDLE_DIST_CAN_SHOOT_HEAD = true;
-            settings.FileSettings.Look.FAR_DISTANCE = 500f;
-            settings.FileSettings.Look.MIDDLE_DIST = 300f;
-            settings.FileSettings.Look.MiddleDeltaTimeSec = 0.1f;
-            settings.FileSettings.Look.FarDeltaTimeSec = 0.1f;
+            settings.FileSettings.Look.FAR_DISTANCE = BotSettingUtils.ApplyBoostUp(500f, settings.FileSettings.Look.FAR_DISTANCE, carryServiceLevel);
+            settings.FileSettings.Look.MIDDLE_DIST = BotSettingUtils.ApplyBoostUp(300f, settings.FileSettings.Look.MIDDLE_DIST, carryServiceLevel);
+            settings.FileSettings.Look.MiddleDeltaTimeSec = BotSettingUtils.ApplyWeakenUp(0.1f, settings.FileSettings.Look.MiddleDeltaTimeSec, carryServiceLevel);
+            settings.FileSettings.Look.FarDeltaTimeSec = BotSettingUtils.ApplyWeakenUp(0.1f, settings.FileSettings.Look.FarDeltaTimeSec, carryServiceLevel);
 
-            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = 1f;
-            settings.FileSettings.Hearing.DISPERSION_COEF = 20f + 15f * botDifficultyInt;
-            settings.FileSettings.Hearing.DISPERSION_COEF_GUN = 100f + 20f * botDifficultyInt;
-            settings.FileSettings.Hearing.CLOSE_DIST = 30f + botDifficultyInt * 3f;
-            settings.FileSettings.Hearing.FAR_DIST += 60f + botDifficultyInt * 2f;
-            settings.FileSettings.Hearing.SOUND_DIR_DEEFREE *= botDifficultyInt;
+            settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1 = BotSettingUtils.ApplyBoostUp(1f, settings.FileSettings.Hearing.CHANCE_TO_HEAR_SIMPLE_SOUND_0_1, carryServiceLevel);
+            settings.FileSettings.Hearing.DISPERSION_COEF = BotSettingUtils.ApplyBoostUp(80f, settings.FileSettings.Hearing.DISPERSION_COEF, carryServiceLevel);
+            settings.FileSettings.Hearing.DISPERSION_COEF_GUN = BotSettingUtils.ApplyBoostUp(180f, settings.FileSettings.Hearing.DISPERSION_COEF_GUN, carryServiceLevel);
+            settings.FileSettings.Hearing.CLOSE_DIST = BotSettingUtils.ApplyBoostUp(42f, settings.FileSettings.Hearing.CLOSE_DIST, carryServiceLevel);
+            settings.FileSettings.Hearing.FAR_DIST = BotSettingUtils.ApplyBoostUp(settings.FileSettings.Hearing.FAR_DIST + 68f, settings.FileSettings.Hearing.FAR_DIST, carryServiceLevel);
+            settings.FileSettings.Hearing.SOUND_DIR_DEEFREE = BotSettingUtils.ApplyBoostUp(settings.FileSettings.Hearing.SOUND_DIR_DEEFREE * 4f, settings.FileSettings.Hearing.SOUND_DIR_DEEFREE, carryServiceLevel);
             settings.FileSettings.Hearing.LOOK_ONLY_DANGER = true;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = 0.01f;
-            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = 0.01f;
+            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE = BotSettingUtils.ApplyWeakenUp(0.01f, settings.FileSettings.Hearing.HEAR_DELAY_WHEN_PEACE, carryServiceLevel);
+            settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT = BotSettingUtils.ApplyWeakenUp(0.01f, settings.FileSettings.Hearing.HEAR_DELAY_WHEN_HAVE_SMT, carryServiceLevel);
             settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
 
             settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
-            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 2f - botDifficultyInt * 0.2f;
+            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = BotSettingUtils.ApplyWeakenUp(1.2f, settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX, carryServiceLevel);
             settings.FileSettings.Shoot.NEXT_SINGLE_SHOT_PAUSE = 0f;
-            settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST = 300f;
+            settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST = BotSettingUtils.ApplyBoostUp(300f, settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST, carryServiceLevel);
             settings.FileSettings.Shoot.AGS_17_DIST_TO_LEAVE = 20f;
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;
