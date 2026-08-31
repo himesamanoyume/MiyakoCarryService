@@ -450,7 +450,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                         else
                         {
-                            if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasIntent(Intents.ShouldKeepFormation) && !McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
+                            if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasIntent(Intents.ShouldKeepFormation) && !McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon) && !McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
                             {
                                 return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                             }

@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
@@ -8,6 +9,8 @@ namespace MiyakoCarryService.Client.Datas
     public abstract class ObstacleData : TriggerData
     {
         protected ConditionalWeakTable<Collider, NavMeshObstacle> _obstacles = new();
+        public bool IsActiveObstacle { get; private set; } = true;
+        public bool IsCarvingApplied { get; private set; } = false;
 
         public void InitObstacle()
         {
@@ -19,7 +22,7 @@ namespace MiyakoCarryService.Client.Datas
                     obstacle = collider.gameObject.AddComponent<NavMeshObstacle>();
                 }
                 obstacle.enabled = true;
-                obstacle.carving = true;
+                obstacle.carving = false;
                 obstacle.carveOnlyStationary = true;
                 obstacle.shape = NavMeshObstacleShape.Box;
                 var xPadding = 0.6f;
@@ -28,14 +31,14 @@ namespace MiyakoCarryService.Client.Datas
 
                 if (collider is BoxCollider boxCollider)
                 {
-                    obstacle.center = boxCollider.center;  
-                    obstacle.size = new Vector3(boxCollider.size.x + xPadding, boxCollider.size.y + yPadding, boxCollider.size.z + zPadding); 
+                    obstacle.center = boxCollider.center;
+                    obstacle.size = new Vector3(boxCollider.size.x + xPadding, boxCollider.size.y + yPadding, boxCollider.size.z + zPadding);
                 }
                 else
                 {
-                    var bounds = collider.bounds;  
-                    obstacle.center = collider.transform.InverseTransformPoint(bounds.center);  
-                    obstacle.size = new Vector3(bounds.size.x + xPadding, bounds.size.y + yPadding, bounds.size.z + zPadding); 
+                    var bounds = collider.bounds;
+                    obstacle.center = collider.transform.InverseTransformPoint(bounds.center);
+                    obstacle.size = new Vector3(bounds.size.x + xPadding, bounds.size.y + yPadding, bounds.size.z + zPadding);
                 }
                 _obstacles.Add(collider, obstacle);
             }
@@ -43,10 +46,65 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetObstacle(bool active)
         {
+            IsActiveObstacle = active;
+        }
+
+        public void ApplyCarving(bool carve)
+        {
+            if (IsCarvingApplied == carve)
+            {
+                return;
+            }
+
+            IsCarvingApplied = carve;
             foreach ((var collider, var obstacle) in _obstacles)
             {
-                obstacle.carving = active;
+                if (obstacle != null)
+                {
+                    obstacle.carving = carve;
+                }
             }
+        }
+
+        public List<Bounds> GetObstacleWorldBounds()
+        {
+            var result = new List<Bounds>();
+            if (_obstacles == null)
+            {
+                return result;
+            }
+
+            foreach ((var collider, var obstacle) in _obstacles)
+            {
+                if (obstacle == null)
+                {
+                    continue;
+                }
+
+                var transform = obstacle.transform;
+                var halfSize = obstacle.size * 0.5f;
+                var worldMin = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                var worldMax = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+                for (int x = -1; x <= 1; x += 2)
+                {
+                    for (int y = -1; y <= 1; y += 2)
+                    {
+                        for (int z = -1; z <= 1; z += 2)
+                        {
+                            var corner = obstacle.center + new Vector3(halfSize.x * x, halfSize.y * y, halfSize.z * z);
+                            var worldCorner = transform.TransformPoint(corner);
+                            worldMin = Vector3.Min(worldMin, worldCorner);
+                            worldMax = Vector3.Max(worldMax, worldCorner);
+                        }
+                    }
+                }
+
+                var bounds = new Bounds();
+                bounds.SetMinMax(worldMin, worldMax);
+                result.Add(bounds);
+            }
+            return result;
         }
 
         public override void Dispose()
@@ -56,6 +114,7 @@ namespace MiyakoCarryService.Client.Datas
             {
                 _obstacles.Clear();
             }
+            IsCarvingApplied = false;
         }
     }
 }

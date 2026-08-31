@@ -146,6 +146,7 @@ namespace MiyakoCarryService.Client
             BaseMgr.Enable(typeof(DoorDataMgr));
             BaseMgr.Enable(typeof(StationaryWeaponDataMgr));
             BaseMgr.Enable(typeof(FormationDataMgr));
+            BaseMgr.Enable(typeof(TrapAvoidanceMgr));
 
             // BrainMgr必须在最后，用以脚本引擎重载
             BaseMgr.Enable(typeof(BrainMgr));

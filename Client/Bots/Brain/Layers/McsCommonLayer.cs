@@ -218,6 +218,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (McsBotPlayerData != null && McsBotPlayerData.HasIntent(Intents.ShouldTeleport))
             {
                 McsBotPlayerData.RemoveIntent(Intents.ShouldTeleport);
+                var playerPosition = McsBotPlayerData.Player.Position;
+                BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
+                BotOwner.Mover._lastGoodCastPointTime = Time.time;
+                BotOwner.Mover._prevPosLinkedTime = 0f;
+                BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                BotOwner.Mover.RecalcWay();
+                BotOwner.Mover.Pause = true;
                 UpdateLeadNearMoveTarget(McsBotPlayerData.LeadPlayer.Position, out float nextTime);
                 if (_currentMoveTarget.HasValue)
                 {
