@@ -552,7 +552,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 foreach (var mcsBotPlayerId in _allMcsBotPlayerIdInRaid)
                 {
-                    var mcsBotPlayer = TryGetMcsBotPlayer(mcsBotPlayerId);
+                    var mcsBotPlayer = FetchMcsBotPlayer(mcsBotPlayerId);
                     if (mcsBotPlayer == null)
                     {
                         continue;
@@ -708,6 +708,9 @@ namespace MiyakoCarryService.Client.Mgrs
             return squadMembers.Keys.ToList();
         }
 
+        /// <summary>
+        /// 副机不应该进行调用
+        /// </summary>
         public Player TryGetMcsBotPlayer(MongoID mcsBotPlayerId, MongoID? mcsLeadPlayerId = null)
         {
             if (mcsLeadPlayerId.HasValue)
