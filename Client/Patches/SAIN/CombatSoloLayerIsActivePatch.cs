@@ -39,6 +39,11 @@ namespace MiyakoCarryService.Client.Patches.SAIN
                     return true;
                 }
 
+                if (SAINUtils.GetSAINBot(botOwner) == null)
+                {
+                    return true;
+                }
+
                 var state = _states.GetOrCreateValue(botOwner);
                 if (mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
                 {

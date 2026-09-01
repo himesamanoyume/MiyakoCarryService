@@ -289,7 +289,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (fightActive)
                 {
-                    if (!MiyakoCarryServicePlugin.SAINInstalled)
+                    if (!MiyakoCarryServicePlugin.SAINInstalled || SAINUtils.GetSAINBot(BotOwner) == null)
                     {
                         if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive || goalEnemy.Person.AIData.BotOwner.Brain == null || goalEnemy.Person.AIData.BotOwner.BotState is EBotState.NonActive))
                         {
@@ -797,7 +797,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled)
+                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled && SAINUtils.GetSAINBot(BotOwner) != null)
                 {
                     var sqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
                     if (_deferToSain)

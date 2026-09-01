@@ -742,7 +742,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = BotSettingUtils.ApplyBoostUp(30f, settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC, carryServiceLevel);
             settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = BotSettingUtils.ApplyBoostUp(20f, settings.FileSettings.Mind.TIME_TO_FIND_ENEMY, carryServiceLevel);
             settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = BotSettingUtils.ApplyBoostUp(100f, settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100, carryServiceLevel);
-            settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = BotSettingUtils.ApplyWeakenUp(50f, settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100, carryServiceLevel);
+            settings.FileSettings.Mind.CHANCE_TO_RUN_CAUSE_DAMAGE_0_100 = 0f;
 
             settings.FileSettings.Mind.CAN_TALK = true;
             settings.FileSettings.Mind.TALK_WITH_QUERY = true;
@@ -802,7 +802,15 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.DOG_FIGHT_IN = 0f;
             settings.FileSettings.Mind.DOG_FIGHT_OUT = 0f;
             settings.FileSettings.Mind.SHOOT_INSTEAD_DOG_FIGHT = 0f;
-            settings.FileSettings.Mind.MIN_DAMAGE_SCARE = BotSettingUtils.ApplyBoostUp(10f, settings.FileSettings.Mind.MIN_DAMAGE_SCARE, carryServiceLevel);
+            settings.FileSettings.Mind.MIN_DAMAGE_SCARE = 99999f;
+            settings.FileSettings.Mind.DANGER_EXPIRE_TIME_MIN = 0f;
+            settings.FileSettings.Mind.DANGER_EXPIRE_TIME_MAX = 0f;
+            settings.FileSettings.Mind.PANIC_SIT_WEIGHT = 0f;
+            settings.FileSettings.Mind.PANIC_LAY_WEIGHT = 0f;
+            settings.FileSettings.Mind.PANIC_SIT_WEIGHT_PEACE = 0f;
+            settings.FileSettings.Mind.PANIC_RUN_WEIGHT = 1f;
+            settings.FileSettings.Mind.PANIC_NONE_WEIGHT = 1f;
+            settings.FileSettings.Mind.CAN_PANIC_IS_PROTECT = false;
             settings.FileSettings.Mind.AVOID_BTR_RADIUS_SQR = 1f;
             settings.FileSettings.Mind.GRENADE_DAMAGE_IGNORE = false;
             settings.FileSettings.Mind.IGNORE_DANGER_PLACES = false;
@@ -847,8 +855,8 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Aiming.HARD_AIM_CHANCE_100 = 100;
             settings.FileSettings.Aiming.PANIC_TIME = 0f;
             settings.FileSettings.Aiming.DAMAGE_PANIC_TIME = 0f;
-            settings.FileSettings.Aiming.PANIC_COEF = BotSettingUtils.ApplyWeakenUp(0.25f, settings.FileSettings.Aiming.PANIC_COEF, carryServiceLevel);
-            settings.FileSettings.Aiming.PANIC_ACCURATY_COEF = BotSettingUtils.ApplyWeakenUp(1f, settings.FileSettings.Aiming.PANIC_ACCURATY_COEF, carryServiceLevel);
+            settings.FileSettings.Aiming.PANIC_COEF = 1f;
+            settings.FileSettings.Aiming.PANIC_ACCURATY_COEF = 1f;
             settings.FileSettings.Aiming.DAMAGE_TO_DISCARD_AIM_0_100 = 0f;
             settings.FileSettings.Aiming.MIN_TIME_DISCARD_AIM_SEC = 0f;
             settings.FileSettings.Aiming.MAX_TIME_DISCARD_AIM_SEC = 0f;
