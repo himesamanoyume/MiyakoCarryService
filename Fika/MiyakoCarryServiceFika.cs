@@ -9,7 +9,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Modding;
 using EFT;
 using Fika.Core.Networking.LiteNetLib;
-using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Fika.Patches;
@@ -18,7 +17,6 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
 using BepInEx;
-using System.Linq;
 
 namespace MiyakoCarryService.Fika
 {
@@ -29,7 +27,6 @@ namespace MiyakoCarryService.Fika
     [BepInDependency(MiyakoCarryServicePlugin.FikaGUID, BepInDependency.DependencyFlags.HardDependency)]
     public sealed class MiyakoCarryServiceFika : BaseUnityPlugin
     {
-        private McsMgr McsMgr => McsMgrApi.GetMgr<McsMgr>();
         private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
         private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
         private List<ModulePatch> _patches = new();
@@ -168,17 +165,7 @@ namespace MiyakoCarryService.Fika
                     return;
                 }
 
-                McsCommandApi.Execute(new McsCommandContext
-                {
-                    CommandType = packet.CommandType,
-                    Position = packet.Position,
-                    TargetId = packet.TargetId,
-                    AimingBodyPartType = packet.AimingBodyPartType,
-                    McsLeadPlayer = mcsLeadPlayer,
-                    McsBotPlayer = mcsBotPlayer,
-                    ShouldCheckExclude = packet.ShouldCheckExclude,
-                    Extensions = packet.Extensions
-                }, true);
+                McsPacketApi.ExecuteCommand(packet.Payload, mcsLeadPlayer, mcsBotPlayer);
             }
         }
 
@@ -204,12 +191,7 @@ namespace MiyakoCarryService.Fika
                     return;
                 }
 
-                SubtitlesMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, new McsMsg
-                {
-                    PhraseTrigger = packet.PhraseTrigger,
-                    Position = packet.Position,
-                    Keys = packet.Keys.ToArray()
-                });
+                SubtitlesMgr.ShowMsg(mcsLeadPlayer, mcsBotPlayer, McsPacketApi.DeserializeMsg(packet.Payload));
             }
         }
 
@@ -236,7 +218,13 @@ namespace MiyakoCarryService.Fika
                     return;
                 }
 
-                var questData = QuestDataMgr.FindQuestData(packet.TargetId);
+                var targetId = McsPacketApi.DeserializeQuestProxy(packet.Payload);
+                if (targetId == null)
+                {
+                    return;
+                }
+
+                var questData = QuestDataMgr.FindQuestData(targetId);
                 if (questData != null)
                 {
                     TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayer));
@@ -259,20 +247,7 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            McsMgr.UpdateMcsBotPlayerConfig(mcsLeadPlayer.ProfileId, new McsBotPlayerConfig
-            {
-                McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                EnableLooting = packet.McsBotPlayerConfig.EnableLooting,
-                PriceThreshold = packet.McsBotPlayerConfig.PriceThreshold,
-                KeywordItemText = packet.KeywordItemText,
-                LootingKeywordItem = packet.McsBotPlayerConfig.LootingKeywordItem,
-                BlockItemType = packet.McsBotPlayerConfig.BlockItemType,
-                EnableKeepFormation = packet.McsBotPlayerConfig.EnableKeepFormation,
-                FormationMatrix = packet.FormationMatrix,
-                FormationSpacing = packet.McsBotPlayerConfig.FormationSpacing,
-                FormationSequentialFill = packet.McsBotPlayerConfig.FormationSequentialFill,
-                PhrasesSilent = packet.McsBotPlayerConfig.PhrasesSilent,
-            });
+            McsPacketApi.ApplyBotPlayerConfig(mcsLeadPlayer.ProfileId, packet.Payload);
         }
 
         public void SendCommandPacket(CommandMgrHandleFikaEvent @event)
@@ -287,12 +262,7 @@ namespace MiyakoCarryService.Fika
             {
                 var packet = new CommandPacket
                 {
-                    CommandType = @event.CommandPacketType,
-                    Position = @event.Position,
-                    TargetId = @event.TargetId,
-                    AimingBodyPartType = @event.AimingBodyPartType,
-                    ShouldCheckExclude = @event.ShouldCheckExclude,
-                    Extensions = @event.Extensions ?? new Dictionary<string, McsValue>(),
+                    Payload = McsPacketApi.SerializeCommand(@event),
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
@@ -318,9 +288,7 @@ namespace MiyakoCarryService.Fika
             {
                 var packet = new TalkMsgPacket
                 {
-                    PhraseTrigger = @event.Msg.PhraseTrigger,
-                    Position = @event.Msg.Position,
-                    Keys = @event.Msg.Keys != null ? @event.Msg.Keys.ToList() : [],
+                    Payload = McsPacketApi.SerializeMsg(@event.Msg),
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
                     McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
@@ -354,9 +322,9 @@ namespace MiyakoCarryService.Fika
             {
                 var packet = new QuestProxyCommandCallbackPacket
                 {
+                    Payload = McsPacketApi.SerializeQuestProxy(@event.TargetId),
                     McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
-                    McsBotPlayerNetId = fikaMcsBotPlayer.NetId,
-                    TargetId = @event.TargetId
+                    McsBotPlayerNetId = fikaMcsBotPlayer.NetId
                 };
 
                 var netPeer = GetPeerByNetId(fikaMcsLeadPlayer.NetId);
@@ -386,21 +354,8 @@ namespace MiyakoCarryService.Fika
             {
                 var packet = new McsBotPlayerConfigPacket
                 {
-                    McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId,
-                    KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
-                    FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
-                    McsBotPlayerConfig = new SMcsBotPlayerConfig
-                    {
-                        EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
-                        PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-                        LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-                        BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
-                        EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
-                        FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
-                        FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
-                        PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
-                    },
-                    Extensions = McsConfigApi.GetConfigSnapshot()
+                    Payload = McsPacketApi.SerializeBotPlayerConfig(@event.McsBotPlayerConfig),
+                    McsLeadPlayerNetId = fikaMcsLeadPlayer.NetId
                 };
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }

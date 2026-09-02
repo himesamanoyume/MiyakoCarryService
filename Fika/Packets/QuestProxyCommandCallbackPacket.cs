@@ -6,18 +6,18 @@ namespace MiyakoCarryService.Fika.Packets
 {
     public class QuestProxyCommandCallbackPacket : BasePacket
     {
-        public string TargetId;
+        public string Payload;
 
         public override void Deserialize(NetDataReader reader)
         {
             base.Deserialize(reader);
-            TargetId = reader.GetString();
+            Payload = reader.GetString();
         }
 
         public override void Serialize(NetDataWriter writer)
         {
             base.Serialize(writer);
-            writer.Put(TargetId, 0);
+            writer.Put(Payload, 0);
         }
     }
 }
