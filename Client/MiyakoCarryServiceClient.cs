@@ -262,6 +262,7 @@ namespace MiyakoCarryService.Client
                 _patches.Add(new MoverManualUpdatePatch());
                 _patches.Add(new CalcGoalDropEnemyPatch());
                 _patches.Add(new CheckCanShootPatch());
+                _patches.Add(new SainPlayVoiceLineSilencePatch());
             }
 
 #if DEBUG

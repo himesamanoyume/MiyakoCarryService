@@ -153,11 +153,42 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private bool ShouldSilencePhrases(Player mcsLeadPlayer)
         {
-            if (McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayer.ProfileId, out var mcsBotPlayerConfig))
+            return ShouldSilencePhrases(mcsLeadPlayer.ProfileId);
+        }
+
+        public bool ShouldSilencePhrases(MongoID mcsLeadPlayerId)
+        {
+            if (McsMgr != null && McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerConfig))
             {
                 return mcsBotPlayerConfig.PhrasesSilent;
             }
             return MiyakoCarryServicePlugin.PhrasesSilent.Value;
+        }
+
+        public bool ShouldSilenceBot(Player mcsBotPlayer)
+        {
+            if (!Tools.IsHost)
+            {
+                return false;
+            }
+
+            if (mcsBotPlayer == null)
+            {
+                return false;
+            }
+
+            if (McsMgr == null || !McsMgr.IsMcsBotPlayer(mcsBotPlayer.ProfileId))
+            {
+                return false;
+            }
+
+            var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayer.ProfileId);
+            if (mcsLeadPlayer == null)
+            {
+                return false;
+            }
+
+            return ShouldSilencePhrases(mcsLeadPlayer.ProfileId);
         }
 
         public string HandleOnFirstContact(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
