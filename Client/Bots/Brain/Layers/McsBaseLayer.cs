@@ -1762,7 +1762,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (!McsBotPlayerData.HasIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldQuestProxyAction]))
+            if (!McsBotPlayerData.HasAnyIntent(Intents.ShouldInteractionProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldQuestProxyAction))
             {
                 return true;
             }

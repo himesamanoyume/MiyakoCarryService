@@ -105,6 +105,23 @@ namespace MiyakoCarryService.Client.Datas
             return true;
         }
 
+        public bool HasAnyIntent(params string[] intents)
+        {
+            if (intents == null)
+            {
+                return false;
+            }
+
+            foreach (var intent in intents)
+            {
+                if (_intents.Contains(intent))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void AddIntent(params string[] intents)
         {
             foreach (var intent in intents)

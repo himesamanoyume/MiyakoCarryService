@@ -25,10 +25,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public float _lastSqrToOperator = float.MaxValue;
         public float _lastCanShootTime = -999f;
         private const float CAN_SHOOT_HOLD_TIME = 2f;
+        private const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
         private const float ARRIVE_DIST = 2.5f;
         private const float LOOK_AROUND_TIME = 2f;
         private const float STUCK_TIMEOUT = 8f;
         public int _isTurnRight = 1;
+
+        private static readonly string[] _travelTaskIntents =
+        {
+            Intents.ShouldQuestProxyAction,
+            Intents.ShouldLootProxyAction,
+            Intents.ShouldInteractionProxyAction,
+            Intents.ShouldStationaryWeaponProxyAction,
+            Intents.ShouldEscort,
+            Intents.ShouldEscortToBtr,
+            Intents.ShouldGoToPoint,
+            Intents.ShouldDropTargetLoot,
+        };
 
         public override Action GetNextAction()
         {
@@ -90,7 +103,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
                 }
 
-                var fightActive = goalEnemy != null && time - _lastCanShootTime <= CAN_SHOOT_HOLD_TIME;
+                var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
+                var fightActive = goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE);
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 var isEnemyPosLost = IsEnemyPosLost();
                 mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
@@ -372,7 +386,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         {
                             if (goalEnemy.IsVisible)
                             {
-                                if (!BotOwner.GoToSomePointData.IsCome() && !McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                                if (!BotOwner.GoToSomePointData.IsCome() && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation))
                                 {
                                     return new Action(typeof(AttackMovingLogic), "Mcs:AttackMoving");
                                 }
@@ -381,105 +395,38 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     return new Action(typeof(ShootFromPlaceLogic), "Mcs:ShootFromPlace");
                                 }
                             }
-                            else
-                            {
-                                if (McsBotPlayerData != null)
-                                {
-                                    if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
-                                    {
-                                        if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
-                                        {
-                                            ApplyMovePoint();
-                                            return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
-                                        }
-                                        else
-                                        {
-                                            return new Action(typeof(HoldPositionLogic), "Mcs:GoToPointCommandTargetPosNotFound");
-                                        }
-                                    }
-
-                                    if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
-                                    {
-                                        if (needHeal && isEnemyPosLost)
-                                        {
-                                            RefreshStuckTimer();
-                                            return new Action(typeof(HealLogic), "Mcs:FightHealing1");
-                                        }
-                                        return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
-                                    }
-                                }
-
-                                TryRefreshLeadTarget(mcsLeadPlayerPos, time);
-
-                                if (needHeal && isEnemyPosLost)
-                                {
-                                    RefreshStuckTimer();
-                                    ApplyMovePoint();
-                                    return new Action(typeof(HealLogic), "Mcs:FightHealing2");
-                                }
-
-                                if (sqrDistance >= TOO_FAR_FROM_LEAD_DISTANCE * 1 || tooClose)
-                                {
-                                    if (_currentMoveTarget.HasValue)
-                                    {
-                                        ApplyMovePoint();
-                                        return new Action(typeof(GoToPointLogic), tooClose ? "Mcs:TooClose" : "Mcs:TooFar");
-                                    }
-                                }
-                                else
-                                {
-                                    if (_nextPatrolTime + 4f < time)
-                                    {
-                                        _nextPatrolTime = time + 4f;
-                                        if (_currentMoveTarget.HasValue)
-                                        {
-                                            ApplyMovePoint();
-                                            return new Action(typeof(GoToPointLogic), "Mcs:Partoling");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (needHeal && isEnemyPosLost)
-                                        {
-                                            RefreshStuckTimer();
-                                            return new Action(typeof(HealLogic), "Mcs:FightHealing3");
-                                        }
-                                    }
-                                }
-                            }
                         }
                         else
                         {
-                            if (McsBotPlayerData != null && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f) && !McsBotPlayerData.HasIntent(Intents.ShouldKeepFormation) && !McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon) && !McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                            if (!hasTravelTask
+                                && ((mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 50f * 50f && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe)) || mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position) <= 20f * 20f)
+                                && !McsBotPlayerData.HasAnyIntent(Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon, Intents.ShouldHoldPosition))
                             {
                                 return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                             }
                             else
                             {
-                                if (McsBotPlayerData != null)
+                                if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
                                 {
-                                    if (McsBotPlayerData.HasIntent(Intents.ShouldGoToPoint))
+                                    if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
                                     {
-                                        if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
-                                        {
-                                            ApplyMovePoint();
-                                            return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
-                                        }
-                                        else
-                                        {
-                                            return new Action(typeof(HoldPositionLogic), "Mcs:GoToLootTargetPosNotFound");
-                                        }
+                                        ApplyMovePoint();
+                                        return new Action(typeof(GoToPointLogic), "Mcs:GoToPointCommand");
                                     }
+                                    else
+                                    {
+                                        return new Action(typeof(HoldPositionLogic), "Mcs:GoToLootTargetPosNotFound");
+                                    }
+                                }
 
-                                    if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                                if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                                {
+                                    if (needHeal && isEnemyPosLost)
                                     {
-                                        if (needHeal && isEnemyPosLost)
-                                        {
-                                            RefreshStuckTimer();
-                                            return new Action(typeof(HealLogic), "Mcs:FightHealing4");
-                                        }
-                                        return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
+                                        RefreshStuckTimer();
+                                        return new Action(typeof(HealLogic), "Mcs:FightHealing4");
                                     }
+                                    return new Action(typeof(HoldPositionLogic), "Mcs:HoldPositionCommand");
                                 }
 
                                 TryRefreshLeadTarget(mcsLeadPlayerPos, time);
