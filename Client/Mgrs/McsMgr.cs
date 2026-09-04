@@ -508,6 +508,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     oldConfig.FormationSpacing = mcsBotPlayerConfig.FormationSpacing;
                     oldConfig.FormationSequentialFill = mcsBotPlayerConfig.FormationSequentialFill;
                     oldConfig.PhrasesSilent = mcsBotPlayerConfig.PhrasesSilent;
+                    oldConfig.EnableSubtitles = mcsBotPlayerConfig.EnableSubtitles;
                     oldConfig.Extensions = mcsBotPlayerConfig.Extensions;
                     return oldConfig;
                 }

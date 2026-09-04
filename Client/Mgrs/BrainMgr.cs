@@ -93,6 +93,7 @@ namespace MiyakoCarryService.Client.Mgrs
                         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
                         FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
                         PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
+                        EnableSubtitles = MiyakoCarryServicePlugin.EnableSubtitles.Value,
                     };
                     McsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }

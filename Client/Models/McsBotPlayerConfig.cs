@@ -41,6 +41,9 @@ namespace MiyakoCarryService.Client.Models
         [DataMember(Name = "PhrasesSilent")]
         public bool PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value;
 
+        [DataMember(Name = "EnableSubtitles")]
+        public bool EnableSubtitles = MiyakoCarryServicePlugin.EnableSubtitles.Value;
+
         [DataMember(Name = "Extensions")]
         public Dictionary<string, McsValue> Extensions = new();
     }

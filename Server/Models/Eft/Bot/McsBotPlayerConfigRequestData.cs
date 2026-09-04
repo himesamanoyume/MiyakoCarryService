@@ -39,5 +39,8 @@ namespace MiyakoCarryService.Server.Models.Eft.Common.Tables
 
         [JsonPropertyName("PhrasesSilent")]
         public required bool PhrasesSilent { get; set; }
+
+        [JsonPropertyName("EnableSubtitles")]
+        public required bool EnableSubtitles { get; set; }
     }
 }

@@ -72,6 +72,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<KeyboardShortcut> SaveFormationPresetHotKey;
         public static ConfigEntry<string> FormationPresets;
         public static ConfigEntry<bool> PhrasesSilent;
+        public static ConfigEntry<bool> EnableSubtitles;
 
         #endregion
 
@@ -86,7 +87,6 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> TeammateHighlight;
         public static ConfigEntry<KeyboardShortcut> TeammateHighlightHotKey;
         public static ConfigEntry<Color> TeammateHighlightColor;
-        public static ConfigEntry<bool> EnableSubtitles;
         public static ConfigEntry<bool> ShowBrevityCode;
 
         #endregion
@@ -365,6 +365,7 @@ namespace MiyakoCarryService.Client
                         FormationSpacing = FormationSpacing.Value,
                         FormationSequentialFill = FormationSequentialFill.Value,
                         PhrasesSilent = PhrasesSilent.Value,
+                        EnableSubtitles = EnableSubtitles.Value,
                         Extensions = McsBotPlayerConfigUtils.Snapshot()
                     });
                 };
@@ -522,6 +523,12 @@ namespace MiyakoCarryService.Client
                 Locales.PHRASESSILENT_DESCRIPTION
             );
 
+            EnableSubtitles = Register(
+                EConfigType.BASIC,
+                Locales.ENABLESUBTITLES_KEY,
+                true
+            );
+
             FormationPresets = Register(
                 EConfigType.BASIC,
                 "FormationPresets",
@@ -557,12 +564,6 @@ namespace MiyakoCarryService.Client
                 EConfigType.PLAYER,
                 Locales.TEAMMATEHIGHLIGHTCOLOR_KEY,
                 Draw.TranslucentTianyi.Rgb
-            );
-
-            EnableSubtitles = Register(
-                EConfigType.PLAYER,
-                Locales.ENABLESUBTITLES_KEY,
-                true
             );
 
             ShowBrevityCode = Register(

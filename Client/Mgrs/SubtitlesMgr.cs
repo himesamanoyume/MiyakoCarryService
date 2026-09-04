@@ -133,6 +133,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 else
                 {
+                    if (!ShouldShowSubtitles(mcsLeadPlayer.ProfileId))
+                    {
+                        return;
+                    }
+
                     EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
                     {
                         McsLeadPlayerId = mcsLeadPlayer.ProfileId,
@@ -163,6 +168,15 @@ namespace MiyakoCarryService.Client.Mgrs
                 return mcsBotPlayerConfig.PhrasesSilent;
             }
             return MiyakoCarryServicePlugin.PhrasesSilent.Value;
+        }
+
+        public bool ShouldShowSubtitles(MongoID mcsLeadPlayerId)
+        {
+            if (McsMgr != null && McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerConfig))
+            {
+                return mcsBotPlayerConfig.EnableSubtitles;
+            }
+            return true;
         }
 
         public bool ShouldSilenceBot(Player mcsBotPlayer)

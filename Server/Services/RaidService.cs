@@ -451,7 +451,8 @@ namespace MiyakoCarryService.Server.Services
                             FormationMatrix = "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,6,0,7,8,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
                             FormationSpacing = 3f,
                             FormationSequentialFill = false,
-                            PhrasesSilent = false
+                            PhrasesSilent = false,
+                            EnableSubtitles = true
                         };
                     }
                 });
