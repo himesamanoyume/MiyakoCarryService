@@ -303,7 +303,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 }
             }
 
-            // MiyakoCarryServiceAssistantPlugin.Logger.LogInfo($"录音结束：{(samples == null ? 0 : samples.Length) / (float)_capture.SampleRate:F2}s，{(samples == null ? 0 : samples.Length)} 样本");
+            // McsLogger.LogInfo($"录音结束：{(samples == null ? 0 : samples.Length) / (float)_capture.SampleRate:F2}s，{(samples == null ? 0 : samples.Length)} 样本");
 
             if (samples == null || samples.Length == 0)
             {
@@ -413,7 +413,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"STT Exception：{ex}");
+                McsLogger.LogError($"STT Exception：{ex}");
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value)
                 {
                     SetDebugText(string.Format(Utils.Locales.STT_FAILED.McsLocalized(), ex.Message));
@@ -486,7 +486,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM Exception：{ex}");
+                McsLogger.LogError($"LLM Exception：{ex}");
                 if (MiyakoCarryServiceAssistantPlugin.SttDebugEnabled.Value && MiyakoCarryServiceAssistantPlugin.LlmDebugAutoEnabled.Value)
                 {
                     MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = string.Format(Utils.Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
@@ -539,7 +539,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
                 }
                 catch (Exception ex)
                 {
-                    MiyakoCarryServiceAssistantPlugin.Logger.LogError($"BindAndDispatch Exception：{ex}");
+                    McsLogger.LogError($"BindAndDispatch Exception：{ex}");
                     feedback = string.Format(Utils.Locales.DISPATCH_ERROR.McsLocalized(), ex.Message);
                 }
             }
@@ -595,7 +595,7 @@ namespace MiyakoCarryService.Assistant.Mgrs
             }
             catch (Exception ex)
             {
-                MiyakoCarryServiceAssistantPlugin.Logger.LogError($"LLM Exception：{ex}");
+                McsLogger.LogError($"LLM Exception：{ex}");
                 MiyakoCarryServiceAssistantPlugin.LlmDebugAutoResult.Value = string.Format(Utils.Locales.LLM_DEBUG_ERROR.McsLocalized(), ex.Message);
             }
         }

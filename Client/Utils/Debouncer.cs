@@ -71,7 +71,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 catch (Exception e)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogError($"Debouncer batch callback error: {e}");
+                    McsLogger.LogError($"Debouncer batch callback error: {e}");
                 }
             }
 
@@ -98,7 +98,7 @@ namespace MiyakoCarryService.Client.Utils
                 }
                 catch (Exception e)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogError($"Debouncer flush error: {e}");
+                    McsLogger.LogError($"Debouncer flush error: {e}");
                 }
             }
 

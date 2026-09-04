@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Datas
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
             }
         }
 

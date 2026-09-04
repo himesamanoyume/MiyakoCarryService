@@ -5,6 +5,7 @@ using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.Vehicle;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
@@ -126,7 +127,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
             }
             finally
             {
@@ -181,7 +182,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
             }
             finally
             {

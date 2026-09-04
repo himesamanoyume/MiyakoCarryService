@@ -57,7 +57,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError($"BotHearingSensorPatch 报错: {e}");
+                McsLogger.LogError($"BotHearingSensorPatch 报错: {e}");
             }
         }
     }

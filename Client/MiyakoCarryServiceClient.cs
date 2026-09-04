@@ -1,6 +1,5 @@
 using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
@@ -50,7 +49,6 @@ namespace MiyakoCarryService.Client
         public static McsPluginClientConfig McsPluginClientConfig = null;
         private List<ModulePatch> _patches = new();
         public static bool IsLoadedByScriptEngine = false;
-        public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
         public static bool FikaInstalled { get; private set; } = false;
         public static bool IsFikaHeadless { get; private set; } = false;
         public static bool SAINInstalled { get; private set; } = false;
@@ -632,7 +630,7 @@ namespace MiyakoCarryService.Client
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError($"Batch refresh mcsBotPlayerConfig error: {e}");
+                    McsLogger.LogError($"Batch refresh mcsBotPlayerConfig error: {e}");
                 }
             }
         }

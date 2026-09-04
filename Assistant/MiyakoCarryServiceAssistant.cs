@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using MiyakoCarryService.Assistant.Enums;
 using MiyakoCarryService.Assistant.Mgrs;
 using MiyakoCarryService.Assistant.Models;
@@ -33,7 +32,6 @@ namespace MiyakoCarryService.Assistant
 #endif
 
         public static MiyakoCarryServiceAssistantPlugin Instance;
-        public static new readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryServiceAssistant");
 
         public static bool IsLoadedByScriptEngine = false;
 

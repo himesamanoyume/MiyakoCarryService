@@ -134,7 +134,7 @@ namespace MiyakoCarryService.Client.Utils
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
                 return false;
             }
         }

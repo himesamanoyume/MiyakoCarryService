@@ -65,7 +65,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
                 catch (Exception e)
                 {
-                    MiyakoCarryServicePlugin.Logger.LogError(e);
+                    McsLogger.LogError(e);
                 }
             }
         }

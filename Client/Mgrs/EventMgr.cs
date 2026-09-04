@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
@@ -56,7 +57,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public static void Notify<T>(T @event) where T : IMcsEvent
         {
 #if DEBUG
-            MiyakoCarryServicePlugin.Logger.LogWarning($"触发 {typeof(T).Name}");
+            McsLogger.LogWarning($"触发 {typeof(T).Name}");
 #endif
             var eventType = typeof(T);
             if (_eventHandlers.TryGetValue(eventType, out var handlers))
@@ -69,7 +70,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                     catch (Exception e)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogError($"事件处理错误 [{eventType.Name}]: {e}");
+                        McsLogger.LogError($"事件处理错误 [{eventType.Name}]: {e}");
                     }
                 }
             }

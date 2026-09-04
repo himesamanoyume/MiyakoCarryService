@@ -1,6 +1,7 @@
 using System;
 using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
@@ -63,7 +64,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
                 return new Action(typeof(HoldPositionLogic), "Mcs:Exception");
             }
         }

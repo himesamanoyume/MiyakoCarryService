@@ -372,7 +372,7 @@ namespace MiyakoCarryService.Client
                     }
                     catch (Exception e)
                     {
-                        MiyakoCarryServicePlugin.Logger.LogError($"Batch refresh item error: {e}");
+                        McsLogger.LogError($"Batch refresh item error: {e}");
                     }
                 }
             }

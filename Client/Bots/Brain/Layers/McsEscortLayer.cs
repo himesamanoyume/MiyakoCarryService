@@ -89,7 +89,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
                 return new Action(typeof(HoldPositionLogic), "Mcs:Exception");
             }
         }

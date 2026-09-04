@@ -179,7 +179,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
             }
             finally
             {
@@ -346,7 +346,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
             catch (Exception e)
             {
-                MiyakoCarryServicePlugin.Logger.LogError(e);
+                McsLogger.LogError(e);
             }
             finally
             {

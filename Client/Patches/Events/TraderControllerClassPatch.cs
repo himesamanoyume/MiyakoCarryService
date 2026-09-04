@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                         }
                         catch (Exception e)
                         {
-                            MiyakoCarryServicePlugin.Logger.LogInfo(e);
+                            McsLogger.LogInfo(e);
                         }
                     }
                 }

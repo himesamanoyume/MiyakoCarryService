@@ -397,7 +397,7 @@ namespace MiyakoCarryService.Client.Extensions
                 botOwner.Mover.RecalcWay();
                 botOwner.Mover.Pause = true;
 #if DEBUG
-                MiyakoCarryServicePlugin.Logger.LogWarning("尝试强制重置手部状态" + Time.time);
+                McsLogger.LogWarning("尝试强制重置手部状态" + Time.time);
 #endif
             }
         }
