@@ -103,6 +103,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
                 }
 
+                if (McsBotPlayerData.LeadPlayer == null)
+                {
+                    return new Action(typeof(HoldPositionLogic), "Mcs:LeadPlayerNull");
+                }
+
                 var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
                 var fightActive = goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE);
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
@@ -324,6 +329,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         goalEnemy = BotOwner.Memory.GoalEnemy;
                     }
 
+                    if (goalEnemy == null)
+                    {
+                        return new Action(typeof(HoldPositionLogic), "Mcs:FightNoEnemy");
+                    }
+
                     var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
                     if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                     {
@@ -474,7 +484,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 #endregion
                 #region McsExfiltrationLayer
 
-                if (!McsBotPlayerData.LeadPlayer.HealthController.IsAlive || McsBotPlayerData.HasIntent(Intents.ShouldExfil))
+                if (McsBotPlayerData.LeadPlayer == null || !McsBotPlayerData.LeadPlayer.HealthController.IsAlive || McsBotPlayerData.HasIntent(Intents.ShouldExfil))
                 {
                     if (BotOwner.PatrollingData.ExfiltrationData.HaveActions())
                     {
@@ -610,7 +620,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.LootingTarget != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
+                else if (_nextLootingCheckTime < time && McsBotPlayerData.LootingTarget != null && McsBotPlayerData.McsAILeadPlayer != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
                 {
                     var enableLooting = McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting;
                     var hasEmergencyLootNeed = McsBotPlayerData.HasEmergencyLootNeed();
@@ -663,8 +673,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        #region 移动目标刷新辅助（原内联刷新块的行为等价封装）
-
         private bool TryRefreshCommonTarget(Vector3? targetPos, float time)
         {
             if (_nextUpdatePosTime < time)
@@ -702,8 +710,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
             }
         }
-
-        #endregion
 
         public override bool IsActive()
         {

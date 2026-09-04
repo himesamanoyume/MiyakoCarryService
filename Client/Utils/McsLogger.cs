@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Utils
     /// </summary>
     public static class McsLogger
     {
-        private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("MiyakoCarryService");
+        private static readonly ManualLogSource _logger = Logger.CreateLogSource("MiyakoCarryService");
 
         public static void LogInfo(object data)
         {
@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Client.Utils
 
             for (int i = 0; i < max; i++)
             {
-                MethodBase method = stackTrace.GetFrame(i)?.GetMethod();
+                var method = stackTrace.GetFrame(i)?.GetMethod();
                 if (method == null)
                 {
                     continue;
@@ -77,7 +77,7 @@ namespace MiyakoCarryService.Client.Utils
                 declaringType = typeof(McsLogger);
             }
 
-            var result = $"[{level}] [{declaringType.FullName ?? declaringType.Name}] : [{methodsString}] : [{data}]";
+            var result = $"[{level}] [{declaringType.FullName ?? declaringType.Name}.{methodsString}]\n{data}";
             _logger.Log(level, result);
         }
 
