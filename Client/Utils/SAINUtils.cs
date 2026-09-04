@@ -29,6 +29,7 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly Type _sainBotComponentType = GetSAINMethod?.GetParameters().ElementAtOrDefault(1)?.ParameterType?.GetElementType();
         private static readonly Type _botActivationType = _sainBotComponentType?.GetProperty("BotActivation")?.PropertyType ?? _sainBotComponentType?.GetField("BotActivation")?.FieldType;
         public static readonly Type SAINActivationClassType = _botActivationType;
+        private static readonly Type _sainBotInfoType = Type.GetType("SAIN.SAINComponent.Classes.Info.SAINBotInfoClass, SAIN");
 
         public static readonly MethodInfo SetTargetMoveDirectionMethod = AccessTools.Method(Type.GetType("SAIN.Classes.PlayerMovementController, SAIN"), "SetTargetMoveDirection");
         public static readonly MethodInfo RunToPointMethod = AccessTools.Method(SainMoverType, "RunToPoint");
@@ -50,6 +51,7 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly Func<object, object> _botActivationGetter = BuildInstanceGetter(_sainBotComponentType, "BotActivation");
         private static readonly Func<object, bool> _moverMovingGetter = BuildBoolGetter(SainMoverType, "Moving");
         private static readonly Func<object, BotOwner> _dogFightBotOwnerGetter = BuildBotOwnerGetter(DogFightType);
+        private static readonly Func<object, BotOwner> _sainBotInfoBotOwnerGetter = BuildBotOwnerGetter(_sainBotInfoType);
 
         private static readonly ConditionalWeakTable<object, BotOwner> _playerComponentBotOwners = new();
         private static readonly ConditionalWeakTable<object, BotOwner> _moverBotOwners = new();
@@ -136,6 +138,16 @@ namespace MiyakoCarryService.Client.Utils
 
             _dogFightBotOwners.Add(dogFight, botOwner);
             return botOwner;
+        }
+
+        public static BotOwner GetBotOwnerFromSainBotInfo(object sainBotInfo)
+        {
+            if (sainBotInfo == null)
+            {
+                return null;
+            }
+
+            return _sainBotInfoBotOwnerGetter?.Invoke(sainBotInfo);
         }
 
         public static bool GetMoving(object mover)

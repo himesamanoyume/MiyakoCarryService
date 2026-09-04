@@ -251,6 +251,7 @@ namespace MiyakoCarryService.Client
                 _patches.Add(new CombatSoloLayerStartPatch());
                 _patches.Add(new CombatSoloLayerIsActivePatch());
                 _patches.Add(new SAINActivationManualUpdatePatch());
+                _patches.Add(new SAINBotInfoInitPatch());
                 _patches.Add(new SetTargetMoveDirectionPatch());
                 _patches.Add(new DogFightMovePatch());
                 _patches.Add(new RunToPointPatch());
