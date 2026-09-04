@@ -1,12 +1,11 @@
-﻿using System;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
     internal static class BotSettingUtils
     {
-        private static readonly float[] _boostUpCoefficients = [0.55f, 0.70f, 0.85f, 0.95f, 1.0f];
-        private static readonly float[] _weakenUpCoefficients = [1.45f, 1.30f, 1.15f, 1.05f, 1.0f];
+        private static readonly float[] _boostUpCoefficients = [0.42f, 0.55f, 0.75f, 0.90f, 1.0f];
+        private static readonly float[] _weakenUpCoefficients = [1.667f, 1.6f, 1.35f, 1.15f, 1.0f];
 
         public static int GetCarryServiceLevel(int playerLevel)
         {
@@ -21,20 +20,33 @@ namespace MiyakoCarryService.Client.Utils
             };
         }
 
-        public static float ApplyBoostUp(float currentValue, float nativeValue, int carryServiceLevel)
+        public static float GetBoostScaled(float strongValue, int carryServiceLevel)
         {
-            var carryLevel = ClampLevel(carryServiceLevel);
-            var baseValue = Math.Max(currentValue, nativeValue);
-            var scaledValue = baseValue * _boostUpCoefficients[carryLevel - 1];
-            return Math.Max(scaledValue, nativeValue);
+            return GetBoostScaled(strongValue * _boostUpCoefficients[0], strongValue, carryServiceLevel);
         }
 
-        public static float ApplyWeakenUp(float currentValue, float nativeValue, int carryServiceLevel)
+        public static float GetBoostScaled(float weakValue, float strongValue, int carryServiceLevel)
         {
             var carryLevel = ClampLevel(carryServiceLevel);
-            var baseValue = Math.Min(currentValue, nativeValue);
-            var scaledValue = baseValue * _weakenUpCoefficients[carryLevel - 1];
-            return Math.Min(scaledValue, nativeValue);
+            var t = (_boostUpCoefficients[carryLevel - 1] - _boostUpCoefficients[0]) / (_boostUpCoefficients[^1] - _boostUpCoefficients[0]);
+            return Mathf.Lerp(weakValue, strongValue, t);
+        }
+
+        public static float GetWeakenScaled(float strongValue, int carryServiceLevel)
+        {
+            return GetWeakenScaled(strongValue * _weakenUpCoefficients[0], strongValue, carryServiceLevel);
+        }
+
+        public static float GetWeakenScaled(float weakValue, float strongValue, int carryServiceLevel)
+        {
+            var carryLevel = ClampLevel(carryServiceLevel);
+            var w = (_weakenUpCoefficients[carryLevel - 1] - _weakenUpCoefficients[^1]) / (_weakenUpCoefficients[0] - _weakenUpCoefficients[^1]);
+            return Mathf.Lerp(strongValue, weakValue, w);
+        }
+
+        public static int GetWeakenScaledInt(float weakValue, int carryServiceLevel)
+        {
+            return Mathf.RoundToInt(GetWeakenScaled(weakValue, 0f, carryServiceLevel));
         }
 
         private static int ClampLevel(int carryServiceLevel)
