@@ -946,9 +946,9 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Hearing.RESET_TIMER_DIST = 5f;
 
             settings.FileSettings.Shoot.SHOOT_IMMEDIATELY_DIST = BotSettingUtils.GetBoostScaled(300f, carryServiceLevel);
-            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = BotSettingUtils.GetWeakenScaled(0.75f, 0f, carryServiceLevel);
-            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = BotSettingUtils.GetWeakenScaled(2.167f, 1.2f, carryServiceLevel);
-            settings.FileSettings.Shoot.NEXT_SINGLE_SHOT_PAUSE = BotSettingUtils.GetWeakenScaled(0.667f, 0f, carryServiceLevel);
+            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT = 0f;
+            settings.FileSettings.Shoot.WAIT_NEXT_SINGLE_SHOT_LONG_MAX = 1.2f;
+            settings.FileSettings.Shoot.NEXT_SINGLE_SHOT_PAUSE = 0f;
             settings.FileSettings.Shoot.AGS_17_DIST_TO_LEAVE = 20f;
 
             settings.FileSettings.Grenade.NO_RUN_FROM_AI_GRENADES = false;

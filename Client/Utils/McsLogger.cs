@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
+using System.Linq;
 using BepInEx.Logging;
 
 namespace MiyakoCarryService.Client.Utils
@@ -39,64 +40,45 @@ namespace MiyakoCarryService.Client.Utils
 
         private static void Log(LogLevel level, object data)
         {
-            var methodsString = string.Empty;
-            Type declaringType = null;
-
             var stackTrace = new StackTrace(2);
-            var max = GetMaxFrames(level);
-            max = Math.Min(max, stackTrace.FrameCount);
+            var max = Math.Min(GetMaxFrames(level), stackTrace.FrameCount);
 
+            var segments = new List<(Type DeclaringType, string MethodName)>();
             for (int i = 0; i < max; i++)
             {
                 var method = stackTrace.GetFrame(i)?.GetMethod();
-                if (method == null)
+                if (method == null || method.DeclaringType == null || method.DeclaringType == typeof(McsLogger))
                 {
                     continue;
                 }
 
-                if (method.DeclaringType == typeof(McsLogger))
-                {
-                    continue;
-                }
-
-                if (declaringType == null)
-                {
-                    declaringType = method.DeclaringType;
-                }
-
-                if (!string.IsNullOrEmpty(methodsString))
-                {
-                    methodsString = "." + methodsString;
-                }
-
-                methodsString = $"{method.Name}()" + methodsString;
+                segments.Add((method.DeclaringType, method.Name));
             }
 
-            if (declaringType == null)
+            if (segments.Count == 0)
             {
-                declaringType = typeof(McsLogger);
+                segments.Add((typeof(McsLogger), nameof(Log)));
             }
 
-            var result = $"[{level}] [{declaringType.FullName ?? declaringType.Name}.{methodsString}]\n{data}";
+            var chain = string.Join(" -> ", segments.Select((segment, index) =>
+            {
+                var typeName = index == 0 ? segment.DeclaringType.FullName ?? segment.DeclaringType.Name : segment.DeclaringType.Name;
+                return $"{typeName}.{segment.MethodName}()";
+            }).Reverse());
+
+            var result = $"[{chain}]\n{data}";
             _logger.Log(level, result);
         }
 
         private static int GetMaxFrames(LogLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case LogLevel.Debug:
-                case LogLevel.Info:
-                    return 1;
-                case LogLevel.Warning:
-                    return 2;
-                case LogLevel.Error:
-                    return 3;
-                case LogLevel.Fatal:
-                    return 4;
-                default:
-                    return 1;
-            }
+                LogLevel.Warning => 2,
+                LogLevel.Error => 3,
+                LogLevel.Fatal => 4,
+                _ => 1,
+            };
         }
     }
 }
