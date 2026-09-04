@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Server
 {
     public record ModMetadata : IModMetadata, IModBlazorMetadata
     {
-        private const string CurrentVersion = "1.1.2.5";
+        private const string CurrentVersion = "1.1.3.0";
 #if DEBUG
         public string Name { get; init; } = "MiyakoCarryServiceServer DebugBuild";
 #else
