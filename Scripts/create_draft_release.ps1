@@ -1,11 +1,162 @@
 ﻿param(
-    [string]$WorkspaceFolder,
-    [string]$RepoName = "Himesamanoyume/MiyakoCarryService"
+    [string]$WorkspaceFolder = (Split-Path -Parent $PSScriptRoot),
+    [string]$RepoName = "Himesamanoyume/MiyakoCarryService",
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
 
 . (Join-Path $PSScriptRoot "artifact-manifest.ps1")
+
+function ConvertTo-McsTrimmedLines {
+    param(
+        [string[]]$RawLines
+    )
+
+    $trimmed = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $RawLines) {
+        $trimmed.Add($line.TrimEnd())
+    }
+
+    while ($trimmed.Count -gt 0 -and $trimmed[0].Trim().Length -eq 0) {
+        $trimmed.RemoveAt(0)
+    }
+
+    while ($trimmed.Count -gt 0 -and $trimmed[$trimmed.Count - 1].Trim().Length -eq 0) {
+        $trimmed.RemoveAt($trimmed.Count - 1)
+    }
+
+    return $trimmed.ToArray()
+}
+
+function Get-McsChangeLogNotes {
+    param(
+        [string]$ChangeLogPath,
+        [string]$Ver
+    )
+
+    $lines = Get-Content -Path $ChangeLogPath -Encoding UTF8
+
+    $startIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -notmatch '^#{1,6}\s+\S') {
+            continue
+        }
+
+        $headingText = ($lines[$i] -replace '^#{1,6}\s+', '').Trim()
+        if ($headingText -eq $Ver) {
+            $startIndex = $i
+            break
+        }
+    }
+
+    if ($startIndex -lt 0) {
+        return $null
+    }
+
+    $chinese = New-Object System.Collections.Generic.List[string]
+    $english = New-Object System.Collections.Generic.List[string]
+    $inEnglish = $false
+
+    for ($i = $startIndex + 1; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+
+        if ($line -match '^#{1,6}\s+\S') {
+            break
+        }
+
+        if ($line.Trim() -eq '---') {
+            $inEnglish = $true
+            continue
+        }
+
+        if ($inEnglish) {
+            $english.Add($line)
+        }
+        else {
+            $chinese.Add($line)
+        }
+    }
+
+    return @{
+        Chinese = ConvertTo-McsTrimmedLines -RawLines $chinese.ToArray()
+        English = ConvertTo-McsTrimmedLines -RawLines $english.ToArray()
+    }
+}
+
+function ConvertTo-McsGithubReleaseBody {
+    param(
+        [string[]]$ChineseLines,
+        [string[]]$EnglishLines,
+        [string]$VtText
+    )
+
+    $bodyLines = New-Object System.Collections.Generic.List[string]
+    $bodyLines.Add('宫子是我老婆')
+    $bodyLines.Add('')
+    foreach ($line in $ChineseLines) {
+        $bodyLines.Add($line)
+    }
+
+    if ($EnglishLines.Count -gt 0) {
+        $bodyLines.Add('')
+        $bodyLines.Add('---')
+        $bodyLines.Add('')
+        $bodyLines.Add('Miyako is my waifu.')
+        $bodyLines.Add('')
+        foreach ($line in $EnglishLines) {
+            $bodyLines.Add($line)
+        }
+    }
+
+    $bodyText = $bodyLines -join "`n"
+    if (-not [string]::IsNullOrEmpty($VtText)) {
+        $bodyText += "`n`n$VtText"
+    }
+
+    return $bodyText
+}
+
+function ConvertTo-McsForgeText {
+    param(
+        [string[]]$ChineseLines,
+        [string[]]$EnglishLines
+    )
+
+    $forgeLines = New-Object System.Collections.Generic.List[string]
+    $forgeLines.Add('# {.tabset}')
+    $forgeLines.Add('')
+
+    if ($EnglishLines.Count -gt 0) {
+        $forgeLines.Add('## English')
+        $forgeLines.Add('')
+        $forgeLines.Add('Miyako is my waifu.')
+        $forgeLines.Add('')
+        $forgeLines.Add('---')
+        $forgeLines.Add('')
+        foreach ($line in $EnglishLines) {
+            $forgeLines.Add($line)
+        }
+
+        if ($ChineseLines.Count -gt 0) {
+            $forgeLines.Add('')
+        }
+    }
+
+    if ($ChineseLines.Count -gt 0) {
+        $forgeLines.Add('## 中文')
+        $forgeLines.Add('')
+        $forgeLines.Add('宫子是我老婆')
+        $forgeLines.Add('')
+        $forgeLines.Add('---')
+        $forgeLines.Add('')
+        foreach ($line in $ChineseLines) {
+            $forgeLines.Add($line)
+        }
+    }
+
+    return ($forgeLines -join "`n")
+}
 
 $ver = Get-Content "$WorkspaceFolder\version.txt" | Select-Object -First 1
 if (-not $ver) {
@@ -23,21 +174,51 @@ foreach ($artifact in $artifacts) {
     }
 }
 
-$token = $env:GITHUB_TOKEN
-if (-not $token) {
-    Write-Host "Error: GITHUB_TOKEN environment variable not found"
+$changeLogPath = Join-Path $WorkspaceFolder "CHANGELOG.md"
+if (-not (Test-Path $changeLogPath)) {
+    Write-Host "Error: CHANGELOG.md not found at $changeLogPath"
     exit 1
 }
 
-$bodyText = ""
+$notes = Get-McsChangeLogNotes -ChangeLogPath $changeLogPath -Ver $ver
+if ($null -eq $notes) {
+    Write-Host "Error: Could not find changelog section for version $ver in CHANGELOG.md"
+    exit 1
+}
+
+$vtLines = New-Object System.Collections.Generic.List[string]
 foreach ($artifact in $artifacts) {
     $reportPath = Join-Path $WorkspaceFolder $artifact.ReportFile
     if (Test-Path $reportPath) {
         $vtUrl = Get-Content $reportPath | Select-Object -First 1
-        $bodyText += "`n`n$($artifact.Name) VT: $vtUrl"
-    } else {
+        $vtLines.Add("$($artifact.Name) VT: $vtUrl")
+    }
+    else {
         Write-Host "Warning: VT report file not found for $($artifact.Name), releasing without scan link."
     }
+}
+$vtText = $vtLines -join "`n`n"
+
+$bodyText = ConvertTo-McsGithubReleaseBody -ChineseLines $notes.Chinese -EnglishLines $notes.English -VtText $vtText
+
+$forgeText = ConvertTo-McsForgeText -ChineseLines $notes.Chinese -EnglishLines $notes.English
+$forgeTemplatePath = Join-Path $WorkspaceFolder "template.txt"
+$forgeTextCrlf = $forgeText.Replace("`n", "`r`n")
+[System.IO.File]::WriteAllText($forgeTemplatePath, $forgeTextCrlf, (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "Forge release text written to $forgeTemplatePath"
+
+if ($DryRun) {
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "Dry run - release body preview (draft will NOT be created):" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host $bodyText
+    exit 0
+}
+
+$token = $env:GITHUB_TOKEN
+if (-not $token) {
+    Write-Host "Error: GITHUB_TOKEN environment variable not found"
+    exit 1
 }
 
 try {

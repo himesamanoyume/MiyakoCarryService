@@ -428,6 +428,22 @@
                     "create draft release"
                 ],
                 "group": "build"
+            },
+            {
+                "label": "create draft release (dry run)",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/scripts/create_draft_release.ps1",
+                    "-WorkspaceFolder",
+                    "${workspaceFolder}",
+                    "-DryRun"
+                ],
+                "group": "build"
             }
         ]
     },
