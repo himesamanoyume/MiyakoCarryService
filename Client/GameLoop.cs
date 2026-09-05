@@ -353,7 +353,7 @@ namespace MiyakoCarryService.Client
                 if (currentBatch.Count >= batchSize)
                 {
                     batches.Add(currentBatch);
-                    currentBatch.Clear();
+                    currentBatch = new();
                 }
             }
 
