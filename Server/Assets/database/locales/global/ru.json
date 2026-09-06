@@ -123,6 +123,8 @@
     "Mcs/TeammateHighlight Key": "Подцветка наёмников",
     "Mcs/TeammateHighlightHotKey Key": "Кнопка включения подцветки наёмников",
     "Mcs/TeammateHighlightColor Key": "Цвет подцвеки наёмников",
+    "Mcs/DrawDebugInfo Key": "Draw Debug Info",
+    "Mcs/DebugInfoTextSize Key": "Debug Info Text Size",
     "Mcs/EnableSubtitles Key": "Включить субтитры mcs",
     "Mcs/OnFirstContact": "Вижу врага! ",
     "Mcs/Roger": "Принято.",

@@ -16,5 +16,28 @@ namespace MiyakoCarryService.Client.Utils
         public static SColor Gray = new(new Color(.66f, .66f, .66f, 1));
         public static SColor Yellow = new(new Color(.95f, .95f, 0, 1));
         public static SColor White = new(Color.white);
+
+        public static GUIStyle GuiCommonStyle = null;
+
+        public static void CreateGuiStyle()
+        {
+            var baseStyle = new GUIStyle(GUI.skin.box)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                margin = new RectOffset(2, 2, 2, 2),
+                fontStyle = FontStyle.Bold,
+                fontSize = 12,
+                richText = true,
+                border = new RectOffset(0, 0, 0, 0)
+            };
+
+            GuiCommonStyle = new GUIStyle(baseStyle)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fontStyle = FontStyle.Normal,
+                fontSize = 10
+            };
+            GuiCommonStyle.normal.background = null;
+        }
     }
 }

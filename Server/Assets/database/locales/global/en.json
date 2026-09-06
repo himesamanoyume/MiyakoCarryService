@@ -123,6 +123,8 @@
     "Mcs/TeammateHighlight Key": "Teammate Highlight",
     "Mcs/TeammateHighlightHotKey Key": "Teammate Highlight Hotkey",
     "Mcs/TeammateHighlightColor Key": "Teammate Highlight Color",
+    "Mcs/DrawDebugInfo Key": "Draw Debug Info",
+    "Mcs/DebugInfoTextSize Key": "Debug Info Text Size",
     "Mcs/EnableSubtitles Key": "Enable Mcs Subtitles",
     "Mcs/OnFirstContact": "Enemy Contact!",
     "Mcs/Roger": "Roger.",

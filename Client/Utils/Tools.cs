@@ -29,6 +29,44 @@ namespace MiyakoCarryService.Client.Utils
             return stringTemplateId == ItemTpl.DefaultInventory;
         }
 
+        public static bool IsBoss(WildSpawnType wildSpawnType)
+        {
+            return Classification.BossTypes.Contains(wildSpawnType);
+        }
+
+        public static string GetTypeName(WildSpawnType wildSpawnType)
+        {
+            return wildSpawnType switch
+            {
+                WildSpawnType.bossBoar => "Kaban",
+                WildSpawnType.bossBully => "Reshala",
+                WildSpawnType.bossGluhar => "Glukhar",
+                WildSpawnType.bossKilla => "Killa",
+                WildSpawnType.bossKnight => "Knight",
+                WildSpawnType.bossKojaniy => "Shturman",
+                WildSpawnType.bossSanitar => "Sanitar",
+                WildSpawnType.bossTagilla => "Tagilla",
+                WildSpawnType.bossZryachiy => "Zryachiy",
+                WildSpawnType.followerBigPipe => "Big Pipe",
+                WildSpawnType.followerBirdEye => "Bird Eye",
+                WildSpawnType.bossKolontay => "Kollontay",
+                WildSpawnType.bossPartisan => "Partisan",
+                WildSpawnType.shooterBTR => "BTR",
+                WildSpawnType.assault => "Scav",
+                WildSpawnType.pmcBEAR => "Bear",
+                WildSpawnType.pmcUSEC => "Usec",
+                WildSpawnType.pmcBot => "Raider",
+                _ => wildSpawnType.ToString()
+            };
+        }
+
+        public static bool IsInvalidCamera()
+        {
+            var gameloop = GameLoop.Instance;
+            var isOpticAiming = gameloop.OpticCamera != null && gameloop.OpticCamera.gameObject.activeSelf;
+            return gameloop.IsAiming && isOpticAiming ? gameloop.OpticCamera == null : gameloop.MainCamera == null;
+        }
+
         public static bool IsBlockItem(EBlockItemType blockItemType, LootData lootData)
         {
             var itemType = lootData.ItemType;

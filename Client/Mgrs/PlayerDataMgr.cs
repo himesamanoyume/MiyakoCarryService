@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using EFT;
+using EFT.UI.Screens;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -13,6 +14,8 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public class PlayerDataMgr : ItemDataMgr
     {
+        private List<McsBotPlayerData> _visibleDatas = new();
+
         public List<McsBotPlayerData> GetMcsBotPlayerDatas()
         {
             var result = new List<McsBotPlayerData>();
@@ -31,6 +34,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void Start()
         {
             base.Start();
+            MiyakoCarryServicePlugin.DebugTextSize.SettingChanged += OnDebugTextSizeChanged;
         }
 
         public override void OnRaidStarted()
@@ -41,6 +45,14 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(UpdateItemData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
             StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f));
+            if (Draw.GuiCommonStyle == null)
+            {
+                Draw.CreateGuiStyle();
+            }
+            Draw.GuiCommonStyle.fontSize = MiyakoCarryServicePlugin.DebugTextSize.Value;
+            _visibleDatas.Clear();
+            StartCoroutine(ReloadDataVisibleLoop(1f));
+            StartCoroutine(UpdateDataLoop());
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
             {
@@ -256,6 +268,172 @@ namespace MiyakoCarryService.Client.Mgrs
                     yield return null;
                     continue;
                 }
+            }
+        }
+
+        public override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
+            _visibleDatas.Clear();
+        }
+
+        public override void OnMgrDestroy()
+        {
+            base.OnMgrDestroy();
+            MiyakoCarryServicePlugin.DebugTextSize.SettingChanged -= OnDebugTextSizeChanged;
+        }
+
+        private void OnDebugTextSizeChanged(object sender, EventArgs e)
+        {
+            if (Draw.GuiCommonStyle == null)
+            {
+                return;
+            }
+
+            Draw.GuiCommonStyle.fontSize = MiyakoCarryServicePlugin.DebugTextSize.Value;
+            foreach (var mcsBotPlayerData in _visibleDatas)
+            {
+                mcsBotPlayerData.SyncFontSize();
+            }
+        }
+
+        private IEnumerator ReloadDataVisibleLoop(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+
+                if (!Gameloop.IsVaildGameWorld)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                var visibleDatas = new List<McsBotPlayerData>(mcsBotPlayerDatas.Count);
+
+                foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                {
+                    if (mcsBotPlayerData == null)
+                    {
+                        continue;
+                    }
+
+                    var player = mcsBotPlayerData.Player;
+                    if (player == null)
+                    {
+                        mcsBotPlayerData.IsVisible = false;
+                        continue;
+                    }
+
+                    if (!player.HealthController.IsAlive)
+                    {
+                        mcsBotPlayerData.IsVisible = false;
+                        continue;
+                    }
+
+                    if (player.Transform == null)
+                    {
+                        mcsBotPlayerData.IsVisible = false;
+                        continue;
+                    }
+
+                    mcsBotPlayerData.Distance = Mathf.RoundToInt(player.Distance);
+                    var distance = mcsBotPlayerData.Distance;
+
+                    if (distance <= 50 || mcsBotPlayerData.IsInCameraView())
+                    {
+                        mcsBotPlayerData.IsVisible = true;
+                    }
+                    else
+                    {
+                        mcsBotPlayerData.IsVisible = false;
+                        continue;
+                    }
+
+                    if (Tools.IsInvalidCamera())
+                    {
+                        mcsBotPlayerData.IsVisible = false;
+                        continue;
+                    }
+
+                    mcsBotPlayerData.UpdateBaseInfo();
+                    visibleDatas.Add(mcsBotPlayerData);
+                }
+
+                _visibleDatas = visibleDatas;
+            }
+        }
+
+        private IEnumerator UpdateDataLoop()
+        {
+            while (true)
+            {
+                yield return null;
+                if (Gameloop.IsVaildGameWorld)
+                {
+                    foreach (var mcsBotPlayerData in _visibleDatas)
+                    {
+                        mcsBotPlayerData.UpdateData();
+                    }
+                }
+            }
+        }
+
+        private void OnGUI()
+        {
+            if (Draw.GuiCommonStyle == null)
+            {
+                Draw.CreateGuiStyle();
+            }
+
+            if (Event.current != null && Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
+
+            if (!MiyakoCarryServicePlugin.DrawDebugInfo.Value)
+            {
+                return;
+            }
+
+            if (!Gameloop.IsVaildGameWorld)
+            {
+                return;
+            }
+
+            var screenManager = EftScreenManager.Instance;
+            if (screenManager == null)
+            {
+                return;
+            }
+
+            var isCursorLocked = Cursor.lockState is CursorLockMode.Locked or CursorLockMode.Confined;
+            if (!screenManager.CheckCurrentScreen(EEftScreenType.BattleUI) || !isCursorLocked)
+            {
+                return;
+            }
+
+            if (_visibleDatas.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var mcsBotPlayerData in _visibleDatas)
+            {
+                if (mcsBotPlayerData == null)
+                {
+                    continue;
+                }
+
+                if (mcsBotPlayerData.BottomScreenPos.x == -10000 && mcsBotPlayerData.BottomScreenPos.y == -10000)
+                {
+                    continue;
+                }
+
+                mcsBotPlayerData.Color = Draw.Green.Rgb;
+                GUI.Label(mcsBotPlayerData.Rect, mcsBotPlayerData.Info, mcsBotPlayerData.GUIStyle);
             }
         }
     }

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
@@ -58,6 +59,33 @@ namespace MiyakoCarryService.Client.Datas
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
+        public Vector2 BottomScreenPos = Vector2.zero;
+        public string Info = "";
+        public bool IsVisible = false;
+        public Color Color
+        {
+            get;
+            set
+            {
+                if (field != value)
+                {
+                    GUIStyle.normal.textColor = value;
+                }
+                field = value;
+            }
+        }
+        public GUIStyle GUIStyle { get; protected set; }
+        public Rect Rect;
+        public int Distance = 0;
+        public string TeamInfo = "";
+        public string BaseInfo = "";
+        public string WeaponInfo = "";
+        public StringBuilder BaseInfoBuilder = new StringBuilder();
+        public StringBuilder WeaponInfoBuilder = new StringBuilder();
+        private readonly GUIContent _measureContent = new GUIContent();
+        private string _measuredInfo = null;
+        private int _measuredFontSize = -1;
+        private Vector2 _measuredGuiSize = Vector2.zero;
 
         public void SetIntent(string[] exclude = null, params string[] intents)
         {
@@ -153,6 +181,21 @@ namespace MiyakoCarryService.Client.Datas
             {
                 RemoveIntent(Intents.ShouldKeepFormation);
             }
+
+            GUIStyle = new GUIStyle(Draw.GuiCommonStyle);
+
+            var role = player.Profile.Info.Settings.Role;
+            var stringBuilder = new StringBuilder();
+            if (player.Profile.Side == EPlayerSide.Savage)
+            {
+                stringBuilder.Append(Tools.IsBoss(role) ? "BOSS/" : "");
+                stringBuilder.Append(Tools.GetTypeName(role));
+            }
+            else
+            {
+                stringBuilder.Append(player.Profile.Side);
+            }
+            TeamInfo = stringBuilder.ToString();
         }
 
         public void CollectVanishingCurseLootItems()
@@ -318,6 +361,223 @@ namespace MiyakoCarryService.Client.Datas
                 LootDataMgr.LockLootingTargetRootTransform(lootData.RootTransform);
                 LootingTarget = lootData;
                 return;
+            }
+        }
+
+        public void SetInfo()
+        {
+            var fontSize = GUIStyle.fontSize;
+            if (!ReferenceEquals(_measuredInfo, Info) || _measuredFontSize != fontSize)
+            {
+                _measuredInfo = Info;
+                _measuredFontSize = fontSize;
+                _measureContent.text = Info;
+                _measuredGuiSize = GUIStyle.CalcSize(_measureContent);
+            }
+
+            Rect = new Rect(new Vector2(BottomScreenPos.x - (_measuredGuiSize.x / 2), BottomScreenPos.y), _measuredGuiSize);
+        }
+
+        public void SyncFontSize()
+        {
+            GUIStyle.fontSize = Draw.GuiCommonStyle.fontSize;
+        }
+
+        public Vector2 GetBottomScreenPos()
+        {
+            try
+            {
+                BottomScreenPos = WorldPointToVisibleScreenPoint(Player.Position);
+                return BottomScreenPos;
+            }
+            catch
+            {
+                BottomScreenPos = new Vector2(-10000, -10000);
+                return BottomScreenPos;
+            }
+        }
+
+        public bool IsInCameraView()
+        {
+            var pos = GetBottomScreenPos();
+            return pos.x != -10000 && pos.y != -10000;
+        }
+
+        public Vector2 WorldPointToVisibleScreenPoint(Vector3 worldPoint)
+        {
+            var mainCamera = Gameloop.MainCamera;
+            var opticCamera = Gameloop.OpticCamera;
+
+            if (!mainCamera)
+            {
+                return new Vector2(-10000, -10000);
+            }
+
+            var screenWidth = Screen.width;
+            var screenHeight = Screen.height;
+            Vector3 screenPoint;
+
+            var isOpticAiming = Gameloop.OpticCamera != null && Gameloop.OpticCamera.gameObject.activeSelf;
+
+            if (Gameloop.IsAiming && isOpticAiming)
+            {
+                if (!opticCamera)
+                {
+                    return new Vector2(-10000, -10000);
+                }
+
+                screenPoint = opticCamera.WorldToScreenPoint(worldPoint);
+
+                var scopeSize = Mathf.Min(screenWidth, screenHeight) * 0.6766f;
+                var scopeX = (screenWidth - scopeSize) * 0.5f;
+                var scopeY = (screenHeight - scopeSize) * 0.5f;
+
+                var uvX = screenPoint.x / opticCamera.pixelWidth;
+                var uvY = screenPoint.y / opticCamera.pixelHeight;
+
+                screenPoint.x = scopeX + uvX * scopeSize;
+                screenPoint.y = scopeY + (1 - uvY) * scopeSize;
+            }
+            else
+            {
+                screenPoint = mainCamera.WorldToScreenPoint(worldPoint);
+                var scale = screenHeight / (float)mainCamera.scaledPixelHeight;
+                screenPoint.x = screenPoint.x * scale;
+                screenPoint.y = screenHeight - screenPoint.y * scale;
+            }
+
+            if (screenPoint.z <= 0.01f)
+            {
+                return new Vector2(-10000, -10000);
+            }
+            else if (screenPoint.x < -5f || screenPoint.x > screenWidth + 5f)
+            {
+                return new Vector2(-10000, -10000);
+            }
+            else if (screenPoint.y < -5f || screenPoint.y > screenHeight + 5f)
+            {
+                return new Vector2(-10000, -10000);
+            }
+
+            return screenPoint;
+        }
+
+        public void UpdateBaseInfo()
+        {
+            var player = Player;
+            if (player == null)
+            {
+                return;
+            }
+
+            var isAlive = player.HealthController.IsAlive;
+            BaseInfoBuilder.Clear();
+
+            BaseInfoBuilder.Append(player.Profile.McsNickname);
+            BaseInfoBuilder.Append('(').Append(TeamInfo).Append(')');
+            BaseInfoBuilder.Append('\n');
+
+            if (isAlive)
+            {
+                var hp = player.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
+                var hpmax = player.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
+                BaseInfoBuilder.Append(hp).Append('/').Append(hpmax).Append(' ');
+            }
+
+            BaseInfoBuilder.Append('[').Append(Distance).Append("]M");
+
+            try
+            {
+                var botOwner = player.AIData?.BotOwner;
+                if (botOwner?.Memory?.GoalEnemy != null)
+                {
+                    BaseInfoBuilder.Append('\n').Append("GoalEnemy: ").Append(botOwner.Memory.GoalEnemy.Person.Profile.Nickname);
+                    BaseInfoBuilder.Append('\n').Append("GoalEnemyDist: [").Append(botOwner.Memory.GoalEnemy.Distance).Append("] M");
+                }
+
+                var brain = botOwner?.Brain;
+                if (brain?.BaseBrain != null)
+                {
+                    BaseInfoBuilder.Append('\n').Append("Brain: ").Append(brain.BaseBrain.ShortName());
+                    BaseInfoBuilder.Append('\n').Append("Layer: ").Append(brain.ActiveLayerName());
+                    BaseInfoBuilder.Append('\n').Append("EnterBy: ").Append(brain.GetActiveNodeReason());
+                }
+            }
+            catch
+            {
+
+            }
+
+            BaseInfo = BaseInfoBuilder.ToString();
+            UpdateWeaponInfo(isAlive);
+        }
+
+        private void UpdateWeaponInfo(bool isAlive)
+        {
+            if (!isAlive)
+            {
+                WeaponInfo = "";
+                return;
+            }
+
+            var player = Player;
+            if (player?.HandsController?.Item is Weapon weapon)
+            {
+                WeaponInfoBuilder.Clear();
+                var magazine = weapon.GetCurrentMagazine();
+                if (magazine != null)
+                {
+                    WeaponInfoBuilder.Append('\n')
+                                .Append(weapon.ChamberAmmoCount)
+                                .Append('+')
+                                .Append(magazine.Count)
+                                .Append('/')
+                                .Append(magazine.MaxCount)
+                                .Append(' ');
+                }
+                else
+                {
+                    WeaponInfoBuilder.Append('\n')
+                                .Append(weapon.ChamberAmmoCount)
+                                .Append(' ');
+                }
+
+                var weaponName = weapon.ShortName.McsLocalized();
+                if (weaponName == "")
+                {
+                    weaponName = weapon.Name.McsLocalized();
+                }
+
+                WeaponInfoBuilder.Append(weaponName)
+                            .Append(' ')
+                            .Append(weapon.SelectedFireMode.ToString().McsLocalized())
+                            .Append(' ')
+                            .Append(weapon.WeapClass.McsLocalized());
+
+                WeaponInfo = WeaponInfoBuilder.ToString();
+            }
+            else
+            {
+                WeaponInfo = "";
+            }
+        }
+
+        public void UpdateData()
+        {
+            try
+            {
+                GetBottomScreenPos();
+                if (Player == null)
+                {
+                    return;
+                }
+
+                Info = BaseInfo + WeaponInfo;
+                SetInfo();
+            }
+            catch
+            {
+
             }
         }
 

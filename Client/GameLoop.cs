@@ -33,6 +33,7 @@ namespace MiyakoCarryService.Client
         public Shader HighlightShader { get; private set; } = null;
         public Camera MainCamera { get; private set; } = null;
         public Camera OpticCamera { get; private set; } = null;
+        public Player MyPlayer { get; private set; } = null;
         public bool IsGameStarted = false;
         private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
         private HashSet<MongoID> _loadedMcsLeadPlayer = new();
@@ -47,6 +48,19 @@ namespace MiyakoCarryService.Client
         }
 
         public bool IsVaildGameWorld = false;
+
+        public bool IsAiming
+        {
+            get
+            {
+                if (MyPlayer == null || MyPlayer.HandsController == null)
+                {
+                    return false;
+                }
+
+                return MyPlayer.HandsController.IsAiming;
+            }
+        }
 
         public bool CheckVaildGameWorld()
         {
@@ -64,6 +78,15 @@ namespace MiyakoCarryService.Client
             if (!IsVaildGameWorld)
             {
                 return;
+            }
+
+            if (MyPlayer == null)
+            {
+                var mainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                if (mainPlayer != null)
+                {
+                    MyPlayer = mainPlayer;
+                }
             }
 
             if (MainCamera == null)
@@ -273,6 +296,7 @@ namespace MiyakoCarryService.Client
         {
             MainCamera = null;
             OpticCamera = null;
+            MyPlayer = null;
         }
 
         public override void Destroy()

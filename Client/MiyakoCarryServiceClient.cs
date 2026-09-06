@@ -93,6 +93,9 @@ namespace MiyakoCarryService.Client
 
         #region DEBUG
 
+        public static ConfigEntry<bool> DrawDebugInfo;
+        public static ConfigEntry<int> DebugTextSize;
+
 #if DEBUG
         public static ConfigEntry<bool> McsBotPlayerNoDamage;
         public static ConfigEntry<bool> McsBotPlayerKeepAlive;
@@ -575,6 +578,21 @@ namespace MiyakoCarryService.Client
 
             #endregion
             #region DEBUG
+
+            DrawDebugInfo = Register(
+                EConfigType.DEBUG,
+                Locales.DRAWDEBUGINFO_KEY,
+                false,
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
+
+            DebugTextSize = Register(
+                EConfigType.DEBUG,
+                Locales.DEBUGINFOTEXTSIZE_KEY,
+                10,
+                acceptableValues: new AcceptableValueRange<int>(5, 50),
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
 
 #if DEBUG
             McsBotPlayerNoDamage = Register(

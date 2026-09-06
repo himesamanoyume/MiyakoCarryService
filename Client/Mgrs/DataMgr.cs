@@ -12,13 +12,12 @@ namespace MiyakoCarryService.Client.Mgrs
     public abstract class DataMgr : BaseMgr
     {
         protected HashSet<BaseData> _datas;
-        protected McsMgr McsMgr { get; private set; }
+        protected McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public override void Start()
         {
             base.Start();
             _datas = new HashSet<BaseData>();
-            McsMgr = MgrAccessor.Get<McsMgr>();
         }
 
         public HashSet<K> GetDatas<K>() where K : BaseData

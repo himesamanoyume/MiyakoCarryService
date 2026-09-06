@@ -244,5 +244,7 @@ namespace MiyakoCarryService.Client.Utils
         public const string TEAMAIRDROPESCORTCOMMAND_TARGETNAME = "Mcs/TeamAirdropEscortCommand TargetName";
         public const string EXCLUDEORTAKEOVERCOMMAND_NAME = "Mcs/ExcludeOrTakeOverCommand Name";
         public const string EXCLUDEORTAKEOVERCOMMAND_TARGETNAME = "Mcs/ExcludeOrTakeOverCommand TargetName";
+        public const string DRAWDEBUGINFO_KEY = "Mcs/DrawDebugInfo Key";
+        public const string DEBUGINFOTEXTSIZE_KEY = "Mcs/DebugInfoTextSize Key";
     }
 }
