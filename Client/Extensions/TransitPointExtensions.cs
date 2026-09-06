@@ -1,26 +1,19 @@
 
-using System.Runtime.CompilerServices;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Extensions
 {
     public static class TransitPointExtensions
     {
-        private static readonly ConditionalWeakTable<TransitPoint, TransitData> _dataDict = new();
-        
+        private static readonly AttachedTable<TransitPoint, TransitData> _datas = new();
+
         extension(TransitPoint transitPoint)
         {
             public TransitData GetData()
             {
-                return _dataDict.TryGetValue(transitPoint, out TransitData data) ? data : transitPoint.InitData();
-            }
-
-            public TransitData InitData()
-            {
-                var data = new TransitData(transitPoint);
-                _dataDict.Add(transitPoint, data);
-                return data;
+                return _datas.GetOrCreate(transitPoint, key => new TransitData(key));
             }
         }
     }

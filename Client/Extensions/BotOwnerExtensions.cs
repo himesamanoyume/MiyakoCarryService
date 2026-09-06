@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
@@ -19,7 +18,7 @@ namespace MiyakoCarryService.Client.Extensions
 
         private static SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
-        private static readonly ConditionalWeakTable<BotOwner, McsBotPlayerData> _datas = new();
+        private static readonly AttachedTable<BotOwner, McsBotPlayerData> _datas = new();
 
         extension(BotOwner botOwner)
         {
@@ -27,26 +26,27 @@ namespace MiyakoCarryService.Client.Extensions
 
             public McsBotPlayerData GetMcsBotPlayerData()
             {
-                if (_datas.TryGetValue(botOwner, out var mcsBotPlayerData))
+                // 双重判定：
+                // - 确定非 Mcs bot → 缓存负结果（哨兵），后续 O(1) 返回 null
+                // - Mcs bot 数据未创建（LoadItemData 1s 循环尚未扫到）→ 不缓存 null，保持重试；
+                //   数据创建时构造函数 SetMcsBotPlayerData 写入正缓存后自然命中
+                return _datas.GetOrCreate(botOwner, key =>
                 {
-                    return mcsBotPlayerData;
-                }
-
-                var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
-                foreach (var _mcsBotPlayerData in mcsBotPlayerDatas)
-                {
-                    if (_mcsBotPlayerData.BotOwner == botOwner)
+                    var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
+                    foreach (var _mcsBotPlayerData in mcsBotPlayerDatas)
                     {
-                        _datas.Add(botOwner, _mcsBotPlayerData);
-                        return _mcsBotPlayerData;
+                        if (_mcsBotPlayerData.BotOwner == key)
+                        {
+                            return _mcsBotPlayerData;
+                        }
                     }
-                }
-                return null;
+                    return null;
+                }, cacheNegative: !McsMgr.IsMcsBotPlayer(botOwner.ProfileId));
             }
 
             public void SetMcsBotPlayerData(McsBotPlayerData mcsBotPlayerData)
             {
-                _datas.AddOrUpdate(botOwner, mcsBotPlayerData);
+                _datas.Set(botOwner, mcsBotPlayerData);
             }
 
             public void TalkMsg(McsMsg msg)

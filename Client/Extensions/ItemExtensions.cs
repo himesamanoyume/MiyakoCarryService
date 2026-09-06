@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -13,7 +12,7 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class ItemExtensions
     {
-        private static readonly ConditionalWeakTable<Item, ItemData> _datas = new();
+        private static readonly AttachedTable<Item, ItemData> _datas = new();
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
@@ -21,7 +20,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public ItemData GetData()
             {
-                return _datas.TryGetValue(item, out var itemData) ? itemData : item.InitData();
+                return _datas.GetOrCreate(item, key => key.InitData(), cacheNegative: false);
             }
 
             public IEnumerable<ItemData> GetAllDatas()
@@ -88,17 +87,14 @@ namespace MiyakoCarryService.Client.Extensions
                         {
                             var McsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
                             playerData = new McsBotPlayerData(McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId), McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(McsLeadPlayer.ProfileId), player, item);
-                            _datas.Add(item, playerData);
                             return playerData;
                         }
                     }
                     playerData = new PlayerData(player, item);
-                    _datas.Add(item, playerData);
                     return playerData;
                 }
 
                 var lootData = new LootData(item, ContainsBestPrice(item));
-                _datas.Add(item, lootData);
                 return lootData;
             }
 
