@@ -61,8 +61,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// <summary>
         /// 狗斗进入/退出路径距离（米）（SAIN DOGFIGHT_PATH_DIST_START=10 / END=15；进入放宽到 12m 覆盖边缘距离）
         /// </summary>
-        private const float DOGFIGHT_ENTER_SQUARE_DIST = 12f * 12f;
-        private const float DOGFIGHT_EXIT_SQUARE_DIST = 15f * 15f;
+        private const float DOGFIGHT_ENTER_SQUARE_DIST = 15f * 15f;
+        private const float DOGFIGHT_EXIT_SQUARE_DIST = 20f * 20f;
 
         /// <summary>
         /// 狗斗进入条件：刚见敌（秒）或刚被打（秒）（SAIN DOGFIGHT_TIMESINCESEEN_START=1 + ShotMeRecently）
@@ -125,11 +125,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// </summary>
         private const float SEEK_COVER_ARRIVE_SQUARE_DIST = 1.5f * 1.5f;
 
+        /// <summary>
+        /// GoalEnemy 切换锁定窗（秒）：切换目标后此时间内不接受 CalcGoal 的再次切换
+        /// （原生无滞回，靠 3.3s 低频重算防抖；MCS 战斗区 0.1s 提频重算导致多敌高频摆动，视角不停转、瞄准永远被清空）
+        /// </summary>
+        private const float GOAL_SWITCH_LOCK_TIME = 2f;
+
+        /// <summary>
+        /// GoalEnemy 切换优势门限：新敌需比当前敌近此比例以上（0.75=近25%）才允许切换
+        /// </summary>
+        private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
+
         private string _holdGroundEnemyId = null;
         private float _holdGroundStartTime = 0f;
         private float _holdGroundDuration = 0f;
         private float _lastEnemyVisibleTime = -999f;
         private float _coverEnterTime = 0f;
+
+        /// <summary>
+        /// 滞回锁定记录：当前已接受目标的 ProfileId 与接受时刻（外部写入源换目标时视为重新接受）
+        /// </summary>
+        private string _lastAcceptedGoalEnemyId = null;
+        private float _lastAcceptedGoalSetTime = -999f;
 
         #endregion
 
@@ -413,7 +430,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         if (time >= _nextRecalcGoalTime)
                         {
                             _nextRecalcGoalTime = time + 0.1f;
-                            BotOwner.CalcGoal();
+                            UpdateGoalEnemyWithHysteresis(time);
                         }
 
                         goalEnemy = BotOwner.Memory.GoalEnemy;
@@ -515,8 +532,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
 
                         // 狗斗：敌可见且近身（路径≈直线 ≤10m）且刚见敌(1s)/刚被打(2s) → 近身走射缠斗（借鉴 SAIN DogFight）
-                        if (goalEnemy.IsVisible
-                            && haveBullets.Value
+                        if (haveBullets.Value
                             && botToEnemySqrDist <= DOGFIGHT_ENTER_SQUARE_DIST
                             && (time - _lastEnemyVisibleTime <= DOGFIGHT_VISIBLE_WINDOW || time - McsBotPlayerData.LastHitTime <= DOGFIGHT_HIT_WINDOW)
                             && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon))
@@ -1052,6 +1068,87 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 _coverEnterTime = 0f;
             }
+        }
+
+        /// <summary>
+        /// 带滞回的目标重算（多敌防抖）：不调 BotOwner.CalcGoal（它会无条件写 GoalEnemy），
+        /// 改用 EnemyChooser.FindDangerEnemy 只读预判最优敌，通过滞回判定才写入 Memory——
+        /// 拒绝切换时 setter 不触发、瞄准不被清空（原生防抖靠 3.3s 低频重算，MCS 0.1s 提频后必须自带滞回）。
+        /// 规则：当前敌不可见/不可射/死亡时无条件接受新目标；否则需过锁定窗（GOAL_SWITCH_LOCK_TIME）
+        /// 且新敌有距离优势（近 GOAL_SWITCH_ADVANTAGE 比例）。受击追溯选敌在滞回之前执行，不受影响。
+        /// </summary>
+        private void UpdateGoalEnemyWithHysteresis(float time)
+        {
+            // 外部写入源（受击追溯/队长广播）可能已换目标：同步锁定记录（视为重新接受，锁定窗从现在起算）
+            var currentGoalEnemy = BotOwner.Memory.GoalEnemy;
+            var currentGoalId = currentGoalEnemy?.Person?.ProfileId;
+            if (currentGoalId != _lastAcceptedGoalEnemyId)
+            {
+                _lastAcceptedGoalEnemyId = currentGoalId;
+                _lastAcceptedGoalSetTime = time;
+            }
+
+            // 近身危险时对齐原生语义：清目标（原生 CalcGoalForBot 的 HaveCloseDanger 分支）
+            if (BotOwner.Memory.DangerData.HaveCloseDanger)
+            {
+                BotOwner.Memory.GoalEnemy = null;
+                return;
+            }
+
+            var candidateEnemy = BotOwner.EnemyChooser.FindDangerEnemy();
+            if (candidateEnemy == null)
+            {
+                // 无可锁目标：对齐原生语义只在完全无目标时清空（保留丢敌后的压制射击等状态依赖）
+                if (BotOwner.Memory.GoalEnemy == null && BotOwner.Memory.HaveGoal)
+                {
+                    BotOwner.Memory.GoalTarget.Clear();
+                }
+                return;
+            }
+
+            // 无当前目标或候选与当前相同 → 直接接受（首次锁定无滞回）
+            if (currentGoalEnemy == null || currentGoalEnemy == candidateEnemy)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            var currentPerson = currentGoalEnemy.Person;
+            var currentAlive = currentPerson != null && currentPerson.HealthController != null && currentPerson.HealthController.IsAlive;
+            var currentStillViable = currentAlive && currentGoalEnemy.IsVisible && currentGoalEnemy.CanShoot;
+
+            // 当前敌已失效（死亡/不可见/不可射）→ 接受新目标
+            if (!currentStillViable)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            // 锁定窗内：不接受切换
+            if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < GOAL_SWITCH_LOCK_TIME)
+            {
+                return;
+            }
+
+            // 锁定窗外：新敌须有距离优势（近 25% 以上）才允许切换
+            if (candidateEnemy.IsVisible && candidateEnemy.CanShoot
+                && candidateEnemy.Distance <= currentGoalEnemy.Distance * GOAL_SWITCH_ADVANTAGE)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            // 拒绝切换：保持当前目标（不写 Memory，setter 不触发，瞄准保留）
+        }
+
+        /// <summary>
+        /// 接受新目标：写入 Memory 并刷新滞回锁定记录
+        /// </summary>
+        private void AcceptGoalEnemy(EnemyInfo goalEnemy, float time)
+        {
+            BotOwner.Memory.GoalEnemy = goalEnemy;
+            _lastAcceptedGoalEnemyId = goalEnemy?.Person?.ProfileId;
+            _lastAcceptedGoalSetTime = time;
         }
 
         /// <summary>

@@ -55,10 +55,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private const float ENEMY_CLOSE_SQUARE_DIST = 8f * 8f;
 
         /// <summary>
-        /// 站定开火段时长范围（秒）：近距+移动中瞄准时间被 TIME_COEF_IF_MOVE 拉长，须留足瞄准完成窗口
+        /// 站定开火段时长下限（秒）：最短开火窗口，保证瞄准系统至少有一次完成机会
         /// </summary>
         private const float SHOOT_DURATION_MIN = 0.4f;
-        private const float SHOOT_DURATION_MAX = 0.8f;
+
+        /// <summary>
+        /// 站定开火段时长上限兜底（秒）：Settings 不可用时使用
+        /// </summary>
+        private const float SHOOT_DURATION_MAX_FALLBACK = 0.8f;
 
         /// <summary>
         /// 后撤走位段时长范围（秒）
@@ -147,10 +151,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
 
-            // 敌可见且近身 → 切站定开火段
+            // 敌可见且近身 → 切站定开火段（时长上限从护航级别瞄准参数派生，随级别自适应）
             if (goalEnemy.IsVisible && botToEnemySqrDist <= ENEMY_CLOSE_SQUARE_DIST)
             {
-                SwitchToShootingPhase(Random.Range(SHOOT_DURATION_MIN, SHOOT_DURATION_MAX));
+                SwitchToShootingPhase(Random.Range(SHOOT_DURATION_MIN, CalcShootDurationMax()));
                 BotOwner.StopMove();
                 return;
             }
@@ -222,6 +226,22 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 BotOwner.Steering.LookToMovingDirection();
             }
+        }
+
+        /// <summary>
+        /// 站定开火段时长上限：从护航级别瞄准参数派生（MAX_AIM_TIME 为引擎完成瞄准的基准上限，
+        /// ×2 + 0.2s 保证站定段始终 ≥ 完成一次瞄准所需时间——低级别护航瞄准慢则站得更久），
+        /// Settings 缺失时兜底 0.8f
+        /// </summary>
+        private float CalcShootDurationMax()
+        {
+            var aimingSettings = BotOwner?.Settings?.FileSettings?.Aiming;
+            if (aimingSettings != null)
+            {
+                return aimingSettings.MAX_AIM_TIME * 2f + 0.2f;
+            }
+
+            return SHOOT_DURATION_MAX_FALLBACK;
         }
 
         /// <summary>

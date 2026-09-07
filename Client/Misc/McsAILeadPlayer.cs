@@ -11,6 +11,11 @@ namespace MiyakoCarryService.Client.Misc
 {
     public class McsAILeadPlayer : AIBossPlayer
     {
+        /// <summary>
+        /// 队长报点覆盖门限：新报点敌需比 bot 当前目标近此比例以上（0.75=近25%）才覆盖（与 McsTestBrainLayer 滞回同参数）
+        /// </summary>
+        private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
+
         public McsBotPlayerConfig McsBotPlayerConfig
         {
             get
@@ -114,11 +119,43 @@ namespace MiyakoCarryService.Client.Misc
 
                 if (botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {
+                    // 队长报点弱化：bot 当前目标仍存活且可见可射时，新报点敌须有 25% 距离优势才覆盖（多敌防抖，
+                    // 与 McsTestBrainLayer 的 GoalEnemy 切换滞回同参数）；无目标/目标失效时立即接管报点
+                    if (ShouldKeepCurrentGoalEnemy(botOwner, enemyInfo))
+                    {
+                        continue;
+                    }
+
                     enemyInfo.IsVisible = true;
                     botOwner.Memory.GoalEnemy = enemyInfo;
                     enemyInfo.PriorityIndex = 0;
                 }
             }
+        }
+
+        /// <summary>
+        /// 队长报点是否应让位于 bot 当前目标（目标仍有效且报点敌无距离优势）
+        /// </summary>
+        private bool ShouldKeepCurrentGoalEnemy(BotOwner botOwner, EnemyInfo reportedEnemy)
+        {
+            var currentGoalEnemy = botOwner.Memory.GoalEnemy;
+            if (currentGoalEnemy == null || currentGoalEnemy == reportedEnemy)
+            {
+                return false;
+            }
+
+            var currentPerson = currentGoalEnemy.Person;
+            if (currentPerson == null || currentPerson.HealthController == null || !currentPerson.HealthController.IsAlive)
+            {
+                return false;
+            }
+
+            if (!currentGoalEnemy.IsVisible || !currentGoalEnemy.CanShoot)
+            {
+                return false;
+            }
+
+            return reportedEnemy.Distance > currentGoalEnemy.Distance * GOAL_SWITCH_ADVANTAGE;
         }
 
         public EnemyInfo GetClosestEnemy(List<EnemyInfo> enemiesInfos)
