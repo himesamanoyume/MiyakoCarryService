@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.UI.Screens;
 using MiyakoCarryService.Client.Datas;
@@ -61,47 +62,50 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
+        /// <summary>
+        /// 每秒采样护航 bot 的 Brain/Layer/Reason 供 BigSurvey 分局报告。
+        /// 数据驱动：主机执行 Bot 运算才有 Brain 数据，副机没有——首次检测到本局有有效 Brain 数据时
+        /// 才创建对局记录（EnsureCurrentRaid 绑定 GameWorld 实例 ID，脚本引擎 raid 中重载同局延续不分裂）。
+        /// </summary>
         public IEnumerator RecordAgentInfo(float time)
         {
-            if (Tools.IsHost)
+            var waitTime = new WaitForSeconds(time);
+            while (true)
             {
-                var waitTime = new WaitForSeconds(time);
-                while (true)
+                yield return waitTime;
+                if (Gameloop.IsVaildGameWorld)
                 {
-                    yield return waitTime;
-                    if (Gameloop.IsVaildGameWorld)
+                    try
                     {
-                        try
+                        var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                        foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
                         {
-                            var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
-                            foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                            var brain = mcsBotPlayerData.BotOwner?.Brain;
+                            var baseBrain = brain?.BaseBrain;
+                            if (baseBrain == null)
                             {
-                                var brain = mcsBotPlayerData.BotOwner?.Brain;
-                                if (brain == null)
-                                {
-                                    continue;
-                                }
+                                continue;
+                            }
 
-                                var baseBrain = brain?.BaseBrain;
-                                if (baseBrain == null)
-                                {
-                                    continue;
-                                }
+                            // 首次检测到本局有 Brain 数据 → 创建/切换对局记录（副机无 Bot 运算永远不触发）
+                            if (!MiyakoCarryServicePlugin.LogBuffer.EnsureCurrentRaid(Singleton<GameWorld>.Instance.GetInstanceID()))
+                            {
+                                continue;
+                            }
 
-                                MiyakoCarryServicePlugin.LogBuffer.AddUsedBrain(baseBrain.ShortName());
-                                MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
-                                MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedBrain(baseBrain.ShortName());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedLayer(brain.ActiveLayerName());
+                            MiyakoCarryServicePlugin.LogBuffer.AddUsedReason(brain.GetActiveNodeReason());
 
-                                if (!LayerUtils.IsMcsBotPlayerInjected(mcsBotPlayerData.BotOwner))
-                                {
-                                    BrainMgr.InjectLayers(baseBrain);
-                                }
+                            if (!LayerUtils.IsMcsBotPlayerInjected(mcsBotPlayerData.BotOwner))
+                            {
+                                BrainMgr.InjectLayers(baseBrain);
                             }
                         }
-                        catch
-                        {
+                    }
+                    catch
+                    {
 
-                        }
                     }
                 }
             }

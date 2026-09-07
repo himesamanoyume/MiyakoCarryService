@@ -119,9 +119,7 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
                                 .ToArray())).Append("\n")
                         .Append("- All Server Mod:\n")
                         .Append(string.Join(", ", McsRequestHandler.GetLoadedServerMods().Values.Select(x => $"{x.Name}({x.Version})"))).Append('\n')
-                        .Append("- Used Brain:").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedBrains().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
-                        .Append("- Used Layer:").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedLayers().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
-                        .Append("- Used Reason:").Append('\n').Append(string.Join(", ", MiyakoCarryServicePlugin.LogBuffer.GetUsedReasons().Select(kvp => $"{kvp.Key}({kvp.Value}s)"))).Append('\n')
+                        .Append(BuildRaidUsedInfoSections()).Append('\n')
                         .Append("- Vaild Trader Info: ").Append(GameLoop.Instance.Session.Traders.Any(t => t.Id == MiyakoCarryServicePlugin.MiyakoTraderId)).Append('\n')
                         .Append("- Total Exception: ").Append(MiyakoCarryServicePlugin.LogBuffer.GetLogCount).Append("\n");
 
@@ -161,6 +159,46 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
             }
             ____newInformation = [.. newList];
         }
+    }
+
+    /// <summary>
+    /// 构建按对局分组的 Brain/Layer/Reason 报告（战局信息为表头，其下并列三个分支；新局在前；
+    /// 计数为采样次数，每秒每护航 +1）。无任何对局记录时仅输出 Non-Host（非主机无 Bot 运算、无数据）
+    /// </summary>
+    private static string BuildRaidUsedInfoSections()
+    {
+        var sectionsBuilder = new StringBuilder();
+        sectionsBuilder.Append("- Raid Info:");
+
+        var raidUsedInfos = MiyakoCarryServicePlugin.LogBuffer.GetRaidUsedInfos();
+        if (raidUsedInfos.Count == 0)
+        {
+            sectionsBuilder.Append('\n').Append("  Non-Host");
+            return sectionsBuilder.ToString();
+        }
+
+        foreach (var raidUsedInfo in raidUsedInfos)
+        {
+            sectionsBuilder.Append('\n').Append($"  [Raid#{raidUsedInfo.RaidIndex} {raidUsedInfo.LocationId}]:")
+                .Append('\n').Append("  - Used Brain: ").Append(FormatRaidUsedEntries(raidUsedInfo.UsedBrains))
+                .Append('\n').Append("  - Used Layer: ").Append(FormatRaidUsedEntries(raidUsedInfo.UsedLayers))
+                .Append('\n').Append("  - Used Reason: ").Append(FormatRaidUsedEntries(raidUsedInfo.UsedReasons));
+        }
+
+        return sectionsBuilder.ToString();
+    }
+
+    /// <summary>
+    /// 格式化单分支的采样条目（空分支显示 Non-Host）
+    /// </summary>
+    private static string FormatRaidUsedEntries(IEnumerable<KeyValuePair<string, int>> entries)
+    {
+        if (entries == null || !entries.Any())
+        {
+            return "Non-Host";
+        }
+
+        return string.Join(", ", entries.Select(kvp => $"{kvp.Key}({kvp.Value})"));
     }
 
     public static void SetBigSurveyButtonInteractable(bool interactable, string customTooltip = null)
