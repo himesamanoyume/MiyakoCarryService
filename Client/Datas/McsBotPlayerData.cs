@@ -59,6 +59,77 @@ namespace MiyakoCarryService.Client.Datas
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
+
+        #region 受击与压制状态（战斗拟人化）
+
+        /// <summary>
+        /// 最近一次受击时间（Time.time），-999f 表示从未受击
+        /// </summary>
+        public float LastHitTime = -999f;
+
+        /// <summary>
+        /// 最近一次打到我的敌人（用于受击追溯选敌与压制射击判断）
+        /// </summary>
+        public Player LastHitShooter = null;
+
+        /// <summary>
+        /// 最近一次被弹着点逼近的时间（Time.time），-999f 表示从未发生
+        /// </summary>
+        public float LastShotAtTime = -999f;
+
+        /// <summary>
+        /// 压制值：受击/被弹着点逼近时累积，随时间衰减（参照 SAIN CheckAddSuppression 轻量版）
+        /// </summary>
+        public float SuppressionNumber = 0f;
+
+        /// <summary>
+        /// 重度压制：禁止冲脸类进攻决策，强制优先转掩体
+        /// </summary>
+        public bool IsHeavySuppressed => SuppressionNumber >= 3f;
+
+        /// <summary>
+        /// 中度压制：影响进攻性决策的软阈值
+        /// </summary>
+        public bool IsMediumSuppressed => SuppressionNumber >= 1f;
+
+        private const float SUPPRESSION_DECAY_PER_SECOND = 0.75f;
+        private const float SUPPRESSION_MAX = 6f;
+        private const float SUPPRESSION_DECAY_MIN_INTERVAL = 0.25f;
+        private float _lastSuppressionDecayTime = 0f;
+
+        /// <summary>
+        /// 压制值随时间线性衰减（惰性计算：按两次调用的时间差衰减，调用频率无关）
+        /// </summary>
+        public void UpdateSuppressionDecay()
+        {
+            var time = Time.time;
+            var delta = time - _lastSuppressionDecayTime;
+            _lastSuppressionDecayTime = time;
+            if (delta < SUPPRESSION_DECAY_MIN_INTERVAL || SuppressionNumber <= 0f)
+            {
+                return;
+            }
+
+            SuppressionNumber = Mathf.Max(0f, SuppressionNumber - SUPPRESSION_DECAY_PER_SECOND * delta);
+        }
+
+        /// <summary>
+        /// 受击时累积压制值（按伤害量级缩放）
+        /// </summary>
+        public void AddSuppression(float damage)
+        {
+            SuppressionNumber = Mathf.Min(SUPPRESSION_MAX, SuppressionNumber + Mathf.Clamp(damage / 20f, 0.5f, 2f));
+        }
+
+        /// <summary>
+        /// 弹着点逼近（未直接命中）时累积压制值
+        /// </summary>
+        public void AddSuppressionFromNearMiss()
+        {
+            SuppressionNumber = Mathf.Min(SUPPRESSION_MAX, SuppressionNumber + 0.15f);
+        }
+
+        #endregion
         public Vector2 BottomScreenPos = Vector2.zero;
         public string Info = "";
         public bool IsVisible = false;

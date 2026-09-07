@@ -12,6 +12,7 @@ using System;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -363,6 +364,56 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         protected async Task InteractionDelay(float time)
         {
             await Task.Delay(TimeSpan.FromMilliseconds(time * 1000f));
+        }
+
+        /// <summary>
+        /// 朝指定点瞄准并在瞄准就绪后扣动扳机（压制射击/走射/探头射击共用的轻量射击驱动）
+        /// 对齐原版 Aiming.FindPointToShoot 行为：SetTarget 后必须调 AimingManager.NodeUpdate() 推进瞄准状态机，
+        /// 否则 Status 永远停在 Aiming、IsReady 永远 false，bot 会一直举枪但永不开火。
+        /// </summary>
+        protected bool AimAndShootAtPoint(Vector3 targetPos)
+        {
+            if (BotOwner.Memory.GoalEnemy == null || BotOwner.WeaponManager.IsMelee)
+            {
+                return false;
+            }
+
+            BotOwner.Steering.LookToPoint(targetPos);
+            var currentAiming = BotOwner.AimingManager.CurrentAiming;
+            if (currentAiming == null)
+            {
+                return false;
+            }
+
+            currentAiming.SetTarget(targetPos);
+            BotOwner.AimingManager.NodeUpdate();
+            if (!currentAiming.IsReady)
+            {
+                return false;
+            }
+
+            // 友军安全检查（对齐原版 Shoot 节点：弹道命中友军则停火）
+            var weaponRootPos = BotOwner.GetPlayer.PlayerBones.WeaponRoot.position;
+            if (BotOwner.ShootData.CheckFriendlyFire(weaponRootPos, currentAiming.RealTargetPoint))
+            {
+                BotOwner.ShootData.EndShoot();
+                return false;
+            }
+
+            return BotOwner.ShootData.Shoot();
+        }
+
+        /// <summary>
+        /// 侧身（对齐原版 BotTilt.Set：±5f 满幅；force=false 平滑过渡，与原版各 MovementState 行为一致）
+        /// </summary>
+        /// <param name="direction">-1 左 / 1 右 / 0 回正</param>
+        protected void TiltToSide(int direction)
+        {
+            var movementContext = BotOwner.GetPlayer?.MovementContext;
+            if (movementContext != null)
+            {
+                movementContext.SetTilt(direction * 5f, false);
+            }
         }
     }
 }

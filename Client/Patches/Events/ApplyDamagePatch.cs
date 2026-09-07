@@ -10,6 +10,7 @@ using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -66,12 +67,25 @@ namespace MiyakoCarryService.Client.Patches.Events
                 return;
             }
 
+            var attacker = damageInfo.Player?.iPlayer;
+
+            // 受击反应（战斗拟人化）：MCS bot 被非自己人攻击时记录受击状态，供试验层压制累积/受击追溯选敌使用
+            // 放在 damage<=0 检查之前：DEBUG 免伤配置下仍保留受击反馈（拟人感不因免伤而消失）
+            if (attacker != null && attacker is Player attackerPlayer && McsMgr.IsMcsBotPlayer(___Player.ProfileId) && !McsMgr.IsMcsBotPlayer(attackerPlayer.ProfileId))
+            {
+                var mcsBotPlayerData = ___Player.AIData.BotOwner.GetMcsBotPlayerData();
+                if (mcsBotPlayerData != null)
+                {
+                    mcsBotPlayerData.LastHitTime = Time.time;
+                    mcsBotPlayerData.LastHitShooter = attackerPlayer;
+                    mcsBotPlayerData.AddSuppression(damage);
+                }
+            }
+
             if (damage <= 0)
             {
                 return;
             }
-
-            var attacker = damageInfo.Player?.iPlayer;
 
             if (attacker == null)
             {

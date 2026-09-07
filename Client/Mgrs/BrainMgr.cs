@@ -43,6 +43,8 @@ namespace MiyakoCarryService.Client.Mgrs
             // LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 186);
             // LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 187);
             LayerUtils.RegisterCustomLayer(typeof(McsBrainLayer), 200);
+            // 试验层：承载拟人化战斗行为改造，优先级高于 McsBrainLayer，开关关闭时回退 McsBrainLayer（见 McsTestBrainLayer.IsActive）
+            LayerUtils.RegisterCustomLayer(typeof(McsTestBrainLayer), 201);
         }
 
         public override void OnRaidEnded()
