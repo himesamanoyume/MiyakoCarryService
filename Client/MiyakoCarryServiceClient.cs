@@ -182,6 +182,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new BotsControllerInitPatch());
             _patches.Add(new AddEnemyPatch());
             _patches.Add(new MakingShotPatch());
+            _patches.Add(new BotDoorOpenerUpdateStatusPatch());
             _patches.Add(new TraderClassConstructorPatch());
             _patches.Add(new TraderControllerClassConstructorPatch());
             _patches.Add(new TraderControllerClassAddItemEventInvokePatch());

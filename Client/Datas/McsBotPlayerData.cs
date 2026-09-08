@@ -65,12 +65,12 @@ namespace MiyakoCarryService.Client.Datas
         #region 快速开门状态（移动提速）
 
         /// <summary>
-        /// 当前快速开门的 Door（碰撞忽略窗口内非空；窗口过期由移动路径刷新与 PlayerDataMgr 保险循环收尾）
+        /// 当前快速开门的 Door（窗口内非空；窗口过期由层内驱动与 PlayerDataMgr 保险循环收尾）
         /// </summary>
         public Door FastOpenDoor = null;
 
         /// <summary>
-        /// 快速开门碰撞忽略窗口截止时间（Time.time）
+        /// 快速开门窗口截止时间（Time.time）
         /// </summary>
         public float FastOpenDoorEndTime = 0f;
 
@@ -80,7 +80,8 @@ namespace MiyakoCarryService.Client.Datas
         public Dictionary<string, float> FastOpenDoorCooldowns = new();
 
         /// <summary>
-        /// 收尾快速开门窗口：窗口过期或门已销毁时恢复门碰撞（IgnoreInteractionCollision false 恢复该玩家全部被忽略碰撞）
+        /// 收尾快速开门窗口：窗口过期或门已销毁时清理状态（v4 已移除碰撞忽略，无需恢复门碰撞；
+        /// 字段仅用于防窗口内重复触发与诊断）
         /// </summary>
         public void TryFinishFastOpenDoor()
         {
@@ -95,11 +96,6 @@ namespace MiyakoCarryService.Client.Datas
                 return;
             }
 
-            var player = BotOwner?.GetPlayer;
-            if (player != null && fastOpenDoor && fastOpenDoor.Collider != null)
-            {
-                player.MovementContext.IgnoreInteractionCollision(fastOpenDoor.Collider, false);
-            }
             FastOpenDoor = null;
         }
 

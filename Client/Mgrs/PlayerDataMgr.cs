@@ -343,8 +343,8 @@ namespace MiyakoCarryService.Client.Mgrs
         }
 
         /// <summary>
-        /// 快速开门窗口保险循环（1s）：移动路径刷新收尾（TryFastOpenDoorOnPath 内调用 TryFinishFastOpenDoor）
-        /// 之外的兜底——战斗开始后移动刷新停止时，过期窗口照样恢复门碰撞，防门碰撞被永久忽略；
+        /// 快速开门窗口保险循环（1s）：层内窗口驱动（IsCurrentActionEnding 内 UpdateFastOpenDoor）收尾
+        /// 之外的兜底——层失活/战斗期窗口驱动停止时，过期窗口照样恢复门碰撞，防门碰撞被永久忽略；
         /// 顺带修剪冷却字典的过期条目
         /// </summary>
         private IEnumerator CheckFastOpenDoorLoop(float time)
