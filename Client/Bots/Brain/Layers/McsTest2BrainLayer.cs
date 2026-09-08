@@ -18,6 +18,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     /// 2) 滞回高威胁豁免：高威胁敌作为候选绕过锁定窗/距离优势，作为当前目标且存活时不被非高威胁候选替换；
     /// 3) 中威胁就近接管：无目标/目标失效时从老板视野威胁列表（McsAILeadPlayer.LeadVisibleEnemies）就近接管；
     /// 4) 威胁收回让渡：威胁窗口内不向 SAIN 让渡（IsActive 保持激活），确保 SAIN 区内威胁接管不被 SAIN 决策冲掉。
+    /// 威胁中断应战（移动/任务类 End 威胁中断 + fightActive 威胁保持 + EndHeal Cancel）在基类 McsBaseLayer
+    /// 统一实现，200/201/202 三层共享，本层不再覆写。
     /// DEBUG 开关 EnableTest2BrainLayer 关闭时 IsActive 返回 false，自动回退 McsTestBrainLayer(201)，便于前后对比。
     /// </summary>
     public class McsTest2BrainLayer : McsBaseLayer
@@ -220,7 +222,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
-                var fightActive = goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE);
+                // 战斗区激活 = CanShootNow 窗口 || 威胁逼近（基类 IsApproachingThreat：受击/近身/近距对峙/老板高威胁）——
+                // 威胁保持解决两类场景：长途冲刺中被伏击（CanShootNow 常 false，闸门从未打开）与
+                // 共享 GoalEnemy 但看不到敌的护航（IsVisible 被视觉 tick 重置后闸门过期）。
+                // 不要求当前有 GoalEnemy：被伏击时先开闸，滞回/受击追溯随后在闸内选目标；
+                // 无候选时落 FightNoEnemy 站桩防御（优于闷头跑）。
+                // 移动/任务类动作的威胁中断在基类各 End 函数统一实现（三层共享）
+                var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE))
+                    || IsApproachingThreat();
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 var isEnemyPosLost = IsEnemyPosLost();
                 mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);

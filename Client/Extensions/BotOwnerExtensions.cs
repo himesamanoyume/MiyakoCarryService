@@ -283,36 +283,6 @@ namespace MiyakoCarryService.Client.Extensions
                 return currentSlot;
             }
 
-            public void CollectAmmoOrBackupAmmoCount(out int total)
-            {
-                total = 0;
-                var equipment = botOwner.GetPlayer.InventoryController.Inventory.Equipment;
-
-                if (equipment.HasWeaponInSlot(EquipmentSlot.FirstPrimaryWeapon))
-                {
-                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.FirstPrimaryWeapon, out var _total))
-                    {
-                        total += _total;
-                    }
-                }
-
-                if (equipment.HasWeaponInSlot(EquipmentSlot.SecondPrimaryWeapon))
-                {
-                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.SecondPrimaryWeapon, out var _total))
-                    {
-                        total += _total;
-                    }
-                }
-
-                if (equipment.HasWeaponInSlot(EquipmentSlot.Holster))
-                {
-                    if (botOwner.HasAmmoOrBackupAmmo(EquipmentSlot.Holster, out var _total))
-                    {
-                        total += _total;
-                    }
-                }
-            }
-
             public float McsGetCurrentMagAmmoRatio()
             {
                 var selector = botOwner.WeaponManager?.Selector;

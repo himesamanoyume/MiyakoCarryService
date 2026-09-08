@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EFT;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
@@ -151,12 +152,17 @@ namespace MiyakoCarryService.Client.Datas
         public string TeamInfo = "";
         public string BaseInfo = "";
         public string WeaponInfo = "";
+        public string EffectsInfo = "";
+        public string SuppliesInfo = "";
         public StringBuilder BaseInfoBuilder = new StringBuilder();
         public StringBuilder WeaponInfoBuilder = new StringBuilder();
+        public StringBuilder EffectsInfoBuilder = new StringBuilder();
+        public StringBuilder SuppliesInfoBuilder = new StringBuilder();
         private readonly GUIContent _measureContent = new GUIContent();
         private string _measuredInfo = null;
         private int _measuredFontSize = -1;
         private Vector2 _measuredGuiSize = Vector2.zero;
+        private readonly List<string> _effectEntries = new();
 
         public void SetIntent(string[] exclude = null, params string[] intents)
         {
@@ -581,6 +587,8 @@ namespace MiyakoCarryService.Client.Datas
 
             BaseInfo = BaseInfoBuilder.ToString();
             UpdateWeaponInfo(isAlive);
+            UpdateEffectsInfo(isAlive);
+            UpdateSuppliesInfo(isAlive);
         }
 
         private void UpdateWeaponInfo(bool isAlive)
@@ -633,6 +641,101 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
+        /// <summary>
+        /// 刷新状态效果部分：与汇报自身状态指令同链路（全量活跃效果 - 噪音过滤 - 本地化），
+        /// 每行最多 2 个效果换行，避免单行文本过宽；无效果时省略整行
+        /// </summary>
+        private void UpdateEffectsInfo(bool isAlive)
+        {
+            EffectsInfo = "";
+            if (!isAlive)
+            {
+                return;
+            }
+
+            var player = Player;
+            if (player?.HealthController == null)
+            {
+                return;
+            }
+
+            _effectEntries.Clear();
+            try
+            {
+                foreach (var activeEffect in player.HealthController.GetAllActiveEffects())
+                {
+                    if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
+                    {
+                        continue;
+                    }
+
+                    var effectType = HealthHelper.EffectName(activeEffect);
+                    if (string.IsNullOrEmpty(effectType))
+                    {
+                        continue;
+                    }
+
+                    _effectEntries.Add(activeEffect.BodyPart.ToString().McsLocalized() + " " + effectType.McsLocalized());
+                }
+            }
+            catch
+            {
+
+            }
+
+            if (_effectEntries.Count == 0)
+            {
+                return;
+            }
+
+            EffectsInfoBuilder.Clear();
+            EffectsInfoBuilder.Append("\nEffects: ");
+            for (int i = 0; i < _effectEntries.Count; i++)
+            {
+                if (i > 0)
+                {
+                    EffectsInfoBuilder.Append(i % 2 == 0 ? ",\n" : ", ");
+                }
+                EffectsInfoBuilder.Append(_effectEntries[i]);
+            }
+
+            EffectsInfo = EffectsInfoBuilder.ToString();
+        }
+
+        /// <summary>
+        /// 刷新物资部分：当前手持武器的完整弹药/弹匣储备 + 三类医疗品数量；
+        /// 手持非枪械（刀/医疗品/空手）时省略弹药行
+        /// </summary>
+        private void UpdateSuppliesInfo(bool isAlive)
+        {
+            SuppliesInfo = "";
+            if (!isAlive)
+            {
+                return;
+            }
+
+            var player = Player;
+            if (player?.InventoryController == null)
+            {
+                return;
+            }
+
+            SuppliesInfoBuilder.Clear();
+
+            if (player.HandsController?.Item is Weapon currentWeapon
+                && CollectWeaponAmmoAndMagCount(currentWeapon, out var ammoCount, out var magCount))
+            {
+                SuppliesInfoBuilder.Append("\nAmmo: ").Append(ammoCount).Append(" Mag: ").Append(magCount);
+            }
+
+            CountMedSupplies(out var firstAidCount, out var surgicalKitCount, out var splintCount);
+            SuppliesInfoBuilder.Append("\nFirstAid: ").Append(firstAidCount)
+                        .Append(" Splint: ").Append(splintCount)
+                        .Append("\nSurgicalKit: ").Append(surgicalKitCount);
+
+            SuppliesInfo = SuppliesInfoBuilder.ToString();
+        }
+
         public void UpdateData()
         {
             try
@@ -643,7 +746,7 @@ namespace MiyakoCarryService.Client.Datas
                     return;
                 }
 
-                Info = BaseInfo + WeaponInfo;
+                Info = BaseInfo + WeaponInfo + EffectsInfo + SuppliesInfo;
                 SetInfo();
             }
             catch
@@ -719,13 +822,12 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             var weaponManager = botOwner.WeaponManager;
-            var inventoryController = player.InventoryController;
-            if (weaponManager == null || inventoryController == null)
+            if (weaponManager == null || player.InventoryController == null)
             {
                 return _cachedEmergencyLootNeed;
             }
 
-            if (NeedMagazine(weaponManager.CurrentWeapon, inventoryController))
+            if (NeedMagazine(weaponManager.CurrentWeapon))
             {
                 _cachedEmergencyLootNeed = ELootNeedType.Magazine;
                 return _cachedEmergencyLootNeed;
@@ -751,15 +853,9 @@ namespace MiyakoCarryService.Client.Datas
             return GetEmergencyLootNeed() != ELootNeedType.None;
         }
 
-        private bool NeedMagazine(Weapon weapon, InventoryController inventoryController)
+        private bool NeedMagazine(Weapon weapon)
         {
-            if (weapon == null)
-            {
-                return false;
-            }
-
-            var magazineSlot = weapon.GetMagazineSlot();
-            if (magazineSlot == null)
+            if (weapon == null || weapon.GetMagazineSlot() == null)
             {
                 return false;
             }
@@ -769,23 +865,9 @@ namespace MiyakoCarryService.Client.Datas
                 return false;
             }
 
-            var compatibleMagCount = 0;
-            if (weapon.GetCurrentMagazine() != null)
-            {
-                compatibleMagCount++;
-            }
-
-            var magazineList = new List<Magazine>();
-            inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, magazineList, null, null);
-            foreach (var magazine in magazineList)
-            {
-                if (magazineSlot.CanAccept(magazine))
-                {
-                    compatibleMagCount++;
-                }
-            }
-
-            return compatibleMagCount < REQUIRED_MAG_COUNT;
+            // 与 ESP 弹匣计数同口径：枪上弹匣 + 装备栏兼容弹匣
+            CollectWeaponAmmoAndMagCount(weapon, out _, out var magCount);
+            return magCount < REQUIRED_MAG_COUNT;
         }
 
         private bool NeedAmmo(BotOwner botOwner)
@@ -888,6 +970,135 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             return DEFAULT_MAG_CAPACITY;
+        }
+
+        /// <summary>
+        /// 统计当前手持武器的完整弹药/弹匣储备（手持非枪械或数据未就绪时返回 false）
+        /// </summary>
+        public bool CollectCurrentWeaponAmmoAndMagCount(out int ammoCount, out int magCount)
+        {
+            ammoCount = 0;
+            magCount = 0;
+
+            var player = Player;
+            if (player?.HandsController?.Item is not Weapon weapon)
+            {
+                return false;
+            }
+
+            return CollectWeaponAmmoAndMagCount(weapon, out ammoCount, out magCount);
+        }
+
+        /// <summary>
+        /// 统计指定武器的完整弹药储备：膛内 + 枪上弹匣 + 装备栏兼容弹匣（含其内弹药）+ 兼容散装弹药；
+        /// 装备栏枚举只取槽位容器顶层，弹匣内弹药不会作为散装弹药重复计数
+        /// </summary>
+        public bool CollectWeaponAmmoAndMagCount(Weapon weapon, out int ammoCount, out int magCount)
+        {
+            ammoCount = 0;
+            magCount = 0;
+
+            var player = Player;
+            var inventoryController = player?.InventoryController;
+            if (weapon == null || inventoryController == null)
+            {
+                return false;
+            }
+
+            ammoCount += weapon.ChamberAmmoCount;
+
+            var magazineSlot = weapon.GetMagazineSlot();
+            if (magazineSlot != null)
+            {
+                var currentMagazine = weapon.GetCurrentMagazine();
+                if (currentMagazine != null)
+                {
+                    magCount++;
+                    ammoCount += currentMagazine.Count;
+                }
+
+                var magazineList = new List<Magazine>();
+                inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, magazineList, null, null);
+                foreach (var magazine in magazineList)
+                {
+                    if (magazine != null && magazineSlot.CanAccept(magazine))
+                    {
+                        magCount++;
+                        ammoCount += magazine.Count;
+                    }
+                }
+            }
+
+            var ammoList = new List<Ammo>();
+            inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, ammoList, null, null);
+            foreach (var ammo in ammoList)
+            {
+                if (ammo != null && ammo.StackObjectsCount > 0 && IsAmmoCompatible(ammo, weapon))
+                {
+                    ammoCount += ammo.StackObjectsCount;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 统计三类医疗品数量（按物品个数，互斥归属）：
+        /// 手术包（含 DestroyedPart，附带骨折消除不影响归属） > 急救（含大/小出血效果、MedKit 类或含回血健康效果） > 夹板（含 Fracture）
+        /// </summary>
+        public void CountMedSupplies(out int firstAidCount, out int surgicalKitCount, out int splintCount)
+        {
+            firstAidCount = 0;
+            surgicalKitCount = 0;
+            splintCount = 0;
+
+            var player = Player;
+            if (player?.InventoryController == null)
+            {
+                return;
+            }
+
+            var medsList = new List<Meds>();
+            player.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, medsList);
+            foreach (var meds in medsList)
+            {
+                if (meds == null)
+                {
+                    continue;
+                }
+
+                var healthEffectsComponent = meds.HealthEffectsComponent;
+                if (healthEffectsComponent == null)
+                {
+                    continue;
+                }
+
+                var damageEffects = healthEffectsComponent.DamageEffects;
+                if (damageEffects == null)
+                {
+                    continue;
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.DestroyedPart))
+                {
+                    surgicalKitCount++;
+                    continue;
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.HeavyBleeding)
+                    || damageEffects.ContainsKey(EDamageEffectType.LightBleeding)
+                    || meds is MedKit
+                    || (healthEffectsComponent.HealthEffects != null && healthEffectsComponent.HealthEffects.ContainsKey(EHealthFactorType.Health)))
+                {
+                    firstAidCount++;
+                    continue;
+                }
+
+                if (damageEffects.ContainsKey(EDamageEffectType.Fracture))
+                {
+                    splintCount++;
+                }
+            }
         }
 
         public HashSet<EDamageEffectType> GetMissingMedEffects()
@@ -1098,6 +1309,14 @@ namespace MiyakoCarryService.Client.Datas
                 return false;
             }
 
+            return IsAmmoCompatible(ammo, weapon);
+        }
+
+        /// <summary>
+        /// 弹药是否可被该武器使用：任一膛室可装填，或当前弹匣弹药过滤器可装填（与紧急搜刮判定同口径）
+        /// </summary>
+        private bool IsAmmoCompatible(Ammo ammo, Weapon weapon)
+        {
             if (weapon.Chambers != null)
             {
                 foreach (var chamber in weapon.Chambers)

@@ -72,6 +72,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public const float WEAPON_SWITCH_COOLDOWN = 1f;
         public const float MELEE_CHECK_INTERVAL = 0.5f;
 
+        /// <summary>
+        /// 威胁中断-受击窗口（秒）：窗口内被打过视为威胁逼近（与原生 CheckMedsToStop 信号同源；
+        /// 不依赖 GoalEnemy——被伏击时先开战斗闸门，滞回/受击追溯随后选目标）
+        /// </summary>
+        public const float THREAT_INTERRUPT_HIT_WINDOW = 2f;
+
+        /// <summary>
+        /// 威胁中断-近身距离（米）：GoalEnemy 距自身此距离内视为威胁逼近（原生 CheckMedsToStop 同款 10m）
+        /// </summary>
+        public const float THREAT_INTERRUPT_CLOSE_DIST = 10f;
+
+        /// <summary>
+        /// 威胁中断-近距威胁距离（米）：GoalEnemy 距自身此距离内且可见/正盯我时视为威胁逼近（原生同款 30m）
+        /// </summary>
+        public const float THREAT_INTERRUPT_NEAR_DIST = 30f;
+
+        /// <summary>
+        /// 威胁中断-被盯判定时长（秒）：敌盯我此时长视为威胁（原生 IsEnemyLookAtMeForPeriod 同参数）
+        /// </summary>
+        public const float THREAT_INTERRUPT_LOOK_PERIOD = 2f;
+
         public McsBotPlayerData McsBotPlayerData
         {
             get
@@ -177,6 +198,69 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(GoToBtrLogic), EndGoToBtr);
         }
 
+        /// <summary>
+        /// 威胁逼近判定（战斗区保持与移动/任务类动作中断共用，信号与原生治疗中断 CheckMedsToStop 同源）：
+        /// ① 2s 内被打（无 GoalEnemy 依赖——被伏击时先开闸，滞回/受击追溯随后选目标）；
+        /// ② GoalEnemy 存活且距自身 &lt;10m（近身险情）；
+        /// ③ GoalEnemy 存活且距自身 &lt;30m 且（可见/正盯我 2s）（近距对峙）；
+        /// ④ 老板高威胁（GetLeadThreatEnemy，威胁窗口内攻击过/正瞄老板）——全员保持战斗，集火参与。
+        /// 消费方：McsBrainLayer/McsTestBrainLayer/McsTest2BrainLayer 的 fightActive 威胁保持，
+        /// 以及基类各移动/任务类 End 的威胁中断（威胁时结束当前动作 → 重评 → 战斗区接住；
+        /// 战斗类/避险类 End 不接——前者本就是应战，后者跑雷/跑炮击/闪光不可被打断）
+        /// </summary>
+        protected bool IsApproachingThreat()
+        {
+            var time = Time.time;
+
+            // ① 受击威胁：最近被打（护航 bot 自身，ApplyDamagePatch 记录）
+            var mcsBotPlayerData = McsBotPlayerData;
+            if (mcsBotPlayerData != null)
+            {
+                var lastHitShooter = mcsBotPlayerData.LastHitShooter;
+                if (lastHitShooter != null
+                    && lastHitShooter.HealthController != null
+                    && lastHitShooter.HealthController.IsAlive
+                    && time - mcsBotPlayerData.LastHitTime <= THREAT_INTERRUPT_HIT_WINDOW)
+                {
+                    return true;
+                }
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+
+            // ②/③ 目标威胁：按距离分级判定
+            if (goalEnemy != null && goalEnemy.Person != null && goalEnemy.Person.HealthController.IsAlive)
+            {
+                var enemyDistance = goalEnemy.Distance;
+                if (enemyDistance < THREAT_INTERRUPT_CLOSE_DIST)
+                {
+                    return true;
+                }
+
+                if (enemyDistance < THREAT_INTERRUPT_NEAR_DIST)
+                {
+                    if (goalEnemy.IsVisible)
+                    {
+                        return true;
+                    }
+
+                    BotOwner.EnemyLookData.DoCheck();
+                    if (BotOwner.EnemyLookData.IsEnemyLookAtMeForPeriod(THREAT_INTERRUPT_LOOK_PERIOD))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // ④ 老板威胁：威胁窗口内全员保持战斗（集火参与），不再依赖自身能否看见该敌
+            if (mcsBotPlayerData?.McsAILeadPlayer?.GetLeadThreatEnemy() != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public virtual bool EndHeal()
         {
             if (!BotOwner.Medecine.Using)
@@ -184,8 +268,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BaseLogicLayer.CheckMedsToStop(BotOwner))
+            // 威胁中断（IsApproachingThreat 含被打/老板高威胁，覆盖原生 CheckMedsToStop 的 10m/30m 场景）：
+            // 中断时取消当前急救（对齐原生 AssaultHaveEnemyLayer.EndHeal 语义，避免 Medecine.Using 残留）
+            if (IsApproachingThreat() || BaseLogicLayer.CheckMedsToStop(BotOwner))
             {
+                BotOwner.Medecine.FirstAid.CancelCurrent();
                 _currentHealTimes = 0;
                 return true;
             }
@@ -238,6 +325,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHealStimulators()
         {
+            // 威胁中断：打兴奋剂是战术增益非生存必需，威胁逼近时中断应战
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (BotOwner.Medecine.Stimulators.Using)
             {
                 return false;
@@ -449,6 +542,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToPoint()
         {
+            // 威胁中断：指定点前往途中威胁逼近时结束动作重评应战（intent/TargetPos 保留，战后自动续走）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -521,6 +620,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndEscortToPointByWay()
         {
+            // 威胁中断：跟随/护送途中威胁逼近时结束动作重评应战（长途跟随闷头走的主场景；
+            // intent/TargetPos 保留，战后自动落回本分区续走）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -609,6 +715,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToProtect()
         {
+            // 威胁中断：保护点前往途中威胁逼近时结束动作重评应战
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -834,6 +946,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToLootTarget()
         {
+            // 威胁中断：拾取目标前往途中威胁逼近时结束动作重评应战（LootingTarget/锁保留，战后续走）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -1109,6 +1227,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToExfiltrationPoint()
         {
+            // 威胁中断：撤离点前往途中威胁逼近时结束动作重评应战
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -1661,6 +1785,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndDeactivateMine()
         {
+            // 威胁中断：拆雷途中威胁逼近时结束动作重评应战（雷未拆完战后可续）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (BotOwner.Mover._lastTimePosChanged + 1f < Time.time)
             {
                 CheckStuck();
@@ -1757,6 +1887,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToExcuteProxyAction()
         {
+            // 威胁中断：代捡/任务/交互/固定武器前往途中威胁逼近时结束动作重评应战
+            // （intent/TargetPos/ProxyTargetId 保留，战后自动续走）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;
@@ -1771,6 +1908,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndDropTargetLootLogic()
         {
+            // 威胁中断：丢弃战利品途中威胁逼近时结束动作重评应战（物品未丢完战后可续）
+            if (IsApproachingThreat())
+            {
+                return true;
+            }
+
             if (McsBotPlayerData == null)
             {
                 return true;

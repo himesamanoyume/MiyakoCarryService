@@ -687,8 +687,11 @@ namespace MiyakoCarryService.Client.Mgrs
             var botOwner = mcsBotPlayer.AIData.BotOwner;
             var health = botOwner.HealthController.GetBodyPartHealth(EBodyPart.Common);
             var key1 = $"{(int)health.Current}/{health.Maximum}";
-            botOwner.CollectAmmoOrBackupAmmoCount(out var total);
-            var key2 = total.ToString();
+            // 当前手持武器的完整弹药储备（膛内+弹匣+散装兼容弹药）；手持非枪械或数据未就绪时报 0
+            var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
+            var key2 = mcsBotPlayerData != null && mcsBotPlayerData.CollectCurrentWeaponAmmoAndMagCount(out var total, out _)
+                ? total.ToString()
+                : "0";
             var allActiveEffects = botOwner.HealthController.GetAllActiveEffects();
             var healthStates = new List<HealthState>();
             foreach (var activeEffect in allActiveEffects)

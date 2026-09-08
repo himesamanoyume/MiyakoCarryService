@@ -109,7 +109,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
-                var fightActive = goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE);
+                // 战斗区激活 = CanShootNow 窗口 || 威胁逼近（受击/近身/近距对峙/老板高威胁）：
+                // 配合基类移动/任务类 End 的威胁中断——中断重评后战斗区必须能接住，否则回任务区再次中断造成抖动；
+                // 长途冲刺被伏击（CanShootNow 常 false）时由威胁保持开闸，恢复选敌链路（滞回/受击追溯）
+                var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE))
+                    || IsApproachingThreat();
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 var isEnemyPosLost = IsEnemyPosLost();
                 mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
