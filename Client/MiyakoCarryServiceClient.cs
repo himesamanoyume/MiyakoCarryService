@@ -101,6 +101,7 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> McsBotPlayerKeepAlive;
         public static ConfigEntry<bool> EnableMcsLayer;
         public static ConfigEntry<bool> EnableTestBrainLayer;
+        public static ConfigEntry<bool> EnableTest2BrainLayer;
 #endif
 
         #endregion
@@ -182,6 +183,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new MatchMakerAcceptScreenReadyPatch());
             _patches.Add(new BotsControllerInitPatch());
             _patches.Add(new AddEnemyPatch());
+            _patches.Add(new MakingShotPatch());
             _patches.Add(new TraderClassConstructorPatch());
             _patches.Add(new TraderControllerClassConstructorPatch());
             _patches.Add(new TraderControllerClassAddItemEventInvokePatch());
@@ -620,6 +622,13 @@ namespace MiyakoCarryService.Client
             EnableTestBrainLayer = Register(
                 EConfigType.DEBUG,
                 "启用试验层级",
+                true,
+                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+            );
+
+            EnableTest2BrainLayer = Register(
+                EConfigType.DEBUG,
+                "启用试验层级2",
                 true,
                 customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
             );

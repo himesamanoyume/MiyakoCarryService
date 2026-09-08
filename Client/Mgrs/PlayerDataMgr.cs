@@ -8,6 +8,7 @@ using EFT;
 using EFT.UI.Screens;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -198,6 +199,11 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
+        /// <summary>
+        /// 正瞄老板扫描的最大距离（米）：超距的敌即使瞄着老板也不视为高威胁（狙不到的威胁优先级让位给实战敌情）
+        /// </summary>
+        private const float AIMING_SCAN_MAX_SQUARE_DIST = 300f * 300f;
+
         private IEnumerator CheckMcsLeadPlayerSeenEnemiesLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
@@ -213,6 +219,24 @@ namespace MiyakoCarryService.Client.Mgrs
                         var leadPlayer = mcsAILeadPlayer.Player() as Player;
                         var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
                         var playerDatas = GetDatas<PlayerData>();
+
+                        // 对敌优先级扩展（McsTest2BrainLayer）：老板视野威胁列表 + 多目标仲裁报点；
+                        // 关闭时维持原行为（IsEnemy 前置 + 每轮只报第一个通过筛选的）
+                        var isThreatPriorityEnabled = McsAILeadPlayer.IsThreatPriorityEnabled;
+                        var leadVisibleEnemies = mcsAILeadPlayer.LeadVisibleEnemies;
+                        if (isThreatPriorityEnabled)
+                        {
+                            leadVisibleEnemies.Clear();
+                        }
+
+                        Player reportTarget = null;
+                        var reportSqrDistance = float.MaxValue;
+
+                        // 正瞄老板扫描（威胁上下文，独立于视野过滤——敌可能在老板视野外/45°外瞄着老板）：
+                        // 敌 AI 的 GoalEnemy 是老板本人且当前可见/可射/正在射击老板，取距老板最近
+                        Player aimingTarget = null;
+                        var aimingSqrDistance = float.MaxValue;
+
                         foreach (var playerData in playerDatas)
                         {
                             var target = playerData.Player;
@@ -232,7 +256,37 @@ namespace MiyakoCarryService.Client.Mgrs
                                 continue;
                             }
 
-                            if (!leadPlayer.BotsGroup.IsEnemy(target))
+                            if (isThreatPriorityEnabled)
+                            {
+                                var targetBotOwner = target.AIData?.BotOwner;
+                                if (targetBotOwner != null && targetBotOwner.BotState != EBotState.NonActive)
+                                {
+                                    var targetGoalEnemy = targetBotOwner.Memory?.GoalEnemy;
+                                    if (targetGoalEnemy?.Person != null
+                                        && targetGoalEnemy.Person.ProfileId == leadPlayer.ProfileId
+                                        && (targetGoalEnemy.IsVisible || targetGoalEnemy.CanShoot || targetBotOwner.ShootData?.Shooting == true))
+                                    {
+                                        var aimSqrDistance = target.Position.McsSqrDistance(leadPlayer.Position);
+                                        if (aimSqrDistance < AIMING_SCAN_MAX_SQUARE_DIST && aimSqrDistance < aimingSqrDistance)
+                                        {
+                                            aimingTarget = target;
+                                            aimingSqrDistance = aimSqrDistance;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 扩展开启：去除 IsEnemy 前置——敌人尚未入组时老板看见也报（CalcGoalEnemy 内 AddEnemy 入组），
+                            // 让"老板视野中已出现敌人"的新敌能立即报点；Scav 老板对同阵营中立目标仍保持不报
+                            // （避免注视中立 Scav 即触发组敌对升级）
+                            if (isThreatPriorityEnabled)
+                            {
+                                if (leadPlayer.Side == EPlayerSide.Savage && target.Side == EPlayerSide.Savage && !leadPlayer.BotsGroup.IsEnemy(target))
+                                {
+                                    continue;
+                                }
+                            }
+                            else if (!leadPlayer.BotsGroup.IsEnemy(target))
                             {
                                 continue;
                             }
@@ -257,10 +311,48 @@ namespace MiyakoCarryService.Client.Mgrs
                                 LayersMaskController.HighPolyWithTerrainMask
                             );
 
-                            if (!blocked)
+                            if (blocked)
+                            {
+                                continue;
+                            }
+
+                            if (isThreatPriorityEnabled)
+                            {
+                                // 威胁列表：老板视野内全部可见敌（循环后按距老板升序排序，供护航中威胁就近接管）
+                                leadVisibleEnemies.Add(target);
+
+                                // 报点目标仲裁：距老板最近的可见敌（替代原"第一个通过筛选的"）
+                                if (sqrDistance < reportSqrDistance)
+                                {
+                                    reportTarget = target;
+                                    reportSqrDistance = sqrDistance;
+                                }
+                            }
+                            else
                             {
                                 mcsAILeadPlayer.CalcGoalEnemy(target);
                                 break;
+                            }
+                        }
+
+                        if (isThreatPriorityEnabled)
+                        {
+                            if (leadVisibleEnemies.Count > 1)
+                            {
+                                leadVisibleEnemies.Sort((a, b) => a.Position.McsSqrDistance(leadPlayer.Position).CompareTo(b.Position.McsSqrDistance(leadPlayer.Position)));
+                            }
+
+                            if (reportTarget != null)
+                            {
+                                mcsAILeadPlayer.CalcGoalEnemy(reportTarget);
+                            }
+
+                            // 正瞄威胁记录 + 报点：正瞄老板的最近敌记入威胁上下文（威胁窗口内与攻击者同级，
+                            // 层内强制接管/滞回豁免/SAIN 收回让渡生效），并即时报点（高威胁豁免弱化直写）
+                            if (aimingTarget != null)
+                            {
+                                mcsAILeadPlayer.MarkLeadAimingEnemy(aimingTarget);
+                                mcsAILeadPlayer.CalcGoalEnemy(aimingTarget);
                             }
                         }
 

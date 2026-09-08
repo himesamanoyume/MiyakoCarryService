@@ -489,33 +489,50 @@ namespace MiyakoCarryService.Client
 
                 leadPlayer.BeingHitAction += (DamageInfo damageInfo, EBodyPart bodyPart, float value) =>
                 {
-                    if (damageInfo.Player?.AIData?.BotOwner == null)
+                    var attackerIPlayer = damageInfo.Player?.iPlayer;
+                    if (attackerIPlayer == null || !attackerIPlayer.HealthController.IsAlive || mcsMgr.IsMcsBotPlayer(attackerIPlayer.ProfileId))
                     {
                         return;
                     }
 
-                    var enemyBotOwner = damageInfo.Player.AIData.BotOwner;
-
-                    if (mcsMgr.IsMcsBotPlayer(enemyBotOwner.ProfileId))
+                    if (leadPlayer.BotsGroup == null)
                     {
                         return;
                     }
 
-                    if (leadPlayer.BotsGroup != null)
+                    var mcsBotPlayers = mcsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
+
+                    if (mcsBotPlayers == null)
                     {
-                        var mcsBotPlayers = mcsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
-
-                        if (mcsBotPlayers == null)
-                        {
-                            return;
-                        }
-
-                        var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
-                        if (mcsBotPlayer?.AIData?.BotOwner?.BotFollower?.BossToFollow is McsAILeadPlayer mcsAILeadPlayer)
-                        {
-                            mcsAILeadPlayer.CalcGoalEnemy(enemyBotOwner.GetPlayer);
-                        }
+                        return;
                     }
+
+                    var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
+                    if (mcsBotPlayer?.AIData?.BotOwner?.BotFollower?.BossToFollow is not McsAILeadPlayer mcsAILeadPlayer)
+                    {
+                        return;
+                    }
+
+                    // 攻击者 Player 实体解析（DamageInfo.Player 是 IObserverToPlayerBridge，经 ProfileId 反查；
+                    // 不再要求 AIData.BotOwner 存在，补 Fika 玩家攻击老板不报点的缺口）
+                    var attacker = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(attackerIPlayer.ProfileId);
+                    if (attacker == null)
+                    {
+                        return;
+                    }
+
+                    // 老板威胁上下文：记录最近攻击老板的敌（AI 与玩家攻击者均记录），
+                    // 供护航全员强制接管（McsTest2BrainLayer 高威胁接管）
+                    mcsAILeadPlayer.MarkLeadAttacker(attacker);
+
+                    // 报点节流：连发武器连续命中时避免高频全队遍历（威胁上下文记录不受节流影响）
+                    if (Time.time - mcsAILeadPlayer.LastLeadReportTime < McsAILeadPlayer.LEAD_HIT_REPORT_INTERVAL)
+                    {
+                        return;
+                    }
+                    mcsAILeadPlayer.LastLeadReportTime = Time.time;
+
+                    mcsAILeadPlayer.CalcGoalEnemy(attacker);
                 };
 
                 var leadPlayerPos = leadPlayer.Position;
