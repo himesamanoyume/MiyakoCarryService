@@ -42,12 +42,8 @@ namespace MiyakoCarryService.Client.Mgrs
             // LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 185);
             // LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 186);
             // LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 187);
+            // 护航战斗大脑层：拟人化战斗行为 + 对敌优先级 + 威胁中断应战（基类共享），DEBUG 开关 EnableMcsLayer 可一键失活
             LayerUtils.RegisterCustomLayer(typeof(McsBrainLayer), 200);
-            // 试验层：承载拟人化战斗行为改造，优先级高于 McsBrainLayer，开关关闭时回退 McsBrainLayer（见 McsTestBrainLayer.IsActive）
-            LayerUtils.RegisterCustomLayer(typeof(McsTestBrainLayer), 201);
-            // 试验层2：承载对敌优先级改造（高威胁接管/滞回豁免/中威胁就近接管），优先级高于 McsTestBrainLayer，
-            // 开关关闭时回退 McsTestBrainLayer（见 McsTest2BrainLayer.IsActive）
-            LayerUtils.RegisterCustomLayer(typeof(McsTest2BrainLayer), 202);
         }
 
         public override void OnRaidEnded()

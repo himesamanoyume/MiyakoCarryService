@@ -7,6 +7,7 @@ using System.Text;
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using EFT.Interactive;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
@@ -60,6 +61,49 @@ namespace MiyakoCarryService.Client.Datas
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
+
+        #region 快速开门状态（移动提速）
+
+        /// <summary>
+        /// 当前快速开门的 Door（碰撞忽略窗口内非空；窗口过期由移动路径刷新与 PlayerDataMgr 保险循环收尾）
+        /// </summary>
+        public Door FastOpenDoor = null;
+
+        /// <summary>
+        /// 快速开门碰撞忽略窗口截止时间（Time.time）
+        /// </summary>
+        public float FastOpenDoorEndTime = 0f;
+
+        /// <summary>
+        /// 每扇门（Id）下次允许快速开门的时间（Time.time），防同一扇门反复开关抖动
+        /// </summary>
+        public Dictionary<string, float> FastOpenDoorCooldowns = new();
+
+        /// <summary>
+        /// 收尾快速开门窗口：窗口过期或门已销毁时恢复门碰撞（IgnoreInteractionCollision false 恢复该玩家全部被忽略碰撞）
+        /// </summary>
+        public void TryFinishFastOpenDoor()
+        {
+            var fastOpenDoor = FastOpenDoor;
+            if (fastOpenDoor == null)
+            {
+                return;
+            }
+
+            if (Time.time <= FastOpenDoorEndTime && fastOpenDoor)
+            {
+                return;
+            }
+
+            var player = BotOwner?.GetPlayer;
+            if (player != null && fastOpenDoor && fastOpenDoor.Collider != null)
+            {
+                player.MovementContext.IgnoreInteractionCollision(fastOpenDoor.Collider, false);
+            }
+            FastOpenDoor = null;
+        }
+
+        #endregion
 
         #region 受击与压制状态（战斗拟人化）
 

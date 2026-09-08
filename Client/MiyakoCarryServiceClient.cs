@@ -100,8 +100,6 @@ namespace MiyakoCarryService.Client
         public static ConfigEntry<bool> McsBotPlayerNoDamage;
         public static ConfigEntry<bool> McsBotPlayerKeepAlive;
         public static ConfigEntry<bool> EnableMcsLayer;
-        public static ConfigEntry<bool> EnableTestBrainLayer;
-        public static ConfigEntry<bool> EnableTest2BrainLayer;
 #endif
 
         #endregion
@@ -615,20 +613,6 @@ namespace MiyakoCarryService.Client
             EnableMcsLayer = Register(
                 EConfigType.DEBUG,
                 "启用Mcs层级",
-                true,
-                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
-            );
-
-            EnableTestBrainLayer = Register(
-                EConfigType.DEBUG,
-                "启用试验层级",
-                true,
-                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
-            );
-
-            EnableTest2BrainLayer = Register(
-                EConfigType.DEBUG,
-                "启用试验层级2",
                 true,
                 customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
             );

@@ -93,6 +93,32 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// </summary>
         public const float THREAT_INTERRUPT_LOOK_PERIOD = 2f;
 
+        /// <summary>
+        /// 快速开门-路径检测距离（米）：门洞中点距自身此距离内才做路径求交检测（原生 wantPass 2m 的前瞻放宽）
+        /// </summary>
+        public const float FAST_OPEN_DOOR_PATH_CHECK_DIST = 12f;
+
+        /// <summary>
+        /// 快速开门-碰撞忽略窗口（秒）：指令直开后无视门碰撞的时长（覆盖门摆动 ~0.5-2s + 通过余量；
+        /// SAIN 用 1.0/1.25s 交互窗口，此值偏保守防半开门碰撞）
+        /// </summary>
+        public const float FAST_OPEN_DOOR_WINDOW = 2.5f;
+
+        /// <summary>
+        /// 快速开门-同门冷却（秒）：同一扇门两次快速开门的最小间隔（SAIN DOOR_INTERACTION_INTERVAL 同款），防反复开关抖动
+        /// </summary>
+        public const float FAST_OPEN_DOOR_COOLDOWN = 3.5f;
+
+        /// <summary>
+        /// 快速开门-路径求交前段长度（米）：只检测路径累计此长度内的段（与移动目标取点距离 15m 对齐）
+        /// </summary>
+        public const float FAST_OPEN_DOOR_PATH_LOOKAHEAD = 15f;
+
+        /// <summary>
+        /// 快速开门-楼层防护高差（米）：路径段与门洞中点高差超过此值视为跨层，不做开门判定
+        /// </summary>
+        public const float FAST_OPEN_DOOR_FLOOR_HEIGHT_DIFF = 1.5f;
+
         public McsBotPlayerData McsBotPlayerData
         {
             get
@@ -204,7 +230,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         /// ② GoalEnemy 存活且距自身 &lt;10m（近身险情）；
         /// ③ GoalEnemy 存活且距自身 &lt;30m 且（可见/正盯我 2s）（近距对峙）；
         /// ④ 老板高威胁（GetLeadThreatEnemy，威胁窗口内攻击过/正瞄老板）——全员保持战斗，集火参与。
-        /// 消费方：McsBrainLayer/McsTestBrainLayer/McsTest2BrainLayer 的 fightActive 威胁保持，
+        /// 消费方：McsBrainLayer 的 fightActive 威胁保持，
         /// 以及基类各移动/任务类 End 的威胁中断（威胁时结束当前动作 → 重评 → 战斗区接住；
         /// 战斗类/避险类 End 不接——前者本就是应战，后者跑雷/跑炮击/闪光不可被打断）
         /// </summary>
@@ -819,6 +845,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void TrySolveStuck()
         {
+            // 卡门兜底：原地卡住且最近门（≤2m）为关闭态时直接快速开门（覆盖路径求交漏检：
+            // 目标点恰在门前不远处时穿门线判定可能失败；门不可翻越，翻越解法对门无效）
+            if (TryFastOpenNearestDoor())
+            {
+                return;
+            }
+
             if (_nextVaultCheckTime < Time.time)
             {
                 _nextVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
@@ -830,6 +863,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 卡门兜底开门：最近体素门（GetNearestDoor ≤2m）为关闭态且无冷却时快速开门
+        /// </summary>
+        private bool TryFastOpenNearestDoor()
+        {
+            var mcsBotPlayerData = McsBotPlayerData;
+            if (mcsBotPlayerData == null || BotOwner.Memory.HaveEnemy)
+            {
+                return false;
+            }
+
+            var nearestDoorLink = BotOwner.NearDoorData.GetNearestDoor();
+            var door = nearestDoorLink?.Door;
+            if (door == null || door.DoorState != EDoorState.Shut)
+            {
+                return false;
+            }
+
+            var time = Time.time;
+            if (mcsBotPlayerData.FastOpenDoorCooldowns.TryGetValue(door.Id, out var cooldownTime) && time < cooldownTime)
+            {
+                return false;
+            }
+
+            FastOpenDoor(door, time);
+            return true;
         }
 
         public virtual bool EndHoldPosition()
@@ -1745,7 +1806,141 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             _lastCalcCorners = navMeshPath.corners;
             corners = _lastCalcCorners;
             _lastCanRunResult = true;
+
+            // 快速开门：新路径产出时检测前段是否穿过关闭门（跟随/护送/通用移动的唯一角点咽喉）
+            TryFastOpenDoorOnPath(navMeshPath.corners);
             return _lastCanRunResult;
+        }
+
+        /// <summary>
+        /// 快速开门（参考 SAIN DoorOpener 思路，以 MCS 风格落地）：移动路径与关闭门求交命中时——
+        /// 指令直开（Player.ExecuteInteraction，门当帧开始摆动，绕过原生 LayHand 动画对位链）+ 碰撞忽略窗口
+        /// （不等门完全打开即通过）。原生链不删不改：门变 Interacting/Open 后原生 WantPassTheDoor 不再触发，
+        /// 2.5s 冻结/半速接近/进门仪式天然绕过。仅非战斗移动使用（战斗近区由 SAIN 门逻辑接管，远区保留原生链）
+        /// </summary>
+        protected void TryFastOpenDoorOnPath(Vector3[] corners)
+        {
+            var mcsBotPlayerData = McsBotPlayerData;
+
+            // 窗口收尾（PlayerDataMgr 1s 保险循环同样调用，防移动刷新停止后碰撞被永久忽略）
+            mcsBotPlayerData?.TryFinishFastOpenDoor();
+            if (mcsBotPlayerData == null)
+            {
+                return;
+            }
+
+            // 仅非战斗移动：战斗期间不快速开门
+            if (BotOwner.Memory.HaveEnemy)
+            {
+                return;
+            }
+
+            if (corners == null || corners.Length < 2)
+            {
+                return;
+            }
+
+            var time = Time.time;
+            var doorLinks = BotOwner.NearDoorData.CurrentDoorLinks();
+            if (doorLinks.Count == 0)
+            {
+                return;
+            }
+
+            var botPosition = BotOwner.Position;
+            var sqrCheckDist = FAST_OPEN_DOOR_PATH_CHECK_DIST * FAST_OPEN_DOOR_PATH_CHECK_DIST;
+            for (var linkIndex = 0; linkIndex < doorLinks.Count; linkIndex++)
+            {
+                var doorLink = doorLinks[linkIndex];
+                var door = doorLink?.Door;
+                if (door == null || door.DoorState != EDoorState.Shut)
+                {
+                    continue;
+                }
+
+                if (botPosition.McsSqrDistance(doorLink.MidOpen) > sqrCheckDist)
+                {
+                    continue;
+                }
+
+                if (mcsBotPlayerData.FastOpenDoorCooldowns.TryGetValue(door.Id, out var cooldownTime) && time < cooldownTime)
+                {
+                    continue;
+                }
+
+                if (!IsPathCrossingDoorOpen(corners, doorLink))
+                {
+                    continue;
+                }
+
+                FastOpenDoor(door, time);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// 路径前段（累计 FAST_OPEN_DOOR_PATH_LOOKAHEAD 米内）是否穿越门洞线
+        /// （SegmentOpen 两端各外延 0.1，几何判定同 GetCrossPoint 原生用法；楼层防护过滤跨层门）
+        /// </summary>
+        private bool IsPathCrossingDoorOpen(Vector3[] corners, NavMeshDoorLink doorLink)
+        {
+            var segmentOpen = doorLink.SegmentOpen;
+            var openDir = segmentOpen.b - segmentOpen.a;
+            var openA = segmentOpen.a - openDir * 0.1f;
+            var openB = segmentOpen.b + openDir * 0.1f;
+
+            var accumulated = 0f;
+            for (var i = 0; i < corners.Length - 1; i++)
+            {
+                var segmentLength = Vector3.Distance(corners[i], corners[i + 1]);
+
+                if (Mathf.Abs(corners[i].y - doorLink.MidOpen.y) > FAST_OPEN_DOOR_FLOOR_HEIGHT_DIFF)
+                {
+                    // 跨层段：跳过但计入前段长度
+                    accumulated += segmentLength;
+                    if (accumulated >= FAST_OPEN_DOOR_PATH_LOOKAHEAD)
+                    {
+                        return false;
+                    }
+                    continue;
+                }
+
+                if (AIUtility.GetCrossPoint(corners[i], corners[i + 1], openA, openB) != null)
+                {
+                    return true;
+                }
+
+                accumulated += segmentLength;
+                if (accumulated >= FAST_OPEN_DOOR_PATH_LOOKAHEAD)
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 执行快速开门：可交互校验 → 指令直开 → 碰撞忽略窗口 + 同门冷却记录
+        /// </summary>
+        private void FastOpenDoor(Door door, float time)
+        {
+            var player = BotOwner.GetPlayer;
+            if (player == null || player.MovementContext.CanInteract != null)
+            {
+                return;
+            }
+
+            player.ExecuteInteraction(door, new InteractionResult(EInteractionType.Open));
+
+            if (door.Collider != null)
+            {
+                player.MovementContext.IgnoreInteractionCollision(door.Collider, true);
+            }
+
+            var mcsBotPlayerData = McsBotPlayerData;
+            mcsBotPlayerData.FastOpenDoor = door;
+            mcsBotPlayerData.FastOpenDoorEndTime = time + FAST_OPEN_DOOR_WINDOW;
+            mcsBotPlayerData.FastOpenDoorCooldowns[door.Id] = time + FAST_OPEN_DOOR_COOLDOWN;
         }
 
         public virtual Vector3 GetPointAlongPathAtDistance(Vector3[] corners, float distance)

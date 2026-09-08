@@ -371,9 +371,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// 对齐原版 Aiming.FindPointToShoot 行为：SetTarget 后必须调 AimingManager.NodeUpdate() 推进瞄准状态机，
         /// 否则 Status 永远停在 Aiming、IsReady 永远 false，bot 会一直举枪但永不开火。
         /// </summary>
-        protected bool AimAndShootAtPoint(Vector3 targetPos)
+        /// <param name="targetPos">瞄准点</param>
+        /// <param name="requireClearShot">
+        /// 直射场景传 true（默认）：GoalEnemy.CanShoot 为 false（敌人半可见、可打部位全被遮挡）时不扣扳机，
+        /// 只保持瞄准（对齐原版 AttackMoving.AimingAndShoot / ShootFromPlace.CheckCanShoot 的 CanShoot 门控，
+        /// 避免持续朝墙开火）；压制射击/盲射场景传 false：有意朝最后已知位置压制（允许糊墙，压制语义）
+        /// </param>
+        protected bool AimAndShootAtPoint(Vector3 targetPos, bool requireClearShot = true)
         {
-            if (BotOwner.Memory.GoalEnemy == null || BotOwner.WeaponManager.IsMelee)
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy == null || BotOwner.WeaponManager.IsMelee)
+            {
+                return false;
+            }
+
+            if (requireClearShot && !goalEnemy.CanShoot)
             {
                 return false;
             }

@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// 掩体内探头射击节奏 + 盲射（借鉴 SAIN SeekCoverAction 探头循环与 BlindFireController）：
     /// 探头/缩回按时间戳交替，全部顺序 if 驱动（与 McsBrainLayer 风格一致）。
     /// 敌可见 → 保持侧身（原版 BotTilt ±5f 满幅）持续射击；敌不可见 → 侧身+盲射一段 → 缩回随机时长 → 换边再探头。
-    /// 由 McsTestBrainLayer 在"Memory.IsInCover 且能对敌射击"时进入。
+    /// 由 McsBrainLayer 在"Memory.IsInCover 且能对敌射击"时进入。
     /// </summary>
     public class McsCoverPeakLogic : McsBotBaseLogic
     {
@@ -126,7 +126,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     Random.Range(-BLIND_AIM_JITTER_DISTANCE, BLIND_AIM_JITTER_DISTANCE));
             }
 
-            AimAndShootAtPoint(_blindFireTargetPos);
+            // 盲射：有意朝敌人最后已知位置压制（允许糊墙，压制语义），跳过 CanShoot 弹道门控
+            AimAndShootAtPoint(_blindFireTargetPos, false);
         }
 
         /// <summary>

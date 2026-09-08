@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(UpdateItemData(1f));
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
             StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f));
+            StartCoroutine(CheckFastOpenDoorLoop(1f));
             if (Draw.GuiCommonStyle == null)
             {
                 Draw.CreateGuiStyle();
@@ -220,14 +221,9 @@ namespace MiyakoCarryService.Client.Mgrs
                         var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
                         var playerDatas = GetDatas<PlayerData>();
 
-                        // 对敌优先级扩展（McsTest2BrainLayer）：老板视野威胁列表 + 多目标仲裁报点；
-                        // 关闭时维持原行为（IsEnemy 前置 + 每轮只报第一个通过筛选的）
-                        var isThreatPriorityEnabled = McsAILeadPlayer.IsThreatPriorityEnabled;
+                        // 对敌优先级：老板视野威胁列表 + 多目标仲裁报点（距老板最近的可见敌优先）
                         var leadVisibleEnemies = mcsAILeadPlayer.LeadVisibleEnemies;
-                        if (isThreatPriorityEnabled)
-                        {
-                            leadVisibleEnemies.Clear();
-                        }
+                        leadVisibleEnemies.Clear();
 
                         Player reportTarget = null;
                         var reportSqrDistance = float.MaxValue;
@@ -256,37 +252,27 @@ namespace MiyakoCarryService.Client.Mgrs
                                 continue;
                             }
 
-                            if (isThreatPriorityEnabled)
+                            var targetBotOwner = target.AIData?.BotOwner;
+                            if (targetBotOwner != null && targetBotOwner.BotState != EBotState.NonActive)
                             {
-                                var targetBotOwner = target.AIData?.BotOwner;
-                                if (targetBotOwner != null && targetBotOwner.BotState != EBotState.NonActive)
+                                var targetGoalEnemy = targetBotOwner.Memory?.GoalEnemy;
+                                if (targetGoalEnemy?.Person != null
+                                    && targetGoalEnemy.Person.ProfileId == leadPlayer.ProfileId
+                                    && (targetGoalEnemy.IsVisible || targetGoalEnemy.CanShoot || targetBotOwner.ShootData?.Shooting == true))
                                 {
-                                    var targetGoalEnemy = targetBotOwner.Memory?.GoalEnemy;
-                                    if (targetGoalEnemy?.Person != null
-                                        && targetGoalEnemy.Person.ProfileId == leadPlayer.ProfileId
-                                        && (targetGoalEnemy.IsVisible || targetGoalEnemy.CanShoot || targetBotOwner.ShootData?.Shooting == true))
+                                    var aimSqrDistance = target.Position.McsSqrDistance(leadPlayer.Position);
+                                    if (aimSqrDistance < AIMING_SCAN_MAX_SQUARE_DIST && aimSqrDistance < aimingSqrDistance)
                                     {
-                                        var aimSqrDistance = target.Position.McsSqrDistance(leadPlayer.Position);
-                                        if (aimSqrDistance < AIMING_SCAN_MAX_SQUARE_DIST && aimSqrDistance < aimingSqrDistance)
-                                        {
-                                            aimingTarget = target;
-                                            aimingSqrDistance = aimSqrDistance;
-                                        }
+                                        aimingTarget = target;
+                                        aimingSqrDistance = aimSqrDistance;
                                     }
                                 }
                             }
 
-                            // 扩展开启：去除 IsEnemy 前置——敌人尚未入组时老板看见也报（CalcGoalEnemy 内 AddEnemy 入组），
+                            // 无 IsEnemy 前置——敌人尚未入组时老板看见也报（CalcGoalEnemy 内 AddEnemy 入组），
                             // 让"老板视野中已出现敌人"的新敌能立即报点；Scav 老板对同阵营中立目标仍保持不报
                             // （避免注视中立 Scav 即触发组敌对升级）
-                            if (isThreatPriorityEnabled)
-                            {
-                                if (leadPlayer.Side == EPlayerSide.Savage && target.Side == EPlayerSide.Savage && !leadPlayer.BotsGroup.IsEnemy(target))
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (!leadPlayer.BotsGroup.IsEnemy(target))
+                            if (leadPlayer.Side == EPlayerSide.Savage && target.Side == EPlayerSide.Savage && !leadPlayer.BotsGroup.IsEnemy(target))
                             {
                                 continue;
                             }
@@ -316,44 +302,33 @@ namespace MiyakoCarryService.Client.Mgrs
                                 continue;
                             }
 
-                            if (isThreatPriorityEnabled)
-                            {
-                                // 威胁列表：老板视野内全部可见敌（循环后按距老板升序排序，供护航中威胁就近接管）
-                                leadVisibleEnemies.Add(target);
+                            // 威胁列表：老板视野内全部可见敌（循环后按距老板升序排序，供护航中威胁就近接管）
+                            leadVisibleEnemies.Add(target);
 
-                                // 报点目标仲裁：距老板最近的可见敌（替代原"第一个通过筛选的"）
-                                if (sqrDistance < reportSqrDistance)
-                                {
-                                    reportTarget = target;
-                                    reportSqrDistance = sqrDistance;
-                                }
-                            }
-                            else
+                            // 报点目标仲裁：距老板最近的可见敌
+                            if (sqrDistance < reportSqrDistance)
                             {
-                                mcsAILeadPlayer.CalcGoalEnemy(target);
-                                break;
+                                reportTarget = target;
+                                reportSqrDistance = sqrDistance;
                             }
                         }
 
-                        if (isThreatPriorityEnabled)
+                        if (leadVisibleEnemies.Count > 1)
                         {
-                            if (leadVisibleEnemies.Count > 1)
-                            {
-                                leadVisibleEnemies.Sort((a, b) => a.Position.McsSqrDistance(leadPlayer.Position).CompareTo(b.Position.McsSqrDistance(leadPlayer.Position)));
-                            }
+                            leadVisibleEnemies.Sort((a, b) => a.Position.McsSqrDistance(leadPlayer.Position).CompareTo(b.Position.McsSqrDistance(leadPlayer.Position)));
+                        }
 
-                            if (reportTarget != null)
-                            {
-                                mcsAILeadPlayer.CalcGoalEnemy(reportTarget);
-                            }
+                        if (reportTarget != null)
+                        {
+                            mcsAILeadPlayer.CalcGoalEnemy(reportTarget);
+                        }
 
-                            // 正瞄威胁记录 + 报点：正瞄老板的最近敌记入威胁上下文（威胁窗口内与攻击者同级，
-                            // 层内强制接管/滞回豁免/SAIN 收回让渡生效），并即时报点（高威胁豁免弱化直写）
-                            if (aimingTarget != null)
-                            {
-                                mcsAILeadPlayer.MarkLeadAimingEnemy(aimingTarget);
-                                mcsAILeadPlayer.CalcGoalEnemy(aimingTarget);
-                            }
+                        // 正瞄威胁记录 + 报点：正瞄老板的最近敌记入威胁上下文（威胁窗口内与攻击者同级，
+                        // 层内强制接管/滞回豁免/SAIN 收回让渡生效），并即时报点（高威胁豁免弱化直写）
+                        if (aimingTarget != null)
+                        {
+                            mcsAILeadPlayer.MarkLeadAimingEnemy(aimingTarget);
+                            mcsAILeadPlayer.CalcGoalEnemy(aimingTarget);
                         }
 
                         yield return publicTime;
@@ -363,6 +338,53 @@ namespace MiyakoCarryService.Client.Mgrs
                 {
                     yield return null;
                     continue;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 快速开门窗口保险循环（1s）：移动路径刷新收尾（TryFastOpenDoorOnPath 内调用 TryFinishFastOpenDoor）
+        /// 之外的兜底——战斗开始后移动刷新停止时，过期窗口照样恢复门碰撞，防门碰撞被永久忽略；
+        /// 顺带修剪冷却字典的过期条目
+        /// </summary>
+        private IEnumerator CheckFastOpenDoorLoop(float time)
+        {
+            var waitTime = new WaitForSeconds(time);
+            while (true)
+            {
+                yield return waitTime;
+                if (!Gameloop.IsVaildGameWorld)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                var now = Time.time;
+                var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
+                foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
+                {
+                    if (mcsBotPlayerData == null)
+                    {
+                        continue;
+                    }
+
+                    mcsBotPlayerData.TryFinishFastOpenDoor();
+
+                    if (mcsBotPlayerData.FastOpenDoorCooldowns.Count > 16)
+                    {
+                        var expiredDoorIds = new List<string>();
+                        foreach (var kvp in mcsBotPlayerData.FastOpenDoorCooldowns)
+                        {
+                            if (kvp.Value < now)
+                            {
+                                expiredDoorIds.Add(kvp.Key);
+                            }
+                        }
+                        foreach (var expiredDoorId in expiredDoorIds)
+                        {
+                            mcsBotPlayerData.FastOpenDoorCooldowns.Remove(expiredDoorId);
+                        }
+                    }
                 }
             }
         }

@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 压制射击（借鉴 SAIN 反压制 TrySuppressAnyEnemy）：
     /// 敌人不可见但近期目击过时，朝敌人最后已知位置开火，用于掩护与压制，替代无脑冲脸。
-    /// 由 McsTestBrainLayer 在"敌不可见且失联窗口内"进入。
+    /// 由 McsBrainLayer 在"敌不可见且失联窗口内"进入。
     /// </summary>
     public class McsSuppressFireLogic : McsBotBaseLogic
     {
@@ -41,7 +41,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     UnityEngine.Random.Range(-AIM_JITTER_DISTANCE, AIM_JITTER_DISTANCE));
             }
 
-            AimAndShootAtPoint(_suppressTargetPos);
+            // 压制射击：有意朝敌人最后已知位置开火（允许糊墙压制藏身点），跳过 CanShoot 弹道门控
+            AimAndShootAtPoint(_suppressTargetPos, false);
         }
     }
 }

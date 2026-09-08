@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 近身走射（借鉴 SAIN DogFight）：走/撤与站定开火按时间戳交替，全部顺序 if 驱动（与 McsBrainLayer 风格一致）。
     /// 站定开火段与后撤段敌可见时侧身（原版 BotTilt ±5f 满幅），冲向敌人近身时有概率跳跃（借鉴 SAIN RushEnemyAction.checkJump）。
-    /// 由 McsTestBrainLayer 在"路径距离近且刚见敌/刚被打"时进入。
+    /// 由 McsBrainLayer 在"路径距离近且刚见敌/刚被打"时进入。
     /// </summary>
     public class McsDogFightLogic : McsBotBaseLogic
     {

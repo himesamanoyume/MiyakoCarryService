@@ -12,7 +12,7 @@ namespace MiyakoCarryService.Client.Misc
     public class McsAILeadPlayer : AIBossPlayer
     {
         /// <summary>
-        /// 队长报点覆盖门限：新报点敌需比 bot 当前目标近此比例以上（0.75=近25%）才覆盖（与 McsTestBrainLayer 滞回同参数）
+        /// 队长报点覆盖门限：新报点敌需比 bot 当前目标近此比例以上（0.75=近25%）才覆盖（与 McsBrainLayer 滞回同参数）
         /// </summary>
         private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
 
@@ -146,21 +146,6 @@ namespace MiyakoCarryService.Client.Misc
             return null;
         }
 
-        /// <summary>
-        /// 对敌优先级扩展是否启用（试验层2 McsTest2BrainLayer 配套；Release 构建恒启用）
-        /// </summary>
-        public static bool IsThreatPriorityEnabled
-        {
-            get
-            {
-#if DEBUG
-                return MiyakoCarryServicePlugin.EnableTest2BrainLayer.Value;
-#else
-                return true;
-#endif
-            }
-        }
-
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public void CleanupDeadEnemies()
@@ -271,7 +256,7 @@ namespace MiyakoCarryService.Client.Misc
             }
 
             var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(McsLeadPlayer.ProfileId);
-            var isLeadThreatEnemy = IsThreatPriorityEnabled && IsLeadThreatEnemy(seenEnemy);
+            var isLeadThreatEnemy = IsLeadThreatEnemy(seenEnemy);
 
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
@@ -284,17 +269,16 @@ namespace MiyakoCarryService.Client.Misc
                 if (!botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {
                     // 注入补全：成员尚不认识该敌时手动建 EnemyInfo（BotEnemiesController.AddNew+SetInfo 原生路径，
-                    // 兜底组级 AddEnemy 被拦截的场景如 Zryachiy 系护航/醉酒玩家限制）；
-                    // 关闭对敌优先级扩展时维持原行为（仅组加敌，GoalEnemy 交由 CalcGoal 自行选择）
-                    if (!IsThreatPriorityEnabled || !TryRegisterEnemyForFollower(botOwner, seenEnemy, out enemyInfo))
+                    // 兜底组级 AddEnemy 被拦截的场景如 Zryachiy 系护航/醉酒玩家限制）
+                    if (!TryRegisterEnemyForFollower(botOwner, seenEnemy, out enemyInfo))
                     {
                         continue;
                     }
                 }
 
                 // 队长报点弱化：bot 当前目标仍存活且可见可射时，新报点敌须有 25% 距离优势才覆盖（多敌防抖，
-                // 与 McsTestBrainLayer 的 GoalEnemy 切换滞回同参数）；无目标/目标失效时立即接管报点；
-                // 对敌优先级扩展：高威胁敌（威胁窗口内攻击过老板）豁免弱化，全员强制接管
+                // 与 McsBrainLayer 的 GoalEnemy 切换滞回同参数）；无目标/目标失效时立即接管报点；
+                // 高威胁敌（威胁窗口内攻击过老板）豁免弱化，全员强制接管
                 if (!isLeadThreatEnemy && ShouldKeepCurrentGoalEnemy(botOwner, enemyInfo))
                 {
                     continue;
