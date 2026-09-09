@@ -61,28 +61,17 @@ namespace MiyakoCarryService.Client.Datas
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
         public bool IsExcluded = false;
-
-        #region 快速开门状态（移动提速）
-
-        /// <summary>
-        /// 当前快速开门的 Door（窗口内非空；窗口过期由层内驱动与 PlayerDataMgr 保险循环收尾）
-        /// </summary>
         public Door FastOpenDoor = null;
-
-        /// <summary>
-        /// 快速开门窗口截止时间（Time.time）
-        /// </summary>
         public float FastOpenDoorEndTime = 0f;
-
-        /// <summary>
-        /// 每扇门（Id）下次允许快速开门的时间（Time.time），防同一扇门反复开关抖动
-        /// </summary>
         public Dictionary<string, float> FastOpenDoorCooldowns = new();
+        public float LastHitTime = -999f;
+        public Player LastHitShooter = null;
+        public float LastShotAtTime = -999f;
+        public float SuppressionNumber = 0f;
+        public bool IsHeavySuppressed => SuppressionNumber >= 3f;
+        private const float SUPPRESSION_MAX = 6f;
+        private float _lastSuppressionDecayTime = 0f;
 
-        /// <summary>
-        /// 收尾快速开门窗口：窗口过期或门已销毁时清理状态（v4 已移除碰撞忽略，无需恢复门碰撞；
-        /// 字段仅用于防窗口内重复触发与诊断）
-        /// </summary>
         public void TryFinishFastOpenDoor()
         {
             var fastOpenDoor = FastOpenDoor;
@@ -99,78 +88,29 @@ namespace MiyakoCarryService.Client.Datas
             FastOpenDoor = null;
         }
 
-        #endregion
-
-        #region 受击与压制状态（战斗拟人化）
-
-        /// <summary>
-        /// 最近一次受击时间（Time.time），-999f 表示从未受击
-        /// </summary>
-        public float LastHitTime = -999f;
-
-        /// <summary>
-        /// 最近一次打到我的敌人（用于受击追溯选敌与压制射击判断）
-        /// </summary>
-        public Player LastHitShooter = null;
-
-        /// <summary>
-        /// 最近一次被弹着点逼近的时间（Time.time），-999f 表示从未发生
-        /// </summary>
-        public float LastShotAtTime = -999f;
-
-        /// <summary>
-        /// 压制值：受击/被弹着点逼近时累积，随时间衰减（参照 SAIN CheckAddSuppression 轻量版）
-        /// </summary>
-        public float SuppressionNumber = 0f;
-
-        /// <summary>
-        /// 重度压制：禁止冲脸类进攻决策，强制优先转掩体
-        /// </summary>
-        public bool IsHeavySuppressed => SuppressionNumber >= 3f;
-
-        /// <summary>
-        /// 中度压制：影响进攻性决策的软阈值
-        /// </summary>
-        public bool IsMediumSuppressed => SuppressionNumber >= 1f;
-
-        private const float SUPPRESSION_DECAY_PER_SECOND = 0.75f;
-        private const float SUPPRESSION_MAX = 6f;
-        private const float SUPPRESSION_DECAY_MIN_INTERVAL = 0.25f;
-        private float _lastSuppressionDecayTime = 0f;
-
-        /// <summary>
-        /// 压制值随时间线性衰减（惰性计算：按两次调用的时间差衰减，调用频率无关）
-        /// </summary>
         public void UpdateSuppressionDecay()
         {
             var time = Time.time;
             var delta = time - _lastSuppressionDecayTime;
             _lastSuppressionDecayTime = time;
-            if (delta < SUPPRESSION_DECAY_MIN_INTERVAL || SuppressionNumber <= 0f)
+            if (delta < 0.25f || SuppressionNumber <= 0f)
             {
                 return;
             }
 
-            SuppressionNumber = Mathf.Max(0f, SuppressionNumber - SUPPRESSION_DECAY_PER_SECOND * delta);
+            SuppressionNumber = Mathf.Max(0f, SuppressionNumber - 0.75f * delta);
         }
 
-        /// <summary>
-        /// 受击时累积压制值（按伤害量级缩放）
-        /// </summary>
         public void AddSuppression(float damage)
         {
             SuppressionNumber = Mathf.Min(SUPPRESSION_MAX, SuppressionNumber + Mathf.Clamp(damage / 20f, 0.5f, 2f));
         }
 
-        /// <summary>
-        /// 弹着点逼近（未直接命中）时累积压制值
-        /// </summary>
         public void AddSuppressionFromNearMiss()
         {
             SuppressionNumber = Mathf.Min(SUPPRESSION_MAX, SuppressionNumber + 0.15f);
         }
 
-        #endregion
         public Vector2 BottomScreenPos = Vector2.zero;
         public string Info = "";
         public bool IsVisible = false;
@@ -681,10 +621,6 @@ namespace MiyakoCarryService.Client.Datas
             }
         }
 
-        /// <summary>
-        /// 刷新状态效果部分：与汇报自身状态指令同链路（全量活跃效果 - 噪音过滤 - 本地化），
-        /// 每行最多 2 个效果换行，避免单行文本过宽；无效果时省略整行
-        /// </summary>
         private void UpdateEffectsInfo(bool isAlive)
         {
             EffectsInfo = "";
@@ -742,10 +678,6 @@ namespace MiyakoCarryService.Client.Datas
             EffectsInfo = EffectsInfoBuilder.ToString();
         }
 
-        /// <summary>
-        /// 刷新物资部分：当前手持武器的完整弹药/弹匣储备 + 三类医疗品数量；
-        /// 手持非枪械（刀/医疗品/空手）时省略弹药行
-        /// </summary>
         private void UpdateSuppliesInfo(bool isAlive)
         {
             SuppliesInfo = "";
@@ -905,7 +837,6 @@ namespace MiyakoCarryService.Client.Datas
                 return false;
             }
 
-            // 与 ESP 弹匣计数同口径：枪上弹匣 + 装备栏兼容弹匣
             CollectWeaponAmmoAndMagCount(weapon, out _, out var magCount);
             return magCount < REQUIRED_MAG_COUNT;
         }
@@ -1012,9 +943,6 @@ namespace MiyakoCarryService.Client.Datas
             return DEFAULT_MAG_CAPACITY;
         }
 
-        /// <summary>
-        /// 统计当前手持武器的完整弹药/弹匣储备（手持非枪械或数据未就绪时返回 false）
-        /// </summary>
         public bool CollectCurrentWeaponAmmoAndMagCount(out int ammoCount, out int magCount)
         {
             ammoCount = 0;
@@ -1029,10 +957,6 @@ namespace MiyakoCarryService.Client.Datas
             return CollectWeaponAmmoAndMagCount(weapon, out ammoCount, out magCount);
         }
 
-        /// <summary>
-        /// 统计指定武器的完整弹药储备：膛内 + 枪上弹匣 + 装备栏兼容弹匣（含其内弹药）+ 兼容散装弹药；
-        /// 装备栏枚举只取槽位容器顶层，弹匣内弹药不会作为散装弹药重复计数
-        /// </summary>
         public bool CollectWeaponAmmoAndMagCount(Weapon weapon, out int ammoCount, out int magCount)
         {
             ammoCount = 0;
@@ -1082,10 +1006,6 @@ namespace MiyakoCarryService.Client.Datas
             return true;
         }
 
-        /// <summary>
-        /// 统计三类医疗品数量（按物品个数，互斥归属）：
-        /// 手术包（含 DestroyedPart，附带骨折消除不影响归属） > 急救（含大/小出血效果、MedKit 类或含回血健康效果） > 夹板（含 Fracture）
-        /// </summary>
         public void CountMedSupplies(out int firstAidCount, out int surgicalKitCount, out int splintCount)
         {
             firstAidCount = 0;
@@ -1352,9 +1272,6 @@ namespace MiyakoCarryService.Client.Datas
             return IsAmmoCompatible(ammo, weapon);
         }
 
-        /// <summary>
-        /// 弹药是否可被该武器使用：任一膛室可装填，或当前弹匣弹药过滤器可装填（与紧急搜刮判定同口径）
-        /// </summary>
         private bool IsAmmoCompatible(Ammo ammo, Weapon weapon)
         {
             if (weapon.Chambers != null)

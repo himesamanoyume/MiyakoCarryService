@@ -8,7 +8,6 @@ using EFT;
 using EFT.UI.Screens;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -64,11 +63,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        /// <summary>
-        /// 每秒采样护航 bot 的 Brain/Layer/Reason 供 BigSurvey 分局报告。
-        /// 数据驱动：主机执行 Bot 运算才有 Brain 数据，副机没有——首次检测到本局有有效 Brain 数据时
-        /// 才创建对局记录（EnsureCurrentRaid 绑定 GameWorld 实例 ID，脚本引擎 raid 中重载同局延续不分裂）。
-        /// </summary>
         public IEnumerator RecordAgentInfo(float time)
         {
             var waitTime = new WaitForSeconds(time);
@@ -89,7 +83,6 @@ namespace MiyakoCarryService.Client.Mgrs
                                 continue;
                             }
 
-                            // 首次检测到本局有 Brain 数据 → 创建/切换对局记录（副机无 Bot 运算永远不触发）
                             if (!MiyakoCarryServicePlugin.LogBuffer.EnsureCurrentRaid(Singleton<GameWorld>.Instance.GetInstanceID()))
                             {
                                 continue;
@@ -200,9 +193,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        /// <summary>
-        /// 正瞄老板扫描的最大距离（米）：超距的敌即使瞄着老板也不视为高威胁（狙不到的威胁优先级让位给实战敌情）
-        /// </summary>
         private const float AIMING_SCAN_MAX_SQUARE_DIST = 300f * 300f;
 
         private IEnumerator CheckMcsLeadPlayerSeenEnemiesLoop(float time)
@@ -221,15 +211,12 @@ namespace MiyakoCarryService.Client.Mgrs
                         var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
                         var playerDatas = GetDatas<PlayerData>();
 
-                        // 对敌优先级：老板视野威胁列表 + 多目标仲裁报点（距老板最近的可见敌优先）
                         var leadVisibleEnemies = mcsAILeadPlayer.LeadVisibleEnemies;
                         leadVisibleEnemies.Clear();
 
                         Player reportTarget = null;
                         var reportSqrDistance = float.MaxValue;
 
-                        // 正瞄老板扫描（威胁上下文，独立于视野过滤——敌可能在老板视野外/45°外瞄着老板）：
-                        // 敌 AI 的 GoalEnemy 是老板本人且当前可见/可射/正在射击老板，取距老板最近
                         Player aimingTarget = null;
                         var aimingSqrDistance = float.MaxValue;
 
@@ -269,9 +256,6 @@ namespace MiyakoCarryService.Client.Mgrs
                                 }
                             }
 
-                            // 无 IsEnemy 前置——敌人尚未入组时老板看见也报（CalcGoalEnemy 内 AddEnemy 入组），
-                            // 让"老板视野中已出现敌人"的新敌能立即报点；Scav 老板对同阵营中立目标仍保持不报
-                            // （避免注视中立 Scav 即触发组敌对升级）
                             if (leadPlayer.Side == EPlayerSide.Savage && target.Side == EPlayerSide.Savage && !leadPlayer.BotsGroup.IsEnemy(target))
                             {
                                 continue;
@@ -302,10 +286,8 @@ namespace MiyakoCarryService.Client.Mgrs
                                 continue;
                             }
 
-                            // 威胁列表：老板视野内全部可见敌（循环后按距老板升序排序，供护航中威胁就近接管）
                             leadVisibleEnemies.Add(target);
 
-                            // 报点目标仲裁：距老板最近的可见敌
                             if (sqrDistance < reportSqrDistance)
                             {
                                 reportTarget = target;
@@ -323,8 +305,6 @@ namespace MiyakoCarryService.Client.Mgrs
                             mcsAILeadPlayer.CalcGoalEnemy(reportTarget);
                         }
 
-                        // 正瞄威胁记录 + 报点：正瞄老板的最近敌记入威胁上下文（威胁窗口内与攻击者同级，
-                        // 层内强制接管/滞回豁免/SAIN 收回让渡生效），并即时报点（高威胁豁免弱化直写）
                         if (aimingTarget != null)
                         {
                             mcsAILeadPlayer.MarkLeadAimingEnemy(aimingTarget);
@@ -342,11 +322,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        /// <summary>
-        /// 快速开门窗口保险循环（1s）：层内窗口驱动（IsCurrentActionEnding 内 UpdateFastOpenDoor）收尾
-        /// 之外的兜底——层失活/战斗期窗口驱动停止时，过期窗口照样恢复门碰撞，防门碰撞被永久忽略；
-        /// 顺带修剪冷却字典的过期条目
-        /// </summary>
         private IEnumerator CheckFastOpenDoorLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);

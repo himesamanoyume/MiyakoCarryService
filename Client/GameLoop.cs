@@ -513,20 +513,15 @@ namespace MiyakoCarryService.Client
                         return;
                     }
 
-                    // 攻击者 Player 实体解析（DamageInfo.Player 是 IObserverToPlayerBridge，经 ProfileId 反查；
-                    // 不再要求 AIData.BotOwner 存在，补 Fika 玩家攻击老板不报点的缺口）
                     var attacker = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(attackerIPlayer.ProfileId);
                     if (attacker == null)
                     {
                         return;
                     }
 
-                    // 老板威胁上下文：记录最近攻击老板的敌（AI 与玩家攻击者均记录），
-                    // 供护航全员强制接管（McsBrainLayer 高威胁接管）
                     mcsAILeadPlayer.MarkLeadAttacker(attacker);
 
-                    // 报点节流：连发武器连续命中时避免高频全队遍历（威胁上下文记录不受节流影响）
-                    if (Time.time - mcsAILeadPlayer.LastLeadReportTime < McsAILeadPlayer.LEAD_HIT_REPORT_INTERVAL)
+                    if (Time.time - mcsAILeadPlayer.LastLeadReportTime < 0.25f)
                     {
                         return;
                     }
@@ -864,8 +859,6 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Move.REACH_DIST_COVER = 2f;
             settings.FileSettings.Move.REACH_DIST_RUN = 1.5f;
             settings.FileSettings.Move.DIST_SPRINT_GO_TO_SOME_POINT = 2f;
-            // 快速开门配套：残留原生门链（漏检/兜底场景）的开门等待从默认 2.5s 收紧到 1s；
-            // 护航不踹门（默认 40% 概率踹门声音大，破坏潜行跟随，漏检门靠快速开门兜底/卡住传送解决）
             settings.FileSettings.Move.WAIT_DOOR_OPEN_SEC = 1f;
             settings.FileSettings.Move.BREACH_CHANCE_100 = 0;
 

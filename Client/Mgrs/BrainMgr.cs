@@ -35,14 +35,6 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void InitCustomLayerMaps()
         {
-            // LayerUtils.RegisterCustomLayer(typeof(McsCommonLayer), 65);
-            // LayerUtils.RegisterCustomLayer(typeof(McsAvoidDangerLayer), 66);
-            // LayerUtils.RegisterCustomLayer(typeof(McsClearAreaLayer), 67);
-            // LayerUtils.RegisterCustomLayer(typeof(McsExfiltrationLayer), 68);
-            // LayerUtils.RegisterCustomLayer(typeof(McsFightLayer), 185);
-            // LayerUtils.RegisterCustomLayer(typeof(McsEscortLayer), 186);
-            // LayerUtils.RegisterCustomLayer(typeof(McsProxyLayer), 187);
-            // 护航战斗大脑层：拟人化战斗行为 + 对敌优先级 + 威胁中断应战（基类共享），DEBUG 开关 EnableMcsLayer 可一键失活
             LayerUtils.RegisterCustomLayer(typeof(McsBrainLayer), 200);
         }
 

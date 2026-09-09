@@ -584,16 +584,14 @@ namespace MiyakoCarryService.Client
             DrawDebugInfo = Register(
                 EConfigType.DEBUG,
                 Locales.DRAWDEBUGINFO_KEY,
-                false,
-                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+                false
             );
 
             DebugTextSize = Register(
                 EConfigType.DEBUG,
                 Locales.DEBUGINFOTEXTSIZE_KEY,
                 10,
-                acceptableValues: new AcceptableValueRange<int>(5, 50),
-                customAttributes: new ConfigurationManagerAttributes() { IsAdvanced = true }
+                acceptableValues: new AcceptableValueRange<int>(5, 50)
             );
 
 #if DEBUG

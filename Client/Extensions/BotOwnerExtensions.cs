@@ -26,10 +26,6 @@ namespace MiyakoCarryService.Client.Extensions
 
             public McsBotPlayerData GetMcsBotPlayerData()
             {
-                // 双重判定：
-                // - 确定非 Mcs bot → 缓存负结果（哨兵），后续 O(1) 返回 null
-                // - Mcs bot 数据未创建（LoadItemData 1s 循环尚未扫到）→ 不缓存 null，保持重试；
-                //   数据创建时构造函数 SetMcsBotPlayerData 写入正缓存后自然命中
                 return _datas.GetOrCreate(botOwner, key =>
                 {
                     var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();

@@ -8,9 +8,7 @@ using UnityEngine.AI;
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     /// <summary>
-    /// 站桩射击 + 随机微走位（借鉴 SAIN StandAndShootAction 的 moveShoot）：
-    /// 基础行为沿用原版 ShootFromPlace，站立期间按概率朝敌人轴向随机旋转 70°~110° 的 6m 侧移点走射，
-    /// 到位后回到原版站桩。"露头换一个角度打"，破除机械站桩。
+    /// 重点参考了SAIN
     /// </summary>
     public class McsStandAndShootLogic : McsBotBaseLogic
     {
@@ -18,15 +16,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private float _nextStrafeCheckTime = 0f;
         private float _strafeUntilTime = 0f;
         private Vector3 _strafeTarget = Vector3.zero;
-
-        private const float STRAFE_CHANCE = 40f;
-        private const float STRAFE_CHECK_INTERVAL_MIN = 2.5f;
-        private const float STRAFE_CHECK_INTERVAL_MAX = 5f;
-        private const float STRAFE_DISTANCE = 6f;
         private const float STRAFE_DURATION = 2.5f;
-        private const float STRAFE_MIN_ROTATION = 70f;
-        private const float STRAFE_MAX_ROTATION = 110f;
-        private const float STRAFE_ARRIVE_SQUARE_DIST = 0.75f * 0.75f;
 
         public McsStandAndShootLogic(BotOwner botOwner) : base(botOwner)
         {
@@ -42,8 +32,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return;
             }
 
-            // 指令优先级（对齐老层语义）：驻守/跟随/保持阵位指令下禁止一切位移——已激活的走位段立即终止，
-            // 也不再寻找新走位点，退化为纯站桩（原版 ShootFromPlace 零位移）
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null && mcsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation))
             {
@@ -67,7 +55,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (_nextStrafeCheckTime < Time.time)
             {
-                _nextStrafeCheckTime = Time.time + UnityEngine.Random.Range(STRAFE_CHECK_INTERVAL_MIN, STRAFE_CHECK_INTERVAL_MAX);
+                _nextStrafeCheckTime = Time.time + UnityEngine.Random.Range(2.5f, 5f);
                 if (goalEnemy.IsVisible && TryFindStrafePoint(goalEnemy, out var strafeTarget))
                 {
                     _strafeTarget = strafeTarget;
@@ -89,7 +77,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 BotOwner.GoToPoint(_strafeTarget, true, -1f, false, false, true, false, false);
             }
 
-            if (BotOwner.Position.McsSqrDistance(_strafeTarget) <= STRAFE_ARRIVE_SQUARE_DIST)
+            if (BotOwner.Position.McsSqrDistance(_strafeTarget) <= (0.75f * 0.75f))
             {
                 _strafeTarget = Vector3.zero;
                 _strafeUntilTime = 0f;
@@ -107,12 +95,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             strafeTarget = Vector3.zero;
             var directionToEnemy = (goalEnemy.Person.Position - BotOwner.Position).normalized;
-            var rotationAngle = Random.Range(STRAFE_MIN_ROTATION, STRAFE_MAX_ROTATION) * (UnityEngine.Random.value < 0.5f ? -1f : 1f);
+            var rotationAngle = Random.Range(70f, 110f) * (UnityEngine.Random.value < 0.5f ? -1f : 1f);
             var strafeDirection = Quaternion.Euler(0f, rotationAngle, 0f) * directionToEnemy;
-            var rawTarget = BotOwner.Position + strafeDirection * STRAFE_DISTANCE;
+            var rawTarget = BotOwner.Position + strafeDirection * 6f;
             rawTarget.y = BotOwner.Position.y;
 
-            // 被障碍物截断时取射线命中点，避免穿墙目标
             var origin = BotOwner.Position + Vector3.up * 0.5f;
             var rayDirection = (rawTarget - origin).normalized;
             var rayDistance = Vector3.Distance(origin, rawTarget);

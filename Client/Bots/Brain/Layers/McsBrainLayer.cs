@@ -10,18 +10,6 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
-    /// <summary>
-    /// 护航战斗大脑层（优先级 200，正式）：拟人化战斗行为（借鉴 SAIN）+ 对敌优先级（参考 PitFireTeam 集火思路）+
-    /// 威胁中断应战（基类统一实现）。
-    /// 战斗区选敌链路（Mcs: 前缀 label）：
-    /// 1) 高威胁接管：威胁窗口内攻击过老板的敌（含玩家攻击者）或正瞄老板的敌（McsAILeadPlayer.GetLeadThreatEnemy 仲裁）
-    ///    全员强制接管，绕过滞回；
-    /// 2) 滞回高威胁豁免：高威胁敌作为候选绕过锁定窗/距离优势，作为当前目标且存活时不被非高威胁候选替换；
-    /// 3) 中威胁就近接管：无目标/目标失效时从老板视野威胁列表（McsAILeadPlayer.LeadVisibleEnemies）就近接管；
-    /// 4) 威胁收回让渡：威胁窗口内不向 SAIN 让渡（IsActive 保持激活），确保 SAIN 区内威胁接管不被 SAIN 决策冲掉；
-    /// 5) GoalEnemy 切换滞回（锁定窗+距离优势）：多敌防抖，原生 3.3s 低频重算的等价替代。
-    /// DEBUG 开关 EnableMcsLayer（启用Mcs层级）关闭时 IsActive 返回 false，可一键失活 MCS 大脑层观察对比。
-    /// </summary>
     public class McsBrainLayer : McsBaseLayer
     {
         public McsBrainLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
@@ -29,19 +17,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         }
 
-        public float _contactTime = 0f;
-        public float _nextRecalcGoalTime = 0f;
-        public const float FightHoldTime = 3f;
-        public bool _deferToSain = false;
-        public float _goToStationaryStuckTime = -999f;
-        public float _lastSqrToOperator = float.MaxValue;
-        public float _lastCanShootTime = -999f;
+        private float _contactTime = 0f;
+        private float _nextRecalcGoalTime = 0f;
+        private bool _deferToSain = false;
+        private float _goToStationaryStuckTime = -999f;
+        private float _lastSqrToOperator = float.MaxValue;
+        private float _lastCanShootTime = -999f;
         private const float CAN_SHOOT_HOLD_TIME = 2f;
         private const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
         private const float ARRIVE_DIST = 2.5f;
         private const float LOOK_AROUND_TIME = 2f;
         private const float STUCK_TIMEOUT = 8f;
-        public int _isTurnRight = 1;
+        private int _isTurnRight = 1;
 
         private static readonly string[] _travelTaskIntents =
         {
@@ -55,91 +42,26 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             Intents.ShouldDropTargetLoot,
         };
 
-        #region 拟人化战斗常量与状态（参数出处：SAIN EnemyDecisionClass / DogFight / SeekCoverAction）
 
-        /// <summary>
-        /// 站桩窗口基准时长（秒），乘随机系数得到本次交火的站打上限（SAIN HoldGroundBaseTime=1f，护航场景放宽到 4f）
-        /// </summary>
-        private const float HOLD_GROUND_BASE_TIME = 4f;
-        private const float HOLD_GROUND_RANDOM_MIN = 0.66f;
-        private const float HOLD_GROUND_RANDOM_MAX = 1.5f;
 
-        /// <summary>
-        /// 狗斗进入/退出路径距离（米）（SAIN DOGFIGHT_PATH_DIST_START=10 / END=15；进入放宽到 12m 覆盖边缘距离）
-        /// </summary>
-        private const float DOGFIGHT_ENTER_SQUARE_DIST = 15f * 15f;
-        private const float DOGFIGHT_EXIT_SQUARE_DIST = 20f * 20f;
 
-        /// <summary>
-        /// 狗斗进入条件：刚见敌（秒）或刚被打（秒）（SAIN DOGFIGHT_TIMESINCESEEN_START=1 + ShotMeRecently）
-        /// </summary>
-        private const float DOGFIGHT_VISIBLE_WINDOW = 1f;
-        private const float DOGFIGHT_HIT_WINDOW = 2f;
 
-        /// <summary>
-        /// 狗斗退出：失联时长（秒）（SAIN DOGFIGHT_TIMESINCESEEN_END=8）
-        /// </summary>
-        private const float DOGFIGHT_UNSEEN_EXIT = 8f;
 
-        /// <summary>
-        /// 压制射击：敌人最后可见窗口（秒）（SAIN TimeSinceSeenToSuppress=3）
-        /// </summary>
         private const float SUPPRESS_TIME_SINCE_SEEN = 3f;
 
-        /// <summary>
-        /// 压制射击：被该敌打过后的反压制窗口（秒）（SAIN TimeSinceShotAtToSuppress=12）
-        /// </summary>
-        private const float SUPPRESS_SHOT_AT_WINDOW = 6f;
 
-        /// <summary>
-        /// 保护冲脸：敌人距队长此距离内可冲（恢复旧层 50m 语义）
-        /// </summary>
-        private const float RUSH_PROTECT_LEAD_SQUARE_DIST = 50f * 50f;
 
-        /// <summary>
-        /// 近敌冲脸：敌人距自身此距离内可直接冲（与保护冲满足其一即触发）
-        /// </summary>
         private const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
 
-        /// <summary>
-        /// 近距可见敌推进：bot 距敌此距离内且可见时边打边冲，不受 HoldGround 站打窗口限制
-        /// </summary>
-        private const float NEAR_ENEMY_ADVANCE_SQUARE_DIST = 20f * 20f;
 
-        /// <summary>
-        /// 寻掩体：自身与掩体点允许的最大移动距离（米）
-        /// </summary>
-        private const float SEEK_COVER_MAX_MOVE_SQUARE_DIST = 30f * 30f;
 
-        /// <summary>
-        /// 换掩体（ShiftCover）：在掩体内驻留最短时长（秒）（SAIN ShiftCoverChangeDecisionTime=6）
-        /// </summary>
         private const float SHIFT_COVER_MIN_TIME = 6f;
 
-        /// <summary>
-        /// 换掩体：敌人最后一次现身距今超过此值才考虑挪窝（秒）（SAIN ShiftCoverTimeSinceSeen=30）
-        /// </summary>
-        private const float SHIFT_COVER_ENEMY_UNSEEN_TIME = 30f;
 
-        /// <summary>
-        /// 受击追溯选敌窗口（秒）
-        /// </summary>
-        private const float HIT_SELECT_WINDOW = 2f;
 
-        /// <summary>
-        /// 已抵达掩体位置的判定距离（米）
-        /// </summary>
-        private const float SEEK_COVER_ARRIVE_SQUARE_DIST = 1.5f * 1.5f;
 
-        /// <summary>
-        /// GoalEnemy 切换锁定窗（秒）：切换目标后此时间内不接受 CalcGoal 的再次切换
-        /// （原生无滞回，靠 3.3s 低频重算防抖；MCS 战斗区 0.1s 提频重算导致多敌高频摆动，视角不停转、瞄准永远被清空）
-        /// </summary>
         private const float GOAL_SWITCH_LOCK_TIME = 2f;
 
-        /// <summary>
-        /// GoalEnemy 切换优势门限：新敌需比当前敌近此比例以上（0.75=近25%）才允许切换
-        /// </summary>
         private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
 
         private string _holdGroundEnemyId = null;
@@ -148,13 +70,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private float _lastEnemyVisibleTime = -999f;
         private float _coverEnterTime = 0f;
 
-        /// <summary>
-        /// 滞回锁定记录：当前已接受目标的 ProfileId 与接受时刻（外部写入源换目标时视为重新接受）
-        /// </summary>
         private string _lastAcceptedGoalEnemyId = null;
         private float _lastAcceptedGoalSetTime = -999f;
 
-        #endregion
 
         public override Action GetNextAction()
         {
@@ -222,12 +140,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
-                // 战斗区激活 = CanShootNow 窗口 || 威胁逼近（基类 IsApproachingThreat：受击/近身/近距对峙/老板高威胁）——
-                // 威胁保持解决两类场景：长途冲刺中被伏击（CanShootNow 常 false，闸门从未打开）与
-                // 共享 GoalEnemy 但看不到敌的护航（IsVisible 被视觉 tick 重置后闸门过期）。
-                // 不要求当前有 GoalEnemy：被伏击时先开闸，滞回/受击追溯随后在闸内选目标；
-                // 无候选时落 FightNoEnemy 站桩防御（优于闷头跑）。
-                // 移动/任务类动作的威胁中断在基类各 End 函数统一实现
                 var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE))
                     || IsApproachingThreat();
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
@@ -458,10 +370,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     TrackCoverEnter(time);
 
-                    // 换掩体（ShiftCover）：在掩体内驻留过久且敌人长时间未现身 → 挪窝换更高掩体（借鉴 SAIN ShiftCoverAction）
                     if (_coverEnterTime > 0f
                         && time - _coverEnterTime > SHIFT_COVER_MIN_TIME
-                        && time - GetEnemyLastSeenTime() > SHIFT_COVER_ENEMY_UNSEEN_TIME
+                        && time - GetEnemyLastSeenTime() > 30f
                         && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation))
                     {
                         if (TryGetCombatCoverTarget(mcsLeadPlayerPos, out var shiftCoverPos))
@@ -476,12 +387,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                         else
                         {
-                            // 没有可换的掩体：再等一个周期，避免每帧重试
                             _coverEnterTime = time - SHIFT_COVER_MIN_TIME + 5f;
                         }
                     }
 
-                    // 已在掩体且能对敌射击 → 探头节奏 + 盲射（借鉴 SAIN SeekCoverAction / BlindFireController）
                     if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                     {
                         return new Action(typeof(McsCoverPeakLogic), "Mcs:CoverPeak");
@@ -519,12 +428,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     var isProtectWantKill = ProtectWantKill();
                     var isProtectCareKill = ProtectCareKill();
 
-                    // 压制值惰性衰减 + 受击追溯选敌（借鉴 SAIN 受击链路：2s 内被打优先把打我者设为 GoalEnemy）
                     McsBotPlayerData.UpdateSuppressionDecay();
                     TrySelectLastHitShooter(time);
 
-                    // 老板威胁接管：威胁窗口内攻击过老板的敌（含玩家攻击者）强制设为 GoalEnemy（优先级仅次于自身受击追溯，
-                    // 与受击追溯同为外部写入源，SAIN 区内直写 GoalEnemy 与其共享同一字段，由 SAIN 下一轮决策覆盖/参考）
                     TrySelectLeadThreatEnemy(time);
 
                     UpdateCoverToShoot();
@@ -548,10 +454,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             _lastEnemyVisibleTime = time;
                         }
 
-                        // 狗斗：敌可见且近身（路径≈直线 ≤10m）且刚见敌(1s)/刚被打(2s) → 近身走射缠斗（借鉴 SAIN DogFight）
                         if (haveBullets.Value
-                            && botToEnemySqrDist <= DOGFIGHT_ENTER_SQUARE_DIST
-                            && (time - _lastEnemyVisibleTime <= DOGFIGHT_VISIBLE_WINDOW || time - McsBotPlayerData.LastHitTime <= DOGFIGHT_HIT_WINDOW)
+                            && botToEnemySqrDist <= (15f * 15f)
+                            && (time - _lastEnemyVisibleTime <= 1f || time - McsBotPlayerData.LastHitTime <= 2f)
                             && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon))
                         {
                             return new Action(typeof(McsDogFightLogic), "Mcs:DogFight");
@@ -570,8 +475,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             {
                                 UpdateHoldGroundTimer(goalEnemy, time);
 
-                                // 近距可见敌推进：bot 距敌 ≤20m 且可见时边打边冲（原版 AttackMoving 行为），不受 HoldGround 站打窗口限制
-                                if (botToEnemySqrDist <= NEAR_ENEMY_ADVANCE_SQUARE_DIST
+                                if (botToEnemySqrDist <= (20f * 20f)
                                     && !McsBotPlayerData.IsHeavySuppressed
                                     && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation)
                                     && !BotOwner.GoToSomePointData.IsCome())
@@ -579,7 +483,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     return new Action(typeof(AttackMovingLogic), "Mcs:AttackMovingClose");
                                 }
 
-                                // HoldGround 暴露计时器：站打窗口耗尽且敌人正注视我 → 撤往掩体（借鉴 SAIN shallStandAndShoot）
                                 var holdGroundExpired = IsEnemyLookingAtMe(goalEnemy) && time - _holdGroundStartTime >= _holdGroundDuration;
                                 var heavySuppressed = McsBotPlayerData.IsHeavySuppressed;
 
@@ -601,22 +504,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    // 站桩射击 + 概率微走位（借鉴 SAIN StandAndShootAction.moveShoot）
                                     return new Action(typeof(McsStandAndShootLogic), "Mcs:StandAndShoot");
                                 }
                             }
                             else
                             {
-                                // 敌不可见：重置站打计时
                                 _holdGroundEnemyId = null;
 
-                                // 近敌听声清剿：bot 距敌 ≤15m 直接冲（优先于压制射击），近距保持进攻性
                                 if (botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST && ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask))
                                 {
                                     return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemyNear");
                                 }
 
-                                // 压制射击：刚丢敌（≤3s）或被该敌打过（≤6s）→ 朝最后已知点开火（借鉴 SAIN 反压制），替代无脑冲脸
                                 var timeSinceSeen = time - GetEnemyLastSeenTime();
                                 var shotByThisEnemy = IsShotByEnemyRecently(goalEnemy, time);
                                 if (timeSinceSeen <= SUPPRESS_TIME_SINCE_SEEN || shotByThisEnemy)
@@ -624,7 +523,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     return new Action(typeof(McsSuppressFireLogic), "Mcs:SuppressFire");
                                 }
 
-                                // 保护冲脸：敌距队长 ≤50m（恢复旧层语义）或敌脆弱（换弹/治疗中）才冲
                                 if (ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask))
                                 {
                                     return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
@@ -694,7 +592,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         }
                         else
                         {
-                            // !safeFire || !haveBullets：没子弹 → 优先掩体方向换弹，不再无脑冲脸
                             if (!haveBullets.Value && TryGetCombatCoverTarget(mcsLeadPlayerPos, out var reloadCoverPos))
                             {
                                 UpdateCommonMoveTarget(reloadCoverPos, out var reloadNextTime);
@@ -966,11 +863,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        #region 拟人化战斗辅助方法
 
-        /// <summary>
-        /// 站打计时：敌人切换或重新可见时重置窗口（借鉴 SAIN CalcHoldGroundDelay）
-        /// </summary>
         private void UpdateHoldGroundTimer(EnemyInfo goalEnemy, float time)
         {
             var enemyId = goalEnemy.Person?.ProfileId;
@@ -978,13 +871,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 _holdGroundEnemyId = enemyId;
                 _holdGroundStartTime = time;
-                _holdGroundDuration = HOLD_GROUND_BASE_TIME * UnityEngine.Random.Range(HOLD_GROUND_RANDOM_MIN, HOLD_GROUND_RANDOM_MAX);
+                _holdGroundDuration = 4f * UnityEngine.Random.Range(0.66f, 1.5f);
             }
         }
 
-        /// <summary>
-        /// 敌人是否正注视我（bot 敌人查其 GoalEnemy；玩家敌人保守认为正注视，用于触发站打计时）
-        /// </summary>
         private bool IsEnemyLookingAtMe(EnemyInfo goalEnemy)
         {
             var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
@@ -1000,13 +890,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        /// <summary>
-        /// 受击追溯选敌：2s 内被打且打人者存活时，把打我者设为主目标（借鉴 SAIN GetHit 链路）
-        /// </summary>
         private void TrySelectLastHitShooter(float time)
         {
             var shooter = McsBotPlayerData.LastHitShooter;
-            if (shooter == null || time - McsBotPlayerData.LastHitTime > HIT_SELECT_WINDOW || !shooter.HealthController.IsAlive)
+            if (shooter == null || time - McsBotPlayerData.LastHitTime > 2f || !shooter.HealthController.IsAlive)
             {
                 return;
             }
@@ -1024,11 +911,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        /// <summary>
-        /// 老板威胁接管：威胁窗口内的敌（攻击过老板优先，正瞄老板次之，GetLeadThreatEnemy 仲裁）
-        /// 存活且已认识时，强制设为 GoalEnemy
-        /// （对敌优先级核心：高威胁全员强制接管，优先级仅次于自身受击追溯；不依赖 CalcGoal 是否选出该候选）
-        /// </summary>
         private void TrySelectLeadThreatEnemy(float time)
         {
             var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
@@ -1056,11 +938,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        /// <summary>
-        /// 中威胁就近接管：从老板视野威胁列表（LeadVisibleEnemies，PlayerDataMgr 每秒按距老板升序刷新）
-        /// 取距自身最近且已认识的存活敌接管，仅在自身感官无可锁目标且当前无目标时使用
-        /// （老板有而 bot 没有的敌情兜底，列表为空/全部不认识时返回 false 维持原行为）
-        /// </summary>
         private bool TrySelectNearestLeadVisibleEnemy(float time)
         {
             var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
@@ -1107,9 +984,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        /// <summary>
-        /// 是否为老板威胁敌（委托 McsAILeadPlayer 威胁上下文判定，含威胁窗口过期检查）
-        /// </summary>
         private bool IsLeadThreatEnemy(IPlayer enemyPerson)
         {
             var mcsAILeadPlayer = McsBotPlayerData?.McsAILeadPlayer;
@@ -1121,9 +995,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return mcsAILeadPlayer.IsLeadThreatEnemy(enemyPerson);
         }
 
-        /// <summary>
-        /// 战斗掩体目标：优先用已刷新的可射击掩体点，其次查 hide 型掩体；限制距自身与队长的距离，已在位则返回 false
-        /// </summary>
         private bool TryGetCombatCoverTarget(Vector3 mcsLeadPlayerPos, out Vector3 coverPos)
         {
             coverPos = Vector3.zero;
@@ -1147,7 +1018,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) > SEEK_COVER_MAX_MOVE_SQUARE_DIST)
+            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) > (30f * 30f))
             {
                 return false;
             }
@@ -1157,7 +1028,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) <= SEEK_COVER_ARRIVE_SQUARE_DIST)
+            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) <= (1.5f * 1.5f))
             {
                 return false;
             }
@@ -1166,9 +1037,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return true;
         }
 
-        /// <summary>
-        /// 记录进入掩体的时刻（换掩体判定用）
-        /// </summary>
         private void TrackCoverEnter(float time)
         {
             if (BotOwner.Memory.IsInCover)
@@ -1184,19 +1052,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        /// <summary>
-        /// 带滞回的目标重算（多敌防抖）：不调 BotOwner.CalcGoal（它会无条件写 GoalEnemy），
-        /// 改用 EnemyChooser.FindDangerEnemy 只读预判最优敌，通过滞回判定才写入 Memory——
-        /// 拒绝切换时 setter 不触发、瞄准不被清空（原生防抖靠 3.3s 低频重算，MCS 0.1s 提频后必须自带滞回）。
-        /// 规则：当前敌不可见/不可射/死亡时无条件接受新目标；否则需过锁定窗（GOAL_SWITCH_LOCK_TIME）
-        /// 且新敌有距离优势（近 GOAL_SWITCH_ADVANTAGE 比例）。受击追溯选敌在滞回之前执行，不受影响。
-        /// 对敌优先级：老板威胁敌（威胁窗口内攻击过老板）豁免滞回——
-        /// 作为候选绕过锁定窗/距离优势直接接管，作为当前目标且存活时不被非威胁候选替换；
-        /// 自身感官无可锁目标且当前无目标时，从老板视野威胁列表（LeadVisibleEnemies）就近接管。
-        /// </summary>
         private void UpdateGoalEnemyWithHysteresis(float time)
         {
-            // 外部写入源（受击追溯/队长广播）可能已换目标：同步锁定记录（视为重新接受，锁定窗从现在起算）
             var currentGoalEnemy = BotOwner.Memory.GoalEnemy;
             var currentGoalId = currentGoalEnemy?.Person?.ProfileId;
             if (currentGoalId != _lastAcceptedGoalEnemyId)
@@ -1205,7 +1062,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 _lastAcceptedGoalSetTime = time;
             }
 
-            // 近身危险时对齐原生语义：清目标（原生 CalcGoalForBot 的 HaveCloseDanger 分支）
             if (BotOwner.Memory.DangerData.HaveCloseDanger)
             {
                 BotOwner.Memory.GoalEnemy = null;
@@ -1215,14 +1071,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var candidateEnemy = BotOwner.EnemyChooser.FindDangerEnemy();
             if (candidateEnemy == null)
             {
-                // 无可锁目标：对齐原生语义只在完全无目标时清空（保留丢敌后的压制射击等状态依赖）
                 if (BotOwner.Memory.GoalEnemy == null && BotOwner.Memory.HaveGoal)
                 {
                     BotOwner.Memory.GoalTarget.Clear();
                 }
 
-                // 中威胁就近接管：自身感官无可锁目标且当前无目标时，从老板视野威胁列表就近接管
-                // （老板有而 bot 没有的敌情兜底：老板视野内 45°/150m/LOS 可见的敌，按距自身最近接管）
                 if (currentGoalEnemy == null)
                 {
                     TrySelectNearestLeadVisibleEnemy(time);
@@ -1230,7 +1083,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            // 无当前目标或候选与当前相同 → 直接接受（首次锁定无滞回）
             if (currentGoalEnemy == null || currentGoalEnemy == candidateEnemy)
             {
                 AcceptGoalEnemy(candidateEnemy, time);
@@ -1241,35 +1093,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var currentAlive = currentPerson != null && currentPerson.HealthController != null && currentPerson.HealthController.IsAlive;
             var currentStillViable = currentAlive && currentGoalEnemy.IsVisible && currentGoalEnemy.CanShoot;
 
-            // 高威胁保持：当前目标为威胁窗口内攻击过老板的敌且存活时，不接受切向非高威胁候选
-            // （威胁敌短暂失视/失射时保持集火——压制射击/冲脸分支仍在处理该敌，不因距离劣势被拉走；死亡则落入下方失效分支换目标）
             if (currentAlive && IsLeadThreatEnemy(currentPerson) && !IsLeadThreatEnemy(candidateEnemy.Person))
             {
                 return;
             }
 
-            // 当前敌已失效（死亡/不可见/不可射）→ 接受新目标
             if (!currentStillViable)
             {
                 AcceptGoalEnemy(candidateEnemy, time);
                 return;
             }
 
-            // 高威胁豁免：候选为威胁窗口内攻击过老板的敌 → 绕过锁定窗与距离优势直接接管
-            // （兜底 CalcGoal 自身选出高威胁候选的场景，与 TrySelectLeadThreatEnemy 的每帧强制接管语义一致）
             if (IsLeadThreatEnemy(candidateEnemy.Person))
             {
                 AcceptGoalEnemy(candidateEnemy, time);
                 return;
             }
 
-            // 锁定窗内：不接受切换
             if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < GOAL_SWITCH_LOCK_TIME)
             {
                 return;
             }
 
-            // 锁定窗外：新敌须有距离优势（近 25% 以上）才允许切换
             if (candidateEnemy.IsVisible && candidateEnemy.CanShoot
                 && candidateEnemy.Distance <= currentGoalEnemy.Distance * GOAL_SWITCH_ADVANTAGE)
             {
@@ -1277,12 +1122,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            // 拒绝切换：保持当前目标（不写 Memory，setter 不触发，瞄准保留）
         }
 
-        /// <summary>
-        /// 接受新目标：写入 Memory 并刷新滞回锁定记录
-        /// </summary>
         private void AcceptGoalEnemy(EnemyInfo goalEnemy, float time)
         {
             BotOwner.Memory.GoalEnemy = goalEnemy;
@@ -1290,10 +1131,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             _lastAcceptedGoalSetTime = time;
         }
 
-        /// <summary>
-        /// 冲脸条件：敌距队长 ≤50m（保护，恢复旧层语义）或 bot 距敌 ≤15m 或敌脆弱（bot 敌人换弹/治疗中），
-        /// 且非重度压制、无阵位指令
-        /// </summary>
         private bool ShallRushEnemy(float enemyToLeadSqrDist, EnemyInfo goalEnemy, bool hasTravelTask, float botToEnemySqrDist = float.MaxValue)
         {
             if (McsBotPlayerData.IsHeavySuppressed)
@@ -1306,7 +1143,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (!hasTravelTask && (enemyToLeadSqrDist <= RUSH_PROTECT_LEAD_SQUARE_DIST || botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST))
+            if (!hasTravelTask && (enemyToLeadSqrDist <= (50f * 50f) || botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST))
             {
                 return true;
             }
@@ -1323,9 +1160,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        /// <summary>
-        /// 最近打到我的是否为当前敌人（压制射击的反压制窗口判定）
-        /// </summary>
         private bool IsShotByEnemyRecently(EnemyInfo goalEnemy, float time)
         {
             var shooter = McsBotPlayerData.LastHitShooter;
@@ -1333,12 +1167,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return false;
             }
-            return shooter.ProfileId == goalEnemy.Person.ProfileId && time - McsBotPlayerData.LastHitTime <= SUPPRESS_SHOT_AT_WINDOW;
+            return shooter.ProfileId == goalEnemy.Person.ProfileId && time - McsBotPlayerData.LastHitTime <= 6f;
         }
 
-        #endregion
 
-        #region 新 Logic 结束条件
 
         public override void InitActionMap()
         {
@@ -1349,7 +1181,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(McsStandAndShootLogic), EndShootFromPlace);
         }
 
-        public bool EndDogFight()
+        private bool EndDogFight()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
@@ -1357,12 +1189,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position) > DOGFIGHT_EXIT_SQUARE_DIST)
+            if (BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position) > (20f * 20f))
             {
                 return true;
             }
 
-            if (!goalEnemy.IsVisible && Time.time - GetEnemyLastSeenTime() > DOGFIGHT_UNSEEN_EXIT)
+            if (!goalEnemy.IsVisible && Time.time - GetEnemyLastSeenTime() > 8f)
             {
                 return true;
             }
@@ -1370,7 +1202,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public bool EndSuppressFire()
+        private bool EndSuppressFire()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy == null || goalEnemy.Person == null)
@@ -1398,7 +1230,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        public bool EndCoverPeak()
+        private bool EndCoverPeak()
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
@@ -1414,7 +1246,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        #endregion
 
         private bool TryRefreshCommonTarget(Vector3? targetPos, float time)
         {
@@ -1470,7 +1301,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
 
-            // 固定武器操控不让渡SAIN（原McsFightLayer.IsActive语义）
             if (mcsBotPlayerData != null && mcsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
             {
                 return true;
@@ -1480,7 +1310,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
                 var enemyExist = goalEnemy != null && goalEnemy.Person != null;
-                // 使护航下的Zyriachy无视目标处于灯塔限定区域时才可视为敌人的限制
                 if (BotOwner.Profile.Info.Settings.Role is WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
                 {
                     if (enemyExist)
@@ -1495,9 +1324,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
                 if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled && SAINUtils.GetSAINBot(BotOwner) != null)
                 {
-                    // 威胁收回让渡：威胁窗口内有威胁敌（攻击过/正瞄老板）时保持本层接管，
-                    // 高威胁接管/滞回豁免全套生效，避免 SAIN 区（敌距老板<48m）内注入的目标被 SAIN 决策冲掉；
-                    // 威胁窗口过后恢复按距离让渡
                     if (mcsBotPlayerData?.McsAILeadPlayer?.GetLeadThreatEnemy() != null)
                     {
                         _deferToSain = false;

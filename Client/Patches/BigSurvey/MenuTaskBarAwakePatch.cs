@@ -161,10 +161,6 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
         }
     }
 
-    /// <summary>
-    /// 构建按对局分组的 Brain/Layer/Reason 报告（战局信息为表头，其下并列三个分支；新局在前；
-    /// 计数为采样次数，每秒每护航 +1）。无任何对局记录时仅输出 Non-Host（非主机无 Bot 运算、无数据）
-    /// </summary>
     private static string BuildRaidUsedInfoSections()
     {
         var sectionsBuilder = new StringBuilder();
@@ -188,9 +184,6 @@ public sealed class MenuTaskBarAwakePatch : ModulePatch
         return sectionsBuilder.ToString();
     }
 
-    /// <summary>
-    /// 格式化单分支的采样条目（空分支显示 Non-Host）
-    /// </summary>
     private static string FormatRaidUsedEntries(IEnumerable<KeyValuePair<string, int>> entries)
     {
         if (entries == null || !entries.Any())

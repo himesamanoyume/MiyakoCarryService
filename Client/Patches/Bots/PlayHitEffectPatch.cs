@@ -46,7 +46,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
                     if (mcsBotPlayer.Position.McsSqrDistance(info.HitPoint) <= botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST * botOwner.Settings.FileSettings.Mind.BULLET_FEEL_CLOSE_SDIST)
                     {
-                        // 弹着点逼近：近失也累积压制值（借鉴 SAIN CheckAddSuppression 按距离衰减思路的轻量版）
                         var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
                         if (mcsBotPlayerData != null)
                         {

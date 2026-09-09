@@ -59,9 +59,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            // 组镜像敌意：任何外部组把老板/护航加为敌人 → 该老板的全部护航组反向把该组全员加为敌
-            // （护航对威胁老板的势力有敌对反应，不再"老板被打护航还中立"；__instance 含护航成员时
-            // Prefix 已拦截 MCS 系入敌，能走到这里的 __instance 必为外部组）
             if (McsMgr.IsMcsLeadPlayer(person.ProfileId) || McsMgr.IsMcsBotPlayer(person.ProfileId))
             {
                 MirrorHostilityToSquadGroups(__instance, person);
@@ -104,8 +101,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         continue;
                     }
 
-                    // AI 攻击者：镜像传播其所在组全体成员；人类玩家攻击者（无 BotOwner）：仅传播攻击者本身
-                    // （统一传 Player 本体做键：原生自然目击流程按 Player 键入 EnemyInfos，BotOwner 键会造成同敌双份记录）
                     var attackerGroup = person.AIData?.BotOwner?.BotsGroup;
                     if (attackerGroup != null)
                     {
@@ -126,10 +121,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
         }
 
-        /// <summary>
-        /// 组镜像敌意传播：把敌视组（hostileGroup）的全体成员加为该老板的老板组与全部护航组的敌人。
-        /// person 为老板时镜像到其 squad；为护航时镜像到其所属老板的 squad（解除"护航被敌视但 squad 无反应"）
-        /// </summary>
         private static void MirrorHostilityToSquadGroups(BotsGroup hostileGroup, IPlayer mcsPerson)
         {
             var mcsLeadPlayerId = McsMgr.IsMcsLeadPlayer(mcsPerson.ProfileId)
@@ -149,14 +140,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
             _isPropagating = true;
             try
             {
-                // 老板组
                 var leadGroup = mcsAILeadPlayer.McsLeadPlayer.BotsGroup;
                 if (leadGroup != null)
                 {
                     AddGroupMembersAsEnemy(leadGroup, hostileGroup);
                 }
 
-                // 各护航组（与老板组同组时跳过）
                 var mcsBotPlayers = McsMgr.GetAllMcsSquadMembersByMcsLeadId(mcsLeadPlayerId);
                 foreach (var mcsBotPlayer in mcsBotPlayers)
                 {
@@ -175,10 +164,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
         }
 
-        /// <summary>
-        /// 把 hostileGroup 的全体存活成员加为 targetGroup 的敌人（组镜像敌意的单组传播，
-        /// 统一传 Player 本体做键，与原生自然目击流程的 EnemyInfos 键一致）
-        /// </summary>
         private static void AddGroupMembersAsEnemy(BotsGroup targetGroup, BotsGroup hostileGroup)
         {
             foreach (var hostileMember in hostileGroup._members)

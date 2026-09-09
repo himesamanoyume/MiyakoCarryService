@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Comfort.Common;
@@ -12,28 +11,15 @@ namespace MiyakoCarryService.Client.Utils
 {
     internal sealed class LogBuffer
     {
-        /// <summary>
-        /// 按对局保留的 Brain/Layer/Reason 采样记录（跨对局不清空，分开显示）
-        /// </summary>
         internal sealed class RaidUsedInfo
         {
             public int RaidIndex;
             public string LocationId;
-
-            /// <summary>
-            /// 绑定的 GameWorld 实例 ID（脚本引擎 raid 中重载时同局延续，不重复建记录）
-            /// </summary>
             public int GameWorldInstanceId;
-
             public ConcurrentDictionary<string, int> UsedBrains = new();
             public ConcurrentDictionary<string, int> UsedLayers = new();
             public ConcurrentDictionary<string, int> UsedReasons = new();
         }
-
-        /// <summary>
-        /// 保留的最大对局记录数（超限丢最旧，防内存无限增长）
-        /// </summary>
-        private const int MAX_RAID_RECORDS = 8;
 
         private readonly ConcurrentDictionary<string, LogEntry> _entries = new();
         private int _newBigSurveyCount = 0;
@@ -55,10 +41,6 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        /// <summary>
-        /// 开启一条新对局记录（旧的保留用于分局显示）。幂等：同一 GameWorld 实例不重复创建
-        /// （脚本引擎 raid 中重载后新协程发现同局则延续，数据不分裂）。
-        /// </summary>
         public void BeginRaid(int gameWorldInstanceId)
         {
             lock (_raidRecordsLock)
@@ -76,18 +58,13 @@ namespace MiyakoCarryService.Client.Utils
                     GameWorldInstanceId = gameWorldInstanceId,
                 };
                 _raidRecords.Add(_currentRaidRecord);
-                if (_raidRecords.Count > MAX_RAID_RECORDS)
+                if (_raidRecords.Count > 8)
                 {
                     _raidRecords.RemoveAt(0);
                 }
             }
         }
 
-        /// <summary>
-        /// 确保当前对局记录与指定 GameWorld 匹配：相同→延续（返回 true）；不同或无当前记录→创建新记录
-        /// （数据驱动创建：由 RecordAgentInfo 检测到有效 Brain 数据时调用——主机执行 Bot 运算才有数据，
-        /// 副机永远不触发，天然区分主副机且不受 IsHost 置位时序影响）
-        /// </summary>
         public bool EnsureCurrentRaid(int gameWorldInstanceId)
         {
             lock (_raidRecordsLock)
@@ -144,9 +121,6 @@ namespace MiyakoCarryService.Client.Utils
             });
         }
 
-        /// <summary>
-        /// 全部对局记录快照（新局在前，供 BigSurvey 分局显示）
-        /// </summary>
         public List<RaidUsedInfo> GetRaidUsedInfos()
         {
             lock (_raidRecordsLock)

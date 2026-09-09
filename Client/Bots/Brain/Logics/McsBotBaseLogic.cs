@@ -366,17 +366,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             await Task.Delay(TimeSpan.FromMilliseconds(time * 1000f));
         }
 
-        /// <summary>
-        /// 朝指定点瞄准并在瞄准就绪后扣动扳机（压制射击/走射/探头射击共用的轻量射击驱动）
-        /// 对齐原版 Aiming.FindPointToShoot 行为：SetTarget 后必须调 AimingManager.NodeUpdate() 推进瞄准状态机，
-        /// 否则 Status 永远停在 Aiming、IsReady 永远 false，bot 会一直举枪但永不开火。
-        /// </summary>
-        /// <param name="targetPos">瞄准点</param>
-        /// <param name="requireClearShot">
-        /// 直射场景传 true（默认）：GoalEnemy.CanShoot 为 false（敌人半可见、可打部位全被遮挡）时不扣扳机，
-        /// 只保持瞄准（对齐原版 AttackMoving.AimingAndShoot / ShootFromPlace.CheckCanShoot 的 CanShoot 门控，
-        /// 避免持续朝墙开火）；压制射击/盲射场景传 false：有意朝最后已知位置压制（允许糊墙，压制语义）
-        /// </param>
         protected bool AimAndShootAtPoint(Vector3 targetPos, bool requireClearShot = true)
         {
             var goalEnemy = BotOwner.Memory.GoalEnemy;
@@ -404,7 +393,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return false;
             }
 
-            // 友军安全检查（对齐原版 Shoot 节点：弹道命中友军则停火）
             var weaponRootPos = BotOwner.GetPlayer.PlayerBones.WeaponRoot.position;
             if (BotOwner.ShootData.CheckFriendlyFire(weaponRootPos, currentAiming.RealTargetPoint))
             {
@@ -415,10 +403,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             return BotOwner.ShootData.Shoot();
         }
 
-        /// <summary>
-        /// 侧身（对齐原版 BotTilt.Set：±5f 满幅；force=false 平滑过渡，与原版各 MovementState 行为一致）
-        /// </summary>
-        /// <param name="direction">-1 左 / 1 右 / 0 回正</param>
         protected void TiltToSide(int direction)
         {
             var movementContext = BotOwner.GetPlayer?.MovementContext;
