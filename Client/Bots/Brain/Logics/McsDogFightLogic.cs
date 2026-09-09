@@ -16,16 +16,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private float _dogFightPhaseEndTime = 0f;
         private int _dogFightTiltDirection = 1;
         private Vector3 _backupTarget = Vector3.zero;
-        private float _nextJumpTime = 0f;
         private float _nextPathUpdateTime = 0f;
-        private const float STRAFE_SPEED = 0.5f;
         private const float BACKUP_DISTANCE = 3f;
         private const float BACKUP_RANDOM_RADIUS = 2f;
         private const float PATH_UPDATE_INTERVAL = 0.4f;
 
         public McsDogFightLogic(BotOwner botOwner) : base(botOwner)
         {
-            
+
         }
 
         public override void Start()
@@ -35,7 +33,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _dogFightPhaseEndTime = 0f;
             _dogFightTiltDirection = Random.value < 0.5f ? -1 : 1;
             _backupTarget = Vector3.zero;
-            _nextJumpTime = 0f;
             _nextPathUpdateTime = 0f;
         }
 
@@ -81,7 +78,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private void UpdateMovingToEnemyPhase(EnemyInfo goalEnemy)
         {
             BotOwner.Sprint(false, false);
-            BotOwner.SetTargetMoveSpeed(STRAFE_SPEED);
+            BotOwner.SetTargetMoveSpeed(0.5f);
             BotOwner.SetPose(1f);
 
             var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
@@ -97,16 +94,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 _nextPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;
                 BotOwner.GoToPoint(goalEnemy.Person.Position, true, -1f, false, false, true, false, false);
-            }
-
-            if (goalEnemy.IsVisible
-                && botToEnemySqrDist >= (1.5f * 1.5f)
-                && botToEnemySqrDist <= (6f * 6f)
-                && Time.time >= _nextJumpTime
-                && MyExtensions.IsTrue100(35f))
-            {
-                _nextJumpTime = Time.time + 3f;
-                BotOwner.GetPlayer?.MovementContext?.TryJump();
             }
 
             if (goalEnemy.IsVisible)

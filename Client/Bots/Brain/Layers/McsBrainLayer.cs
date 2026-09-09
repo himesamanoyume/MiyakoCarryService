@@ -17,7 +17,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         }
 
-        private float _contactTime = 0f;
         private float _nextRecalcGoalTime = 0f;
         private bool _deferToSain = false;
         private float _goToStationaryStuckTime = -999f;
@@ -27,7 +26,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         private const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
         private const float ARRIVE_DIST = 2.5f;
         private const float LOOK_AROUND_TIME = 2f;
-        private const float STUCK_TIMEOUT = 8f;
         private int _isTurnRight = 1;
 
         private static readonly string[] _travelTaskIntents =
@@ -42,37 +40,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             Intents.ShouldDropTargetLoot,
         };
 
-
-
-
-
-
         private const float SUPPRESS_TIME_SINCE_SEEN = 3f;
-
-
-
         private const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
-
-
-
         private const float SHIFT_COVER_MIN_TIME = 6f;
-
-
-
-
-        private const float GOAL_SWITCH_LOCK_TIME = 2f;
-
-        private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
-
         private string _holdGroundEnemyId = null;
         private float _holdGroundStartTime = 0f;
         private float _holdGroundDuration = 0f;
         private float _lastEnemyVisibleTime = -999f;
         private float _coverEnterTime = 0f;
-
         private string _lastAcceptedGoalEnemyId = null;
         private float _lastAcceptedGoalSetTime = -999f;
-
+        private float _nextRushJumpTime = 0f;
 
         public override Action GetNextAction()
         {
@@ -513,6 +491,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST && ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask))
                                 {
+                                    TryRushJump(goalEnemy, time);
                                     return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemyNear");
                                 }
 
@@ -525,6 +504,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                                 if (ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask))
                                 {
+                                    TryRushJump(goalEnemy, time);
                                     return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                                 }
 
@@ -604,6 +584,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                             if (ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask, botToEnemySqrDist))
                             {
+                                TryRushJump(goalEnemy, time);
                                 return new Action(typeof(RunToEnemyLogic), "Mcs:RushEnemy");
                             }
 
@@ -697,7 +678,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     McsBotPlayerData.TargetPos = targetPos;
 
                     var arrived = BotOwner.Position.McsSqrDistance(targetPos) <= ARRIVE_DIST * ARRIVE_DIST;
-                    var stuck = BotOwner.Mover._lastTimePosChanged + STUCK_TIMEOUT < time;
+                    var stuck = BotOwner.Mover._lastTimePosChanged + 8f < time;
 
                     if (arrived || stuck)
                     {
@@ -1110,13 +1091,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < GOAL_SWITCH_LOCK_TIME)
+            if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < 2f)
             {
                 return;
             }
 
             if (candidateEnemy.IsVisible && candidateEnemy.CanShoot
-                && candidateEnemy.Distance <= currentGoalEnemy.Distance * GOAL_SWITCH_ADVANTAGE)
+                && candidateEnemy.Distance <= currentGoalEnemy.Distance * 0.75f)
             {
                 AcceptGoalEnemy(candidateEnemy, time);
                 return;
@@ -1158,6 +1139,38 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 冲脸跳跃（借鉴 SAIN RushEnemyAction.checkJump）：全速冲脸途中 bot 距敌近身区间时
+        /// 概率起跳翻越障碍。只看距离（不要求敌可见——Rush 分支本就发生在敌不可见/不可安全开火时），
+        /// TryJump 内部自检 CanJump（体力/治疗/禁跳状态）。
+        /// </summary>
+        private void TryRushJump(EnemyInfo goalEnemy, float time)
+        {
+            if (goalEnemy?.Person == null)
+            {
+                return;
+            }
+
+            var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
+            if (botToEnemySqrDist < 1.5f * 1.5f || botToEnemySqrDist > 6f * 6f)
+            {
+                return;
+            }
+
+            if (time < _nextRushJumpTime)
+            {
+                return;
+            }
+
+            if (!MyExtensions.IsTrue100(35f))
+            {
+                return;
+            }
+
+            _nextRushJumpTime = time + 3f;
+            BotOwner.GetPlayer?.MovementContext?.TryJump();
         }
 
         private bool IsShotByEnemyRecently(EnemyInfo goalEnemy, float time)

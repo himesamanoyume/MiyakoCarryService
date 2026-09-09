@@ -7,8 +7,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     public class AttackMovingOverrideLogic : AttackMoving
     {
         private float _lastPathUpdateTime = 0f;
-        private const float PATH_UPDATE_INTERVAL = 0.5f;
-
         public AttackMovingOverrideLogic(BotOwner bot) : base(bot)
         {
 
@@ -40,7 +38,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             if (_lastPathUpdateTime < Time.time)
             {
-                _lastPathUpdateTime = Time.time + PATH_UPDATE_INTERVAL;
+                _lastPathUpdateTime = Time.time + 0.5f;
 
                 var directionToEnemy = (goalEnemy.Person.Position - _owner.Position).normalized;
                 var targetPosition = goalEnemy.Person.Position - directionToEnemy * 3f;
@@ -60,7 +58,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     _owner.WeaponManager.UnderbarrelLauncherController.TryEnable(null);
                 }
-                // 使用原版的瞄准逻辑  
                 base.AimingAndShoot(data);
                 return;
             }
