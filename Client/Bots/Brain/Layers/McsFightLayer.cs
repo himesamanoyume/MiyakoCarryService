@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
+    [Obsolete]
     public class McsFightLayer : McsBaseLayer
     {
         public float _contactTime = 0f;

@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
+    [Obsolete]
     public class McsEscortLayer : McsBaseLayer
     {
         public McsEscortLayer(BotOwner botOwner, int priority) : base(botOwner, priority)

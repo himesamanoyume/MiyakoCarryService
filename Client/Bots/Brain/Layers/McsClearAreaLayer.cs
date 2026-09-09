@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
+    [Obsolete]
     public class McsClearAreaLayer : McsBaseLayer
     {
         private const float ARRIVE_DIST = 2.5f;

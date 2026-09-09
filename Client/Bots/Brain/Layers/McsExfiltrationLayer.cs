@@ -6,6 +6,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
+    [Obsolete]
     public class McsExfiltrationLayer : McsBaseLayer
     {
         public McsExfiltrationLayer(BotOwner botOwner, int priority) : base(botOwner, priority)

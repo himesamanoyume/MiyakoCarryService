@@ -5,6 +5,7 @@ using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Layers
 {
+    [Obsolete]
     public class McsAvoidDangerLayer : McsBaseLayer
     {
         public McsAvoidDangerLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
