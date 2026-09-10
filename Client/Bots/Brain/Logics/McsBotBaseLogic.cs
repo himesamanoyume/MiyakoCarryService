@@ -411,5 +411,50 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 movementContext.SetTilt(direction * 5f, false);
             }
         }
+
+        protected int CalcAvoidTiltDirection(Vector3 enemyPos)
+        {
+            var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
+            if (closestFriend == null || sqrDist >= 1f)
+            {
+                return MyExtensions.RandomSing();
+            }
+
+            var toEnemy = (enemyPos - BotOwner.Position).normalized;
+            var toFriend = (closestFriend.Position - BotOwner.Position).normalized;
+            var crossY = Vector3.Cross(toEnemy, toFriend).y;
+            if (crossY > 0.1f)
+            {
+                return -1;
+            }
+            if (crossY < -0.1f)
+            {
+                return 1;
+            }
+
+            return MyExtensions.RandomSing();
+        }
+
+        protected void SetLeftStanceShoulder(bool enabled, int tiltDirection)
+        {
+            var player = BotOwner.GetPlayer;
+            var movementContext = player?.MovementContext;
+            var stance = movementContext?.LeftStanceController;
+            if (stance == null || player.HandsController is not Player.FirearmController fireCont)
+            {
+                return;
+            }
+
+            if (fireCont.Weapon.IsStationaryWeapon || fireCont.Weapon.BlockLeftStance || movementContext.IsInPronePose)
+            {
+                return;
+            }
+
+            if (stance.LeftStance != enabled)
+            {
+                stance.SetLeftStanceForce(enabled);
+            }
+            TiltToSide(tiltDirection);
+        }
     }
 }

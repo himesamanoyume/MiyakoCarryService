@@ -14,19 +14,27 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public BlindFireBlockedLogic(BotOwner botOwner) : base(botOwner)
         {
-            _tiltDirection = MyExtensions.RandomSing();
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy?.Person != null)
+            {
+                _tiltDirection = CalcAvoidTiltDirection(goalEnemy.Person.Position);
+            }
+            else
+            {
+                _tiltDirection = MyExtensions.RandomSing();
+            }
         }
 
         public override void Start()
         {
             base.Start();
-            TiltToSide(_tiltDirection);
+            SetLeftStanceShoulder(_tiltDirection == -1, _tiltDirection);
         }
 
         public override void Stop()
         {
             base.Stop();
-            TiltToSide(0);
+            SetLeftStanceShoulder(false, 0);
         }
 
         public override void Update(CustomLayer.ActionData data)
@@ -39,7 +47,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             BotOwner.Sprint(false, false);
             BotOwner.SetPose(1f);
-            TiltToSide(_tiltDirection);
+            SetLeftStanceShoulder(_tiltDirection == -1, _tiltDirection);
 
             if (_nextAimUpdateTime < Time.time)
             {

@@ -193,7 +193,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(GoToBtrLogic), EndGoToBtr);
             RegisterAction(typeof(DogFightLogic), EndDogFight);
             RegisterAction(typeof(SuppressFireLogic), EndSuppressFire);
-            RegisterAction(typeof(BlindFireBlockedLogic), EndSuppressFire);
+            RegisterAction(typeof(BlindFireBlockedLogic), EndBlindFireBlocked);
             RegisterAction(typeof(CoverPeakLogic), EndCoverPeak);
             RegisterAction(typeof(StandAndShootLogic), EndShootFromPlace);
         }
@@ -2288,6 +2288,36 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (timeSinceSeen > SUPPRESS_TIME_SINCE_SEEN && !IsShotByEnemyRecently(goalEnemy, time))
             {
                 return true;
+            }
+
+            return false;
+        }
+
+        public virtual bool EndBlindFireBlocked()
+        {
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy == null || goalEnemy.Person == null)
+            {
+                return true;
+            }
+
+            if (!goalEnemy.IsVisible)
+            {
+                return true;
+            }
+
+            if (!BotOwner.WeaponManager.HaveBullets)
+            {
+                return true;
+            }
+
+            if (CanShootNow())
+            {
+                var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
+                if (sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id)
+                {
+                    return true;
+                }
             }
 
             return false;

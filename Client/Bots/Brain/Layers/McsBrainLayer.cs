@@ -394,9 +394,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         BotOwner.WeaponManager.UnderbarrelLauncherController.TryReload();
                     }
 
-                    var isProtectWantKill = ProtectWantKill();
-                    var isProtectCareKill = ProtectCareKill();
-
                     McsBotPlayerData.UpdateSuppressionDecay();
                     TrySelectLastHitShooter(time);
 
