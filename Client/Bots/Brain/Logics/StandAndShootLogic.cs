@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 重点参考了SAIN
     /// </summary>
-    public class McsStandAndShootLogic : McsBotBaseLogic
+    public class StandAndShootLogic : McsBotBaseLogic
     {
         private ShootFromPlace _baseLogic;
         private float _nextStrafeCheckTime = 0f;
@@ -18,7 +18,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private Vector3 _strafeTarget = Vector3.zero;
         private const float STRAFE_DURATION = 2.5f;
 
-        public McsStandAndShootLogic(BotOwner botOwner) : base(botOwner)
+        public StandAndShootLogic(BotOwner botOwner) : base(botOwner)
         {
             _baseLogic = new(botOwner);
         }

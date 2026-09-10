@@ -4,7 +4,6 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
-using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -16,41 +15,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
 
         }
-
-        private float _nextRecalcGoalTime = 0f;
-        private bool _deferToSain = false;
-        private float _goToStationaryStuckTime = -999f;
-        private float _lastSqrToOperator = float.MaxValue;
-        private float _lastCanShootTime = -999f;
-        private const float CAN_SHOOT_HOLD_TIME = 2f;
-        private const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
-        private const float ARRIVE_DIST = 2.5f;
-        private const float LOOK_AROUND_TIME = 2f;
-        private int _isTurnRight = 1;
-
-        private static readonly string[] _travelTaskIntents =
-        {
-            Intents.ShouldQuestProxyAction,
-            Intents.ShouldLootProxyAction,
-            Intents.ShouldInteractionProxyAction,
-            Intents.ShouldStationaryWeaponProxyAction,
-            Intents.ShouldEscort,
-            Intents.ShouldEscortToBtr,
-            Intents.ShouldGoToPoint,
-            Intents.ShouldDropTargetLoot,
-        };
-
-        private const float SUPPRESS_TIME_SINCE_SEEN = 3f;
-        private const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
-        private const float SHIFT_COVER_MIN_TIME = 6f;
-        private string _holdGroundEnemyId = null;
-        private float _holdGroundStartTime = 0f;
-        private float _holdGroundDuration = 0f;
-        private float _lastEnemyVisibleTime = -999f;
-        private float _coverEnterTime = 0f;
-        private string _lastAcceptedGoalEnemyId = null;
-        private float _lastAcceptedGoalSetTime = -999f;
-        private float _nextRushJumpTime = 0f;
 
         public override Action GetNextAction()
         {
@@ -100,7 +64,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(GoToCoverPointLogic), "Mcs:PeaceSmoke");
                 }
 
-                if (BotOwner.BewarePlantedMine.CanDeactivate())
+                if (!IsApproachingThreat() && BotOwner.BewarePlantedMine.CanDeactivate())
                 {
                     return new Action(typeof(DeactivateMineLogic), "Mcs:DeactivateMine");
                 }
@@ -117,7 +81,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return new Action(typeof(HoldPositionLogic), "Mcs:LeadPlayerNull");
                 }
 
-                var hasTravelTask = McsBotPlayerData.HasAnyIntent(_travelTaskIntents);
+                var hasTravelTask = McsBotPlayerData.HasAnyIntent(Classification.TravelTaskIntents);
                 var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE))
                     || IsApproachingThreat();
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
@@ -166,32 +130,31 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         var btrController = Singleton<GameWorld>.Instance.BtrController;
                         var side = btrController.BtrView.GetBtrSide(1);
-                        if (side == null)
+                        if (side != null)
                         {
-                            return new Action(typeof(HoldPositionLogic), "Mcs:CannotFindBtrSide");
-                        }
-
-                        var doorPos = side.GoInPoints().Item1;
-                        if (_nextUpdatePosTime < time)
-                        {
-                            McsBotPlayerData.TargetPos = doorPos;
-                            UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
-                            _nextUpdatePosTime = time + nextTime;
-                        }
-
-                        if (_currentMoveTarget.HasValue)
-                        {
-                            ApplyMovePoint();
-                            if (needHeal)
+                            var doorPos = side.GoInPoints().Item1;
+                            if (_nextUpdatePosTime < time)
                             {
-                                RefreshStuckTimer();
-                                return new Action(typeof(HealLogic), "Mcs:HealWhileEscort");
+                                McsBotPlayerData.TargetPos = doorPos;
+                                UpdateEscortMoveTarget(McsBotPlayerData.TargetPos, out float nextTime);
+                                _nextUpdatePosTime = time + nextTime;
                             }
-                            return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
+
+                            if (_currentMoveTarget.HasValue)
+                            {
+                                ApplyMovePoint();
+                                if (needHeal)
+                                {
+                                    RefreshStuckTimer();
+                                    return new Action(typeof(HealLogic), "Mcs:HealWhileEscort");
+                                }
+                                return new Action(typeof(EscortToPointByWayLogic), "Mcs:EscortToBtr");
+                            }
                         }
                     }
 
-                    if ((McsBotPlayerData.HasIntent(Intents.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue) || McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr))
+                    if ((McsBotPlayerData.HasIntent(Intents.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
+                        || (McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr) && Singleton<GameWorld>.Instance.BtrController.BtrView.GetBtrSide(1) != null))
                     {
                         if (TryRefreshEscortTarget(McsBotPlayerData.TargetPos, time))
                         {
@@ -290,16 +253,44 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
 
-                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
+                        // 无敌人：先追溯选目标（被攻击时能锁定攻击者还击），仍 null → 留位扫视
+                        if (goalEnemy == null)
                         {
-                            BotOwner.ShootData.EndShoot();
-                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                            TrySelectLastHitShooter(time);
+                            TrySelectLeadThreatEnemy(time);
+                            goalEnemy = BotOwner.Memory.GoalEnemy;
                         }
 
                         if (goalEnemy == null)
                         {
                             ScanSector(stationaryWeaponLink);
+                            return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
                         }
+
+                        if (isEnemyAtSector)
+                        {
+                            if (stationaryWeaponLink.HaveAmmo()
+                                && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary
+                                && goalEnemy.CanShoot
+                                && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))
+                            {
+                                if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
+                                {
+                                    McsBotPlayerData.RemoveIntent(Intents.ShouldHoldPosition);
+                                }
+                                BotOwner.ShootData.EndShoot();
+                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
+                            }
+
+                            ScanSector(stationaryWeaponLink);
+                            return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
+                        }
+
+                        if (stationary.Taken)
+                        {
+                            stationary.DropCurWeapon(false, true);
+                        }
+                        McsBotPlayerData.AddIntent(Intents.ShouldHoldPosition);
                     }
                 }
                 else
@@ -371,7 +362,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (haveBullets.Value && IsShootFromCoverConditionAllFine())
                     {
-                        return new Action(typeof(McsCoverPeakLogic), "Mcs:CoverPeak");
+                        return new Action(typeof(CoverPeakLogic), "Mcs:CoverPeak");
                     }
 
                     if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= time && GetCrossPoint(goalEnemy))
@@ -410,6 +401,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     TrySelectLastHitShooter(time);
 
                     TrySelectLeadThreatEnemy(time);
+                    goalEnemy = BotOwner.Memory.GoalEnemy;
 
                     UpdateCoverToShoot();
 
@@ -419,11 +411,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
                     else
                     {
-                        if (mcsLeadPlayerPos == null)
-                        {
-                            return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
-                        }
-
                         var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
                         var enemyToLeadSqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
 
@@ -437,13 +424,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                             && (time - _lastEnemyVisibleTime <= 1f || time - McsBotPlayerData.LastHitTime <= 2f)
                             && !McsBotPlayerData.HasAnyIntent(Intents.ShouldHoldPosition, Intents.ShouldFollowMe, Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon))
                         {
-                            return new Action(typeof(McsDogFightLogic), "Mcs:DogFight");
+                            return new Action(typeof(DogFightLogic), "Mcs:DogFight");
                         }
 
                         var safeFire = false;
+                        BotOwner closestFriend = null;
+                        var sqrDist = float.MaxValue;
                         if (canShootNow)
                         {
-                            var closestFriend = BotOwner.Covers.GetClosestFriend(out var sqrDist);
+                            closestFriend = BotOwner.Covers.GetClosestFriend(out sqrDist);
                             safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                         }
 
@@ -482,7 +471,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 }
                                 else
                                 {
-                                    return new Action(typeof(McsStandAndShootLogic), "Mcs:StandAndShoot");
+                                    return new Action(typeof(StandAndShootLogic), "Mcs:StandAndShoot");
                                 }
                             }
                             else
@@ -499,7 +488,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 var shotByThisEnemy = IsShotByEnemyRecently(goalEnemy, time);
                                 if (timeSinceSeen <= SUPPRESS_TIME_SINCE_SEEN || shotByThisEnemy)
                                 {
-                                    return new Action(typeof(McsSuppressFireLogic), "Mcs:SuppressFire");
+                                    return new Action(typeof(SuppressFireLogic), "Mcs:SuppressFire");
                                 }
 
                                 if (ShallRushEnemy(enemyToLeadSqrDist, goalEnemy, hasTravelTask))
@@ -569,6 +558,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                     }
                                 }
                             }
+                        }
+                        else if (goalEnemy.IsVisible && haveBullets.Value && !McsBotPlayerData.HasIntent(Intents.ShouldUseStationaryWeapon))
+                        {
+                            if (closestFriend != null && sqrDist < 0.5f * 0.5f)
+                            {
+                                return new Action(typeof(HoldPositionLogic), "Mcs:MonitorBlockedLine");
+                            }
+
+                            if (TryGetCombatCoverTarget(mcsLeadPlayerPos, out var flankCoverPos))
+                            {
+                                UpdateCommonMoveTarget(flankCoverPos, out var flankNextTime);
+                                if (_currentMoveTarget.HasValue)
+                                {
+                                    ApplyMovePoint();
+                                    return new Action(typeof(GoToPointLogic), "Mcs:FlankForClearShot");
+                                }
+                            }
+
+                            return new Action(typeof(BlindFireBlockedLogic), "Mcs:BlindFireBlockedLine");
                         }
                         else
                         {
@@ -724,11 +732,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 #endregion
                 #region McsCommonLayer
 
-                if (mcsLeadPlayerPos == null)
-                {
-                    return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
-                }
-
                 if (McsBotPlayerData.HasIntent(Intents.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
                     if (TryRefreshLeadTarget(mcsLeadPlayerPos, time))
@@ -844,460 +847,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-
-        private void UpdateHoldGroundTimer(EnemyInfo goalEnemy, float time)
-        {
-            var enemyId = goalEnemy.Person?.ProfileId;
-            if (_holdGroundEnemyId != enemyId)
-            {
-                _holdGroundEnemyId = enemyId;
-                _holdGroundStartTime = time;
-                _holdGroundDuration = 4f * UnityEngine.Random.Range(0.66f, 1.5f);
-            }
-        }
-
-        private bool IsEnemyLookingAtMe(EnemyInfo goalEnemy)
-        {
-            var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
-            if (enemyBotOwner != null && enemyBotOwner.BotState != EBotState.NonActive)
-            {
-                var enemyGoalEnemy = enemyBotOwner.Memory?.GoalEnemy;
-                if (enemyGoalEnemy?.Person == null)
-                {
-                    return false;
-                }
-                return enemyGoalEnemy.Person.ProfileId == BotOwner.ProfileId;
-            }
-            return true;
-        }
-
-        private void TrySelectLastHitShooter(float time)
-        {
-            var shooter = McsBotPlayerData.LastHitShooter;
-            if (shooter == null || time - McsBotPlayerData.LastHitTime > 2f || !shooter.HealthController.IsAlive)
-            {
-                return;
-            }
-
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy != null && goalEnemy.Person?.ProfileId == shooter.ProfileId)
-            {
-                return;
-            }
-
-            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(shooter, out var enemyInfo))
-            {
-                BotOwner.Memory.GoalEnemy = enemyInfo;
-                _nextRecalcGoalTime = 0f;
-            }
-        }
-
-        private void TrySelectLeadThreatEnemy(float time)
-        {
-            var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
-            if (mcsAILeadPlayer == null)
-            {
-                return;
-            }
-
-            var threatEnemy = mcsAILeadPlayer.GetLeadThreatEnemy();
-            if (threatEnemy == null)
-            {
-                return;
-            }
-
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy != null && goalEnemy.Person?.ProfileId == threatEnemy.ProfileId)
-            {
-                return;
-            }
-
-            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(threatEnemy, out var enemyInfo))
-            {
-                BotOwner.Memory.GoalEnemy = enemyInfo;
-                _nextRecalcGoalTime = 0f;
-            }
-        }
-
-        private bool TrySelectNearestLeadVisibleEnemy(float time)
-        {
-            var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
-            if (mcsAILeadPlayer == null)
-            {
-                return false;
-            }
-
-            var leadVisibleEnemies = mcsAILeadPlayer.LeadVisibleEnemies;
-            if (leadVisibleEnemies == null || leadVisibleEnemies.Count == 0)
-            {
-                return false;
-            }
-
-            EnemyInfo nearestEnemyInfo = null;
-            var minSqrDistance = float.MaxValue;
-            foreach (var leadVisibleEnemy in leadVisibleEnemies)
-            {
-                if (leadVisibleEnemy == null || !leadVisibleEnemy.HealthController.IsAlive)
-                {
-                    continue;
-                }
-
-                if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(leadVisibleEnemy, out var enemyInfo))
-                {
-                    continue;
-                }
-
-                var sqrDistance = BotOwner.Position.McsSqrDistance(leadVisibleEnemy.Position);
-                if (sqrDistance < minSqrDistance)
-                {
-                    nearestEnemyInfo = enemyInfo;
-                    minSqrDistance = sqrDistance;
-                }
-            }
-
-            if (nearestEnemyInfo == null)
-            {
-                return false;
-            }
-
-            BotOwner.Memory.GoalEnemy = nearestEnemyInfo;
-            _nextRecalcGoalTime = 0f;
-            return true;
-        }
-
-        private bool IsLeadThreatEnemy(IPlayer enemyPerson)
-        {
-            var mcsAILeadPlayer = McsBotPlayerData?.McsAILeadPlayer;
-            if (mcsAILeadPlayer == null || enemyPerson == null)
-            {
-                return false;
-            }
-
-            return mcsAILeadPlayer.IsLeadThreatEnemy(enemyPerson);
-        }
-
-        private bool TryGetCombatCoverTarget(Vector3 mcsLeadPlayerPos, out Vector3 coverPos)
-        {
-            coverPos = Vector3.zero;
-            CustomNavigationPoint coverPoint = null;
-
-            if (_haveCoverToShoot && _currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
-            {
-                coverPoint = _currentNavigationPoint;
-            }
-            else
-            {
-                TryFindCover(mcsLeadPlayerPos);
-                if (_currentNavigationPoint != null && !_currentNavigationPoint.IsSpotted)
-                {
-                    coverPoint = _currentNavigationPoint;
-                }
-            }
-
-            if (coverPoint == null)
-            {
-                return false;
-            }
-
-            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) > (30f * 30f))
-            {
-                return false;
-            }
-
-            if (mcsLeadPlayerPos.McsSqrDistance(coverPoint.Position) > TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
-            {
-                return false;
-            }
-
-            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) <= (1.5f * 1.5f))
-            {
-                return false;
-            }
-
-            coverPos = coverPoint.Position;
-            return true;
-        }
-
-        private void TrackCoverEnter(float time)
-        {
-            if (BotOwner.Memory.IsInCover)
-            {
-                if (_coverEnterTime <= 0f)
-                {
-                    _coverEnterTime = time;
-                }
-            }
-            else
-            {
-                _coverEnterTime = 0f;
-            }
-        }
-
-        private void UpdateGoalEnemyWithHysteresis(float time)
-        {
-            var currentGoalEnemy = BotOwner.Memory.GoalEnemy;
-            var currentGoalId = currentGoalEnemy?.Person?.ProfileId;
-            if (currentGoalId != _lastAcceptedGoalEnemyId)
-            {
-                _lastAcceptedGoalEnemyId = currentGoalId;
-                _lastAcceptedGoalSetTime = time;
-            }
-
-            if (BotOwner.Memory.DangerData.HaveCloseDanger)
-            {
-                BotOwner.Memory.GoalEnemy = null;
-                return;
-            }
-
-            var candidateEnemy = BotOwner.EnemyChooser.FindDangerEnemy();
-            if (candidateEnemy == null)
-            {
-                if (BotOwner.Memory.GoalEnemy == null && BotOwner.Memory.HaveGoal)
-                {
-                    BotOwner.Memory.GoalTarget.Clear();
-                }
-
-                if (currentGoalEnemy == null)
-                {
-                    TrySelectNearestLeadVisibleEnemy(time);
-                }
-                return;
-            }
-
-            if (currentGoalEnemy == null || currentGoalEnemy == candidateEnemy)
-            {
-                AcceptGoalEnemy(candidateEnemy, time);
-                return;
-            }
-
-            var currentPerson = currentGoalEnemy.Person;
-            var currentAlive = currentPerson != null && currentPerson.HealthController != null && currentPerson.HealthController.IsAlive;
-            var currentStillViable = currentAlive && currentGoalEnemy.IsVisible && currentGoalEnemy.CanShoot;
-
-            if (currentAlive && IsLeadThreatEnemy(currentPerson) && !IsLeadThreatEnemy(candidateEnemy.Person))
-            {
-                return;
-            }
-
-            if (!currentStillViable)
-            {
-                AcceptGoalEnemy(candidateEnemy, time);
-                return;
-            }
-
-            if (IsLeadThreatEnemy(candidateEnemy.Person))
-            {
-                AcceptGoalEnemy(candidateEnemy, time);
-                return;
-            }
-
-            if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < 2f)
-            {
-                return;
-            }
-
-            if (candidateEnemy.IsVisible && candidateEnemy.CanShoot
-                && candidateEnemy.Distance <= currentGoalEnemy.Distance * 0.75f)
-            {
-                AcceptGoalEnemy(candidateEnemy, time);
-                return;
-            }
-
-        }
-
-        private void AcceptGoalEnemy(EnemyInfo goalEnemy, float time)
-        {
-            BotOwner.Memory.GoalEnemy = goalEnemy;
-            _lastAcceptedGoalEnemyId = goalEnemy?.Person?.ProfileId;
-            _lastAcceptedGoalSetTime = time;
-        }
-
-        private bool ShallRushEnemy(float enemyToLeadSqrDist, EnemyInfo goalEnemy, bool hasTravelTask, float botToEnemySqrDist = float.MaxValue)
-        {
-            if (McsBotPlayerData.IsHeavySuppressed)
-            {
-                return false;
-            }
-
-            if (McsBotPlayerData.HasAnyIntent(Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon, Intents.ShouldHoldPosition))
-            {
-                return false;
-            }
-
-            if (!hasTravelTask && (enemyToLeadSqrDist <= (50f * 50f) || botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST))
-            {
-                return true;
-            }
-
-            var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
-            if (enemyBotOwner != null && enemyBotOwner.BotState != EBotState.NonActive)
-            {
-                if (enemyBotOwner.WeaponManager?.Reload?.Reloading == true || enemyBotOwner.Medecine?.Using == true)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 冲脸跳跃（借鉴 SAIN RushEnemyAction.checkJump）：全速冲脸途中 bot 距敌近身区间时
-        /// 概率起跳翻越障碍。只看距离（不要求敌可见——Rush 分支本就发生在敌不可见/不可安全开火时），
-        /// TryJump 内部自检 CanJump（体力/治疗/禁跳状态）。
-        /// </summary>
-        private void TryRushJump(EnemyInfo goalEnemy, float time)
-        {
-            if (goalEnemy?.Person == null)
-            {
-                return;
-            }
-
-            var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
-            if (botToEnemySqrDist < 1.5f * 1.5f || botToEnemySqrDist > 6f * 6f)
-            {
-                return;
-            }
-
-            if (time < _nextRushJumpTime)
-            {
-                return;
-            }
-
-            if (!MyExtensions.IsTrue100(35f))
-            {
-                return;
-            }
-
-            _nextRushJumpTime = time + 3f;
-            BotOwner.GetPlayer?.MovementContext?.TryJump();
-        }
-
-        private bool IsShotByEnemyRecently(EnemyInfo goalEnemy, float time)
-        {
-            var shooter = McsBotPlayerData.LastHitShooter;
-            if (shooter == null || goalEnemy.Person == null)
-            {
-                return false;
-            }
-            return shooter.ProfileId == goalEnemy.Person.ProfileId && time - McsBotPlayerData.LastHitTime <= 6f;
-        }
-
-
-
-        public override void InitActionMap()
-        {
-            base.InitActionMap();
-            RegisterAction(typeof(McsDogFightLogic), EndDogFight);
-            RegisterAction(typeof(McsSuppressFireLogic), EndSuppressFire);
-            RegisterAction(typeof(McsCoverPeakLogic), EndCoverPeak);
-            RegisterAction(typeof(McsStandAndShootLogic), EndShootFromPlace);
-        }
-
-        private bool EndDogFight()
-        {
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
-            {
-                return true;
-            }
-
-            if (BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position) > (20f * 20f))
-            {
-                return true;
-            }
-
-            if (!goalEnemy.IsVisible && Time.time - GetEnemyLastSeenTime() > 8f)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool EndSuppressFire()
-        {
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy == null || goalEnemy.Person == null)
-            {
-                return true;
-            }
-
-            if (goalEnemy.IsVisible)
-            {
-                return true;
-            }
-
-            if (!BotOwner.WeaponManager.HaveBullets)
-            {
-                return true;
-            }
-
-            var time = Time.time;
-            var timeSinceSeen = time - GetEnemyLastSeenTime();
-            if (timeSinceSeen > SUPPRESS_TIME_SINCE_SEEN && !IsShotByEnemyRecently(goalEnemy, time))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool EndCoverPeak()
-        {
-            var goalEnemy = BotOwner.Memory.GoalEnemy;
-            if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
-            {
-                return true;
-            }
-
-            if (!BotOwner.Memory.IsInCover)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-
-        private bool TryRefreshCommonTarget(Vector3? targetPos, float time)
-        {
-            if (_nextUpdatePosTime < time)
-            {
-                UpdateCommonMoveTarget(targetPos, out float nextTime);
-                _nextUpdatePosTime = time + nextTime;
-            }
-            return _currentMoveTarget.HasValue;
-        }
-
-        private bool TryRefreshEscortTarget(Vector3? escortPos, float time)
-        {
-            if (_nextUpdatePosTime < time)
-            {
-                UpdateEscortMoveTarget(escortPos, out float nextTime);
-                _nextUpdatePosTime = time + nextTime;
-            }
-            return _currentMoveTarget.HasValue;
-        }
-
-        private bool TryRefreshLeadTarget(Vector3? leadPos, float time)
-        {
-            if (_nextUpdatePosTime < time)
-            {
-                UpdateLeadNearMoveTarget(leadPos, out float nextTime);
-                _nextUpdatePosTime = time + nextTime;
-            }
-            return _currentMoveTarget.HasValue;
-        }
-
-        private void ApplyMovePoint()
-        {
-            if (_currentMoveTarget.HasValue)
-            {
-                BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
-            }
-        }
-
         public override bool IsActive()
         {
             if (!IsMcsBotPlayer)
@@ -1366,28 +915,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
             return true;
-        }
-
-        private void FinishClearArea()
-        {
-            McsBotPlayerData.ClearAreaPoints = null;
-            McsBotPlayerData.ClearAreaIndex = 0;
-            McsBotPlayerData.ClearAreaLookAroundUntil = 0f;
-            McsBotPlayerData.TargetPos = null;
-            McsBotPlayerData.RemoveIntent(Intents.ShouldClearArea);
-            BotOwner.TalkMsg(new McsMsg
-            {
-                PhraseTrigger = EPhraseTrigger.Clear
-            });
-        }
-
-        public override bool IsEnemyPosLost()
-        {
-            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
-            {
-                return true;
-            }
-            return base.IsEnemyPosLost();
         }
     }
 }

@@ -7,13 +7,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 重点参考了SAIN
     /// </summary>
-    public class McsSuppressFireLogic : McsBotBaseLogic
+    public class SuppressFireLogic : McsBotBaseLogic
     {
         private float _nextAimUpdateTime = 0f;
         private Vector3 _suppressTargetPos = Vector3.zero;
         private const float AIM_JITTER_DISTANCE = 0.5f;
 
-        public McsSuppressFireLogic(BotOwner botOwner) : base(botOwner)
+        public SuppressFireLogic(BotOwner botOwner) : base(botOwner)
         {
             
         }

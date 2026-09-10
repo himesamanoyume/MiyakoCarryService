@@ -25,101 +25,66 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             InitActionMap();
         }
 
-        public bool? _isMcsBotPlayer = null;
+        protected bool? _isMcsBotPlayer = null;
         public bool IsMcsBotPlayer => _isMcsBotPlayer ??= BotOwner.IsMcsBotPlayer;
         protected ConcurrentDictionary<Type, Func<bool>> _endActionMap;
-        public bool _haveCoverToShoot = false;
-        public float _nextHoldPositionTime = 0f;
-        public float _goToCoverTime = 0f;
-        public CustomNavigationPoint _currentNavigationPoint = null;
-        public float _nextPatrolTime = 0f;
-        public float _nextShootTime = 0f;
-        public float _nextWeaponSwitchTime = 0f;
-        public float _nextMeleeCheckTime = 0f;
-        public float _nextLootingCheckTime = 0f;
-        public float _nextVaultCheckTime = 0f;
-        public float _nextUpdatePosTime = 0f;
-        public float _nextHealCheckTime = 0f;
-        public float _nextStimCheckTime = 0f;
-        public float _nextDeactivateCheckTime = 0f;
-        public float _nextFastOpenDoorCheckTime = 0f;
-        public Vector3? _currentMoveTarget = null;
-        public Vector3? _lastTargetPos = Vector3.zero;
-        public Vector3[] _lastCalcCorners = null;
-        public bool _lastCanRunResult = false;
-        public int _currentMoveRetries = 0;
-        public int _currentHealTimes = 0;
-        public int _currentLootingRetries = 0;
-        public int _currentDeactivateRetries = 0;
-        public float _currentHealTimeout = 10f;
-        public float _nextAnimatorFixTime = 0f;
-        public string _cachedProxyTargetId;
-        public StationaryWeaponData _cachedStationaryWeaponData;
-        public float _scanPhase = 0f;
-        public const float SCANPERIOD = 4f;
-        public const float SCANDISTANCE = 30f;
-        public const float SCANPITCHDOWN = 2f;
+        protected bool _haveCoverToShoot = false;
+        protected float _nextHoldPositionTime = 0f;
+        protected float _goToCoverTime = 0f;
+        protected CustomNavigationPoint _currentNavigationPoint = null;
+        protected float _nextPatrolTime = 0f;
+        protected float _nextShootTime = 0f;
+        protected float _nextWeaponSwitchTime = 0f;
+        protected float _nextMeleeCheckTime = 0f;
+        protected float _nextLootingCheckTime = 0f;
+        protected float _nextVaultCheckTime = 0f;
+        protected float _nextUpdatePosTime = 0f;
+        protected float _nextHealCheckTime = 0f;
+        protected float _nextStimCheckTime = 0f;
+        protected float _nextDeactivateCheckTime = 0f;
+        protected float _nextFastOpenDoorCheckTime = 0f;
+        protected Vector3? _currentMoveTarget = null;
+        protected Vector3? _lastTargetPos = Vector3.zero;
+        protected Vector3[] _lastCalcCorners = null;
+        protected bool _lastCanRunResult = false;
+        protected int _currentMoveRetries = 0;
+        protected int _currentHealTimes = 0;
+        protected int _currentLootingRetries = 0;
+        protected int _currentDeactivateRetries = 0;
+        protected float _currentHealTimeout = 10f;
+        protected float _nextAnimatorFixTime = 0f;
+        protected string _cachedProxyTargetId;
+        protected StationaryWeaponData _cachedStationaryWeaponData;
+        protected float _scanPhase = 0f;
+        protected float _nextRecalcGoalTime = 0f;
+        protected bool _deferToSain = false;
+        protected float _goToStationaryStuckTime = -999f;
+        protected float _lastSqrToOperator = float.MaxValue;
+        protected float _lastCanShootTime = -999f;
+        protected const float CAN_SHOOT_HOLD_TIME = 2f;
+        protected const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
+        protected const float ARRIVE_DIST = 2.5f;
+        protected const float LOOK_AROUND_TIME = 2f;
+        protected int _isTurnRight = 1;
+        protected string _holdGroundEnemyId = null;
+        protected float _holdGroundStartTime = 0f;
+        protected float _holdGroundDuration = 0f;
+        protected float _lastEnemyVisibleTime = -999f;
+        protected float _coverEnterTime = 0f;
+        protected string _lastAcceptedGoalEnemyId = null;
+        protected float _lastAcceptedGoalSetTime = -999f;
+        protected float _nextRushJumpTime = 0f;
         public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
-        public const float HEAL_CHECK_INTERVAL = 1f;
-        public const float VAULT_CHECK_INTERVAL = 2f;
-        public const float VAULT_HEIGHT_THRESHOLD = 1.5f;
-        public const float SPHERECAST_RADIUS = 0.1f;
         public const float SPHERECAST_DISTANCE = 2f;
-        public const float DIRECTION_ALIGNMENT_THRESHOLD = 0.85f;
         public const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
-        public const float LOOTING_FINNISHED_COODDOWN = 1f;
         public const float WEAPON_SWITCH_COOLDOWN = 1f;
-        public const float MELEE_CHECK_INTERVAL = 0.5f;
-
-        /// <summary>
-        /// 威胁中断-受击窗口（秒）：窗口内被打过视为威胁逼近（与原生 CheckMedsToStop 信号同源；
-        /// 不依赖 GoalEnemy——被伏击时先开战斗闸门，滞回/受击追溯随后选目标）
-        /// </summary>
-        public const float THREAT_INTERRUPT_HIT_WINDOW = 2f;
-
-        /// <summary>
-        /// 威胁中断-近身距离（米）：GoalEnemy 距自身此距离内视为威胁逼近（原生 CheckMedsToStop 同款 10m）
-        /// </summary>
-        public const float THREAT_INTERRUPT_CLOSE_DIST = 10f;
-
-        /// <summary>
-        /// 威胁中断-近距威胁距离（米）：GoalEnemy 距自身此距离内且可见/正盯我时视为威胁逼近（原生同款 30m）
-        /// </summary>
-        public const float THREAT_INTERRUPT_NEAR_DIST = 30f;
-
-        /// <summary>
-        /// 威胁中断-被盯判定时长（秒）：敌盯我此时长视为威胁（原生 IsEnemyLookAtMeForPeriod 同参数）
-        /// </summary>
-        public const float THREAT_INTERRUPT_LOOK_PERIOD = 2f;
-
-        /// <summary>
-        /// 快速开门-触发距离（米）：距门洞中点此距离内且移动方向穿门时触发（真人 pick 开门的"先靠近门"语义；
-        /// 原生 wantPass 为 2m，略放宽覆盖起步惯性）
-        /// </summary>
+        public const float SUPPRESS_TIME_SINCE_SEEN = 3f;
+        public const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
+        public const float SHIFT_COVER_MIN_TIME = 6f;
         public const float FAST_OPEN_DOOR_TRIGGER_DIST = 4.5f;
-
-        /// <summary>
-        /// 快速开门-碰撞忽略窗口（秒）：过门走路段时长（SprintPause 覆盖），门摆动 ~0.5-2s + 通过余量；
-        /// 走路每帧位移远小于门板厚度，物理上无法隧道穿透（不穿门的物理基础）
-        /// </summary>
         public const float FAST_OPEN_DOOR_WINDOW = 2.5f;
-
-        /// <summary>
-        /// 快速开门-同门冷却（秒）：同一扇门两次快速开门的最小间隔（SAIN DOOR_INTERACTION_INTERVAL 同款），防反复开关抖动
-        /// </summary>
-        public const float FAST_OPEN_DOOR_COOLDOWN = 3.5f;
-
-        /// <summary>
-        /// 快速开门-窗口驱动节流间隔（秒）：窗口收尾与新门检测的频率（挂在 IsCurrentActionEnding 的每 tick 调用上）
-        /// </summary>
-        public const float FAST_OPEN_DOOR_CHECK_INTERVAL = 0.25f;
-
-        /// <summary>
-        /// 快速开门-楼层防护高差（米）：移动方向与门洞中点高差超过此值视为跨层，不做开门判定
-        /// </summary>
-        public const float FAST_OPEN_DOOR_FLOOR_HEIGHT_DIFF = 3f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -169,9 +134,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public override bool IsCurrentActionEnding()
         {
-            // pick 开门窗口驱动（节流内完成窗口收尾与新门检测；BigBrain 每 tick 调用本方法，是窗口管理的挂点）。
-            // 不做决策冻结：开门期间动作照常结束重评——"等门开"由后撤步走路的耗时自然构成（全程行走不停顿），
-            // 重评后新移动点经碰撞忽略可安全穿过摆动中的门
             UpdateFastOpenDoor();
 
             if (CurrentAction == null)
@@ -229,23 +191,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             RegisterAction(typeof(DropTargetLootLogic), EndDropTargetLootLogic);
             RegisterAction(typeof(HealStimulatorsLogic), EndHealStimulators);
             RegisterAction(typeof(GoToBtrLogic), EndGoToBtr);
+            RegisterAction(typeof(DogFightLogic), EndDogFight);
+            RegisterAction(typeof(SuppressFireLogic), EndSuppressFire);
+            RegisterAction(typeof(BlindFireBlockedLogic), EndSuppressFire);
+            RegisterAction(typeof(CoverPeakLogic), EndCoverPeak);
+            RegisterAction(typeof(StandAndShootLogic), EndShootFromPlace);
         }
 
-        /// <summary>
-        /// 威胁逼近判定（战斗区保持与移动/任务类动作中断共用，信号与原生治疗中断 CheckMedsToStop 同源）：
-        /// ① 2s 内被打（无 GoalEnemy 依赖——被伏击时先开闸，滞回/受击追溯随后选目标）；
-        /// ② GoalEnemy 存活且距自身 &lt;10m（近身险情）；
-        /// ③ GoalEnemy 存活且距自身 &lt;30m 且（可见/正盯我 2s）（近距对峙）；
-        /// ④ 老板高威胁（GetLeadThreatEnemy，威胁窗口内攻击过/正瞄老板）——全员保持战斗，集火参与。
-        /// 消费方：McsBrainLayer 的 fightActive 威胁保持，
-        /// 以及基类各移动/任务类 End 的威胁中断（威胁时结束当前动作 → 重评 → 战斗区接住；
-        /// 战斗类/避险类 End 不接——前者本就是应战，后者跑雷/跑炮击/闪光不可被打断）
-        /// </summary>
         protected bool IsApproachingThreat()
         {
             var time = Time.time;
 
-            // ① 受击威胁：最近被打（护航 bot 自身，ApplyDamagePatch 记录）
             var mcsBotPlayerData = McsBotPlayerData;
             if (mcsBotPlayerData != null)
             {
@@ -253,7 +209,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 if (lastHitShooter != null
                     && lastHitShooter.HealthController != null
                     && lastHitShooter.HealthController.IsAlive
-                    && time - mcsBotPlayerData.LastHitTime <= THREAT_INTERRUPT_HIT_WINDOW)
+                    && time - mcsBotPlayerData.LastHitTime <= 2f)
                 {
                     return true;
                 }
@@ -261,16 +217,15 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var goalEnemy = BotOwner.Memory.GoalEnemy;
 
-            // ②/③ 目标威胁：按距离分级判定
             if (goalEnemy != null && goalEnemy.Person != null && goalEnemy.Person.HealthController.IsAlive)
             {
                 var enemyDistance = goalEnemy.Distance;
-                if (enemyDistance < THREAT_INTERRUPT_CLOSE_DIST)
+                if (enemyDistance < 10f)
                 {
                     return true;
                 }
 
-                if (enemyDistance < THREAT_INTERRUPT_NEAR_DIST)
+                if (enemyDistance < 30f)
                 {
                     if (goalEnemy.IsVisible)
                     {
@@ -278,14 +233,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     }
 
                     BotOwner.EnemyLookData.DoCheck();
-                    if (BotOwner.EnemyLookData.IsEnemyLookAtMeForPeriod(THREAT_INTERRUPT_LOOK_PERIOD))
+                    if (BotOwner.EnemyLookData.IsEnemyLookAtMeForPeriod(2f))
                     {
                         return true;
                     }
                 }
             }
 
-            // ④ 老板威胁：威胁窗口内全员保持战斗（集火参与），不再依赖自身能否看见该敌
             if (mcsBotPlayerData?.McsAILeadPlayer?.GetLeadThreatEnemy() != null)
             {
                 return true;
@@ -301,8 +255,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            // 威胁中断（IsApproachingThreat 含被打/老板高威胁，覆盖原生 CheckMedsToStop 的 10m/30m 场景）：
-            // 中断时取消当前急救（对齐原生 AssaultHaveEnemyLayer.EndHeal 语义，避免 Medecine.Using 残留）
             if (IsApproachingThreat() || BaseLogicLayer.CheckMedsToStop(BotOwner))
             {
                 BotOwner.Medecine.FirstAid.CancelCurrent();
@@ -316,7 +268,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     _currentHealTimeout = timeout;
                 }
-                _nextHealCheckTime = Time.time + HEAL_CHECK_INTERVAL;
+                _nextHealCheckTime = Time.time + 1f;
                 _currentHealTimes += 1;
             }
 
@@ -575,7 +527,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToPoint()
         {
-            // 威胁中断：指定点前往途中威胁逼近时结束动作重评应战（intent/TargetPos 保留，战后自动续走）
             if (IsApproachingThreat())
             {
                 return true;
@@ -653,8 +604,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndEscortToPointByWay()
         {
-            // 威胁中断：跟随/护送途中威胁逼近时结束动作重评应战（长途跟随闷头走的主场景；
-            // intent/TargetPos 保留，战后自动落回本分区续走）
             if (IsApproachingThreat())
             {
                 return true;
@@ -748,7 +697,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToProtect()
         {
-            // 威胁中断：保护点前往途中威胁逼近时结束动作重评应战
             if (IsApproachingThreat())
             {
                 return true;
@@ -852,8 +800,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void TrySolveStuck()
         {
-            // 卡门兜底：原地卡住且最近门（≤2m）为关闭态时直接快速开门（覆盖路径求交漏检：
-            // 目标点恰在门前不远处时穿门线判定可能失败；门不可翻越，翻越解法对门无效）
             if (TryFastOpenNearestDoor())
             {
                 return;
@@ -861,7 +807,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (_nextVaultCheckTime < Time.time)
             {
-                _nextVaultCheckTime = Time.time + VAULT_CHECK_INTERVAL;
+                _nextVaultCheckTime = Time.time + 2f;
                 if (ShouldTryVault())
                 {
                     if (!TryVault())
@@ -872,10 +818,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        /// <summary>
-        /// 卡门兜底开门：最近体素门（GetNearestDoor ≤2m）为关闭态且无冷却时快速开门
-        /// （战斗/和平均触发——FastOpenDoor 内分流节奏；战斗中被门卡住同样需要立即开门脱困）
-        /// </summary>
         private bool TryFastOpenNearestDoor()
         {
             var mcsBotPlayerData = McsBotPlayerData;
@@ -1020,7 +962,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToLootTarget()
         {
-            // 威胁中断：拾取目标前往途中威胁逼近时结束动作重评应战（LootingTarget/锁保留，战后续走）
             if (IsApproachingThreat())
             {
                 return true;
@@ -1039,7 +980,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (Time.time > _nextLootingCheckTime && !McsBotPlayerData.IsTaskRunning && !McsBotPlayerData.IsLooting)
             {
                 _currentLootingRetries += 1;
-                _nextLootingCheckTime = Time.time + LOOTING_FINNISHED_COODDOWN;
+                _nextLootingCheckTime = Time.time + 1f;
                 return true;
             }
 
@@ -1206,9 +1147,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool IsEnemyPosLost()
         {
-            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 10f)
+            if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 5f)
             {
-                BotOwner.Memory.GoalEnemy = null;
+                if (Time.time - BotOwner.Memory.LastEnemyTimeSeen > 10f)
+                {
+                    BotOwner.Memory.GoalEnemy = null;
+                }
                 return true;
             }
             return false;
@@ -1301,7 +1245,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToExfiltrationPoint()
         {
-            // 威胁中断：撤离点前往途中威胁逼近时结束动作重评应战
             if (IsApproachingThreat())
             {
                 return true;
@@ -1454,7 +1397,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 #if DEBUG
             // McsLogger.LogWarning($"目标武器类型: {targetSlot}");
 #endif
-            _nextMeleeCheckTime = Time.time + MELEE_CHECK_INTERVAL;
+            _nextMeleeCheckTime = Time.time + 0.5f;
 
             if (targetSlot == EquipmentSlot.Scabbard && weaponManager.IsMelee)
             {
@@ -1496,7 +1439,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
             var targetDirection = BotOwner.Mover.NormDirCurPoint;
-            if (Vector3.Dot(lookDirection, targetDirection) < DIRECTION_ALIGNMENT_THRESHOLD)
+            if (Vector3.Dot(lookDirection, targetDirection) < 0.85f)
             {
                 return false;
             }
@@ -1531,14 +1474,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             startPosition.y += 0.33f;
             endPosition.y += 0.33f;
 
-            if (Physics.SphereCast(startPosition, SPHERECAST_RADIUS, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayersMaskController.PlayerStaticCollisionsMask))
+            if (Physics.SphereCast(startPosition, 0.1f, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayersMaskController.PlayerStaticCollisionsMask))
             {
                 if (hit.collider != null)
                 {
                     var obstacleHeight = hit.collider.bounds.size.y;
                     var maxVaultHeight = BotOwner.GetPlayer.VaultingParameters.VaultingHeight;
 
-                    return obstacleHeight < maxVaultHeight && obstacleHeight < VAULT_HEIGHT_THRESHOLD;
+                    return obstacleHeight < maxVaultHeight && obstacleHeight < 1.5f;
                 }
             }
 
@@ -1822,12 +1765,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return _lastCanRunResult;
         }
 
-        /// <summary>
-        /// 快速开门窗口驱动（pick 式，参考 SAIN DoorOpener 思路以 MCS 风格落地）：
-        /// 挂在 IsCurrentActionEnding（BigBrain 每 tick 调用）上，FAST_OPEN_DOOR_CHECK_INTERVAL 节流。
-        /// 窗口激活时无管理需求（开门时刻已一次性设置 SprintPause 覆盖整窗，碰撞忽略到窗口截止由收尾处理）；
-        /// 无窗口时做新门检测（距门 ≤2.5m + 移动方向穿门，战斗/和平均触发——FastOpenDoor 内分流模式）
-        /// </summary>
         protected void UpdateFastOpenDoor()
         {
             var time = Time.time;
@@ -1835,7 +1772,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 return;
             }
-            _nextFastOpenDoorCheckTime = time + FAST_OPEN_DOOR_CHECK_INTERVAL;
+            _nextFastOpenDoorCheckTime = time + 0.25f;
 
             var mcsBotPlayerData = McsBotPlayerData;
             if (mcsBotPlayerData == null)
@@ -1843,16 +1780,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return;
             }
 
-            // 窗口活跃：开门时刻已设置整窗节奏与碰撞忽略，无需干预
             if (mcsBotPlayerData.FastOpenDoor != null && time <= mcsBotPlayerData.FastOpenDoorEndTime)
             {
                 return;
             }
 
-            // 窗口已过期：收尾（含碰撞恢复，PlayerDataMgr 1s 保险循环兜底）
             mcsBotPlayerData.TryFinishFastOpenDoor();
 
-            // 新门检测：正在移动（有移动目标且未到达）
             var targetPoint = BotOwner.Mover.TargetPoint;
             if (!targetPoint.HasValue || BotOwner.SqrDistHorizontal(targetPoint.Value) <= 0.01f)
             {
@@ -1896,13 +1830,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        /// <summary>
-        /// 移动方向是否穿越门洞线（bot→移动目标线段与 SegmentOpen 求交，原生 WantPassTheDoor 同款几何；
-        /// SegmentOpen 两端各外延 0.1，楼层防护过滤跨层门）
-        /// </summary>
         private bool IsMoveDirectionCrossingDoorOpen(Vector3 botPosition, Vector3 targetPoint, NavMeshDoorLink doorLink)
         {
-            if (Mathf.Abs(botPosition.y - doorLink.MidOpen.y) > FAST_OPEN_DOOR_FLOOR_HEIGHT_DIFF)
+            if (Mathf.Abs(botPosition.y - doorLink.MidOpen.y) > 3f)
             {
                 return false;
             }
@@ -1915,15 +1845,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return AIUtility.GetCrossPoint(botPosition, targetPoint, openA, openB) != null;
         }
 
-        /// <summary>
-        /// 执行快速开门（v6 极简形态）：可交互校验 → Sprint(false) 打断冲刺（手势层 SetInteractInHands
-        /// 冲刺中会被跳过，先停冲刺开门手势才会播；BotMover.Sprint 已冲刺时早退不查 NoSprint，先打断
-        /// SprintPause 才能防住跟随 Logic 每 tick 的 Sprint(true) 重启）→ 指令直开（ExecuteInteraction：
-        /// 门当帧开始摆动+轻量手势，无吸附无动画状态机，Fika 经 FikaPlayer.ExecuteInteraction 广播
-        /// WorldInteractionPacket 同步）→ SprintPause 覆盖整窗（过门走路段：走路每帧位移远小于门板厚度，
-        /// 物理上无法隧道穿透——不穿门的物理基础；门板碰撞始终生效，先到门板前会被叶挡住随摆开自然通过）→
-        /// 窗口/冷却记录（防重复触发）。战斗/和平统一（战斗同样限速过门）
-        /// </summary>
         private void FastOpenDoor(Door door, float time)
         {
             var player = BotOwner.GetPlayer;
@@ -1945,7 +1866,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var mcsBotPlayerData = McsBotPlayerData;
             mcsBotPlayerData.FastOpenDoor = door;
             mcsBotPlayerData.FastOpenDoorEndTime = time + FAST_OPEN_DOOR_WINDOW;
-            mcsBotPlayerData.FastOpenDoorCooldowns[door.Id] = time + FAST_OPEN_DOOR_COOLDOWN;
+            mcsBotPlayerData.FastOpenDoorCooldowns[door.Id] = time + 3.5f;
         }
 
         public virtual Vector3 GetPointAlongPathAtDistance(Vector3[] corners, float distance)
@@ -1985,7 +1906,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndDeactivateMine()
         {
-            // 威胁中断：拆雷途中威胁逼近时结束动作重评应战（雷未拆完战后可续）
             if (IsApproachingThreat())
             {
                 return true;
@@ -2087,8 +2007,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndGoToExcuteProxyAction()
         {
-            // 威胁中断：代捡/任务/交互/固定武器前往途中威胁逼近时结束动作重评应战
-            // （intent/TargetPos/ProxyTargetId 保留，战后自动续走）
             if (IsApproachingThreat())
             {
                 return true;
@@ -2108,7 +2026,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndDropTargetLootLogic()
         {
-            // 威胁中断：丢弃战利品途中威胁逼近时结束动作重评应战（物品未丢完战后可续）
             if (IsApproachingThreat())
             {
                 return true;
@@ -2308,7 +2225,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             var halfAngleDeg = Mathf.Acos(Mathf.Clamp(link.CosAngleBase, -1f, 1f)) * Mathf.Rad2Deg;
 
-            _scanPhase += Time.deltaTime / SCANPERIOD;
+            _scanPhase += Time.deltaTime / 4f;
             var tri = Mathf.PingPong(_scanPhase, 1f);
             var yawDeg = Mathf.Lerp(-halfAngleDeg, halfAngleDeg, tri);
 
@@ -2321,10 +2238,459 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             baseDir.Normalize();
 
             var dir = Quaternion.AngleAxis(yawDeg, Vector3.up) * baseDir;
-            dir = Quaternion.AngleAxis(SCANPITCHDOWN, Vector3.Cross(dir, Vector3.up)) * dir;
-            var scanPoint = weapon.OperatorPosition + dir * SCANDISTANCE;
+            dir = Quaternion.AngleAxis(2f, Vector3.Cross(dir, Vector3.up)) * dir;
+            var scanPoint = weapon.OperatorPosition + dir * 30f;
             BotOwner.AimingManager.CurrentAiming.SetTarget(scanPoint);
             BotOwner.AimingManager.NodeUpdate();
+        }
+
+        public virtual bool EndDogFight()
+        {
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
+            {
+                return true;
+            }
+
+            if (BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position) > (20f * 20f))
+            {
+                return true;
+            }
+
+            if (!goalEnemy.IsVisible && Time.time - GetEnemyLastSeenTime() > 8f)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public virtual bool EndSuppressFire()
+        {
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy == null || goalEnemy.Person == null)
+            {
+                return true;
+            }
+
+            if (goalEnemy.IsVisible)
+            {
+                return true;
+            }
+
+            if (!BotOwner.WeaponManager.HaveBullets)
+            {
+                return true;
+            }
+
+            var time = Time.time;
+            var timeSinceSeen = time - GetEnemyLastSeenTime();
+            if (timeSinceSeen > SUPPRESS_TIME_SINCE_SEEN && !IsShotByEnemyRecently(goalEnemy, time))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public virtual bool EndCoverPeak()
+        {
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy == null || goalEnemy.Person == null || !goalEnemy.Person.HealthController.IsAlive)
+            {
+                return true;
+            }
+
+            if (!BotOwner.Memory.IsInCover)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public virtual void UpdateHoldGroundTimer(EnemyInfo goalEnemy, float time)
+        {
+            var enemyId = goalEnemy.Person?.ProfileId;
+            if (_holdGroundEnemyId != enemyId)
+            {
+                _holdGroundEnemyId = enemyId;
+                _holdGroundStartTime = time;
+                _holdGroundDuration = 4f * UnityEngine.Random.Range(0.66f, 1.5f);
+            }
+        }
+
+        public virtual bool IsEnemyLookingAtMe(EnemyInfo goalEnemy)
+        {
+            var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
+            if (enemyBotOwner != null && enemyBotOwner.BotState != EBotState.NonActive)
+            {
+                var enemyGoalEnemy = enemyBotOwner.Memory?.GoalEnemy;
+                if (enemyGoalEnemy?.Person == null)
+                {
+                    return false;
+                }
+                return enemyGoalEnemy.Person.ProfileId == BotOwner.ProfileId;
+            }
+            return true;
+        }
+
+        public virtual void TrySelectLastHitShooter(float time)
+        {
+            var shooter = McsBotPlayerData.LastHitShooter;
+            if (shooter == null || time - McsBotPlayerData.LastHitTime > 2f || !shooter.HealthController.IsAlive)
+            {
+                return;
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy != null && goalEnemy.Person?.ProfileId == shooter.ProfileId)
+            {
+                return;
+            }
+
+            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(shooter, out var enemyInfo))
+            {
+                BotOwner.Memory.GoalEnemy = enemyInfo;
+                _nextRecalcGoalTime = 0f;
+            }
+        }
+
+        public virtual void TrySelectLeadThreatEnemy(float time)
+        {
+            var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
+            if (mcsAILeadPlayer == null)
+            {
+                return;
+            }
+
+            var threatEnemy = mcsAILeadPlayer.GetLeadThreatEnemy();
+            if (threatEnemy == null)
+            {
+                return;
+            }
+
+            var goalEnemy = BotOwner.Memory.GoalEnemy;
+            if (goalEnemy != null && goalEnemy.Person?.ProfileId == threatEnemy.ProfileId)
+            {
+                return;
+            }
+
+            if (BotOwner.EnemiesController.EnemyInfos.TryGetValue(threatEnemy, out var enemyInfo))
+            {
+                BotOwner.Memory.GoalEnemy = enemyInfo;
+                _nextRecalcGoalTime = 0f;
+            }
+        }
+
+        public virtual bool TrySelectNearestLeadVisibleEnemy(float time)
+        {
+            var mcsAILeadPlayer = McsBotPlayerData.McsAILeadPlayer;
+            if (mcsAILeadPlayer == null)
+            {
+                return false;
+            }
+
+            var leadVisibleEnemies = mcsAILeadPlayer.LeadVisibleEnemies;
+            if (leadVisibleEnemies == null || leadVisibleEnemies.Count == 0)
+            {
+                return false;
+            }
+
+            EnemyInfo nearestEnemyInfo = null;
+            var minSqrDistance = float.MaxValue;
+            foreach (var leadVisibleEnemy in leadVisibleEnemies)
+            {
+                if (leadVisibleEnemy == null || !leadVisibleEnemy.HealthController.IsAlive)
+                {
+                    continue;
+                }
+
+                if (!BotOwner.EnemiesController.EnemyInfos.TryGetValue(leadVisibleEnemy, out var enemyInfo))
+                {
+                    continue;
+                }
+
+                var sqrDistance = BotOwner.Position.McsSqrDistance(leadVisibleEnemy.Position);
+                if (sqrDistance < minSqrDistance)
+                {
+                    nearestEnemyInfo = enemyInfo;
+                    minSqrDistance = sqrDistance;
+                }
+            }
+
+            if (nearestEnemyInfo == null)
+            {
+                return false;
+            }
+
+            BotOwner.Memory.GoalEnemy = nearestEnemyInfo;
+            _nextRecalcGoalTime = 0f;
+            return true;
+        }
+
+        public virtual bool IsLeadThreatEnemy(IPlayer enemyPerson)
+        {
+            var mcsAILeadPlayer = McsBotPlayerData?.McsAILeadPlayer;
+            if (mcsAILeadPlayer == null || enemyPerson == null)
+            {
+                return false;
+            }
+
+            return mcsAILeadPlayer.IsLeadThreatEnemy(enemyPerson);
+        }
+
+        public virtual bool TryGetCombatCoverTarget(Vector3 mcsLeadPlayerPos, out Vector3 coverPos)
+        {
+            coverPos = Vector3.zero;
+            CustomNavigationPoint coverPoint = null;
+
+            if (_haveCoverToShoot && _currentNavigationPoint != null && _currentNavigationPoint.IsFreeById(BotOwner.Id) && !_currentNavigationPoint.IsSpotted)
+            {
+                coverPoint = _currentNavigationPoint;
+            }
+            else
+            {
+                TryFindCover(mcsLeadPlayerPos);
+                if (_currentNavigationPoint != null && !_currentNavigationPoint.IsSpotted)
+                {
+                    coverPoint = _currentNavigationPoint;
+                }
+            }
+
+            if (coverPoint == null)
+            {
+                return false;
+            }
+
+            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) > (30f * 30f))
+            {
+                return false;
+            }
+
+            if (mcsLeadPlayerPos.McsSqrDistance(coverPoint.Position) > TOO_FAR_FROM_LEAD_DISTANCE * TOO_FAR_FROM_LEAD_DISTANCE)
+            {
+                return false;
+            }
+
+            if (BotOwner.Position.McsSqrDistance(coverPoint.Position) <= (1.5f * 1.5f))
+            {
+                return false;
+            }
+
+            coverPos = coverPoint.Position;
+            return true;
+        }
+
+        public virtual void TrackCoverEnter(float time)
+        {
+            if (BotOwner.Memory.IsInCover)
+            {
+                if (_coverEnterTime <= 0f)
+                {
+                    _coverEnterTime = time;
+                }
+            }
+            else
+            {
+                _coverEnterTime = 0f;
+            }
+        }
+
+        public virtual void UpdateGoalEnemyWithHysteresis(float time)
+        {
+            var currentGoalEnemy = BotOwner.Memory.GoalEnemy;
+            var currentGoalId = currentGoalEnemy?.Person?.ProfileId;
+            if (currentGoalId != _lastAcceptedGoalEnemyId)
+            {
+                _lastAcceptedGoalEnemyId = currentGoalId;
+                _lastAcceptedGoalSetTime = time;
+            }
+
+            if (BotOwner.Memory.DangerData.HaveCloseDanger)
+            {
+                BotOwner.Memory.GoalEnemy = null;
+                return;
+            }
+
+            var candidateEnemy = BotOwner.EnemyChooser.FindDangerEnemy();
+            if (candidateEnemy == null)
+            {
+                if (BotOwner.Memory.GoalEnemy == null && BotOwner.Memory.HaveGoal)
+                {
+                    BotOwner.Memory.GoalTarget.Clear();
+                }
+
+                if (currentGoalEnemy == null)
+                {
+                    TrySelectNearestLeadVisibleEnemy(time);
+                }
+                return;
+            }
+
+            if (currentGoalEnemy == null || currentGoalEnemy == candidateEnemy)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            var currentPerson = currentGoalEnemy.Person;
+            var currentAlive = currentPerson != null && currentPerson.HealthController != null && currentPerson.HealthController.IsAlive;
+            var currentStillViable = currentAlive && currentGoalEnemy.IsVisible && currentGoalEnemy.CanShoot;
+
+            if (currentAlive && IsLeadThreatEnemy(currentPerson) && !IsLeadThreatEnemy(candidateEnemy.Person))
+            {
+                return;
+            }
+
+            if (!currentStillViable)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            if (IsLeadThreatEnemy(candidateEnemy.Person))
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+            if (currentPerson != null && currentPerson.ProfileId == _lastAcceptedGoalEnemyId && time - _lastAcceptedGoalSetTime < 2f)
+            {
+                return;
+            }
+
+            if (candidateEnemy.IsVisible && candidateEnemy.CanShoot
+                && candidateEnemy.Distance <= currentGoalEnemy.Distance * 0.75f)
+            {
+                AcceptGoalEnemy(candidateEnemy, time);
+                return;
+            }
+
+        }
+
+        public virtual void AcceptGoalEnemy(EnemyInfo goalEnemy, float time)
+        {
+            BotOwner.Memory.GoalEnemy = goalEnemy;
+            _lastAcceptedGoalEnemyId = goalEnemy?.Person?.ProfileId;
+            _lastAcceptedGoalSetTime = time;
+        }
+
+        public virtual bool ShallRushEnemy(float enemyToLeadSqrDist, EnemyInfo goalEnemy, bool hasTravelTask, float botToEnemySqrDist = float.MaxValue)
+        {
+            if (McsBotPlayerData.IsHeavySuppressed)
+            {
+                return false;
+            }
+
+            if (McsBotPlayerData.HasAnyIntent(Intents.ShouldKeepFormation, Intents.ShouldUseStationaryWeapon, Intents.ShouldHoldPosition, Intents.ShouldFollowMe))
+            {
+                return false;
+            }
+
+            if (!hasTravelTask && (enemyToLeadSqrDist <= (50f * 50f) || botToEnemySqrDist <= RUSH_NEAR_ENEMY_SQUARE_DIST))
+            {
+                return true;
+            }
+
+            var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
+            if (enemyBotOwner != null && enemyBotOwner.BotState != EBotState.NonActive)
+            {
+                if (enemyBotOwner.WeaponManager?.Reload?.Reloading == true || enemyBotOwner.Medecine?.Using == true)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public virtual void TryRushJump(EnemyInfo goalEnemy, float time)
+        {
+            if (goalEnemy?.Person == null)
+            {
+                return;
+            }
+
+            var botToEnemySqrDist = BotOwner.Position.McsSqrDistance(goalEnemy.Person.Position);
+            if (botToEnemySqrDist < 1.5f * 1.5f || botToEnemySqrDist > 6f * 6f)
+            {
+                return;
+            }
+
+            if (time < _nextRushJumpTime)
+            {
+                return;
+            }
+
+            if (!MyExtensions.IsTrue100(35f))
+            {
+                return;
+            }
+
+            _nextRushJumpTime = time + 3f;
+            BotOwner.GetPlayer?.MovementContext?.TryJump();
+        }
+
+        public virtual bool IsShotByEnemyRecently(EnemyInfo goalEnemy, float time)
+        {
+            var shooter = McsBotPlayerData.LastHitShooter;
+            if (shooter == null || goalEnemy.Person == null)
+            {
+                return false;
+            }
+            return shooter.ProfileId == goalEnemy.Person.ProfileId && time - McsBotPlayerData.LastHitTime <= 6f;
+        }
+
+        public virtual bool TryRefreshCommonTarget(Vector3? targetPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateCommonMoveTarget(targetPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        public virtual bool TryRefreshEscortTarget(Vector3? escortPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateEscortMoveTarget(escortPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        public virtual bool TryRefreshLeadTarget(Vector3? leadPos, float time)
+        {
+            if (_nextUpdatePosTime < time)
+            {
+                UpdateLeadNearMoveTarget(leadPos, out float nextTime);
+                _nextUpdatePosTime = time + nextTime;
+            }
+            return _currentMoveTarget.HasValue;
+        }
+
+        public virtual void ApplyMovePoint()
+        {
+            if (_currentMoveTarget.HasValue)
+            {
+                BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
+            }
+        }
+
+        public virtual void FinishClearArea()
+        {
+            McsBotPlayerData.ClearAreaPoints = null;
+            McsBotPlayerData.ClearAreaIndex = 0;
+            McsBotPlayerData.ClearAreaLookAroundUntil = 0f;
+            McsBotPlayerData.TargetPos = null;
+            McsBotPlayerData.RemoveIntent(Intents.ShouldClearArea);
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.Clear
+            });
         }
     }
 }

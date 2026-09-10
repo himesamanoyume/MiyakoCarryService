@@ -10,7 +10,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 重点参考了SAIN
     /// </summary>
-    public class McsDogFightLogic : McsBotBaseLogic
+    public class DogFightLogic : McsBotBaseLogic
     {
         private bool _dogFightPhaseIsShooting = false;
         private float _dogFightPhaseEndTime = 0f;
@@ -21,7 +21,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private const float BACKUP_RANDOM_RADIUS = 2f;
         private const float PATH_UPDATE_INTERVAL = 0.4f;
 
-        public McsDogFightLogic(BotOwner botOwner) : base(botOwner)
+        public DogFightLogic(BotOwner botOwner) : base(botOwner)
         {
 
         }

@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
     /// <summary>
     /// 重点参考了SAIN
     /// </summary>
-    public class McsCoverPeakLogic : McsBotBaseLogic
+    public class CoverPeakLogic : McsBotBaseLogic
     {
         private float _peakRetractUntil = 0f;
         private float _peakPhaseEndTime = 0f;
@@ -22,7 +22,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         private const float PEEK_DURATION_MAX = 2.5f;
         private const float BLIND_AIM_JITTER_DISTANCE = 0.5f;
 
-        public McsCoverPeakLogic(BotOwner botOwner) : base(botOwner)
+        public CoverPeakLogic(BotOwner botOwner) : base(botOwner)
         {
 
         }

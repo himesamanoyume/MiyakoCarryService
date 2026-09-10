@@ -207,5 +207,17 @@ namespace MiyakoCarryService.Client.Utils
         {
             "SAIN : Combat Layer",
         };
+
+        public static readonly string[] TravelTaskIntents = 
+        {
+            Intents.ShouldQuestProxyAction,
+            Intents.ShouldLootProxyAction,
+            Intents.ShouldInteractionProxyAction,
+            Intents.ShouldStationaryWeaponProxyAction,
+            Intents.ShouldEscort,
+            Intents.ShouldEscortToBtr,
+            Intents.ShouldGoToPoint,
+            Intents.ShouldDropTargetLoot,
+        };
     }
 }
