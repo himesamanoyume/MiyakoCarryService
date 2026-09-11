@@ -206,6 +206,7 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | Formation Spacing | The spacing between formation members. |
 | Formation Sequential Fill | When enabled, if a `McsBotPlayer` dies in formation, the next squad member fills the empty slot in brevity-code order. |
 | Save Formation Preset Hotkey | Saves the current formation preset and binds a hotkey. |
+| Phrases Silence | When enabled, `McsBotPlayer` only shows subtitles and does not produce voice. |
 
 > When Fika is installed, in-raid setting changes are synced to the host automatically, but this requires the **MiyakoCarryServiceFika** addon to be installed first.
 
@@ -264,6 +265,13 @@ According to game settings, `McsBotPlayer` mimics a real player, so after they p
 | Teammate Highlight Color | Highlight color configuration. |
 | Enable Mcs Subtitles | Whether to use subtitles to display `McsBotPlayer` reports. |
 | Show Brevity Code | Use brevity codes to replace the original nicknames for display. |
+
+### Z. Debug
+
+| Option | Description |
+| --- | --- |
+| Draw Debug Info | Whether to draw `McsBotPlayer` debug info in raid. |
+| Debug Info Text Size | Font size of the `McsBotPlayer` debug info drawn in raid. |
 
 ## Assistant Addon
 
