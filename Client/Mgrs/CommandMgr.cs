@@ -957,11 +957,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 PhraseTrigger = EPhraseTrigger.Roger
             });
 
-            if (!MiyakoCarryServicePlugin.SAINInstalled)
-            {
-                botOwner.Memory.GoalTarget.Clear();
-                botOwner.Memory.GoalEnemy = null;
-            }
+            botOwner.Memory.GoalTarget.Clear();
+            botOwner.Memory.GoalEnemy = null;
         }
 
         public virtual void InteractionProxyActionCommandAction(McsCommandContext ctx)

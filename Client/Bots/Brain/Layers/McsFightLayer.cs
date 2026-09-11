@@ -68,26 +68,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 var time = Time.time;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
-                if (!MiyakoCarryServicePlugin.SAINInstalled)
+                if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive || goalEnemy.Person.AIData.BotOwner.Brain == null || goalEnemy.Person.AIData.BotOwner.BotState is EBotState.NonActive))
                 {
-                    if (goalEnemy != null && (goalEnemy.Person == null || goalEnemy.Person.HealthController == null || !goalEnemy.Person.HealthController.IsAlive || goalEnemy.Person.AIData.BotOwner.Brain == null || goalEnemy.Person.AIData.BotOwner.BotState is EBotState.NonActive))
+                    BotOwner.Memory.GoalEnemy = null;
+                    if (BotOwner.EnemiesController.EnemyInfos.ContainsKey(goalEnemy.Person))
                     {
-                        BotOwner.Memory.GoalEnemy = null;
-                        if (BotOwner.EnemiesController.EnemyInfos.ContainsKey(goalEnemy.Person))
-                        {
-                            BotOwner.EnemiesController.Remove(goalEnemy.Person);
-                        }
-                        _nextRecalcGoalTime = 0f;
+                        BotOwner.EnemiesController.Remove(goalEnemy.Person);
                     }
-
-                    if (time >= _nextRecalcGoalTime)
-                    {
-                        _nextRecalcGoalTime = time + 0.1f;
-                        BotOwner.CalcGoal();
-                    }
-
-                    goalEnemy = BotOwner.Memory.GoalEnemy;
+                    _nextRecalcGoalTime = 0f;
                 }
+
+                if (time >= _nextRecalcGoalTime)
+                {
+                    _nextRecalcGoalTime = time + 0.1f;
+                    BotOwner.CalcGoal();
+                }
+
+                goalEnemy = BotOwner.Memory.GoalEnemy;
 
                 var needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 var isEnemyPosLost = IsEnemyPosLost();
@@ -503,31 +500,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     _lastHaveEnemyTime = -999f;
                     return false;
-                }
-
-                var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(mcsBotPlayerData);
-                if (enemyExist && MiyakoCarryServicePlugin.SAINInstalled)
-                {
-                    var sqrDist = mcsLeadPlayerPos.McsSqrDistance(goalEnemy.Person.Position);
-                    if (_deferToSain)
-                    {
-                        if (sqrDist > SAINUtils.ExitSainSqr)
-                        {
-                            _deferToSain = false;
-                        }
-                    }
-                    else
-                    {
-                        if (sqrDist < SAINUtils.EnterSainSqr)
-                        {
-                            _deferToSain = true;
-                        }
-                    }
-
-                    if (_deferToSain)
-                    {
-                        return false;
-                    }
                 }
 
                 _lastHaveEnemyTime = Time.time;

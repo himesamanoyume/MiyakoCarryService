@@ -211,11 +211,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.Memory.HaveEnemy && MiyakoCarryServicePlugin.SAINInstalled)
-            {
-                return false;
-            }
-
             if (McsBotPlayerData != null && McsBotPlayerData.HasIntent(Intents.ShouldTeleport))
             {
                 McsBotPlayerData.RemoveIntent(Intents.ShouldTeleport);

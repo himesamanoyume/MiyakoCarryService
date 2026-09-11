@@ -58,15 +58,6 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.followerSanitar
         };
 
-        public static readonly HashSet<string> SAINNotAdjusted = new()
-        {
-            nameof(EBrainName.BossZryachiy),
-            nameof(EBrainName.Fl_Zraychiy),
-            nameof(EBrainName.SctPredvst),
-            nameof(EBrainName.PrizrakSt),
-            nameof(EBrainName.Oni)
-        };
-
         public static readonly HashSet<string> LabyrinthSolvePuzzleItems = new()
         {
             ItemTpl.BBQS43_GasTorch,
@@ -203,10 +194,7 @@ namespace MiyakoCarryService.Client.Utils
             { "Shopping_Mall_DesignStuff_00064", Locales.FLUSHURINAL }
         };
 
-        public static readonly HashSet<string> KeepLayerNames = new()
-        {
-            "SAIN : Combat Layer",
-        };
+        public static readonly HashSet<string> KeepLayerNames = new();
 
         public static readonly string[] TravelTaskIntents = 
         {

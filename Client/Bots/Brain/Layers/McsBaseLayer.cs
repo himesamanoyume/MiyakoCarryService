@@ -57,7 +57,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected StationaryWeaponData _cachedStationaryWeaponData;
         protected float _scanPhase = 0f;
         protected float _nextRecalcGoalTime = 0f;
-        protected bool _deferToSain = false;
         protected float _goToStationaryStuckTime = -999f;
         protected float _lastSqrToOperator = float.MaxValue;
         protected float _lastCanShootTime = -999f;
@@ -110,11 +109,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public override void Start()
         {
             base.Start();
-            if (MiyakoCarryServicePlugin.SAINInstalled)
-            {
-                // 如果不执行这段代码，当护航从SAIN的Layer回到Mcs的Layer时，就会卡住不动（以前会，现在似乎删除也不会再发生了，但避免意外，依旧保留）
-                SAINUtils.ResetSAINLayer(BotOwner);
-            }
             if (McsBotPlayerData != null)
             {
                 McsBotPlayerData.IsMcsLayerActive = true;

@@ -253,19 +253,6 @@ namespace MiyakoCarryService.Client
 
             if (SAINInstalled)
             {
-                _patches.Add(new CombatSoloLayerStartPatch());
-                _patches.Add(new CombatSoloLayerIsActivePatch());
-                _patches.Add(new SAINActivationManualUpdatePatch());
-                _patches.Add(new SAINBotInfoInitPatch());
-                _patches.Add(new SetTargetMoveDirectionPatch());
-                _patches.Add(new DogFightMovePatch());
-                _patches.Add(new RunToPointPatch());
-                _patches.Add(new WalkToPointPatch());
-                _patches.Add(new RunToPointByWayPatch());
-                _patches.Add(new WalkToPointByWayPatch());
-                _patches.Add(new MoverManualUpdatePatch());
-                _patches.Add(new CalcGoalDropEnemyPatch());
-                _patches.Add(new CheckCanShootPatch());
                 _patches.Add(new SainPlayVoiceLinePatch());
             }
 
