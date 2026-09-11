@@ -43,6 +43,9 @@ namespace MiyakoCarryService.Client.Datas
                     LootDataMgr.UnlockLootingTarget(LootingTarget);
                     LootDataMgr.UnlockLootingTargetRootTransform(LootingTarget.RootTransform);
                     LootingTarget = null;
+                    ProxyTargetId = null;
+                    TargetPos = null;
+                    RemoveIntent([Intents.ShouldLootProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldInteractionProxyAction, Intents.ShouldStationaryWeaponProxyAction]);
                 }
             }
         }

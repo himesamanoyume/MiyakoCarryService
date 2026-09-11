@@ -69,7 +69,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var normalTake = false;
             var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
-                    targetLootData.ItemType == EItemType.Equipment ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    (targetLootData.ItemType == EItemType.Equipment && targetLootData.Item is not Headphones) ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
             if (currentSlot == null)
             {

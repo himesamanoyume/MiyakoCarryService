@@ -2,12 +2,15 @@
 
 ## 1.1.4.0
 
+- 大幅改进护航的战斗相关行为
 - 新增绘制护航调试信息
 - 修复了一些其他问题
 
 ---
 
-- bb
+- Significantly improved McsBotPlayer combat-related behavior
+- Added rendering of McsBotPlayer debug information
+- Fixed some other issues
 
 ## 1.1.3.1
 

@@ -15,12 +15,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     public class McsFightLayer : McsBaseLayer
     {
         public float _contactTime = 0f;
-        public float _nextRecalcGoalTime = 0f;
         public const float FightHoldTime = 3f;
         public float _lastHaveEnemyTime = -999f;
-        public bool _deferToSain = false;
-        public float _goToStationaryStuckTime = -999f;
-        public float _lastSqrToOperator = float.MaxValue;
 
         public McsFightLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {

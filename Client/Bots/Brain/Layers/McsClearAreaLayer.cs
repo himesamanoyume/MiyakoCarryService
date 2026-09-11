@@ -11,10 +11,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
     [Obsolete]
     public class McsClearAreaLayer : McsBaseLayer
     {
-        private const float ARRIVE_DIST = 2.5f;
-        private const float LOOK_AROUND_TIME = 2f;
         private const float STUCK_TIMEOUT = 8f;
-        public int _isTurnRight = 1;
 
         public McsClearAreaLayer(BotOwner botOwner, int priority) : base(botOwner, priority)
         {
@@ -112,7 +109,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
         }
 
-        private void FinishClearArea()
+        public override void FinishClearArea()
         {
             McsBotPlayerData.ClearAreaPoints = null;
             McsBotPlayerData.ClearAreaIndex = 0;

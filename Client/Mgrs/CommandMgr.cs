@@ -625,10 +625,10 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
+                mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldQuestProxyAction);
                 mcsBotPlayerData.ProxyTargetId = ctx.TargetId;
                 mcsBotPlayerData.TargetPos = ctx.Position;
-                mcsBotPlayerData.IsLooting = false;
                 botOwner.TalkMsg(new McsMsg
                 {
                     PhraseTrigger = EPhraseTrigger.Going,
@@ -649,14 +649,21 @@ namespace MiyakoCarryService.Client.Mgrs
                     Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                 });
             }
+            else
+            {
+                botOwner.TalkMsg(new McsMsg
+                {
+                    PhraseTrigger = EPhraseTrigger.Roger
+                });
+            }
             botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.StopMove();
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
+                mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldEscort);
                 mcsBotPlayerData.TargetPos = ctx.Position;
-                mcsBotPlayerData.IsLooting = false;
             }
         }
 
@@ -974,6 +981,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
+                mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldInteractionProxyAction);
                 var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(ctx.TargetId);
                 if (interactableObjectData != null)
@@ -986,7 +994,6 @@ namespace MiyakoCarryService.Client.Mgrs
                         Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                     });
                 }
-                mcsBotPlayerData.IsLooting = false;
             }
         }
 
@@ -1165,11 +1172,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 PhraseTrigger = EPhraseTrigger.Going,
                 Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
             });
+            mcsBotPlayerData.IsLooting = false;
             mcsBotPlayerData.ClearAreaPoints = seg;
             mcsBotPlayerData.ClearAreaIndex = 0;
             mcsBotPlayerData.ClearAreaLookAroundUntil = 0f;
             mcsBotPlayerData.TargetPos = seg[0];
-            mcsBotPlayerData.IsLooting = false;
             mcsBotPlayerData.ProxyTargetId = null;
             mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldClearArea);
             botOwner.Mover._lastTimePosChanged = Time.time;
@@ -1185,6 +1192,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var mcsBotPlayerData = botOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData != null)
             {
+                mcsBotPlayerData.IsLooting = false;
                 mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation], Intents.ShouldStationaryWeaponProxyAction);
                 var interactableObjectData = Singleton<GameWorld>.Instance.FindInteractableObjectData(ctx.TargetId);
                 if (interactableObjectData != null)
@@ -1197,7 +1205,6 @@ namespace MiyakoCarryService.Client.Mgrs
                         Keys = botOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null
                     });
                 }
-                mcsBotPlayerData.IsLooting = false;
             }
         }
 

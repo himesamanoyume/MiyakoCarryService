@@ -1854,15 +1854,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             BotOwner.Mover.Sprint(false);
-
             player.ExecuteInteraction(door, new InteractionResult(EInteractionType.Open));
-
             BotOwner.Mover.SprintPause(FAST_OPEN_DOOR_WINDOW);
-
-#if DEBUG
-            McsLogger.LogInfo($"FastOpenDoor: {door.Id} bot={BotOwner.ProfileId}");
-#endif
-
             var mcsBotPlayerData = McsBotPlayerData;
             mcsBotPlayerData.FastOpenDoor = door;
             mcsBotPlayerData.FastOpenDoorEndTime = time + FAST_OPEN_DOOR_WINDOW;
