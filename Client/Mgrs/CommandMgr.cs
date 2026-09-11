@@ -653,7 +653,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 botOwner.TalkMsg(new McsMsg
                 {
-                    PhraseTrigger = EPhraseTrigger.Roger
+                    PhraseTrigger = EPhraseTrigger.FollowMe
                 });
             }
             botOwner.Mover._lastTimePosChanged = Time.time;

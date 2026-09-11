@@ -633,5 +633,25 @@ namespace MiyakoCarryService.Client.Utils
             }
             return formationMatrix;
         }
+
+        public static bool IsForbiddenEnemy(IPlayer person)
+        {
+            if (person?.Profile?.Info == null)
+            {
+                return false;
+            }
+
+            if (person.Profile.Info.GroupId is "Mcs" or "Fika")
+            {
+                return true;
+            }
+
+            if (McsMgr.IsMcsBotPlayer(person.ProfileId) || McsMgr.IsMcsLeadPlayer(person.ProfileId))
+            {
+                return true;
+            }
+
+            return person.Profile.Info.Settings?.Role is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy;
+        }
     }
 }

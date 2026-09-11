@@ -74,7 +74,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 if (mcsBotPlayerData != null)
                 {
                     mcsBotPlayerData.LastHitTime = Time.time;
-                    mcsBotPlayerData.LastHitShooter = attackerPlayer;
+                    mcsBotPlayerData.LastHitShooter = Tools.IsForbiddenEnemy(attackerPlayer) ? null : attackerPlayer;
                     mcsBotPlayerData.AddSuppression(damage);
                 }
             }

@@ -60,10 +60,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _goToStationaryStuckTime = -999f;
         protected float _lastSqrToOperator = float.MaxValue;
         protected float _lastCanShootTime = -999f;
-        protected const float CAN_SHOOT_HOLD_TIME = 2f;
-        protected const float CAN_SHOOT_HOLD_TIME_FREE = 15f;
-        protected const float ARRIVE_DIST = 2.5f;
-        protected const float LOOK_AROUND_TIME = 2f;
         protected int _isTurnRight = 1;
         protected string _holdGroundEnemyId = null;
         protected float _holdGroundStartTime = 0f;
@@ -73,17 +69,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected string _lastAcceptedGoalEnemyId = null;
         protected float _lastAcceptedGoalSetTime = -999f;
         protected float _nextRushJumpTime = 0f;
-        public const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
-        public const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
-        public const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
-        public const float SPHERECAST_DISTANCE = 2f;
-        public const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
-        public const float WEAPON_SWITCH_COOLDOWN = 1f;
-        public const float SUPPRESS_TIME_SINCE_SEEN = 3f;
-        public const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
-        public const float SHIFT_COVER_MIN_TIME = 6f;
-        public const float FAST_OPEN_DOOR_TRIGGER_DIST = 4.5f;
-        public const float FAST_OPEN_DOOR_WINDOW = 2.5f;
+        protected bool _wasProxying = false;
+        protected bool _wasEscorting = false;
+        protected bool _wasClearingArea = false;
+        private string _lastReportedContactEnemyId = null;
+        private float _lastContactReportTime = -999f;
+        private bool _wasFightActive = false;
+        protected const float ARRIVE_DIST = 2.5f;
+        protected const float LOOK_AROUND_TIME = 2f;
+        protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
+        protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
+        protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
+        protected const float SPHERECAST_DISTANCE = 2f;
+        protected const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
+        protected const float WEAPON_SWITCH_COOLDOWN = 1f;
+        protected const float SUPPRESS_TIME_SINCE_SEEN = 3f;
+        protected const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
+        protected const float SHIFT_COVER_MIN_TIME = 6f;
+        protected const float FAST_OPEN_DOOR_TRIGGER_DIST = 4.5f;
+        protected const float FAST_OPEN_DOOR_WINDOW = 2.5f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -654,6 +658,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
+                    BotOwner.TalkMsg(new McsMsg
+                    {
+                        PhraseTrigger = EPhraseTrigger.Regroup
+                    });
                     UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
                     if (_currentMoveTarget.HasValue)
                     {
@@ -2337,7 +2345,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         public virtual void TrySelectLastHitShooter(float time)
         {
             var shooter = McsBotPlayerData.LastHitShooter;
-            if (shooter == null || time - McsBotPlayerData.LastHitTime > 2f || !shooter.HealthController.IsAlive)
+            if (shooter == null || time - McsBotPlayerData.LastHitTime > 2f || !shooter.HealthController.IsAlive || Tools.IsForbiddenEnemy(shooter))
             {
                 return;
             }
@@ -2364,7 +2372,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var threatEnemy = mcsAILeadPlayer.GetLeadThreatEnemy();
-            if (threatEnemy == null)
+            if (threatEnemy == null || Tools.IsForbiddenEnemy(threatEnemy))
             {
                 return;
             }
@@ -2400,7 +2408,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var minSqrDistance = float.MaxValue;
             foreach (var leadVisibleEnemy in leadVisibleEnemies)
             {
-                if (leadVisibleEnemy == null || !leadVisibleEnemy.HealthController.IsAlive)
+                if (leadVisibleEnemy == null || !leadVisibleEnemy.HealthController.IsAlive || Tools.IsForbiddenEnemy(leadVisibleEnemy))
                 {
                     continue;
                 }
@@ -2570,6 +2578,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void AcceptGoalEnemy(EnemyInfo goalEnemy, float time)
         {
+            // 目标选择链路的最后落点：即使有遗漏入口把禁敌角色送进来，也在这里挡掉
+            if (goalEnemy != null && Tools.IsForbiddenEnemy(goalEnemy.Person))
+            {
+                return;
+            }
+
             BotOwner.Memory.GoalEnemy = goalEnemy;
             _lastAcceptedGoalEnemyId = goalEnemy?.Person?.ProfileId;
             _lastAcceptedGoalSetTime = time;
@@ -2689,6 +2703,83 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             BotOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Clear
+            });
+        }
+
+        public virtual void ReportFirstContact(EnemyInfo goalEnemy, float time)
+        {
+            var enemyId = goalEnemy?.Person?.ProfileId;
+            if (enemyId == null || enemyId == _lastReportedContactEnemyId)
+            {
+                return;
+            }
+
+            if (time - _lastContactReportTime < 3f)
+            {
+                return;
+            }
+
+            _lastReportedContactEnemyId = enemyId;
+            _lastContactReportTime = time;
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.OnFirstContact,
+                Position = goalEnemy.EnemyLastPosition
+            });
+        }
+
+        public virtual void ReportFightState(bool fightActive, float time)
+        {
+            if (fightActive)
+            {
+                _wasFightActive = true;
+                return;
+            }
+
+            if (!_wasFightActive)
+            {
+                return;
+            }
+
+            _wasFightActive = false;
+            _lastReportedContactEnemyId = null;
+
+            if (time - _lastContactReportTime < 0.5f)
+            {
+                return;
+            }
+
+            foreach (var member in BotOwner.BotsGroup._members)
+            {
+                if (member.Memory.HaveEnemy)
+                {
+                    return;
+                }
+            }
+
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = EPhraseTrigger.Clear
+            });
+        }
+
+        public virtual void ReportTaskStart(ref bool wasActive, bool isActive, EPhraseTrigger phraseTrigger, string[] keys = null)
+        {
+            if (wasActive == isActive)
+            {
+                return;
+            }
+
+            wasActive = isActive;
+            if (!isActive)
+            {
+                return;
+            }
+
+            BotOwner.TalkMsg(new McsMsg
+            {
+                PhraseTrigger = phraseTrigger,
+                Keys = keys
             });
         }
     }

@@ -169,7 +169,7 @@ namespace MiyakoCarryService.Client.Misc
 
         public void MarkLeadAttacker(Player attacker)
         {
-            if (attacker == null)
+            if (attacker == null || Tools.IsForbiddenEnemy(attacker))
             {
                 return;
             }
@@ -180,7 +180,7 @@ namespace MiyakoCarryService.Client.Misc
 
         public void MarkLeadAimingEnemy(Player aimingEnemy)
         {
-            if (aimingEnemy == null)
+            if (aimingEnemy == null || Tools.IsForbiddenEnemy(aimingEnemy))
             {
                 return;
             }
@@ -197,6 +197,11 @@ namespace MiyakoCarryService.Client.Misc
             CleanupDeadEnemies();
 
             if (seenEnemy == null || !seenEnemy.HealthController.IsAlive)
+            {
+                return;
+            }
+
+            if (Tools.IsForbiddenEnemy(seenEnemy))
             {
                 return;
             }

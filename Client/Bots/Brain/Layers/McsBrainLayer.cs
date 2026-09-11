@@ -26,6 +26,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 var tooClose = false;
                 var needHeal = false;
                 var goalEnemy = BotOwner.Memory.GoalEnemy;
+
+                if (goalEnemy != null && Tools.IsForbiddenEnemy(goalEnemy.Person))
+                {
+                    BotOwner.Memory.GoalEnemy = null;
+                    if (BotOwner.EnemiesController.EnemyInfos.ContainsKey(goalEnemy.Person))
+                    {
+                        BotOwner.EnemiesController.Remove(goalEnemy.Person);
+                    }
+                    goalEnemy = null;
+                }
+
                 var canShootNow = CanShootNow();
                 if (canShootNow)
                 {
@@ -82,8 +93,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var hasTravelTask = McsBotPlayerData.HasAnyIntent(Classification.TravelTaskIntents);
-                var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? CAN_SHOOT_HOLD_TIME : CAN_SHOOT_HOLD_TIME_FREE))
-                    || IsApproachingThreat();
+                var fightActive = (goalEnemy != null && time - _lastCanShootTime <= (hasTravelTask ? 2f : 15f)) || IsApproachingThreat();
+
+                ReportFightState(fightActive, time);
+
                 needHeal = (BotOwner.Medecine.FirstAid.Damaged && BotOwner.Medecine.FirstAid.HaveSmth2Use) || (BotOwner.Medecine.SurgicalKit.Damaged && BotOwner.Medecine.SurgicalKit.HaveSmth2Use);
                 var isEnemyPosLost = IsEnemyPosLost();
                 mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
@@ -91,6 +104,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 tooClose = sqrDistance <= TOO_CLOSE_FROM_LEAD_DISTANCE * TOO_CLOSE_FROM_LEAD_DISTANCE;
 
                 #region McsProxyLayer
+
+                ReportTaskStart(
+                    ref _wasProxying,
+                    !fightActive
+                        && McsBotPlayerData.LeadPlayer.HealthController.IsAlive
+                        && (McsBotPlayerData.HasIntent(Intents.ShouldQuestProxyAction)
+                            || McsBotPlayerData.HasIntent(Intents.ShouldLootProxyAction)
+                            || McsBotPlayerData.HasIntent(Intents.ShouldInteractionProxyAction)
+                            || McsBotPlayerData.HasIntent(Intents.ShouldStationaryWeaponProxyAction)),
+                    EPhraseTrigger.Going,
+                    BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null);
 
                 if (!fightActive && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
@@ -123,6 +147,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 #endregion
                 #region McsEscortLayer
+
+                ReportTaskStart(
+                    ref _wasEscorting,
+                    !fightActive
+                        && McsBotPlayerData.LeadPlayer.HealthController.IsAlive
+                        && ((McsBotPlayerData.HasIntent(Intents.ShouldEscort) && McsBotPlayerData.TargetPos.HasValue)
+                            || McsBotPlayerData.HasIntent(Intents.ShouldEscortToBtr)),
+                    EPhraseTrigger.FollowMe);
 
                 if (!fightActive && McsBotPlayerData.LeadPlayer.HealthController.IsAlive)
                 {
@@ -253,7 +285,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
 
-                        // 无敌人：先追溯选目标（被攻击时能锁定攻击者还击），仍 null → 留位扫视
                         if (goalEnemy == null)
                         {
                             TrySelectLastHitShooter(time);
@@ -331,6 +362,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     {
                         return new Action(typeof(HoldPositionLogic), "Mcs:FightNoEnemy");
                     }
+
+                    ReportFirstContact(goalEnemy, time);
 
                     var haveBullets = BotOwner?.WeaponManager?.HaveBullets;
 
@@ -667,6 +700,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 #endregion
                 #region McsClearAreaLayer
+
+                ReportTaskStart(
+                    ref _wasClearingArea,
+                    McsBotPlayerData.HasIntent(Intents.ShouldClearArea)
+                        && McsBotPlayerData.ClearAreaPoints != null
+                        && McsBotPlayerData.ClearAreaPoints.Count > 0,
+                    EPhraseTrigger.Going,
+                    BotOwner.Memory.HaveEnemy ? [Locales.ONFIGHT] : null);
 
                 if (McsBotPlayerData.HasIntent(Intents.ShouldClearArea) && McsBotPlayerData.ClearAreaPoints != null && McsBotPlayerData.ClearAreaPoints.Count > 0)
                 {
