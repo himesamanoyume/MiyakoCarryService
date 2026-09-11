@@ -26,6 +26,26 @@ namespace MiyakoCarryService.Client.Datas
         private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
         public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
         public BodyPartType AimingBodyPartType = BodyPartType.head;
+        public int CarryServiceLevel
+        {
+            get
+            {
+                if (field <= 0)
+                {
+                    var player = Player;
+                    if (player == null)
+                    {
+                        return 5;
+                    }
+
+                    field = BotSettingUtils.GetCarryServiceLevel(player.Profile.Info.Level);
+                }
+
+                return field;
+            }
+            set => field = value;
+        }
+
         public Vector3? TargetPos = null;
         public string ProxyTargetId = null;
         public LootData LootingTarget = null;
@@ -59,7 +79,44 @@ namespace MiyakoCarryService.Client.Datas
         private float _nextEmergencyNeedCheckTime = 0f;
         private ELootNeedType _cachedEmergencyLootNeed = ELootNeedType.None;
         private HashSet<EDamageEffectType> _missingMedEffects = new();
-        public bool IsMcsLayerActive = false;
+        private string _enemyVelocityKey = null;
+        private Vector3 _enemyVelocityPosition = Vector3.zero;
+        private float _enemyVelocityTime = 0f;
+        private Vector3 _enemyVelocity = Vector3.zero;
+
+        public Vector3 GetEstimatedEnemyVelocity(EnemyInfo enemyInfo)
+        {
+            var person = enemyInfo?.Person;
+            if (person == null)
+            {
+                return Vector3.zero;
+            }
+
+            var key = person.ProfileId;
+            var position = enemyInfo.CurrPosition;
+            var now = Time.time;
+
+            if (key != _enemyVelocityKey)
+            {
+                _enemyVelocityKey = key;
+                _enemyVelocityPosition = position;
+                _enemyVelocityTime = now;
+                _enemyVelocity = Vector3.zero;
+                return Vector3.zero;
+            }
+
+            var deltaTime = now - _enemyVelocityTime;
+            if (deltaTime < 0.05f)
+            {
+                return _enemyVelocity;
+            }
+
+            _enemyVelocity = (position - _enemyVelocityPosition) / deltaTime;
+            _enemyVelocityPosition = position;
+            _enemyVelocityTime = now;
+            return _enemyVelocity;
+        }
+
         public bool IsBtrLeaving = false;
         public byte BtrTargetSide = 0;
         public byte BtrTargetSlot = 0;
@@ -736,6 +793,10 @@ namespace MiyakoCarryService.Client.Datas
             _botOwnerRef = null;
             _leadPlayeRef = null;
             _mcsAILeadPlayerRef = null;
+            _enemyVelocityKey = null;
+            _enemyVelocityPosition = Vector3.zero;
+            _enemyVelocityTime = 0f;
+            _enemyVelocity = Vector3.zero;
             IsLooting = false;
             LootingTarget = null;
         }

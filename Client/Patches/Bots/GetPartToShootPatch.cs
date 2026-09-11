@@ -10,7 +10,7 @@ using UnityEngine;
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 设定护航的攻击部位
+    /// 设定护航的攻击部位，并叠加弹道预测的提前量
     /// </summary>
     public sealed class GetPartToShootPatch : ModulePatch
     {
@@ -32,10 +32,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (!mcsBotPlayerData.IsMcsLayerActive)
-            {
-                return true;
-            }
             __result = GetPartToShootPos(__instance, mcsBotPlayerData);
             return false;
         }
@@ -56,7 +52,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 }
                 else
                 {
-                    return ApplyLead(enemyInfo, enemyInfo.GetVisiblePartToShoot()); 
+                    return ApplyLead(enemyInfo, mcsBotPlayerData, enemyInfo.GetVisiblePartToShoot());
                 }
             }
 
@@ -65,10 +61,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return enemyInfo.CurrPosition + Vector3.up;
             }
 
-            return ApplyLead(enemyInfo, enemyInfo.LastPartToShoot.GetPartPositionWithOffset());
+            return ApplyLead(enemyInfo, mcsBotPlayerData, enemyInfo.LastPartToShoot.GetPartPositionWithOffset());
         }
 
-        private static Vector3 ApplyLead(EnemyInfo enemyInfo, Vector3 basePos)
+        private static Vector3 ApplyLead(EnemyInfo enemyInfo, McsBotPlayerData mcsBotPlayerData, Vector3 basePos)
         {
             if (basePos == Vector3.zero)
             {
@@ -81,16 +77,32 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return basePos;
             }
 
-            var muzzleVelocity = weapon.CurrentAmmoTemplate.InitialSpeed * weapon.SpeedFactor;
+            var ammoTemplate = weapon.CurrentAmmoTemplate;
+            if (ammoTemplate == null)
+            {
+                return basePos;
+            }
+
+            var muzzleVelocity = ammoTemplate.InitialSpeed * weapon.SpeedFactor;
             if (muzzleVelocity <= 0f)
             {
                 return basePos;
             }
 
             var firePort = enemyInfo.Owner.WeaponRoot.position;
-            var targetVelocity = enemyInfo.Person.Velocity;
+            var distance = new Vector3(basePos.x - firePort.x, 0f, basePos.z - firePort.z).magnitude;
+            var confidence = BotSettingUtils.GetPredictConfidence(distance, mcsBotPlayerData.CarryServiceLevel);
+            if (confidence <= 0f)
+            {
+                return basePos;
+            }
 
-            return Tools.GetPredictedAimPoint(firePort, basePos, targetVelocity, weapon.CurrentAmmoTemplate, muzzleVelocity);
+            var controlVelocity = enemyInfo.Person.Velocity;
+            var estimatedVelocity = mcsBotPlayerData.GetEstimatedEnemyVelocity(enemyInfo);
+            var targetVelocity = controlVelocity.magnitude >= 0.5f || estimatedVelocity.magnitude < 1f ? controlVelocity : estimatedVelocity;
+            var bulletHasGravity = weapon.IsGrenadeLauncher;
+
+            return Tools.GetPredictedAimPoint(firePort, basePos, targetVelocity, ammoTemplate, muzzleVelocity, bulletHasGravity, confidence);
         }
     }
 }

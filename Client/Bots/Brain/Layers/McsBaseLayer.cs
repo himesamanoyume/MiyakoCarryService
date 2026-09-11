@@ -106,24 +106,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return Name;
         }
 
-        public override void Start()
-        {
-            base.Start();
-            if (McsBotPlayerData != null)
-            {
-                McsBotPlayerData.IsMcsLayerActive = true;
-            }
-        }
-
-        public override void Stop()
-        {
-            base.Stop();
-            if (McsBotPlayerData != null)
-            {
-                McsBotPlayerData.IsMcsLayerActive = false;
-            }
-        }
-
         protected SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
         public override bool IsCurrentActionEnding()

@@ -23,6 +23,11 @@ namespace MiyakoCarryService.Client.Utils
 
         public static bool IsHost => McsMgr.IsHost;
         private static ConcurrentDictionary<string, int> _formationOpenCells = new();
+        private const float BALLISTIC_CONVERGE_DISTANCE = 0.02f;
+        private const float MAX_LEAD_DISTANCE = 12f;
+        private const float MAX_DROP_COMPENSATION_DISTANCE = 20f;
+        private const float BALLISTIC_STEP_TIME = 0.01f;
+        private const int BALLISTIC_MAX_STEP_COUNT = 1300;
 
         public static bool IsPlayerInventory(string stringTemplateId)
         {
@@ -348,79 +353,113 @@ namespace MiyakoCarryService.Client.Utils
             }
         }
 
-        private static bool SimulateToHorizontalDistance(Vector3 firePort, Vector3 aimDir, float muzzleVelocity, AmmoTemplate ammo, float targetHorizDist, out float timeOfFlight, out float bulletY)
+        private static bool SimulateToHorizontalDistance(Vector3 firePort, Vector3 aimDir, float muzzleVelocity, AmmoTemplate ammo, bool bulletHasGravity, float targetHorizDist, out float timeOfFlight, out Vector3 bulletPosition)
         {
-            timeOfFlight = -1f;
-            bulletY = firePort.y;
+            timeOfFlight = 0f;
+            bulletPosition = firePort;
 
-            var calc = new TrajectoryCalculator();
-            try
+            if (targetHorizDist <= 0f)
             {
-                calc.Initialize(firePort, aimDir.normalized * muzzleVelocity, ammo.BulletMassGram, ammo.BulletDiameterMilimeters, ammo.BallisticCoeficient, true);
+                return true;
+            }
 
-                var prev = calc.Current;
-                for (int i = 0; i < 800; i++)
-                {
-                    var cur = calc.Next();
-                    var horiz = new Vector3(cur.position.x - firePort.x, 0f, cur.position.z - firePort.z).magnitude;
-                    if (horiz >= targetHorizDist)
-                    {
-                        var prevHoriz = new Vector3(prev.position.x - firePort.x, 0f, prev.position.z - firePort.z).magnitude;
-                        var t = (horiz - prevHoriz) < 1e-4f ? 0f : Mathf.InverseLerp(prevHoriz, horiz, targetHorizDist);
-                        timeOfFlight = Mathf.Lerp(prev.time, cur.time, t);
-                        bulletY = Mathf.Lerp(prev.position.y, cur.position.y, t);
-                        return true;
-                    }
-                    prev = cur;
-                }
-                timeOfFlight = prev.time;
-                bulletY = prev.position.y;
+            var bulletMassKg = ammo.BulletMassGram / 1000f;
+            var bulletDiameterM = ammo.BulletDiameterMilimeters / 1000f;
+            if (bulletMassKg <= 0f || bulletDiameterM <= 0f || ammo.BallisticCoeficient <= 0f)
+            {
                 return false;
             }
-            finally
+
+            var gravity = bulletHasGravity ? Physics.gravity : Vector3.zero;
+            var bulletMassKgX2 = bulletMassKg * 2f;
+            var bulletBallisticCoefficient = bulletMassKg * 0.0014223f / (bulletDiameterM * bulletDiameterM * ammo.BallisticCoeficient);
+            var bulletSlowdown = 1.2f * (bulletDiameterM * bulletDiameterM * 3.1415927f / 4f);
+
+            var position = firePort;
+            var velocity = aimDir.normalized * muzzleVelocity;
+            var prevPosition = position;
+            var prevHorizontal = 0f;
+
+            for (int step = 0; step < BALLISTIC_MAX_STEP_COUNT; step++)
             {
-                calc.ClearClass();
+                var speed = velocity.magnitude;
+                var dragCoefficient = Shot.CalculateG1DragCoefficient(speed) * bulletBallisticCoefficient;
+                var acceleration = gravity + bulletSlowdown * -dragCoefficient * speed * speed / bulletMassKgX2 * velocity.normalized;
+
+                var nextPosition = position + velocity * BALLISTIC_STEP_TIME + 5E-05f * acceleration;
+                velocity += acceleration * BALLISTIC_STEP_TIME;
+
+                prevPosition = position;
+                position = nextPosition;
+
+                var horizontal = new Vector3(position.x - firePort.x, 0f, position.z - firePort.z).magnitude;
+                if (horizontal >= targetHorizDist)
+                {
+                    var curTime = (step + 1) * BALLISTIC_STEP_TIME;
+                    var t = (horizontal - prevHorizontal) < 1E-04f ? 0f : Mathf.InverseLerp(prevHorizontal, horizontal, targetHorizDist);
+                    timeOfFlight = Mathf.Lerp(curTime - BALLISTIC_STEP_TIME, curTime, t);
+                    bulletPosition = Vector3.Lerp(prevPosition, position, t);
+                    return true;
+                }
+
+                prevHorizontal = horizontal;
             }
+
+            timeOfFlight = BALLISTIC_MAX_STEP_COUNT * BALLISTIC_STEP_TIME;
+            bulletPosition = position;
+            return false;
         }
 
-        public static Vector3 GetPredictedAimPoint(Vector3 firePort, Vector3 targetPos, Vector3 targetVelocity, AmmoTemplate ammo, float muzzleVelocity)
+        public static Vector3 GetPredictedAimPoint(Vector3 firePort, Vector3 targetPos, Vector3 targetVelocity, AmmoTemplate ammo, float muzzleVelocity, bool bulletHasGravity, float confidence = 1f)
         {
-            if (ammo == null || muzzleVelocity <= 0f)
+            if (ammo == null || muzzleVelocity <= 0f || confidence <= 0f)
             {
                 return targetPos;
             }
 
-            var predicted = targetPos;
-            for (int i = 0; i < 5; i++)
+            var aimPoint = targetPos;
+            for (int i = 0; i < 4; i++)
             {
-                var dir = predicted - firePort;
-                var horiz = new Vector3(dir.x, 0f, dir.z).magnitude;
+                var direction = aimPoint - firePort;
+                var horiz = new Vector3(direction.x, 0f, direction.z).magnitude;
                 if (horiz < 0.01f)
-                {
-                    break;
-                }
-                if (!SimulateToHorizontalDistance(firePort, dir, muzzleVelocity, ammo, horiz, out var tof, out _) || tof <= 0f)
                 {
                     return targetPos;
                 }
-                predicted = targetPos + targetVelocity * tof;
+
+                if (!SimulateToHorizontalDistance(firePort, direction, muzzleVelocity, ammo, bulletHasGravity, horiz, out var timeOfFlight, out var bulletPosition) || timeOfFlight <= 0f)
+                {
+                    return targetPos;
+                }
+
+                var impactPos = targetPos + targetVelocity * timeOfFlight;
+                var drop = Mathf.Clamp(impactPos.y - bulletPosition.y, -MAX_DROP_COMPENSATION_DISTANCE, MAX_DROP_COMPENSATION_DISTANCE);
+                var nextAimPoint = impactPos + Vector3.up * drop;
+
+                var converged = (nextAimPoint - aimPoint).sqrMagnitude <= BALLISTIC_CONVERGE_DISTANCE * BALLISTIC_CONVERGE_DISTANCE;
+                aimPoint = nextAimPoint;
+                if (converged)
+                {
+                    break;
+                }
             }
 
-            var lead = predicted - targetPos;
-            if (lead.magnitude > 8f)
+            var offset = aimPoint - targetPos;
+            var lead = new Vector3(offset.x, 0f, offset.z);
+            if (lead.sqrMagnitude > MAX_LEAD_DISTANCE * MAX_LEAD_DISTANCE)
             {
-                predicted = targetPos + lead.normalized * 8f;
+                lead = lead.normalized * MAX_LEAD_DISTANCE;
             }
 
-            var pdir = predicted - firePort;
-            var phoriz = new Vector3(pdir.x, 0f, pdir.z).magnitude;
-            if (phoriz >= 0.01f && SimulateToHorizontalDistance(firePort, pdir, muzzleVelocity, ammo, phoriz, out _, out var bulletY))
+            var verticalOffset = Mathf.Clamp(offset.y, -MAX_DROP_COMPENSATION_DISTANCE, MAX_DROP_COMPENSATION_DISTANCE);
+            aimPoint = targetPos + lead + Vector3.up * verticalOffset;
+
+            if (confidence >= 1f)
             {
-                var drop = predicted.y - bulletY;
-                predicted += Vector3.up * drop;
+                return aimPoint;
             }
 
-            return predicted;
+            return Vector3.Lerp(targetPos, aimPoint, confidence);
         }
 
         public static Vector3? ComputeTarget(Player mcsLeadPlayer, Vector3 basePos, int botIndex, int[] matrix, float spacing)
