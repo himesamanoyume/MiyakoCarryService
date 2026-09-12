@@ -38,6 +38,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextMeleeCheckTime = 0f;
         protected float _nextLootingCheckTime = 0f;
         protected float _nextVaultCheckTime = 0f;
+        protected float _nextJumpCheckTime = float.MaxValue;
         protected float _nextUpdatePosTime = 0f;
         protected float _nextHealCheckTime = 0f;
         protected float _nextStimCheckTime = 0f;
@@ -791,14 +792,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             if (_nextVaultCheckTime < Time.time)
             {
-                _nextVaultCheckTime = Time.time + 2f;
-                if (ShouldTryVault())
+                _nextVaultCheckTime = Time.time + 1.5f;
+                if (ShouldTryVault() && TryVault())
                 {
-                    if (!TryVault())
-                    {
-
-                    }
+                    _nextJumpCheckTime = float.MaxValue;
+                    return;
                 }
+
+                _nextJumpCheckTime = Time.time + 1.5f;
+            }
+
+            if (_nextJumpCheckTime < Time.time)
+            {
+                _nextJumpCheckTime = Time.time + 3f;
+                TryJump();
             }
         }
 
@@ -1421,14 +1428,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
-            var targetDirection = BotOwner.Mover.NormDirCurPoint;
-            if (Vector3.Dot(lookDirection, targetDirection) < 0.85f)
-            {
-                return false;
-            }
-
-            if (Time.time - BotOwner.Mover._lastTimePosChanged < 3f)
+            if (Time.time - BotOwner.Mover._lastTimePosChanged < 1.5f)
             {
                 return false;
             }
@@ -1449,23 +1449,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
+        public virtual void TryJump()
+        {
+            var movementContext = BotOwner.GetPlayer?.MovementContext;
+            if (movementContext == null)
+            {
+                return;
+            }
+
+            movementContext.TryJump();
+        }
+
         public virtual bool CheckForVaultableObstacle()
         {
+            var moveDirection = BotOwner.Mover.NormDirCurPoint.normalized;
             var startPosition = BotOwner.GetPlayer.WeaponRoot.position;
-            var lookDirection = BotOwner.GetPlayer.LookDirection.normalized;
-            var endPosition = startPosition + lookDirection * SPHERECAST_DISTANCE;
+            var endPosition = startPosition + moveDirection * SPHERECAST_DISTANCE;
 
             startPosition.y += 0.33f;
             endPosition.y += 0.33f;
 
-            if (Physics.SphereCast(startPosition, 0.1f, lookDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayersMaskController.PlayerStaticCollisionsMask))
+            if (Physics.SphereCast(startPosition, 0.1f, moveDirection, out RaycastHit hit, SPHERECAST_DISTANCE, LayersMaskController.PlayerStaticCollisionsMask))
             {
                 if (hit.collider != null)
                 {
                     var obstacleHeight = hit.collider.bounds.size.y;
                     var maxVaultHeight = BotOwner.GetPlayer.VaultingParameters.VaultingHeight;
 
-                    return obstacleHeight < maxVaultHeight && obstacleHeight < 1.5f;
+                    return obstacleHeight < maxVaultHeight;
                 }
             }
 
