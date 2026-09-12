@@ -53,6 +53,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             mcsBotPlayerData.AddSuppressionFromNearMiss();
                         }
 
+                        if (!Tools.TryMakeRoomForEnemy(mcsBotPlayer.BotsGroup))
+                        {
+                            continue;
+                        }
+
                         mcsBotPlayer.BotsGroup.AddEnemy(shooter.iPlayer, EBotEnemyCause.callForHelp1);
                         var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayer.ProfileId);
                         var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);

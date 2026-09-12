@@ -106,11 +106,21 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     {
                         foreach (var enemy in attackerGroup._members)
                         {
+                            if (!Tools.TryMakeRoomForEnemy(botGroup))
+                            {
+                                continue;
+                            }
+
                             botGroup.AddEnemy(enemy.GetPlayer, EBotEnemyCause.callForHelp1);
                         }
                     }
                     else
                     {
+                        if (!Tools.TryMakeRoomForEnemy(botGroup))
+                        {
+                            continue;
+                        }
+
                         botGroup.AddEnemy(person, EBotEnemyCause.callForHelp1);
                     }
                 }
@@ -171,6 +181,11 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 if (hostileMember == null || hostileMember.IsDead)
                 {
                     continue;
+                }
+
+                if (!Tools.TryMakeRoomForEnemy(targetGroup))
+                {
+                    return;
                 }
 
                 targetGroup.AddEnemy(hostileMember.GetPlayer, EBotEnemyCause.callForHelp1);

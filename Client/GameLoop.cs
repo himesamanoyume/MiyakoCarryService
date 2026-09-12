@@ -418,11 +418,11 @@ namespace MiyakoCarryService.Client
         public async Task SpawnMcsBotPlayer()
         {
             var gameWorld = Singleton<GameWorld>.Instance;
-            var currentGameWorldInstanceId = gameWorld.GetInstanceID();  
-            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)  
-            {  
-                _loadedMcsLeadPlayer.Clear();  
-                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;  
+            var currentGameWorldInstanceId = gameWorld.GetInstanceID();
+            if (_lastSpawnGameWorldInstanceId != currentGameWorldInstanceId)
+            {
+                _loadedMcsLeadPlayer.Clear();
+                _lastSpawnGameWorldInstanceId = currentGameWorldInstanceId;
             }
 
             var currentType = MatchmakerAcceptScreenShowPatch.CurrentType;
@@ -642,6 +642,12 @@ namespace MiyakoCarryService.Client
                                 {
                                     return;
                                 }
+
+                                if (!Tools.TryMakeRoomForEnemy(botsGroup))
+                                {
+                                    return;
+                                }
+
                                 botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
                             };
                         }

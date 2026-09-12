@@ -48,10 +48,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var enemy = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(player.ProfileId);
                     if (enemy != null && shouldReact)
                     {
-                        thisBotOwner.BotsGroup.AddEnemy(enemy, EBotEnemyCause.callForHelp1);
-                        var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(thisBotOwner.ProfileId);
-                        var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
-                        mcsAILeadPlayer.CalcGoalEnemy(enemy);
+                        if (Tools.TryMakeRoomForEnemy(thisBotOwner.BotsGroup))
+                        {
+                            thisBotOwner.BotsGroup.AddEnemy(enemy, EBotEnemyCause.callForHelp1);
+                            var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(thisBotOwner.ProfileId);
+                            var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
+                            mcsAILeadPlayer.CalcGoalEnemy(enemy);
+                        }
                     }
                 }
             }

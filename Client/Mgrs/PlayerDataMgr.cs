@@ -193,8 +193,6 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        private const float AIMING_SCAN_MAX_SQUARE_DIST = 300f * 300f;
-
         private IEnumerator CheckMcsLeadPlayerSeenEnemiesLoop(float time)
         {
             var waitTime = new WaitForSeconds(time);
@@ -207,6 +205,12 @@ namespace MiyakoCarryService.Client.Mgrs
                     var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                     foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                     {
+                        if (Time.time >= mcsAILeadPlayer.NextEnemyCleanupTime)
+                        {
+                            mcsAILeadPlayer.NextEnemyCleanupTime = Time.time + 3f;
+                            mcsAILeadPlayer.CleanupDeadEnemies();
+                        }
+
                         var leadPlayer = mcsAILeadPlayer.Player() as Player;
                         var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
                         var playerDatas = GetDatas<PlayerData>();
@@ -248,7 +252,7 @@ namespace MiyakoCarryService.Client.Mgrs
                                     && (targetGoalEnemy.IsVisible || targetGoalEnemy.CanShoot || targetBotOwner.ShootData?.Shooting == true))
                                 {
                                     var aimSqrDistance = target.Position.McsSqrDistance(leadPlayer.Position);
-                                    if (aimSqrDistance < AIMING_SCAN_MAX_SQUARE_DIST && aimSqrDistance < aimingSqrDistance)
+                                    if (aimSqrDistance < 300f * 300f && aimSqrDistance < aimingSqrDistance)
                                     {
                                         aimingTarget = target;
                                         aimingSqrDistance = aimSqrDistance;

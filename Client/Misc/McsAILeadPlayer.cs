@@ -11,8 +11,6 @@ namespace MiyakoCarryService.Client.Misc
 {
     public class McsAILeadPlayer : AIBossPlayer
     {
-        private const float GOAL_SWITCH_ADVANTAGE = 0.75f;
-
         public McsBotPlayerConfig McsBotPlayerConfig
         {
             get
@@ -54,20 +52,15 @@ namespace MiyakoCarryService.Client.Misc
         public float ClearAreaCacheTime;
         public List<Player> ClearAreaCacheMembers;
         public List<List<Vector3>> ClearAreaCacheSegments;
-
         public const float LEAD_THREAT_WINDOW = 3f;
-
         public Player LastLeadAttackerPlayer = null;
-
         public float LastLeadAttackerTime = -999f;
-
         public const float LEAD_AIMING_WINDOW = 2f;
-
         public Player LastLeadAimingEnemyPlayer = null;
-
         public float LastLeadAimingTime = -999f;
-
         public List<Player> LeadVisibleEnemies = new();
+        public float LastLeadShotReportTime = -999f;
+        public float NextEnemyCleanupTime = -999f;
 
         public bool IsLeadThreatEnemy(IPlayer enemy)
         {
@@ -189,9 +182,6 @@ namespace MiyakoCarryService.Client.Misc
             LastLeadAimingTime = Time.time;
         }
 
-
-        public float LastLeadShotReportTime = -999f;
-
         public void CalcGoalEnemy(Player seenEnemy)
         {
             CleanupDeadEnemies();
@@ -212,6 +202,12 @@ namespace MiyakoCarryService.Client.Misc
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 var botOwner = mcsBotPlayer.BotOwner;
+
+                // 敌人表接近 EFT 硬上限时先腾位置，腾不出来就放弃这次加敌，绝不把表灌到崩溃线
+                if (!Tools.TryMakeRoomForEnemy(botOwner))
+                {
+                    continue;
+                }
 
                 McsLeadPlayer.BotsGroup.AddEnemy(seenEnemy, EBotEnemyCause.callForHelp2);
 
@@ -243,6 +239,12 @@ namespace MiyakoCarryService.Client.Misc
                 return false;
             }
 
+            // 绕过 BotMemory.AddEnemy 自己注册敌人，必须先确保敌人表有位置
+            if (!Tools.TryMakeRoomForEnemy(botOwner))
+            {
+                return false;
+            }
+
             if (!McsLeadPlayer.BotsGroup.Enemies.TryGetValue(seenEnemy, out var groupInfo))
             {
                 groupInfo = new BotGroupEnemyInfo(seenEnemy, McsLeadPlayer.BotsGroup, EBotEnemyCause.callForHelp2);
@@ -250,6 +252,28 @@ namespace MiyakoCarryService.Client.Misc
 
             enemyInfo = botOwner.EnemiesController.AddNew(botOwner.BotsGroup, seenEnemy, groupInfo);
             botOwner.EnemiesController.SetInfo(seenEnemy, enemyInfo);
+
+            // 原生 BotMemory.AddEnemy 会订阅 DiedEvent 自动回收，这里自己注册的同理补上，
+            // 否则这类敌人死后永远留在敌人表里，只增不减
+            seenEnemy.HealthController.DiedEvent += (EDamageType damageType) =>
+            {
+                if (botOwner?.EnemiesController == null || botOwner.Memory == null)
+                {
+                    return;
+                }
+
+                if (!botOwner.EnemiesController.EnemyInfos.ContainsKey(seenEnemy))
+                {
+                    return;
+                }
+
+                if (botOwner.Memory.GoalEnemy?.Person?.ProfileId == seenEnemy.ProfileId)
+                {
+                    botOwner.Memory.GoalEnemy = null;
+                }
+
+                botOwner.EnemiesController.Remove(seenEnemy);
+            };
 
             var time = Time.time;
             enemyInfo.HaveSeenPersonal = true;
@@ -291,7 +315,7 @@ namespace MiyakoCarryService.Client.Misc
                 return false;
             }
 
-            return reportedEnemy.Distance > currentGoalEnemy.Distance * GOAL_SWITCH_ADVANTAGE;
+            return reportedEnemy.Distance > currentGoalEnemy.Distance * 0.75f;
         }
 
         public EnemyInfo GetClosestEnemy(List<EnemyInfo> enemiesInfos)

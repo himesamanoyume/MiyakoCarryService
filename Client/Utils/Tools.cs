@@ -20,7 +20,6 @@ namespace MiyakoCarryService.Client.Utils
     public static class Tools
     {
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
-
         public static bool IsHost => McsMgr.IsHost;
         private static ConcurrentDictionary<string, int> _formationOpenCells = new();
         private const float BALLISTIC_CONVERGE_DISTANCE = 0.02f;
@@ -28,6 +27,7 @@ namespace MiyakoCarryService.Client.Utils
         private const float MAX_DROP_COMPENSATION_DISTANCE = 20f;
         private const float BALLISTIC_STEP_TIME = 0.01f;
         private const int BALLISTIC_MAX_STEP_COUNT = 1300;
+        private const int ENEMY_TABLE_WATERMARK = 80;
 
         public static bool IsPlayerInventory(string stringTemplateId)
         {
@@ -652,6 +652,80 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             return person.Profile.Info.Settings?.Role is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy;
+        }
+
+        public static bool TryMakeRoomForEnemy(BotOwner botOwner)
+        {
+            var enemiesController = botOwner?.EnemiesController;
+            if (enemiesController == null)
+            {
+                return false;
+            }
+
+            if (enemiesController._countEnemies >= enemiesController.SortedInfos.Length)
+            {
+                return false;
+            }
+
+            if (enemiesController._countEnemies >= ENEMY_TABLE_WATERMARK)
+            {
+                EvictFarthestEnemy(botOwner, enemiesController);
+            }
+
+            return enemiesController._countEnemies < enemiesController.SortedInfos.Length;
+        }
+
+        public static bool TryMakeRoomForEnemy(BotsGroup botsGroup)
+        {
+            if (botsGroup == null)
+            {
+                return false;
+            }
+
+            var canAdd = true;
+            foreach (var member in botsGroup._members)
+            {
+                if (member == null || member.IsDead)
+                {
+                    continue;
+                }
+
+                if (!TryMakeRoomForEnemy(member))
+                {
+                    canAdd = false;
+                }
+            }
+
+            return canAdd;
+        }
+
+        private static void EvictFarthestEnemy(BotOwner botOwner, BotEnemiesController enemiesController)
+        {
+            var goalEnemy = botOwner.Memory?.GoalEnemy;
+
+            for (var i = 0; i < 8 && enemiesController._countEnemies >= ENEMY_TABLE_WATERMARK; i++)
+            {
+                EnemyInfo farthestEnemy = null;
+                foreach (var enemyInfo in enemiesController.EnemyInfos.Values)
+                {
+                    if (enemyInfo == null || enemyInfo == goalEnemy)
+                    {
+                        continue;
+                    }
+
+                    if (farthestEnemy == null || enemyInfo.Distance > farthestEnemy.Distance)
+                    {
+                        farthestEnemy = enemyInfo;
+                    }
+                }
+
+                if (farthestEnemy?.Person == null)
+                {
+                    return;
+                }
+
+                botOwner.Memory.DeleteInfoAboutEnemy(farthestEnemy.Person);
+            }
         }
     }
 }
