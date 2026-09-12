@@ -16,6 +16,15 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 跨越结束后 3s 内的 bot（Funnel 补丁据此拦截远距离拉回传送）
         private static readonly Dictionary<BotOwner, float> RecentHopEnds = new Dictionary<BotOwner, float>();
 
+        // 全局单帧位移侦查用的上帧位置。正常行走每帧位移上限 0.3m（OnMotionApplied 的 num =
+        // min(deltaMove.magnitude, 0.3f)，BotMoverImpostor.cs:109-113），远小于 0.6m 阈值
+        // ⇒ 单帧位移超过 0.6m 必为写位置事件（CastFromPos / Teleport 直写 Transform）。
+        //
+        // 关键是不能只盯跨越中的 bot：上面几个补丁的拦截条件全是 IsHopping()，而 IsHopping 只看 _hopping——
+        // 执行器的"接近阶段"（_hopping 仍为 false）里 SetPlayerToNavMesh 是放行的，跨越被 Cancel 之后
+        // 更是彻底没人看着。所以这里按 bot 无条件记录，覆盖全部阶段
+        private static readonly Dictionary<BotOwner, Vector3> LastMoverPositions = new Dictionary<BotOwner, Vector3>();
+
         // 翻越失败黑名单（全局：翻越可行性是几何属性，与具体 bot 无关）
         private static readonly List<VaultBlacklistEntry> VaultBlacklist = new List<VaultBlacklistEntry>();
 
@@ -36,11 +45,25 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private float _startTime;
         private bool _hopping;
         private ENavGapType _type;
-        private Vector3 _lastTickPos;
-        private bool _hasLastTickPos;
         private bool _arrived;
         private int _vaultTryCount;
         private float _nextVaultTryTime;
+
+        // 翻越动画开始（_hopping 置真）的时刻：判定"被抬到障碍顶上卡住"要用它做时基，
+        // 不能用 _startTime（那是接近阶段的起点，接近本身可能已经花掉好几秒）
+        private float _hopStartTime;
+
+        // 到位（_arrived 置真）的时刻：动画过渡等待要用它做上限，不能用 _startTime
+        // （接近本身可能花掉好几秒，用 _startTime 会让等待窗口被接近耗时吃掉）
+        private float _arrivedTime;
+
+        // 当前是否在用"直线顶上去"推进（推进目标被放到障碍另一侧）。仅用于日志区分
+        // "正常寻路" 与 "直线顶住" 两种接近形态，不再参与任何位置写入的拦截
+        private bool _pushingIntoObstacle;
+
+        // 接近阶段的最近最好成绩与下一条卡住取证日志的时间：距离不再缩短时才取证
+        private float _bestApproachDistance;
+        private float _nextStallLogTime;
 
         // 顶住判据用：锚点位置与其最后一次变化的时间（0.4s 无位移 ⇒ 被障碍挡住）
         private Vector3 _pressAnchor;
@@ -54,7 +77,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 跨越超时（大概率边缘不可跨越，如护栏/檐口）后的一段时间内不再重复规划
         public float NextPlanCooldownUntil { get; private set; }
 
-        // 执行器落地重链接主动调用 SetPlayerToNavMesh 时置位，NavBridgeLinkWritePatch 据此放行
+        // 执行器落地重链接主动调用 SetPlayerToNavMesh 时置位，NavBridgeCastFromPosPatch 据此只放行
+        // bot 附近的写入（0.5m 内），远距离写入是 superFail 分支的拉回
         public static bool RelinkInProgress;
 
         public bool IsHoppingNow => _hopping;
@@ -63,6 +87,34 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         {
             return botOwner != null && CrossingBots.TryGetValue(botOwner, out var executor) && executor._hopping;
         }
+
+        // 执行器接管了这个 bot、且还没进翻越动画（接近 / 到位等待 / 翻越尝试三段）。
+        // 这三段里 bot 是被我们主动"顶"到障碍上的：SetPlayerToNavMesh 的 superFail 兜底会把
+        // PrevSuccessLinkedFrom 沿当前角点方向硬挪 1m（FindBetterPosition，BotMover.cs:787-796），
+        // 也就是把 bot 从障碍近侧直接甩到另一侧。实测 22:18:44~22:23:41 的 21 次 1.0~1.1m 位置写入
+        // 全部落在这一段，且方向正反交替 —— 这就是"接近障碍时疯狂原地瞬移"
+        // （拦截点见 NavBridgeBetterPositionPatch）
+        public static bool IsApproaching(BotOwner botOwner)
+        {
+            return botOwner != null && CrossingBots.TryGetValue(botOwner, out var executor) && !executor._hopping;
+        }
+
+        // 【2026-09-12 20:12 日志定死】这里原先有 IsLinkWriteFrozen / LinkWriteFrozen，用来在
+        // "顶住障碍 / 到位等待 / 翻越动画" 三段挂起 BotMover.SetPlayerToNavMesh。整段删除，原因是
+        // 那个方法根本不是"重链接工具"，而是 bot 每帧的位移驱动本身：
+        //   BotMoverImpostor.OnMotionApplied（MovementContext.OnMotionApplied 的处理器）
+        //     → PositionOnWayInner += DirectionMove * deltaMove(≤0.3m)   // 虚拟点沿路径推进
+        //     → SetPlayerToNavMesh(PositionOnWay)                        // BotMoverImpostor.cs:167
+        //       → CastFromPos → this._owner.Transform.position = ...     // BotMover.cs:938 真正的位移写入
+        // 拦掉它 = 拦掉 bot 的移动能力。同时它还是 PrevSuccessLinkedFrom 的唯一更新点（BotMover.cs:782），
+        // 冻住后 method_12 会拿那个过期锚点每 0.3m 把 bot 拽回去一次：
+        //   if (vector.sqrMagnitude > 0.09f)                              // BotMover.cs:990 ⇒ 0.30m
+        //       this._owner.Mover.SetPosition(this._prevSuccessLinkedFrom);   // 真实位置写入
+        // 实测 20:12:38.239~20:12:54.058 共 15 次 linkBlock，bot 在距站立点 2.2~2.5m 处被钉了 15 秒，
+        // 抖动幅度 Never 越过 0.30m（日志"两者相距" 0.00/0.21/0.24/0.15/0.29/0.28），且本轮 exec.snap = 0 次
+        // ⇒ 冻结没有换来任何防瞬移收益，纯亏损。
+        // 顶住阶段本来就不需要冻结：OnMotionApplied 的推进量取自实际位移 deltaMove，被障碍挡住时
+        // deltaMove → 0，PositionOnWay 自动停住，不会越过障碍去对面采样。
 
         // hop 结束后 within 秒内返回 true（Funnel 补丁的拉回拦截窗口）
         public static bool EndedHopRecently(BotOwner botOwner, float within)
@@ -130,7 +182,36 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 不依赖大脑动作状态（护航动作因 IsCome 结束/意图切换时跨越驱动不再断供）
         public static void OnMoverTick(BotOwner botOwner)
         {
-            if (botOwner != null && CrossingBots.TryGetValue(botOwner, out var executor))
+            if (botOwner == null)
+            {
+                return;
+            }
+
+            // bot 销毁后清掉记录，避免字典跨局累积（此时位置也不再有意义）
+            if (botOwner.GetPlayer == null)
+            {
+                LastMoverPositions.Remove(botOwner);
+                return;
+            }
+
+            // 位移侦查必须放在跨越驱动之前：驱动本身会移动 bot，放后面会把跨越的正常推进也算进去
+            var position = botOwner.Position;
+            if (LastMoverPositions.TryGetValue(botOwner, out var lastPosition))
+            {
+                // 阈值 0.6m：正常行走每帧位移上限 0.3m —— OnMotionApplied 的 num 是
+                // min(deltaMove.magnitude, 0.3f)（BotMoverImpostor.cs:109-113），而 PositionOnWayInner
+                // 的推进量就是它，Transform 也按它写（BotMover.cs:938）。超过 0.6m 必是写位置事件
+                var jump = (position - lastPosition).magnitude;
+                if (jump > 0.6f)
+                {
+                    CrossingBots.TryGetValue(botOwner, out var moving);
+                    NavBridgeDebug.Log($"exec.snap.{botOwner.Id}", $"单帧位移 {jump:F1}m（正常 ≤0.3m）：{lastPosition.ToString("F1")} → {position.ToString("F1")}；跨越中={moving != null} hop={(moving != null && moving._hopping)} relink={RelinkInProgress}");
+                }
+            }
+
+            LastMoverPositions[botOwner] = position;
+
+            if (CrossingBots.TryGetValue(botOwner, out var executor))
             {
                 executor.Tick(botOwner);
             }
@@ -149,7 +230,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             _nextVaultTryTime = 0f;
             _pressAnchor = botOwner.Position;
             _pressAnchorTime = Time.time;
+            _arrivedTime = 0f;
             _nextPressTime = 0f;
+            _pushingIntoObstacle = false;
+            _bestApproachDistance = float.MaxValue;
+            _nextStallLogTime = 0f;
             IsCrossing = true;
             CrossingBots[botOwner] = this;
             NavBridgeDebug.Log("exec.begin", $"开始跨越：type={_type} edge={_edge.ToString("F1")} dest={_destination.ToString("F1")} way角点={gap.Way.Length}");
@@ -157,18 +242,9 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         private void Tick(BotOwner botOwner)
         {
-            // 单帧位移侦查：原生跑速每帧 <0.1m，跨越中单帧位移 >0.5m 必为写位置事件
+            // 单帧位移侦查已上移到 OnMoverTick：那里对每个 bot 无条件执行，跨越被 Cancel
+            // （接近失败/超时/自检放弃）之后仍能继续抓到写位置事件
             var pos = botOwner.Position;
-            if (_hasLastTickPos)
-            {
-                var jump = (pos - _lastTickPos).magnitude;
-                if (jump > 0.5f)
-                {
-                    //NavBridgeDebug.Log("exec.snap", $"单帧位移 {jump:F2}m：{_lastTickPos.ToString("F2")} → {pos.ToString("F2")} hopping={_hopping}", 0.15f);
-                }
-            }
-            _lastTickPos = pos;
-            _hasLastTickPos = true;
 
             if (_type == ENavGapType.Vault)
             {
@@ -178,20 +254,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             if (ShouldFinish(botOwner))
             {
-                Cancel();
-                // relink 结果记录 EBotLinkResult：fail/superFail 说明半空采样失败 → superFail 分支的
-                // FindBetterPosition(100m) 会取最近 navmesh（可能是上层边缘）→"拉回原地"路径
-                RelinkInProgress = true;
-                EBotLinkResult linkResult;
-                try
-                {
-                    linkResult = botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
-                }
-                finally
-                {
-                    RelinkInProgress = false;
-                }
-                //NavBridgeDebug.Log("exec.relink", $"重链接到落点层，pos={botOwner.Position.ToString("F1")} result={linkResult}");
+                FinishAndRelink(botOwner);
                 return;
             }
 
@@ -235,28 +298,23 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             if (_hopping)
             {
                 // 翻越动画进行中：越过障碍面（沿 Near→Far 方向推进过 60%）且落在网格上才算完成
-                var dir = _destination - _edge;
-                dir.y = 0f;
-                var total = dir.magnitude;
-                if (total > 0.01f)
+                if (IsAcrossObstacle(pos, out _))
                 {
-                    dir.Normalize();
-                    var progress = Vector3.Dot(pos - _edge, dir);
-                    if (progress > total * 0.6f && NavMesh.SamplePosition(pos, out _, 0.3f, -1))
-                    {
-                        //NavBridgeDebug.Log("vault.exec.finish", $"翻越完成 pos={pos.ToString("F1")}");
-                        Cancel();
-                        RelinkInProgress = true;
-                        try
-                        {
-                            botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
-                        }
-                        finally
-                        {
-                            RelinkInProgress = false;
-                        }
-                        return;
-                    }
+                    //NavBridgeDebug.Log("vault.exec.finish", $"翻越完成 pos={pos.ToString("F1")}");
+                    FinishAndRelink(botOwner);
+                    return;
+                }
+
+                // 攀爬把护航抬到障碍顶上（护栏、檐口）而顶上没有 navmesh：动画早已结束，bot 却既不前进
+                // 也踩不到网格。一直等满 12s 只会让它杵在上面，最后还要靠 EFT 的救援传送才下得来。
+                // 2.5s 无位移 + 脚下 0.5m 内没有网格即判定"落在障碍顶上"：拉黑障碍并交回大脑，
+                // 下一帧功能③（边缘走下）就会把 bot 送下去
+                if (Time.time - _hopStartTime > 2.5f && IsPressed(pos) && !NavMesh.SamplePosition(pos, out _, 0.5f, -1))
+                {
+                    NavBridgeDebug.Log("vault.exec.stuckOnTop", $"翻越停滞：动画开始后 {Time.time - _hopStartTime:F1}s 无位移且脚下 0.5m 内无 navmesh（pos={pos.ToString("F1")}，落点={_destination.ToString("F1")}），判定落在障碍顶上，拉黑障碍并交回大脑走下");
+                    BlacklistVault(_edge, true);
+                    Cancel();
+                    return;
                 }
 
                 if (Time.time - _startTime > 12f)
@@ -265,6 +323,18 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                     BlacklistVault(_edge, true);
                     Cancel();
                 }
+                return;
+            }
+
+            // 翻越未必由我们这次 TryVaulting 完成：自动翻越开启时 VaultingComponent.DoVaultingTick 每帧
+            // Tick + TryDoAutomaticVaulting，bot 顶着障碍走两步就被它自己送过去了，而执行器还停在接近/尝试阶段、
+            // _edge 仍在障碍近侧 ⇒ 推进目标会把 bot 从对面硬拉回障碍前面；往回走时移动方向与 faceDir 相反，
+            // 紧接着又会撞上"朝向自检未过"（gridOff 取的是上一帧骨架朝向，≈180°）→ 放弃 → 冷却后重规划 → 无限来回。
+            // 所以每帧先判"是不是已经在对面"：在就按完成收尾，任何阶段都不再把 bot 往回拉
+            if (IsAcrossObstacle(pos, out var acrossProgress))
+            {
+                NavBridgeDebug.Log("vault.exec.alreadyAcross", $"翻越已由其它途径完成：已推进 {acrossProgress:F2}m（站立点→落点全程的 60% 即判定跨过），pos={pos.ToString("F1")} 站立点={_edge.ToString("F1")} 落点={_destination.ToString("F1")}；按完成收尾，不再回拉");
+                FinishAndRelink(botOwner);
                 return;
             }
 
@@ -287,28 +357,35 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 // GoToPointNoWay 的单点路径自身可接受距离也只有 0.5m（AbstractBotPath.ReachDist），照样会提前停下。
                 // 所以最后 2.5m 把目标点放到障碍前方 1m 处、靠直线推进顶上去：bot 会被障碍的碰撞挡住，
                 // 中心停在距障碍面约一个胶囊半径（0.35m）的地方，正落在 MinDistantToInteract 之内。
-                // 直线推进不绕行，但前提是已经离得很近（2.5m 内），更远时仍交给寻路避免撞墙角
+                // 直线推进不绕行，但前提是已经离得很近（2.5m 内），更远时仍交给寻路避免撞墙角。
+                // 注意这里绝不挂起 SetPlayerToNavMesh：顶住阶段之所以不需要冻结，是因为 OnMotionApplied 的
+                // 推进量取自实际位移 deltaMove，被障碍挡住时 deltaMove → 0、PositionOnWay 自动停住，
+                // 不可能越过障碍跑到对面去采样（详见文件上方 IsLinkWriteFrozen 删除处的原因说明）
                 if (toEdge.magnitude <= 2.5f)
                 {
-                    if (Time.time >= _nextPressTime)
-                    {
-                        _nextPressTime = Time.time + 0.25f;
-                        var pressDir = _destination - _edge;
-                        pressDir.y = 0f;
-                        if (pressDir.sqrMagnitude > 0.001f)
-                        {
-                            pressDir.Normalize();
-                        }
-
-                        botOwner.Mover.GoToPointNoWay(_edge + pressDir);
-                    }
+                    _pushingIntoObstacle = true;
+                    PressInto(botOwner);
                 }
                 else
                 {
+                    _pushingIntoObstacle = false;
                     botOwner.GoToSomePointData.SetPoint(_edge);
                 }
 
                 NavBridgeDebug.Log("vault.exec.approach", $"接近障碍：pos={pos.ToString("F1")} 站立点={_edge.ToString("F1")} 距 {toEdge.magnitude:F2}m 组件实测障碍距={(hasObstacle ? obstacleDistance.ToString("F2") : "无")} IsMoving={botOwner.Mover.IsMoving}", 0.5f);
+
+                // 卡住取证：距离不再缩短时把 EFT 侧与"移动记账"有关的状态全打出来。
+                // 只打"距多少米"分不清"被障碍挡住"和"移动记账被冻住"——两者的位置表现完全一样
+                if (toEdge.magnitude < _bestApproachDistance - 0.05f)
+                {
+                    _bestApproachDistance = toEdge.magnitude;
+                    _nextStallLogTime = 0f;
+                }
+                else if (Time.time >= _nextStallLogTime)
+                {
+                    _nextStallLogTime = Time.time + 1f;
+                    NavBridgeDebug.Log("vault.exec.stall", DescribeStall(botOwner, pos, toEdge.magnitude, hasObstacle, obstacleDistance));
+                }
 
                 if (hasObstacle && obstacleDistance <= 0.45f)
                 {
@@ -351,14 +428,30 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 botOwner.Mover.Sprint(false);
             }
 
+            var vaultingComponent = botOwner.GetPlayer.VaultingComponent as VaultingComponent;
+
+            // 等待期间继续顶着障碍：松开推进会带一点惯性回退，第二次尝试时就量不到 ≤0.5m 了
             if (Time.time < _nextVaultTryTime)
             {
-                // 等待期间继续顶着障碍：松开推进会带一点惯性回退，第二次尝试时就量不到 ≤0.5m 了
-                if (Time.time >= _nextPressTime)
-                {
-                    _nextPressTime = Time.time + 0.25f;
-                    botOwner.Mover.GoToPointNoWay(_edge + faceDir);
-                }
+                PressInto(botOwner);
+                return;
+            }
+
+            // 【2026-09-12 22:36 日志定死】策略门"anim过渡"的等待。GetVaultingStrategy() 的头两道门是
+            //   if (IsAnimatorInTransitionState(0) || PlayerAnimatorIsJumpSetted()) return None;
+            // （VaultingComponent.cs:200），而 TryVaulting() 只把策略结果交给 DoVaultingByStrategy（:107）
+            // —— 于是会出现"CanVaulting=True、Vault 与 Climb 的 CanMove() 全为 True、strategy 却是 None"。
+            // 实测 22:36:00.977 那次就是这样：站位距边缘 0.08m、距=0.40m、高/长/背高比/顶净空全达标，
+            // 唯独 anim过渡×，TryVaulting=False 白占一次失败额度；0.43s 后 EFT 的 navmesh 救援把 bot
+            // 一帧送到对面，alreadyAcross 才把这次穿墙当成"翻越已完成"收尾。
+            // 过渡几乎是我们自己造成的：顶住阶段一路在冲刺（stall 日志里 冲刺=True），到场后才
+            // Mover.Sprint(false)（紧邻上方），而到位等待只有 0.2s —— 冲刺→行走的过渡还没走完。
+            // 过渡期不代表"翻不过去"，等它结束再试，且不计入 _vaultTryCount。
+            // 上限 2.5s：动画若因异常卡在过渡态，不能无限等，到点照常尝试（把真实原因交给下面的 Describe）
+            if (VaultGateProbe.IsAnimatorBusy(vaultingComponent) && Time.time - _arrivedTime < 2.5f)
+            {
+                NavBridgeDebug.Log("vault.exec.animWait", $"动画过渡中（anim过渡/跳跃标记），等它走完再试：到位后已等 {Time.time - _arrivedTime:F1}s", 0.5f);
+                PressInto(botOwner);
                 return;
             }
 
@@ -366,7 +459,6 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             // LookToMovingDirection 顶回移动方向（GoToPointLogic.cs:29）→ 到点直接写正身体 yaw；
             // 再补一次 Tick，避免自动翻越开启时复用上一帧的旧扫描结果（详见 VaultAim）
             var aimAngle = VaultAim.FaceYaw(botOwner, faceDir);
-            var vaultingComponent = botOwner.GetPlayer.VaultingComponent as VaultingComponent;
             vaultingComponent?.Tick();
 
             // 朝向自检（详见 VaultAim.TryAlign）：写正 yaw 不等于网格就扫在障碍上。超限且重掰无效时
@@ -374,7 +466,9 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             // 只会白占一次失败额度。这里不拉黑障碍，与接近超时同样只加规划冷却，避免立刻重规划同一缺口形成死循环
             if (!VaultAim.TryAlign(botOwner, vaultingComponent, faceDir, out var aimDetail))
             {
-                NavBridgeDebug.Log("vault.exec.aim.giveup", $"{aimDetail}；放弃本次翻越，改走绕路");
+                // 越过量一起打：正值且接近全程说明 bot 其实已经在障碍另一侧（不该再掰朝向、更不该往回走），
+                // 那是"翻越已由自动翻越完成但执行器不知道"的形态，正常应由上面的 alreadyAcross 兜住
+                NavBridgeDebug.Log("vault.exec.aim.giveup", $"{aimDetail}；越过量 {Vector3.Dot(pos - _edge, faceDir):F2}m（站立点→落点为全程）；放弃本次翻越，改走绕路");
                 NextPlanCooldownUntil = Time.time + 8f;
                 Cancel();
                 return;
@@ -390,6 +484,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 botOwner.Mover.Stop();
                 botOwner.GetPlayer.OnVaulting();
                 _hopping = true;
+                _hopStartTime = Time.time;
                 return;
             }
 
@@ -414,8 +509,82 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private void MarkArrived(string reason)
         {
             _arrived = true;
+            _arrivedTime = Time.time;
             _nextVaultTryTime = Time.time + 0.2f;
             NavBridgeDebug.Log("vault.exec.arrive", $"到位：{reason}");
+        }
+
+        // 顶着障碍推进：0.25s 节流下发单点路径（每帧重建会一直重置 mover 的路径进度）。
+        // 【2026-09-12 22:19 日志定死】必须同步写 GoToSomePointData.Point：只写 Mover.GoToPointNoWay 时
+        // Point 会一直烂在上一次的站立点上——实测 22:19:16.073 与 22:19:48.718 两次都打出
+        // "目标点=(-772.0,-59.6,467.3) 到目标 0.19m"，而大脑正是拿这个 Point 判 IsCome()
+        // （BotGoToPointData.cs:87，阈值 REACH_DIST≈1.5m）。0.19m 远小于 1.5m ⇒ 护航的移动动作
+        // 认定"已经到位"而收工，bot 在距站立点 1.66m / 2.21m 处各自钉死 8 秒，最后 approachTimeout
+        private void PressInto(BotOwner botOwner)
+        {
+            if (Time.time < _nextPressTime)
+            {
+                return;
+            }
+
+            _nextPressTime = Time.time + 0.25f;
+            var pressTarget = PressTarget();
+            botOwner.GoToSomePointData.SetPoint(pressTarget);
+            botOwner.Mover.GoToPointNoWay(pressTarget);
+        }
+
+        // 接近阶段的卡住取证。这条链很深：SetPlayerToNavMesh 既驱动每帧位移、又更新 PrevSuccessLinkedFrom →
+        // method_12 拿它判是否把 bot 拽回锚点（>0.3m 就拽）→ MovePlayer 用 PositionOnWayInner 算方向与角点进度。
+        // "被障碍挡住"和"被 method_12 拽回"在位置表现上完全一样（都是原地抖动），所以一次把各环节的值都打出来：
+        // 判据是"两者相距"——持续接近 0.30m 上限 ⇒ 是 method_12 在拽；远小于 0.30m 且 deltaMove 归零 ⇒ 真的被挡住
+        private string DescribeStall(BotOwner botOwner, Vector3 pos, float toEdge, bool hasObstacle, float obstacleDistance)
+        {
+            var mover = botOwner.Mover;
+            var goTo = botOwner.GoToSomePointData;
+            var movementContext = botOwner.GetPlayer.MovementContext;
+            return $"接近受阻：pos={pos.ToString("F1")} 站立点={_edge.ToString("F1")} 距 {toEdge:F2}m 推进={(_pushingIntoObstacle ? "直线顶住" : "正常寻路")}"
+                + $" 组件实测障碍距={(hasObstacle ? obstacleDistance.ToString("F2") : "无")}"
+                + $" | IsMoving={mover.IsMoving} 有路径={mover.HasPathAndNoComplete} 允许传送={mover._allowTeleport} 暂停={mover.Pause} 距上次位移 {Time.time - mover._lastTimePosChanged:F1}s"
+                + $" | PositionOnWay={mover.PositionOnWay.ToString("F1")} 上次链接点={mover.PrevSuccessLinkedFrom.ToString("F1")} 两者相距 {Vector3.Distance(mover.PositionOnWay, mover.PrevSuccessLinkedFrom):F2}m（>0.30m 会被 method_12 拽回）"
+                + $" | 目标点={goTo.Point.ToString("F1")} 到目标 {goTo._distToPoint:F2}m 待重算已置={goTo._pointhRefreshed}"
+                + $" | 身体朝向={movementContext.PlayerRealForward.ToString("F2")} 冲刺={movementContext.IsSprintEnabled}"
+                + $" | 周围1.5m：{DescribeNeighbours(pos)}";
+        }
+
+        // 静态障碍探针查不到角色碰撞体：同行 bot 或玩家堵在面前时表现为"无障碍却走不动"
+        private static string DescribeNeighbours(Vector3 pos)
+        {
+            var found = new List<string>();
+            var colliders = Physics.OverlapSphere(pos + Vector3.up, 1.5f);
+            foreach (var collider in colliders)
+            {
+                if (collider == null)
+                {
+                    continue;
+                }
+
+                found.Add($"{collider.name}({LayerMask.LayerToName(collider.gameObject.layer)})");
+                if (found.Count >= 8)
+                {
+                    break;
+                }
+            }
+
+            return found.Count == 0 ? "无" : string.Join(" / ", found);
+        }
+
+        // 顶住目标：站立点再沿"站立点→落点"方向推 1m（正好越过障碍面）。bot 会被障碍的碰撞挡住，
+        // 中心停在距障碍面约一个胶囊半径（0.35m）处，正落在 MinDistantToInteract 之内
+        private Vector3 PressTarget()
+        {
+            var dir = _destination - _edge;
+            dir.y = 0f;
+            if (dir.sqrMagnitude > 0.001f)
+            {
+                dir.Normalize();
+            }
+
+            return _edge + dir;
         }
 
         // 顶住判据：0.4s 内累计位移 < 5cm 视为被障碍挡住。
@@ -430,6 +599,44 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
 
             return Time.time - _pressAnchorTime > 0.4f;
+        }
+
+        // 是否已经站到障碍另一侧：沿 Near→Far 方向推进过全程 60%，且脚下确实踩在 navmesh 上。
+        // 用相对量（60%）而不是绝对距离：站立点到障碍面的距离会被 navmesh 采样吸附（实测 0.51m，
+        // 上限约 1.15m），而"顶着障碍"时的推进量只有 站距 − 0.35m（胶囊半径）—— 绝对阈值会把两种状态混在一起。
+        // progress 回传给调用方进日志，便于事后反推几何
+        private bool IsAcrossObstacle(Vector3 pos, out float progress)
+        {
+            progress = 0f;
+            var dir = _destination - _edge;
+            dir.y = 0f;
+            var total = dir.magnitude;
+            if (total < 0.01f)
+            {
+                return false;
+            }
+
+            progress = Vector3.Dot(pos - _edge, dir / total);
+            return progress > total * 0.6f && NavMesh.SamplePosition(pos, out _, 0.3f, -1);
+        }
+
+        // 跨越收尾：结束状态机 + 主动重链接到脚下 navmesh。
+        // relink 期间必须放行 SetPlayerToNavMesh（RelinkInProgress），否则跨越期的挂起会让它空转。
+        // 完成判定一律先要求脚下 0.3m 内有网格（比 relink 内部 FindSamplePoint 的 0.4f 更严）：
+        // 半空 relink 采样失败会走 superFail 分支，FindBetterPosition(100m) 取最近 navmesh
+        // 可能是上层边缘，表现为"被拉回原地"
+        private void FinishAndRelink(BotOwner botOwner)
+        {
+            Cancel();
+            RelinkInProgress = true;
+            try
+            {
+                botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
+            }
+            finally
+            {
+                RelinkInProgress = false;
+            }
         }
 
         private bool ShouldFinish(BotOwner botOwner)
@@ -483,6 +690,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             IsCrossing = false;
             _hopping = false;
+            _arrived = false;
+            _pushingIntoObstacle = false;
             if (_botOwner != null)
             {
                 CrossingBots.Remove(_botOwner);

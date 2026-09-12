@@ -33,6 +33,25 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             builder.Append($" | 扫描值 高={height:F2} 长={length:F2} 距={distance:F2} 背高比={obstacle.BehindObstacleRatio:F2}");
             builder.Append($" 顶净空={(obstacle.MinRoofHeight.HasValue ? obstacle.MinRoofHeight.Value.ToString("F2") : "无")}");
 
+            // GetVaultingStrategy 另有四道门不体现在上面两套 MoveRestrictions 里，任一道不过都返回 None——
+            // 而 TryVaulting() 正是只把 GetVaultingStrategy() 的结果交给 DoVaultingByStrategy
+            //（VaultingComponent.cs:107），所以"Vault/Climb 的 CanMove() 全为 True、CanVaulting=True，
+            // strategy 却是 None"就是这四道在挡。√ 表示这道门没挡路：
+            //   ① IsStairsCondition()：只看网格 root 局部 z ∈ [-0.366, +0.234] 那 6 个采样点的相邻高差
+            //      （平地上全为 0 ⇒ tan=0 ⇒ false），脚下有台阶/路缘/障碍底座时平均 tan 会落进
+            //      (0.45, 1.1917) 被判成楼梯，而 !flag 同时挂在 Vault 与 Climb 两处 ⇒ 两种翻越一起被禁，
+            //      是最隐蔽的一道；
+            //   ② animator 过渡中 / ③ 跳跃标记已置位：都直接 return None；
+            //   ④ 两个体力 getter（未注入时为 null，标 "?"）
+            // 另外这里的"冲刺格挡"就是 flag2（冲刺中且背后高度比 > -0.5 时连 Vault 都不给）
+            var stairs = component._vaultingModelDebug.StairsCalculatorModel.IsStairsCondition();
+            var inTransition = component._vaultingContext.IsAnimatorInTransitionState(0);
+            var jumpSetted = component._vaultingContext.PlayerAnimatorIsJumpSetted();
+            builder.Append($" | 策略门 楼梯{Mark(!stairs)} anim过渡{Mark(!inTransition)} 跳跃标记{Mark(!jumpSetted)}");
+            builder.Append($" 体力V{(component._canVaultByStaminaGetter == null ? "?" : Mark(component._canVaultByStaminaGetter()))}");
+            builder.Append($" 体力C{(component._canClimbByStaminaGetter == null ? "?" : Mark(component._canClimbByStaminaGetter()))}");
+            builder.Append($" 冲刺格挡{Mark(!(component._vaultingContext.IsSprintEnabled && obstacle.BehindObstacleRatio > -0.5f))}");
+
             var vaultRestrictions = component._vaultingSettings.MovesSettings.VaultSettings.MoveRestrictions;
             if (vaultRestrictions != null)
             {
@@ -75,6 +94,16 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         //
         // 反过来，只要 TargetCollider 非空就说明确实扫到了障碍，此时 DistanceToMainObstacle 才可信。
         // 判"贴到障碍跟前了没有"必须带上这个前提：退化时距离恒为 0，直接读会把 2m 开外误判成"已经贴上"
+        // GetVaultingStrategy() 的头一道门（VaultingComponent.cs:200）：动画过渡中或跳跃标记已置位时
+        // 直接返回 None。它与几何无关，所以"CanVaulting=True、Vault 与 Climb 的 CanMove() 全为 True、
+        // strategy 却是 None"就是这道在挡（Describe 里的"策略门 anim过渡×/跳跃标记×"）。
+        // 供执行器在翻越尝试前等待：过渡期结束再试，不消耗尝试次数
+        public static bool IsAnimatorBusy(VaultingComponent component)
+        {
+            return component != null
+                && (component._vaultingContext.IsAnimatorInTransitionState(0) || component._vaultingContext.PlayerAnimatorIsJumpSetted());
+        }
+
         public static bool TryMeasureObstacle(VaultingComponent component, out float distance)
         {
             distance = 0f;
@@ -109,10 +138,19 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             builder.Append($"网格 root={(root == null ? "null" : root.position.ToString("F2"))}");
             if (root != null)
             {
+                // gridRoot 的 rotation 从来不由 EFT 写：GridRootMoverModel.RecalculateGridOffset 只写 localPosition，
+                // 网格朝向完全来自骨骼层级。而扫描射线走的是 gridRoot.TransformPoint(...)（网格自身坐标系），
+                // 不是 PlayerRealForward —— 两者一旦脱节（实测差 136°），"写正身体 yaw"就没有对齐扫描方向。
+                // 一并打出父节点名与本地 yaw，用来区分"骨架比逻辑朝向慢一帧"与"gridRoot 根本挂在不受身体旋转控制的骨骼下"
                 builder.Append($" rootFwd={root.forward.ToString("F2")}");
+                builder.Append($" rootYaw={root.eulerAngles.y:F0}°");
+                builder.Append($" 父={root.parent?.name ?? "null"}(本地Y={root.localEulerAngles.y:F0}°)");
             }
 
+            var bodyForward = component._vaultingContext.PlayerRealForward;
+            bodyForward.y = 0f;
             builder.Append($" 身体Fwd={component._vaultingContext.PlayerRealForward.ToString("F2")}");
+            builder.Append($" 身体yaw={Mathf.Atan2(bodyForward.x, bodyForward.z) * Mathf.Rad2Deg:F0}°");
             builder.Append($" 命中 {points.Count} 点");
 
             if (moves == null || points.Count == 0)

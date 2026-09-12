@@ -219,10 +219,11 @@ namespace MiyakoCarryService.Client
             _patches.Add(new AdvAssaultTargetPatch());
             _patches.Add(new InitVaultComponentPatch());
             _patches.Add(new NavBridgeMoverGuardPatch());
-            _patches.Add(new NavBridgeLinkWritePatch());
             _patches.Add(new NavBridgeMoverDrivePostfix());
             _patches.Add(new NavBridgeObstaclePatch());
             _patches.Add(new NavBridgeCastFromPosPatch());
+            _patches.Add(new NavBridgeBetterPositionPatch());
+            _patches.Add(new NavBridgeCastPointClampPatch());
             _patches.Add(new NavBridgeTeleportFunnelPatch());
             _patches.Add(new MatchMakerSideSelectionScreenPatch());
             _patches.Add(new ActionPanelAnchorPatch());

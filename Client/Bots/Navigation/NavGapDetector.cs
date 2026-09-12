@@ -327,19 +327,37 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return false;
             }
 
-            // bot 必须能简洁地走到边缘（直线被墙隔断时拒绝）
-            var toEdgePath = new NavMeshPath();
-            if (!NavMesh.CalculatePath(startPos, edge, -1, toEdgePath) || toEdgePath.status != NavMeshPathStatus.PathComplete)
+            // bot 脚下不是 navmesh（行进循环的第一个采样点就断开 ⇒ edgeDist=0、edge 退化成 startPos 自身）时，
+            // 「bot 能走到边缘」这道门必须跳过：CalculatePath 的起点就不在网格上，结果必然不是 PathComplete，
+            // 于是唯一可行的方案被它自己拒掉，bot 永远留在上面。实测形态是 EFT 的 Climb 策略把护航抬到
+            // 护栏顶上，顶上没有 navmesh ⇒ 功能③一直不触发，最后只能靠 EFT 的救援传送瞬移下来。
+            // 脚下没有网格时不存在「走到边缘」这回事：bot 已经站在边缘上了，路径就是原地一条直线
+            Vector3[] toEdgeCorners;
+            float toEdgeLen;
+            if (edgeDist <= 0.01f)
             {
-                //NavBridgeDebug.Log("march.toEdgePath", "拒绝：bot→边缘 无完整路径（直线被隔断）");
-                return false;
+                toEdgeCorners = new[] { startPos };
+                toEdgeLen = 0f;
+                NavBridgeDebug.Log("march.edgeFromAir", $"起点不在 navmesh 上（edge 退化为 bot 自身位置 {startPos.ToString("F1")}），跳过走到边缘的路径校验，直接按原地下跨规划：落差 {drop:F2}m，落点 {targetPos.ToString("F1")}");
             }
-
-            var toEdgeLen = PathLength(toEdgePath.corners);
-            if (toEdgeLen > edgeDist + 2.5f)
+            else
             {
-                //NavBridgeDebug.Log("march.toEdgeLen", $"拒绝：到边缘路径 {toEdgeLen:F1}m 远超直线 {edgeDist:F1}m");
-                return false;
+                // bot 必须能简洁地走到边缘（直线被墙隔断时拒绝）
+                var toEdgePath = new NavMeshPath();
+                if (!NavMesh.CalculatePath(startPos, edge, -1, toEdgePath) || toEdgePath.status != NavMeshPathStatus.PathComplete)
+                {
+                    //NavBridgeDebug.Log("march.toEdgePath", "拒绝：bot→边缘 无完整路径（直线被隔断）");
+                    return false;
+                }
+
+                toEdgeLen = PathLength(toEdgePath.corners);
+                if (toEdgeLen > edgeDist + 2.5f)
+                {
+                    //NavBridgeDebug.Log("march.toEdgeLen", $"拒绝：到边缘路径 {toEdgeLen:F1}m 远超直线 {edgeDist:F1}m");
+                    return false;
+                }
+
+                toEdgeCorners = toEdgePath.corners;
             }
 
             // 连通场景需要证明捷径确实更省；Invalid 场景无路可走，跨就是了
@@ -358,7 +376,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
 
             //NavBridgeDebug.Log("march.ok", $"规划成功：edge={edge.ToString("F1")} landing={targetPos.ToString("F1")} drop={drop:F1} toEdge={toEdgeLen:F1}m");
-            gap = BuildGap(edge, targetPos, toEdgePath.corners, toEdgePath.corners.Length);
+            gap = BuildGap(edge, targetPos, toEdgeCorners, toEdgeCorners.Length);
             return true;
         }
 

@@ -26,7 +26,10 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             if (Time.time < _executor.NextPlanCooldownUntil)
             {
-                //NavBridgeDebug.Log("plan.cooldown", "规划冷却中（上次跨越超时，疑似边缘不可跨越）");
+                // 这段冷却只能走绕路。之前是静默的，"先绕路一段时间再尝试翻越"的所有嫌疑里
+                // 它是唯一不带日志的一个（接近超时 / 朝向自检放弃各置 8s），所以打出来以便区分
+                // "规划被拒"（有 vault.plan.* 日志）与"根本没轮到规划"
+                NavBridgeDebug.Log("plan.cooldown", $"规划冷却中，还需 {_executor.NextPlanCooldownUntil - Time.time:F1}s（上次接近超时或朝向自检放弃），这段只能走绕路");
                 return false;
             }
 
