@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 builder.Append(" | Vault");
                 builder.Append($" 高{Mark(height >= vaultRestrictions.MinHeight && height <= vaultRestrictions.MaxHeight)}[{vaultRestrictions.MinHeight:F2},{vaultRestrictions.MaxHeight:F2}]");
                 builder.Append($" 长{Mark(length >= vaultRestrictions.MinLength && length <= vaultRestrictions.MaxLength)}[{vaultRestrictions.MinLength:F2},{vaultRestrictions.MaxLength:F2}]");
-                builder.Append($" 距{Mark(vaultRestrictions.MinDistantToInteract >= distance)}≤{vaultRestrictions.MinDistantToInteract:F2}");
+                builder.Append($" 距{Mark(IsWithinInteractDistance(vaultRestrictions.MinDistantToInteract, distance))}≤{vaultRestrictions.MinDistantToInteract:F2}(实{distance:F4})");
                 builder.Append($" 背高比{Mark(moves._vaultState.CheckBehindObstacleHeightCondition())}");
                 builder.Append($" 背墙{Mark(moves._vaultState.CheckBehindObstacleWall())}");
                 builder.Append($" 顶{Mark(moves._vaultState.CheckRoofCondition())}");
@@ -72,7 +72,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 builder.Append(" | Climb");
                 builder.Append($" 高{Mark(height >= climbRestrictions.MinHeight && height <= climbRestrictions.MaxHeight)}[{climbRestrictions.MinHeight:F2},{climbRestrictions.MaxHeight:F2}]");
                 builder.Append($" 长{Mark(length >= climbRestrictions.MinLength && length <= climbRestrictions.MaxLength)}[{climbRestrictions.MinLength:F2},{climbRestrictions.MaxLength:F2}]");
-                builder.Append($" 距{Mark(climbRestrictions.MinDistantToInteract >= distance)}≤{climbRestrictions.MinDistantToInteract:F2}");
+                builder.Append($" 距{Mark(IsWithinInteractDistance(climbRestrictions.MinDistantToInteract, distance))}≤{climbRestrictions.MinDistantToInteract:F2}(实{distance:F4})");
                 builder.Append($" 顶{Mark(moves._climbState.CheckRoofCondition())}");
                 builder.Append($" 面墙{Mark(moves._climbState.CheckBeforeObstacleWall())}");
                 builder.Append($" → CanMove={moves._climbState.CanMove()}");
@@ -102,6 +102,43 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         {
             return component != null
                 && (component._vaultingContext.IsAnimatorInTransitionState(0) || component._vaultingContext.PlayerAnimatorIsJumpSetted());
+        }
+
+        // 【2026-09-12 23:06 日志定死】交互距离门的浮点容差。
+        //   VaultMoveModel.CheckVaultCondition:56 / ClimbMoveModel.CheckClimbCondition:73
+        //       bool flag3 = MoveRestrictions.MinDistantToInteract >= distance;
+        // 而 distance 就是 ObstacleCalculatorModel.DistanceToMainObstacle —— 它只是网格局部坐标的 z
+        // （CalculateDistance:195 直接 return p0.z，p0 是命中点经 world→local 逆变换的结果，原始浮点、
+        // 没有任何量化），站位正好落在第 5 格时实测是 0.5000000x，而 globals.json 里 Vault 与 Climb 的
+        // MinDistantToInteract 恰好是 0.5 ⇒ `0.5 >= 0.5000000x` 判负、两种翻越的 CanMove() 一起为 False，
+        // 白占两次尝试后拉黑放弃（放弃之后就是 23:06:29.767 那次 1.1m 穿墙）。
+        // 容差 0.01m：比实际浮点误差（~1e-6）大三个数量级，又远小于网格步长 0.1m ⇒ 跨不到下一格，
+        // 不会把"站在 0.6m 外"放进来
+        public const float InteractDistanceTolerance = 0.01f;
+
+        public static bool IsWithinInteractDistance(float minDistantToInteract, float distance)
+        {
+            return distance <= minDistantToInteract + InteractDistanceTolerance;
+        }
+
+        // 供 VaultInteractDistancePatch 复用同一套判定：把 distance 抬到容差内。
+        // 差值（distance − 限值）带 F6 精度打出来 —— 它是区分"浮点边界"与"真的站远了"的唯一依据，
+        // 也是下一轮判断 0.01m 够不够用的唯一数据
+        public static void NudgeInteractDistance(IVaultingRestrictions restrictions, ref float distance, string label)
+        {
+            if (restrictions == null)
+            {
+                return;
+            }
+
+            var minDistantToInteract = restrictions.MinDistantToInteract;
+            if (distance <= minDistantToInteract || !IsWithinInteractDistance(minDistantToInteract, distance))
+            {
+                return;
+            }
+
+            NavBridgeDebug.Log($"vault.gateDist.{label}", $"{label} 交互距离卡在阈值边界：距={distance:F6} 限={minDistantToInteract:F6}（差 {distance - minDistantToInteract:F6}m），按限值放行");
+            distance = minDistantToInteract;
         }
 
         public static bool TryMeasureObstacle(VaultingComponent component, out float distance)

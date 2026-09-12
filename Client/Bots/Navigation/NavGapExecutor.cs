@@ -16,6 +16,17 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 跨越结束后 3s 内的 bot（Funnel 补丁据此拦截远距离拉回传送）
         private static readonly Dictionary<BotOwner, float> RecentHopEnds = new Dictionary<BotOwner, float>();
 
+        // 未进入翻越动画就放弃的 bot → 放弃时刻。Cancel() 只清得掉执行器自己的状态，清不掉 EFT 侧
+        // 那条顶住的单点路径：虚拟点 PositionOnWay 推的是"路径进度"、不受碰撞体阻挡，还会沿
+        // "障碍面之后 1m"继续前进，一旦越过障碍就走 TryExtraSample 的 2m 兜底采样把 bot 一帧送到对面
+        // —— 实测 23:06:29.767 的 1.1m 穿墙正好发生在第二次尝试失败 Cancel() 之后 0.06s
+        //（23:06:28.906 第一次尝试失败 → +0.8s 第二次失败 → _vaultTryCount >= 2 → 拉黑 + Cancel）。
+        // 所以放弃后的短暂窗口内继续按"接管中"对待（IsApproaching），并在 Cancel() 里把那条
+        // 残留路径直接清掉（Mover.Stop()，与翻越成功时同一处理）
+        private static readonly Dictionary<BotOwner, float> RecentAborts = new Dictionary<BotOwner, float>();
+
+        private const float AbortGuardDuration = 1.5f;
+
         // 全局单帧位移侦查用的上帧位置。正常行走每帧位移上限 0.3m（OnMotionApplied 的 num =
         // min(deltaMove.magnitude, 0.3f)，BotMoverImpostor.cs:109-113），远小于 0.6m 阈值
         // ⇒ 单帧位移超过 0.6m 必为写位置事件（CastFromPos / Teleport 直写 Transform）。
@@ -65,6 +76,12 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private float _bestApproachDistance;
         private float _nextStallLogTime;
 
+        // 上一次 Begin 的站立点，用来判断"这次规划是不是同一个障碍"。
+        // 规划器每秒都可能重进 Begin（详见 Begin 里 sameGap 的说明），重进时若把失败额度清零，
+        // "两次失败即拉黑 60s"就永远触发不了，bot 会被一直按在同一个障碍上
+        private Vector3 _lastGapNear;
+        private bool _hasGap;
+
         // 顶住判据用：锚点位置与其最后一次变化的时间（0.4s 无位移 ⇒ 被障碍挡住）
         private Vector3 _pressAnchor;
         private float _pressAnchorTime;
@@ -94,9 +111,24 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 也就是把 bot 从障碍近侧直接甩到另一侧。实测 22:18:44~22:23:41 的 21 次 1.0~1.1m 位置写入
         // 全部落在这一段，且方向正反交替 —— 这就是"接近障碍时疯狂原地瞬移"
         // （拦截点见 NavBridgeBetterPositionPatch）
+        //
+        // 【2026-09-12 23:06 补】放弃后的 1.5s 内也算"接管中"：Cancel() 清不掉 EFT 侧的顶住路径，
+        // 虚拟点还会继续朝障碍里推进，穿墙就发生在放弃之后（实测 0.06s）。窗口长度取 1.5s ——
+        // 远大于实测的 0.06s，而窗口内护栏只对"链接目标领先身体 >0.3m"的失控生效（正常行走时
+        // 每帧推进量 ≤0.3m，见 OnMotionApplied），所以对放弃后正常走绕路没有影响
         public static bool IsApproaching(BotOwner botOwner)
         {
-            return botOwner != null && CrossingBots.TryGetValue(botOwner, out var executor) && !executor._hopping;
+            if (botOwner == null)
+            {
+                return false;
+            }
+
+            if (CrossingBots.TryGetValue(botOwner, out var executor))
+            {
+                return !executor._hopping;
+            }
+
+            return RecentAborts.TryGetValue(botOwner, out var abortedAt) && Time.time - abortedAt < AbortGuardDuration;
         }
 
         // 【2026-09-12 20:12 日志定死】这里原先有 IsLinkWriteFrozen / LinkWriteFrozen，用来在
@@ -111,7 +143,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         //   if (vector.sqrMagnitude > 0.09f)                              // BotMover.cs:990 ⇒ 0.30m
         //       this._owner.Mover.SetPosition(this._prevSuccessLinkedFrom);   // 真实位置写入
         // 实测 20:12:38.239~20:12:54.058 共 15 次 linkBlock，bot 在距站立点 2.2~2.5m 处被钉了 15 秒，
-        // 抖动幅度 Never 越过 0.30m（日志"两者相距" 0.00/0.21/0.24/0.15/0.29/0.28），且本轮 exec.snap = 0 次
+        // 抖动幅度从未越过 0.30m（日志"两者相距" 0.00/0.21/0.24/0.15/0.29/0.28），且本轮 exec.snap = 0 次
         // ⇒ 冻结没有换来任何防瞬移收益，纯亏损。
         // 顶住阶段本来就不需要冻结：OnMotionApplied 的推进量取自实际位移 deltaMove，被障碍挡住时
         // deltaMove → 0，PositionOnWay 自动停住，不会越过障碍去对面采样。
@@ -219,6 +251,26 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         public void Begin(NavGapInfo gap, BotOwner botOwner)
         {
+            // 【2026-09-12 23:53 日志定死】同一个障碍被反复重进 Begin 时，失败额度必须带过来。
+            // 循环链条：NavBridge.TryPlanStepDown 只由 IsCrossing 挡着；而 ShouldAbort 在
+            // 「目标距站立点 >20m」时每秒 Cancel 一次（NavBridge.cs:68），Cancel 把 IsCrossing 置假、
+            // 紧接着同一个 CanGetPathToRun 又往下走 TryPlanStepDown（McsBaseLayer.cs:1848→1877）
+            // 用它自己重规划把 IsCrossing 置回真 —— 于是每秒一次 Begin，_vaultTryCount 每秒被清零。
+            // 实测 23:53:17.530~23:53:30.936 同一个 typhoon_pas_col 连续 10 次 TryVaulting 全是
+            // 「第 1 次失败」（站位/落点逐字不变，目标点在 90m 外、绕路 114m），bot 被一直按在障碍上，
+            // 15s 后由游戏自己的 ForceTeleportCommandAction 把它传走 111.9m —— 用户看到的瞬移就是这个。
+            // 站立点相距 1m 内且是同一个 bot 即视为同一障碍：把额度带过来，让「两次失败即拉黑 60s」
+            // 真正落地；换了障碍则照旧清零
+            var sameGap = _hasGap && _botOwner == botOwner
+                && Vector3.Distance(gap.NearPoint, _lastGapNear) <= 1f;
+            if (sameGap)
+            {
+                NavBridgeDebug.Log("vault.exec.replan", $"同一障碍重新规划：站立点 {gap.NearPoint.ToString("F1")} 距上次站立点 {Vector3.Distance(gap.NearPoint, _lastGapNear):F2}m，失败额度 {_vaultTryCount} 次带到本次（不清零，否则「两次失败即拉黑」永不生效）");
+            }
+
+            _lastGapNear = gap.NearPoint;
+            _hasGap = true;
+
             _edge = gap.NearPoint;
             _destination = gap.FarPoint;
             _type = gap.Type;
@@ -226,7 +278,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             _startTime = Time.time;
             _hopping = false;
             _arrived = false;
-            _vaultTryCount = 0;
+            if (!sameGap)
+            {
+                _vaultTryCount = 0;
+            }
+
             _nextVaultTryTime = 0f;
             _pressAnchor = botOwner.Position;
             _pressAnchorTime = Time.time;
@@ -379,7 +435,10 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 if (toEdge.magnitude < _bestApproachDistance - 0.05f)
                 {
                     _bestApproachDistance = toEdge.magnitude;
-                    _nextStallLogTime = 0f;
+                    // 必须往后推 1s 而不是置 0：置 0 会让"距离还在缩短"的下一帧立刻打出一条假的
+                    // vault.exec.stall（实测 23:06:31.865 —— exec.begin 之后 0.012s 就报"接近受阻"，
+                    // 而同一段 32.485 的 approach 明明在缩短 1.78 → 1.40）
+                    _nextStallLogTime = Time.time + 1f;
                 }
                 else if (Time.time >= _nextStallLogTime)
                 {
@@ -683,9 +742,23 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         public void Cancel()
         {
-            if (_hopping && _botOwner != null)
+            if (_botOwner != null)
             {
-                RecentHopEnds[_botOwner] = Time.time;
+                if (_hopping)
+                {
+                    RecentHopEnds[_botOwner] = Time.time;
+                }
+                else
+                {
+                    // 【2026-09-12 23:06 日志定死】放弃时把顶住阶段留下的单点路径清掉：它的目标点在
+                    // 障碍面之后（PressTarget = 站立点 + 前向 1m），而 PositionOnWayInner 推的是"路径
+                    // 进度"、不受碰撞体阻挡 —— 路径留着，虚拟点就会继续朝障碍里走，越过障碍后
+                    // TryExtraSample 的 2m 兜底采样就能一帧把 bot 送到对面。实测放弃后 0.06s 就发生。
+                    // 与翻越成功时的处理一致（TickVault 里 TryVaulting = True 那条也调 Mover.Stop()）。
+                    // 大脑若要继续走绕路会自己重新下发路径，这里只是撤掉我们留下的那条
+                    _botOwner.Mover.Stop();
+                    RecordAbort(_botOwner);
+                }
             }
 
             IsCrossing = false;
@@ -696,6 +769,30 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             {
                 CrossingBots.Remove(_botOwner);
             }
+        }
+
+        // 记录一次"未进入翻越动画的放弃"，并顺手清理过期项（字典是静态的、跨局存活）
+        private static void RecordAbort(BotOwner botOwner)
+        {
+            var now = Time.time;
+            if (RecentAborts.Count >= 8)
+            {
+                var stale = new List<BotOwner>();
+                foreach (var pair in RecentAborts)
+                {
+                    if (now - pair.Value >= AbortGuardDuration)
+                    {
+                        stale.Add(pair.Key);
+                    }
+                }
+
+                foreach (var owner in stale)
+                {
+                    RecentAborts.Remove(owner);
+                }
+            }
+
+            RecentAborts[botOwner] = now;
         }
     }
 }

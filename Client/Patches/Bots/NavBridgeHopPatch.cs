@@ -115,8 +115,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
             // 必属救援/重链接类：superFail 的 FindBetterPosition（BotMover.cs:787-796，返回
             // PrevSuccessLinkedFrom + 角点方向、不做可达性校验）或 TryExtraSample 的 2m navmesh 采样
             // （:846）。两道都在接近期被拦住（前者见 NavBridgeBetterPositionPatch，后者靠链接目标
-            // 已被 NavBridgeCastPointClampPatch 拉回身体半米内而自然失效），这里是最后一道兜底：
-            // 跨距过大就直接判定"这次链接没写成"。
+            // 已被 NavBridgeCastPointClampPatch 压回身体 0.3m 内而自然失效 —— 0.4m 首查必然命中近侧网格），
+            // 这里是最后一道兜底：跨距过大就直接判定"这次链接没写成"。
+            // 覆盖范围含"放弃后 1.5s"（IsApproaching 的护栏窗口）：实测 23:06:29.767 的 1.1m 穿墙
+            // 就发生在第二次尝试失败 Cancel() 之后 0.06s，栈是 TryExtraSample → SetPlayerToNavMesh
             // 返回 fail 而不是 superFail：superFail 会接着走 FindBetterPosition + Teleport 那条路，
             // 而 fail 只是让 TryExtraSample 认为本次写入无效（它自身仍返回 true），
             // SetPlayerToNavMesh 照 extraConnect 收尾、把 _prevSuccessLinkedFrom 更新到当前位置 —— 零位移
@@ -190,9 +192,18 @@ namespace MiyakoCarryService.Client.Patches.Bots
     // 这个形态，栈清一色 TryExtraSample，且落点与执行器自己算出的"落点"重合
     // （写入 (-794.5,-59.5,467.9) vs plan 的 dest=(-794.6,-59.5,467.9)）⇒ 紧接着 alreadyAcross
     // 就把这次穿墙当成"翻越已完成"收尾了，用户看到的就是"瞬移翻越"。
-    // 约束只在执行器接管的接近/到位/尝试三段生效：这三段 bot 是被我们主动顶上去的，链接目标跑到
-    // 身体半米开外只可能是虚拟点失控。其余时刻（EFT 自己的救援重链接）保持原样。
+    // 约束只在执行器接管的接近/到位/尝试三段（以及放弃后 1.5s 护栏窗口，见 NavGapExecutor.IsApproaching）
+    // 生效：这几段 bot 是被我们主动顶上去的，链接目标跑到身体半米开外只可能是虚拟点失控。
+    // 其余时刻（EFT 自己的救援重链接）保持原样。
     // 只改参数、不返回 false —— SetPlayerToNavMesh 本身是每帧位移驱动，绝不能挂起（详见上方 20:12 说明）
+    //
+    // 【2026-09-12 23:06 修正】阈值从 0.5m 收到 0.3m。0.5m 太松、等于没拦：顶住障碍时身体距障碍面
+    // 本就只有 0.35~0.5m，领先 0.5m 的链接目标已经越到障碍另一侧，0.4m 首查（BotMover.cs:719）必
+    // 失败、直接落进 TryExtraSample 的 2m 兜底采样 —— 实测 23:06:29.156 / 29.655 两次 clamp 打出
+    // "距身体 0.51m"，而"拉回"后的坐标与拉回前一模一样（0.51 → 0.50 的差别在 F1 里看不出来），
+    // 紧接着 29.767 就是那次 1.1m 穿墙。0.3m 正是 OnMotionApplied 自己的每帧推进上限
+    //（num = min(|deltaMove|, 0.3f)，BotMoverImpostor.cs:109-113）：虚拟点领先身体超过一帧的量
+    // 只可能是"推路径进度、不受碰撞体阻挡"造成的失控，压回 0.3m 后首查仍在身体附近、必然命中近侧网格
     public class NavBridgeCastPointClampPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), nameof(BotMover.SetPlayerToNavMesh));
@@ -208,15 +219,16 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var body = __instance._owner.Position;
             var toCast = castPoint - body;
             toCast.y = 0f;
-            if (toCast.magnitude <= 0.5f)
+            var lead = toCast.magnitude;
+            if (lead <= 0.3f)
             {
                 return;
             }
 
             // 只压水平分量：y 要留给 _lastGoodCastPoint 那套高度逻辑（BotMover.cs:714-717）
-            var clamped = body + toCast.normalized * 0.5f;
+            var clamped = body + toCast.normalized * 0.3f;
             clamped.y = castPoint.y;
-            NavBridgeDebug.Log($"exec.castClamp.{__instance._owner.Id}", $"链接目标 {castPoint.ToString("F1")} 距身体 {toCast.magnitude:F2}m > 0.5m（虚拟点失控，正常应在本帧 0.3m 以内），拉回 {clamped.ToString("F1")}", 0.5f);
+            NavBridgeDebug.Log($"exec.castClamp.{__instance._owner.Id}", $"链接目标 {castPoint.ToString("F1")} 领先身体 {lead:F2}m > 0.3m（超出 OnMotionApplied 的每帧推进上限，虚拟点在推路径进度），压到 {clamped.ToString("F1")}", 0.5f);
             castPoint = clamped;
         }
     }

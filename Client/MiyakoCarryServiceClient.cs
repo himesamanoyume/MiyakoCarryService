@@ -218,6 +218,10 @@ namespace MiyakoCarryService.Client
             _patches.Add(new BotWeaponSelectorPatch());
             _patches.Add(new AdvAssaultTargetPatch());
             _patches.Add(new InitVaultComponentPatch());
+            _patches.Add(new VaultInteractDistancePatch());
+            _patches.Add(new VaultAutoInteractDistancePatch());
+            _patches.Add(new ClimbInteractDistancePatch());
+            _patches.Add(new ClimbAutoInteractDistancePatch());
             _patches.Add(new NavBridgeMoverGuardPatch());
             _patches.Add(new NavBridgeMoverDrivePostfix());
             _patches.Add(new NavBridgeObstaclePatch());
