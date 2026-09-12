@@ -8,6 +8,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
 using MiyakoCarryService.Client.Bots.Brain.Logics;
+using MiyakoCarryService.Client.Bots.Navigation;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
@@ -45,6 +46,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextDeactivateCheckTime = 0f;
         protected float _nextFastOpenDoorCheckTime = 0f;
         protected Vector3? _currentMoveTarget = null;
+        protected readonly NavBridge NavBridge = new NavBridge();
         protected Vector3? _lastTargetPos = Vector3.zero;
         protected Vector3[] _lastCalcCorners = null;
         protected bool _lastCanRunResult = false;
@@ -1709,6 +1711,21 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
         {
+            // 跨越进行中：玩家仍在边缘下层区域就沿用跨越路径，交给执行器每帧驱动
+            if (NavBridge.IsCrossing)
+            {
+                if (!NavBridge.ShouldAbort(targetPos))
+                {
+                    _currentMoveRetries = 0;
+                    _lastCalcCorners = NavBridge.Way;
+                    corners = _lastCalcCorners;
+                    _lastCanRunResult = true;
+                    return _lastCanRunResult;
+                }
+
+                NavBridge.Cancel();
+            }
+
             var navMeshPath = new NavMeshPath();
             NavMesh.CalculatePath(startPos, targetPos, -1, navMeshPath);
             var flag = false;
@@ -1719,10 +1736,29 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (navMeshPath.status is NavMeshPathStatus.PathComplete or NavMeshPathStatus.PathPartial)
             {
                 flag = true;
-                if ((targetPos - navMeshPath.corners[navMeshPath.corners.Length - 1]).magnitude > Math.Max(2f, sampleRadius))
+                var lastCorner = navMeshPath.corners[navMeshPath.corners.Length - 1];
+                if ((targetPos - lastCorner).magnitude > Math.Max(2f, sampleRadius))
                 {
                     flag = false;
                 }
+
+                if (flag && navMeshPath.status == NavMeshPathStatus.PathPartial && Math.Abs(lastCorner.y - targetPos.y) > 0.25f)
+                {
+                    flag = false;
+                }
+            }
+
+            //NavBridgeDebug.Log("CanGetPathToRun", $"start={startPos.ToString("F1")} target={targetPos.ToString("F1")} status={navMeshPath.status} len={NavGapDetector.PathLength(navMeshPath.corners):F1} flag={flag}");
+
+            // 功能③：低台阶走下。断开型缺口（PathPartial）、无路可走（PathInvalid）与连通但绕路明显（PathComplete）都尝试规划捷径。
+            // 该能力天然仅限 Mcs 护航 bot：整条链路挂在 McsBaseLayer 脑层，野生 AI 不经过此代码
+            if (NavBridge.TryPlanStepDown(BotOwner, targetPos, navMeshPath))
+            {
+                _currentMoveRetries = 0;
+                _lastCalcCorners = NavBridge.Way;
+                corners = _lastCalcCorners;
+                _lastCanRunResult = true;
+                return _lastCanRunResult;
             }
 
             if (!flag && Tools.BetterDestination(sampleRadius, targetPos, out var betterDest))
@@ -1875,21 +1911,33 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual Vector3 TryProjectToGround(Vector3 pos)
         {
+            Vector3 result;
             if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var rayHit, 50f, LayersMaskController.HighPolyWithTerrainMask))
             {
                 if (NavMesh.SamplePosition(rayHit.point, out var navHit1, 1f, -1))
                 {
-                    return navHit1.position;
+                    result = navHit1.position;
                 }
-                return rayHit.point;
+                else
+                {
+                    result = rayHit.point;
+                }
             }
-
-            if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))
+            else if (NavMesh.SamplePosition(pos, out var navHit2, 10f, -1))
             {
-                return navHit2.position;
+                result = navHit2.position;
+            }
+            else
+            {
+                result = pos;
             }
 
-            return pos;
+            if (Math.Abs(result.y - pos.y) > 1f)
+            {
+                //NavBridgeDebug.Log("Project", $"投影层高变化：pos={pos.ToString("F1")} → result={result.ToString("F1")}");
+            }
+
+            return result;
         }
 
         public virtual bool EndDeactivateMine()
@@ -2698,6 +2746,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void ApplyMovePoint()
         {
+            // 跨越期间由 BotMover.ManualFixedUpdate 的 postfix 每帧驱动（NavGapExecutor.OnMoverTick），
+            // 这里不再下发 SetPoint，避免覆盖跨越目标
+            if (NavBridge.IsCrossing)
+            {
+                return;
+            }
+
             if (_currentMoveTarget.HasValue)
             {
                 BotOwner.GoToSomePointData.SetPoint(_currentMoveTarget.Value);
