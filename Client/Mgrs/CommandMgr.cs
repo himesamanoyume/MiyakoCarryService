@@ -108,21 +108,20 @@ namespace MiyakoCarryService.Client.Mgrs
         public virtual void BuildMainMenu(McsCommandMenu menu)
         {
             var mcsBotPlayers = GetMembers();
-            if (mcsBotPlayers.Length == 0)
-            {
-                return;
-            }
 
-            menu.RegisterSubMenu(Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME, m => BuildTeamMenu(m, mcsBotPlayers, true), disabled: () => mcsBotPlayers.All(p => !p.HealthController.IsAlive));
-
-            foreach (var mcsBotPlayer in mcsBotPlayers)
+            if (mcsBotPlayers.Length > 0)
             {
-                menu.RegisterSubMenu(mcsBotPlayer.Profile.McsNickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
+                menu.RegisterSubMenu(Locales.TEAMCOMMAND_NAME, Locales.TEAMCOMMAND_TARGETNAME, m => BuildTeamMenu(m, mcsBotPlayers, true), disabled: () => mcsBotPlayers.All(p => !p.HealthController.IsAlive));
+
+                foreach (var mcsBotPlayer in mcsBotPlayers)
+                {
+                    menu.RegisterSubMenu(mcsBotPlayer.Profile.McsNickname, Locales.MEMBERCOMMAND_TARGETNAME, m => BuildMemberMenu(m, [mcsBotPlayer]), disabled: () => !mcsBotPlayer.HealthController.IsAlive);
+                }
             }
 
 #if DEBUG
 
-            menu.RegisterSubMenu("Debug", "调试指令菜单", m => BuildDebugMenu(m, [mcsBotPlayers.FirstOrDefault()]));
+            menu.RegisterSubMenu("Debug", "调试指令菜单", m => BuildDebugMenu(m, mcsBotPlayers));
 
 #endif
 
@@ -130,11 +129,6 @@ namespace MiyakoCarryService.Client.Mgrs
             // CommandUtils.Apply(EMenuId.Main.ToString(), menu, mcsBotPlayers);
         }
 
-        /// <summary>
-        /// 供语音管线枚举"代理/护送"类菜单选项（与玩家手动打开的子菜单一一对应）。
-        /// 递归展开代理（开关/任务/固定武器）与护送（撤离/传送/开关/固定武器等）子菜单，
-        /// 收集可执行且带目标数据的条目。选项顺序在单局内稳定，可用 1-based 序号引用。
-        /// </summary>
         public virtual List<VoiceMenuOption> GetVoiceProxyEscortOptions(Player[] members)
         {
             var options = new List<VoiceMenuOption>();
@@ -246,7 +240,7 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
 
-            menu.RegisterCommand("生成AI", "指定地点生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
+            menu.RegisterCommand("生成AI", "指定地点生成一个AI敌人", ECommandType.DebugSpawnAI.ToString(), mcsBotPlayers, isLocal: true, disabled: () => mcsBotPlayers == null || mcsBotPlayers.Length == 0, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
             menu.RegisterCommand("生成空投", "指定地点生成空投", ECommandType.DebugInitAirdrop.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
         }
 #endif

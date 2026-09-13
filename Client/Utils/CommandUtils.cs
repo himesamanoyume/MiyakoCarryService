@@ -296,16 +296,7 @@ namespace MiyakoCarryService.Client.Utils
 
             ForEachAlive(mcsBotPlayers, mcsBotPlayer =>
             {
-                var ctx = new McsCommandContext
-                {
-                    CommandType = commandType,
-                    Position = data?.Position,
-                    TargetId = data?.TargetId,
-                    AimingBodyPartType = data?.AimingBodyPartType ?? default,
-                    Extensions = data?.Extensions ?? new(),
-                    ShouldCheckExclude = data?.ShouldCheckExclude ?? shouldCheckExclude,
-                    McsBotPlayer = mcsBotPlayer
-                };
+                var ctx = CreateCommandContext(commandType, mcsBotPlayer, data, shouldCheckExclude);
 
                 if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
                 {
@@ -334,11 +325,38 @@ namespace MiyakoCarryService.Client.Utils
                     Execute(ctx, true);
                 }
             });
+
+            if (isLocal && (mcsBotPlayers == null || mcsBotPlayers.Length == 0))
+            {
+                var ctx = CreateCommandContext(commandType, null, data, false);
+                ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                Execute(ctx, false);
+            }
+
             CloseCommandMenuAction();
+        }
+
+        private static McsCommandContext CreateCommandContext( string commandType, Player mcsBotPlayer, McsCommandContext data, bool shouldCheckExclude)
+        {
+            return new McsCommandContext
+            {
+                CommandType = commandType,
+                Position = data?.Position,
+                TargetId = data?.TargetId,
+                AimingBodyPartType = data?.AimingBodyPartType ?? default,
+                Extensions = data?.Extensions ?? new(),
+                ShouldCheckExclude = data?.ShouldCheckExclude ?? shouldCheckExclude,
+                McsBotPlayer = mcsBotPlayer
+            };
         }
 
         public static void ForEachAlive(Player[] mcsBotPlayers, Action<Player> action)
         {
+            if (mcsBotPlayers == null)
+            {
+                return;
+            }
+
             foreach (var player in mcsBotPlayers)
             {
                 if (player == null || !player.HealthController.IsAlive)
