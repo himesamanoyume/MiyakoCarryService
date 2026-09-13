@@ -45,6 +45,7 @@ namespace MiyakoCarryService.Fika
             _patches.Add(new FikaOnBeenKilledByAggressorPatch1());
             _patches.Add(new FikaOnBeenKilledByAggressorPatch2());
             _patches.Add(new SetupCorpseSyncPacketPatch());
+            _patches.Add(new FikaBotVaultingSyncPatch());
 
             foreach (var patch in _patches)
             {
