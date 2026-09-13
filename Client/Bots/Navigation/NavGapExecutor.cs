@@ -126,7 +126,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         public static void OnMoverTick(BotOwner botOwner)
         {
-            if (botOwner == null)
+            if (botOwner == null || !botOwner.IsMcsBotPlayer)
             {
                 return;
             }

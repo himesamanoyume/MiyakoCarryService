@@ -1,14 +1,15 @@
 
 using System.Reflection;
 using EFT;
+using EFT.Vaulting;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
     /// <summary>
-    /// 允许AI进行翻越（与 SAIN EnableVaultPatch / ORBIT BotVaultingPatch 同机制）：
-    /// 简化骨架角色（僵尸等）不启用——翻越动画需要完整骨架
+    /// 护航开启完整骨架以允许AI进行翻越
     /// </summary>
     public sealed class InitVaultComponentPatch : ModulePatch
     {
@@ -23,6 +24,30 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             aiControlled = false;
+        }
+    }
+
+    public sealed class DoVaultingTickPatch : ModulePatch
+    {
+        private static readonly AccessTools.FieldRef<MovementContext, Player> _playerRef = AccessTools.FieldRefAccess<MovementContext, Player>("_player");
+
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(VaultingComponent), nameof(VaultingComponent.DoVaultingTick));
+
+        [PatchPrefix]
+        public static bool Prefix(VaultingComponent __instance)
+        {
+            if (__instance._vaultingContext is not MovementContext movementContext)
+            {
+                return true;
+            }
+
+            var botOwner = _playerRef(movementContext)?.AIData?.BotOwner;
+            if (botOwner == null || botOwner.IsMcsBotPlayer)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

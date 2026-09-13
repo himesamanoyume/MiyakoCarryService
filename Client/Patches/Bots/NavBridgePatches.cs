@@ -8,7 +8,10 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
-    public class NavBridgeMoverGuardPatch : ModulePatch
+    /// <summary>
+    /// 用于实现护航的各种翻越、跨越边缘能力
+    /// </summary>
+    public class BotMoverHopGuardPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), "method_12");
 
@@ -25,7 +28,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         }
     }
 
-    public class NavBridgeTeleportFunnelPatch : ModulePatch
+    public class PlayerTeleportPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.Teleport));
 
@@ -58,7 +61,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         }
     }
 
-    public class NavBridgeCastFromPosPatch : ModulePatch
+    public class CastFromPosPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), nameof(BotMover.CastFromPos));
 
@@ -98,7 +101,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         }
     }
 
-    public class NavBridgeBetterPositionPatch : ModulePatch
+    public class FindBetterPositionPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), nameof(BotMover.FindBetterPosition));
 
@@ -115,7 +118,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         }
     }
 
-    public class NavBridgeCastPointClampPatch : ModulePatch
+    public class SetPlayerToNavMeshPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), nameof(BotMover.SetPlayerToNavMesh));
 
@@ -158,7 +161,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         }
     }
 
-    public class NavBridgeMoverDrivePostfix : ModulePatch
+    public class BotMoverFixedUpdatePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotMover), nameof(BotMover.ManualFixedUpdate));
 
