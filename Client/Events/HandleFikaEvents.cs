@@ -40,4 +40,9 @@ namespace MiyakoCarryService.Client.Events
     {
         public MongoID McsLeadPlayerId { get; set; }
     }
+
+    public class PlayerVaultHintHandleFikaEvent : IMcsEvent
+    {
+        public VaultHint Hint { get; set; }
+    }
 }

@@ -241,7 +241,7 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             menu.RegisterCommand("传送", "传送至指定地点", ECommandType.DebugTeleport.ToString(), mcsBotPlayers, isLocal: true, resolver: () => Physics.Raycast(Singleton<GameWorld>.Instance.MainPlayer.InteractionRay, out var hit, float.MaxValue, LayersMaskController.HighPolyWithTerrainMask) ? new McsCommandContext { Position = hit.point } : null);
 
-            if (!McsMgr.IsHost)
+            if (!Tools.IsHost)
             {
                 return;
             }

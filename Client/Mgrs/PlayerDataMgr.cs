@@ -532,6 +532,28 @@ namespace MiyakoCarryService.Client.Mgrs
                 mcsBotPlayerData.Color = Draw.Green.Rgb;
                 GUI.Label(mcsBotPlayerData.Rect, mcsBotPlayerData.Info, mcsBotPlayerData.GUIStyle);
             }
+
+            var hintProjector = _visibleDatas[0];
+            if (hintProjector != null)
+            {
+                GUI.color = Draw.Green.Rgb;
+                foreach (var hint in PlayerVaultHints.All)
+                {
+                    var startScreenPos = hintProjector.WorldPointToVisibleScreenPoint(hint.StartPos);
+                    if (startScreenPos.x != -10000 || startScreenPos.y != -10000)
+                    {
+                        GUI.Label(new Rect(startScreenPos.x - 5f, startScreenPos.y - 16f, 40f, 18f), "V", Draw.GuiCommonStyle);
+                    }
+
+                    var endScreenPos = hintProjector.WorldPointToVisibleScreenPoint(hint.EndPos);
+                    if (endScreenPos.x != -10000 || endScreenPos.y != -10000)
+                    {
+                        GUI.Label(new Rect(endScreenPos.x - 5f, endScreenPos.y - 16f, 40f, 18f), "v", Draw.GuiCommonStyle);
+                    }
+                }
+
+                GUI.color = Color.white;
+            }
         }
     }
 }

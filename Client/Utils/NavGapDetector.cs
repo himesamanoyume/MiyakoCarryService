@@ -120,6 +120,15 @@ namespace MiyakoCarryService.Client.Utils
                 return false;
             }
 
+            if (PlayerVaultHints.TryFind(face, dir, out var hint)
+                && !NavGapExecutor.IsVaultBlacklisted(hint.StartPos)
+                && NavMesh.SamplePosition(hint.StartPos, out var hintNear, 0.75f, -1)
+                && NavMesh.SamplePosition(hint.EndPos, out var hintFar, 1f, -1))
+            {
+                standSample.position = hintNear.position;
+                farPoint = hintFar.position;
+            }
+
             var toNearPath = new NavMeshPath();
             if (!NavMesh.CalculatePath(startPos, standSample.position, -1, toNearPath) || toNearPath.status != NavMeshPathStatus.PathComplete)
             {
@@ -205,6 +214,15 @@ namespace MiyakoCarryService.Client.Utils
             if (!NavMesh.SamplePosition(standQuery, out var standSample, 0.75f, -1))
             {
                 return false;
+            }
+
+            if (PlayerVaultHints.TryFind(face, dir, out var hint)
+                && !NavGapExecutor.IsVaultBlacklisted(hint.StartPos)
+                && NavMesh.SamplePosition(hint.StartPos, out var hintNear, 0.75f, -1)
+                && NavMesh.SamplePosition(hint.EndPos, out var hintFar, 1f, -1))
+            {
+                standSample.position = hintNear.position;
+                farPoint = hintFar.position;
             }
 
             var toNearPath = new NavMeshPath();

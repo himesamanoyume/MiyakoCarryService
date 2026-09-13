@@ -584,6 +584,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
+            PlayerVaultHints.Clear();
             _friendlyFireDebouncer = new Debouncer<MongoID, FriendlyFirePenalty>(
                 this,
                 10f,
@@ -640,6 +641,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void OnRaidEnded()
         {
             base.OnRaidEnded();
+            PlayerVaultHints.Clear();
             if (_friendlyFireDebouncer != null)
             {
                 _friendlyFireDebouncer.Flush();

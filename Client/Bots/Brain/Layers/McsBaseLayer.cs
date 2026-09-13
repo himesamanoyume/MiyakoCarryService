@@ -1492,6 +1492,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool CheckForVaultableObstacle(out Vector3 obstaclePoint)
         {
+            if (PlayerVaultHints.TryFind(BotOwner.Position, BotOwner.Mover.NormDirCurPoint, out var hint) && ProbeVaultableObstacle(hint.EndPos - hint.StartPos, out obstaclePoint))
+            {
+                return true;
+            }
+
             if (ProbeVaultableObstacle(BotOwner.GetPlayer.MovementContext.PlayerRealForward, out obstaclePoint))
             {
                 return true;

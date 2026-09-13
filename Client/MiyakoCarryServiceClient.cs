@@ -219,6 +219,10 @@ namespace MiyakoCarryService.Client
             _patches.Add(new AdvAssaultTargetPatch());
             _patches.Add(new InitVaultComponentPatch());
             _patches.Add(new DoVaultingTickPatch());
+            _patches.Add(new VaultStateEnterPatch());
+            _patches.Add(new VaultStateExitPatch());
+            _patches.Add(new ClimbStateEnterPatch());
+            _patches.Add(new ClimbStateExitPatch());
             _patches.Add(new VaultInteractDistancePatch());
             _patches.Add(new VaultAutoInteractDistancePatch());
             _patches.Add(new ClimbInteractDistancePatch());

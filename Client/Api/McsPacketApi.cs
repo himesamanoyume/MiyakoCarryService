@@ -34,6 +34,16 @@ namespace MiyakoCarryService.Client.Api
             McsMgrApi.GetMgr<McsMgr>().UpdateMcsBotPlayerConfig(mcsLeadPlayerId, config);
         }
 
+        public static string SerializeVaultHint(VaultHint hint)
+        {
+            return JsonConvert.SerializeObject(hint, _settings);
+        }
+
+        public static VaultHint DeserializeVaultHint(string json)
+        {
+            return JsonConvert.DeserializeObject<VaultHint>(json, _settings);
+        }
+
         public static string SerializeCommand(CommandMgrHandleFikaEvent @event)
         {
             var request = new McsCommandRequest

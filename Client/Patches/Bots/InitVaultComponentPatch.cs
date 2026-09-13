@@ -4,6 +4,7 @@ using EFT;
 using EFT.Vaulting;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -29,8 +30,6 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
     public sealed class DoVaultingTickPatch : ModulePatch
     {
-        private static readonly AccessTools.FieldRef<MovementContext, Player> _playerRef = AccessTools.FieldRefAccess<MovementContext, Player>("_player");
-
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(VaultingComponent), nameof(VaultingComponent.DoVaultingTick));
 
         [PatchPrefix]
@@ -41,7 +40,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            var botOwner = _playerRef(movementContext)?.AIData?.BotOwner;
+            var botOwner = MovementContextUtils.GetPlayer(movementContext)?.AIData?.BotOwner;
             if (botOwner == null || botOwner.IsMcsBotPlayer)
             {
                 return true;
