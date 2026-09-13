@@ -84,10 +84,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float LEAD_POSITION_CHANGE_THRESHOLD = 2f;
         protected const float TOO_FAR_FROM_LEAD_DISTANCE = 20f;
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
-        // 翻越障碍探测：起点沿探测轴回退 VAULT_PROBE_BACKOFF，再沿轴前扫 VAULT_PROBE_REACH。
-        // 回退段是为了绕开 Unity SphereCast 的起点重叠盲区（详见 CheckForVaultableObstacle）
         protected const float VAULT_PROBE_BACKOFF = 0.75f;
-        protected const float VAULT_PROBE_REACH = 1.5f;
         protected const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float SUPPRESS_TIME_SINCE_SEEN = 3f;
@@ -1413,43 +1410,23 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             return false;
         }
 
-        /// <summary>
-        /// 参考SAIN
-        /// </summary>
-        /// <returns></returns>
         public virtual bool ShouldTryVault()
         {
             if (BotOwner.GetPlayer == null || BotOwner.GetPlayer.VaultingComponent == null || BotOwner.GetPlayer.VaultingGameplayRestrictions == null)
             {
-                NavBridgeDebug.Log("vault.skip.components", $"VaultingComponent={BotOwner.GetPlayer?.VaultingComponent != null} Restrictions={BotOwner.GetPlayer?.VaultingGameplayRestrictions != null}（为 false 说明 InitVaultComponentPatch 未生效）");
                 return false;
             }
 
-            // 【2026-09-13 日志定死】"卡死"必须是"手上有一条没走完的路却被挡住"，不能只看"这段区间位移 <2m"。
-            // CheckStuck 的判据是后者（BotOwner.Mover._lastPos 与当前相距 <2m 就算卡住），于是玩家站住不动、
-            // 护航跟着原地待命时同样满足 —— 每次触发都会拿"面前 1.5m 内随便什么东西"去试翻越。
-            // 实测 185 次命中里 174 次（94%）沿"身体朝向"（= bot 当时随便朝着哪边），138 次（75%）水平距
-            // 落在 0.6~0.8m（bot 正贴着某个东西站着），20 次 TryVaulting 全部 False —— 纯浪费，
-            // 还会把身体拧向那个障碍。HasPathAndNoComplete 就是 ActualPathController.HavePath，
-            // 即"手上有一条没走完的路径"，正是"被挡住"的定义；原地待命时它是 false
             if (!BotOwner.Mover.HasPathAndNoComplete)
             {
-                NavBridgeDebug.Log("vault.skip.noPath", "跳过硬翻越：当前没有未完成的路径（只是原地待命，不是被挡住）");
                 return false;
             }
 
             if (!BotOwner.GetPlayer.VaultingGameplayRestrictions.CanVaulting())
             {
-                NavBridgeDebug.Log("vault.skip.restrictions", "VaultingGameplayRestrictions.CanVaulting() = false");
                 return false;
             }
 
-            // 原先这里还有 Mover.IsMoving 与 Mover._lastTimePosChanged 两道闸，与调用场景自相矛盾，删掉：
-            // 调用方是卡死恢复（CheckStuck → TrySolveStuck，判定的是"这段区间内位移不足 2m"），而卡死时
-            // Mover.IsMoving 恰好为 false（MovePlayer 在路径耗尽/到末角点时置 false），位置也恰恰刚变化过，
-            // 两道闸把检测本身挡在门外——实测日志里绝大多数条目都是 vault.skip.notMoving。
-            // 值不值得翻交由下面的障碍探测回答，探测本身要求面前 1m 内有静态障碍。
-            NavBridgeDebug.Log("vault.pass", $"ShouldTryVault 通过，尝试检测障碍（IsMoving={BotOwner.Mover.IsMoving} 距上次位移 {Time.time - BotOwner.Mover._lastTimePosChanged:F2}s）");
             return true;
         }
 
@@ -1460,56 +1437,34 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            // 冲刺状态下 Vault/Climb 策略都被禁用（VaultingComponent.GetVaultingStrategy），先停冲刺
             if (BotOwner.GetPlayer.MovementContext.IsSprintEnabled)
             {
                 BotOwner.Mover.Sprint(false);
             }
 
-            // 翻越扫描沿身体 yaw（详见 VaultAim），先把朝向写正再让组件扫描
-            var aimAngle = VaultAim.FaceYaw(BotOwner, obstaclePoint - BotOwner.Position);
+            VaultAim.FaceYaw(BotOwner, obstaclePoint - BotOwner.Position);
 
-            // TryVaulting 只在自动翻越关闭时才自己 Tick（VaultingComponent.TryVaulting）；
-            // 自动翻越开启时复用 UpdateEvent → DoVaultingTick 留下的上一帧扫描结果。补一次 Tick，
-            // 保证 VaultState.CanMove() 判定用的就是刚写正的身体 yaw 扫出来的障碍数据
             var vaultingComponent = BotOwner.GetPlayer.VaultingComponent as VaultingComponent;
             vaultingComponent?.Tick();
 
-            // 朝向自检：写正 yaw 不等于网格就扫在障碍上（详见 VaultAim.TryAlign）。
-            // 实测同一障碍"修正 5° 就成功、119° 就失败"，失败时扫描退化成"本地全地面"（长=2.00、terrain=true），
-            // 这种尝试注定 TryVaulting=false，还白吃一次拉黑额度 —— 先量夹角，超限就再掰一次，仍超限直接放弃本次
-            var toObstacleDirection = obstaclePoint - BotOwner.Position;
-            if (!VaultAim.TryAlign(BotOwner, vaultingComponent, toObstacleDirection, out var aimDetail))
+            if (!VaultAim.TryAlign(BotOwner, vaultingComponent, obstaclePoint - BotOwner.Position))
             {
-                NavBridgeDebug.Log("vault.aim.giveup", $"{aimDetail}；放弃本次翻越尝试（不拉黑：不是翻不过去，是没扫到）");
                 return false;
             }
 
-            var tryResult = BotOwner.GetPlayer.VaultingComponent.TryVaulting();
-
-            // 距离取水平值：障碍命中点在胸口高，3D 距离会凭空多出 1.2m 的竖直分量
-            var toObstacle = obstaclePoint - BotOwner.Position;
-            toObstacle.y = 0f;
-            if (tryResult)
+            if (BotOwner.GetPlayer.VaultingComponent.TryVaulting())
             {
-                NavBridgeDebug.Log("vault.try", $"TryVaulting = True（朝向修正 {aimAngle:F0}°，障碍水平距 {toObstacle.magnitude:F2}m；{aimDetail}）");
                 BotOwner.GetPlayer.OnVaulting();
                 return true;
             }
 
-            // false 只说明七道门里有不达标的，把每道门的两侧量都打出来（VaultGateProbe）
-            NavBridgeDebug.Log("vault.try", $"TryVaulting = False（朝向修正 {aimAngle:F0}°，障碍水平距 {toObstacle.magnitude:F2}m；{aimDetail}）；{VaultGateProbe.Describe(vaultingComponent)}");
-
-            // 只有真正贴到障碍（水平 0.8m 内）才计入黑名单：更远处的失败是"离太远、组件必然判 None"，
-            // 拉黑会把后续正常的近距离尝试也一起挡掉
+            var toObstacle = obstaclePoint - BotOwner.Position;
+            toObstacle.y = 0f;
             if (toObstacle.magnitude <= 0.8f)
             {
                 NavGapExecutor.BlacklistVault(obstaclePoint, false);
             }
-            else
-            {
-                NavBridgeDebug.Log("vault.tooFar", $"障碍水平距 {toObstacle.magnitude:F2}m > 0.8m，组件必然判 None，不计入黑名单");
-            }
+
             return false;
         }
 
@@ -1524,51 +1479,25 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             movementContext.TryJump();
         }
 
-        // 只判定"前方有静态障碍"：高度判断交给 VaultingComponent 自己的扫描器
-        // （TryVaulting 内部 Tick 会用完整 ObstacleCalculator 沿身体朝向扫描）。
-        // 注意 VaultingHeight 是扫描器的运行时输出（MainObstacleHeight，空闲恒 0），不是静态上限；
-        // collider.bounds.size.y 是碰撞体整体高度，对窗户等竖长碰撞体无判定意义
-        //
-        // 原先只沿 Mover.NormDirCurPoint 探一条轴，而它指向的是路径角点：贴墙卡脚时路径绕着障碍走，
-        // 这条方向与面前的墙基本切向平行，扫过去正好擦着墙面（日志方向 (1.00, -0.06, 0.03) 就是这种切向）。
-        // 而且起点就放在胸口——Unity 的 SphereCast 官方注明不检测与起点球体重叠的碰撞体
-        // （docs: "SphereCast will not detect colliders for which the sphere overlaps the collider"），
-        // 贴脸时球体已经埋在墙里，恒返回 false，即日志里的 vault.check.noHit。
-        // 三处一并修正：轴按 身体 yaw（与组件扫描同轴）→ 路径方向 → 当前移动目标方向 依次探；
-        // 起点沿轴回退 VAULT_PROBE_BACKOFF 再前扫，等价于从"球体不再嵌进障碍"的位置起扫；
-        // 高度从膝高到胸口逐层扫——矮围栏（0.8~1.2m）会从单条胸口高射线的头顶整个掠过
         public virtual bool CheckForVaultableObstacle(out Vector3 obstaclePoint)
         {
             if (ProbeVaultableObstacle(BotOwner.GetPlayer.MovementContext.PlayerRealForward, out obstaclePoint))
             {
-                NavBridgeDebug.Log("vault.check.hit", $"前方有障碍（身体朝向）：{DescribeObstacle(obstaclePoint)}");
                 return true;
             }
 
             if (ProbeVaultableObstacle(BotOwner.Mover.NormDirCurPoint, out obstaclePoint))
             {
-                NavBridgeDebug.Log("vault.check.hit", $"前方有障碍（路径方向）：{DescribeObstacle(obstaclePoint)}");
                 return true;
             }
 
             if (_currentMoveTarget.HasValue && ProbeVaultableObstacle(_currentMoveTarget.Value - BotOwner.Position, out obstaclePoint))
             {
-                NavBridgeDebug.Log("vault.check.hit", $"前方有障碍（移动目标方向）：{DescribeObstacle(obstaclePoint)}");
                 return true;
             }
 
             obstaclePoint = default;
-            var bodyYaw = BotOwner.GetPlayer.MovementContext.PlayerRealForward;
-            var moveTarget = _currentMoveTarget.HasValue ? (_currentMoveTarget.Value - BotOwner.Position).ToString("F2") : "null";
-            NavBridgeDebug.Log("vault.check.noHit", $"身体朝向/路径方向/移动目标三轴 {VAULT_PROBE_REACH:F1}m（0.5~1.4m 多高度）内均无静态障碍（pos={BotOwner.Position.ToString("F1")} bodyYaw={bodyYaw.ToString("F2")} 路径={BotOwner.Mover.NormDirCurPoint.ToString("F2")} 目标={moveTarget}）");
             return false;
-        }
-
-        private string DescribeObstacle(Vector3 obstaclePoint)
-        {
-            var toObstacle = obstaclePoint - BotOwner.Position;
-            toObstacle.y = 0f;
-            return $"水平距 {toObstacle.magnitude:F2}m，命中面高 {obstaclePoint.y - BotOwner.Position.y:F2}m";
         }
 
         private bool ProbeVaultableObstacle(Vector3 axis, out Vector3 obstaclePoint)
@@ -1585,25 +1514,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var found = false;
             var nearest = float.MaxValue;
 
-            // 多高度扫描（膝高 → 略高于胸口）：围栏/矮墙常在 0.8~1.2m，而 EFT 的可翻上限也才
-            // 1.1m(Vault)/1.31m(Climb)，单条胸口高的射线会整个从矮障碍头顶掠过
             for (var height = 0.5f; height <= 1.4f; height += 0.3f)
             {
                 var origin = position + Vector3.up * height - axis * VAULT_PROBE_BACKOFF;
-                if (!Physics.SphereCast(origin, 0.1f, axis, out var hit, VAULT_PROBE_BACKOFF + VAULT_PROBE_REACH, LayersMaskController.PlayerStaticCollisionsMask)
+                if (!Physics.SphereCast(origin, 0.1f, axis, out var hit, VAULT_PROBE_BACKOFF + 1.5f, LayersMaskController.PlayerStaticCollisionsMask)
                     || hit.collider == null)
                 {
                     continue;
                 }
 
-                // 起点回退带来的副作用：回退段（脚底之后 VAULT_PROBE_BACKOFF 那一段）上的命中其实是"身后的东西"，
-                // 拿它当障碍会把 bot 拧过去面壁。只接受脚底平面及更前的命中
                 if (hit.distance < VAULT_PROBE_BACKOFF)
                 {
                     continue;
                 }
 
-                // 命中面接近水平的是地面/坡面，不是可翻障碍
                 if (hit.normal.y > 0.7f)
                 {
                     continue;
@@ -1846,7 +1770,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool CanGetPathToRun(Vector3 startPos, Vector3 targetPos, McsBotPlayerData mcsBotPlayerData, out Vector3[] corners)
         {
-            // 跨越进行中：玩家仍在边缘下层区域就沿用跨越路径，交给执行器每帧驱动
             if (NavBridge.IsCrossing)
             {
                 if (!NavBridge.ShouldAbort(targetPos))
@@ -1883,10 +1806,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
             }
 
-            //NavBridgeDebug.Log("CanGetPathToRun", $"start={startPos.ToString("F1")} target={targetPos.ToString("F1")} status={navMeshPath.status} len={NavGapDetector.PathLength(navMeshPath.corners):F1} flag={flag}");
-
-            // 功能③：低台阶走下。断开型缺口（PathPartial）、无路可走（PathInvalid）与连通但绕路明显（PathComplete）都尝试规划捷径。
-            // 该能力天然仅限 Mcs 护航 bot：整条链路挂在 McsBaseLayer 脑层，野生 AI 不经过此代码
             if (NavBridge.TryPlanStepDown(BotOwner, targetPos, navMeshPath))
             {
                 _currentMoveRetries = 0;
@@ -2065,11 +1984,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             else
             {
                 result = pos;
-            }
-
-            if (Math.Abs(result.y - pos.y) > 1f)
-            {
-                //NavBridgeDebug.Log("Project", $"投影层高变化：pos={pos.ToString("F1")} → result={result.ToString("F1")}");
             }
 
             return result;
@@ -2881,8 +2795,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void ApplyMovePoint()
         {
-            // 跨越期间由 BotMover.ManualFixedUpdate 的 postfix 每帧驱动（NavGapExecutor.OnMoverTick），
-            // 这里不再下发 SetPoint，避免覆盖跨越目标
             if (NavBridge.IsCrossing)
             {
                 return;
