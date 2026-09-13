@@ -42,6 +42,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         public BotOwner BotOwner => _botOwner;
         public static bool RelinkInProgress;
         public static bool RescueInProgress;
+        public static bool McsVaultScope;
         public bool IsHoppingNow => _hopping;
 
         public static bool IsHopping(BotOwner botOwner)
@@ -180,7 +181,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private void Tick(BotOwner botOwner)
         {
             var pos = botOwner.Position;
-            if (_type == ENavGapType.Vault)
+            if (_type is ENavGapType.Vault or ENavGapType.StepUp)
             {
                 TickVault(botOwner, pos);
                 return;
@@ -335,7 +336,18 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
 
             _vaultTryCount++;
-            if (botOwner.GetPlayer.VaultingComponent.TryVaulting())
+            bool tryResult;
+            McsVaultScope = true;
+            try
+            {
+                tryResult = botOwner.GetPlayer.VaultingComponent.TryVaulting();
+            }
+            finally
+            {
+                McsVaultScope = false;
+            }
+
+            if (tryResult)
             {
                 botOwner.Mover.Stop();
                 botOwner.GetPlayer.OnVaulting();

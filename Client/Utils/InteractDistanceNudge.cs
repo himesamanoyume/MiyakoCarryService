@@ -1,4 +1,5 @@
 using EFT.Vaulting;
+using MiyakoCarryService.Client.Bots.Navigation;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -12,7 +13,8 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             var minDistantToInteract = restrictions.MinDistantToInteract;
-            if (distance <= minDistantToInteract || distance > minDistantToInteract + 0.01f)
+            var tolerance = NavGapExecutor.McsVaultScope ? 0.3f : 0.01f;
+            if (distance <= minDistantToInteract || distance > minDistantToInteract + tolerance)
             {
                 return;
             }

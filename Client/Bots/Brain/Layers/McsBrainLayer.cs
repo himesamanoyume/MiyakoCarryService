@@ -21,6 +21,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             try
             {
                 var time = Time.time;
+                if (McsBotPlayerData != null && (McsBotPlayerData.MoveResetRequested || McsBotPlayerData.HasIntent(Intents.ShouldTeleport)))
+                {
+                    McsBotPlayerData.MoveResetRequested = false;
+                    McsBotPlayerData.RemoveIntent(Intents.ShouldTeleport);
+                    NavBridge.Cancel();
+                    _currentMoveTarget = null;
+                    _lastTargetPos = Vector3.zero;
+                    _lastCalcCorners = null;
+                    _lastCanRunResult = false;
+                    _currentMoveRetries = 0;
+                    _nextUpdatePosTime = 0f;
+                }
+
                 var mcsLeadPlayerPos = Vector3.zero;
                 var sqrDistance = 0f;
                 var tooClose = false;

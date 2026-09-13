@@ -1452,7 +1452,18 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            if (BotOwner.GetPlayer.VaultingComponent.TryVaulting())
+            var tryResult = false;
+            NavGapExecutor.McsVaultScope = true;
+            try
+            {
+                tryResult = BotOwner.GetPlayer.VaultingComponent.TryVaulting();
+            }
+            finally
+            {
+                NavGapExecutor.McsVaultScope = false;
+            }
+
+            if (tryResult)
             {
                 BotOwner.GetPlayer.OnVaulting();
                 return true;

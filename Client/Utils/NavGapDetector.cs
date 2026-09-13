@@ -1,3 +1,5 @@
+using Comfort.Common;
+using EFT;
 using MiyakoCarryService.Client.Bots.Navigation;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Models;
@@ -10,6 +12,11 @@ namespace MiyakoCarryService.Client.Utils
     {
         public static bool TryDetectGap(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
         {
+            if (TryDetectStepUp(startPos, targetPos, path, out gap))
+            {
+                return true;
+            }
+
             if (TryDetectVault(startPos, targetPos, path, out gap))
             {
                 return true;
@@ -27,6 +34,106 @@ namespace MiyakoCarryService.Client.Utils
 
             gap = null;
             return false;
+        }
+
+        private static bool TryDetectStepUp(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
+        {
+            gap = null;
+            if (path.status == NavMeshPathStatus.PathComplete)
+            {
+                return false;
+            }
+
+            var toTarget = targetPos - startPos;
+            toTarget.y = 0f;
+            var targetDistance = toTarget.magnitude;
+            if (targetDistance < 1f)
+            {
+                return false;
+            }
+
+            var dir = toTarget / targetDistance;
+            if (!TryRaycastObstacle(startPos, dir, out var hit))
+            {
+                return false;
+            }
+
+            var face = hit.point;
+            if (Vector3.Dot(targetPos - face, dir) <= 0.3f)
+            {
+                return false;
+            }
+
+            if (NavGapExecutor.IsVaultBlacklisted(face))
+            {
+                return false;
+            }
+
+            var climbMaxHeight = Singleton<GlobalConfiguration>.Instance.VaultingSettings.MovesSettings.ClimbSettings.MoveRestrictions.MaxHeight;
+            if (climbMaxHeight <= 0f)
+            {
+                return false;
+            }
+
+            var crossingColumn = face + dir * 0.25f;
+            crossingColumn.y = startPos.y;
+            if (Physics.CheckSphere(crossingColumn + Vector3.up * 1.35f, 0.1f, LayersMaskController.PlayerStaticCollisionsMask))
+            {
+                return false;
+            }
+
+            Vector3 farPoint = default;
+            var found = false;
+            for (var offset = 0.4f; offset <= 2.5f; offset += 0.3f)
+            {
+                var probe = face + dir * offset + Vector3.up * 2f;
+                if (!Physics.Raycast(probe, Vector3.down, out var downHit, 8f, LayersMaskController.PlayerStaticCollisionsMask))
+                {
+                    continue;
+                }
+
+                var stepHeight = downHit.point.y - startPos.y;
+                if (stepHeight < 0.6f || stepHeight > climbMaxHeight)
+                {
+                    continue;
+                }
+
+                if (NavMesh.SamplePosition(downHit.point, out var farSample, 1f, -1)
+                    && farSample.position.y - startPos.y >= 0.6f
+                    && farSample.position.y - startPos.y <= climbMaxHeight
+                    && Vector3.Dot(farSample.position - face, dir) > 0.3f)
+                {
+                    farPoint = farSample.position;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                return false;
+            }
+
+            var standQuery = face - dir * 0.4f;
+            if (!NavMesh.SamplePosition(standQuery, out var standSample, 0.75f, -1))
+            {
+                return false;
+            }
+
+            var toNearPath = new NavMeshPath();
+            if (!NavMesh.CalculatePath(startPos, standSample.position, -1, toNearPath) || toNearPath.status != NavMeshPathStatus.PathComplete)
+            {
+                return false;
+            }
+
+            gap = new NavGapInfo
+            {
+                Type = ENavGapType.StepUp,
+                NearPoint = standSample.position,
+                FarPoint = farPoint,
+                Way = BuildWay(toNearPath.corners, farPoint),
+            };
+            return true;
         }
 
         private static bool TryDetectVault(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)

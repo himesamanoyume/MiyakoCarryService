@@ -4,6 +4,7 @@ namespace MiyakoCarryService.Client.Enums
     {
         None,
         StepDown,
+        StepUp,
         Vault,
         Bridge,
     }

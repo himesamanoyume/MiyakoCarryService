@@ -47,6 +47,7 @@ namespace MiyakoCarryService.Client.Datas
         }
 
         public Vector3? TargetPos = null;
+        public bool MoveResetRequested = false;
         public string ProxyTargetId = null;
         public LootData LootingTarget = null;
         public List<Vector3> ClearAreaPoints = null;

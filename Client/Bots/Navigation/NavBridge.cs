@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
 
             if (!NavGapDetector.TryDetectGap(botOwner.Position, targetPos, path, out var gap)
-                || (gap.Type != ENavGapType.StepDown && gap.Type != ENavGapType.Vault))
+                || (gap.Type != ENavGapType.StepDown && gap.Type != ENavGapType.StepUp && gap.Type != ENavGapType.Vault))
             {
                 return false;
             }
@@ -54,7 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             var toTarget = targetPos - edge;
             toTarget.y = 0f;
 
-            return _gap.Type == ENavGapType.Vault ? toTarget.magnitude > 20f : (targetPos.y > edge.y - 0.25f || toTarget.magnitude > 20f);
+            return _gap.Type is ENavGapType.StepDown ? (targetPos.y > edge.y - 0.25f || toTarget.magnitude > 20f) : toTarget.magnitude > 20f;
         }
 
         public void Cancel()
