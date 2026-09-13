@@ -12,6 +12,11 @@ namespace MiyakoCarryService.Client.Utils
     {
         public static bool TryDetectGap(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
         {
+            if (TryDetectPlayerHint(startPos, targetPos, path, out gap))
+            {
+                return true;
+            }
+
             if (TryDetectStepUp(startPos, targetPos, path, out gap))
             {
                 return true;
@@ -34,6 +39,69 @@ namespace MiyakoCarryService.Client.Utils
 
             gap = null;
             return false;
+        }
+
+        private static bool TryDetectPlayerHint(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
+        {
+            gap = null;
+            var toTarget = targetPos - startPos;
+            toTarget.y = 0f;
+            var targetDistance = toTarget.magnitude;
+            if (targetDistance < 1f)
+            {
+                return false;
+            }
+
+            var dir = toTarget / targetDistance;
+            if (!PlayerVaultHints.TryFind(startPos, dir, out var hint, 10f))
+            {
+                return false;
+            }
+
+            if (NavGapExecutor.IsVaultBlacklisted(hint.StartPos))
+            {
+                return false;
+            }
+
+            if (!NavMesh.SamplePosition(hint.StartPos, out var nearSample, 0.75f, -1) || !NavMesh.SamplePosition(hint.EndPos, out var farSample, 1f, -1))
+            {
+                return false;
+            }
+
+            if (Vector3.Dot(farSample.position - startPos, dir) <= Vector3.Dot(nearSample.position - startPos, dir))
+            {
+                return false;
+            }
+
+            var toNearPath = new NavMeshPath();
+            if (!NavMesh.CalculatePath(startPos, nearSample.position, -1, toNearPath) || toNearPath.status != NavMeshPathStatus.PathComplete)
+            {
+                return false;
+            }
+
+            if (path.status == NavMeshPathStatus.PathComplete)
+            {
+                var fromFarPath = new NavMeshPath();
+                if (!NavMesh.CalculatePath(farSample.position, targetPos, -1, fromFarPath))
+                {
+                    return false;
+                }
+
+                var hintLength = PathLength(toNearPath.corners) + (farSample.position - nearSample.position).magnitude + PathLength(fromFarPath.corners);
+                if (PathLength(path.corners) - hintLength < 2f)
+                {
+                    return false;
+                }
+            }
+
+            gap = new NavGapInfo
+            {
+                Type = ENavGapType.Vault,
+                NearPoint = nearSample.position,
+                FarPoint = farSample.position,
+                Way = BuildWay(toNearPath.corners, farSample.position),
+            };
+            return true;
         }
 
         private static bool TryDetectStepUp(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
@@ -118,15 +186,6 @@ namespace MiyakoCarryService.Client.Utils
             if (!NavMesh.SamplePosition(standQuery, out var standSample, 0.75f, -1))
             {
                 return false;
-            }
-
-            if (PlayerVaultHints.TryFind(face, dir, out var hint)
-                && !NavGapExecutor.IsVaultBlacklisted(hint.StartPos)
-                && NavMesh.SamplePosition(hint.StartPos, out var hintNear, 0.75f, -1)
-                && NavMesh.SamplePosition(hint.EndPos, out var hintFar, 1f, -1))
-            {
-                standSample.position = hintNear.position;
-                farPoint = hintFar.position;
             }
 
             var toNearPath = new NavMeshPath();
@@ -214,15 +273,6 @@ namespace MiyakoCarryService.Client.Utils
             if (!NavMesh.SamplePosition(standQuery, out var standSample, 0.75f, -1))
             {
                 return false;
-            }
-
-            if (PlayerVaultHints.TryFind(face, dir, out var hint)
-                && !NavGapExecutor.IsVaultBlacklisted(hint.StartPos)
-                && NavMesh.SamplePosition(hint.StartPos, out var hintNear, 0.75f, -1)
-                && NavMesh.SamplePosition(hint.EndPos, out var hintFar, 1f, -1))
-            {
-                standSample.position = hintNear.position;
-                farPoint = hintFar.position;
             }
 
             var toNearPath = new NavMeshPath();

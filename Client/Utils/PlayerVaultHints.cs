@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Utils
             _hints.Add(hint);
         }
 
-        public static bool TryFind(Vector3 anchor, Vector3 dir, out VaultHint hint)
+        public static bool TryFind(Vector3 anchor, Vector3 dir, out VaultHint hint, float maxDistance = 3f)
         {
             hint = null;
             dir.y = 0f;
@@ -44,19 +44,19 @@ namespace MiyakoCarryService.Client.Utils
                 var toStart = candidate.StartPos - anchor;
                 toStart.y = 0f;
                 var distance = toStart.magnitude;
-                if (distance > 3f)
+                if (distance > maxDistance)
                 {
                     continue;
                 }
 
-                var crossing = candidate.EndPos - candidate.StartPos;
-                crossing.y = 0f;
-                if (crossing.sqrMagnitude < 0.01f)
+                var forward = candidate.Forward;
+                forward.y = 0f;
+                if (forward.sqrMagnitude < 0.01f)
                 {
                     continue;
                 }
 
-                if (Vector3.Dot(crossing.normalized, direction) < 0.5f)
+                if (Vector3.Dot(forward.normalized, direction) < 0.5f)
                 {
                     continue;
                 }

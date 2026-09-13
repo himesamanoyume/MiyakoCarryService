@@ -48,9 +48,7 @@ namespace MiyakoCarryService.Client.Utils
 
             hint.EndPos = movementContext.TransformPosition;
 
-            var crossed = hint.EndPos - hint.StartPos;
-            crossed.y = 0f;
-            if (crossed.magnitude <= 0.5f)
+            if ((hint.EndPos - hint.StartPos).magnitude <= 0.5f)
             {
                 return;
             }
