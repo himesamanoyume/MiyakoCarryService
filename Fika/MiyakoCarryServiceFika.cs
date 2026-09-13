@@ -16,8 +16,6 @@ using MiyakoCarryService.Client.Patches.Events;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
-using MiyakoCarryService.Client.Utils;
-using UnityEngine.AI;
 using BepInEx;
 
 namespace MiyakoCarryService.Fika
@@ -58,7 +56,6 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Subscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket, this);
             McsEventApi.Subscribe<CommandMgrHandleFikaEvent>(SendCommandPacket, this);
             McsEventApi.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
-            McsEventApi.Subscribe<PlayerVaultHintHandleFikaEvent>(SendPlayerVaultHintPacket, this);
         }
 
         public void OnDestroy()
@@ -71,7 +68,6 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Unsubscribe<SubtitlesMgrHandleFikaEvent>(SendTalkMsgPacket);
             McsEventApi.Unsubscribe<CommandMgrHandleFikaEvent>(SendCommandPacket);
             McsEventApi.Unsubscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket);
-            McsEventApi.Unsubscribe<PlayerVaultHintHandleFikaEvent>(SendPlayerVaultHintPacket);
             McsEventApi.Unsubscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket);
         }
 
@@ -80,7 +76,6 @@ namespace MiyakoCarryService.Fika
             fikaEvent.Manager.RegisterPacket<CommandPacket>(OnCommandPacketReceived);
             fikaEvent.Manager.RegisterPacket<TalkMsgPacket>(OnTalkPacketReceived);
             fikaEvent.Manager.RegisterPacket<McsBotPlayerConfigPacket>(OnMcsBotPlayerConfigPacketReceived);
-            fikaEvent.Manager.RegisterPacket<PlayerVaultHintPacket>(OnPlayerVaultHintPacketReceived);
             fikaEvent.Manager.RegisterPacket<QuestProxyCommandCallbackPacket>(OnQuestProxyCommandCallbackPacketReceived);
 
             // 用于主机同步护航信息至副机
@@ -364,43 +359,6 @@ namespace MiyakoCarryService.Fika
                 };
                 Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
-        }
-
-        public void SendPlayerVaultHintPacket(PlayerVaultHintHandleFikaEvent @event)
-        {
-            if (!FikaBackendUtils.IsClient)
-            {
-                return;
-            }
-
-            var packet = new PlayerVaultHintPacket
-            {
-                Payload = McsPacketApi.SerializeVaultHint(@event.Hint)
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-        }
-
-        public void OnPlayerVaultHintPacketReceived(PlayerVaultHintPacket packet)
-        {
-            if (!FikaBackendUtils.IsServer)
-            {
-                return;
-            }
-
-            var hint = McsPacketApi.DeserializeVaultHint(packet.Payload);
-            if (hint == null)
-            {
-                return;
-            }
-
-            if (!NavMesh.SamplePosition(hint.StartPos, out var startSample, 1f, -1) || !NavMesh.SamplePosition(hint.EndPos, out var endSample, 1f, -1))
-            {
-                return;
-            }
-
-            hint.StartPos = startSample.position;
-            hint.EndPos = endSample.position;
-            PlayerVaultHints.Add(hint);
         }
 
         private NetPeer GetPeerByNetId(int netId)
