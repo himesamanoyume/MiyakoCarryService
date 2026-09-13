@@ -4,6 +4,7 @@ using EFT.Vaulting;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,15 +12,15 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 {
     public class NavGapExecutor
     {
-        private static readonly Dictionary<BotOwner, NavGapExecutor> CrossingBots = new Dictionary<BotOwner, NavGapExecutor>();
-        private static readonly Dictionary<BotOwner, float> RecentHopEnds = new Dictionary<BotOwner, float>();
-        private static readonly Dictionary<BotOwner, float> RecentAborts = new Dictionary<BotOwner, float>();
-        private const float AbortGuardDuration = 1.5f;
-        private static readonly List<VaultBlacklistEntry> VaultBlacklist = new List<VaultBlacklistEntry>();
-        private const float VaultBlacklistRadius = 1.5f;
-        private const float VaultBlacklistDuration = 60f;
-        private static readonly Dictionary<BotOwner, RescueWatch> RescueWatches = new Dictionary<BotOwner, RescueWatch>();
+        private static readonly Dictionary<BotOwner, NavGapExecutor> _crossingBots = new Dictionary<BotOwner, NavGapExecutor>();
+        private static readonly Dictionary<BotOwner, float> _recentHopEnds = new Dictionary<BotOwner, float>();
+        private static readonly Dictionary<BotOwner, float> _recentAborts = new Dictionary<BotOwner, float>();
+        private static readonly List<VaultBlacklistEntry> _vaultBlacklist = new List<VaultBlacklistEntry>();
+        private static readonly Dictionary<BotOwner, RescueWatch> _rescueWatches = new Dictionary<BotOwner, RescueWatch>();
 
+        private const float ABORT_GUARD_DURATION = 1.5f;
+        private const float VAULT_BLACKLIST_RADIUS = 1.5f;
+        private const float VAULT_BLACKLIST_DURATION = 60f;
         private Vector3 _edge;
         private Vector3 _destination;
         private BotOwner _botOwner;
@@ -36,20 +37,15 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private Vector3 _pressAnchor;
         private float _pressAnchorTime;
         private float _nextPressTime;
-
         public bool IsCrossing { get; private set; }
-
         public float NextPlanCooldownUntil { get; private set; }
-
         public static bool RelinkInProgress;
-
         public static bool RescueInProgress;
-
         public bool IsHoppingNow => _hopping;
 
         public static bool IsHopping(BotOwner botOwner)
         {
-            return botOwner != null && CrossingBots.TryGetValue(botOwner, out var executor) && executor._hopping;
+            return botOwner != null && _crossingBots.TryGetValue(botOwner, out var executor) && executor._hopping;
         }
 
         public static bool IsApproaching(BotOwner botOwner)
@@ -59,22 +55,22 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return false;
             }
 
-            if (CrossingBots.TryGetValue(botOwner, out var executor))
+            if (_crossingBots.TryGetValue(botOwner, out var executor))
             {
                 return !executor._hopping;
             }
 
-            return RecentAborts.TryGetValue(botOwner, out var abortedAt) && Time.time - abortedAt < AbortGuardDuration;
+            return _recentAborts.TryGetValue(botOwner, out var abortedAt) && Time.time - abortedAt < ABORT_GUARD_DURATION;
         }
 
-        public static bool EndedHopRecently(BotOwner botOwner, float within)
+        public static bool EndedHopRecently(BotOwner botOwner)
         {
-            return botOwner != null && RecentHopEnds.TryGetValue(botOwner, out var time) && Time.time - time < within;
+            return botOwner != null && _recentHopEnds.TryGetValue(botOwner, out var time) && Time.time - time < 3f;
         }
 
         public static bool IsHoppingNear(Vector3 pos)
         {
-            foreach (var executor in CrossingBots.Values)
+            foreach (var executor in _crossingBots.Values)
             {
                 if (executor._hopping && executor._botOwner != null && executor._botOwner.Position.McsSqrDistance(pos) <= 1f)
                 {
@@ -87,10 +83,10 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         public static bool IsVaultBlacklisted(Vector3 pos)
         {
-            VaultBlacklist.RemoveAll(e => e.Until > 0f && Time.time >= e.Until);
-            foreach (var entry in VaultBlacklist)
+            _vaultBlacklist.RemoveAll(e => e.Until > 0f && Time.time >= e.Until);
+            foreach (var entry in _vaultBlacklist)
             {
-                if (entry.Until > 0f && entry.Pos.McsSqrDistance(pos) <= VaultBlacklistRadius * VaultBlacklistRadius)
+                if (entry.Until > 0f && entry.Pos.McsSqrDistance(pos) <= VAULT_BLACKLIST_RADIUS * VAULT_BLACKLIST_RADIUS)
                 {
                     return true;
                 }
@@ -101,26 +97,27 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
         public static void BlacklistVault(Vector3 pos, bool immediate)
         {
-            VaultBlacklist.RemoveAll(e => e.Until > 0f && Time.time >= e.Until);
-            for (var i = 0; i < VaultBlacklist.Count; i++)
+            _vaultBlacklist.RemoveAll(e => e.Until > 0f && Time.time >= e.Until);
+            for (var i = 0; i < _vaultBlacklist.Count; i++)
             {
-                if (VaultBlacklist[i].Pos.McsSqrDistance(pos) <= VaultBlacklistRadius * VaultBlacklistRadius)
+                if (_vaultBlacklist[i].Pos.McsSqrDistance(pos) <= VAULT_BLACKLIST_RADIUS * VAULT_BLACKLIST_RADIUS)
                 {
-                    var entry = VaultBlacklist[i];
+                    var entry = _vaultBlacklist[i];
                     entry.Fails++;
                     if (immediate || entry.Fails >= 3)
                     {
-                        entry.Until = Time.time + VaultBlacklistDuration;
+                        entry.Until = Time.time + VAULT_BLACKLIST_DURATION;
                     }
-                    VaultBlacklist[i] = entry;
+
+                    _vaultBlacklist[i] = entry;
                     return;
                 }
             }
 
-            VaultBlacklist.Add(new VaultBlacklistEntry
+            _vaultBlacklist.Add(new VaultBlacklistEntry
             {
                 Pos = pos,
-                Until = immediate ? Time.time + VaultBlacklistDuration : 0f,
+                Until = immediate ? Time.time + VAULT_BLACKLIST_DURATION : 0f,
                 Fails = 1,
             });
         }
@@ -134,75 +131,27 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             if (botOwner.GetPlayer == null)
             {
-                RescueWatches.Remove(botOwner);
+                _rescueWatches.Remove(botOwner);
                 return;
             }
 
-            WatchRescue(botOwner, botOwner.Position);
+            if (!_rescueWatches.TryGetValue(botOwner, out var watch))
+            {
+                watch = new RescueWatch();
+                _rescueWatches[botOwner] = watch;
+            }
 
-            if (CrossingBots.TryGetValue(botOwner, out var executor))
+            watch.Update(botOwner, botOwner.Position, _crossingBots.ContainsKey(botOwner));
+
+            if (_crossingBots.TryGetValue(botOwner, out var executor))
             {
                 executor.Tick(botOwner);
             }
         }
 
-        private static void WatchRescue(BotOwner botOwner, Vector3 position)
-        {
-            if (!RescueWatches.TryGetValue(botOwner, out var watch))
-            {
-                watch = new RescueWatch();
-                RescueWatches[botOwner] = watch;
-            }
-
-            var now = Time.time;
-            if (now >= watch.NextProbeTime)
-            {
-                watch.NextProbeTime = now + 0.5f;
-                if (NavMesh.SamplePosition(position, out var sample, 0.5f, -1))
-                {
-                    watch.LastGoodPos = sample.position;
-                    watch.HasLastGood = true;
-                    watch.Anchor = position;
-                    watch.AnchorTime = now;
-                    return;
-                }
-            }
-
-            if (CrossingBots.ContainsKey(botOwner) || !watch.HasLastGood)
-            {
-                return;
-            }
-
-            if (position.McsSqrDistance(watch.Anchor) > 0.5f * 0.5f)
-            {
-                watch.Anchor = position;
-                watch.AnchorTime = now;
-                return;
-            }
-
-            if (now - watch.AnchorTime < 3f)
-            {
-                return;
-            }
-
-            watch.Anchor = watch.LastGoodPos;
-            watch.AnchorTime = now;
-            watch.NextProbeTime = now + 1f;
-            RescueInProgress = true;
-            try
-            {
-                botOwner.Mover.SetPlayerToNavMesh(watch.LastGoodPos);
-            }
-            finally
-            {
-                RescueInProgress = false;
-            }
-        }
-
         public void Begin(NavGapInfo gap, BotOwner botOwner)
         {
-            var sameGap = _hasGap && _botOwner == botOwner
-                && Vector3.Distance(gap.NearPoint, _lastGapNear) <= 1f;
+            var sameGap = _hasGap && _botOwner == botOwner && Vector3.Distance(gap.NearPoint, _lastGapNear) <= 1f;
 
             _lastGapNear = gap.NearPoint;
             _hasGap = true;
@@ -224,13 +173,12 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             _arrivedTime = 0f;
             _nextPressTime = 0f;
             IsCrossing = true;
-            CrossingBots[botOwner] = this;
+            _crossingBots[botOwner] = this;
         }
 
         private void Tick(BotOwner botOwner)
         {
             var pos = botOwner.Position;
-
             if (_type == ENavGapType.Vault)
             {
                 TickVault(botOwner, pos);
@@ -243,18 +191,18 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return;
             }
 
-            var botPosition = botOwner.Position;
             if (!_hopping)
             {
                 botOwner.GoToSomePointData.SetPoint(_edge);
 
-                var toEdgeNow = _edge - botPosition;
-                toEdgeNow.y = 0f;
-                if (toEdgeNow.magnitude <= 2.5f || botOwner.GoToSomePointData.IsCome())
+                var toEdge = _edge - pos;
+                toEdge.y = 0f;
+                if (toEdge.magnitude <= 2.5f || botOwner.GoToSomePointData.IsCome())
                 {
                     _hopping = true;
                     botOwner.GoToSomePointData.Point = _destination;
                 }
+
                 return;
             }
 
@@ -286,6 +234,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                     BlacklistVault(_edge, true);
                     Cancel();
                 }
+
                 return;
             }
 
@@ -302,7 +251,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
                 var component = botOwner.GetPlayer.VaultingComponent as VaultingComponent;
                 component?.Tick();
-                var hasObstacle = VaultGateProbe.TryMeasureObstacle(component, out var obstacleDistance);
+                var obstacle = component?.VaultingModelDebug?.ObstacleCalculatorModelDebug;
+                var hasObstacle = obstacle != null && obstacle.TargetCollider != null;
 
                 if (toEdge.magnitude <= 2.5f)
                 {
@@ -313,15 +263,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                     botOwner.GoToSomePointData.SetPoint(_edge);
                 }
 
-                if (hasObstacle && obstacleDistance <= 0.45f)
+                if ((hasObstacle && obstacle.DistanceToMainObstacle <= 0.45f) || (toEdge.magnitude <= 1.2f && IsPressed(pos)))
                 {
-                    MarkArrived();
-                    return;
-                }
-
-                if (toEdge.magnitude <= 1.2f && IsPressed(pos))
-                {
-                    MarkArrived();
+                    _arrived = true;
+                    _arrivedTime = Time.time;
+                    _nextVaultTryTime = Time.time + 0.2f;
                     return;
                 }
 
@@ -330,6 +276,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                     NextPlanCooldownUntil = Time.time + 8f;
                     Cancel();
                 }
+
                 return;
             }
 
@@ -354,7 +301,9 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return;
             }
 
-            if (VaultGateProbe.IsAnimatorBusy(vaultingComponent) && Time.time - _arrivedTime < 2.5f)
+            if (vaultingComponent != null
+                && (vaultingComponent._vaultingContext.IsAnimatorInTransitionState(0) || vaultingComponent._vaultingContext.PlayerAnimatorIsJumpSetted())
+                && Time.time - _arrivedTime < 2.5f)
             {
                 PressInto(botOwner);
                 return;
@@ -391,13 +340,6 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
         }
 
-        private void MarkArrived()
-        {
-            _arrived = true;
-            _arrivedTime = Time.time;
-            _nextVaultTryTime = Time.time + 0.2f;
-        }
-
         private void PressInto(BotOwner botOwner)
         {
             if (Time.time < _nextPressTime)
@@ -406,21 +348,17 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
 
             _nextPressTime = Time.time + 0.25f;
-            var pressTarget = PressTarget();
-            botOwner.GoToSomePointData.SetPoint(pressTarget);
-            botOwner.Mover.GoToPointNoWay(pressTarget);
-        }
 
-        private Vector3 PressTarget()
-        {
-            var dir = _destination - _edge;
-            dir.y = 0f;
-            if (dir.sqrMagnitude > 0.001f)
+            var direction = _destination - _edge;
+            direction.y = 0f;
+            if (direction.sqrMagnitude > 0.001f)
             {
-                dir.Normalize();
+                direction.Normalize();
             }
 
-            return _edge + dir;
+            var pressTarget = _edge + direction;
+            botOwner.GoToSomePointData.SetPoint(pressTarget);
+            botOwner.Mover.GoToPointNoWay(pressTarget);
         }
 
         private bool IsPressed(Vector3 pos)
@@ -490,7 +428,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             {
                 if (_hopping)
                 {
-                    RecentHopEnds[_botOwner] = Time.time;
+                    _recentHopEnds[_botOwner] = Time.time;
                 }
                 else
                 {
@@ -504,31 +442,28 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             _arrived = false;
             if (_botOwner != null)
             {
-                CrossingBots.Remove(_botOwner);
+                _crossingBots.Remove(_botOwner);
             }
         }
 
-        private static void RecordAbort(BotOwner botOwner)
+        private void RecordAbort(BotOwner botOwner)
         {
             var now = Time.time;
-            if (RecentAborts.Count >= 8)
+            var stale = new List<BotOwner>();
+            foreach (var pair in _recentAborts)
             {
-                var stale = new List<BotOwner>();
-                foreach (var pair in RecentAborts)
+                if (now - pair.Value >= ABORT_GUARD_DURATION)
                 {
-                    if (now - pair.Value >= AbortGuardDuration)
-                    {
-                        stale.Add(pair.Key);
-                    }
-                }
-
-                foreach (var owner in stale)
-                {
-                    RecentAborts.Remove(owner);
+                    stale.Add(pair.Key);
                 }
             }
 
-            RecentAborts[botOwner] = now;
+            foreach (var owner in stale)
+            {
+                _recentAborts.Remove(owner);
+            }
+
+            _recentAborts[botOwner] = now;
         }
     }
 }

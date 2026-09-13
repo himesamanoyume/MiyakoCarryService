@@ -38,7 +38,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return false;
             }
 
-            if (botOwner != null && NavGapExecutor.EndedHopRecently(botOwner, 3f)
+            if (botOwner != null && NavGapExecutor.EndedHopRecently(botOwner)
                 && (position - botOwner.Position).magnitude > 2f)
             {
                 return false;

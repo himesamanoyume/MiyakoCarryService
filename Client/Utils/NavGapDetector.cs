@@ -1,9 +1,10 @@
+using MiyakoCarryService.Client.Bots.Navigation;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Models;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace MiyakoCarryService.Client.Bots.Navigation
+namespace MiyakoCarryService.Client.Utils
 {
     public static class NavGapDetector
     {
@@ -19,12 +20,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return TryDetectStepDownOnPartial(targetPos, path, out gap);
             }
 
-            if (path.status == NavMeshPathStatus.PathInvalid)
-            {
-                return TryDetectStepDownOnDetour(startPos, targetPos, path, out gap);
-            }
-
-            if (path.status == NavMeshPathStatus.PathComplete)
+            if (path.status is NavMeshPathStatus.PathInvalid or NavMeshPathStatus.PathComplete)
             {
                 return TryDetectStepDownOnDetour(startPos, targetPos, path, out gap);
             }
@@ -164,7 +160,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             return found;
         }
 
-        public static float PathLength(Vector3[] corners)
+        private static float PathLength(Vector3[] corners)
         {
             var total = 0f;
             for (var i = 0; i < corners.Length - 1; i++)
@@ -197,7 +193,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return false;
             }
 
-            gap = BuildGap(edge, targetPos, path.corners, path.corners.Length);
+            gap = BuildGap(edge, targetPos, path.corners);
             return true;
         }
 
@@ -275,11 +271,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return false;
             }
 
-            gap = BuildGap(edge, targetPos, toEdgeCorners, toEdgeCorners.Length);
+            gap = BuildGap(edge, targetPos, toEdgeCorners);
             return true;
         }
 
-        private static NavGapInfo BuildGap(Vector3 nearPoint, Vector3 farPoint, Vector3[] corners, int count)
+        private static NavGapInfo BuildGap(Vector3 nearPoint, Vector3 farPoint, Vector3[] corners)
         {
             return new NavGapInfo
             {

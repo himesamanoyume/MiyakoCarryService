@@ -1,7 +1,7 @@
 using System.Reflection;
 using EFT.Vaulting;
 using HarmonyLib;
-using MiyakoCarryService.Client.Bots.Navigation;
+using MiyakoCarryService.Client.Utils;
 using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -13,7 +13,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(VaultMoveModel __instance, ref float distance)
         {
-            VaultGateProbe.NudgeInteractDistance(__instance._settings?.MoveRestrictions, ref distance);
+            InteractDistanceNudge.Nudge(__instance._settings?.MoveRestrictions, ref distance);
         }
     }
 
@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(VaultMoveModel __instance, ref float distance)
         {
-            VaultGateProbe.NudgeInteractDistance(__instance._settings?.AutoMoveRestrictions, ref distance);
+            InteractDistanceNudge.Nudge(__instance._settings?.AutoMoveRestrictions, ref distance);
         }
     }
 
@@ -35,7 +35,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(ClimbMoveModel __instance, ref float distance)
         {
-            VaultGateProbe.NudgeInteractDistance(__instance._settings?.MoveRestrictions, ref distance);
+            InteractDistanceNudge.Nudge(__instance._settings?.MoveRestrictions, ref distance);
         }
     }
 
@@ -46,7 +46,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(ClimbMoveModel __instance, ref float distance)
         {
-            VaultGateProbe.NudgeInteractDistance(__instance._settings?.AutoMoveRestrictions, ref distance);
+            InteractDistanceNudge.Nudge(__instance._settings?.AutoMoveRestrictions, ref distance);
         }
     }
 }

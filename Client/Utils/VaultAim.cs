@@ -2,7 +2,7 @@ using EFT;
 using EFT.Vaulting;
 using UnityEngine;
 
-namespace MiyakoCarryService.Client.Bots.Navigation
+namespace MiyakoCarryService.Client.Utils
 {
     public static class VaultAim
     {
