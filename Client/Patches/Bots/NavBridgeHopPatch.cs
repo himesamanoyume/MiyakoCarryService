@@ -51,6 +51,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static bool Prefix(Player __instance, Vector3 position)
         {
             var botOwner = __instance.AIData?.BotOwner;
+            if (botOwner != null && NavGapExecutor.RescueInProgress)
+            {
+                // 自救看门狗发出的传送：目标是"几米内最后一个确认可达的网格点"，
+                // 与"被拉回上层边缘"那个远距离拉回不是一回事，放行
+                return true;
+            }
+
             if (botOwner != null && NavGapExecutor.IsHopping(botOwner))
             {
                 //NavBridgeDebug.Log("exec.teleportBlock", $"拦截 Teleport → {position.ToString("F1")}\n{Environment.StackTrace}");
@@ -95,6 +102,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotMover __instance, Vector3 posiblePos, ref EBotLinkResult __result)
         {
+            // 自救看门狗把 bot 拉回网格点：这是有界（几米内）且目标点已知可达的合法写入，
+            // 期间整体放行 —— 自救常常发生在放弃后的 1.5s 窗口内（IsApproaching 为真），
+            // 不放行就会把救援本身一起拦掉（详见 NavGapExecutor.WatchRescue）
+            if (NavGapExecutor.RescueInProgress)
+            {
+                return true;
+            }
+
             if (NavGapExecutor.IsHopping(__instance._owner))
             {
                 //NavBridgeDebug.Log("exec.castBlock", $"拦截 CastFromPos 写位置 pos={__instance._owner.Position.ToString("F2")}\n{Environment.StackTrace}", 0.15f);
@@ -165,7 +180,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotMover __instance, Vector3 castPoint, ref Vector3 __result)
         {
-            if (!NavGapExecutor.IsApproaching(__instance._owner))
+            if (NavGapExecutor.RescueInProgress || !NavGapExecutor.IsApproaching(__instance._owner))
             {
                 return true;
             }
@@ -211,7 +226,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static void Prefix(BotMover __instance, ref Vector3 castPoint)
         {
-            if (!NavGapExecutor.IsApproaching(__instance._owner))
+            // 自救期间不做压缩：那时候链接目标就是"几米外那个已知可达的网格点"，压回 0.3m 会让救援失败
+            if (NavGapExecutor.RescueInProgress || !NavGapExecutor.IsApproaching(__instance._owner))
             {
                 return;
             }

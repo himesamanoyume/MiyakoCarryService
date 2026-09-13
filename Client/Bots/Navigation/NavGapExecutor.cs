@@ -82,6 +82,25 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private Vector3 _lastGapNear;
         private bool _hasGap;
 
+        // 【2026-09-13 新增】"离开 navmesh 且卡在几何里"的自救。
+        // 翻越把 bot 送进封闭几何（车厢、檐口）之后，原先只有两条出路：stuckOnTop（必须还在动画期、
+        // 2.5s 无位移、且脚下 0.5m 内没有 navmesh，条件极窄）与 EFT 自己的 SetPlayerToNavMesh superFail
+        // / 卡死 15s 后由 ForceTeleportCommandAction 传走（实测跨距 18.9~111.9m，用户看到的瞬移）。
+        // 实测位置几乎不动 ≥8s 的窗口有 7 段（最长 36.1s），全部集中在 x≈-770..-738 / z≈460..469 的车堆
+        // —— 用户描述"翻进车里出不来、只能手动传送"就是这个形态。
+        // 这里按 bot 记录"最后一次确认站在 navmesh 上的位置"，若它连续 3s 位移不足 0.5m 且当前不在
+        // navmesh 上，就把它拉回那个已知良好点（几米内、有界），不再等 EFT 那个又慢又远的传送
+        private static readonly Dictionary<BotOwner, RescueWatch> RescueWatches = new Dictionary<BotOwner, RescueWatch>();
+
+        private sealed class RescueWatch
+        {
+            public Vector3 LastGoodPos;   // 最后一次确认可达的网格点
+            public bool HasLastGood;
+            public Vector3 Anchor;        // 判"没动"用的锚点
+            public float AnchorTime;
+            public float NextProbeTime;   // navmesh 采样的节流时刻
+        }
+
         // 顶住判据用：锚点位置与其最后一次变化的时间（0.4s 无位移 ⇒ 被障碍挡住）
         private Vector3 _pressAnchor;
         private float _pressAnchorTime;
@@ -97,6 +116,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         // 执行器落地重链接主动调用 SetPlayerToNavMesh 时置位，NavBridgeCastFromPosPatch 据此只放行
         // bot 附近的写入（0.5m 内），远距离写入是 superFail 分支的拉回
         public static bool RelinkInProgress;
+
+        // 自救看门狗把 bot 拉回网格点时置位。位置写入的几道护栏（clamp / FindBetterPosition / castBlock）
+        // 全部以"执行器接管中"为前提，而自救恰恰可能发生在放弃后的 1.5s 窗口内（IsApproaching 为真）
+        // —— 那种时候护栏会把这次合法救援也一起拦掉，所以自救期间必须整体放行
+        public static bool RescueInProgress;
 
         public bool IsHoppingNow => _hopping;
 
@@ -223,6 +247,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             if (botOwner.GetPlayer == null)
             {
                 LastMoverPositions.Remove(botOwner);
+                RescueWatches.Remove(botOwner);
                 return;
             }
 
@@ -243,9 +268,73 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             LastMoverPositions[botOwner] = position;
 
+            WatchRescue(botOwner, position);
+
             if (CrossingBots.TryGetValue(botOwner, out var executor))
             {
                 executor.Tick(botOwner);
+            }
+        }
+
+        // "离开 navmesh 且长时间不动"的自救（详见 RescueWatches 的说明）。
+        // 只在执行器没接管这个 bot 时生效：翻越过程中 bot 本来就会短暂离开网格（动画把身体抬起来、
+        // 落点还在障碍另一侧），那一段由 _hopping / FinishAndRelink 负责，不能被这里插手。
+        // 反过来，站在网格上原地待命（等玩家）不会被误伤——那时采样每次都成功、锚点一直在被重置
+        private static void WatchRescue(BotOwner botOwner, Vector3 position)
+        {
+            if (!RescueWatches.TryGetValue(botOwner, out var watch))
+            {
+                watch = new RescueWatch();
+                RescueWatches[botOwner] = watch;
+            }
+
+            var now = Time.time;
+
+            // navmesh 采样按 0.5s 节流：OnMoverTick 是每帧每个 bot 都要走的
+            if (now >= watch.NextProbeTime)
+            {
+                watch.NextProbeTime = now + 0.5f;
+                if (NavMesh.SamplePosition(position, out var sample, 0.5f, -1))
+                {
+                    watch.LastGoodPos = sample.position;
+                    watch.HasLastGood = true;
+                    watch.Anchor = position;
+                    watch.AnchorTime = now;
+                    return;
+                }
+            }
+
+            if (CrossingBots.ContainsKey(botOwner) || !watch.HasLastGood)
+            {
+                return;
+            }
+
+            if (position.McsSqrDistance(watch.Anchor) > 0.5f * 0.5f)
+            {
+                watch.Anchor = position;
+                watch.AnchorTime = now;
+                return;
+            }
+
+            if (now - watch.AnchorTime < 3f)
+            {
+                return;
+            }
+
+            NavBridgeDebug.Log($"exec.rescue.{botOwner.Id}", $"离开 navmesh 且 {now - watch.AnchorTime:F1}s 位移不足 0.5m（pos={position.ToString("F1")}），拉回最后一次确认可达的网格点 {watch.LastGoodPos.ToString("F1")}（相距 {Vector3.Distance(position, watch.LastGoodPos):F1}m）");
+
+            // 锚点直接挪到目标点：救援后 bot 就在那里，不需要再等一次"没动"的判定累积
+            watch.Anchor = watch.LastGoodPos;
+            watch.AnchorTime = now;
+            watch.NextProbeTime = now + 1f;
+            RescueInProgress = true;
+            try
+            {
+                botOwner.Mover.SetPlayerToNavMesh(watch.LastGoodPos);
+            }
+            finally
+            {
+                RescueInProgress = false;
             }
         }
 

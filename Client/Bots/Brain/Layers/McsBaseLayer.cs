@@ -1425,6 +1425,19 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
+            // 【2026-09-13 日志定死】"卡死"必须是"手上有一条没走完的路却被挡住"，不能只看"这段区间位移 <2m"。
+            // CheckStuck 的判据是后者（BotOwner.Mover._lastPos 与当前相距 <2m 就算卡住），于是玩家站住不动、
+            // 护航跟着原地待命时同样满足 —— 每次触发都会拿"面前 1.5m 内随便什么东西"去试翻越。
+            // 实测 185 次命中里 174 次（94%）沿"身体朝向"（= bot 当时随便朝着哪边），138 次（75%）水平距
+            // 落在 0.6~0.8m（bot 正贴着某个东西站着），20 次 TryVaulting 全部 False —— 纯浪费，
+            // 还会把身体拧向那个障碍。HasPathAndNoComplete 就是 ActualPathController.HavePath，
+            // 即"手上有一条没走完的路径"，正是"被挡住"的定义；原地待命时它是 false
+            if (!BotOwner.Mover.HasPathAndNoComplete)
+            {
+                NavBridgeDebug.Log("vault.skip.noPath", "跳过硬翻越：当前没有未完成的路径（只是原地待命，不是被挡住）");
+                return false;
+            }
+
             if (!BotOwner.GetPlayer.VaultingGameplayRestrictions.CanVaulting())
             {
                 NavBridgeDebug.Log("vault.skip.restrictions", "VaultingGameplayRestrictions.CanVaulting() = false");

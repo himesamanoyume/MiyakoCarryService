@@ -9,9 +9,12 @@ namespace MiyakoCarryService.Client.Bots.Navigation
     {
         // 翻越检测参数（硬编码）
         private const float VaultObstacleMaxDistance = 15f;   // 障碍搜索距离
-        private const float VaultTopMaxHeight = 2.2f;         // 障碍顶面相对 bot 的最大高度（更高的视为墙，粗过滤用）
         private const float VaultMaxThickness = 2.5f;         // 障碍最大厚度
         private const float VaultStandOffset = 0.4f;          // 站立点取在障碍面前多远（EFT 只在距障碍 ≤0.5m 时才给翻越策略）
+
+        // 连通场景（路径本来就能走通）下，翻越必须省下这么多路程才值得做。
+        // 判据是"省下来的绝对路程"：绕路 20m、翻越后 3m ⇒ 省 17m 该翻；绕路 20m、翻越后 19m ⇒ 只省 1m 不该翻
+        private const float VaultMinSaving = 2f;
 
         public static bool TryDetectGap(Vector3 startPos, Vector3 targetPos, NavMeshPath path, out NavGapInfo gap)
         {
@@ -83,13 +86,23 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return false;
             }
 
-            // 顶面高度粗过滤：更高的结构（墙体）不可能是翻越目标。
-            // 探针从障碍面前上方 3m 垂直下打；窗口/围栏顶部 ≤2.2m，厚墙顶面更高或探针扎进墙体内部无命中
-            var probeTop = face - dir * 0.25f + Vector3.up * 3f;
-            if (Physics.Raycast(probeTop, Vector3.down, out var topHit, 6f, LayersMaskController.PlayerStaticCollisionsMask)
-                && topHit.point.y - startPos.y > VaultTopMaxHeight)
+            // 【2026-09-13 日志定死】障碍高度判定。原先的探针是 face - dir * 0.25f（退到障碍"外侧"）
+            // 从 3m 高垂直下打 —— 打中的是脚前的地面（topHit.y - startPos.y ≈ 0），永远不拒绝，
+            // 全日志 vault.plan.tooHigh 只出现 2 次。后果是卡车 kamaz_5490_COLLIDER（顶面约 3.5m）、
+            // 轿车 Subaru_Legacy_Closed_COLLIDER 都被规划翻越 —— 共 19 次车辆，日志里"命中面高 0.50m"
+            // 全是 0.5m 那条射线先命中车侧造成的假象。
+            // 改成"跨越柱占用检测"：在障碍面内侧 0.25m、可翻上限之上取一点测有没有实体。
+            // 可翻上限是 Vault 1.10m / Climb 1.31m（MoveRestrictions），所以 1.35m 处还有实体就必然翻不过去：
+            //   · 轿车（车顶约 1.4m）/ 卡车（约 3.5m）→ 该处是实心 ⇒ 拒绝
+            //   · 围栏、混凝土路障（1.0~1.25m）→ 该处已在障碍之上 ⇒ 放行
+            //   · 窗户（窗洞约 1.0~1.7m）→ 面内侧 0.25m 正好是窗洞 ⇒ 放行
+            // 这里必须用体积检测 CheckSphere 而不是向下 Raycast：从上方打射线时，障碍越高起点越容易
+            // 落在碰撞体内部，而 Unity 的 Raycast 不检测"起点所在"的碰撞体 ⇒ 卡车那种高障碍反而测不到
+            var crossingColumn = face + dir * 0.25f;
+            crossingColumn.y = startPos.y;
+            if (Physics.CheckSphere(crossingColumn + Vector3.up * 1.35f, 0.1f, LayersMaskController.PlayerStaticCollisionsMask))
             {
-                NavBridgeDebug.Log("vault.plan.tooHigh", $"拒绝：障碍前顶面高 {topHit.point.y - startPos.y:F2}m > {VaultTopMaxHeight:F1}");
+                NavBridgeDebug.Log("vault.plan.tooHigh", $"拒绝：跨越柱 1.35m 高处是实体（可翻上限 Vault 1.10 / Climb 1.31m），障碍顶面高于可翻高度（命中面高 {face.y - startPos.y:F2}m face={face.ToString("F1")}）");
                 return false;
             }
 
@@ -151,13 +164,35 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             var standPoint = standSample.position;
             var standDistance = Vector3.Dot(face - standPoint, dir);
 
-            // 连通绕路场景原先要求"翻越必须比绕路省 2m 以上"才规划，实测两侧可直接绕行的围栏就被这条门槛
-            // 挡回去绕路了。玩家已经翻过去时护航应当跟过去：只要直线被挡且障碍可翻就直接翻。
-            // 这里只记录数值，便于后续按日志决定是否重新加回门槛。
+            // 【2026-09-13 日志定死】这里的"节省量"原先量纲是错的：拿"整条绕路的长度"去减"到站立点 + 2m"。
+            // path.corners 是 bot→移动目标的完整路线（实测目标常在 90m 外），而 toNearLength + 2f 只是走到
+            // 障碍脚下那几米 —— 实测差恒为正且巨大（60.8 / 112.0 / 81.1m），"仍选择翻越"永远成立，
+            // 于是 96%（171/178）的翻越规划都发生在路径本来就能走通（PathComplete）的时候，
+            // 护航舍近求远跑去翻一个根本不挡路的障碍（用户报的"过度想翻越"）。
+            // 正确的比较是"翻越之后的剩余路程"：到站立点 + 跨过障碍 + 从落点继续走到目标。
+            // 这样绕路 20m 而翻越后只要 3m 会判"该翻"，绕路 20m 而翻越后还要 19m 则判"不该翻"
             if (path.status == NavMeshPathStatus.PathComplete)
             {
                 var toNearLength = PathLength(toNearPath.corners);
-                NavBridgeDebug.Log("vault.plan.saving", $"连通场景：绕路 {PathLength(path.corners):F1}m，翻越约 {toNearLength + 2f:F1}m（差 {PathLength(path.corners) - (toNearLength + 2f):F1}m），仍选择翻越");
+                var detourLength = PathLength(path.corners);
+                var fromFarPath = new NavMeshPath();
+                if (!NavMesh.CalculatePath(farPoint, targetPos, -1, fromFarPath))
+                {
+                    NavBridgeDebug.Log("vault.plan.noSaving", $"拒绝：落点→目标算不出路径（落点={farPoint.ToString("F1")} target={targetPos.ToString("F1")}），无法证明翻越更省，不翻");
+                    return false;
+                }
+
+                // 跨越障碍本身按 2.0m 计：站立点顶到障碍面 + 翻到对面落点
+                var fromFarLength = PathLength(fromFarPath.corners);
+                var vaultLength = toNearLength + 2f + fromFarLength;
+                var saving = detourLength - vaultLength;
+                if (saving < VaultMinSaving)
+                {
+                    NavBridgeDebug.Log("vault.plan.noSaving", $"拒绝：翻越省不下路程（绕路 {detourLength:F1}m vs 翻越 {vaultLength:F1}m = 到站立点 {toNearLength:F1} + 跨越 2.0 + 落点到目标 {fromFarLength:F1}，只省 {saving:F1}m < {VaultMinSaving:F1}m）");
+                    return false;
+                }
+
+                NavBridgeDebug.Log("vault.plan.saving", $"连通场景：绕路 {detourLength:F1}m，翻越 {vaultLength:F1}m（省 {saving:F1}m ≥ {VaultMinSaving:F1}m），选择翻越");
             }
 
             NavBridgeDebug.Log("vault.plan.ok", $"规划翻越：障碍 {hit.collider.name} 距 {Vector3.Distance(face, startPos):F2}m（命中面高 {face.y - startPos.y:F2}m），站位={standPoint.ToString("F1")}（距障碍面 {standDistance:F2}m），落点={farPoint.ToString("F1")}");
