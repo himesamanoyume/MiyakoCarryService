@@ -54,17 +54,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             var toTarget = targetPos - edge;
             toTarget.y = 0f;
 
-            if (_gap.Type == ENavGapType.Vault)
-            {
-                return toTarget.magnitude > 20f;
-            }
-
-            if (targetPos.y > edge.y - 0.25f)
-            {
-                return true;
-            }
-
-            return toTarget.magnitude > 20f;
+            return _gap.Type == ENavGapType.Vault ? toTarget.magnitude > 20f : (targetPos.y > edge.y - 0.25f || toTarget.magnitude > 20f);
         }
 
         public void Cancel()

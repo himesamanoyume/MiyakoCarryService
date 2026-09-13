@@ -3,7 +3,6 @@ using EFT;
 using EFT.ObstacleCollision;
 using HarmonyLib;
 using MiyakoCarryService.Client.Bots.Navigation;
-using MiyakoCarryService.Client.Extensions;
 using SPT.Reflection.Patching;
 using UnityEngine;
 
@@ -16,7 +15,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(BotMover __instance)
         {
-            return !NavGapExecutor.IsHopping(__instance._owner);
+            var botOwner = __instance._owner;
+            if (botOwner == null || !NavGapExecutor.IsHopping(botOwner))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 
@@ -28,18 +33,23 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static bool Prefix(Player __instance, Vector3 position)
         {
             var botOwner = __instance.AIData?.BotOwner;
-            if (botOwner != null && NavGapExecutor.RescueInProgress)
+            if (botOwner == null)
             {
                 return true;
             }
 
-            if (botOwner != null && NavGapExecutor.IsHopping(botOwner))
+            if (NavGapExecutor.RescueInProgress)
+            {
+                return true;
+            }
+
+            if (NavGapExecutor.IsHopping(botOwner))
             {
                 return false;
             }
 
-            if (botOwner != null && NavGapExecutor.EndedHopRecently(botOwner)
-                && (position - botOwner.Position).magnitude > 2f)
+            var distance = (position - botOwner.Position).magnitude;
+            if (NavGapExecutor.EndedHopRecently(botOwner) && distance > 2f)
             {
                 return false;
             }
@@ -60,21 +70,25 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return true;
             }
 
-            if (NavGapExecutor.IsHopping(__instance._owner))
+            var owner = __instance._owner;
+            if (owner == null)
+            {
+                return true;
+            }
+
+            if (NavGapExecutor.IsHopping(owner))
             {
                 __result = EBotLinkResult.superFail;
                 return false;
             }
 
-            if (NavGapExecutor.RelinkInProgress && __instance._owner != null
-                && posiblePos.McsSqrDistance(__instance._owner.Position) > 0.5f * 0.5f)
+            if (NavGapExecutor.RelinkInProgress && posiblePos.y - owner.Position.y > 0.5f)
             {
                 __result = EBotLinkResult.fail;
                 return false;
             }
 
-            var owner = __instance._owner;
-            if (owner != null && NavGapExecutor.IsApproaching(owner) && (posiblePos - owner.Position).magnitude > 0.6f)
+            if (NavGapExecutor.IsApproaching(owner) && (posiblePos - owner.Position).magnitude > 0.6f)
             {
                 __result = EBotLinkResult.fail;
                 return false;
@@ -134,7 +148,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(ObstacleCollisionFacade __instance)
         {
-            return !NavGapExecutor.IsHoppingNear(__instance._playerTransform.position);
+            var position = __instance._playerTransform.position;
+            if (!NavGapExecutor.IsHoppingNear(position))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 
@@ -145,7 +165,13 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPostfix]
         public static void Postfix(BotMover __instance)
         {
-            NavGapExecutor.OnMoverTick(__instance._owner);
+            var botOwner = __instance._owner;
+            if (botOwner == null)
+            {
+                return;
+            }
+
+            NavGapExecutor.OnMoverTick(botOwner);
         }
     }
 }

@@ -39,6 +39,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private float _nextPressTime;
         public bool IsCrossing { get; private set; }
         public float NextPlanCooldownUntil { get; private set; }
+        public BotOwner BotOwner => _botOwner;
         public static bool RelinkInProgress;
         public static bool RescueInProgress;
         public bool IsHoppingNow => _hopping;
@@ -200,6 +201,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 if (toEdge.magnitude <= 2.5f || botOwner.GoToSomePointData.IsCome())
                 {
                     _hopping = true;
+                    _hopStartTime = Time.time;
                     botOwner.GoToSomePointData.Point = _destination;
                 }
 
@@ -210,6 +212,12 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             botOwner.GoToSomePointData.Point = _destination;
             botOwner.GoToSomePointData._lastPosibleRecalc = Time.time;
             botOwner.GoToSomePointData._pointhRefreshed = false;
+
+            if (Time.time - _hopStartTime > 1f && !NavMesh.SamplePosition(pos, out _, 0.5f, -1) && IsPressed(pos)
+                && TryWarpToGround(botOwner, pos))
+            {
+                FinishAndRelink(botOwner);
+            }
         }
 
         private void TickVault(BotOwner botOwner, Vector3 pos)
@@ -217,6 +225,13 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             if (_hopping)
             {
                 if (IsAcrossObstacle(pos))
+                {
+                    FinishAndRelink(botOwner);
+                    return;
+                }
+
+                if (Time.time - _hopStartTime > 1f && IsPressed(pos) && !NavMesh.SamplePosition(pos, out _, 0.5f, -1)
+                    && TryWarpToGround(botOwner, pos))
                 {
                     FinishAndRelink(botOwner);
                     return;
@@ -340,6 +355,43 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             }
         }
 
+        private bool TryWarpToGround(BotOwner botOwner, Vector3 pos)
+        {
+            var dir = _destination - _edge;
+            dir.y = 0f;
+            dir = dir.sqrMagnitude > 0.001f ? dir.normalized : Vector3.zero;
+
+            for (var offset = 0f; offset <= 3.5f; offset += 0.5f)
+            {
+                var probe = pos + dir * offset + Vector3.up * 0.6f;
+                if (!Physics.Raycast(probe, Vector3.down, out var hit, 12f, LayersMaskController.PlayerStaticCollisionsMask))
+                {
+                    continue;
+                }
+
+                var sampled = NavMesh.SamplePosition(hit.point, out var sample, 0.8f, -1);
+                var drop = pos.y - hit.point.y;
+                if (drop < 0.3f || !sampled || pos.y - sample.position.y < 0.3f)
+                {
+                    continue;
+                }
+
+                RescueInProgress = true;
+                try
+                {
+                    botOwner.Mover.SetPlayerToNavMesh(sample.position);
+                }
+                finally
+                {
+                    RescueInProgress = false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         private void PressInto(BotOwner botOwner)
         {
             if (Time.time < _nextPressTime)
@@ -389,10 +441,21 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private void FinishAndRelink(BotOwner botOwner)
         {
             Cancel();
+
+            var mover = botOwner.Mover;
+            var pos = botOwner.Position;
+            if (NavMesh.SamplePosition(pos, out var sample, 0.5f, -1))
+            {
+                pos = sample.position;
+            }
+
+            mover._lastGoodCastPoint = pos;
+            mover._lastGoodCastPointTime = Time.time;
+
             RelinkInProgress = true;
             try
             {
-                botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
+                mover.SetPlayerToNavMesh(pos);
             }
             finally
             {
@@ -405,12 +468,22 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             var pos = botOwner.Position;
             if (pos.McsSqrDistance(_destination) <= 1f * 1f)
             {
-                return NavMesh.SamplePosition(pos, out _, 0.3f, -1);
+                if (NavMesh.SamplePosition(pos, out _, 0.3f, -1))
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             if (_hopping && pos.y - _destination.y <= 0.2f)
             {
-                return NavMesh.SamplePosition(pos, out _, 0.3f, -1);
+                if (NavMesh.SamplePosition(pos, out _, 0.3f, -1))
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             if (Time.time - _startTime > 10f)

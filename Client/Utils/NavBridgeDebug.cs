@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
-    // NavBridge 诊断日志：Info 级别写入 LogOutput.log，按 key 限频（每秒一条），排障期默认开启
     public static class NavBridgeDebug
     {
         private static readonly Dictionary<string, float> _nextLogTime = new Dictionary<string, float>();
@@ -25,7 +24,6 @@ namespace MiyakoCarryService.Client.Utils
             }
             _nextLogTime[key] = time + interval;
 
-            // 带墙钟时间：脚本引擎热重载后日志连成一片，靠时间戳区分轮次
             McsLogger.LogInfo($"[NavBridge][{key}] [{DateTime.Now:HH:mm:ss.fff}] {message}");
         }
     }
