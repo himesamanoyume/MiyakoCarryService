@@ -2,7 +2,7 @@
 
 ## 1.1.4.0
 
-- 大幅改进护航的战斗相关行为，涵盖射击提前量、开门、掩体射击、盲射、侧身射击、换肩射击、压制射击、近距离狗斗、集火
+- 大幅改进护航的相关行为，涵盖战斗、寻路两大方面
 - 新增绘制护航调试信息
 - 修复护航会攻击BTR的问题
 - 修复护航不会对部分事件进行报告的问题
@@ -10,7 +10,7 @@
 
 ---
 
-- Significantly improved McsBotPlayer combat-related behavior, including leading shots, door opening, cover shooting, blind fire, side shooting, shoulder swapping, suppressive fire, close-range dogfighting, and focus fire
+- Significantly improved McsBotPlayer behavior, covering two major aspects: combat and pathfinding
 - Added rendering of McsBotPlayer debug information
 - Fixed the issue where McsBotPlayer would attack the BTR
 - Fixed the issue where McsBotPlayer would not report certain events
