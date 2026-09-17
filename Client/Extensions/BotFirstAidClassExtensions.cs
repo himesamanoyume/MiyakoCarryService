@@ -61,7 +61,9 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
-                var medKitItemClasses = botFirstAid._medsList.OfType<MedKit>().ToList();
+                var medKitItemClasses = botFirstAid._medsList.OfType<MedKit>()
+                    .Where(kit => kit.TryGetItemComponent(out MedKitComponent medKit) && medKit.HpResource > 0f)
+                    .ToList();
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
                 {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Comfort.Common;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
@@ -42,7 +43,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextVaultCheckTime = 0f;
         protected float _nextJumpCheckTime = float.MaxValue;
         protected float _nextUpdatePosTime = 0f;
-        protected float _nextHealCheckTime = 0f;
         protected float _nextStimCheckTime = 0f;
         protected float _nextDeactivateCheckTime = 0f;
         protected float _nextFastOpenDoorCheckTime = 0f;
@@ -52,10 +52,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected Vector3[] _lastCalcCorners = null;
         protected bool _lastCanRunResult = false;
         protected int _currentMoveRetries = 0;
-        protected int _currentHealTimes = 0;
         protected int _currentLootingRetries = 0;
         protected int _currentDeactivateRetries = 0;
-        protected float _currentHealTimeout = 10f;
         protected float _nextAnimatorFixTime = 0f;
         protected string _cachedProxyTargetId;
         protected StationaryWeaponData _cachedStationaryWeaponData;
@@ -92,6 +90,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float SHIFT_COVER_MIN_TIME = 6f;
         protected const float FAST_OPEN_DOOR_TRIGGER_DIST = 4.5f;
         protected const float FAST_OPEN_DOOR_WINDOW = 2.5f;
+        protected const float MEDS_FINISH_TIMEOUT = 1.5f;
+        protected float _medsFinishTime = 0f;
 
         public McsBotPlayerData McsBotPlayerData
         {
@@ -234,76 +234,67 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool EndHeal()
         {
-            if (!BotOwner.Medecine.Using)
-            {
-                return true;
-            }
-
-            if (IsApproachingThreat() || BaseLogicLayer.CheckMedsToStop(BotOwner))
-            {
-                BotOwner.Medecine.FirstAid.CancelCurrent();
-                _currentHealTimes = 0;
-                return true;
-            }
-
-            if (Time.time > _nextHealCheckTime)
-            {
-                if (GetHealTimeout(out var timeout))
-                {
-                    _currentHealTimeout = timeout;
-                }
-                _nextHealCheckTime = Time.time + 1f;
-                _currentHealTimes += 1;
-            }
-
-            if (_currentHealTimes >= _currentHealTimeout)
-            {
-                BotOwner.WeaponManager.CheckWeaponReady();
-                if (!CheckFirearmsAnimatorState())
-                {
-                    BotOwner.WeaponManager.CheckWeaponReady();
-                }
-                BotOwner.TryResetHandsState();
-                _currentHealTimes = 0;
-                return true;
-            }
-
-            return false;
-        }
-
-        public virtual bool GetHealTimeout(out float timeout)
-        {
-            timeout = 0f;
-            if (BotOwner.Medecine.Stimulators.Using)
-            {
-                timeout = 3f;
-                return true;
-            }
-            if (BotOwner.Medecine.FirstAid.Have2Do)
-            {
-                timeout = 10f;
-                return true;
-            }
-            if (BotOwner.Medecine.SurgicalKit.HaveWork)
-            {
-                timeout = 20f;
-                return true;
-            }
-            return false;
+            return EndMedSequence();
         }
 
         public virtual bool EndHealStimulators()
         {
-            // 威胁中断：打兴奋剂是战术增益非生存必需，威胁逼近时中断应战
-            if (IsApproachingThreat())
+            return EndMedSequence();
+        }
+
+        private bool EndMedSequence()
+        {
+            var botOwner = BotOwner;
+            var player = botOwner.GetPlayer;
+            if (player?.HealthController == null)
             {
+                _medsFinishTime = 0f;
                 return true;
             }
 
-            if (BotOwner.Medecine.Stimulators.Using)
+            if (IsApproachingThreat() || BaseLogicLayer.CheckMedsToStop(botOwner))
+            {
+                _medsFinishTime = 0f;
+                botOwner.McsStopMeds();
+                return true;
+            }
+
+            if (player.HealthController.FindExistingEffect<IMedEffect>(EBodyPart.Common) != null)
+            {
+                _medsFinishTime = 0f;
+                return false;
+            }
+
+            botOwner.McsStopMeds();
+
+            var hands = player.HandsController;
+            if (hands is Player.MedsController)
+            {
+                
+            }
+            else if (hands == null || hands is Player.EmptyHandsController)
+            {
+                botOwner.McsReturnWeapon();
+            }
+            else
+            {
+                _medsFinishTime = 0f;
+                return true;
+            }
+
+            if (_medsFinishTime <= 0f)
+            {
+                _medsFinishTime = Time.time + MEDS_FINISH_TIMEOUT;
+                return false;
+            }
+
+            if (Time.time < _medsFinishTime)
             {
                 return false;
             }
+
+            (hands as Player.MedsController)?.CurrentOperation?.FastForward();
+            _medsFinishTime = 0f;
             return true;
         }
 
@@ -2163,6 +2154,31 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual bool CheckFirearmsAnimatorState()
         {
+            if (BotOwner.Medecine.Using)
+            {
+                return true;
+            }
+
+            if (BotOwner.GetPlayer?.HandsController is Player.MedsController meds)
+            {
+                if (meds.CurrentOperation?.State == Player.EOperationState.Finished)
+                {
+                    BotOwner.McsReturnWeapon();
+                }
+                else if (_medsFinishTime <= 0f)
+                {
+                    _medsFinishTime = Time.time + MEDS_FINISH_TIMEOUT;
+                }
+                else if (Time.time >= _medsFinishTime)
+                {
+                    meds.CurrentOperation?.FastForward();
+                }
+
+                return true;
+            }
+
+            _medsFinishTime = 0f;
+
             BotOwner.WeaponManager.CheckWeaponReady();
             var time = Time.time;
             if (time < _nextAnimatorFixTime)

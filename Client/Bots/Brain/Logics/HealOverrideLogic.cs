@@ -1,5 +1,5 @@
-
 using EFT;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
-            if (_owner.Medecine.Using)
+            if (!_owner.McsCanStartMed())
             {
                 return;
             }
@@ -25,12 +25,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
 
             _owner.LookData.SetLookPointByHearing();
-            var shallStartUse = _owner.Medecine.FirstAid.ShallStartUse();
-            if (shallStartUse && _owner.Medecine.FirstAid.IsBleeding)
+            var firstAid = _owner.Medecine.FirstAid;
+            var shallStartUse = firstAid.ShallStartUse();
+            if (shallStartUse && firstAid.IsBleeding)
             {
                 _baseLogic.UpdateNodeByMain(data);
                 _owner.SetPose(1f);
-                _owner.Medecine.FirstAid.TryApplyToCurrentPart();
+                firstAid.TryApplyToCurrentPart();
             }
             else if (_owner.Medecine.SurgicalKit.ShallStartUse())
             {
@@ -42,7 +43,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 _baseLogic.UpdateNodeByMain(data);
                 _owner.SetPose(1f);
-                _owner.Medecine.FirstAid.TryApplyToCurrentPart();
+                firstAid.TryApplyToCurrentPart();
             }
             _owner.Sprint(false);
         }

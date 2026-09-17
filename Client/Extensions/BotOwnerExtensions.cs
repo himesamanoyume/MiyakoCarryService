@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using EFT;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
@@ -318,6 +319,11 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void TryResetHandsState()
             {
+                if (botOwner.Medecine.Using || botOwner.GetPlayer?.HandsController is Player.MedsController)
+                {
+                    return;
+                }
+
                 var player = botOwner.GetPlayer;
                 if (player?.HandsController == null)
                 {
@@ -365,6 +371,100 @@ namespace MiyakoCarryService.Client.Extensions
 #if DEBUG
                 McsLogger.LogWarning("尝试强制重置手部状态" + Time.time);
 #endif
+            }
+
+            public bool McsCanStartMed()
+            {
+                var medecine = botOwner.Medecine;
+                var player = botOwner.GetPlayer;
+                if (player?.HealthController == null)
+                {
+                    return false;
+                }
+
+                if (medecine.Using)
+                {
+                    if (player.HealthController.FindExistingEffect<IMedEffect>(EBodyPart.Common) == null
+                        && player.HandsController is not Player.MedsController)
+                    {
+                        botOwner.McsStopMeds();
+                    }
+
+                    return false;
+                }
+
+                if (player.HandsController is Player.MedsController
+                    || player.ProcessStatus != Player.EProcessStatus.None)
+                {
+                    return false;
+                }
+
+                var firstAid = medecine.FirstAid;
+                var meds = firstAid.CurUsingMeds;
+                if (meds == null)
+                {
+                    return true;
+                }
+
+                if (meds.TryGetItemComponent(out MedKitComponent medKit) && medKit.HpResource <= 0f)
+                {
+                    firstAid.CurUsingMeds = null;
+                    return false;
+                }
+
+                if (firstAid.Damaged && !firstAid.IsBleeding)
+                {
+                    var bodyPart = firstAid._bodyPartToHeal ?? EBodyPart.Common;
+                    if (!player.HealthController.CanApplyItem(meds, bodyPart))
+                    {
+                        firstAid.McsRefreshMeds();
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public void McsStopMeds()
+            {
+                var medecine = botOwner.Medecine;
+                if (medecine == null)
+                {
+                    return;
+                }
+
+                if (medecine.FirstAid.Using)
+                {
+                    medecine.FirstAid.CancelCurrent();
+                }
+
+                if (medecine.SurgicalKit.Using)
+                {
+                    medecine.SurgicalKit.CancelCurrent();
+                }
+
+                if (medecine.Stimulators.Using)
+                {
+                    medecine.Stimulators.CancelCurrent();
+                }
+
+                if (medecine.Using)
+                {
+                    medecine.FirstAid.Using = false;
+                    medecine.SurgicalKit.Using = false;
+                    medecine.Stimulators.Using = false;
+                }
+            }
+
+            public void McsReturnWeapon()
+            {
+                var player = botOwner.GetPlayer;
+                if (player == null || player.ProcessStatus != Player.EProcessStatus.None)
+                {
+                    return;
+                }
+
+                player.TrySetLastEquippedWeapon(true);
             }
         }
     }

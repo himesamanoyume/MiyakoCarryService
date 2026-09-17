@@ -25,6 +25,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
+            ClearUntreatableDestroyedPart(__instance);
+
             if (__instance.Damaged)
             {
                 return;
@@ -42,6 +44,29 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 __instance._bodyPartToHeal = fracture.BodyPart;
                 __instance.Damaged = true;
             }
+        }
+
+        private static void ClearUntreatableDestroyedPart(BotFirstAid __instance)
+        {
+            if (!__instance.Damaged || __instance._bodyPartToHeal == null || __instance.CurUsingMeds == null)
+            {
+                return;
+            }
+
+            var bodyPart = __instance._bodyPartToHeal.Value;
+            var healthController = __instance._owner.GetPlayer.HealthController;
+            if (!healthController.IsBodyPartDestroyed(bodyPart))
+            {
+                return;
+            }
+
+            if (__instance.CanHealDamageEffectType(__instance.CurUsingMeds, EDamageEffectType.DestroyedPart))
+            {
+                return;
+            }
+
+            __instance._bodyPartToHeal = null;
+            __instance.Damaged = false;
         }
     }
 }

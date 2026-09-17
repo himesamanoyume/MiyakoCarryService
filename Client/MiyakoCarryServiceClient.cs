@@ -254,6 +254,7 @@ namespace MiyakoCarryService.Client
             _patches.Add(new BotBewarePlantedMineUpdatePatch());
             _patches.Add(new AvailableInteractionStateSetterPatch());
             _patches.Add(new FindDamagedPartPatch());
+            _patches.Add(new MedsWeaponRestorePatch());
 
             if (FikaInstalled)
             {

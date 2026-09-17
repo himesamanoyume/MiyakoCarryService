@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
     public class StationaryHealLogic : McsBotBaseLogic
     {
-        private HealNode _baseLogic;
+        private HealOverrideLogic _baseLogic;
 
         public StationaryHealLogic(BotOwner botOwner) : base(botOwner)
         {

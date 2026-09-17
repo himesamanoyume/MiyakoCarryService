@@ -1,5 +1,6 @@
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using MiyakoCarryService.Client.Extensions;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -14,6 +15,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
+            if (!BotOwner.McsCanStartMed())
+            {
+                return;
+            }
+
             _baseLogic.UpdateNodeByMain(data);
         }
     }
