@@ -362,14 +362,52 @@ namespace MiyakoCarryService.Server.Services
                 }
             }
 
-            MergeTraderAssortGroups();
+            MergeTraderAssortGroups(BuildMiyakoAssortFingerprints());
 
             return Task.CompletedTask;
         }
 
-        private void MergeTraderAssortGroups()
+        private HashSet<string> BuildMiyakoAssortFingerprints()
         {
-            var addedGroupKeys = new HashSet<string>();
+            var childrenByParent = new Dictionary<string, List<Item>>();
+            foreach (var item in _mcsBotPlayerInventoryModeItems)
+            {
+                if (item.ParentId == "hideout")
+                {
+                    continue;
+                }
+
+                if (!childrenByParent.TryGetValue(item.ParentId, out var children))
+                {
+                    children = new List<Item>();
+                    childrenByParent[item.ParentId] = children;
+                }
+
+                children.Add(item);
+            }
+
+            var fingerprints = new HashSet<string>();
+            foreach (var root in _mcsBotPlayerInventoryModeItems)
+            {
+                if (root.ParentId != "hideout")
+                {
+                    continue;
+                }
+
+                if (!childrenByParent.TryGetValue(root.Id.ToString(), out var children))
+                {
+                    children = new List<Item>();
+                }
+
+                fingerprints.Add(BuildGroupFingerprint(root, children));
+            }
+
+            return fingerprints;
+        }
+
+        private void MergeTraderAssortGroups(HashSet<string> miyakoFingerprints)
+        {
+            var addedGroupKeys = miyakoFingerprints;
 
             foreach (var kvp in tradersTable)
             {

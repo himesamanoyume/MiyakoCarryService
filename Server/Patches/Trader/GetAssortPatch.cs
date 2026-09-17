@@ -34,26 +34,19 @@ namespace MiyakoCarryService.Server.Patches.Trader
                 return;
             }
 
-            if (!_profileController.IsMcsBotPlayerInventoryMode(sessionId))  
-            {  
-                return;
-            }  
-
-            var traderAssort = _traderController.GetMcsBotPlayerInventoryModeAssort();
-
-            if (_profileController.IsMcsBotPlayerInventoryMode(sessionId))
-            {
-                __result = traderAssort;
-            }
-            else
+            if (!_profileController.IsMcsBotPlayerInventoryMode(sessionId))
             {
                 __result = new TraderAssort
                 {
-                    Items = traderAssort.Items,
+                    Items = [],
                     BarterScheme = new(),
                     LoyalLevelItems = new()
                 };
+
+                return;
             }
+
+            __result = _traderController.GetMcsBotPlayerInventoryModeAssort();
         }
     }
 }
