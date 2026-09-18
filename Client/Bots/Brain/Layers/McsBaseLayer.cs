@@ -125,6 +125,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
+            if (CurrentAction.Type != typeof(RunAwayGrenadeLogic) && BotOwner.BewareGrenade.McsShallRunAway())
+            {
+                return true;
+            }
+
             return _endActionMap.TryGetValue(CurrentAction.Type, out var endFunc) ? endFunc() : true;
         }
 
@@ -2035,7 +2040,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 CheckStuck();
             }
 
-            if (!BotOwner.BewareGrenade.ShallRunAway())
+            if (!BotOwner.BewareGrenade.McsShallRunAway())
             {
                 return true;
             }
