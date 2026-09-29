@@ -1849,6 +1849,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     mcsBotPlayerData.SetIntent([Intents.ShouldFollowMe, Intents.ShouldKeepFormation]);
                     mcsBotPlayerData.TargetPos = null;
                     mcsBotPlayerData.ProxyTargetId = null;
+                    _currentMoveTarget = null;
                     return _lastCanRunResult;
                 }
 

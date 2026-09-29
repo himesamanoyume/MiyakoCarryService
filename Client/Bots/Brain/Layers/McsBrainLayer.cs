@@ -144,7 +144,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         if (McsBotPlayerData.TargetPos.HasValue)
                         {
-                            if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time))
+                            if (TryRefreshCommonTarget(McsBotPlayerData.TargetPos, time) && McsBotPlayerData.TargetPos.HasValue)
                             {
                                 ApplyMovePoint();
                                 if (needHeal)
@@ -307,6 +307,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         if (goalEnemy == null)
                         {
+                            if (!stationary.Taken && stationaryWeaponLink.HaveAmmo())
+                            {
+                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:SitOnStationaryWeapon");
+                            }
+
                             ScanSector(stationaryWeaponLink);
                             return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
                         }

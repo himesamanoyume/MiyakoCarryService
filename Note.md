@@ -31,4 +31,15 @@
 
 ## TODO
 
-- null
+- 无头下会出现此错误
+```
+[Error :MiyakoCarryService] [GameWorld.EFT.GameWorld::OnGameStarted() -> OnGameStartedPatch.Postfix() -> MiyakoCarryService.Client.Mgrs.EventMgr.Notify()]
+事件处理错误 [GameWorldStartedEvent]: System.ArgumentException: You can only call GUI functions from inside OnGUI.
+	at UnityEngine.GUIUtility.CheckOnGUI () [0x00010] in <a57394a9d85d4ac682bd3adc3d66949e>:0
+	at UnityEngine.GUI.get_skin () [0x00001] in <a57394a9d85d4ac682bd3adc3d66949e>:0
+	at MiyakoCarryService.Client.Utils.Draw.CreateGuiStyle () [0x00000] in <73d82f84764c43bf8f31b59d60f0fe6e>:0
+	at MiyakoCarryService.Client.Mgrs.PlayerDataMgr.OnRaidStarted () [0x00086] in <73d82f84764c43bf8f31b59d60f0fe6e>:0
+	at MiyakoCarryService.Client.Mgrs.BaseMgr.OnGameWorldStarted (MiyakoCarryService.Client.Events.GameWorldStartedEvent event) [0x00000] in <73d82f84764c43bf8f31b59d60f0fe6e>:0
+	at MiyakoCarryService.Client.Mgrs.DataMgr.OnGameWorldStarted (MiyakoCarryService.Client.Events.GameWorldStartedEvent event) [0x00000] in <73d82f84764c43bf8f31b59d60f0fe6e>:0
+	at MiyakoCarryService.Client.Mgrs.EventMgr.Notify[T] (T event) [0x0002b] in <73d82f84764c43bf8f31b59d60f0fe6e>:0
+```

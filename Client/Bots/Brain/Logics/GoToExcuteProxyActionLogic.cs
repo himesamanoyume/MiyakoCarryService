@@ -80,6 +80,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 _lastTimeCheckDistance = Time.time + 2f;
 
                 var targetPos = mcsBotPlayerData.TargetPos;
+                if (!targetPos.HasValue)
+                {
+                    _currentLootingRetries = 0;
+                    _lastTimeCheckDistance = 0f;
+                    return;
+                }
+
                 var offset = BotOwner.Position - targetPos.Value;
                 var sqrDistance = BotOwner.Position.McsSqrDistance(targetPos.Value);
 

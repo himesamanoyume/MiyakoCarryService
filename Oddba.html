@@ -1149,9 +1149,6 @@
     <p>
         <span style="font-size: 25px;"><strong>本体</strong></span>
     </p>
-    <p>
-        <br />
-    </p>
     <details>
         <summary id="summary"><span style="font-size: 18px;"><strong>A. 基础</strong></span></summary>
         <table style="margin: 15px;
@@ -1387,9 +1384,6 @@
     <p>
         <span style="font-size: 25px;"><strong>助手插件 (Assistant Addon)</strong></span>
     </p>
-    <p>
-        <br />
-    </p>
     <details>
         <summary id="summary"><span style="font-size: 18px;"><strong>D. 助手</strong></span></summary>
         <table style="margin: 15px; width: auto !important;">
@@ -1519,7 +1513,7 @@
             </tbody>
         </table>
     </details>
-    <hr style="background-color: var(--font-color); margin: 40px auto; max-width: 150px; width: 30%; height: 2px; opacity: .55; border: 0; box-sizing: content-box; overflow: visible;" />
+    <hr/>
     <details>
         <summary id="summary"><span style="font-size: 18px;"><strong>具体功能说明</strong></span></summary>
         &nbsp;&nbsp;
@@ -1567,33 +1561,26 @@
                 <li>然后你需要知道第三方Mod提供的，或者原版自带的AI的WildSpawnType名称</li>
                 <li>拿BlackDiv Mod举例，其提供了一个黑色军团的WildSpawnType：blackDivAssault</li>
                 <li>那么现在你就要在spawntype.json里以正确的格式多添加一个类型</li>
-<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, Courier New, monospace; font-size: 14px; line-height: 6px; white-space: pre;">
-<span>
-{</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"sectantOni"</span>,</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">true</span>,</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"Oni"</span></span>
-<span>
-}, <span style="color: #6a9955;">// 上面是默认自带的，往后新加类型的时候要在 `}` 后带上 `,`</span></span>
-<span>
-{</span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"WildSpawnType"</span>: <span style="color: #ce9178;">"blackDivAssault"</span>, <span style="color: #6a9955;">// 这里写上WildSpawnType的名称</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"IsBoss"</span>: <span style="color: #569cd6;">false</span>, <span style="color: #6a9955;">// 是否作为Boss类型，使用help指令时就会为这个类型添加`[Boss]`的前缀</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #9cdcfe;">"DisplayName"</span>: <span style="color: #ce9178;">"Black Division Assault"</span></span>
-<span>
-&nbsp; &nbsp; <span style="color: #6a9955;">// 展示名称，使用help指令时就只会展示这个名称，而不是WildSpawnType的名称</span></span>
-<span>
-} <span style="color: #6a9955;">// 最后一个 `}` 不要带 `,`</span>
-</span>
-</div>
-<div style="color: rgb(204, 204, 204); background-color: rgb(31, 31, 31); font-family: Consolas, Courier New, monospace; font-size: 14px; line-height: 6px; white-space: pre;">
-</div>
+<pre style="position: relative;"><code>{
+    "WildSpawnType": "sectantOni",
+    "IsBoss": true,
+    "DisplayName": "Oni"
+}, 
+    // 上面的内容是 EFT 原生的 `WildSpawnType`。之后再添加新类型时，
+    // 需要在 `}` 后补上 `,`。
+{
+    "WildSpawnType": "blackDivAssault", 
+    // 在这里写 `WildSpawnType` 名称。
+    "IsBoss": false, 
+    // 是否作为 Boss 类型。
+    // 在使用帮助命令时，会为此类型添加 `[Boss]` 前缀。
+    "DisplayName": "Black Division Assault" 
+    // 显示名称。在使用帮助命令时，
+    // 只会显示这个名称，不显示 `WildSpawnType` 名称。
+} 
+    // 最后一个 `}` 不要加 `,`。</code>
+    <button class="ls-code-copy-btn" title="复制代码"><i class="remix-icon ri-file-copy-line"></i></button>
+</pre>
             <li>确保json格式正确，数据也填写正确后，重启服务端，此时与宫子商人聊天界面使用help指令，列出的可用类型中就会显示出所有的类型</li>
             <li>如果填写的自定义类型在生成时出现异常，会在服务端收到报错提醒，并改为生成默认的pmc类型护航，此时你需要检查是否填写的自定义类型有错误</li>
             </ol>
@@ -1693,7 +1680,10 @@
             </details>
         </div>
     </details>
-    <hr style="background-color: var(--font-color); margin: 40px auto; max-width: 150px; width: 30%; height: 2px; opacity: .55; border: 0; box-sizing: content-box; overflow: visible;" />
+    <hr />
+    <p style="text-align: center;">
+        <a href="https://afdian.com/a/himesamanoyume" target="_blank" id="afadian">[爱发电]简简单单恰个米<img src="https://static.oddba.cn/sns/emoji/1/44.png" alt="&lt;img emoji-text=" class="ls-emoji emotion-type-img" contenteditable="false" draggable="true"></a>
+    </p>
     <p>
         安装方法与其他MOD相同，MiyakoCarryServiceClient放在BepInEx/plugins里，MiyakoCarryServiceServer放在SPT/user/mods里，实在不会b站上大把多教程。
     </p>
