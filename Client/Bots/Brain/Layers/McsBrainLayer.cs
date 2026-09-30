@@ -298,48 +298,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
 
-                        if (goalEnemy == null)
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
                         {
-                            TrySelectLastHitShooter(time);
-                            TrySelectLeadThreatEnemy(time);
-                            goalEnemy = BotOwner.Memory.GoalEnemy;
+                            BotOwner.ShootData.EndShoot();
+                            return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
                         }
 
                         if (goalEnemy == null)
                         {
-                            if (!stationary.Taken && stationaryWeaponLink.HaveAmmo())
-                            {
-                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:SitOnStationaryWeapon");
-                            }
-
                             ScanSector(stationaryWeaponLink);
-                            return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
                         }
-
-                        if (isEnemyAtSector)
-                        {
-                            if (stationaryWeaponLink.HaveAmmo()
-                                && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary
-                                && goalEnemy.CanShoot
-                                && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))
-                            {
-                                if (McsBotPlayerData.HasIntent(Intents.ShouldHoldPosition))
-                                {
-                                    McsBotPlayerData.RemoveIntent(Intents.ShouldHoldPosition);
-                                }
-                                BotOwner.ShootData.EndShoot();
-                                return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
-                            }
-
-                            ScanSector(stationaryWeaponLink);
-                            return new Action(typeof(HoldPositionLogic), "Mcs:ScanSector");
-                        }
-
-                        if (stationary.Taken)
-                        {
-                            stationary.DropCurWeapon(false, true);
-                        }
-                        McsBotPlayerData.AddIntent(Intents.ShouldHoldPosition);
                     }
                 }
                 else
