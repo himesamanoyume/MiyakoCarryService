@@ -625,6 +625,11 @@ namespace MiyakoCarryService.Client.Datas
 
             }
 
+            if (_intents.Count > 0)
+            {
+                BaseInfoBuilder.Append('\n').Append("Intents: ").Append(string.Join(", ", _intents.OrderBy(intent => intent)));
+            }
+
             BaseInfo = BaseInfoBuilder.ToString();
             UpdateWeaponInfo(isAlive);
             UpdateEffectsInfo(isAlive);
