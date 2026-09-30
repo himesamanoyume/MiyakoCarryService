@@ -387,7 +387,6 @@ namespace MiyakoCarryService.Client.Datas
                     return;
                 }
 
-                return;
             }
 
             if (!McsAILeadPlayer.McsBotPlayerConfig.EnableLooting)
