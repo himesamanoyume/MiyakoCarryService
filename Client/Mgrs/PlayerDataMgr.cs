@@ -16,6 +16,7 @@ namespace MiyakoCarryService.Client.Mgrs
     public class PlayerDataMgr : ItemDataMgr
     {
         private List<McsBotPlayerData> _visibleDatas = new();
+        private int _guiFontSize;
 
         public List<McsBotPlayerData> GetMcsBotPlayerDatas()
         {
@@ -47,11 +48,7 @@ namespace MiyakoCarryService.Client.Mgrs
             StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
             StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f));
             StartCoroutine(CheckFastOpenDoorLoop(1f));
-            if (Draw.GuiCommonStyle == null)
-            {
-                Draw.CreateGuiStyle();
-            }
-            Draw.GuiCommonStyle.fontSize = MiyakoCarryServicePlugin.DebugTextSize.Value;
+            _guiFontSize = MiyakoCarryServicePlugin.DebugTextSize.Value;
             _visibleDatas.Clear();
             StartCoroutine(ReloadDataVisibleLoop(1f));
             StartCoroutine(UpdateDataLoop());
@@ -480,10 +477,26 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void OnGUI()
         {
-            if (Draw.GuiCommonStyle == null)
+            Draw.EnterOnGUI();
+
+            try
             {
-                Draw.CreateGuiStyle();
+                OnGUIDraw();
             }
+            finally
+            {
+                Draw.ExitOnGUI();
+            }
+        }
+
+        private void OnGUIDraw()
+        {
+            if (!Draw.TryCreateGuiStyle())
+            {
+                return;
+            }
+
+            Draw.GuiCommonStyle.fontSize = _guiFontSize;
 
             if (Event.current != null && Event.current.type != EventType.Repaint)
             {
@@ -530,6 +543,13 @@ namespace MiyakoCarryService.Client.Mgrs
                 }
 
                 mcsBotPlayerData.Color = Draw.Green.Rgb;
+                mcsBotPlayerData.EnsureGuiStyleForDraw();
+
+                if (mcsBotPlayerData.GUIStyle == null)
+                {
+                    continue;
+                }
+
                 GUI.Label(mcsBotPlayerData.Rect, mcsBotPlayerData.Info, mcsBotPlayerData.GUIStyle);
             }
         }

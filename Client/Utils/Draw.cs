@@ -19,8 +19,30 @@ namespace MiyakoCarryService.Client.Utils
 
         public static GUIStyle GuiCommonStyle = null;
 
-        public static void CreateGuiStyle()
+        private static bool _insideOnGUI;
+
+        public static void EnterOnGUI()
         {
+            _insideOnGUI = true;
+        }
+
+        public static void ExitOnGUI()
+        {
+            _insideOnGUI = false;
+        }
+
+        public static bool TryCreateGuiStyle()
+        {
+            if (GuiCommonStyle != null)
+            {
+                return true;
+            }
+
+            if (!_insideOnGUI)
+            {
+                return false;
+            }
+
             var baseStyle = new GUIStyle(GUI.skin.box)
             {
                 alignment = TextAnchor.MiddleCenter,
@@ -38,6 +60,18 @@ namespace MiyakoCarryService.Client.Utils
                 fontSize = 10
             };
             GuiCommonStyle.normal.background = null;
+
+            return true;
+        }
+
+        public static GUIStyle CreateGuiStyleCopy()
+        {
+            if (!TryCreateGuiStyle())
+            {
+                return null;
+            }
+
+            return new GUIStyle(GuiCommonStyle);
         }
     }
 }

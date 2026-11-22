@@ -182,7 +182,10 @@ namespace MiyakoCarryService.Client.Datas
             {
                 if (field != value)
                 {
-                    GUIStyle.normal.textColor = value;
+                    if (GUIStyle != null)
+                    {
+                        GUIStyle.normal.textColor = value;
+                    }
                 }
                 field = value;
             }
@@ -300,7 +303,7 @@ namespace MiyakoCarryService.Client.Datas
                 RemoveIntent(Intents.ShouldKeepFormation);
             }
 
-            GUIStyle = new GUIStyle(Draw.GuiCommonStyle);
+            GUIStyle = Draw.CreateGuiStyleCopy();
 
             var role = player.Profile.Info.Settings.Role;
             var stringBuilder = new StringBuilder();
@@ -483,6 +486,13 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SetInfo()
         {
+            EnsureGuiStyle();
+
+            if (GUIStyle == null)
+            {
+                return;
+            }
+
             var fontSize = GUIStyle.fontSize;
             if (!ReferenceEquals(_measuredInfo, Info) || _measuredFontSize != fontSize)
             {
@@ -497,7 +507,42 @@ namespace MiyakoCarryService.Client.Datas
 
         public void SyncFontSize()
         {
+            if (GUIStyle == null || Draw.GuiCommonStyle == null)
+            {
+                return;
+            }
+
             GUIStyle.fontSize = Draw.GuiCommonStyle.fontSize;
+        }
+
+        private void EnsureGuiStyle()
+        {
+            if (GUIStyle != null)
+            {
+                return;
+            }
+
+            GUIStyle = Draw.CreateGuiStyleCopy();
+
+            if (GUIStyle == null)
+            {
+                return;
+            }
+
+            GUIStyle.normal.textColor = Color;
+        }
+
+        public void EnsureGuiStyleForDraw()
+        {
+            EnsureGuiStyle();
+
+            if (GUIStyle == null || Draw.GuiCommonStyle == null)
+            {
+                return;
+            }
+
+            GUIStyle.fontSize = Draw.GuiCommonStyle.fontSize;
+            GUIStyle.normal.textColor = Color;
         }
 
         public Vector2 GetBottomScreenPos()
