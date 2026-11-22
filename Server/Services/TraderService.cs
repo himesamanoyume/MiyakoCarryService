@@ -298,20 +298,29 @@ namespace MiyakoCarryService.Server.Services
 
                 if (templateItem.Parent == BaseClasses.ARMOR || templateItem.Parent == BaseClasses.HEADWEAR || templateItem.Parent == BaseClasses.VEST)
                 {
-                    foreach (var slot in templateItem.Properties?.Slots)
+                    foreach (var slot in templateItem.Properties?.Slots ?? [])
                     {
                         if (slot is null)
                         {
                             continue;
                         }
 
-                        var locked = slot.Properties?.Filters?.ElementAt(0)?.Locked;
+                        // Patched: use FirstOrDefault so an empty filter list doesn't throw
+                        var firstFilter = slot.Properties?.Filters?.FirstOrDefault();
+                        var locked = firstFilter?.Locked;
                         if (locked is null)
                         {
                             continue;
                         }
 
                         if (locked == false)
+                        {
+                            continue;
+                        }
+
+                        // Patched: SPT allows a locked slot without a built-in plate (Plate is nullable).
+                        // Nothing to copy in that case, so skip the slot instead of crashing the server.
+                        if (firstFilter.Plate is null)
                         {
                             continue;
                         }
@@ -323,7 +332,7 @@ namespace MiyakoCarryService.Server.Services
                         var slotItem = new Item
                         {
                             Id = new(),
-                            Template = slot.Properties.Filters.ElementAt(0).Plate.Value,
+                            Template = firstFilter.Plate.Value,
                             ParentId = item.Id,
                             SlotId = slot.Name,
                             Upd = slotUpd
@@ -333,7 +342,7 @@ namespace MiyakoCarryService.Server.Services
                 }
                 else if (templateItem.Parent == BaseClasses.AMMO_BOX)
                 {
-                    var stackSlot = templateItem.Properties?.StackSlots?.ElementAt(0);
+                    var stackSlot = templateItem.Properties?.StackSlots?.FirstOrDefault();
                     if (stackSlot is null)
                     {
                         continue;
