@@ -16,8 +16,8 @@ namespace MiyakoCarryService.Client.Datas
 {
     public abstract class ItemData : BaseData
     {
-        private WeakReference<Item> _itemRef;
-        public Item Item => _itemRef.TryGetTarget(out var item) ? item : null;
+        private Item _itemRef;
+        public Item Item => _itemRef;
         public List<ItemData> ItemsInContainer = null;
         public EItemType ItemType = EItemType.None;
         public Transform RootTransform => GetRootTransfrom();
@@ -25,8 +25,8 @@ namespace MiyakoCarryService.Client.Datas
 
         public ItemData(Item item)
         {
-            _itemRef = new(item);
-            ItemType = ItemViewFactory.GetItemType(item.GetType());
+            _itemRef = item;
+            ItemType = ItemViewFactory.GetItemType(ManagedArguments.ToIl2CppType(item.GetType()));
         }
 
         public virtual void RefreshInteresting(McsAILeadPlayer mcsAILeadPlayer, bool unlock)

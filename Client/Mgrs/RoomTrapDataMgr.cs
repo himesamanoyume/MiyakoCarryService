@@ -3,16 +3,22 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using EFT.GameTriggers;
-using HarmonyLib;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class RoomTrapDataMgr : LabyrinthDataMgr
     {
+        public RoomTrapDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public ConcurrentDictionary<ELabyrinthTrapType, HashSet<TriggerZoneData>> TrapDatas;
 
         public override void OnRaidStarted()
@@ -28,7 +34,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             TrapDatas = new();
             LoadData(LoadRoomTrap);
-            StartCoroutine(ReloadDataLoop(2f, RefreshTrapState));
+            StartCoroutine(ReloadDataLoop(2f, RefreshTrapState).McsSafe());
         }
 
         public override void OnRaidEnded()
@@ -51,7 +57,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var triggerZones = FindObjectsOfType<TriggerZone>();
             foreach (var triggerZone in triggerZones)
             {
-                var triggerZoneId = (string)AccessTools.Field(typeof(TriggerZone), "_triggerId").GetValue(triggerZone);
+                var triggerZoneId = triggerZone._triggerId;
                 foreach ((var labyrinthTrapType, var ids) in Classification.LabyrinthTrapIds)
                 {
                     if (!ids.Contains(triggerZoneId))
@@ -69,13 +75,14 @@ namespace MiyakoCarryService.Client.Mgrs
             }
         }
 
-        public bool IsTrapDisabled(ELabyrinthTrapType labyrinthTrapType)
+        public bool IsTrapDisabled(int labyrinthTrapType)
         {
+            var trapType = (ELabyrinthTrapType)labyrinthTrapType;
             if (TrapDatas == null)
             {
                 return false;
             }
-            var triggerZoneDatas = TrapDatas.GetOrAdd(labyrinthTrapType, _ => new());
+            var triggerZoneDatas = TrapDatas.GetOrAdd(trapType, _ => new());
             return !triggerZoneDatas.All(triggerZoneData => TriggersEmitter.Instance._ignoreTriggers.Contains(triggerZoneData.Id));
         }
 
@@ -88,12 +95,12 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach ((var labyrinthTrapType, var triggerZoneDatas) in TrapDatas)
             {
-                var isTrapDisabled = IsTrapDisabled(labyrinthTrapType);
+                var isTrapDisabled = IsTrapDisabled((int)labyrinthTrapType);
                 foreach (var triggerZoneData in triggerZoneDatas)
                 {
                     triggerZoneData.SetObstacle(isTrapDisabled);
                 }
             }
-        } 
+        }
     }
 }

@@ -80,8 +80,6 @@ namespace MiyakoCarryService.Client.Mgrs
         {
             _eventHandlers.Clear();
             _subscriberEventTypes.Clear();
-            _eventHandlers = null;
-            _subscriberEventTypes = null;
         }
     }
 }

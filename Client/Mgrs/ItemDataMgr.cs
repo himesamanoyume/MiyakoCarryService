@@ -11,6 +11,10 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public abstract class ItemDataMgr : DataMgr
     {
+        protected ItemDataMgr(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public virtual void LoadItemData<K>() where K : BaseData
         {
             var datas = new HashSet<K>();
@@ -67,7 +71,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        McsLogger.LogFatal(e);
                     }
                     yield return publicTime;
                 }

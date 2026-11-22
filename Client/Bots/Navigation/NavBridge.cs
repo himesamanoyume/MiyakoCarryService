@@ -15,6 +15,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         public bool IsCrossing => _executor.IsCrossing;
         public Vector3[] Way => _gap?.Way;
 
+        public float CrossingSince { get; private set; } = -999f;
+
         public bool TryPlanStepDown(BotOwner botOwner, Vector3 targetPos, NavMeshPath path)
         {
             if (IsCrossing)
@@ -35,6 +37,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             _gap = gap;
             _executor.Begin(gap, botOwner);
+            CrossingSince = Time.time;
             return true;
         }
 
@@ -61,6 +64,13 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         {
             _executor.Cancel();
             _gap = null;
+            CrossingSince = -999f;
+        }
+
+        public void CancelFor(float cooldownSeconds)
+        {
+            Cancel();
+            _executor.SetNextPlanCooldown(cooldownSeconds);
         }
     }
 }

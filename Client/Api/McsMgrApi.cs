@@ -1,5 +1,5 @@
 
-using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Api
@@ -9,7 +9,7 @@ namespace MiyakoCarryService.Client.Api
         /// <summary>
         /// 
         /// </summary>
-        public static T GetMgr<T>() where T : IMgr
+        public static T GetMgr<T>() where T : BaseMgr
         {
             return MgrAccessor.Get<T>();
         }

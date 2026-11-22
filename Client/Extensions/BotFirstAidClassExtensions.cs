@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using System.Linq;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
@@ -61,9 +62,15 @@ namespace MiyakoCarryService.Client.Extensions
                     }
                 }
 
-                var medKitItemClasses = botFirstAid._medsList.OfType<MedKit>()
-                    .Where(kit => kit.TryGetItemComponent(out MedKitComponent medKit) && medKit.HpResource > 0f)
-                    .ToList();
+                var medKitItemClasses = new List<MedKit>();
+                foreach (var med in botFirstAid._medsList)
+                {
+                    var medKit = med.TryCast<MedKit>();
+                    if (medKit != null && medKit.TryGetItemComponent(out MedKitComponent medKitComponent) && medKitComponent.HpResource > 0f)
+                    {
+                        medKitItemClasses.Add(medKit);
+                    }
+                }
 
                 var medKitItemClass = medKitItemClasses.FirstOrDefault((kit) =>
                 {

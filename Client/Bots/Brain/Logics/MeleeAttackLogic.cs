@@ -24,7 +24,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
         }
     }
 }

@@ -1,5 +1,3 @@
-
-
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
@@ -7,11 +5,18 @@ using EFT.SynchronizableObjects;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class TripwireDataMgr : DataMgr
     {
+        public TripwireDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
@@ -20,8 +25,8 @@ namespace MiyakoCarryService.Client.Mgrs
                 return;
             }
             LoadData(LoadTripwires);
-            StartCoroutine(ReloadDataLoop(2f, LoadTripwires));
-            StartCoroutine(ReloadDataLoop(1f, RefreshTripwireState));
+            StartCoroutine(ReloadDataLoop(2f, LoadTripwires).McsSafe());
+            StartCoroutine(ReloadDataLoop(1f, RefreshTripwireState).McsSafe());
         }
 
         private void LoadTripwires()
@@ -29,7 +34,8 @@ namespace MiyakoCarryService.Client.Mgrs
             var datas = new HashSet<BaseData>();
             foreach (var synchronizableObject in Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor.GetSynchronizableObjects())
             {
-                if (synchronizableObject is TripwireSynchronizableObject tripwireSynchronizableObject)
+                var tripwireSynchronizableObject = synchronizableObject == null ? null : synchronizableObject.TryCast<TripwireSynchronizableObject>();
+                if (tripwireSynchronizableObject != null)
                 {
                     var data = tripwireSynchronizableObject.GetData();
                     if (data != null)

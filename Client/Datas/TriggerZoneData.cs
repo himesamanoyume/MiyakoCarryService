@@ -8,13 +8,13 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class TriggerZoneData : ObstacleData
     {
-        private WeakReference<TriggerZone> _triggerZoneRef;
-        public TriggerZone TriggerZone => _triggerZoneRef.TryGetTarget(out var triggerZone) ? triggerZone : null;
+        private TriggerZone _triggerZoneRef;
+        public TriggerZone TriggerZone => _triggerZoneRef;
         public string Id;
 
         public TriggerZoneData(TriggerZone triggerZone, string triggerZoneId) : base()
         {
-            _triggerZoneRef = new WeakReference<TriggerZone>(triggerZone);
+            _triggerZoneRef = triggerZone;
             _colliders = triggerZone.GetComponentsInChildren<Collider>().ToList();
             Id = triggerZoneId;
             InitObstacle();

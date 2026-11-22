@@ -11,7 +11,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
-            var canRun = DoorOpen() == DoorInteractionStatus.CanRun;
+            ChecksWhileMoving(out var doorInteractionStatus);
+            var canRun = doorInteractionStatus == DoorInteractionStatus.CanRun;
             _owner.SetTargetMoveSpeed(1f);
             NotMovingCheck();
             _owner.SetPose(1f);

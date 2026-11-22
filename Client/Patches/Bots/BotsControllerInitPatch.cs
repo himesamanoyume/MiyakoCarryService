@@ -2,9 +2,10 @@
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
@@ -21,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         public static void Postfix()
         {
             McsMgr.IsHost = true;
-            TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
+            GameLoop.Instance.SpawnMcsBotPlayer().McsHandleExceptions();
         }
     }
 }

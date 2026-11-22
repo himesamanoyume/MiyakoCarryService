@@ -6,7 +6,7 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Api;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {

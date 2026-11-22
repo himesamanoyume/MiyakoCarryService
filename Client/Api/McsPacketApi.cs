@@ -5,26 +5,27 @@ using EFT;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MiyakoCarryService.Client.Api
 {
     public static class McsPacketApi
     {
-        private static readonly JsonSerializerSettings _settings = new()
+        private static readonly JsonSerializerOptions _settings = new()
         {
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            NullValueHandling = NullValueHandling.Ignore
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         public static string SerializeBotPlayerConfig(McsBotPlayerConfig config)
         {
-            return JsonConvert.SerializeObject(config, _settings);
+            return JsonSerializer.Serialize(config, _settings);
         }
 
         public static McsBotPlayerConfig DeserializeBotPlayerConfig(string json)
         {
-            return JsonConvert.DeserializeObject<McsBotPlayerConfig>(json, _settings) ?? new McsBotPlayerConfig();
+            return JsonSerializer.Deserialize<McsBotPlayerConfig>(json, _settings) ?? new McsBotPlayerConfig();
         }
 
         public static void ApplyBotPlayerConfig(MongoID mcsLeadPlayerId, string json)
@@ -45,12 +46,12 @@ namespace MiyakoCarryService.Client.Api
                 ShouldCheckExclude = @event.ShouldCheckExclude,
                 Extensions = @event.Extensions ?? new Dictionary<string, McsValue>()
             };
-            return JsonConvert.SerializeObject(request, _settings);
+            return JsonSerializer.Serialize(request, _settings);
         }
 
         public static void ExecuteCommand(string json, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
-            var request = JsonConvert.DeserializeObject<McsCommandRequest>(json, _settings);
+            var request = JsonSerializer.Deserialize<McsCommandRequest>(json, _settings);
             if (request == null)
             {
                 return;
@@ -71,17 +72,17 @@ namespace MiyakoCarryService.Client.Api
 
         public static string SerializeMsg(McsMsg msg)
         {
-            return JsonConvert.SerializeObject(msg, _settings);
+            return JsonSerializer.Serialize(msg, _settings);
         }
 
         public static McsMsg DeserializeMsg(string json)
         {
-            return JsonConvert.DeserializeObject<McsMsg>(json, _settings) ?? new McsMsg();
+            return JsonSerializer.Deserialize<McsMsg>(json, _settings) ?? new McsMsg();
         }
 
         public static string SerializeQuestProxy(string targetId)
         {
-            return JsonConvert.SerializeObject(new McsQuestProxyRequest
+            return JsonSerializer.Serialize(new McsQuestProxyRequest
             {
                 TargetId = targetId
             }, _settings);
@@ -89,7 +90,7 @@ namespace MiyakoCarryService.Client.Api
 
         public static string DeserializeQuestProxy(string json)
         {
-            var request = JsonConvert.DeserializeObject<McsQuestProxyRequest>(json, _settings);
+            var request = JsonSerializer.Deserialize<McsQuestProxyRequest>(json, _settings);
             return request?.TargetId;
         }
     }

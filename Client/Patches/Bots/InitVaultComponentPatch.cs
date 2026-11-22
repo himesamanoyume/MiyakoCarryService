@@ -5,7 +5,7 @@ using EFT.Vaulting;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
@@ -35,7 +35,9 @@ namespace MiyakoCarryService.Client.Patches.Bots
         [PatchPrefix]
         public static bool Prefix(VaultingComponent __instance)
         {
-            if (__instance._vaultingContext is not MovementContext movementContext)
+            // 5.0：_vaultingContext 的声明类型是接口 IVaultingContext，托管 `is not MovementContext` 恒为 true → TryCast
+            var movementContext = __instance._vaultingContext == null ? null : __instance._vaultingContext.TryCast<MovementContext>();
+            if (movementContext == null)
             {
                 return true;
             }

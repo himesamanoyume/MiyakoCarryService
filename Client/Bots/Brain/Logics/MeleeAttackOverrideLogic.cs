@@ -172,7 +172,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         {
             path = null;
 
-            if (meleeData != null && meleeData.CanRunToEnemyToHit(enemy, out Vector3[] way))
+            if (meleeData != null && meleeData.CanRunToEnemyToHit(enemy, out var way))
             {
                 path = way;
                 return true;

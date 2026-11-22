@@ -11,12 +11,14 @@ using EFT;
 using Fika.Core.Networking.LiteNetLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Fika.Patches;
 using MiyakoCarryService.Client.Patches.Events;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using MiyakoCarryService.Client.Api;
 using BepInEx;
+using BepInEx.Unity.IL2CPP;
 
 namespace MiyakoCarryService.Fika
 {
@@ -25,7 +27,7 @@ namespace MiyakoCarryService.Fika
     [BepInDependency(MiyakoCarryServicePlugin.BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.McsGUID, BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency(MiyakoCarryServicePlugin.FikaGUID, BepInDependency.DependencyFlags.HardDependency)]
-    public sealed class MiyakoCarryServiceFika : BaseUnityPlugin
+    public sealed class MiyakoCarryServiceFika : BasePlugin
     {
         private SubtitlesMgr SubtitlesMgr => McsMgrApi.GetMgr<SubtitlesMgr>();
         private QuestDataMgr QuestDataMgr => McsMgrApi.GetMgr<QuestDataMgr>();
@@ -37,7 +39,7 @@ namespace MiyakoCarryService.Fika
         public const string McsFikaName = "姫様の夢 MiyakoCarryServiceFika";
 #endif
 
-        void Start()
+        public override void Load()
         {
             _patches.Add(new ExtractPatch());
             _patches.Add(new OnLoadingProfilePacketReceivedPatch());
@@ -59,7 +61,7 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Subscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket, this);
         }
 
-        public void OnDestroy()
+        public override bool Unload()
         {
             foreach (var patch in _patches)
             {
@@ -70,6 +72,7 @@ namespace MiyakoCarryService.Fika
             McsEventApi.Unsubscribe<CommandMgrHandleFikaEvent>(SendCommandPacket);
             McsEventApi.Unsubscribe<ConfigEntrySettingChangedEvent>(SendMcsBotPlayerConfigPacket);
             McsEventApi.Unsubscribe<QuestProxyCommandCallbackHandleFikaEvent>(SendQuestProxyCommandCallbackPacket);
+            return true;
         }
 
         public void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
@@ -101,7 +104,6 @@ namespace MiyakoCarryService.Fika
                             {
                                 Level = groupPlayerViewModelClass.Info.Level,
                                 Experience = ProfileInfo.GetExperience(groupPlayerViewModelClass.Info.Level),
-                                PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
                                 MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
                                 SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
                                 Nickname = groupPlayerViewModelClass.Info.Nickname,
@@ -112,7 +114,7 @@ namespace MiyakoCarryService.Fika
                             },
                             Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
                             Health = new(),
-                            InsuredItems = [],
+                            InsuredItems = new JsonType.InsuredProfileItems[0],
                             Inventory = new()
                             {
                                 Equipment = ItemBinarySerializer.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, FullySearchedSearchController.Instance)
@@ -228,7 +230,7 @@ namespace MiyakoCarryService.Fika
                 var questData = QuestDataMgr.FindQuestData(targetId);
                 if (questData != null)
                 {
-                    TasksExtensions.HandleExceptions(questData.ForceCompleteQuest(mcsBotPlayer));
+                    questData.ForceCompleteQuest(mcsBotPlayer).McsHandleExceptions();
                 }
             }
         }
@@ -278,8 +280,8 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
-            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(@event.McsLeadPlayerId);
+            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
             {
                 return;
@@ -312,8 +314,8 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsLeadPlayerId);
-            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerId);
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(@event.McsLeadPlayerId);
+            var mcsBotPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(@event.McsBotPlayerId);
             if (mcsLeadPlayer == null || mcsBotPlayer == null)
             {
                 return;
@@ -346,7 +348,7 @@ namespace MiyakoCarryService.Fika
                 return;
             }
 
-            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(@event.McsBotPlayerConfig.McsLeadPlayerId);
+            var mcsLeadPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(@event.McsBotPlayerConfig.McsLeadPlayerId);
             if (mcsLeadPlayer == null)
             {
                 return;

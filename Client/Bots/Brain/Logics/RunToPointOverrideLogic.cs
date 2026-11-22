@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _owner.SetTargetMoveSpeed(1f);
             _owner.Sprint(true, false);
             _owner.Steering.LookToMovingDirection();
-            DoorOpen();
+            ChecksWhileMoving(out _);
             if (data != null && !data.Used)
             {
                 data.Used = true;

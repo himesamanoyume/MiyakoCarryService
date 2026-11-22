@@ -2,7 +2,7 @@ using System.Reflection;
 using EFT.Vaulting;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {

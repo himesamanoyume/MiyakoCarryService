@@ -31,7 +31,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByBrain(data);
+            _baseLogic.UpdateNodeByBrain(null);
         }
     }
 }

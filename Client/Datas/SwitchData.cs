@@ -1,4 +1,3 @@
-using System;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
@@ -9,12 +8,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class SwitchData : InteractableObjectData
     {
-        private WeakReference<Switch> _switchRef;
-        public Switch Switch => _switchRef.TryGetTarget(out var @switch) ? @switch : null;
+        private Switch _switchRef;
+        public Switch Switch => _switchRef;
 
         public SwitchData(Switch @switch): base()
         {
-            _switchRef = new WeakReference<Switch>(@switch);
+            _switchRef = @switch;
         }
 
         public override string GetActionName() => Classification.ImportantSwitchIdsInfo.TryGetValue(Switch.Id, out var info) ? info.McsLocalized() : Locales.SWITCH.McsLocalized();

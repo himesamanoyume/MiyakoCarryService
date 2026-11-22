@@ -6,14 +6,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class DoorExtensions
     {
-        private static readonly AttachedTable<Door, DoorData> _datas = new();
 
         extension(Door door)
         {
             public DoorData GetData()
             {
-                return _datas.GetOrCreate(door, key => new DoorData(key));
+                return InteropDataCache<DoorData>.GetOrCreate(door.Pointer, () => new DoorData(door));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<DoorData>.Clear();
         }
     }
 }

@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -16,12 +15,12 @@ namespace MiyakoCarryService.Client.Patches.Events
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(Player player, List<Player> ___allowedPlayers, ref bool __result)
+        public static void Postfix(LighthouseTraderZone __instance, Player player, ref bool __result)
         {
             if (McsMgr.IsMcsBotPlayer(player.ProfileId))
             {
                 var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(player.ProfileId);
-                __result = ___allowedPlayers.Contains(mcsLeadPlayer);
+                __result = __instance.allowedPlayers.Contains(mcsLeadPlayer);
             }
         }
     }

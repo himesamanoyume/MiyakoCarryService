@@ -15,7 +15,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var item = inventoryEquipment.GetSlot(slot).ContainedItem;
-                return item is Weapon;
+                return item != null && item.TryCast<Weapon>() != null;
             }
 
             public bool HasKnifeInSlot(EquipmentSlot slot)
@@ -26,7 +26,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var item = inventoryEquipment.GetSlot(slot).ContainedItem;
-                return item is Knife;
+                return item != null && item.TryCast<Knife>() != null;
             }
         }
     }

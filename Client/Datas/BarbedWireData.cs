@@ -8,12 +8,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class BarbedWireData : ObstacleData
     {
-        private WeakReference<TrapSyncable> _barbedWireRef;
-        public TrapSyncable BarbedWire => _barbedWireRef.TryGetTarget(out var barbedWire) ? barbedWire : null;
+        private TrapSyncable _barbedWireRef;
+        public TrapSyncable BarbedWire => _barbedWireRef;
 
         public BarbedWireData(TrapSyncable barbedWire) : base()
         {
-            _barbedWireRef = new WeakReference<TrapSyncable>(barbedWire);
+            _barbedWireRef = barbedWire;
             _colliders = barbedWire.transform.GetChild(0).GetComponentsInChildren<Collider>().ToList();
             InitObstacle();
         }

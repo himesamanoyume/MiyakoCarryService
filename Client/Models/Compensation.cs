@@ -1,6 +1,5 @@
 
 using System.Runtime.Serialization;
-using EFT;
 
 namespace MiyakoCarryService.Client.Models
 {
@@ -8,6 +7,6 @@ namespace MiyakoCarryService.Client.Models
     public class Compensation
     {
         [DataMember(Name = "McsLeadPlayerId")]
-        public MongoID McsLeadPlayerId;
+        public string McsLeadPlayerId;
     }
 }

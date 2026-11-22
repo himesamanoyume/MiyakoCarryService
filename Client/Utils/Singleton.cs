@@ -1,3 +1,4 @@
+using Il2CppInterop.Runtime.Injection;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
@@ -9,44 +10,33 @@ namespace MiyakoCarryService.Client.Utils
         {
             get
             {
-                if (_instance == null)
+                if (_instance != null)
                 {
-                    _instance = FindObjectOfType(typeof(T)) as T;
-                    if (_instance == null)
-                    {
-                        var obj = new GameObject();
-                        _instance = (T)obj.AddComponent(typeof(T));
-                        obj.hideFlags = HideFlags.DontSave;
-                        obj.name = "MiyakoCarryService" + typeof(T).Name;
-                    }
+                    return _instance;
                 }
+
+                var type = typeof(T);
+                if (!ClassInjector.IsTypeRegisteredInIl2Cpp(type))
+                {
+                    ClassInjector.RegisterTypeInIl2Cpp(type);
+                }
+
+                var gameObject = new GameObject("MiyakoCarryService" + type.Name)
+                {
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+                DontDestroyOnLoad(gameObject);
+
+                _instance = gameObject.AddComponent(ManagedArguments.ToIl2CppType(typeof(T))).TryCast<T>();
                 return _instance;
             }
         }
 
         public static bool Instantiated => _instance != null;
 
-        public virtual void Awake()
+        public static void Clear()
         {
-            DontDestroyOnLoad(gameObject);
-            if (_instance == null)
-            {
-                _instance = this as T;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
-
-        public virtual void Destroy()
-        {
-            Destroy(gameObject);
-        }
-
-        private void OnDestroy()
-        {
-            Destroy();
+            _instance = null;
         }
     }
 }

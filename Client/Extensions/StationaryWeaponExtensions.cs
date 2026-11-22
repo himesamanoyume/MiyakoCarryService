@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class StationaryWeaponExtensions
     {
-        private static readonly AttachedTable<StationaryWeapon, StationaryWeaponData> _datas = new();
 
         extension(StationaryWeapon stationaryWeapon)
         {
             public StationaryWeaponData GetData()
             {
-                return _datas.GetOrCreate(stationaryWeapon, key => new StationaryWeaponData(key));
+                return InteropDataCache<StationaryWeaponData>.GetOrCreate(stationaryWeapon.Pointer, () => new StationaryWeaponData(stationaryWeapon));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<StationaryWeaponData>.Clear();
         }
     }
 }

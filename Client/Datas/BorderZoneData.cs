@@ -8,12 +8,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class BorderZoneData : ObstacleData
     {
-        private WeakReference<BorderZone> _borderZoneRef;
-        public BorderZone BorderZone => _borderZoneRef.TryGetTarget(out var borderZone) ? borderZone : null;
+        private BorderZone _borderZoneRef;
+        public BorderZone BorderZone => _borderZoneRef;
 
         public BorderZoneData(BorderZone borderZone) : base()
         {
-            _borderZoneRef = new WeakReference<BorderZone>(borderZone);
+            _borderZoneRef = borderZone;
             _colliders = borderZone.GetComponentsInChildren<Collider>().ToList();
             InitObstacle();
         }

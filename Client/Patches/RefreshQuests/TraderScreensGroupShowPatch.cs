@@ -4,7 +4,7 @@ using EFT.UI;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Mgrs;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
 {

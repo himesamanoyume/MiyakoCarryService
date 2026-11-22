@@ -52,7 +52,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             NavGapExecutor.RescueInProgress = true;
             try
             {
-                botOwner.Mover.SetPlayerToNavMesh(LastGoodPos);
+                var deltaMove = LastGoodPos - botOwner.Mover._prevSuccessLinkedFrom;
+                botOwner.Mover.SetPlayerToNavMesh(LastGoodPos, deltaMove, out var _);
             }
             finally
             {

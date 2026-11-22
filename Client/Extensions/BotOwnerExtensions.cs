@@ -1,5 +1,4 @@
 
-using System.Collections.Generic;
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
@@ -19,20 +18,18 @@ namespace MiyakoCarryService.Client.Extensions
 
         private static SubtitlesMgr SubtitlesMgr => field ??= MgrAccessor.Get<SubtitlesMgr>();
 
-        private static readonly AttachedTable<BotOwner, McsBotPlayerData> _datas = new();
-
         extension(BotOwner botOwner)
         {
             public bool IsMcsBotPlayer => McsMgr.IsMcsBotPlayer(botOwner.ProfileId);
 
             public McsBotPlayerData GetMcsBotPlayerData()
             {
-                return _datas.GetOrCreate(botOwner, key =>
+                return InteropDataCache<McsBotPlayerData>.GetOrCreate(botOwner.Pointer, () =>
                 {
                     var mcsBotPlayerDatas = PlayerDataMgr.GetMcsBotPlayerDatas();
                     foreach (var _mcsBotPlayerData in mcsBotPlayerDatas)
                     {
-                        if (_mcsBotPlayerData.BotOwner == key)
+                        if (_mcsBotPlayerData.BotOwner == botOwner)
                         {
                             return _mcsBotPlayerData;
                         }
@@ -43,7 +40,7 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void SetMcsBotPlayerData(McsBotPlayerData mcsBotPlayerData)
             {
-                _datas.Set(botOwner, mcsBotPlayerData);
+                InteropDataCache<McsBotPlayerData>.Set(botOwner.Pointer, mcsBotPlayerData);
             }
 
             public void TalkMsg(McsMsg msg)
@@ -73,10 +70,6 @@ namespace MiyakoCarryService.Client.Extensions
                 }
                 else
                 {
-                    if (botOwner.Position == null)
-                    {
-                        return new();
-                    }
                     return botOwner.Position;
                 }
             }
@@ -120,7 +113,7 @@ namespace MiyakoCarryService.Client.Extensions
 
                 if (magazineSlot != null)
                 {
-                    var preallocatedMagList = new List<Magazine>();
+                    var preallocatedMagList = new Il2CppSystem.Collections.Generic.List<Magazine>();
                     inventoryController.GetReachableItemsOfTypeNonAlloc(preallocatedMagList, null);
 
                     var hasUnusedMagazine = false;
@@ -170,7 +163,7 @@ namespace MiyakoCarryService.Client.Extensions
                 var inventoryController = player.InventoryController;
 
                 var chamberSlot = weapon.HasChambers ? weapon.Chambers[0] : null;
-                var preallocatedAmmoList = new List<Ammo>();
+                var preallocatedAmmoList = new Il2CppSystem.Collections.Generic.List<Ammo>();
                 inventoryController.GetAcceptableItemsNonAlloc(
                     BotReload._availableEquipmentSlots,
                     preallocatedAmmoList,
@@ -214,13 +207,16 @@ namespace MiyakoCarryService.Client.Extensions
                 }
 
                 var item = equipment.GetSlot(slot).ContainedItem;
-                if (item is not Weapon weapon)
+                var weapon = item == null ? null : item.TryCast<Weapon>();
+                if (weapon == null)
                 {
                     return false;
                 }
 
                 var magazineSlot = weapon.GetMagazineSlot();
-                if (magazineSlot?.ContainedItem is Magazine magazine)
+                var magazineContainedItem = magazineSlot?.ContainedItem;
+                var magazine = magazineContainedItem == null ? null : magazineContainedItem.TryCast<Magazine>();
+                if (magazine != null)
                 {
                     if (magazine.Count > 0)
                     {
@@ -296,7 +292,9 @@ namespace MiyakoCarryService.Client.Extensions
                     return 1f;
                 }
 
-                if (equipment.GetSlot(slot).ContainedItem is not Weapon weapon)
+                var containedItem = equipment.GetSlot(slot).ContainedItem;
+                var weapon = containedItem == null ? null : containedItem.TryCast<Weapon>();
+                if (weapon == null)
                 {
                     return 1f;
                 }
@@ -319,7 +317,8 @@ namespace MiyakoCarryService.Client.Extensions
 
             public void TryResetHandsState()
             {
-                if (botOwner.Medecine.Using || botOwner.GetPlayer?.HandsController is Player.MedsController)
+                var handsController = botOwner.GetPlayer?.HandsController;
+                if (botOwner.Medecine.Using || (handsController != null && handsController.TryCast<Player.MedsController>() != null))
                 {
                     return;
                 }
@@ -337,7 +336,8 @@ namespace MiyakoCarryService.Client.Extensions
 
                 botOwner.Mover.AllowTeleport();
                 botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = botOwner.Position;
-                botOwner.Mover.SetPlayerToNavMesh(botOwner.Position);
+                var deltaMove = botOwner.Position - botOwner.Mover._prevSuccessLinkedFrom;
+                botOwner.Mover.SetPlayerToNavMesh(botOwner.Position, deltaMove, out var _);
 
                 if (!botOwner.Medecine.Using && handsIdle)
                 {
@@ -385,7 +385,7 @@ namespace MiyakoCarryService.Client.Extensions
                 if (medecine.Using)
                 {
                     if (player.HealthController.FindExistingEffect<IMedEffect>(EBodyPart.Common) == null
-                        && player.HandsController is not Player.MedsController)
+                        && (player.HandsController == null || player.HandsController.TryCast<Player.MedsController>() == null))
                     {
                         botOwner.McsStopMeds();
                     }
@@ -393,7 +393,7 @@ namespace MiyakoCarryService.Client.Extensions
                     return false;
                 }
 
-                if (player.HandsController is Player.MedsController
+                if ((player.HandsController != null && player.HandsController.TryCast<Player.MedsController>() != null)
                     || player.ProcessStatus != Player.EProcessStatus.None)
                 {
                     return false;
@@ -414,8 +414,13 @@ namespace MiyakoCarryService.Client.Extensions
 
                 if (firstAid.Damaged && !firstAid.IsBleeding)
                 {
-                    var bodyPart = firstAid._bodyPartToHeal ?? EBodyPart.Common;
-                    if (!player.HealthController.CanApplyItem(meds, bodyPart))
+                    var bodyPart = firstAid._bodyPartToHeal;
+                    if (bodyPart == null || !bodyPart.HasValue)
+                    {
+                        bodyPart = new Il2CppSystem.Nullable<EBodyPart>(EBodyPart.Common);
+                    }
+
+                    if (!player.HealthController.CanApplyItem(meds, bodyPart.Value))
                     {
                         firstAid.McsRefreshMeds();
                         return false;
@@ -466,6 +471,11 @@ namespace MiyakoCarryService.Client.Extensions
 
                 player.TrySetLastEquippedWeapon(true);
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<McsBotPlayerData>.Clear();
         }
     }
 }

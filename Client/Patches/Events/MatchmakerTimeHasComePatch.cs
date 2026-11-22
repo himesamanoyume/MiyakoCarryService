@@ -3,7 +3,7 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System.Reflection;
 
 namespace MiyakoCarryService.Client.Patches.Events
@@ -13,14 +13,19 @@ namespace MiyakoCarryService.Client.Patches.Events
 	/// </summary>
 	public sealed class MatchmakerTimeHasComePatch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show), [typeof(IEftSession), typeof(RaidSettings), typeof(MatchmakerPlayersController)]);
+		protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerTimeHasCome), nameof(MatchmakerTimeHasCome.Show));
 
 		private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
 		[PatchPrefix]
-		public static void Prefix(IEftSession session, RaidSettings raidSettings, MatchmakerPlayersController matchmaker)
+		public static void Prefix(MatchmakerTimeHasCome.TimeHasComeScreenController controller)
 		{
-			if (McsMgr.McsTransitBotPlayers.TryGetValue(MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id, out var groupPlayerViewModelClasses))
+			var session = controller.Session;
+			var matchmaker = controller.Matchmaker;
+
+			var profileId = MatchmakerAcceptScreenShowPatch.CurrentType == ESideType.Pmc ? session.Profile.Id : session.ProfileOfPet.Id;
+
+			if (McsMgr.McsTransitBotPlayers.TryGetValue(profileId, out var groupPlayerViewModelClasses))
 			{
 				foreach (var groupPlayerViewModelClass in groupPlayerViewModelClasses.Values)
 				{

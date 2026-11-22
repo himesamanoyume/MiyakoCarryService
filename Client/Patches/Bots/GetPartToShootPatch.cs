@@ -4,7 +4,7 @@ using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -46,7 +46,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
             if (!enemyInfo.HaveSeenPersonal || Time.time - enemyInfo.FirstTimeSeen <= enemyInfo.Owner.Settings.FileSettings.Aiming.ANY_PART_SHOOT_TIME)
             {
                 var enemyPart = enemyInfo._allParts[mcsBotPlayerData.AimingBodyPartType];
-                if (enemyPart.CanShoot && enemyInfo._allPartsVision[mcsBotPlayerData.AimingBodyPartType].Visible)
+                var enemyPartVision = enemyInfo._allPartsVision[mcsBotPlayerData.AimingBodyPartType];
+                if (enemyPartVision.CanShoot && enemyPartVision.Visible)
                 {
                     enemyInfo.LastPartToShoot = enemyPart;
                 }
@@ -61,7 +62,8 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return enemyInfo.CurrPosition + Vector3.up;
             }
 
-            return ApplyLead(enemyInfo, mcsBotPlayerData, enemyInfo.LastPartToShoot.GetPartPositionWithOffset());
+            var lastPartVision = enemyInfo._allPartsVision[enemyInfo.LastPartToShoot.BodyPartType];
+            return ApplyLead(enemyInfo, mcsBotPlayerData, enemyInfo.LastPartToShoot.GetPartPositionWithOffset(lastPartVision.LastShootCastOffsetLocal));
         }
 
         private static Vector3 ApplyLead(EnemyInfo enemyInfo, McsBotPlayerData mcsBotPlayerData, Vector3 basePos)

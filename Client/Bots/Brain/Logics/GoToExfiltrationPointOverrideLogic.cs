@@ -14,7 +14,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void UpdateNodeByBrain(CoreActionResultParams data)
         {
-            DoorOpen(true);
+            ChecksWhileMoving(out _, true);
             var exfiltrationData = _owner.PatrollingData.ExfiltrationData;
             var cachedExfiltrationPoint = exfiltrationData.CachedExfiltrationPoint;
             var sqrDistance = _owner.Position.McsSqrDistance(cachedExfiltrationPoint.GetPosition(_owner));

@@ -2,10 +2,9 @@
 using System.Reflection;
 using EFT.Builds;
 using EFT.UI;
-using EFT.UI.Builds;
 using HarmonyLib;
 using MiyakoCarryService.Client.Patches.Group;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Inventory
 {
@@ -17,23 +16,23 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EquipmentBuildsScreen), nameof(EquipmentBuildsScreen.UpdateBuildList));
 
         [PatchPrefix]
-        public static bool Prefix(EEquipmentBuildType ____currentBuildTabType, EquipmentBuildsStorage ____buildStorage, Tab ____customBuildsTab, Tab ____standardBuildsTab, TabGroup ____buildTypesTabGroup)
+        public static bool Prefix(EquipmentBuildsScreen __instance)
         {
             if (!GetContextInteractionsPatch.IsMcsBotPlayerInventoryMode)
             {
                 return true;
             }
 
-            if (____buildStorage == null || ____customBuildsTab == null || ____standardBuildsTab == null || ____buildTypesTabGroup == null)
+            if (__instance._buildStorage == null || __instance._customBuildsTab == null || __instance._standardBuildsTab == null || __instance._buildTypesTabGroup == null)
             {
                 return true;
             }
 
-            if (____currentBuildTabType == EEquipmentBuildType.Custom && !____buildStorage.HasCustomBuilds)
+            if (__instance._currentBuildTabType == EEquipmentBuildType.Custom && !__instance._buildStorage.HasCustomBuilds)
             {
-                ____customBuildsTab.SetInteractable(false);
-                ____customBuildsTab.Deselect().HandleExceptions();
-                ____buildTypesTabGroup.Show(____standardBuildsTab, true);
+                __instance._customBuildsTab.SetInteractable(false);
+                __instance._customBuildsTab.Deselect().HandleExceptions();
+                __instance._buildTypesTabGroup.Show(__instance._standardBuildsTab, true);
                 return false;
             }
             return true;

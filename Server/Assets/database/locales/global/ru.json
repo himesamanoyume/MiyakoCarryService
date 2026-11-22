@@ -152,7 +152,7 @@
     "Mcs/RefreshFriendList": "Обновить список друзей",
     "Mcs/OpenMcsBotPlayerInventory": "Открыть инвентарь",
     "Mcs/ReturnToMainChar": "Вернуться к главному герою",
-    "Mcs/McsInventoryMode": "Режим инвентаря наёмника",
+    "Mcs/McsInventoryMode": "MCS Инв.",
     "Mcs/BigSurvey": "ЛОГИ MCS",
     "Mcs/BigSurveyNotify": "Количество ошибок: {0}，текст журнала скопирован",
     "Mcs/ReturnToMainCharRefuse": "Этот игрок не является вашим наёмником, нельзя открыть инвентарь.",

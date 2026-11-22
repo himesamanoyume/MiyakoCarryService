@@ -1,34 +1,43 @@
 using Comfort.Common;
+using SPTushonka.Reflection.Utils;
 using EFT;
 using System;
-using SPT.Reflection.Utils;
 using MiyakoCarryService.Client.Utils;
 using System.Collections.Generic;
-using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
 using System.IO;
 using System.Reflection;
+using MiyakoCarryService.Client.Bots.Navigation;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Misc;
-using System.Threading.Tasks;
 using MiyakoCarryService.Client.Patches.Events;
 using System.Linq;
 using MiyakoCarryService.Client.Models;
 using System.Diagnostics;
 using System.Threading;
-using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using EFT.InventoryLogic;
 using Diz.Jobs;
-using EFT.Ballistics;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
+using System.Threading.Tasks;
+using Il2CppSystem.Linq;
+using Il2CppInterop.Runtime.Injection;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client
 {
-    public sealed class GameLoop : MiyakoCarryServiceSingleton<GameLoop>
+    public sealed class GameLoop : MonoBehaviour
     {
-        public Dictionary<Type, IMgr> Mgrs { get; private set; } = new();
+        public GameLoop(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
+        public static GameLoop Instance => MiyakoCarryServiceSingleton<GameLoop>.Instance;
+
+        public Dictionary<Type, BaseMgr> Mgrs { get; private set; } = new();
         public Dictionary<string, TraderOffer> ItemBestPriceDict { get; private set; } = new();
         public Shader HighlightShader { get; private set; } = null;
         public Camera MainCamera { get; private set; } = null;
@@ -36,14 +45,14 @@ namespace MiyakoCarryService.Client
         public Player MyPlayer { get; private set; } = null;
         public bool IsGameStarted = false;
         private Debouncer<ItemData, McsAILeadPlayer> _updateDebouncer;
-        private HashSet<MongoID> _loadedMcsLeadPlayer = new();
+        private HashSet<string> _loadedMcsLeadPlayer = new();
         private int? _lastSpawnGameWorldInstanceId = null;
 
         public IEftSession Session
         {
             get
             {
-                return field ??= ClientAppUtils.GetMainApp().GetClientBackEndSession();
+                return field ??= ClientAppUtils.GetClientApp().GetClientBackEndSession();
             }
         }
 
@@ -64,7 +73,8 @@ namespace MiyakoCarryService.Client
 
         public bool CheckVaildGameWorld()
         {
-            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld && IsGameStarted;
+            var gameWorld = Singleton<GameWorld>.Instance;
+            IsVaildGameWorld = Singleton<GameWorld>.Instantiated && gameWorld != null && gameWorld.TryCast<HideoutGameWorld>() == null && IsGameStarted;
             return IsVaildGameWorld;
         }
 
@@ -74,6 +84,8 @@ namespace MiyakoCarryService.Client
 
             KeyInput.KeyDown(MiyakoCarryServicePlugin.EnableLootingHotKey.Value, MiyakoCarryServicePlugin.EnableLooting);
             KeyInput.KeyDown(MiyakoCarryServicePlugin.EnableKeepFormationHotKey.Value, MiyakoCarryServicePlugin.EnableKeepFormation);
+
+            CommandUtils.KeepCommandMenuOpen();
 
             if (!IsVaildGameWorld)
             {
@@ -135,13 +147,12 @@ namespace MiyakoCarryService.Client
                 var bundle = AssetBundle.LoadFromMemory(assetBytes);
                 if (bundle != null)
                 {
-                    HighlightShader = bundle.LoadAsset<Shader>(highlightShaderName);
+                    HighlightShader = bundle.LoadAsset<Shader>(highlightShaderName)?.KeepLoaded();
                     if (HighlightShader == null)
                     {
-                        UnityEngine.Debug.LogException(new Exception($"无法加载Shader: {highlightShaderName}"));
+                        McsLogger.LogFatal(new Exception($"无法加载Shader: {highlightShaderName}"));
                     }
 
-                    bundle.Unload(false);
                     return;
                 }
             }
@@ -151,29 +162,26 @@ namespace MiyakoCarryService.Client
         {
             LoadAssetBundle();
 
-            BaseMgr.Enable(typeof(McsMgr));
-            BaseMgr.Enable(typeof(PlayerDataMgr));
-            BaseMgr.Enable(typeof(LootDataMgr));
-            BaseMgr.Enable(typeof(SubtitlesMgr));
-            BaseMgr.Enable(typeof(CommandMgr));
-            BaseMgr.Enable(typeof(HighlightMgr));
-            BaseMgr.Enable(typeof(ExfilDataMgr));
-            BaseMgr.Enable(typeof(TransitDataMgr));
-            BaseMgr.Enable(typeof(QuestDataMgr));
-            BaseMgr.Enable(typeof(SwitchDataMgr));
-            BaseMgr.Enable(typeof(TripwireDataMgr));
-            BaseMgr.Enable(typeof(BarbedWireDataMgr));
-            BaseMgr.Enable(typeof(BorderZoneDataMgr));
-            BaseMgr.Enable(typeof(DamageTriggerDataMgr));
-            BaseMgr.Enable(typeof(RoomTrapDataMgr));
-            BaseMgr.Enable(typeof(DoorDataMgr));
-            BaseMgr.Enable(typeof(StationaryWeaponDataMgr));
-            BaseMgr.Enable(typeof(FormationDataMgr));
-            BaseMgr.Enable(typeof(TrapAvoidanceMgr));
-
-            // BrainMgr必须在最后，用以脚本引擎重载
-            BaseMgr.Enable(typeof(BrainMgr));
-            // end
+            Il2CppActivator.Enable(typeof(McsMgr));
+            Il2CppActivator.Enable(typeof(PlayerDataMgr));
+            Il2CppActivator.Enable(typeof(LootDataMgr));
+            Il2CppActivator.Enable(typeof(SubtitlesMgr));
+            Il2CppActivator.Enable(typeof(CommandMgr));
+            Il2CppActivator.Enable(typeof(HighlightMgr));
+            Il2CppActivator.Enable(typeof(ExfilDataMgr));
+            Il2CppActivator.Enable(typeof(TransitDataMgr));
+            Il2CppActivator.Enable(typeof(QuestDataMgr));
+            Il2CppActivator.Enable(typeof(SwitchDataMgr));
+            Il2CppActivator.Enable(typeof(TripwireDataMgr));
+            Il2CppActivator.Enable(typeof(BarbedWireDataMgr));
+            Il2CppActivator.Enable(typeof(BorderZoneDataMgr));
+            Il2CppActivator.Enable(typeof(DamageTriggerDataMgr));
+            Il2CppActivator.Enable(typeof(RoomTrapDataMgr));
+            Il2CppActivator.Enable(typeof(DoorDataMgr));
+            Il2CppActivator.Enable(typeof(StationaryWeaponDataMgr));
+            Il2CppActivator.Enable(typeof(FormationDataMgr));
+            Il2CppActivator.Enable(typeof(TrapAvoidanceMgr));
+            Il2CppActivator.Enable(typeof(BrainMgr));
 
             EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
             EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
@@ -187,57 +195,55 @@ namespace MiyakoCarryService.Client
         {
             foreach (var mgrType in @event.MgrTypes)
             {
-                BaseMgr.Enable(mgrType);
+                Il2CppActivator.Enable(mgrType);
             }
         }
 
         public void OnUpdateProfile(UpdateProfileEvent @event)
         {
-            TasksExtensions.HandleExceptions(UpdateProfile());
+            UpdateProfile().McsHandleExceptions();
         }
 
         public void OnUpdateDailyQuests(UpdateDailyQuestsEvent @event)
         {
-            TasksExtensions.HandleExceptions(UpdateDailyQuests());
+            StartCoroutine(UpdateDailyQuests().McsSafe());
         }
 
         public void OnUpdateMiyakoTraderAssortment(UpdateMiyakoTraderAssortmentEvent @event)
         {
-            TasksExtensions.HandleExceptions(UpdateMiyakoTraderAssortmentEvent());
+            UpdateMiyakoTraderAssortmentEvent().McsHandleExceptions();
         }
 
-        public async Task UpdateDailyQuests()
+        public System.Collections.IEnumerator UpdateDailyQuests()
         {
             for (int i = 0; i < 5; i++)
             {
-                await Task.Delay(1000);
+                yield return new WaitForSeconds(1f);
+
                 TarkovApplication.Exist(out var tarkovApplication);
-                var tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
-
-                var menuOperation = tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
-                var array = await Session.GetDailyQuests();
-                if (!array.IsNullOrEmpty())
+                if (tarkovApplication == null)
                 {
-                    if (menuOperation == null)
-                    {
-                        return;
-                    }
-
-                    if (menuOperation.QuestController == null)
-                    {
-                        return;
-                    }
-
-                    if (menuOperation.QuestController.Quests == null)
-                    {
-                        return;
-                    }
-                    menuOperation.QuestController.Quests.UpdateDailyQuests(array);
+                    continue;
                 }
+
+                var menuOperation = tarkovApplication._menuOperation;
+                if (menuOperation?.QuestController?.Quests == null)
+                {
+                    yield break;
+                }
+
+                var repeatableQuestUpdater = menuOperation.QuestController.Quests._repeatableQuestUpdater;
+                if (repeatableQuestUpdater == null)
+                {
+                    McsLogger.LogError("[UpdateDailyQuests] _repeatableQuestUpdater 为 null，跳过本次刷新");
+                    yield break;
+                }
+
+                TasksExtensions.HandleExceptions(repeatableQuestUpdater.UpdateDailyQuests());
             }
         }
 
-        public async Task UpdateMiyakoTraderAssortmentEvent()
+        public Task UpdateMiyakoTraderAssortmentEvent()
         {
             foreach (var trader in Session.Traders)
             {
@@ -247,17 +253,21 @@ namespace MiyakoCarryService.Client
                     break;
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         public async Task UpdateProfile()
         {
-            var profileChangesPocoClass = await McsRequestHandler.UpdateProfile();
-            if (Session is EftClientBackendSession sessionBackendClass)
+            var profileChangesPayload = await McsRequestHandler.UpdateProfile();
+            var sessionBackendClass = Session == null ? null : Session.TryCast<EftClientBackendSession>();
+            if (sessionBackendClass != null)
             {
                 var profile = sessionBackendClass.Profile;
                 var correctInfo = profile.Info;
 
-                foreach (var (traderId, traderInfo) in profile.TradersInfo)
+                var traderInfos = Il2CppSystem.Linq.Enumerable.ToArray(profile.TradersInfo.Values);
+                foreach (var traderInfo in traderInfos)
                 {
                     if (traderInfo._profileInfo != correctInfo)
                     {
@@ -265,9 +275,50 @@ namespace MiyakoCarryService.Client
                     }
                 }
 
-                if (sessionBackendClass._profileUpdaters.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater))
+                var profileUpdaterFound = sessionBackendClass._profileUpdaters.TryGetValue(sessionBackendClass.Profile.Id, out var profileUpdater);
+                if (profileUpdaterFound && profileUpdater != null && profileChangesPayload != null)
                 {
-                    profileUpdater.UpdateProfile(profileChangesPocoClass);
+                    var profileUpdatesHandler = profileUpdater.TryCast<ProfileUpdatesHandler>();
+                    if (profileUpdatesHandler != null)
+                    {
+                        if (profileChangesPayload.Experience > profile.Info.Experience)
+                        {
+                            profileUpdatesHandler.ApplyExperience(profileChangesPayload.Experience);
+                        }
+
+                        if (profileChangesPayload.TradersData != null && profileChangesPayload.TradersData.Count > 0)
+                        {
+                            var tradersData = new Il2CppSystem.Collections.Generic.Dictionary<string, TraderData>();
+                            foreach (var (traderId, traderData) in profileChangesPayload.TradersData)
+                            {
+                                var il2CppTraderData = new TraderData();
+                                if (traderData.SalesSum.HasValue)
+                                {
+                                    il2CppTraderData._salesSum = new Il2CppSystem.Nullable<long>(traderData.SalesSum.Value);
+                                }
+                                if (traderData.Standing.HasValue)
+                                {
+                                    il2CppTraderData._standing = new Il2CppSystem.Nullable<double>(traderData.Standing.Value);
+                                }
+                                if (traderData.LoyaltyLevel.HasValue)
+                                {
+                                    il2CppTraderData._loyaltyLevel = new Il2CppSystem.Nullable<float>(traderData.LoyaltyLevel.Value);
+                                }
+                                if (traderData.Unlocked.HasValue)
+                                {
+                                    il2CppTraderData._unlocked = new Il2CppSystem.Nullable<bool>(traderData.Unlocked.Value);
+                                }
+                                if (traderData.Disabled.HasValue)
+                                {
+                                    il2CppTraderData._disabled = new Il2CppSystem.Nullable<bool>(traderData.Disabled.Value);
+                                }
+
+                                tradersData.Add(traderId, il2CppTraderData);
+                            }
+
+                            profileUpdatesHandler.ApplyTradersChanges(tradersData);
+                        }
+                    }
                 }
             }
         }
@@ -275,11 +326,13 @@ namespace MiyakoCarryService.Client
         public void OnGameWorldStarted(GameWorldStartedEvent @event)
         {
             Reset();
+            ClearInteropCaches();
         }
 
         public void OnGameWorldEnded(GameWorldEndedEvent @event)
         {
             Reset();
+            ClearInteropCaches();
             if (_updateDebouncer != null)
             {
                 _updateDebouncer.Flush();
@@ -299,7 +352,7 @@ namespace MiyakoCarryService.Client
             MyPlayer = null;
         }
 
-        public override void Destroy()
+        public void Destroy()
         {
             EventMgr.UnsubscribeAll(this);
             Reset();
@@ -334,10 +387,32 @@ namespace MiyakoCarryService.Client
                 ItemBestPriceDict.Clear();
             }
             ItemBestPriceDict = null;
-            base.Destroy();
+            ClearInteropCaches();
+            MiyakoCarryServiceSingleton<GameLoop>.Clear();
+            Destroy(gameObject);
         }
 
-        internal T GetMgr<T>() where T : IMgr
+        private static void ClearInteropCaches()
+        {
+            Extensions.ItemExtensions.Clear();
+            PlayerExtensions.Clear();
+            BotOwnerExtensions.Clear();
+            ConditionExtensions.Clear();
+            DoorExtensions.Clear();
+            SwitchExtensions.Clear();
+            ExfiltrationPointExtensions.Clear();
+            FinalExitZoneExtensions.Clear();
+            TransitPointExtensions.Clear();
+            TripwireSynchronizableObjectExtensions.Clear();
+            TriggerZoneExtensions.Clear();
+            TrapSyncableExtensions.Clear();
+            StationaryWeaponExtensions.Clear();
+            BorderZoneExtensions.Clear();
+            DamageTriggerExtensions.Clear();
+            NavGapExecutor.Clear();
+        }
+
+        internal T GetMgr<T>() where T : BaseMgr
         {
             return (T)Mgrs[typeof(T)];
         }
@@ -392,7 +467,7 @@ namespace MiyakoCarryService.Client
                 {
                     try
                     {
-                        StartCoroutine(kvp.Key.UnlockRefreshRootItemInteresting(kvp.Value));
+                        StartCoroutine(kvp.Key.UnlockRefreshRootItemInteresting(kvp.Value).McsSafe());
                     }
                     catch (Exception e)
                     {
@@ -405,14 +480,7 @@ namespace MiyakoCarryService.Client
         public async Task InitMcsLeadPlayerConfigs()
         {
             var mcsMgr = MgrAccessor.Get<McsMgr>();
-            if (MiyakoCarryServicePlugin.FikaInstalled)
-            {
-                mcsMgr.McsLeadPlayerConfigs = await McsRequestHandler.GetMcsBotPlayerConfigs();
-            }
-            else
-            {
-                mcsMgr.McsLeadPlayerConfigs = new();
-            }
+            mcsMgr.McsLeadPlayerConfigs = new();
         }
 
         public async Task SpawnMcsBotPlayer()
@@ -445,13 +513,31 @@ namespace MiyakoCarryService.Client
             {
                 foreach (var mcsProfile in mcsProfileItem.Value)
                 {
-                    await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Local, mcsProfile.GetAllPrefabPaths(false).ToArray(), JobYieldPriority.Immediate, new Progress<InitLevelProgress>(), default);
+                    var objectsFactory = Singleton<ObjectsFactory>.Instance;
+                    if (objectsFactory == null)
+                    {
+                        return;
+                    }
+
+                    var pools = objectsFactory.GetPools(ObjectsFactory.PoolsCategory.Raid);
+                    if (pools == null)
+                    {
+                        return;
+                    }
+
+                    await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(
+                        pools,
+                        pools.ConvertResourceInfo(mcsProfile.GetAllPrefabPaths(false).ToList()),
+                        ObjectsFactory.AssemblyType.Local,
+                        JobYieldPriority.General,
+                        new Il2CppSystem.Progress<InitLevelProgress>(),
+                        new CancellationToken().ToIl2Cpp()).AsManaged();
                 }
             }
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
-                .Select(kvp => gameWorld.GetEverExistedPlayerByID(kvp.Key))
+                .Select(kvp => gameWorld.GetEverExistedPlayerByProfileId(kvp.Key))
                 .Where(leadPlayer => leadPlayer != null);
 
             var botGame = Singleton<IBotGame>.Instance;
@@ -487,49 +573,6 @@ namespace MiyakoCarryService.Client
 
                 _loadedMcsLeadPlayer.Add(leadPlayer.ProfileId);
 
-                leadPlayer.BeingHitAction += (DamageInfo damageInfo, EBodyPart bodyPart, float value) =>
-                {
-                    var attackerIPlayer = damageInfo.Player?.iPlayer;
-                    if (attackerIPlayer == null || !attackerIPlayer.HealthController.IsAlive || mcsMgr.IsMcsBotPlayer(attackerIPlayer.ProfileId))
-                    {
-                        return;
-                    }
-
-                    if (leadPlayer.BotsGroup == null)
-                    {
-                        return;
-                    }
-
-                    var mcsBotPlayers = mcsMgr.GetAllMcsSquadMembersByMcsLeadId(leadPlayer.ProfileId);
-
-                    if (mcsBotPlayers == null)
-                    {
-                        return;
-                    }
-
-                    var mcsBotPlayer = mcsBotPlayers.FirstOrDefault();
-                    if (mcsBotPlayer?.AIData?.BotOwner?.BotFollower?.BossToFollow is not McsAILeadPlayer mcsAILeadPlayer)
-                    {
-                        return;
-                    }
-
-                    var attacker = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(attackerIPlayer.ProfileId);
-                    if (attacker == null)
-                    {
-                        return;
-                    }
-
-                    mcsAILeadPlayer.MarkLeadAttacker(attacker);
-
-                    if (Time.time - mcsAILeadPlayer.LastLeadReportTime < 0.25f)
-                    {
-                        return;
-                    }
-                    mcsAILeadPlayer.LastLeadReportTime = Time.time;
-
-                    mcsAILeadPlayer.CalcGoalEnemy(attacker);
-                };
-
                 var leadPlayerPos = leadPlayer.Position;
                 if (!mcsMgr.McsLeadPlayerConfigs.TryGetValue(leadPlayer.ProfileId, out var mcsBotPlayerConfig))
                 {
@@ -551,7 +594,7 @@ namespace MiyakoCarryService.Client
                     mcsMgr.UpdateMcsBotPlayerConfig(mcsBotPlayerConfig.McsLeadPlayerId, mcsBotPlayerConfig);
                 }
                 var mcsAILeadPlayer = new McsAILeadPlayer(leadPlayer);
-                leadPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId == "Fika" ? "Fika" : "Mcs";
+                leadPlayer.Profile.Info.GroupId = "Mcs";
 
                 if (mcsProfilesDict[leadPlayer.ProfileId].Count() == 0)
                 {
@@ -579,7 +622,7 @@ namespace MiyakoCarryService.Client
 
                     var botProfileDataClass = new GetProfileDataParams(leadPlayer.Side, wildSpawnType, botDifficulty, 2, botSpawnParams);
 
-                    var botCreationDataClass = await BotCreationData.Create(botProfileDataClass, botCreator, 0, botSpawner);
+                    var botCreationDataClass = await BotCreationData.Create(botProfileDataClass, botCreator, 0, botSpawner).AsManaged();
 
                     botCreationDataClass.AddProfile(mcsBotPlayerProfile);
 
@@ -588,7 +631,7 @@ namespace MiyakoCarryService.Client
 
                     var closestZone = botSpawner.GetClosestZone(leadPlayerPos, out _);
 
-                    var groupAction = new Func<BotOwner, BotZone, BotsGroup>((BotOwner botOwner, BotZone botZone) =>
+                    var groupAction = new Func<BotOwner, BotZone, BotSpawnBossAndGroupParams, BotsGroup>((BotOwner botOwner, BotZone botZone, BotSpawnBossAndGroupParams groupParams) =>
                     {
                         botOwner.GetPlayer.Profile.Info.GroupId = leadPlayer.Profile.Info.GroupId;
                         botOwner.GetPlayer.Profile.Info.TeamId = leadPlayer.Profile.Info.TeamId;
@@ -604,15 +647,27 @@ namespace MiyakoCarryService.Client
                         {
                             botOwner.Boss.IamBoss = false;
                             leadPlayer.BotsGroup.AddMember(botOwner, false);
+
+                            Tools.MakeNeutralBotTypes(leadPlayer.BotsGroup._initialBot?.Settings);
                             return leadPlayer.BotsGroup;
                         }
 
                         var enemyTypes = botOwner.Settings.GetEnemyBotTypes();
 
+                        foreach (var neutralType in Classification.NeutralBotTypes)
+                        {
+                            enemyTypes.Remove(neutralType);
+                        }
+
                         if (leadPlayer.Side != EPlayerSide.Savage)
                         {
                             foreach (WildSpawnType wst in Enum.GetValues(typeof(WildSpawnType)))
                             {
+                                if (Tools.IsNeutralBot(wst))
+                                {
+                                    continue;
+                                }
+
                                 enemyTypes.Add(wst);
                             }
                         }
@@ -629,16 +684,19 @@ namespace MiyakoCarryService.Client
                         botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
                         botOwner.Settings.GetWarnBotTypes().Clear();
 
-                        var enemies = botSpawner.GetBotEnemiesList(botOwner);
-
-                        var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner._deadBodiesController, botSpawner._allPlayers, true);
+                        var botsGroup = new BotsGroup(closestZone, botGame, botOwner, botSpawner._deadBodiesController, true);
 
                         var notScav = leadPlayer.Side != EPlayerSide.Savage;
                         if (notScav)
                         {
-                            botsGroup.OnReportEnemy += (IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
+                            botsGroup.add_OnReportEnemy(new Action<IPlayer, Vector3, Vector3, EEnemyPartVisibleType, BotOwner>((IPlayer enemy, Vector3 enemyPos, Vector3 weaponRootLast, EEnemyPartVisibleType isVisibleOnlyBySense, BotOwner reporter) =>
                             {
-                                if (enemy.Profile.Info.GroupId is "Mcs" or "Fika" || mcsMgr.IsMcsLeadPlayer(enemy.ProfileId) || mcsMgr.IsMcsBotPlayer(enemy.ProfileId))
+                                if (enemy.Profile.Info.GroupId is "Mcs" || mcsMgr.IsMcsLeadPlayer(enemy.ProfileId) || mcsMgr.IsMcsBotPlayer(enemy.ProfileId))
+                                {
+                                    return;
+                                }
+
+                                if (enemy.Profile?.Info?.Settings != null && Tools.IsNeutralBot(enemy.Profile.Info.Settings.Role))
                                 {
                                     return;
                                 }
@@ -648,14 +706,14 @@ namespace MiyakoCarryService.Client
                                     return;
                                 }
 
-                                botsGroup.AddEnemy(enemy, EBotEnemyCause.byKill);
-                            };
+                                botsGroup.AddEnemy(enemy);
+                            }));
                         }
 
                         foreach (var _leadPlayer in leadPlayers)
                         {
-                            botsGroup.RemoveEnemy(_leadPlayer);
-                            botsGroup.AddAlly(_leadPlayer);
+                            botsGroup.BotGroupHostility.RemoveEnemyAction(_leadPlayer);
+                            botsGroup.BotGroupHostility.AddNeutralAction(_leadPlayer);
                         }
 
                         botSpawner.Groups.AddNoKey(botsGroup, botZone);
@@ -664,14 +722,16 @@ namespace MiyakoCarryService.Client
                         leadPlayer.BotsGroup = botsGroup;
                         leadPlayer.BotsGroup.Lock();
 
+                        Tools.MakeNeutralBotTypes(botsGroup._initialBot?.Settings);
+
                         return botsGroup;
                     });
 
-                    botCreationDataClass.Profiles.ForEach(async profile =>
+                    botCreationDataClass.Profiles.ForEach(new Action<Profile>(async profile =>
                     {
                         var onActivate = new Action<BotOwner>((BotOwner botOwner) =>
                         {
-                            var stopWatch = new Stopwatch();
+                            var stopWatch = new Stopwatch().ToIl2Cpp();
                             stopWatch.Start();
 
                             botSpawner.ActivateBotCallback(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
@@ -753,9 +813,9 @@ namespace MiyakoCarryService.Client
 
                         botSpawner._inSpawnProcess += 1;
 
-                        var cancellationToken = new CancellationToken();
-                        await botCreator.ActivateBot(profile, new PositionNote(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, true, groupAction, onActivate, cancellationToken);
-                    });
+                        var cancellationToken = new CancellationToken().ToIl2Cpp();
+                        await botCreator.ActivateBot(profile, new PositionNote(leadPlayerPos, botCreationDataClass.GetPosition().CorePointId, true), closestZone, new BotSpawnBossAndGroupParams(), groupAction, onActivate, cancellationToken);
+                    }));
                 }
             }
         }
@@ -777,7 +837,6 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_PMC_PLAYERS = true;
             settings.FileSettings.Mind.ENEMY_BY_GROUPS_SAVAGE_PLAYERS = notScav;
 
-            settings.FileSettings.Mind.USE_ADD_TO_ENEMY_VALIDATION = false;
             settings.FileSettings.Mind.DEFAULT_SAVAGE_BEHAVIOUR = notScav ? EWarnBehaviour.AlwaysEnemies : EWarnBehaviour.Neutral;
             settings.FileSettings.Mind.DEFAULT_BEAR_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
             settings.FileSettings.Mind.DEFAULT_USEC_BEHAVIOUR = EWarnBehaviour.AlwaysEnemies;
@@ -788,19 +847,6 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.CAN_TALK = true;
             settings.FileSettings.Mind.TALK_WITH_QUERY = true;
             botOwner.BotTalk._canSay = true;
-
-            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.Ready))
-            {
-                botOwner.BotTalk._priority.Add(EPhraseTrigger.Ready, 140f);
-            }
-            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.Going))
-            {
-                botOwner.BotTalk._priority.Add(EPhraseTrigger.Going, 141f);
-            }
-            if (!botOwner.BotTalk._priority.Any(x => x.Key == EPhraseTrigger.DontKnow))
-            {
-                botOwner.BotTalk._priority.Add(EPhraseTrigger.DontKnow, 142f);
-            }
 
             // 此项如果不为false，就会导致SAIN无法进入Combat Layer
             settings.FileSettings.Mind.CAN_STAND_BY = false;
@@ -833,9 +879,11 @@ namespace MiyakoCarryService.Client
             botOwner.Settings.GetAlwaysFriendlyBotTypes().Clear();
             botOwner.Settings.GetFriendNoWarnBotTypes().Clear();
             botOwner.Settings.GetWarnBotTypes().Clear();
-            settings.FileSettings.Mind.FRIENDLY_BOT_TYPES = [];
-            settings.FileSettings.Mind.WARN_BOT_TYPES = [];
-            settings.FileSettings.Mind.REVENGE_BOT_TYPES = [];
+            settings.FileSettings.Mind.FRIENDLY_BOT_TYPES = Array.Empty<WildSpawnType>().ToIl2CppStructArray();
+            settings.FileSettings.Mind.REVENGE_BOT_TYPES = Array.Empty<WildSpawnType>().ToIl2CppStructArray();
+
+            Tools.MakeNeutralBotTypes(settings);
+            Tools.MakeNeutralBotTypes(botOwner.Settings);
 
             settings.FileSettings.Mind.DOG_FIGHT_IN = 0f;
             settings.FileSettings.Mind.DOG_FIGHT_OUT = 0f;
@@ -853,7 +901,7 @@ namespace MiyakoCarryService.Client
             settings.FileSettings.Mind.GRENADE_DAMAGE_IGNORE = false;
             settings.FileSettings.Mind.IGNORE_DANGER_PLACES = false;
 
-            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = BotSettingUtils.GetBoostScaled(0.9999f, carryServiceLevel);
+            settings.FileSettings.Mind.PART_PERCENT_TO_HEAL = BotSettingUtils.GetBoostScaled(0.98f, carryServiceLevel);
             settings.FileSettings.Mind.TIME_TO_FORGOR_ABOUT_ENEMY_SEC = BotSettingUtils.GetBoostScaled(30f, carryServiceLevel);
             settings.FileSettings.Mind.TIME_TO_FIND_ENEMY = BotSettingUtils.GetBoostScaled(20f, carryServiceLevel);
             settings.FileSettings.Mind.ATTACK_IMMEDIATLY_CHANCE_0_100 = BotSettingUtils.GetBoostScaled(48f, 100f, carryServiceLevel);

@@ -26,14 +26,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             }
 
             deactivatingPlace.SetDeactivate(_owner.Id);
-            var sqrDistance = deactivatingPlace.Pos.McsSqrDistance(_owner.Position);
+            var sqrDistance = deactivatingPlace.MidPosition.McsSqrDistance(_owner.Position);
             _owner.Sprint(false, false);
             if (sqrDistance <= 5f)
             {
                 DoDeactivateProcess();
                 _owner.SetPose(0.1f);
                 _owner.StopMove();
-                _owner.Steering.LookToPoint(deactivatingPlace.Pos);
+                _owner.Steering.LookToPoint(deactivatingPlace.MidPosition);
             }
             else
             {
@@ -41,9 +41,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 _owner.Sprint(true, false);
                 _owner.SetPose(1f);
                 _owner.Steering.LookToMovingDirection();
-                BetterSetDeactivatingPlacePos(deactivatingPlace.Pos);
+                BetterSetDeactivatingPlacePos(deactivatingPlace.MidPosition);
             }
-            DoorOpen(false);
+            ChecksWhileMoving(out _, false);
         }
 
         public virtual void BetterSetDeactivatingPlacePos(Vector3 pos)

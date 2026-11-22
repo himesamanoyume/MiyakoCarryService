@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
@@ -8,7 +7,7 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -18,12 +17,12 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TransitPointPatch1 : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.method_7));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(TransitPoint), nameof(TransitPoint.Transit));
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static void Prefix(HashSet<string> players)
+        public static void Prefix(Il2CppSystem.Collections.Generic.HashSet<string> players)
         {
             foreach (var playerId in players)
             {
@@ -55,10 +54,10 @@ namespace MiyakoCarryService.Client.Patches.Events
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPrefix]
-        public static bool Prefix(Dictionary<string, string> ____playerGroups, string groupId, out HashSet<string> singlePlayers, out HashSet<string> partyPlayers, out bool partyIsFull, ref HashSet<string> __result)
+        public static bool Prefix(TransitPoint __instance, string groupId, out Il2CppSystem.Collections.Generic.HashSet<string> singlePlayers, out Il2CppSystem.Collections.Generic.HashSet<string> partyPlayers, out bool partyIsFull, ref Il2CppSystem.Collections.Generic.HashSet<string> __result)
         {
-            var hashSet = new HashSet<string>();
-            foreach ((var key, var value) in ____playerGroups)
+            var hashSet = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            foreach ((var key, var value) in __instance._playerGroups)
             {
                 if (value.Equals(groupId))
                 {
@@ -66,7 +65,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                 }
             }
 
-            singlePlayers = [.. hashSet];
+            singlePlayers = new Il2CppSystem.Collections.Generic.HashSet<string>(hashSet);;
             partyPlayers = new();
             partyIsFull = true;
             foreach (var player in Singleton<GameWorld>.Instance.GroupPlayers(groupId))

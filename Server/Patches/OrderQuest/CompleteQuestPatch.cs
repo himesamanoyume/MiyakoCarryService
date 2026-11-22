@@ -48,7 +48,7 @@ namespace MiyakoCarryService.Server.Patches.OrderQuest
             pmcData.TradersInfo[Services.TraderService.MiyakoTraderId] = new TraderInfo
             {
                 LoyaltyLevel = 1,
-                SalesSum = 0.0,
+                SalesSum = 0,
                 Standing = 0.0,
                 NextResupply = 0,
                 Unlocked = true,

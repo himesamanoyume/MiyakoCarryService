@@ -4,7 +4,8 @@ using Fika.Core.Networking.LiteNetLib;
 using Fika.Core.Networking.Packets.Backend;
 using HarmonyLib;
 using MiyakoCarryService.Client;
-using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {
@@ -18,7 +19,7 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPostfix]
         public static void Postfix(LoadingProfilePacket packet, NetPeer peer)
         {
-            TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
+            GameLoop.Instance.SpawnMcsBotPlayer().McsHandleExceptions();
         }
     }
 }

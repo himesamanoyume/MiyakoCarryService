@@ -8,6 +8,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
@@ -31,6 +32,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (mcsBotPlayerData != null)
             {
+                _currentLootingRetries = 0;
+                _lastTimeCheckDistance = 0f;
                 mcsBotPlayerData.IsLooting = true;
                 BotOwner.TalkMsg(new McsMsg
                 {
@@ -41,7 +44,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
             BotOwner.SetTargetMoveSpeed(1f);
             BotOwner.Sprint(true, false);
             BotOwner.SetPose(1f);
@@ -94,7 +97,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.SetPose(0f);
                     BotOwner.Steering.LookToPoint(lootPos);
-                    TasksExtensions.HandleExceptions(StartLooting());
+                    StartLooting().McsHandleExceptions();
                     return;
                 }
 
@@ -157,12 +160,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     return;
                 }
 
-                if (!Singleton<GameWorld>.Instance.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
+                var ownerWorldData = Singleton<GameWorld>.Instance.FindOwnerWithWorldData(rootItem.Owner.ID);
+                var ownerTransform = ownerWorldData.Value.Transform;
+                if (ownerTransform == null)
                 {
                     return;
                 }
 
-                var lootableContainer = itemOwner.Transform.GetComponent<LootableContainer>();
+                var lootableContainer = ownerTransform.GetComponent<LootableContainer>();
                 var isActuallyInContainer = lootableContainer != null;
 
                 if (isActuallyInContainer)

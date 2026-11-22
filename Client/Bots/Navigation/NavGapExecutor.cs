@@ -18,6 +18,18 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private static readonly List<VaultBlacklistEntry> _vaultBlacklist = new List<VaultBlacklistEntry>();
         private static readonly Dictionary<BotOwner, RescueWatch> _rescueWatches = new Dictionary<BotOwner, RescueWatch>();
 
+        public static void Clear()
+        {
+            _crossingBots.Clear();
+            _recentHopEnds.Clear();
+            _recentAborts.Clear();
+            _vaultBlacklist.Clear();
+            _rescueWatches.Clear();
+            RelinkInProgress = false;
+            RescueInProgress = false;
+            McsVaultScope = false;
+        }
+
         private const float ABORT_GUARD_DURATION = 1.5f;
         private const float VAULT_BLACKLIST_RADIUS = 1.5f;
         private const float VAULT_BLACKLIST_DURATION = 60f;
@@ -39,6 +51,11 @@ namespace MiyakoCarryService.Client.Bots.Navigation
         private float _nextPressTime;
         public bool IsCrossing { get; private set; }
         public float NextPlanCooldownUntil { get; private set; }
+
+        public void SetNextPlanCooldown(float seconds)
+        {
+            NextPlanCooldownUntil = Time.time + seconds;
+        }
         public BotOwner BotOwner => _botOwner;
         public static bool RelinkInProgress;
         public static bool RescueInProgress;
@@ -209,7 +226,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 return;
             }
 
-            botOwner.Mover.GoToPointNoWay(_destination);
+            botOwner.Mover.GoToPointNoWay(new Il2CppSystem.Nullable<Vector3>(_destination));
             botOwner.GoToSomePointData.Point = _destination;
             botOwner.GoToSomePointData._lastPosibleRecalc = Time.time;
             botOwner.GoToSomePointData._pointhRefreshed = false;
@@ -265,7 +282,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 var toEdge = _edge - pos;
                 toEdge.y = 0f;
 
-                var component = botOwner.GetPlayer.VaultingComponent as VaultingComponent;
+                var vaultingInterface = botOwner.GetPlayer.VaultingComponent;
+                var component = vaultingInterface == null ? null : vaultingInterface.TryCast<VaultingComponent>();
                 component?.Tick();
                 var obstacle = component?.VaultingModelDebug?.ObstacleCalculatorModelDebug;
                 var hasObstacle = obstacle != null && obstacle.TargetCollider != null;
@@ -309,7 +327,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 botOwner.Mover.Sprint(false);
             }
 
-            var vaultingComponent = botOwner.GetPlayer.VaultingComponent as VaultingComponent;
+            var vaultingComponentInterface = botOwner.GetPlayer.VaultingComponent;
+            var vaultingComponent = vaultingComponentInterface == null ? null : vaultingComponentInterface.TryCast<VaultingComponent>();
 
             if (Time.time < _nextVaultTryTime)
             {
@@ -391,7 +410,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
                 RescueInProgress = true;
                 try
                 {
-                    botOwner.Mover.SetPlayerToNavMesh(sample.position);
+                    var deltaMove = sample.position - botOwner.Mover._prevSuccessLinkedFrom;
+                    botOwner.Mover.SetPlayerToNavMesh(sample.position, deltaMove, out var _);
                 }
                 finally
                 {
@@ -422,7 +442,7 @@ namespace MiyakoCarryService.Client.Bots.Navigation
 
             var pressTarget = _edge + direction;
             botOwner.GoToSomePointData.SetPoint(pressTarget);
-            botOwner.Mover.GoToPointNoWay(pressTarget);
+            botOwner.Mover.GoToPointNoWay(new Il2CppSystem.Nullable<Vector3>(pressTarget));
         }
 
         private bool IsPressed(Vector3 pos)
@@ -467,7 +487,8 @@ namespace MiyakoCarryService.Client.Bots.Navigation
             RelinkInProgress = true;
             try
             {
-                mover.SetPlayerToNavMesh(pos);
+                var deltaMove = pos - mover._prevSuccessLinkedFrom;
+                mover.SetPlayerToNavMesh(pos, deltaMove, out var _);
             }
             finally
             {

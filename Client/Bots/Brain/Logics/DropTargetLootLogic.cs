@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
@@ -19,7 +20,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData == null)
             {
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 if (Time.time > _nextCheckTime)
                 {
                     _nextCheckTime = Time.time + 1f;
-                    TasksExtensions.HandleExceptions(DropTargetLoot(mcsBotPlayerData));
+                    DropTargetLoot(mcsBotPlayerData).McsHandleExceptions();
                 }
             }
         }

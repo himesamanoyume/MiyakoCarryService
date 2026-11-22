@@ -13,6 +13,7 @@ using MiyakoCarryService.Client.Bots.Brain.Logics;
 using MiyakoCarryService.Client.Bots.Navigation;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -46,6 +47,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected float _nextStimCheckTime = 0f;
         protected float _nextDeactivateCheckTime = 0f;
         protected float _nextFastOpenDoorCheckTime = 0f;
+        protected bool _navCrossingObserved = false;
+        protected float _navCrossingStuckSince = 0f;
         protected Vector3? _currentMoveTarget = null;
         protected readonly NavBridge NavBridge = new NavBridge();
         protected Vector3? _lastTargetPos = Vector3.zero;
@@ -84,6 +87,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         protected const float TOO_CLOSE_FROM_LEAD_DISTANCE = 2f;
         protected const float VAULT_PROBE_BACKOFF = 0.75f;
         protected const float ENTER_COMMON_LOOTING_COODDOWN = 10f;
+        protected const float LOOT_UNREACHABLE_TIMEOUT = 5f;
+        protected const float NAV_CROSSING_STUCK_TIMEOUT = 6f;
+        protected const float NAV_CROSSING_RETRY_COOLDOWN = 3f;
+        protected const float NAV_CROSSING_MIN_LIFETIME = 2f;
         protected const float WEAPON_SWITCH_COOLDOWN = 1f;
         protected const float SUPPRESS_TIME_SINCE_SEEN = 3f;
         protected const float RUSH_NEAR_ENEMY_SQUARE_DIST = 15f * 15f;
@@ -273,11 +280,13 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             botOwner.McsStopMeds();
 
             var hands = player.HandsController;
-            if (hands is Player.MedsController)
+            var medsController = hands == null ? null : hands.TryCast<Player.MedsController>();
+            var emptyHandsController = hands == null ? null : hands.TryCast<Player.EmptyHandsController>();
+            if (medsController != null)
             {
                 
             }
-            else if (hands == null || hands is Player.EmptyHandsController)
+            else if (hands == null || emptyHandsController != null)
             {
                 botOwner.McsReturnWeapon();
             }
@@ -298,7 +307,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return false;
             }
 
-            (hands as Player.MedsController)?.CurrentOperation?.FastForward();
+            medsController?.CurrentOperation?.FastForward();
             _medsFinishTime = 0f;
             return true;
         }
@@ -316,14 +325,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 CheckStuck();
             }
 
-            if (mcsLeadPlayerPos != null)
+            TryFindCover(mcsLeadPlayerPos);
+            UpdateCoverToShoot();
+            if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
             {
-                TryFindCover(mcsLeadPlayerPos);
-                UpdateCoverToShoot();
-                if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
-                {
-                    return true;
-                }
+                return true;
             }
 
             if (BotOwner.Memory.IsInCover)
@@ -354,7 +360,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             if (_goToCoverTime < Time.time)
             {
                 _goToCoverTime = Time.time + 1f;
-                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, TOO_FAR_FROM_LEAD_DISTANCE, 0f, CoverSearchType.closerToSelectedPoint, null, null, new Vector3?(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true, null, null, "Default");
+                var coverSearchData = new CoverSearchData(mcsLeadPlayerPos, BotOwner.CoverSearchInfo, CoverShootType.hide, TOO_FAR_FROM_LEAD_DISTANCE, 0f, CoverSearchType.closerToSelectedPoint, null, new Il2CppSystem.Nullable<Vector3>(), new Il2CppSystem.Nullable<Vector3>(mcsLeadPlayerPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true, new Il2CppSystem.Nullable<int>(), new Il2CppSystem.Nullable<int>(), "Default");
                 _currentNavigationPoint = BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
                 if (_currentNavigationPoint != null)
                 {
@@ -451,14 +457,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 CheckStuck();
             }
 
-            if (mcsLeadPlayerPos != null)
+            TryFindCover(mcsLeadPlayerPos);
+            UpdateCoverToShoot();
+            if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
             {
-                TryFindCover(mcsLeadPlayerPos);
-                UpdateCoverToShoot();
-                if (!BotOwner.Memory.IsInCover && !_haveCoverToShoot)
-                {
-                    return true;
-                }
+                return true;
             }
 
             if (BotOwner.Memory.IsInCover)
@@ -546,7 +549,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
                     BotOwner.Mover._lastGoodCastPointTime = Time.time;
                     BotOwner.Mover._prevPosLinkedTime = 0f;
-                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                    var deltaMove = playerPosition - BotOwner.Mover._prevSuccessLinkedFrom;
+                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition, deltaMove, out var _);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
                     UpdateLeadNearMoveTarget(mcsLeadPlayerPos, out float nextTime);
@@ -631,7 +635,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     PhraseTrigger = EPhraseTrigger.OnPosition
                 });
-                TasksExtensions.HandleExceptions(DelaySetIntents(3f, [Intents.ShouldFollowMe, Intents.ShouldGoToPoint, Intents.ShouldEscort, Intents.ShouldEscortToBtr, Intents.ShouldKeepFormation]));
+                DelaySetIntents(3f, [Intents.ShouldFollowMe, Intents.ShouldGoToPoint, Intents.ShouldEscort, Intents.ShouldEscortToBtr, Intents.ShouldKeepFormation]).McsHandleExceptions();
                 return true;
             }
             else if (BotOwner.GoToSomePointData.IsCome())
@@ -655,7 +659,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
                     BotOwner.Mover._lastGoodCastPointTime = Time.time;
                     BotOwner.Mover._prevPosLinkedTime = 0f;
-                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                    var deltaMove = playerPosition - BotOwner.Mover._prevSuccessLinkedFrom;
+                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition, deltaMove, out var _);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
                     BotOwner.TalkMsg(new McsMsg
@@ -712,7 +717,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
                     BotOwner.Mover._lastGoodCastPointTime = Time.time;
                     BotOwner.Mover._prevPosLinkedTime = 0f;
-                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                    var deltaMove = playerPosition - BotOwner.Mover._prevSuccessLinkedFrom;
+                    BotOwner.Mover.SetPlayerToNavMesh(playerPosition, deltaMove, out var _);
                     BotOwner.Mover.RecalcWay();
                     BotOwner.Mover.Pause = true;
                     BotOwner.TalkMsg(new McsMsg
@@ -931,7 +937,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             {
                 coverShootType = CoverShootType.hide;
             }
-            var coverSearchData = new CoverSearchData(leadPos, BotOwner.CoverSearchInfo, coverShootType, BotInternalSettingsController.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, null, new Vector3?(leadPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true);
+            var coverSearchData = new CoverSearchData(leadPos, BotOwner.CoverSearchInfo, coverShootType, BotInternalSettingsController.Core.START_DIST_TO_COV, 0f, CoverSearchType.closerToSelectedPoint, shootPointClass, new Il2CppSystem.Nullable<Vector3>(), new Il2CppSystem.Nullable<Vector3>(leadPos), ECheckSHootHide.shootAndHide, new CoverSearchDefenceData(0f), PointsArrayType.byShootType, true, new Il2CppSystem.Nullable<int>(), new Il2CppSystem.Nullable<int>());
             return BotOwner.BotsGroup.CoverPointMaster.GetCoverPointMain(coverSearchData, true);
         }
 
@@ -1038,7 +1044,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var vector = nearestDoor.SegmentOpen.b - nearestDoor.SegmentOpen.a;
             var vector2 = nearestDoor.SegmentOpen.a - vector * 0.1f;
             var vector3 = nearestDoor.SegmentOpen.b + vector * 0.1f;
-            return AIUtility.GetCrossPoint(gclass.a, gclass.b, vector2, vector3) != null;
+            return Tools.HasCrossPoint(gclass.a, gclass.b, vector2, vector3);
         }
 
         public virtual bool CannotSeeEnemy(EnemyInfo info)
@@ -1259,7 +1265,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
                 BotOwner.Mover._lastGoodCastPointTime = Time.time;
                 BotOwner.Mover._prevPosLinkedTime = 0f;
-                BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                var deltaMove = playerPosition - BotOwner.Mover._prevSuccessLinkedFrom;
+                BotOwner.Mover.SetPlayerToNavMesh(playerPosition, deltaMove, out var _);
                 BotOwner.Mover.RecalcWay();
                 BotOwner.Mover.Pause = true;
                 UpdateCommonMoveTarget(BotOwner.PatrollingData.ExfiltrationData.CachedExfiltrationPoint.Position, out float nextTime);
@@ -1327,7 +1334,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (weaponManager.Reload?.Reloading == true)
+            if (Tools.IsReloading(BotOwner))
             {
                 return true;
             }
@@ -1440,7 +1447,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             VaultAim.FaceYaw(BotOwner, obstaclePoint - BotOwner.Position);
 
-            var vaultingComponent = BotOwner.GetPlayer.VaultingComponent as VaultingComponent;
+            var vaultingComponent = BotOwner.GetPlayer.VaultingComponent == null ? null : BotOwner.GetPlayer.VaultingComponent.TryCast<VaultingComponent>();
             vaultingComponent?.Tick();
 
             if (!VaultAim.TryAlign(BotOwner, vaultingComponent, obstaclePoint - BotOwner.Position))
@@ -1701,11 +1708,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var leadPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-            if (leadPos == null)
-            {
-                nextUpdateTime = 1f;
-                return;
-            }
 
             var leadVelocity = McsBotPlayerData.LeadPlayer.Velocity;
             var predictedPos = leadPos + leadVelocity * 2;
@@ -1785,7 +1787,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
         {
             if (NavBridge.IsCrossing)
             {
-                if (!NavBridge.ShouldAbort(targetPos))
+                if (!NavBridge.ShouldAbort(targetPos) || Time.time - NavBridge.CrossingSince < NAV_CROSSING_MIN_LIFETIME)
                 {
                     _currentMoveRetries = 0;
                     _lastCalcCorners = NavBridge.Way;
@@ -1794,7 +1796,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                     return _lastCanRunResult;
                 }
 
-                NavBridge.Cancel();
+                NavBridge.CancelFor(NAV_CROSSING_RETRY_COOLDOWN);
             }
 
             var navMeshPath = new NavMeshPath();
@@ -1886,7 +1888,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
             mcsBotPlayerData.TryFinishFastOpenDoor();
 
-            var targetPoint = BotOwner.Mover.TargetPoint;
+            var targetPoint = Tools.GetMoveTargetPoint(BotOwner);
             if (!targetPoint.HasValue || BotOwner.SqrDistHorizontal(targetPoint.Value) <= 0.01f)
             {
                 return;
@@ -1941,7 +1943,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var openA = segmentOpen.a - openDir * 0.1f;
             var openB = segmentOpen.b + openDir * 0.1f;
 
-            return AIUtility.GetCrossPoint(botPosition, targetPoint, openA, openB) != null;
+            return Tools.HasCrossPoint(botPosition, targetPoint, openA, openB);
         }
 
         private void FastOpenDoor(Door door, float time)
@@ -2165,7 +2167,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 return true;
             }
 
-            if (BotOwner.GetPlayer?.HandsController is Player.MedsController meds)
+            var medsHandsController = BotOwner.GetPlayer?.HandsController;
+            var meds = medsHandsController == null ? null : medsHandsController.TryCast<Player.MedsController>();
+            if (meds != null)
             {
                 if (meds.CurrentOperation?.State == Player.EOperationState.Finished)
                 {
@@ -2194,7 +2198,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             }
 
             var player = BotOwner.GetPlayer;
-            var firearmController = player?.HandsController as Player.FirearmController;
+            var handsController = player == null ? null : player.HandsController;
+            var firearmController = handsController == null ? null : handsController.TryCast<Player.FirearmController>();
             if (firearmController == null)
             {
                 _nextAnimatorFixTime = time + 1;
@@ -2364,7 +2369,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var dir = Quaternion.AngleAxis(yawDeg, Vector3.up) * baseDir;
             dir = Quaternion.AngleAxis(2f, Vector3.Cross(dir, Vector3.up)) * dir;
             var scanPoint = weapon.OperatorPosition + dir * 30f;
-            BotOwner.AimingManager.CurrentAiming.SetTarget(scanPoint);
+            BotOwner.AimingManager.CurrentAiming.SetTarget(new BotAimTarget(scanPoint, false, ELookObstacleType.None));
             BotOwner.AimingManager.NodeUpdate();
         }
 
@@ -2756,7 +2761,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
             var enemyBotOwner = goalEnemy.Person?.AIData?.BotOwner;
             if (enemyBotOwner != null && enemyBotOwner.BotState != EBotState.NonActive)
             {
-                if (enemyBotOwner.WeaponManager?.Reload?.Reloading == true || enemyBotOwner.Medecine?.Using == true)
+                if (Tools.IsReloading(enemyBotOwner) || enemyBotOwner.Medecine?.Using == true)
                 {
                     return true;
                 }
@@ -2834,7 +2839,28 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
         public virtual void ApplyMovePoint()
         {
-            if (NavBridge.IsCrossing)
+            var crossing = NavBridge.IsCrossing;
+            if (crossing)
+            {
+                if (!_navCrossingObserved)
+                {
+                    _navCrossingObserved = true;
+                    _navCrossingStuckSince = Time.time;
+                }
+
+                if (Time.time - _navCrossingStuckSince > NAV_CROSSING_STUCK_TIMEOUT)
+                {
+                    _navCrossingObserved = false;
+                    NavBridge.CancelFor(NAV_CROSSING_RETRY_COOLDOWN);
+                    crossing = false;
+                }
+            }
+            else
+            {
+                _navCrossingObserved = false;
+            }
+
+            if (crossing)
             {
                 return;
             }

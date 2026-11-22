@@ -4,7 +4,7 @@ using EFT.InventoryLogic;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
@@ -41,14 +41,16 @@ namespace MiyakoCarryService.Client.Patches.Bots
             var fracture = healthController.FindExistingEffect<IFracture>(EBodyPart.Common);
             if (fracture != null)
             {
-                __instance._bodyPartToHeal = fracture.BodyPart;
+                __instance._bodyPartToHeal = new Il2CppSystem.Nullable<EBodyPart>(fracture.BodyPart);
                 __instance.Damaged = true;
             }
         }
 
         private static void ClearUntreatableDestroyedPart(BotFirstAid __instance)
         {
-            if (!__instance.Damaged || __instance._bodyPartToHeal == null || __instance.CurUsingMeds == null)
+            // Il2CppSystem.Nullable<T> 是类：== null 只判断包装对象，包装存在但 HasValue==false 时取 .Value 会抛
+            // “Nullable object must have a value”。这里同样要先判 HasValue。
+            if (!__instance.Damaged || __instance._bodyPartToHeal == null || !__instance._bodyPartToHeal.HasValue || __instance.CurUsingMeds == null)
             {
                 return;
             }

@@ -5,8 +5,8 @@ using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
-using Systems.Effects;
+using SPTushonka.Reflection.Patching;
+using Il2CppSystems.Effects;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -34,13 +34,19 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 return;
             }
 
-            if (shooter.iPlayer.Profile.Info.GroupId is "Fika" or "Mcs" || McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
+            // if (shooter.iPlayer.Profile.Info.GroupId is "Fika" or "Mcs" || McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
+            if (shooter.iPlayer.Profile.Info.GroupId is "Mcs" || McsMgr.IsMcsLeadPlayer(shooter.iPlayer.ProfileId) || McsMgr.IsMcsBotPlayer(shooter.iPlayer.ProfileId))
             {
                 return;
             }
 
             if (!__instance.IsHitPointAlreadyProcessed(info.HitPoint))
             {
+                // 中立角色（俄军/平民）在附近开枪不构成对我们的敌对：只做近失压制，不主动加敌。
+                // 若其真的打中我们/lead，由受击流程（ApplyDamagePatch）建立敌对。
+                var isNeutralShooter = shooter.iPlayer?.Profile?.Info?.Settings != null
+                    && Tools.IsNeutralBot(shooter.iPlayer.Profile.Info.Settings.Role);
+
                 foreach (var mcsBotPlayer in McsMgr.GetAllAliveMcsBotPlayer())
                 {
                     var botOwner = mcsBotPlayer.AIData.BotOwner;
@@ -53,15 +59,22 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             mcsBotPlayerData.AddSuppressionFromNearMiss();
                         }
 
+                        if (isNeutralShooter)
+                        {
+                            continue;
+                        }
+
                         if (!Tools.TryMakeRoomForEnemy(mcsBotPlayer.BotsGroup))
                         {
                             continue;
                         }
 
-                        mcsBotPlayer.BotsGroup.AddEnemy(shooter.iPlayer, EBotEnemyCause.callForHelp1);
+                        mcsBotPlayer.BotsGroup.AddEnemy(shooter.iPlayer);
                         var mcsLeadPlayer = McsMgr.GetMcsLeadPlayerByMcsBotPlayerId(mcsBotPlayer.ProfileId);
                         var mcsAILeadPlayer = McsMgr.GetMcsAILeadPlayerByMcsLeadPlayerId(mcsLeadPlayer.ProfileId);
-                        if (shooter.iPlayer is Player shooterPlayer)
+                        // 5.0：iPlayer 的声明类型是接口 IPlayer，托管 `is Player` 恒为 false → TryCast
+                        var shooterPlayer = shooter.iPlayer == null ? null : shooter.iPlayer.TryCast<Player>();
+                        if (shooterPlayer != null)
                         {
                             mcsAILeadPlayer.CalcGoalEnemy(shooterPlayer);
                         }

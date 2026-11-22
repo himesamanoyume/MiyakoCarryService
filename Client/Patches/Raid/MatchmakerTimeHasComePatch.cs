@@ -1,6 +1,6 @@
 using EFT.UI.Matchmaker;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System.Reflection;
 
 namespace MiyakoCarryService.Client.Patches.Raid
@@ -13,9 +13,9 @@ namespace MiyakoCarryService.Client.Patches.Raid
         protected override MethodBase GetTargetMethod() => AccessTools.PropertyGetter(typeof(MatchMakerSideSelectionScreen), nameof(MatchMakerSideSelectionScreen.ScavAvailable));
 
         [PatchPrefix]
-        public static bool Prefix(MatchmakerPlayersController ___MatchmakerPlayersController, ref bool __result)
+        public static bool Prefix(MatchMakerSideSelectionScreen __instance, ref bool __result)
         {
-            if (___MatchmakerPlayersController?.GroupPlayers?.Count > MatchmakerPlayersController.MAX_SCAV_COUNT)
+            if (__instance.MatchmakerPlayersController?.GroupPlayers?.Count > MatchmakerPlayersController.MAX_SCAV_COUNT)
             {
                 __result = false;
                 return false;

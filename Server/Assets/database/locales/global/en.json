@@ -152,7 +152,7 @@
     "Mcs/RefreshFriendList": "Refresh",
     "Mcs/OpenMcsBotPlayerInventory": "Open Inventory",
     "Mcs/ReturnToMainChar": "Return To Main Character",
-    "Mcs/McsInventoryMode": "Mcs Inventory Mode",
+    "Mcs/McsInventoryMode": "MCSIM",
     "Mcs/BigSurvey": "BIG SURVEY",
     "Mcs/BigSurveyNotify": "Total exception: {0}，log text copied",
     "Mcs/ReturnToMainCharRefuse": "This player is not a carry service player, unable to open inventory",

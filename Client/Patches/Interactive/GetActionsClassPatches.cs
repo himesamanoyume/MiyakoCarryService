@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using EFT;
 using EFT.Interactive;
@@ -9,7 +10,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Interactive
 {
@@ -41,18 +42,18 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 return;
             }
-            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
+            __result.CurrentActionChanged.Bind(new Action(CommandUtils.OnCurrentActionChanged));
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 __result.Actions.Add(new InteractionAction
                 {
                     Name = string.Format(Locales.DOORPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.McsNickname),
                     TargetName = Locales.DOORPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandUtils.Dispatch(
+                    Action = new Action(() => CommandUtils.Dispatch(
                         ECommandType.InteractionProxyAction.ToString(),
                         [mcsBotPlayer],
                         () => new McsCommandContext { TargetId = doorData.Id() }
-                    ),
+                    )),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
@@ -71,7 +72,8 @@ namespace MiyakoCarryService.Client.Patches.Interactive
         [PatchPostfix]
         public static void Postfix(GamePlayerOwner owner, LootItem lootItem, ref AvailableInteractionState __result)
         {
-            if (lootItem is Corpse)
+            // 5.0：LootItem 形参的静态类型是 LootItem（基类），托管 `is Corpse` 恒为 false → TryCast
+            if (lootItem != null && lootItem.TryCast<Corpse>() != null)
             {
                 return;
             }
@@ -92,18 +94,18 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 return;
             }
-            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
+            __result.CurrentActionChanged.Bind(new Action(CommandUtils.OnCurrentActionChanged));
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 __result.Actions.Add(new InteractionAction
                 {
                     Name = string.Format(Locales.LOOTPROXYCOMMAND_NAME.McsLocalized(), mcsBotPlayer.Profile.McsNickname),
                     TargetName = Locales.LOOTPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandUtils.Dispatch(
+                    Action = new Action(() => CommandUtils.Dispatch(
                         ECommandType.LootProxyAction.ToString(),
                         [mcsBotPlayer],
                         () => new McsCommandContext { TargetId = lootData.Item.Id }
-                    ),
+                    )),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }
@@ -133,14 +135,14 @@ namespace MiyakoCarryService.Client.Patches.Interactive
             {
                 return;
             }
-            __result.CurrentActionChanged.Bind(CommandUtils.OnCurrentActionChanged);
+            __result.CurrentActionChanged.Bind(new Action(CommandUtils.OnCurrentActionChanged));
             foreach (var mcsBotPlayer in mcsBotPlayers)
             {
                 __result.Actions.Add(new InteractionAction
                 {
                     Name = mcsBotPlayer.Profile.McsNickname + " " + Locales.STATIONARYWEAPONPROXYCOMMAND_NAME.McsLocalized(),
                     TargetName = Locales.STATIONARYWEAPONPROXYCOMMAND_TARGETNAME,
-                    Action = () => CommandUtils.Dispatch(
+                    Action = new Action(() => CommandUtils.Dispatch(
                         ECommandType.StationaryWeaponProxyAction.ToString(),
                         [mcsBotPlayer],
                         () => new McsCommandContext 
@@ -148,7 +150,7 @@ namespace MiyakoCarryService.Client.Patches.Interactive
                             Position = stationaryWeaponData.GetPos(),
                             TargetId = stationaryWeaponData.Id(),
                         }
-                    ),
+                    )),
                     Disabled = !mcsBotPlayer.HealthController.IsAlive
                 });
             }

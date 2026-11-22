@@ -3,10 +3,9 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
-using JetBrains.Annotations;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -21,9 +20,14 @@ namespace MiyakoCarryService.Client.Patches.Bots
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.OnMakingShot));
 
         [PatchPostfix]
-        public static void Postfix(Player __instance, [NotNull] IWeapon weapon, Vector3 force)
+        public static void Postfix(Player __instance, IWeapon weapon, Vector3 force)
         {
-            if (__instance == null || !__instance.HealthController.IsAlive || __instance.IsAI)
+            if (__instance == null || !__instance.HealthController.IsAlive)
+            {
+                return;
+            }
+
+            if (__instance.IsAI)
             {
                 return;
             }

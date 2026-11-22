@@ -1,8 +1,9 @@
 using System.Reflection;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -16,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPrefix]
         public static void Prefix()
         {
-            TasksExtensions.HandleExceptions(McsRequestHandler.ClearGroupMember());
+            McsRequestHandler.ClearGroupMember().McsHandleExceptions();
         }
     }
 }

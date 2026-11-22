@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class TrapSyncableExtensions
     {
-        private static readonly AttachedTable<TrapSyncable, BarbedWireData> _datas = new();
 
         extension(TrapSyncable trapSyncable)
         {
             public BarbedWireData GetData()
             {
-                return _datas.GetOrCreate(trapSyncable, key => new BarbedWireData(key));
+                return InteropDataCache<BarbedWireData>.GetOrCreate(trapSyncable.Pointer, () => new BarbedWireData(trapSyncable));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<BarbedWireData>.Clear();
         }
     }
 }

@@ -1,4 +1,6 @@
 
+using System;
+using Il2CppInterop.Runtime.Injection;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
@@ -11,6 +13,11 @@ namespace MiyakoCarryService.Client.Misc
 {
     public class McsAILeadPlayer : AIBossPlayer
     {
+        static McsAILeadPlayer()
+        {
+            ClassInjector.RegisterTypeInIl2Cpp<McsAILeadPlayer>();
+        }
+        
         public McsBotPlayerConfig McsBotPlayerConfig
         {
             get
@@ -43,6 +50,12 @@ namespace MiyakoCarryService.Client.Misc
         }
         public Player McsLeadPlayer;
         public GamePlayerOwner GamePlayerOwner => McsLeadPlayer.GetGamePlayerOwner();
+
+        public McsAILeadPlayer(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+        
         public McsAILeadPlayer(Player player) : base(player)
         {
             McsLeadPlayer = player;
@@ -61,6 +74,8 @@ namespace MiyakoCarryService.Client.Misc
         public List<Player> LeadVisibleEnemies = new();
         public float LastLeadShotReportTime = -999f;
         public float NextEnemyCleanupTime = -999f;
+        public float LastLeadReportTime = -999f;
+        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public bool IsLeadThreatEnemy(IPlayer enemy)
         {
@@ -107,8 +122,6 @@ namespace MiyakoCarryService.Client.Misc
 
             return null;
         }
-
-        private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         public void CleanupDeadEnemies()
         {
@@ -157,9 +170,6 @@ namespace MiyakoCarryService.Client.Misc
             }
         }
 
-
-        public float LastLeadReportTime = -999f;
-
         public void MarkLeadAttacker(Player attacker)
         {
             if (attacker == null || Tools.IsForbiddenEnemy(attacker))
@@ -178,8 +188,50 @@ namespace MiyakoCarryService.Client.Misc
                 return;
             }
 
+            if (aimingEnemy.Profile?.Info?.Settings != null && Tools.IsNeutralBot(aimingEnemy.Profile.Info.Settings.Role))
+            {
+                return;
+            }
+
             LastLeadAimingEnemyPlayer = aimingEnemy;
             LastLeadAimingTime = Time.time;
+        }
+
+        public bool IsLeadAttackerThreat(IPlayer enemy)
+        {
+            if (enemy == null || LastLeadAttackerPlayer == null)
+            {
+                return false;
+            }
+
+            return enemy.ProfileId == LastLeadAttackerPlayer.ProfileId
+                && Time.time - LastLeadAttackerTime <= LEAD_THREAT_WINDOW;
+        }
+
+        public bool IsPassiveNeutralTarget(Player enemy)
+        {
+            if (GetNeutralRole(enemy) == null)
+            {
+                return false;
+            }
+
+            if (McsLeadPlayer?.BotsGroup != null && McsLeadPlayer.BotsGroup.IsEnemy(enemy))
+            {
+                return false;
+            }
+
+            return !IsLeadAttackerThreat(enemy);
+        }
+
+        private WildSpawnType? GetNeutralRole(Player enemy)
+        {
+            var settings = enemy?.Profile?.Info?.Settings;
+            if (settings == null)
+            {
+                return null;
+            }
+
+            return Tools.IsNeutralBot(settings.Role) ? settings.Role : null;
         }
 
         public void CalcGoalEnemy(Player seenEnemy)
@@ -192,6 +244,11 @@ namespace MiyakoCarryService.Client.Misc
             }
 
             if (Tools.IsForbiddenEnemy(seenEnemy))
+            {
+                return;
+            }
+
+            if (IsPassiveNeutralTarget(seenEnemy))
             {
                 return;
             }
@@ -209,7 +266,7 @@ namespace MiyakoCarryService.Client.Misc
                     continue;
                 }
 
-                McsLeadPlayer.BotsGroup.AddEnemy(seenEnemy, EBotEnemyCause.callForHelp2);
+                McsLeadPlayer.BotsGroup.AddEnemy(seenEnemy);
 
                 if (!botOwner.EnemiesController.EnemyInfos.TryGetValue(seenEnemy, out var enemyInfo))
                 {
@@ -247,7 +304,7 @@ namespace MiyakoCarryService.Client.Misc
 
             if (!McsLeadPlayer.BotsGroup.Enemies.TryGetValue(seenEnemy, out var groupInfo))
             {
-                groupInfo = new BotGroupEnemyInfo(seenEnemy, McsLeadPlayer.BotsGroup, EBotEnemyCause.callForHelp2);
+                groupInfo = new BotGroupEnemyInfo(seenEnemy, McsLeadPlayer.BotsGroup);
             }
 
             enemyInfo = botOwner.EnemiesController.AddNew(botOwner.BotsGroup, seenEnemy, groupInfo);
@@ -255,7 +312,7 @@ namespace MiyakoCarryService.Client.Misc
 
             // 原生 BotMemory.AddEnemy 会订阅 DiedEvent 自动回收，这里自己注册的同理补上，
             // 否则这类敌人死后永远留在敌人表里，只增不减
-            seenEnemy.HealthController.DiedEvent += (EDamageType damageType) =>
+            seenEnemy.HealthController.add_DiedEvent(new Action<EDamageType>((damageType) =>
             {
                 if (botOwner?.EnemiesController == null || botOwner.Memory == null)
                 {
@@ -273,7 +330,7 @@ namespace MiyakoCarryService.Client.Misc
                 }
 
                 botOwner.EnemiesController.Remove(seenEnemy);
-            };
+            }));
 
             var time = Time.time;
             enemyInfo.HaveSeenPersonal = true;

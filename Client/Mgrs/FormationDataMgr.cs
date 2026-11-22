@@ -1,21 +1,28 @@
 
 using System.Collections.Generic;
-using EFT;
+using System.Text.Json;
 using EFT.Communications;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
-using SPT.Common.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class FormationDataMgr : DataMgr
     {
-        public override void Start()
+        public FormationDataMgr(IntPtr pointer) : base(pointer)
         {
-            base.Start();
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
+        protected override void OnMgrStart()
+        {
+            base.OnMgrStart();
             LoadFormationPreset();
         }
 
@@ -29,13 +36,15 @@ namespace MiyakoCarryService.Client.Mgrs
             if (KeyInput.BetterIsDown(MiyakoCarryServicePlugin.SaveFormationPresetHotKey.Value))
             {
                 AddFormation("New Formation", MiyakoCarryServicePlugin.FormationMatrix.Value);
-                NotificationManager.DisplayMessageNotification(Locales.SAVEFORMATIONPRESET.McsLocalized());
+                NotificationManager.DisplayMessageNotification(Locales.SAVEFORMATIONPRESET.McsLocalized(), textColor: new Il2CppSystem.Nullable<Color>());
             }
         }
 
         public void LoadFormationPreset()
         {
-            var formationDataDtos = Json.Deserialize<List<FormationDataDto>>(MiyakoCarryServicePlugin.FormationPresets.Value);
+            var formationDataDtos = JsonSerializer.Deserialize<List<FormationDataDto>>(MiyakoCarryServicePlugin.FormationPresets.Value, new JsonSerializerOptions() { IncludeFields = true }) ?? new List<FormationDataDto>();
+
+            _datas ??= new HashSet<BaseData>();
             DataClear();
             foreach (var formationDataDto in formationDataDtos)
             {
@@ -56,11 +65,11 @@ namespace MiyakoCarryService.Client.Mgrs
                 };
                 formationDataDtos.Add(formationDataDto);
             }
-            MiyakoCarryServicePlugin.FormationPresets.Value = Json.Serialize(formationDataDtos);
+            MiyakoCarryServicePlugin.FormationPresets.Value = JsonSerializer.Serialize(formationDataDtos, new JsonSerializerOptions() { IncludeFields = true });
             LoadFormationPreset();
         }
 
-        public void SaveFormationPreset(MongoID id, string rename, string formationMatrix)
+        public void SaveFormationPreset(string id, string rename, string formationMatrix)
         {
             foreach (FormationData formationData in _datas)
             {
@@ -86,7 +95,7 @@ namespace MiyakoCarryService.Client.Mgrs
             SaveFormationPresets();
         }
 
-        public FormationData GetFormationData(MongoID id)
+        public FormationData GetFormationData(string id)
         {
             foreach (FormationData formationData in _datas)
             {
@@ -98,7 +107,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return null;
         }
 
-        public void ApplyFormationData(MongoID id)
+        public void ApplyFormationData(string id)
         {
             var formationData = GetFormationData(id);
             if (formationData == null)

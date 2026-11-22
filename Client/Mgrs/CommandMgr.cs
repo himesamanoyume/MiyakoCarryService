@@ -9,22 +9,31 @@ using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
-using SPT.Common.Utils;
 using System.Threading;
 using System;
 using System.Diagnostics;
-using HarmonyLib;
 using Diz.Utils;
 using EFT.InventoryLogic;
+using EFT.Quests;
 using EFT.HealthSystem;
+using Il2CppSystem.Linq;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
+using System.Text.Json;
+using Il2CppInterop.Runtime.Injection;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class CommandMgr : BaseMgr
     {
-        public sealed override void Start()
+        public CommandMgr(IntPtr pointer) : base(pointer)
         {
-            base.Start();
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
+        protected sealed override void OnMgrStart()
+        {
+            base.OnMgrStart();
             EventMgr.Subscribe<McsLeadPlayerExtractedEvent>(HandleMcsLeadPlayerExtracted, this);
             CommandUtils.RegisterCommandHandler(ECommandType.EscortWorld.ToString(), EscortToWorldPosCommandAction);
             CommandUtils.RegisterCommandHandler(ECommandType.GoToPoint.ToString(), GoToPointCommandAction);
@@ -281,7 +290,7 @@ namespace MiyakoCarryService.Client.Mgrs
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMEXFILESCORTCOMMAND_NAME : Locales.EXFILESCORTCOMMAND_NAME,
                 isTeam ? Locales.TEAMEXFILESCORTCOMMAND_TARGETNAME : Locales.EXFILESCORTCOMMAND_TARGETNAME,
-                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<ExfilData, ExfilDataMgr>(), isTeam));
+                m => BuildWorldEscortMenu(m, mcsBotPlayers, Gameloop.GetDatas<WorldData, ExfilDataMgr>(), isTeam));
 
             menu.RegisterSubMenu(
                 isTeam ? Locales.TEAMSWITCHESCORTCOMMAND_NAME : Locales.SWITCHESCORTCOMMAND_NAME,
@@ -354,6 +363,68 @@ namespace MiyakoCarryService.Client.Mgrs
             CommandUtils.Apply(EMenuId.WorldEscort.ToString(), menu, mcsBotPlayers);
         }
 
+        private static string GetQuestDisplayName(QuestStatusData questStatusData)
+        {
+            if (questStatusData == null)
+            {
+                return null;
+            }
+
+            var runtimeName = ResolveLocalized(GetQuestRuntimeName(questStatusData));
+            if (!string.IsNullOrEmpty(runtimeName))
+            {
+                return runtimeName;
+            }
+
+            var templateName = ResolveLocalized(questStatusData.Template?.Name);
+            if (!string.IsNullOrEmpty(templateName))
+            {
+                return templateName;
+            }
+
+            var idName = ResolveLocalized($"{questStatusData.Id} name");
+            if (!string.IsNullOrEmpty(idName))
+            {
+                return idName;
+            }
+
+            return questStatusData.Id;
+        }
+
+        private static string GetQuestRuntimeName(QuestStatusData questStatusData)
+        {
+            try
+            {
+                var quest = questStatusData.Quest;
+                return quest == null ? null : quest.Name;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string ResolveLocalized(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+
+            try
+            {
+                if (LocalizationManager.Instance.TryGetLocalization(value, MiyakoCarryServicePlugin.DefaultLang, out var localized))
+                {
+                    return string.IsNullOrEmpty(localized) ? null : localized;
+                }
+            }
+            catch
+            {
+            }
+
+            return value;
+        }
+
         public virtual void BuildQuestEscortMenu(McsCommandMenu menu, Player[] mcsBotPlayers, bool isTeam)
         {
             var questDataMgr = MgrAccessor.Get<QuestDataMgr>();
@@ -364,7 +435,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach ((var questDataClass, var questDatas) in questDataMgr.GetQuestDataByGroup())
             {
-                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, m => BuildWorldEscortMenu(m, mcsBotPlayers, questDatas.Cast<WorldData>(), isTeam));
+                menu.RegisterSubMenu(GetQuestDisplayName(questDataClass), Locales.SUBQUESTESCORTCOMMAND_TARGETNAME, m => BuildWorldEscortMenu(m, mcsBotPlayers, questDatas.Cast<WorldData>(), isTeam));
             }
             CommandUtils.Apply(EMenuId.QuestEscort.ToString(), menu, mcsBotPlayers);
         }
@@ -403,7 +474,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             foreach ((var questDataClass, var questDatas) in questDataMgr.GetQuestDataByGroup())
             {
-                menu.RegisterSubMenu(questDataClass.Template.Name.McsLocalized(), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, m => BuildSubQuestProxyMenu(m, mcsBotPlayers, questDatas, isTeam));
+                menu.RegisterSubMenu(GetQuestDisplayName(questDataClass), Locales.SUBQUESTPROXYCOMMAND_TARGETNAME, m => BuildSubQuestProxyMenu(m, mcsBotPlayers, questDatas, isTeam));
             }
             CommandUtils.Apply(EMenuId.QuestProxy.ToString(), menu, mcsBotPlayers);
         }
@@ -479,7 +550,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void DebugSpawnAICommandAction(McsCommandContext ctx)
         {
-            Diz.Utils.AsyncWorker.RunInMainTread(async () =>
+            AsyncWorker.RunInMainTread(new Action(async () =>
             {
                 var pos = ctx.Position.Value;
                 var botGame = Singleton<IBotGame>.Instance;
@@ -514,17 +585,16 @@ namespace MiyakoCarryService.Client.Mgrs
                 cloneProfile.Id = MongoID.Generate();
                 cloneProfile.Info.GroupId = "McsDebug";
                 cloneProfile.Info.Settings.BotDifficulty = BotDifficulty.easy;
-                AccessTools.Field(typeof(Profile), nameof(cloneProfile.AccountId)).SetValue(cloneProfile, MyExtensions.RandomInclude(30560334, 33560336).ToString());
+                cloneProfile.AccountId = MyExtensions.RandomInclude(30560334, 33560336).ToString();
                 botCreationDataClass.AddProfile(cloneProfile);
 
                 var closestGroupPoint = botsController.CoversData.GetClosest(pos);
                 botCreationDataClass.AddPosition(pos, closestGroupPoint.CorePointInGame.Id);
                 var closestZone = botSpawner.GetClosestZone(pos, out _);
 
-                var groupAction = new Func<BotOwner, BotZone, BotsGroup>((botOwner, botZone) =>
+                var groupAction = new Func<BotOwner, BotZone, BotSpawnBossAndGroupParams, BotsGroup>((botOwner, botZone, groupParams) =>
                 {
-                    var enemies = botSpawner.GetBotEnemiesList(botOwner);
-                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, enemies.ToList(), botSpawner._deadBodiesController, botSpawner._allPlayers, false);
+                    var botsGroup = new BotsGroup(closestZone, botGame, botOwner, botSpawner._deadBodiesController, false);
                     botSpawner.Groups.AddNoKey(botsGroup, botZone);
                     botsGroup.AddMember(botOwner, false);
                     return botsGroup;
@@ -532,10 +602,10 @@ namespace MiyakoCarryService.Client.Mgrs
 
                 var onActivate = new Action<BotOwner>(botOwner =>
                 {
-                    var stopWatch = new Stopwatch();
+                    var stopWatch = new Stopwatch().ToIl2Cpp();
                     stopWatch.Start();
                     botSpawner.ActivateBotCallback(botOwner, botCreationDataClass, null, botCreationDataClass.SpawnParams.ShallBeGroup != null, stopWatch);
-                    ctx.McsBotPlayer.BotOwner.BotsGroup.AddEnemy(botOwner.GetPlayer, EBotEnemyCause.addBotAtGroup);
+                    ctx.McsBotPlayer.BotOwner.BotsGroup.AddEnemy(botOwner.GetPlayer);
                     var mcsBotPlayers = McsMgr.GetAllAliveMcsBotPlayer();
                     foreach (var mcsBotPlayer in mcsBotPlayers)
                     {
@@ -544,12 +614,12 @@ namespace MiyakoCarryService.Client.Mgrs
                 });
 
                 botSpawner._inSpawnProcess += 1;
-                var cancellationToken = new CancellationToken();
+                var cancellationToken = new CancellationToken().ToIl2Cpp();
                 await botCreator.ActivateBot(
                     botCreationDataClass.Profiles[0],
                     new PositionNote(pos, botCreationDataClass.GetPosition().CorePointId, true),
-                    closestZone, true, groupAction, onActivate, cancellationToken);
-            });
+                    closestZone, new BotSpawnBossAndGroupParams(), groupAction, onActivate, cancellationToken);
+            }));
         }
 
         public virtual void DebugTeleportCommandAction(McsCommandContext ctx)
@@ -559,7 +629,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public virtual void DebugInitAirdropCommandAction(McsCommandContext ctx)
         {
-            Singleton<GameWorld>.Instance.InitAirdrop(Classification.AirdropIds.Random(), true, ctx.Position.HasValue ? ctx.Position.Value : Singleton<GameWorld>.Instance.MainPlayer.Position);
+            Singleton<GameWorld>.Instance.InitAirdrop(Classification.AirdropIds.McsRandom(), true, ctx.Position.HasValue ? ctx.Position.Value : Singleton<GameWorld>.Instance.MainPlayer.Position);
         }
 
 #endif
@@ -597,15 +667,16 @@ namespace MiyakoCarryService.Client.Mgrs
                     continue;
                 }
 
-                if (mcsBotPlayer.ProfileId == profileId && rootItem.Owner is ItemController traderControllerClass)
+                var traderControllerClass = rootItem.Owner == null ? null : rootItem.Owner.TryCast<ItemController>();
+                if (mcsBotPlayer.ProfileId == profileId && traderControllerClass != null)
                 {
-                    var inventoryActionClass = new InteractionContextHelper.CG_GetAvailableInteractionState1
+                    var inventoryActionClass = new CG_GetAvailableInteractionState1
                     {
                         owner = CommandUtils.GamePlayerOwner,
                         rootItem = rootItem,
                         lootItemOwner = traderControllerClass
                     };
-                    inventoryActionClass.method_3();
+                    inventoryActionClass._GetAvailableInteractionState_b__8();
                 }
             }
         }
@@ -698,7 +769,7 @@ namespace MiyakoCarryService.Client.Mgrs
             var healthStates = new List<HealthState>();
             foreach (var activeEffect in allActiveEffects)
             {
-                if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
+                if (Classification.EffectTypeFilter.Contains(activeEffect.Type.ToManaged()))
                 {
                     continue;
                 }
@@ -715,7 +786,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     EffectType = effectType
                 });
             }
-            var key3 = Json.Serialize(healthStates);
+            var key3 = JsonSerializer.Serialize(healthStates, new JsonSerializerOptions() { IncludeFields = true });
             botOwner.TalkMsg(new McsMsg
             {
                 PhraseTrigger = EPhraseTrigger.Mine,
@@ -954,7 +1025,7 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             var playerPosition = mcsBotPlayer.Position;
             botOwner.Mover._lastGoodCastPoint = botOwner.Mover._prevSuccessLinkedFrom = botOwner.Mover._prevLinkPos = botOwner.Mover.PositionOnWayInner = playerPosition;
-            botOwner.Mover.SetPlayerToNavMesh(playerPosition);
+            botOwner.Mover.SetPlayerToNavMesh(playerPosition, playerPosition, out var _);
             botOwner.GoToSomePointData.SetPoint(playerPosition);
             botOwner.Mover._lastTimePosChanged = Time.time;
             botOwner.TryResetHandsState();

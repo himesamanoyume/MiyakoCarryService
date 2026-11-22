@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
@@ -10,13 +9,13 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class ExfilData : TriggerData
     {
-        private WeakReference<ExfiltrationPoint> _exfilRef;
+        private ExfiltrationPoint _exfilRef;
         private AIExfiltrationPoint _aiExfiltrationPoint;
-        public ExfiltrationPoint ExfiltrationPoint => _exfilRef.TryGetTarget(out var exfil) ? exfil : null;
+        public ExfiltrationPoint ExfiltrationPoint => _exfilRef;
 
         public ExfilData(ExfiltrationPoint exfiltrationPoint) : base()
         {
-            _exfilRef = new WeakReference<ExfiltrationPoint>(exfiltrationPoint);
+            _exfilRef = exfiltrationPoint;
             _colliders = exfiltrationPoint.transform.GetComponentsInChildren<Collider>().ToList();
         }
 

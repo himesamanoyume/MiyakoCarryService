@@ -1,4 +1,3 @@
-using System;
 using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
@@ -10,14 +9,14 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class StationaryWeaponData : InteractableObjectData
     {
-        private WeakReference<StationaryWeapon> _stationaryWeaponRef;
-        public StationaryWeapon StationaryWeapon => _stationaryWeaponRef.TryGetTarget(out var stationaryWeapon) ? stationaryWeapon : null;
-        private WeakReference<StationaryWeaponLink> _stationaryWeaponLinkRef;
-        public StationaryWeaponLink StationaryWeaponLink => _stationaryWeaponLinkRef.TryGetTarget(out var stationaryWeaponLink) ? stationaryWeaponLink : null;
+        private StationaryWeapon _stationaryWeaponRef;
+        public StationaryWeapon StationaryWeapon => _stationaryWeaponRef;
+        private StationaryWeaponLink _stationaryWeaponLinkRef;
+        public StationaryWeaponLink StationaryWeaponLink => _stationaryWeaponLinkRef;
 
         public StationaryWeaponData(StationaryWeapon stationaryWeapon) : base()
         {
-            _stationaryWeaponRef = new WeakReference<StationaryWeapon>(stationaryWeapon);
+            _stationaryWeaponRef = stationaryWeapon;
             if (!Tools.IsHost)
             {
                 return;
@@ -32,7 +31,7 @@ namespace MiyakoCarryService.Client.Datas
             var link = CreateStationaryWeaponLink(weapon);
             if (link != null)
             {
-                _stationaryWeaponLinkRef = new WeakReference<StationaryWeaponLink>(link);
+                _stationaryWeaponLinkRef = link;
             }
         }
 

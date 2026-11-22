@@ -13,18 +13,19 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Datas
 {
     public class McsBotPlayerData : PlayerData
     {
-        private WeakReference<BotOwner> _botOwnerRef;
-        public BotOwner BotOwner => _botOwnerRef.TryGetTarget(out var botOwner) ? botOwner : null;
-        private WeakReference<Player> _leadPlayeRef;
-        public Player LeadPlayer => _leadPlayeRef.TryGetTarget(out var leadPlayer) ? leadPlayer : null;
+        private BotOwner _botOwnerRef;
+        public BotOwner BotOwner => _botOwnerRef;
+        private Player _leadPlayeRef;
+        public Player LeadPlayer => _leadPlayeRef;
         public GamePlayerOwner LeadPlayerGamePlayerOwner => McsAILeadPlayer.GamePlayerOwner;
-        private WeakReference<McsAILeadPlayer> _mcsAILeadPlayerRef;
-        public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef.TryGetTarget(out var mcsAILeadPlayer) ? mcsAILeadPlayer : null;
+        private McsAILeadPlayer _mcsAILeadPlayerRef;
+        public McsAILeadPlayer McsAILeadPlayer => _mcsAILeadPlayerRef;
         public BodyPartType AimingBodyPartType = BodyPartType.head;
         public int CarryServiceLevel
         {
@@ -49,7 +50,35 @@ namespace MiyakoCarryService.Client.Datas
         public Vector3? TargetPos = null;
         public bool MoveResetRequested = false;
         public string ProxyTargetId = null;
-        public LootData LootingTarget = null;
+
+        public float LootUnreachableSince = 0f;
+
+        private LootData _lootingTarget = null;
+        public LootData LootingTarget
+        {
+            get => _lootingTarget;
+            set
+            {
+                _lootingTarget = value;
+                if (value != null)
+                {
+                    LootUnreachableSince = 0f;
+                }
+            }
+        }
+
+        public void ReleaseLootTarget()
+        {
+            if (LootingTarget != null)
+            {
+                LootDataMgr.UnlockLootingTarget(LootingTarget);
+                LootDataMgr.UnlockLootingTargetRootTransform(LootingTarget.RootTransform);
+                LootingTarget = null;
+            }
+
+            LootUnreachableSince = 0f;
+        }
+
         public List<Vector3> ClearAreaPoints = null;
         public int ClearAreaIndex = 0;
         public float ClearAreaLookAroundUntil = 0f;
@@ -289,10 +318,10 @@ namespace MiyakoCarryService.Client.Datas
 
         public McsBotPlayerData(Player bossPlayer, McsAILeadPlayer mcsAILeadPlayer, Player player, Item item) : base(player, item)
         {
-            _botOwnerRef = new(player.AIData.BotOwner);
+            _botOwnerRef = player.AIData.BotOwner;
             BotOwner.SetMcsBotPlayerData(this);
-            _mcsAILeadPlayerRef = new(mcsAILeadPlayer);
-            _leadPlayeRef = new(bossPlayer);
+            _mcsAILeadPlayerRef = mcsAILeadPlayer;
+            _leadPlayeRef = bossPlayer;
             CollectVanishingCurseLootItems();
             if (mcsAILeadPlayer.McsBotPlayerConfig.EnableKeepFormation)
             {
@@ -690,7 +719,9 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             var player = Player;
-            if (player?.HandsController?.Item is Weapon weapon)
+            var handsItem = player?.HandsController?.Item;
+            var weapon = handsItem == null ? null : handsItem.TryCast<Weapon>();
+            if (weapon != null)
             {
                 WeaponInfoBuilder.Clear();
                 var magazine = weapon.GetCurrentMagazine();
@@ -750,7 +781,7 @@ namespace MiyakoCarryService.Client.Datas
             {
                 foreach (var activeEffect in player.HealthController.GetAllActiveEffects())
                 {
-                    if (Classification.EffectTypeFilter.Contains(activeEffect.Type))
+                    if (Classification.EffectTypeFilter.Contains(activeEffect.Type.ToManaged()))
                     {
                         continue;
                     }
@@ -804,7 +835,9 @@ namespace MiyakoCarryService.Client.Datas
 
             SuppliesInfoBuilder.Clear();
 
-            if (player.HandsController?.Item is Weapon currentWeapon
+            var handsItem = player.HandsController == null ? null : player.HandsController.Item;
+            var currentWeapon = handsItem == null ? null : handsItem.TryCast<Weapon>();
+            if (currentWeapon != null
                 && CollectWeaponAmmoAndMagCount(currentWeapon, out var ammoCount, out var magCount))
             {
                 SuppliesInfoBuilder.Append("\nAmmo: ").Append(ammoCount).Append(" Mag: ").Append(magCount);
@@ -861,7 +894,9 @@ namespace MiyakoCarryService.Client.Datas
                     continue;
                 }
 
-                if (item.CurrentAddress.Container is Slot slot && slot.ContainedItem == item && Enum.TryParse<EquipmentSlot>(slot.ID, out var equipmentSlot))
+                var slotContainer = item.CurrentAddress.Container;
+                var slot = slotContainer == null ? null : slotContainer.TryCast<Slot>();
+                if (slot != null && slot.ContainedItem == item && Enum.TryParse<EquipmentSlot>(slot.ID, out var equipmentSlot))
                 {
                     if (equipmentSlot is EquipmentSlot.Backpack or EquipmentSlot.TacticalVest or EquipmentSlot.Pockets)
                     {
@@ -989,7 +1024,7 @@ namespace MiyakoCarryService.Client.Datas
 
             var inventoryController = player.InventoryController;
 
-            var allAmmoList = new List<Ammo>();
+            var allAmmoList = new Il2CppSystem.Collections.Generic.List<Ammo>();
             inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allAmmoList, null, null);
             foreach (var ammo in allAmmoList)
             {
@@ -999,7 +1034,7 @@ namespace MiyakoCarryService.Client.Datas
                 }
             }
 
-            var allMagList = new List<Magazine>();
+            var allMagList = new Il2CppSystem.Collections.Generic.List<Magazine>();
             inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allMagList, null, null);
             foreach (var magazine in allMagList)
             {
@@ -1012,7 +1047,9 @@ namespace MiyakoCarryService.Client.Datas
             var equipment = inventoryController.Inventory.Equipment;
             foreach (var slot in new[] { EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster })
             {
-                if (equipment.GetSlot(slot).ContainedItem is Weapon weapon)
+                var slotContainedItem = equipment.GetSlot(slot).ContainedItem;
+                var weapon = slotContainedItem == null ? null : slotContainedItem.TryCast<Weapon>();
+                if (weapon != null)
                 {
                     total += weapon.GetCurrentMagazine()?.Count ?? 0;
                     total += weapon.ChamberAmmoCount;
@@ -1036,7 +1073,7 @@ namespace MiyakoCarryService.Client.Datas
                 var player = botOwner.GetPlayer;
                 if (player != null)
                 {
-                    var allMagList = new List<Magazine>();
+                    var allMagList = new Il2CppSystem.Collections.Generic.List<Magazine>();
                     player.InventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, allMagList, null, null);
                     var maxCapacity = 0;
                     foreach (var magazine in allMagList)
@@ -1063,7 +1100,9 @@ namespace MiyakoCarryService.Client.Datas
             magCount = 0;
 
             var player = Player;
-            if (player?.HandsController?.Item is not Weapon weapon)
+            var handsItem = player?.HandsController?.Item;
+            var weapon = handsItem == null ? null : handsItem.TryCast<Weapon>();
+            if (weapon == null)
             {
                 return false;
             }
@@ -1095,7 +1134,7 @@ namespace MiyakoCarryService.Client.Datas
                     ammoCount += currentMagazine.Count;
                 }
 
-                var magazineList = new List<Magazine>();
+                var magazineList = new Il2CppSystem.Collections.Generic.List<Magazine>();
                 inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, magazineList, null, null);
                 foreach (var magazine in magazineList)
                 {
@@ -1107,7 +1146,7 @@ namespace MiyakoCarryService.Client.Datas
                 }
             }
 
-            var ammoList = new List<Ammo>();
+            var ammoList = new Il2CppSystem.Collections.Generic.List<Ammo>();
             inventoryController.GetAcceptableItemsNonAlloc(BotReload._availableEquipmentSlots, ammoList, null, null);
             foreach (var ammo in ammoList)
             {
@@ -1132,7 +1171,7 @@ namespace MiyakoCarryService.Client.Datas
                 return;
             }
 
-            var medsList = new List<Meds>();
+            var medsList = new Il2CppSystem.Collections.Generic.List<Meds>();
             player.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, medsList);
             foreach (var meds in medsList)
             {
@@ -1161,7 +1200,7 @@ namespace MiyakoCarryService.Client.Datas
 
                 if (damageEffects.ContainsKey(EDamageEffectType.HeavyBleeding)
                     || damageEffects.ContainsKey(EDamageEffectType.LightBleeding)
-                    || meds is MedKit
+                    || meds.TryCast<MedKit>() != null
                     || (healthEffectsComponent.HealthEffects != null && healthEffectsComponent.HealthEffects.ContainsKey(EHealthFactorType.Health)))
                 {
                     firstAidCount++;
@@ -1189,7 +1228,7 @@ namespace MiyakoCarryService.Client.Datas
                 return _missingMedEffects;
             }
 
-            var medsList = new List<Meds>();
+            var medsList = new Il2CppSystem.Collections.Generic.List<Meds>();
             player.InventoryController.GetAcceptableItemsNonAlloc(BotMedecine.anySlots, medsList);
             foreach (var meds in medsList)
             {
@@ -1338,8 +1377,10 @@ namespace MiyakoCarryService.Client.Datas
             {
                 candidateLootDatas.Sort((a, b) =>
                 {
-                    var aHasAmmo = (a.Item as Magazine)?.Count > 0;
-                    var bHasAmmo = (b.Item as Magazine)?.Count > 0;
+                    var aMagazine = a.Item == null ? null : a.Item.TryCast<Magazine>();
+                    var bMagazine = b.Item == null ? null : b.Item.TryCast<Magazine>();
+                    var aHasAmmo = aMagazine?.Count > 0;
+                    var bHasAmmo = bMagazine?.Count > 0;
                     if (aHasAmmo != bHasAmmo)
                     {
                         return aHasAmmo ? -1 : 1;
@@ -1362,7 +1403,8 @@ namespace MiyakoCarryService.Client.Datas
 
         private bool IsCompatibleMagazine(LootData lootData, Weapon weapon)
         {
-            if (lootData.Item is not Magazine magazine)
+            var magazine = lootData.Item == null ? null : lootData.Item.TryCast<Magazine>();
+            if (magazine == null)
             {
                 return false;
             }
@@ -1378,7 +1420,8 @@ namespace MiyakoCarryService.Client.Datas
 
         private bool IsCompatibleAmmo(LootData lootData, Weapon weapon)
         {
-            if (lootData.Item is not Ammo ammo)
+            var ammo = lootData.Item == null ? null : lootData.Item.TryCast<Ammo>();
+            if (ammo == null)
             {
                 return false;
             }
@@ -1410,7 +1453,8 @@ namespace MiyakoCarryService.Client.Datas
 
         private int GetCoveredMissingMedEffectCount(LootData lootData, HashSet<EDamageEffectType> missingMedEffects)
         {
-            if (lootData.Item is not Meds meds)
+            var meds = lootData.Item == null ? null : lootData.Item.TryCast<Meds>();
+            if (meds == null)
             {
                 return 0;
             }

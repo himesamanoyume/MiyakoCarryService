@@ -3,7 +3,7 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Group
 {

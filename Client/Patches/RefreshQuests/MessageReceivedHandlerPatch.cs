@@ -7,9 +7,10 @@ using ChatShared;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.RefreshQuests
 {
@@ -39,14 +40,15 @@ namespace MiyakoCarryService.Client.Patches.RefreshQuests
             _questRefreshCts?.Cancel();
             _questRefreshCts?.Dispose();
             _questRefreshCts = new CancellationTokenSource();
-            TasksExtensions.HandleExceptions(DelayedRefreshAsync(_questRefreshCts.Token));
+            DelayedRefreshAsync(_questRefreshCts.Token).McsHandleExceptions();
         }
 
         private static async Task DelayedRefreshAsync(CancellationToken cancellationToken)
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(true);
+                // 续体拉回主线程：EventMgr.Notify 会触发 StartCoroutine（Unity API，必须主线程）
+                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 EventMgr.Notify(new UpdateDailyQuestsEvent());
             }
             catch (OperationCanceledException)

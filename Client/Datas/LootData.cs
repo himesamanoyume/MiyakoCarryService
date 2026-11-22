@@ -23,13 +23,14 @@ namespace MiyakoCarryService.Client.Datas
         public int ContainerGridCount = 0;
         public int MaxSingleGridCount = 0;
         public bool IsContainerWithAdditionalGrid => ContainerGridCount > ItemGridCount;
-        public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && Item is not Headphones);
+        public bool IsEquipableContainer => ItemType == EItemType.Backpack || (ItemType == EItemType.Equipment && (Item == null || Item.TryCast<Headphones>() == null));
         public bool VanishingCurse = false;
 
         public LootData(Item item, TraderOffer offer) : base(item)
         {
             Offer = offer ?? new TraderOffer();
-            if (Item.IsContainer && Item is SearchableItem containerItem)
+            var containerItem = Item == null ? null : Item.TryCast<SearchableItem>();
+            if (Item.IsContainer && containerItem != null)
             {
                 foreach (var stashGridClass in containerItem.Grids)
                 {
@@ -126,12 +127,8 @@ namespace MiyakoCarryService.Client.Datas
                     return null;
                 }
 
-                if (!gameWorld.ItemOwners.TryGetValue(rootItem.Owner, out var itemTransform))
-                {
-                    return null;
-                }
-
-                var transform = itemTransform.Transform;
+                var ownerWorldData = gameWorld.FindOwnerWithWorldData(rootItem.Owner.ID);
+                var transform = ownerWorldData.Value.Transform;
                 if (transform == null)
                 {
                     return null;

@@ -17,6 +17,12 @@
 - 个人新增代理整理战利品指令：将护航周围5米的无主战利品以最高价值、尽可能嵌套的方式进行收集（难点在于需要打破当前的单一目标战利品锁定机制，还有对套包算法的开发）
 - 个人新增召唤增援指令：所有类型护航都可长按结束后花费可配置的卢布在战局中召唤好友位中的闲置护航，Boss类型护航还额外增加免费召唤3位小弟的选项，且整个过程复用邪教徒仪式的召唤圈资源和天气事件（难点在于需要适配4人以上的护航，以及需要实现全新的万圣节事件控制器，还要适配Fika）
 
+## 切换回官方 BigBrain（3 步）
+
+1. Client.csproj 取消注释 BigBrain 引用；
+2. 全库替换 MiyakoCarryService.Client.SmallBrain → DrakiaXYZ.BigBrain（41 处 using + LayerUtils 反射字符串）；
+3. Client.cs 删/注释 SmallBrainBootstrap.Initialize();，取消注释 [BepInDependency]（Fika 同理），之后可删除或 <Compile Remove="SmallBrain\**" /> 排除该文件夹。
+
 ## 已知问题
 
 - 似乎AttackMoving总是在战斗结束后被触发
@@ -28,9 +34,12 @@
 - 反馈1:我在使用SPT4.1.3的护航仓库界面时非常卡，具体为仓库内拖动物品超过自身那一格都会有明显卡顿，但是拖动已经穿戴的装备以及弹挂和背包内的物品时不会有卡顿
 - 反馈2:我在使用SPT4.1.3的护航时，他们进入房间加载的非常慢，具体为如果点了多个护航，那么每个护航进入房间时造成短暂的游戏未响应
 - 反馈3:联机第二第三局时双方都50%且自己都作为主机，都显示了护航进队和载入信息，但是战局中没有能够生成
+- **5.0下，某些护航的藏身处是无法进入的**
+- 5.0 下，即便组了护航小队，但只要我调整了战局设置，在匹配界面都会显示是本地战局，而不会显示护航的模型，也没有槽位，右侧也没有队伍信息
 
 ## TODO
 
+- 检查库存模式下是否可以正常~~使用商人和装备预设~~、藏身处设施（特殊的Bot类型无法进入，普通Pmc类型可以进入）
 - 无头下会出现此错误
 ```
 [Error :MiyakoCarryService] [GameWorld.EFT.GameWorld::OnGameStarted() -> OnGameStartedPatch.Postfix() -> MiyakoCarryService.Client.Mgrs.EventMgr.Notify()]

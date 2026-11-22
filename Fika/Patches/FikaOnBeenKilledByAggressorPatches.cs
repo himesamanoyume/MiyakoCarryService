@@ -5,7 +5,7 @@ using Fika.Core;
 using Fika.Core.Main.Players;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {

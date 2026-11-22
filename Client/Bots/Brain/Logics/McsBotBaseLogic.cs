@@ -2,7 +2,6 @@
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using System.Collections.Generic;
-using System.Linq;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Enums;
 using System.Threading.Tasks;
@@ -13,6 +12,7 @@ using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Bots.Brain.Logics
 {
@@ -21,11 +21,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         protected McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
         protected QuestDataMgr QuestDataMgr => field ??= MgrAccessor.Get<QuestDataMgr>();
         protected CommandMgr CommandMgr => field ??= MgrAccessor.Get<CommandMgr>();
-        
+
         protected async Task Execute(McsBotPlayerData mcsBotPlayerData, IItemOperationResult action, LootData targetLootData)
         {
             var mcsBotPlayer = mcsBotPlayerData.Player;
-            var callback = new Callback((IResult result) =>
+            var callback = new Action<IResult>(result =>
             {
                 if (result.Succeed)
                 {
@@ -38,18 +38,24 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             mcsBotPlayer.CurrentManagedState.Pickup(true, new Action(() =>
             {
-                if (action is MoveResult moveResult)
+                if (action != null && action.TryCast<MoveResult>() != null)
                 {
-                    if (targetLootData.Item is Magazine magazineItemClass && magazineItemClass != null)
+                    var magazineItemClass = targetLootData.Item == null ? null : targetLootData.Item.TryCast<Magazine>();
+                    if (magazineItemClass != null)
                     {
                         mcsBotPlayer.InventoryController.StrictCheckMagazine(magazineItemClass, false, 0, false, true);
                     }
 
-                    if (targetLootData.Item is ContainerCollection containerClass && containerClass != null)
+                    var containerClass = targetLootData.Item == null ? null : targetLootData.Item.TryCast<ContainerCollection>();
+                    if (containerClass != null)
                     {
-                        foreach (var mag in containerClass.GetAllItemsFromCollection().OfType<Magazine>())
+                        foreach (var collectionItem in containerClass.GetAllItemsFromCollection())
                         {
-                            mcsBotPlayer.InventoryController.StrictCheckMagazine(mag, false, 0, false, true);
+                            var mag = collectionItem.TryCast<Magazine>();
+                            if (mag != null)
+                            {
+                                mcsBotPlayer.InventoryController.StrictCheckMagazine(mag, false, 0, false, true);
+                            }
                         }
                     }
                     BotOwner.AITaskManager.RegisterDelayedTask(BotOwner, 0.5f, new Action(BotOwner.Medecine.RefreshCurMeds));
@@ -69,7 +75,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var mcsBotPlayerInventoryController = mcsBotPlayerData.Player.InventoryController;
             var normalTake = false;
             var currentSlot = targetLootData.ItemType == EItemType.Backpack ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack) :
-                    (targetLootData.ItemType == EItemType.Equipment && targetLootData.Item is not Headphones) ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
+                    (targetLootData.ItemType == EItemType.Equipment && (targetLootData.Item == null || targetLootData.Item.TryCast<Headphones>() == null)) ? mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest) : null;
 
             if (currentSlot == null)
             {
@@ -194,9 +200,10 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
         /// </summary>
         protected async Task Transfer(McsBotPlayerData mcsBotPlayerData, LootData fromLootData, LootData toLootData)
         {
-            if (fromLootData.Item is ContainerCollection containerClass)
+            var fromContainer = fromLootData.Item == null ? null : fromLootData.Item.TryCast<ContainerCollection>();
+            if (fromContainer != null)
             {
-                var firstLevelItems = containerClass.GetFirstLevelItems().ToList();
+                var firstLevelItems = fromContainer.GetFirstLevelItems();
                 foreach (var firstLevelItem in firstLevelItems)
                 {
                     var firstLevelItemData = firstLevelItem.GetData();
@@ -262,37 +269,46 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (toLootData != null)
             {
-                if (toLootData.Item is CompoundItem compoundItem)
+                var toCompoundItem = toLootData.Item == null ? null : toLootData.Item.TryCast<CompoundItem>();
+                if (toCompoundItem != null)
                 {
-                    targets.Add(compoundItem);
+                    targets.Add(toCompoundItem);
                 }
             }
             else
             {
-                var allContainers = new List<Item>();
+                var nonAllocContainers = new Il2CppSystem.Collections.Generic.List<Item>();
                 var pocketsSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets);
                 if (pocketsSlot.ContainedItem != null)
                 {
-                    pocketsSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
+                    pocketsSlot.ContainedItem.GetAllItemsNonAlloc(nonAllocContainers, false, true);
                 }
 
                 var tacticalVestSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
                 if (tacticalVestSlot.ContainedItem != null)
                 {
-                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
+                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(nonAllocContainers, false, true);
                 }
 
                 var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
                 if (backpckSlot.ContainedItem != null)
                 {
-                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, true);
+                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(nonAllocContainers, false, true);
                 }
 
-                allContainers = allContainers.Where(i => i.IsContainer).ToList();
+                var allContainers = new List<Item>();
+                foreach (var nonAllocContainer in nonAllocContainers)
+                {
+                    if (nonAllocContainer.IsContainer)
+                    {
+                        allContainers.Add(nonAllocContainer);
+                    }
+                }
 
                 foreach (var container in allContainers)
                 {
-                    if (container is CompoundItem compoundItem)
+                    var compoundItem = container == null ? null : container.TryCast<CompoundItem>();
+                    if (compoundItem != null)
                     {
                         targets.Add(compoundItem);
                     }
@@ -302,7 +318,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var result = ItemManipulator.QuickFindAppropriatePlace(
                 fromLootData.Item,
                 mcsBotPlayerInventoryController,
-                targets,
+                targets.ToIl2CppList(),
                 ItemManipulator.EMoveItemOrder.PickUp,
                 true
             );
@@ -326,31 +342,39 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (allContainers == null)
             {
-                allContainers = new();
+                var nonAllocContainers = new Il2CppSystem.Collections.Generic.List<Item>();
 
                 var tacticalVestSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.TacticalVest);
                 if (tacticalVestSlot.ContainedItem != null)
                 {
-                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    tacticalVestSlot.ContainedItem.GetAllItemsNonAlloc(nonAllocContainers, false, false);
                 }
 
                 var backpckSlot = mcsBotPlayerInventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
                 if (backpckSlot.ContainedItem != null)
                 {
-                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(allContainers, false, false);
+                    backpckSlot.ContainedItem.GetAllItemsNonAlloc(nonAllocContainers, false, false);
                 }
 
-                allContainers = allContainers.Where(i => i.IsContainer).ToList();
+                allContainers = new List<Item>();
+                foreach (var nonAllocContainer in nonAllocContainers)
+                {
+                    if (nonAllocContainer.IsContainer)
+                    {
+                        allContainers.Add(nonAllocContainer);
+                    }
+                }
             }
 
             foreach (var item in allContainers)
             {
-                if (item is SearchableItem searchableItemItemClass)
+                var searchableItemItemClass = item == null ? null : item.TryCast<SearchableItem>();
+                if (searchableItemItemClass != null)
                 {
                     var sortResult = ItemManipulator.Sort(searchableItemItemClass, mcsBotPlayerInventoryController, true);
                     if (sortResult.Succeeded)
                     {
-                        await mcsBotPlayerInventoryController.TryRunNetworkTransaction(sortResult, null);
+                        await mcsBotPlayerInventoryController.TryRunNetworkTransaction(sortResult, null).AsManaged();
                     }
                 }
             }
@@ -386,7 +410,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return false;
             }
 
-            currentAiming.SetTarget(targetPos);
+            currentAiming.SetTarget(new BotAimTarget(targetPos, false, ELookObstacleType.None));
             BotOwner.AimingManager.NodeUpdate();
             if (!currentAiming.IsReady)
             {
@@ -440,7 +464,9 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var player = BotOwner.GetPlayer;
             var movementContext = player?.MovementContext;
             var stance = movementContext?.LeftStanceController;
-            if (stance == null || player.HandsController is not Player.FirearmController fireCont)
+            var handsController = player == null ? null : player.HandsController;
+            var fireCont = handsController == null ? null : handsController.TryCast<Player.FirearmController>();
+            if (stance == null || fireCont == null)
             {
                 return;
             }

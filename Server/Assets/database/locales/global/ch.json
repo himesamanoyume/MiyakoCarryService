@@ -152,7 +152,7 @@
     "Mcs/RefreshFriendList": "刷新",
     "Mcs/OpenMcsBotPlayerInventory": "打开库存",
     "Mcs/ReturnToMainChar": "返回主角色",
-    "Mcs/McsInventoryMode": "护航库存模式",
+    "Mcs/McsInventoryMode": "库存模式",
     "Mcs/BigSurvey": "大调查",
     "Mcs/BigSurveyNotify": "共捕获到 {0} 个错误，已复制日志文本",
     "Mcs/ReturnToMainCharRefuse": "此玩家不是护航玩家，无法打开库存",

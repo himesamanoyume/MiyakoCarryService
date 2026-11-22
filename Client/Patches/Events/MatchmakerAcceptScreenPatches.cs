@@ -2,9 +2,7 @@ using Diz.Binding;
 using EFT;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
-using MiyakoCarryService.Client.Models;
-using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System.Reflection;
 
 namespace MiyakoCarryService.Client.Patches.Events
@@ -20,27 +18,27 @@ namespace MiyakoCarryService.Client.Patches.Events
 		/// 在准备开始匹配前发送配置文件
 		/// </summary>
 		[PatchPrefix]
-		public static void Prefix(MatchmakerPlayersController ___MatchmakerPlayersController, IEftSession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
+		public static void Prefix(MatchMakerAcceptScreen __instance, IEftSession session, RaidSettings raidSettings, RaidSettings offlineRaidSettings)
 		{
-			if (MiyakoCarryServicePlugin.FikaInstalled)
-			{
-                TasksExtensions.HandleExceptions(McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
-				{
-					McsLeadPlayerId = session.Profile.Id,
-                    EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
-					PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
-					KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
-					LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
-					BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
-                    EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
-                    FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
-                    FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
-                    FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
-                    PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
-                    EnableSubtitles = MiyakoCarryServicePlugin.EnableSubtitles.Value,
-                }));
-                GroupPlayers = ___MatchmakerPlayersController.GroupPlayers;
-			}
+			// if (MiyakoCarryServicePlugin.FikaInstalled)
+			// {
+            //     TasksExtensions.HandleExceptions(McsRequestHandler.UploadMcsBotPlayerConfig(new McsBotPlayerConfig
+			// 	{
+			// 		McsLeadPlayerId = session.Profile.Id,
+            //         EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value,
+			// 		PriceThreshold = MiyakoCarryServicePlugin.PriceThreshold.Value,
+			// 		KeywordItemText = MiyakoCarryServicePlugin.KeywordItemText.Value,
+			// 		LootingKeywordItem = MiyakoCarryServicePlugin.LootingKeywordItem.Value,
+			// 		BlockItemType = (int)MiyakoCarryServicePlugin.BlockItemType.Value,
+            //         EnableKeepFormation = MiyakoCarryServicePlugin.EnableKeepFormation.Value,
+            //         FormationMatrix = MiyakoCarryServicePlugin.FormationMatrix.Value,
+            //         FormationSpacing = MiyakoCarryServicePlugin.FormationSpacing.Value,
+            //         FormationSequentialFill = MiyakoCarryServicePlugin.FormationSequentialFill.Value,
+            //         PhrasesSilent = MiyakoCarryServicePlugin.PhrasesSilent.Value,
+            //         EnableSubtitles = MiyakoCarryServicePlugin.EnableSubtitles.Value,
+            //     }));
+            //     GroupPlayers = __instance.MatchmakerPlayersController.GroupPlayers;
+			// }
 			CurrentType = raidSettings.Side;
 		}
 	}

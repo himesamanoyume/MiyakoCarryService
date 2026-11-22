@@ -2,11 +2,18 @@
 using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class StationaryWeaponDataMgr : GameWorldDataMgr
     {
+        public StationaryWeaponDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();

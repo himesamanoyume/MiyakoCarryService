@@ -5,11 +5,18 @@ using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class DoorDataMgr : GameWorldDataMgr
     {
+        public DoorDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public override void OnRaidStarted()
         {
             LoadData(LoadDoors);
@@ -25,7 +32,15 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                doors = world.WorldInteractiveObjects().OfType<Door>().ToList();
+                doors = new List<Door>();
+                foreach (var worldInteractiveObject in world.WorldInteractiveObjects())
+                {
+                    var door = worldInteractiveObject.TryCast<Door>();
+                    if (door != null)
+                    {
+                        doors.Add(door);
+                    }
+                }
             }
             foreach (var door in doors)
             {

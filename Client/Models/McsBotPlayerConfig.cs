@@ -1,7 +1,6 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using EFT;
 
 namespace MiyakoCarryService.Client.Models
 {
@@ -9,7 +8,7 @@ namespace MiyakoCarryService.Client.Models
     public class McsBotPlayerConfig
     {
         [DataMember(Name = "McsLeadPlayerId")]
-        public MongoID McsLeadPlayerId;
+        public string McsLeadPlayerId;
 
         [DataMember(Name = "EnableLooting")]
         public bool EnableLooting = MiyakoCarryServicePlugin.EnableLooting.Value;

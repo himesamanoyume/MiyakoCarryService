@@ -7,8 +7,8 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using MiyakoCarryService.Client.Datas;
-using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
@@ -32,7 +32,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             if (mcsBotPlayerData == null)
             {
                 BotOwner.Sprint(true, false);
-                _baseLogic.UpdateNodeByMain(data);
+                _baseLogic.UpdateNodeByMain(null);
                 return;
             }
 
@@ -46,20 +46,20 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (!BotOwner.Memory.HaveEnemy && botWithin50 && leaderMovementContext.IsInPronePose)
             {
-                _baseLogic.DoorOpen();
+                _baseLogic.ChecksWhileMoving(out _);;
                 BotOwner.BotLight?.TurnOff(false, true);
                 BotOwner.GoToSomePointData.UpdateToGo(false, 0f, leaderMovementContext.PoseLevel);
             }
             else if (!BotOwner.Memory.HaveEnemy && botWithin50 && (leaderMovementContext.PoseLevel < 1f || leaderMovementContext.PoseLevel == 1f && leaderRelativeSpeed < 1f))
             {
-                _baseLogic.DoorOpen();
+                _baseLogic.ChecksWhileMoving(out _);;
                 BotOwner.BotLight?.TurnOff(false, true);
                 BotOwner.GoToSomePointData.UpdateToGo(false, leaderMovementContext.CharacterMovementSpeed, leaderMovementContext.PoseLevel);
             }
             else
             {
                 BotOwner.Sprint(true, false);
-                _baseLogic.UpdateNodeByMain(data);
+                _baseLogic.UpdateNodeByMain(null);
             }
 
             if (mcsBotPlayerData.IsTaskRunning)
@@ -94,7 +94,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.Steering.LookToPoint(targetPos.Value);
-                    TasksExtensions.HandleExceptions(StartExcuteProxyAction());
+                    StartExcuteProxyAction().McsHandleExceptions();
                     return;
                 }
 
@@ -150,7 +150,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     if (interactableObjectData is DoorData doorData)
                     {
                         doorData.Door.DoorState = EDoorState.Shut;
-                        mcsBotPlayerData.Player.StartInteraction(doorData.Door, interactionResult, () => InteractionCallback(mcsBotPlayerData));
+                        mcsBotPlayerData.Player.StartInteraction(doorData.Door, interactionResult, new Action(() => InteractionCallback(mcsBotPlayerData)));
                     }
                     else if (interactableObjectData is SwitchData switchData)
                     {
@@ -211,29 +211,17 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             {
                 return;
             }
-            var isMySquadMember = McsMgr.IsMcsMemberPlayer(mcsBotPlayerData.Player.ProfileId, out var mcsLeadPlayer);
+
             var mcsBotPlayer = mcsBotPlayerData.Player;
             if (mcsBotPlayer == null)
             {
                 return;
             }
 
-            if (MiyakoCarryServicePlugin.FikaInstalled && !isMySquadMember)
+            var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
+            if (questData != null)
             {
-                EventMgr.Notify(new QuestProxyCommandCallbackHandleFikaEvent
-                {
-                    McsLeadPlayerId = mcsBotPlayerData.LeadPlayer.ProfileId,
-                    McsBotPlayerId = mcsBotPlayer.ProfileId,
-                    TargetId = mcsBotPlayerData.ProxyTargetId
-                });
-            }
-            else
-            {
-                var questData = QuestDataMgr.FindQuestData(mcsBotPlayerData.ProxyTargetId);
-                if (questData != null)
-                {
-                    await questData.ForceCompleteQuest(mcsBotPlayer);
-                }
+                await questData.ForceCompleteQuest(mcsBotPlayer);
             }
         }
 
@@ -286,12 +274,14 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     return;
                 }
 
-                if (!Singleton<GameWorld>.Instance.ItemOwners.TryGetValue(rootItem.Owner, out var itemOwner))
+                var ownerWorldData = Singleton<GameWorld>.Instance.FindOwnerWithWorldData(rootItem.Owner.ID);
+                var ownerTransform = ownerWorldData.Value.Transform;
+                if (ownerTransform == null)
                 {
                     return;
                 }
 
-                var lootableContainer = itemOwner.Transform.GetComponent<LootableContainer>();
+                var lootableContainer = ownerTransform.GetComponent<LootableContainer>();
                 var isActuallyInContainer = lootableContainer != null;
 
                 if (isActuallyInContainer)

@@ -331,6 +331,48 @@ public class ConfigService(
                     IsBoss = false,
                     DisplayName = "Raider"
                 },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.blackDivision.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Black Division"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.vsRF.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Russian Army"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.vsRFSniper.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Russian Army Sniper"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.sentry.ToString(),
+                    IsBoss = false,
+                    DisplayName = "Russian Army Sentry"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.bossWedge.ToString(),
+                    IsBoss = true,
+                    DisplayName = "Wedge"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.bossBullyBlackDiv.ToString(),
+                    IsBoss = true,
+                    DisplayName = "BD Reshala"
+                },
+                new SpawnType
+                {
+                    WildSpawnType = WildSpawnType.followerBullyBlackDiv.ToString(),
+                    IsBoss = false,
+                    DisplayName = "BD Reshala Guard"
+                },
             };
             await fileUtil.WriteFileAsync(spawnTypeConfigPath, jsonUtil.Serialize(spawnTypeList, true));
         }

@@ -3,7 +3,7 @@ using EFT;
 using EFT.Ballistics;
 using HarmonyLib;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -17,11 +17,14 @@ namespace MiyakoCarryService.Client.Patches.Events
         [PatchPostfix]
         public static void Postfix(Player __instance, IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            if (!MiyakoCarryServicePlugin.FikaInstalled || MiyakoCarryServicePlugin.IsLoadedByScriptEngine)
-            {
-                Tools.HandleSharedExperience(__instance, aggressor);
-                Tools.HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart);
-            }
+            // if (!MiyakoCarryServicePlugin.FikaInstalled || MiyakoCarryServicePlugin.IsLoadedByScriptEngine)
+            // {
+            //     Tools.HandleSharedExperience(__instance, aggressor);
+            //     Tools.HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart);
+            // }
+
+            Tools.HandleSharedExperience(__instance, aggressor);
+            Tools.HandleSharedQuestCondition(__instance, aggressor, damageInfo, bodyPart);
         }
     }
 }

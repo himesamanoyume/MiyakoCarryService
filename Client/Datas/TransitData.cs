@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
@@ -9,12 +8,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class TransitData : TriggerData
     {
-        private WeakReference<TransitPoint> _transitRef;
-        public TransitPoint TransitPoint => _transitRef.TryGetTarget(out var transit) ? transit : null;
+        private TransitPoint _transitRef;
+        public TransitPoint TransitPoint => _transitRef;
 
         public TransitData(TransitPoint transitPoint) : base()
         {
-            _transitRef = new WeakReference<TransitPoint>(transitPoint);
+            _transitRef = transitPoint;
             _colliders = transitPoint.transform.GetComponentsInChildren<Collider>().ToList();
         }
 

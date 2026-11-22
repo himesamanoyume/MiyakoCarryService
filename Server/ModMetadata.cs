@@ -7,7 +7,7 @@ namespace MiyakoCarryService.Server
 {
     public record ModMetadata : IModMetadata, IModBlazorMetadata
     {
-        private const string CurrentVersion = "1.1.5.0";
+        private const string CurrentVersion = "1.99.1";
 #if DEBUG
         public string Name { get; init; } = "MiyakoCarryServiceServer DebugBuild";
 #else
@@ -16,7 +16,7 @@ namespace MiyakoCarryService.Server
         public string Author { get; init; } = "Himesamanoyume";
         public List<string> Contributors { get; init; }
         public SemanticVersioning.Version Version { get; init; } = new(string.Join('.', CurrentVersion.Split('.', System.StringSplitOptions.None).Take(3)));
-        public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.2");
+        public SemanticVersioning.Range SptVersion { get; init; } = new("~5.0.0");
         public List<string> Incompatibilities { get; init; }
         public Dictionary<string, SemanticVersioning.Range> ModDependencies { get; init; }
         public string Url { get; init; } = "https://sp-mod.com/mod/2709/miyako-carry-service";

@@ -22,16 +22,16 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (goalEnemy.IsVisible)
             {
-                base.UpdateNodeByBrain(data);
+                base.UpdateNodeByBrain(null);
                 return;
             }
 
-            DoorOpen();
+            ChecksWhileMoving(out _);
             _owner.SetTargetMoveSpeed(1f);
             _owner.Sprint(false, false);
             _owner.SetPose(1f);
             MoveTowardsEnemy(goalEnemy);
-            AimingAndShoot(data);
+            AimingAndShoot(null);
         }
 
         private void MoveTowardsEnemy(EnemyInfo goalEnemy)
@@ -58,7 +58,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     _owner.WeaponManager.UnderbarrelLauncherController.TryEnable(null);
                 }
-                base.AimingAndShoot(data);
+                base.AimingAndShoot(null);
                 return;
             }
             _owner.LookData.SetLookPointByHearing(null);

@@ -17,7 +17,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             _owner.StopMove();
             if (data != null && data.FinishTime < Time.time)
             {
-                _owner.Memory.Spotted(false, null, null);
+                _owner.Memory.Spotted(false, new Il2CppSystem.Nullable<Vector3>(), new Il2CppSystem.Nullable<float>());
                 return;
             }
             CheckWantReload();

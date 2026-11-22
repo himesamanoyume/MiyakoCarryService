@@ -75,57 +75,62 @@ namespace MiyakoCarryService.Server.Helper
             };
         }
 
-        public McsWsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsBotPlayerProfile, bool isScav)
+        public McsGroupCharacter GenerateGroupCharacter(SptProfile mcsBotPlayerProfile, bool isScav)
         {
             var data = isScav ? mcsBotPlayerProfile.CharacterData.ScavData : mcsBotPlayerProfile.CharacterData.PmcData;
+            return new McsGroupCharacter
+            {
+                Id = data.Id.Value,
+                Aid = data.Aid,
+                Info = new McsCharacterInfo
+                {
+                    Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
+                    Side = data.Info.Side,
+                    Level = data.Info.Level,
+                    MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
+                    GameVersion = data.Info.GameVersion,
+                    SavageLockTime = data.Info.SavageLockTime,
+                    SavageNickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.Nickname,
+                    HasCoopExtension = data.Info.HasCoopExtension,
+                    Health = data.Health
+                },
+                VisualRepresentation = new McsPlayerVisualRepresentation
+                {
+                    Info = new McsVisualInfo
+                    {
+                        Nickname = data.Info.Nickname,
+                        Side = data.Info.Side,
+                        MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
+                        Level = data.Info.Level,
+                        GameVersion = data.Info.GameVersion,
+                        Health = data.Health
+                    },
+                    Customization = new Customization
+                    {
+                        Head = data.Customization.Head,
+                        Body = data.Customization.Body,
+                        Feet = data.Customization.Feet,
+                        Hands = data.Customization.Hands,
+                    },
+                    Equipment = new Equipment
+                    {
+                        Id = data.Inventory.Equipment,
+                        Items = data.Inventory.Items,
+                    },
+                },
+                IsLeader = false,
+                IsReady = true,
+                LookingGroup = true
+            };
+        }
+
+        public McsWsGroupMatchRaidReady GenerateWsGroupMatchRaidReady(SptProfile mcsBotPlayerProfile, bool isScav)
+        {
             return new McsWsGroupMatchRaidReady
             {
                 EventType = NotificationEventType.groupMatchRaidReady,
                 EventIdentifier = new(),
-                ExtendedProfile = new McsGroupCharacter
-                {
-                    Id = data.Id.Value,
-                    Aid = data.Aid,
-                    Info = new McsCharacterInfo
-                    {
-                        Nickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.MainProfileNickname + $" [{configController.GetSpawnTypeDisplayName(data.Info.Settings.Role)}]",
-                        Side = data.Info.Side,
-                        Level = data.Info.Level,
-                        MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
-                        GameVersion = data.Info.GameVersion,
-                        SavageLockTime = data.Info.SavageLockTime,
-                        SavageNickname = mcsBotPlayerProfile.CharacterData.ScavData.Info.Nickname,
-                        HasCoopExtension = data.Info.HasCoopExtension,
-                        Health = data.Health
-                    },
-                    VisualRepresentation = new McsPlayerVisualRepresentation
-                    {
-                        Info = new McsVisualInfo
-                        {
-                            Nickname = data.Info.Nickname,
-                            Side = data.Info.Side,
-                            MemberCategory = mcsBotPlayerProfile.CharacterData.PmcData.Info.MemberCategory,
-                            Level = data.Info.Level,
-                            GameVersion = data.Info.GameVersion,
-                            Health = data.Health
-                        },
-                        Customization = new Customization
-                        {
-                            Head = data.Customization.Head,
-                            Body = data.Customization.Body,
-                            Feet = data.Customization.Feet,
-                            Hands = data.Customization.Hands,
-                        },
-                        Equipment = new Equipment
-                        {
-                            Id = data.Inventory.Equipment,
-                            Items = data.Inventory.Items,
-                        },
-                    },
-                    IsLeader = false,
-                    IsReady = true,
-                    LookingGroup = true
-                }
+                ExtendedProfile = GenerateGroupCharacter(mcsBotPlayerProfile, isScav)
             };
         }
     }

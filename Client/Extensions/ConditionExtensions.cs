@@ -8,14 +8,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class ConditionExtensions
     {
-        private static readonly AttachedTable<Condition, QuestData> _datas = new();
 
         extension(Condition condition)
         {
-            public QuestData GetData(QuestDataClass questDataClass, Transform transform, Condition parentCondition = null)
+            public QuestData GetData(QuestStatusData quest, Transform transform, string zoneId, string targetId, Condition parentCondition = null)
             {
-                return _datas.GetOrCreate(condition, key => new QuestData(questDataClass, transform, key, parentCondition));
+                return InteropDataCache<QuestData>.GetOrCreate(condition.Pointer, zoneId, targetId, () => new QuestData(quest, transform, condition, zoneId, targetId, parentCondition));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<QuestData>.Clear();
         }
     }
 }

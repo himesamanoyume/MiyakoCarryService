@@ -3,16 +3,22 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using EFT;
+using Il2CppInterop.Runtime.InteropTypes;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
-using Newtonsoft.Json;
-using SPT.Common.Http;
+using SPTushonka.Common.Http;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Utils
 {
     public static class McsRequestHandler
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new() { IncludeFields = true };
+
         public static T2 PostJson<T1, T2>(string path, T1 t1)
         {
             return Task.Run(() => PostJsonAsync<T1, T2>(path, t1)).GetAwaiter().GetResult();
@@ -20,15 +26,15 @@ namespace MiyakoCarryService.Client.Utils
 
         public static async Task<T2> PostJsonAsync<T1, T2>(string path, T1 t1)
         {
-            var serialized = JsonConvert.SerializeObject(t1);
+            var serialized = JsonSerializer.Serialize(t1, _jsonOptions);
             var response = await RequestHandler.PostJsonAsync(path, serialized);
-            var data = JsonConvert.DeserializeObject<T2>(response);
+            var data = JsonSerializer.Deserialize<T2>(response, _jsonOptions);
             return data;
         }
 
         public static async Task PostJsonAsync<T1>(string path, T1 t1)
         {
-            var serialized = JsonConvert.SerializeObject(t1);
+            var serialized = JsonSerializer.Serialize(t1, _jsonOptions);
             await RequestHandler.PostJsonAsync(path, serialized);
         }
 
@@ -45,7 +51,7 @@ namespace MiyakoCarryService.Client.Utils
         public static async Task<T> GetJsonAsync<T>(string path)
         {
             var response = await RequestHandler.GetJsonAsync(path);
-            var data = JsonConvert.DeserializeObject<T>(response);
+            var data = JsonSerializer.Deserialize<T>(response, _jsonOptions);
             return data;
         }
 
@@ -56,36 +62,53 @@ namespace MiyakoCarryService.Client.Utils
 
         public static async Task<string> PutJsonAsync<T>(string path, T t)
         {
-            var serialized = JsonConvert.SerializeObject(t);
+            var serialized = JsonSerializer.Serialize(t, _jsonOptions);
             var response = await RequestHandler.PutJsonAsync(path, serialized);
             return response;
         }
 
-        public static async Task<Dictionary<MongoID, Profile[]>> GetMcsBotPlayers(McsBotPlayerType mcsBotPlayerType)
+        public static async Task<Dictionary<string, Profile[]>> GetMcsBotPlayers(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<McsBotPlayerType, Dictionary<MongoID, ProfileDescriptor[]>>("/mcs/client/game/bot/generate", mcsBotPlayerType);
+            MainThread.VerifyAccess();
+            var serialized = JsonSerializer.Serialize(mcsBotPlayerType, _jsonOptions);
+            var json = await RequestHandler.PostJsonAsync("/mcs/client/game/bot/generate", serialized);
+            return BuildMcsBotPlayers();
 
-            if (response == null)
+            Dictionary<string, Profile[]> BuildMcsBotPlayers()
             {
-                return new();
-            }
+                var result = new Dictionary<string, Profile[]>();
+                var response = DeserializeEftJson<Il2CppSystem.Collections.Generic.Dictionary<MongoID, Il2CppReferenceArray<ProfileDescriptor>>>(json);
+                if (response == null)
+                {
+                    return result;
+                }
 
-            return response.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.Select(desc => new Profile(desc)).ToArray()
-            );
+                foreach (var kvp in response)
+                {
+                    result[kvp.Key.MongoIdText()] = kvp.Value.Select(desc => new Profile(desc)).ToArray();
+                }
+
+                return result;
+            }
         }
 
         public static async Task<ProfileDescriptor[]> GetMcsBotPlayerProfiles()
         {
-            var response = await GetJsonAsync<ProfileDescriptor[]>("/mcs/client/game/profile/list");
+            MainThread.VerifyAccess();
+            var json = await RequestHandler.GetJsonAsync("/mcs/client/game/profile/list");
+            return DeserializeEftJson<Il2CppReferenceArray<ProfileDescriptor>>(json)?.ToArray() ?? [];
+        }
 
-            if (response == null)
+        private static T DeserializeEftJson<T>(string json) where T : Il2CppObjectBase
+        {
+            if (string.IsNullOrEmpty(json))
             {
-                return [];
+                return null;
             }
 
-            return response;
+            var serializer = HTTPTransportManager.GetResponseJsonSerializer();
+            var jsonReader = new Newtonsoft.Json.JsonTextReader(new Il2CppSystem.IO.StringReader(json));
+            return serializer.Deserialize(jsonReader, ManagedArguments.ToIl2CppType(typeof(T))).TryCast<T>();
         }
 
         public static bool VerifyMcsBotPlayerAid(McsBotPlayerAid mcsBotPlayerAid)
@@ -102,9 +125,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<ConcurrentDictionary<MongoID, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
+        public static async Task<ConcurrentDictionary<string, McsBotPlayerConfig>> GetMcsBotPlayerConfigs()
         {
-            var response = await GetJsonAsync<ConcurrentDictionary<MongoID, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
+            var response = await GetJsonAsync<ConcurrentDictionary<string, McsBotPlayerConfig>>("/mcs/singleplayer/settings/bot/get");
 
             if (response == null)
             {
@@ -134,9 +157,9 @@ namespace MiyakoCarryService.Client.Utils
             await PostJsonAsync("/mcs/client/trading/api/compensation", compensation);
         }
 
-        public static async Task<ProfileChanges> UpdateProfile()
+        public static async Task<McsProfileChangesPayload> UpdateProfile()
         {
-            var response = await GetJsonAsync<ProfileChanges>("/mcs/client/trading/api/updateProfile");
+            var response = await GetJsonAsync<McsProfileChangesPayload>("/mcs/client/trading/api/updateProfile");
 
             if (response == null)
             {
@@ -146,9 +169,9 @@ namespace MiyakoCarryService.Client.Utils
             return response;
         }
 
-        public static async Task<List<MongoID>> RequestMySquadMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
+        public static async Task<List<string>> RequestMySquadMcsBotPlayerIds(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<McsBotPlayerType, List<MongoID>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);
+            var response = await PostJsonAsync<McsBotPlayerType, List<string>>("/mcs/singleplayer/info/bot/get", mcsBotPlayerType);
 
             if (response == null)
             {
@@ -166,9 +189,9 @@ namespace MiyakoCarryService.Client.Utils
             });
         }
 
-        public static async Task<HashSet<MongoID>> GetAllMcsBotPlayerIdInRaid(McsBotPlayerType mcsBotPlayerType)
+        public static async Task<HashSet<string>> GetAllMcsBotPlayerIdInRaid(McsBotPlayerType mcsBotPlayerType)
         {
-            var response = await PostJsonAsync<McsBotPlayerType, HashSet<MongoID>>("/mcs/singleplayer/info/botids/get", mcsBotPlayerType);
+            var response = await PostJsonAsync<McsBotPlayerType, HashSet<string>>("/mcs/singleplayer/info/botids/get", mcsBotPlayerType);
 
             if (response == null)
             {
@@ -217,5 +240,7 @@ namespace MiyakoCarryService.Client.Utils
 
             return response;
         }
+
+
     }
 }

@@ -1,5 +1,6 @@
 
 using System.Collections.Frozen;
+using System.Collections.Generic;
 using MiyakoCarryService.Server.Services;
 using SPTarkov.Common.Models.Logging;
 using SPTarkov.DI.Annotations;
@@ -40,6 +41,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
         BotEquipmentFilterService botEquipmentFilterService,
         BotEquipmentModPoolService botEquipmentModPoolService,
         BotEquipmentModGenerator botEquipmentModGenerator,
+        BotItemBuildHelper botItemBuildHelper,
         BotInventoryContainerService botInventoryContainerService,
         BotConfig botConfig, 
         PmcConfig pmcConfig,
@@ -47,7 +49,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
     ) : BotInventoryGenerator(logger, randomUtil, profileActivityService, botWeaponGenerator, botLootGenerator, 
         botGeneratorHelper, profileHelper, botHelper, weightedRandomHelper, itemHelper, weatherHelper, 
         serverLocalisationService, botEquipmentFilterService, botEquipmentModPoolService, 
-        botEquipmentModGenerator, botInventoryContainerService, botConfig, pmcConfig
+        botEquipmentModGenerator, botItemBuildHelper, botInventoryContainerService, botConfig, pmcConfig
     )
     {
         private static readonly FrozenSet<EquipmentSlots> _excludedEquipmentSlots =
@@ -197,6 +199,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                         RootEquipmentSlot = equipmentSlot,
                         RootEquipmentPool = itemsWithWeightPool,
                         ModPool = templateInventory.Mods,
+                        EquipmentBuilds = templateInventory.EquipmentBuilds,
                         SpawnChances = wornItemChances,
                         BotData = new BotData
                         {
@@ -217,12 +220,9 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 {
                     BotId = botId,
                     RootEquipmentSlot = EquipmentSlots.Pockets,
-                    RootEquipmentPool = GetPocketPoolByGameEdition(
-                        botGenerationDetails.GameVersion,
-                        templateInventory,
-                        botGenerationDetails.IsPmc
-                    ),
+                    RootEquipmentPool = templateInventory.Equipment.GetValueOrDefault(EquipmentSlots.Pockets),
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -245,6 +245,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.FaceCover,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.FaceCover],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -266,6 +267,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.Headwear,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.Headwear],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -287,6 +289,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.Earpiece,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.Earpiece],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -308,6 +311,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.Eyewear,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.Eyewear],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -329,6 +333,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.ArmorVest,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.ArmorVest],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {
@@ -365,6 +370,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                     RootEquipmentSlot = EquipmentSlots.TacticalVest,
                     RootEquipmentPool = templateInventory.Equipment[EquipmentSlots.TacticalVest],
                     ModPool = templateInventory.Mods,
+                    EquipmentBuilds = templateInventory.EquipmentBuilds,
                     SpawnChances = wornItemChances,
                     BotData = new BotData
                     {

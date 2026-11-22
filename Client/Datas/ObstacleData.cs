@@ -1,6 +1,6 @@
 
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,7 +8,7 @@ namespace MiyakoCarryService.Client.Datas
 {
     public abstract class ObstacleData : TriggerData
     {
-        protected ConditionalWeakTable<Collider, NavMeshObstacle> _obstacles = new();
+        protected Dictionary<IntPtr, NavMeshObstacle> _obstacles = new();
         public bool IsActiveObstacle { get; private set; } = true;
         public bool IsCarvingApplied { get; private set; } = false;
 
@@ -29,7 +29,8 @@ namespace MiyakoCarryService.Client.Datas
                 var yPadding = 0.1f;
                 var zPadding = 0.1f;
 
-                if (collider is BoxCollider boxCollider)
+                var boxCollider = collider.TryCast<BoxCollider>();
+                if (boxCollider != null)
                 {
                     obstacle.center = boxCollider.center;
                     obstacle.size = new Vector3(boxCollider.size.x + xPadding, boxCollider.size.y + yPadding, boxCollider.size.z + zPadding);
@@ -40,7 +41,7 @@ namespace MiyakoCarryService.Client.Datas
                     obstacle.center = collider.transform.InverseTransformPoint(bounds.center);
                     obstacle.size = new Vector3(bounds.size.x + xPadding, bounds.size.y + yPadding, bounds.size.z + zPadding);
                 }
-                _obstacles.Add(collider, obstacle);
+                _obstacles[collider.Pointer] = obstacle;
             }
         }
 
@@ -57,7 +58,7 @@ namespace MiyakoCarryService.Client.Datas
             }
 
             IsCarvingApplied = carve;
-            foreach ((var collider, var obstacle) in _obstacles)
+            foreach (var obstacle in _obstacles.Values)
             {
                 if (obstacle != null)
                 {
@@ -74,7 +75,7 @@ namespace MiyakoCarryService.Client.Datas
                 return result;
             }
 
-            foreach ((var collider, var obstacle) in _obstacles)
+            foreach (var obstacle in _obstacles.Values)
             {
                 if (obstacle == null)
                 {

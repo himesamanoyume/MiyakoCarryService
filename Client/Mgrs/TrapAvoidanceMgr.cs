@@ -4,13 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using EFT;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class TrapAvoidanceMgr : BaseMgr
     {
+        public TrapAvoidanceMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         private const float ENABLE_DIST = 8f;
         private const float DISABLE_DIST = 12f;
         private const float SCAN_INTERVAL = 0.1f;
@@ -38,7 +45,7 @@ namespace MiyakoCarryService.Client.Mgrs
             {
                 return;
             }
-            StartCoroutine(ScanLoop());
+            StartCoroutine(ScanLoop().McsSafe());
         }
 
         public override void OnRaidEnded()

@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class ExfiltrationPointExtensions
     {
-        private static readonly AttachedTable<ExfiltrationPoint, ExfilData> _datas = new();
 
         extension(ExfiltrationPoint exfiltrationPoint)
         {
             public ExfilData GetData()
             {
-                return _datas.GetOrCreate(exfiltrationPoint, key => new ExfilData(key));
+                return InteropDataCache<ExfilData>.GetOrCreate(exfiltrationPoint.Pointer, () => new ExfilData(exfiltrationPoint));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<ExfilData>.Clear();
         }
     }
 }

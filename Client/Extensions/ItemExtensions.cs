@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
@@ -6,13 +7,13 @@ using EFT.Trading;
 using EFT.UI.DragAndDrop;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Mgrs;
+using MiyakoCarryService.Client.Patches.Events;
 using MiyakoCarryService.Client.Utils;
 
 namespace MiyakoCarryService.Client.Extensions
 {
     public static class ItemExtensions
     {
-        private static readonly AttachedTable<Item, ItemData> _datas = new();
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
@@ -20,7 +21,7 @@ namespace MiyakoCarryService.Client.Extensions
         {
             public ItemData GetData()
             {
-                return _datas.GetOrCreate(item, key => key.InitData(), cacheNegative: false);
+                return InteropDataCache<ItemData>.GetOrCreate(item.Pointer, () => item.InitData(), cacheNegative: false);
             }
 
             public IEnumerable<ItemData> GetAllDatas()
@@ -40,7 +41,8 @@ namespace MiyakoCarryService.Client.Extensions
                 try
                 {
                     var iItemOwner = item.Parent.GetOwner();
-                    if (iItemOwner is not ItemController traderControllerClass)
+                    var traderControllerClass = iItemOwner == null ? null : iItemOwner.TryCast<ItemController>();
+                    if (traderControllerClass == null)
                     {
                         return false;
                     }
@@ -73,7 +75,7 @@ namespace MiyakoCarryService.Client.Extensions
                         _ => item.Owner?.ID
                     };
 
-                    var player = !string.IsNullOrEmpty(profileId) ? gameWorld.GetEverExistedPlayerByID(profileId) : null;
+                    var player = !string.IsNullOrEmpty(profileId) ? gameWorld.GetEverExistedPlayerByProfileId(profileId) : null;
 
                     if (player == null)
                     {
@@ -110,7 +112,7 @@ namespace MiyakoCarryService.Client.Extensions
                 }
                 else
                 {
-                    var itemType = ItemViewFactory.GetItemType(item.GetType());
+                    var itemType = ItemViewFactory.GetItemType(ManagedArguments.ToIl2CppType(item.GetType()));
                     switch (itemType)
                     {
                         case EItemType.Armor:
@@ -126,16 +128,14 @@ namespace MiyakoCarryService.Client.Extensions
                                 if (!gameloop.ItemBestPriceDict.TryGetValue(item.TemplateId, out offer))
                                 {
                                     offer = GetBestTraderOffer(item);
+                                    if (offer == null && !item.IsMoney())
+                                    {
+                                        offer = new TraderOffer();
+                                    }
+
                                     if (offer != null)
                                     {
-                                        gameloop.ItemBestPriceDict.Add(item.TemplateId, offer);
-                                    }
-                                    else
-                                    {
-                                        if (!item.IsMoney())
-                                        {
-                                            gameloop.ItemBestPriceDict.Add(item.TemplateId, new TraderOffer());
-                                        }
+                                        gameloop.ItemBestPriceDict[item.TemplateId] = offer;
                                     }
                                 }
                                 return offer;
@@ -171,6 +171,12 @@ namespace MiyakoCarryService.Client.Extensions
                         continue;
                     }
 
+                    if (trader._supplyData == null)
+                    {
+                        TraderClassConstructorPatch.RequestSupplyData(trader);
+                        continue;
+                    }
+
                     var offer = item.GetTraderOffer(trader);
                     if (offer != null)
                     {
@@ -186,26 +192,95 @@ namespace MiyakoCarryService.Client.Extensions
             {
                 try
                 {
-                    var price = trader.GetUserItemPrice(item);
-                    var currency = CurrencyUtil.GetCurrencyCharById(price.Value.CurrencyId.Value) switch
+                    Il2CppSystem.Nullable<Trader.ItemPrice> price = null;
+                    try
                     {
-                        "€" => ECurrencyType.EUR,
-                        "$" => ECurrencyType.USD,
-                        "<sprite=0>" or "GP" => ECurrencyType.GP,
-                        _ => ECurrencyType.RUB
-                    };
-                    return price.HasValue ? new TraderOffer
-                    (
-                        price.Value.Amount,
+                        price = trader.GetUserItemPrice(item);
+                    }
+                    catch
+                    {
+                    }
+
+                    var gameAmount = price != null && price.HasValue ? price.Value.Amount : -1;
+                    var amount = gameAmount > 0 ? gameAmount : CalculateFallbackAmount(item, trader);
+
+                    if (amount <= 0)
+                    {
+                        return new TraderOffer();
+                    }
+
+                    return new TraderOffer(
+                        amount,
                         item.Width * item.Height,
-                        currency,
+                        GetTraderCurrencyType(trader),
                         trader.LocalizedName
-                    ) : new TraderOffer();
+                    );
                 }
                 catch
                 {
                     return new TraderOffer();
                 }
+            }
+
+            private static long CalculateFallbackAmount(Item target, Trader trader)
+            {
+                try
+                {
+                    var supply = trader._supplyData;
+                    if (supply == null)
+                    {
+                        return 0;
+                    }
+
+                    var basePrice = supply.GetBasePrice(target.TemplateId);
+                    if (basePrice <= 0)
+                    {
+                        return 0;
+                    }
+
+                    double course = 1;
+                    try
+                    {
+                        var currencyKey = (string)CurrencyUtil.GetCurrencyId(trader.Settings.Currency);
+                        var courses = trader.CurrencyCourses;
+                        if (courses != null && courses.ContainsKey(currencyKey))
+                        {
+                            var courseValue = courses[currencyKey];
+                            if (courseValue > 0)
+                            {
+                                course = courseValue;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    var sellMod = trader.Info.SellToTraderPriceModifier;
+                    var amount = Math.Floor(basePrice / course * sellMod);
+                    return amount > 0 ? (long)amount : 0;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+
+            private static ECurrencyType GetTraderCurrencyType(Trader trader)
+            {
+                var currencyId = CurrencyUtil.GetCurrencyId(trader.Settings.Currency);
+                return GetCurrencyType(CurrencyUtil.GetCurrencyCharById(currencyId));
+            }
+
+            private static ECurrencyType GetCurrencyType(string currency)
+            {
+                return currency switch
+                {
+                    "€" => ECurrencyType.EUR,
+                    "$" => ECurrencyType.USD,
+                    "<sprite=0>" or "GP" => ECurrencyType.GP,
+                    _ => ECurrencyType.RUB
+                };
             }
 
             public bool IsMoney()
@@ -220,7 +295,8 @@ namespace MiyakoCarryService.Client.Extensions
 
             public IEnumerable<Item> GetAllChildItemsOnly()
             {
-                if (item is ContainerCollection collection)
+                var collection = item == null ? null : item.TryCast<ContainerCollection>();
+                if (collection != null)
                 {
                     foreach (var container in collection.Containers)
                     {
@@ -247,6 +323,11 @@ namespace MiyakoCarryService.Client.Extensions
                 }
                 return false;
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<ItemData>.Clear();
         }
     }
 }

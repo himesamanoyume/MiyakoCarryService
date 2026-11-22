@@ -6,11 +6,18 @@ using EFT;
 using EFT.Interactive;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class SwitchDataMgr : GameWorldDataMgr
     {
+        public SwitchDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
@@ -27,7 +34,15 @@ namespace MiyakoCarryService.Client.Mgrs
             }
             else
             {
-                switches = world.WorldInteractiveObjects().OfType<Switch>().ToList();
+                switches = new List<Switch>();
+                foreach (var worldInteractiveObject in world.WorldInteractiveObjects())
+                {
+                    var @switch = worldInteractiveObject.TryCast<Switch>();
+                    if (@switch != null)
+                    {
+                        switches.Add(@switch);
+                    }
+                }
             }
             foreach (var @switch in switches)
             {

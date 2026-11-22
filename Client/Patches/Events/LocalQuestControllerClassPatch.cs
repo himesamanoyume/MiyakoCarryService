@@ -1,7 +1,7 @@
 using System.Reflection;
 using EFT.Quests;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -10,16 +10,16 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class LocalQuestControllerClassPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestControllerClientBackend.CG_HandoverItem), "MoveNext");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(QuestControllerClientBackend), nameof(QuestControllerClientBackend.HandoverItem));
 
         [PatchPostfix]
-        public static void Postfix(QuestControllerClientBackend.CG_HandoverItem __instance)
+        public static void Postfix(Quest quest, ConditionItem condition)
         {
-            var progressChecker = __instance.quest.ProgressCheckers[__instance.condition];
+            var progressChecker = quest.ProgressCheckers[condition];
             if (progressChecker.Test())
             {
-                var taskConditionCounter = __instance.QuestControllerClientBackend.Profile.GetTaskConditionCounter(__instance.quest, __instance.condition.id);
-                taskConditionCounter.Value = (int)__instance.condition.value;
+                var taskConditionCounter = GameLoop.Instance.Session.Profile.GetTaskConditionCounter(quest, condition.id);
+                taskConditionCounter.Value = (int)condition.value;
             }
         }
     }

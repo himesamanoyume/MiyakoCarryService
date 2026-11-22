@@ -5,6 +5,7 @@ using DrakiaXYZ.BigBrain.Brains;
 using EFT;
 using EFT.Vehicle;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
         public override void Update(CustomLayer.ActionData data)
         {
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
 
             var mcsBotPlayerData = BotOwner.GetMcsBotPlayerData();
             if (mcsBotPlayerData == null)
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
 
             if (mcsBotPlayerData.IsBtrLeaving)
             {
-                TasksExtensions.HandleExceptions(LeaveBtr());
+                LeaveBtr().McsHandleExceptions();
                 return;
             }
 
@@ -77,7 +78,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 {
                     BotOwner.SetTargetMoveSpeed(0f);
                     BotOwner.Steering.LookToPoint(doorPos);
-                    TasksExtensions.HandleExceptions(BoardBtr());
+                    BoardBtr().McsHandleExceptions();
                     return;
                 }
             }

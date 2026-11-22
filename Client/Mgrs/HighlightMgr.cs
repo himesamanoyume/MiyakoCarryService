@@ -6,11 +6,17 @@ using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class HighlightMgr : BaseMgr
     {
+        public HighlightMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         private Dictionary<Renderer, Material> _cache = new();
         private CommandBuffer _commandBuffer;
         private bool _mainCameraInitialized = false;
@@ -19,9 +25,9 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
-        public override void Start()
+        protected override void OnMgrStart()
         {
-            base.Start();
+            base.OnMgrStart();
             _commandBuffer = new CommandBuffer { name = "Mcs Player Highlight Pass" };
 
             MiyakoCarryServicePlugin.TeammateHighlight.SettingChanged += (object sender, EventArgs e) =>
@@ -31,7 +37,7 @@ namespace MiyakoCarryService.Client.Mgrs
                     return;
                 }
 
-                if (MiyakoCarryServicePlugin.TeammateHighlight.Value)
+                if (MiyakoCarryServicePlugin.TeammateHighlight.Value && Gameloop.HighlightShader != null)
                 {
                     SwitchShaders();
                 }
@@ -81,7 +87,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             if (Gameloop.IsVaildGameWorld)
             {
-                if (MiyakoCarryServicePlugin.TeammateHighlight.Value)
+                if (MiyakoCarryServicePlugin.TeammateHighlight.Value && Gameloop.HighlightShader != null)
                 {
                     SwitchShaders();
                 }
@@ -100,13 +106,18 @@ namespace MiyakoCarryService.Client.Mgrs
                     Gameloop.OpticCamera.AddCommandBuffer(CameraEvent.AfterForwardAlpha, _commandBuffer);
                 }
             }
-
         }
 
         void SwitchShaders()
         {
             if (!Gameloop.IsVaildGameWorld)
             {
+                return;
+            }
+
+            if (Gameloop.HighlightShader == null)
+            {
+                _commandBuffer.Clear();
                 return;
             }
 
@@ -138,6 +149,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private void BatchRenderers(Player player, Shader shader, Color color)
         {
+            if (shader == null)
+            {
+                return;
+            }
+
             var playerBody = player.PlayerBody;
             if (playerBody == null)
             {

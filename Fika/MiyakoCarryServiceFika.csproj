@@ -1,19 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>14.0</LangVersion>
     <Nullable>disable</Nullable>
-    <DevGamePath>D:\OtherGames\SPT4.1.X\SPT-4.1.X</DevGamePath>
-    <DevHeadlessGamePath>D:\OtherGames\SPT4.1.X\SPT-4.1.X-Headless</DevHeadlessGamePath>
+    <DevGamePath>D:\OtherGames\SPT5.0.X\SPT-5.0.X</DevGamePath>
     <DevGamePluginsMcsPath>$(DevGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevGamePluginsMcsPath>
-    <DevGameScriptsMcsPath>$(DevGamePath)\BepInEx\scripts</DevGameScriptsMcsPath>
-    <DevHeadlessGamePluginsMcsPath>$(DevHeadlessGamePath)\BepInEx\plugins\MiyakoCarryServiceClient</DevHeadlessGamePluginsMcsPath>
-    <BuildMcsPath>$(ProjectDir)..\Build\Fika\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>  
+    <BuildMcsPath>$(ProjectDir)..\Build\Fika\BepInEx\plugins\MiyakoCarryServiceClient</BuildMcsPath>
     <AssemblyName>Himesamanoyume.MiyakoCarryServiceFika</AssemblyName>
     <AssemblyCompany>Himesamanoyume</AssemblyCompany>
-    <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>  
-    <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright> 
-    <Version>1.1.5.0</Version>
+    <AssemblyProduct>MiyakoCarryServiceFika</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 姫様の夢 2025 - 2026</AssemblyCopyright>
+    <Version>1.99.1</Version>
     <AssemblyTitle>MiyakoCarryServiceFika</AssemblyTitle>
     <Trademark>https://forge.sp-tarkov.com/addon/86/miyako-carry-service-fika-addon</Trademark>
     <RootNamespace>MiyakoCarryService.Fika</RootNamespace>
@@ -21,22 +18,31 @@
   <ItemGroup>
     <Reference Include="0Harmony" HintPath="..\Ref\0Harmony.dll" Private="false" />
     <Reference Include="Assembly-CSharp" HintPath="..\Ref\Assembly-CSharp.dll" Private="false" />
-    <Reference Include="BepInEx" HintPath="..\Ref\BepInEx.dll" Private="false" />
+    <Reference Include="BepInEx.Core" HintPath="..\Ref\BepInEx.Core.dll" Private="false" />
+    <Reference Include="BepInEx.Unity.Common" HintPath="..\Ref\BepInEx.Unity.Common.dll" Private="false" />
+    <Reference Include="BepInEx.Unity.IL2CPP" HintPath="..\Ref\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="Il2CppInterop.Common" HintPath="..\Ref\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="Il2CppInterop.Runtime" HintPath="..\Ref\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="Il2Cppmscorlib" HintPath="..\Ref\Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="Il2CppSystem" HintPath="..\Ref\Il2CppSystem.dll" Private="false" />
+    <Reference Include="Il2CppSystem.Core" HintPath="..\Ref\Il2CppSystem.Core.dll" Private="false" />
     <Reference Include="Comfort" HintPath="..\Ref\Comfort.dll" Private="false" />
     <Reference Include="Comfort.Unity" HintPath="..\Ref\Comfort.Unity.dll" Private="false" />
     <Reference Include="CommonExtensions" HintPath="..\Ref\CommonExtensions.dll" Private="false" />
     <Reference Include="ConfigurationManager" HintPath="..\Ref\ConfigurationManager.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath="..\Ref\DissonanceVoip.dll" Private="false" />
+    <Reference Include="DOTween" HintPath="..\Ref\DOTween.dll" Private="false" />
     <Reference Include="DrakiaXYZ-BigBrain" HintPath="..\Ref\DrakiaXYZ-BigBrain.dll" Private="false" />
+    <Reference Include="Fika.Core" HintPath="..\Ref\Fika.Core-3.0.0.dll" Private="false" />
     <Reference Include="ItemComponent.Types" HintPath="..\Ref\ItemComponent.Types.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath="..\Ref\Newtonsoft.Json.dll" Private="false" />
     <Reference Include="Sirenix.Serialization" HintPath="..\Ref\Sirenix.Serialization.dll" Private="false" />
-    <Reference Include="spt-common" HintPath="..\Ref\spt-common.dll" Private="false" />
-    <Reference Include="spt-core" HintPath="..\Ref\spt-core.dll" Private="false" />
-    <Reference Include="spt-custom" HintPath="..\Ref\spt-custom.dll" Private="false" />
-    <Reference Include="spt-debugging" HintPath="..\Ref\spt-debugging.dll" Private="false" />
-    <Reference Include="spt-reflection" HintPath="..\Ref\spt-reflection.dll" Private="false" />
-    <Reference Include="spt-singleplayer" HintPath="..\Ref\spt-singleplayer.dll" Private="false" />
+    <Reference Include="SPTushonka.Common" HintPath="..\Ref\SPTushonka.Common.dll" Private="false" />
+    <Reference Include="SPTushonka.Core" HintPath="..\Ref\SPTushonka.Core.dll" Private="false" />
+    <Reference Include="SPTushonka.Custom" HintPath="..\Ref\SPTushonka.Custom.dll" Private="false" />
+    <Reference Include="SPTushonka.Debugging" HintPath="..\Ref\SPTushonka.Debugging.dll" Private="false" />
+    <Reference Include="SPTushonka.Reflection" HintPath="..\Ref\SPTushonka.Reflection.dll" Private="false" />
+    <Reference Include="SPTushonka.Singleplayer" HintPath="..\Ref\SPTushonka.Singleplayer.dll" Private="false" />
     <Reference Include="Unity.TextMeshPro" HintPath="..\Ref\Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="UnityEngine.AIModule" HintPath="..\Ref\UnityEngine.AIModule.dll" Private="false" />
     <Reference Include="UnityEngine.AssetBundleModule" HintPath="..\Ref\UnityEngine.AssetBundleModule.dll" Private="false" />
@@ -47,37 +53,25 @@
     <Reference Include="UnityEngine.InputLegacyModule" HintPath="..\Ref\UnityEngine.InputLegacyModule.dll" Private="false" />
     <Reference Include="UnityEngine.TextRenderingModule" HintPath="..\Ref\UnityEngine.TextRenderingModule.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="..\Ref\UnityEngine.UI.dll" Private="false" />
-    <Reference Include="Fika.Core" HintPath="..\Ref\Fika.Core-2.4.1.dll" Private="false" />
-  </ItemGroup>
-  <ItemGroup>
+    <Reference Include="Diz.Jobs" HintPath="..\Ref\Diz.Jobs.dll" Private="false" />
+    <Reference Include="Diz.Binding" HintPath="..\Ref\Diz.Binding.dll" Private="false" />
+    <Reference Include="PlayerEnums" HintPath="..\Ref\PlayerEnums.dll" Private="false" />
+    <Reference Include="Utils" HintPath="..\Ref\Utils.dll" Private="false" />
+    <Reference Include="SemanticVersioning" HintPath="..\Ref\SemanticVersioning.dll" Private="false" />
+    <Reference Include="CoreServices" HintPath="..\Ref\CoreServices.dll" Private="false" />
     <Reference Include="Himesamanoyume.MiyakoCarryServiceClient">
-      <HintPath>..\Client\bin\$(Configuration)\netstandard2.1\Himesamanoyume.MiyakoCarryServiceClient.dll</HintPath>
+      <HintPath>..\Client\bin\$(Configuration)\net10.0\Himesamanoyume.MiyakoCarryServiceClient.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
   <Target Name="CheckMcsClientAssembly" BeforeTargets="CoreCompile">
-    <Error Condition="!Exists('..\Client\bin\$(Configuration)\netstandard2.1\Himesamanoyume.MiyakoCarryServiceClient.dll')" Text="未找到 Client 构建产物（Configuration: $(Configuration)），请先构建 Client/MiyakoCarryServiceClient.sln 的对应配置。" />
+    <Error Condition="!Exists('..\Client\bin\$(Configuration)\net10.0\Himesamanoyume.MiyakoCarryServiceClient.dll')" Text="未找到 Client 程序集（Configuration: $(Configuration)），请先构建 Client/MiyakoCarryServiceClient.csproj 的对应配置。" />
   </Target>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">  
-    <!-- Debug 构建 -->
-    <Exec Command="if exist &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot; del /f /q &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Debug'" />
-    <Exec Command="if exist &quot;$(DevGamePluginsMcsPath)\$(TargetName).pdb&quot; del /f /q &quot;$(DevGamePluginsMcsPath)\$(TargetName).pdb&quot;" Condition="'$(Configuration)' == 'Debug'" />
-    
-    <Exec Command="mkdir &quot;$(DevGameScriptsMcsPath)&quot;" Condition="!Exists('$(DevGameScriptsMcsPath)')" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGameScriptsMcsPath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Debug'" />
-    <Exec Command="copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(DevGameScriptsMcsPath)\$(TargetName).pdb&quot;" Condition="'$(Configuration)' == 'Debug' and Exists('$(TargetDir)$(TargetName).pdb')" />
-
-    <!-- Release 构建 -->
-    <Exec Command="if exist &quot;$(DevGameScriptsMcsPath)\$(TargetFileName)&quot; del /f /q &quot;$(DevGameScriptsMcsPath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Release'" />
-    <Exec Command="if exist &quot;$(DevGameScriptsMcsPath)\$(TargetName).pdb&quot; del /f /q &quot;$(DevGameScriptsMcsPath)\$(TargetName).pdb&quot;" Condition="'$(Configuration)' == 'Release'" />
-    
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if exist &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot; del /f /q &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;" />
     <Exec Command="mkdir &quot;$(DevGamePluginsMcsPath)&quot;" Condition="!Exists('$(DevGamePluginsMcsPath)')" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;" Condition="'$(Configuration)' == 'Release'" />
-
-    <!-- 共通 -->
-    <Exec Command="mkdir &quot;$(DevHeadlessGamePluginsMcsPath)&quot;" Condition="!Exists('$(DevHeadlessGamePluginsMcsPath)')" />
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevHeadlessGamePluginsMcsPath)\$(TargetFileName)&quot;" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(DevGamePluginsMcsPath)\$(TargetFileName)&quot;" />
     <Exec Command="mkdir &quot;$(BuildMcsPath)&quot;" Condition="!Exists('$(BuildMcsPath)')" />
     <Exec Command="copy &quot;$(TargetPath)&quot; &quot;$(BuildMcsPath)\$(TargetFileName)&quot;" />
-  </Target> 
+  </Target>
 </Project>

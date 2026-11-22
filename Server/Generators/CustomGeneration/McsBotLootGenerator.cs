@@ -88,7 +88,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             AddLootFromPool(
                 botId,
                 botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
+                    botGenerationDetails.LootCacheKey,
                     botGenerationDetails.IsPmc,
                     LootCacheType.HealingItems,
                     botJsonTemplate
@@ -106,7 +106,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             AddLootFromPool(
                 botId,
                 botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
+                    botGenerationDetails.LootCacheKey,
                     botGenerationDetails.IsPmc,
                     LootCacheType.DrugItems,
                     botJsonTemplate
@@ -124,7 +124,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             AddLootFromPool(
                 botId,
                 botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
+                    botGenerationDetails.LootCacheKey,
                     botGenerationDetails.IsPmc,
                     LootCacheType.FoodItems,
                     botJsonTemplate
@@ -142,7 +142,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             AddLootFromPool(
                 botId,
                 botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
+                    botGenerationDetails.LootCacheKey,
                     botGenerationDetails.IsPmc,
                     LootCacheType.DrinkItems,
                     botJsonTemplate
@@ -160,7 +160,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             AddLootFromPool(
                 botId,
                 botLootCacheService.GetLootFromCache(
-                    botGenerationDetails.RoleLowercase,
+                    botGenerationDetails.LootCacheKey,
                     botGenerationDetails.IsPmc,
                     LootCacheType.StimItems,
                     botJsonTemplate
@@ -198,7 +198,7 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 AddLootFromPool(
                     botId,
                     botLootCacheService.GetLootFromCache(
-                        botGenerationDetails.RoleLowercase,
+                        botGenerationDetails.LootCacheKey,
                         botGenerationDetails.IsPmc,
                         LootCacheType.Secure,
                         botJsonTemplate

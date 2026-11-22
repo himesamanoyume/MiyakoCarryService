@@ -1,28 +1,38 @@
 using System;
 using MiyakoCarryService.Client.Events;
-using MiyakoCarryService.Client.Interfaces;
+using MiyakoCarryService.Client.Utils;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
-    public abstract class BaseMgr : MonoBehaviour, IMgr
+    public abstract class BaseMgr : MonoBehaviour
     {
-        public GameLoop Gameloop;
-
-        public virtual void Start()
+        protected BaseMgr(IntPtr pointer) : base(pointer)
         {
-            Gameloop = GameLoop.Instance;
-            Gameloop.Mgrs.Add(GetType(), this);
-            EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
-            EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
         }
 
-        public static void Enable(Type type)
+        public GameLoop Gameloop;
+
+        public void Start()
         {
-            if (GameLoop.Instance.gameObject.GetComponent(type) == null)
+            try
             {
-                GameLoop.Instance.gameObject.AddComponent(type);
+                Gameloop = GameLoop.Instance;
+                Gameloop.Mgrs.Add(GetType(), this);
+                EventMgr.Subscribe<GameWorldStartedEvent>(OnGameWorldStarted, this);
+                EventMgr.Subscribe<GameWorldEndedEvent>(OnGameWorldEnded, this);
+
+                OnMgrStart();
             }
+            catch (Exception ex)
+            {
+                McsLogger.LogError($"[BaseMgr.Start] {GetType().FullName} {ex}");
+            }
+        }
+
+        protected virtual void OnMgrStart()
+        {
+            
         }
 
         private void OnDestroy()

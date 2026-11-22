@@ -2,10 +2,11 @@ using System;
 using System.Reflection;
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using HarmonyLib;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -13,6 +14,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// <summary>
     /// 尝试健壮原版的GoalEnemy属性，以避免发生锁尸体的问题
     /// </summary>
+    [IgnoreAutoPatch]
     public sealed class SetGoalEnemyPatch : ModulePatch
     {
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
@@ -20,7 +22,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
         protected override MethodBase GetTargetMethod() => AccessTools.PropertySetter(typeof(BotMemory), nameof(BotMemory.GoalEnemy));
 
         [PatchPrefix]
-        public static bool Prefix(BotMemory __instance, Action<BotOwner> ____onGoalEnemyChanged, ref EnemyInfo value)
+        public static bool Prefix(BotMemory __instance, ref EnemyInfo value)
         {
             try
             {
@@ -47,10 +49,10 @@ namespace MiyakoCarryService.Client.Patches.Bots
 
                 if (__instance._goalEnemy != null)
                 {
-                    var oldPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(__instance._goalEnemy.Person.ProfileId);
+                    var oldPlayer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(__instance._goalEnemy.Person.ProfileId);
                     if (oldPlayer != null)
                     {
-                        oldPlayer.BeingHitAction -= __instance.GoalTargetBeingHitAction;
+                        TryChangeBeingHitAction(oldPlayer, __instance.GoalTargetBeingHitAction, add: false);
                     }
                     __instance.LastEnemy = __instance._goalEnemy;
                 }
@@ -63,14 +65,15 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     var newPlayer = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(__instance._goalEnemy.Person.ProfileId);
                     if (newPlayer != null)
                     {
-                        newPlayer.BeingHitAction += __instance.GoalTargetBeingHitAction;
+                        TryChangeBeingHitAction(newPlayer, __instance.GoalTargetBeingHitAction, add: true);
                     }
                     __instance.ReportAboutEnemyToAll();
                 }
 
-                if (____onGoalEnemyChanged != null && flag)
+                var onGoalEnemyChanged = __instance.OnGoalEnemyChangedField;
+                if (onGoalEnemyChanged != null && flag)
                 {
-                    ____onGoalEnemyChanged(__instance._owner);
+                    onGoalEnemyChanged.Invoke(__instance._owner);
                 }
 
                 if (__instance._goalEnemy != null)
@@ -88,13 +91,45 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 }
                 else
                 {
-                    __instance.method_6();
+                    __instance.CheckAttackImmediately();
                 }
                 return false;
             }
             finally
             {
                 
+            }
+        }
+
+        private static bool _beingHitActionUnsupported;
+
+        /// <summary>
+        /// 5.0 的 Il2CppInterop 无法把参数含非 blittable 结构体 DamageInfo 的委托转成原生委托
+        /// （会抛 "Delegate has parameter of type ... which is not supported"），
+        /// 这里做一次容错：失败只警告一次并不再尝试，避免整个 SetGoalEnemy 被异常打断。
+        /// </summary>
+        private static void TryChangeBeingHitAction(Player player, Action<DamageInfo, EBodyPart, float> handler, bool add)
+        {
+            if (_beingHitActionUnsupported)
+            {
+                return;
+            }
+
+            try
+            {
+                if (add)
+                {
+                    player.add_BeingHitAction(handler);
+                }
+                else
+                {
+                    player.remove_BeingHitAction(handler);
+                }
+            }
+            catch (Exception exception)
+            {
+                _beingHitActionUnsupported = true;
+                McsLogger.LogWarning("[SetGoalEnemyPatch] add/remove_BeingHitAction 在 5.0 不可用（Il2CppInterop 不支持非 blittable 结构体参数委托），已跳过: " + exception.GetType().Name + ": " + exception.Message);
             }
         }
     }

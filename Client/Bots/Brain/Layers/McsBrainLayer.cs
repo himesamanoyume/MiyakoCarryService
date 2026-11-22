@@ -272,7 +272,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
                                 BotOwner.Mover._lastGoodCastPointTime = time;
                                 BotOwner.Mover._prevPosLinkedTime = 0f;
-                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
+                                var deltaMove = operatorPos - BotOwner.Mover._prevSuccessLinkedFrom;
+                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos, deltaMove, out var _);
                                 BotOwner.Mover.RecalcWay();
                                 BotOwner.Mover.Pause = true;
 
@@ -298,7 +299,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
 
-                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision().HasValue && stationary.GetCurrentDecision().Value == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
                         {
                             BotOwner.ShootData.EndShoot();
                             return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
@@ -383,7 +384,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= time && GetCrossPoint(goalEnemy))
                     {
-                        BotOwner.Memory.Spotted(false, null, null);
+                        BotOwner.Memory.Spotted(false, new Il2CppSystem.Nullable<Vector3>(), new Il2CppSystem.Nullable<float>());
                     }
 
                     if (!CheckFirearmsAnimatorState())
@@ -398,11 +399,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                     if (!haveBullets.Value)
                     {
-                        BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                     }
                     else if (!goalEnemy.CanShoot && BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                     {
-                        BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                     }
 
                     if (BotOwner.WeaponManager.UnderbarrelLauncherController.NeedToReload())
@@ -445,7 +446,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                         var sqrDist = float.MaxValue;
                         if (canShootNow)
                         {
-                            closestFriend = BotOwner.Covers.GetClosestFriend(out sqrDist);
+                            var closestFriendInterface = BotOwner.Covers.GetClosestFriend(out sqrDist);
+                            closestFriend = closestFriendInterface == null ? null : closestFriendInterface.TryCast<BotOwner>();
                             safeFire = sqrDist >= 1f || closestFriend == null || closestFriend.Id > BotOwner.Id;
                         }
 
@@ -795,12 +797,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                if (!BotOwner.WeaponManager.Reload.Reloading)
+                if (!Tools.IsReloading(BotOwner))
                 {
                     var haveBullets = BotOwner.WeaponManager.HaveBullets;
                     if (!haveBullets || BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                     {
-                        BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                     }
                 }
 
@@ -815,21 +817,42 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     return btrAction;
                 }
-                else if (_nextLootingCheckTime < time && McsBotPlayerData.LootingTarget != null && McsBotPlayerData.McsAILeadPlayer != null && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe))
+                else if (McsBotPlayerData.LootingTarget != null)
                 {
-                    var enableLooting = McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting;
-                    var hasEmergencyLootNeed = McsBotPlayerData.HasEmergencyLootNeed();
+                    var lootTarget = McsBotPlayerData.LootingTarget;
+                    var lootTargetTransform = lootTarget.RootTransform;
+                    var enableLooting = McsBotPlayerData.McsAILeadPlayer != null && McsBotPlayerData.McsAILeadPlayer.McsBotPlayerConfig.EnableLooting;
+                    var hasEmergencyLootNeed = McsBotPlayerData.McsAILeadPlayer != null && McsBotPlayerData.HasEmergencyLootNeed();
+
+                    var canLootNow = _nextLootingCheckTime < time
+                        && McsBotPlayerData.McsAILeadPlayer != null
+                        && !McsBotPlayerData.HasIntent(Intents.ShouldFollowMe)
+                        && lootTargetTransform != null;
+
+                    var pathOk = false;
+                    if (canLootNow && (enableLooting || hasEmergencyLootNeed))
+                    {
+                        pathOk = TryRefreshCommonTarget(lootTargetTransform.position, time);
+                    }
 
                     if (!enableLooting && !hasEmergencyLootNeed)
                     {
                         McsBotPlayerData.IsLooting = false;
                     }
-                    else
+                    else if (canLootNow && pathOk)
                     {
-                        if (TryRefreshCommonTarget(McsBotPlayerData.LootingTarget.RootTransform.position, time))
+                        ApplyMovePoint();
+                        return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                    }
+                    else if (!McsBotPlayerData.IsLooting && !McsBotPlayerData.IsTaskRunning)
+                    {
+                        if (McsBotPlayerData.LootUnreachableSince <= 0f)
                         {
-                            ApplyMovePoint();
-                            return new Action(typeof(GoToLootTargetLogic), "Mcs:GoToLootTarget");
+                            McsBotPlayerData.LootUnreachableSince = time;
+                        }
+                        else if (time - McsBotPlayerData.LootUnreachableSince > LOOT_UNREACHABLE_TIMEOUT)
+                        {
+                            McsBotPlayerData.ReleaseLootTarget();
                         }
                     }
                 }
@@ -897,9 +920,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (enemyExist)
                     {
-                        if (BotOwner.Boss.BossLogic is BossZryachiy bossZryachiy)
+                        var bossLogic = BotOwner.Boss == null ? null : BotOwner.Boss.BossLogic;
+                        var bossZryachiy = bossLogic == null ? null : bossLogic.TryCast<BossZryachiy>();
+                        if (bossZryachiy != null)
                         {
-                            bossZryachiy.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
+                            bossZryachiy.AddEnemy(goalEnemy.Person);
                         }
                     }
                 }

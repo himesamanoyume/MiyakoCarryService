@@ -3,8 +3,7 @@ using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
-using JetBrains.Annotations;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
 using System.Linq;
@@ -27,7 +26,7 @@ namespace MiyakoCarryService.Client.Patches.Inventory
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(SearchController), nameof(SearchController.TryFindChangedContainer));
 
         [PatchPostfix]
-        public static void Postfix(ItemAddress address, [CanBeNull] out ItemInfo changedContainer, ref bool __result)
+        public static void Postfix(ItemAddress address, out ItemInfo changedContainer, ref bool __result)
         {
             changedContainer = null;
             if (MiyakoCarryServicePlugin.McsPluginClientConfig.BalanceRestriction)

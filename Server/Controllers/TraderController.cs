@@ -23,7 +23,7 @@ namespace MiyakoCarryService.Server.Controllers
             traderService.Compensation(info);
         }
 
-        public async Task<ProfileChange> UpdateProfile(MongoId mcsLeadPlayerId)
+        public async Task<McsProfileChangesResponse> UpdateProfile(MongoId mcsLeadPlayerId)
         {
             return await traderService.UpdateProfile(mcsLeadPlayerId);
         }

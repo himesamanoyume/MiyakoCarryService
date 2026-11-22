@@ -3,7 +3,10 @@ using System.Threading.Tasks;
 using EFT;
 using EFT.Quests;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using MiyakoCarryService.Client.Utils;
+using SPTushonka.Reflection.Patching;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -12,36 +15,53 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class GetDailyQuestsPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EftClientBackendSession), nameof(EftClientBackendSession.GetDailyQuests));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(EftClientBackendSession), "EFT.IQuestSession.GetDailyQuests");
 
         [PatchPostfix]
-        public static void Postfix(ref Task<RepeatableQuestsRange[]> __result)
+        public static void Postfix(ref Il2CppSystem.Threading.Tasks.Task<Il2CppReferenceArray<RepeatableQuestsRange>> __result)
         {
             __result = RewriteOrderTraderIdAsync(__result);
         }
 
-        private static async Task<RepeatableQuestsRange[]> RewriteOrderTraderIdAsync(Task<RepeatableQuestsRange[]> original)
+        private static Il2CppSystem.Threading.Tasks.Task<Il2CppReferenceArray<RepeatableQuestsRange>> RewriteOrderTraderIdAsync(Il2CppSystem.Threading.Tasks.Task<Il2CppReferenceArray<RepeatableQuestsRange>> original)
         {
-            var result = await original;
+            var completion = new Il2CppSystem.Threading.Tasks.TaskCompletionSource<Il2CppReferenceArray<RepeatableQuestsRange>>();
 
-            if (result == null)
+            async Task Load()
             {
-                return result;
-            }
-
-            foreach (var dailyQuestClass in result)
-            {
-                if (dailyQuestClass.Name == "Order")
+                try
                 {
-                    foreach (var quest in dailyQuestClass.Quests)
+                    // 拉回主线程后再改 trader/quest 数据（原续体在线程池，改游戏对象会 AV）
+                    await original.AsManaged();
+                    var result = original.Result;
+
+                    if (result != null)
                     {
-                        quest.TraderId = MiyakoCarryServicePlugin.MiyakoTraderId;
+                        foreach (var dailyQuestClass in result)
+                        {
+                            if (dailyQuestClass.Name == "Order")
+                            {
+                                foreach (var quest in dailyQuestClass.Quests)
+                                {
+                                    quest.TraderId = MiyakoCarryServicePlugin.MiyakoTraderId;
+                                }
+
+                                break;
+                            }
+                        }
                     }
-                    break;
+
+                    completion.TrySetResult(result);
+                }
+                catch (System.Exception ex)
+                {
+                    McsLogger.LogError(ex);
+                    completion.TrySetException(new Il2CppSystem.Exception(ex.Message));
                 }
             }
 
-            return result;
+            _ = Load();
+            return completion.Task;
         }
     }
 }

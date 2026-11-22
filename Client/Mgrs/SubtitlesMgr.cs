@@ -1,37 +1,52 @@
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Comfort.Common;
+using System.Text.Json;
 using EFT;
 using EFT.UI;
-using HarmonyLib;
-using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
-using SPT.Common.Utils;
-using TMPro;
 using UnityEngine;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class SubtitlesMgr : BaseMgr
     {
-        private GameObject _mcsDialogScreen;
-        private Transform _subsContainer;
-        private GameObject _subtitlesViewTemplate;
-        private Dictionary<MongoID, Subtitles> _subTitles = new();
+        public SubtitlesMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
+        private SubtitlesView _view;
+        private Transform _templateTransform;
+        private readonly Dictionary<string, SubtitleLine> _lines = new();
+        private readonly Dictionary<string, string> _knownNicknames = new();
+        private string _renderedText = string.Empty;
+        private bool _dirty;
+        private float _nextViewTryAt;
         private Dictionary<EPhraseTrigger, string> _talkContents;
         private Dictionary<EPhraseTrigger, Func<string, McsMsg, Player, Player, string>> _phraseHandleMaps;
         private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
-        public override void Start()
+        private const float LineLifetime = 4f;
+        private const float SamePhraseCooldown = 2f;
+
+        private sealed class SubtitleLine
         {
-            base.Start();
+            public string Nickname;
+            public string Text;
+            public float ExpireAt;
+            public EPhraseTrigger LastPhraseTrigger;
+            public float NextRepeatAt;
+        }
+
+        protected override void OnMgrStart()
+        {
+            base.OnMgrStart();
             _talkContents = new()
             {
                 { EPhraseTrigger.None, "未知的回应，应进行反馈。" },
@@ -71,89 +86,199 @@ namespace MiyakoCarryService.Client.Mgrs
                 { EPhraseTrigger.Going, HandlePhraseWithOnFight },
                 { EPhraseTrigger.Negative, HandlePhraseWithOnFight },
             };
-
-            TasksExtensions.HandleExceptions(Init());
         }
 
         public override void OnMgrDestroy()
         {
             base.OnMgrDestroy();
-            if (_mcsDialogScreen != null)
+            if (_view != null)
             {
-                Destroy(_mcsDialogScreen);
+                Destroy(_view.gameObject);
+                _view = null;
             }
-            _subsContainer = null;
+            _templateTransform = null;
+            _lines.Clear();
+            _renderedText = string.Empty;
         }
 
-        private async Task Init()
+        void Update()
         {
-            while (true)
+            if (_view == null)
             {
-                await Task.Delay(1000);
-                if (Singleton<CommonUI>.Instantiated || Singleton<GameWorld>.Instantiated)
+                if (Time.time < _nextViewTryAt)
                 {
-                    var traderDialogScreen = Singleton<CommonUI>.Instance.TraderDialogScreen;
-                    var oldTraderDialogScreenGameObject = traderDialogScreen.gameObject;
-                    _mcsDialogScreen = Instantiate(oldTraderDialogScreenGameObject, Singleton<CommonUI>.Instance.transform.GetChild(0));
-                    var _traderDialogScreen = _mcsDialogScreen.transform.GetComponentInChildren<TraderDialogScreen>();
-                    Destroy(_traderDialogScreen);
-                    _mcsDialogScreen.name = "Mcs Subtitles Screen";
-                    for (int i = 0; i < _mcsDialogScreen.transform.childCount; i++)
-                    {
-                        var childContainer = _mcsDialogScreen.transform.GetChild(i);
-                        if (childContainer.transform.name == "SubsContainer")
-                        {
-                            _subsContainer = childContainer;
-                            break;
-                        }
-                    }
+                    return;
+                }
 
-                    var subtitlesView = _subsContainer.GetChild(0).GetComponent<SubtitlesView>();
-                    _subtitlesViewTemplate = subtitlesView.gameObject;
-                    _subtitlesViewTemplate.transform.name = "McsBotPlayerSubtitles";
-                    _mcsDialogScreen.SetActive(true);
-                    subtitlesView.HideGameObject();
-                    break;
+                _nextViewTryAt = Time.time + 1f;
+                TryCreateView();
+                if (_view == null)
+                {
+                    return;
                 }
             }
+
+            if (_templateTransform != null)
+            {
+                _view.transform.position = _templateTransform.position;
+                SyncTemplateScale();
+            }
+
+            if (!MiyakoCarryServicePlugin.EnableSubtitles.Value)
+            {
+                if (_lines.Count > 0)
+                {
+                    _lines.Clear();
+                    _dirty = true;
+                }
+
+                if (_dirty)
+                {
+                    Render();
+                }
+
+                return;
+            }
+
+            var now = Time.time;
+            List<string> expired = null;
+            foreach (var line in _lines)
+            {
+                if (now >= line.Value.ExpireAt)
+                {
+                    expired ??= new List<string>();
+                    expired.Add(line.Key);
+                }
+            }
+
+            if (expired != null)
+            {
+                foreach (var id in expired)
+                {
+                    _lines.Remove(id);
+                }
+
+                _dirty = true;
+            }
+
+            if (_dirty)
+            {
+                Render();
+            }
+        }
+
+        private void SyncTemplateScale()
+        {
+            if (_view == null || _templateTransform == null)
+            {
+                return;
+            }
+
+            var templateScale = _templateTransform.lossyScale;
+            var parent = _view.transform.parent;
+            var parentScale = parent == null ? Vector3.one : parent.lossyScale;
+
+            _view.transform.localScale = new Vector3(
+                parentScale.x == 0f ? templateScale.x : templateScale.x / parentScale.x,
+                parentScale.y == 0f ? templateScale.y : templateScale.y / parentScale.y,
+                parentScale.z == 0f ? templateScale.z : templateScale.z / parentScale.z);
+        }
+
+        private void TryCreateView()
+        {
+            try
+            {
+                var controller = ItemUiContext.Instance?.SubtitlesController;
+                var template = controller?._subtitlesView;
+                if (template == null)
+                {
+                    return;
+                }
+
+                var clone = Instantiate(template.gameObject);
+                clone.name = "McsBotPlayerSubtitles";
+
+                var parent = template.transform.parent;
+                if (parent != null && parent.parent != null)
+                {
+                    parent = parent.parent;
+                }
+
+                clone.transform.SetParent(parent, true);
+
+                _view = clone.GetComponent<SubtitlesView>();
+                if (_view == null)
+                {
+                    _view = clone.GetComponentInChildren<SubtitlesView>(true);
+                }
+
+                if (_view == null)
+                {
+                    Destroy(clone);
+                    return;
+                }
+
+                _templateTransform = template.transform;
+
+                _renderedText = string.Empty;
+                _dirty = false;
+                _view.HideGameObject();
+            }
+            catch (Exception ex)
+            {
+                McsLogger.LogError($"[SubtitlesMgr.TryCreateView] {ex}");
+            }
+        }
+
+        private void Render()
+        {
+            _dirty = false;
+
+            if (_view == null || _view._textField == null)
+            {
+                return;
+            }
+
+            if (_lines.Count == 0)
+            {
+                if (_renderedText.Length != 0)
+                {
+                    _renderedText = string.Empty;
+                    _view._textField.text = string.Empty;
+                }
+
+                _view.HideGameObject();
+                return;
+            }
+
+            var stringBuilder = new StringBuilder();
+            foreach (var line in _lines.Values)
+            {
+                if (stringBuilder.Length > 0)
+                {
+                    stringBuilder.Append('\n');
+                }
+
+                stringBuilder.Append("<b>").Append(line.Nickname).Append("</b>: ").Append(line.Text);
+            }
+
+            var text = stringBuilder.ToString();
+            if (text != _renderedText)
+            {
+                _renderedText = text;
+                _view._textField.text = text;
+            }
+
+            _view.ShowGameObject();
         }
 
         public void TalkMsg(Player mcsLeadPlayer, Player mcsBotPlayer, McsMsg msg)
         {
-            if (MiyakoCarryServicePlugin.FikaInstalled && Tools.IsHost)
+            if (!ShouldSilencePhrases(mcsLeadPlayer))
             {
-                var myPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                if (myPlayer != null && McsMgr.IsMyMcsBotPlayer(myPlayer.ProfileId, mcsBotPlayer.ProfileId))
-                {
-                    if (!ShouldSilencePhrases(mcsLeadPlayer))
-                    {
-                        mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
-                    }
-                    ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
-                }
-                else
-                {
-                    if (!ShouldShowSubtitles(mcsLeadPlayer.ProfileId))
-                    {
-                        return;
-                    }
-
-                    EventMgr.Notify(new SubtitlesMgrHandleFikaEvent
-                    {
-                        McsLeadPlayerId = mcsLeadPlayer.ProfileId,
-                        McsBotPlayerId = mcsBotPlayer.ProfileId,
-                        Msg = msg
-                    });
-                }
+                mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
             }
-            else
-            {
-                if (!ShouldSilencePhrases(mcsLeadPlayer))
-                {
-                    mcsBotPlayer.AIData.BotOwner.BotTalk.TrySay(msg.PhraseTrigger);
-                }
-                ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
-            }
+            ShowMsg(mcsLeadPlayer, mcsBotPlayer, msg);
         }
 
         private bool ShouldSilencePhrases(Player mcsLeadPlayer)
@@ -161,7 +286,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return ShouldSilencePhrases(mcsLeadPlayer.ProfileId);
         }
 
-        public bool ShouldSilencePhrases(MongoID mcsLeadPlayerId)
+        public bool ShouldSilencePhrases(string mcsLeadPlayerId)
         {
             if (McsMgr != null && McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerConfig))
             {
@@ -170,7 +295,7 @@ namespace MiyakoCarryService.Client.Mgrs
             return MiyakoCarryServicePlugin.PhrasesSilent.Value;
         }
 
-        public bool ShouldShowSubtitles(MongoID mcsLeadPlayerId)
+        public bool ShouldShowSubtitles(string mcsLeadPlayerId)
         {
             if (McsMgr != null && McsMgr.McsLeadPlayerConfigs.TryGetValue(mcsLeadPlayerId, out var mcsBotPlayerConfig))
             {
@@ -264,7 +389,7 @@ namespace MiyakoCarryService.Client.Mgrs
         public string HandlePhraseMine(string content, McsMsg msg, Player mcsLeadPlayer, Player mcsBotPlayer)
         {
             content = string.Format(content, msg.Keys[0], msg.Keys[1]);
-            var healthStates = Json.Deserialize<List<HealthState>>(msg.Keys[2]);
+            var healthStates = JsonSerializer.Deserialize<List<HealthState>>(msg.Keys[2], new JsonSerializerOptions() { IncludeFields = true });
             if (healthStates.Count > 0)
             {
                 content += " " + string.Join(", ", healthStates.Select(h => $"{h.BodyPart.McsLocalized()} {h.EffectType.McsLocalized()}"));
@@ -303,115 +428,48 @@ namespace MiyakoCarryService.Client.Mgrs
                 talkContent = action(talkContent, msg, mcsLeadPlayer, mcsBotPlayer);
             }
 
-            if (!_subTitles.ContainsKey(mcsBotPlayer.Profile.Id))
+            var profileId = mcsBotPlayer.Profile.Id;
+            var now = Time.time;
+
+            if (_lines.TryGetValue(profileId, out var existing) && existing.LastPhraseTrigger == msg.PhraseTrigger && now < existing.NextRepeatAt)
             {
-                CreateSubTitle(mcsBotPlayer.Profile);
+                return;
             }
 
-            if (_subTitles.TryGetValue(mcsBotPlayer.Profile.Id, out var subTitle))
+            if (!_knownNicknames.TryGetValue(profileId, out var nickname))
             {
-                if (subTitle.CurrentMsg() == talkContent)
-                {
-                    return;
-                }
-
-                subTitle.Show(talkContent, msg.PhraseTrigger);
+                nickname = mcsBotPlayer.Profile.McsNickname;
+                _knownNicknames[profileId] = nickname;
             }
+
+            _lines[profileId] = new SubtitleLine
+            {
+                Nickname = nickname,
+                Text = talkContent,
+                ExpireAt = now + LineLifetime,
+                LastPhraseTrigger = msg.PhraseTrigger,
+                NextRepeatAt = now + SamePhraseCooldown,
+            };
+
+            _dirty = true;
         }
 
         public void CreateSubTitle(Profile mcsBotPlayerProfile)
         {
-            if (_subtitlesViewTemplate == null)
+            if (mcsBotPlayerProfile == null)
             {
                 return;
             }
-            var cloneSubtitleViewGameObject = Instantiate(_subtitlesViewTemplate);
-            var cloneSubtitleView = cloneSubtitleViewGameObject.GetComponentInChildren<SubtitlesView>();
 
-            cloneSubtitleViewGameObject.transform.SetParent(_subsContainer);
-
-            var cloneSubTitle = new Subtitles(Gameloop, cloneSubtitleView, mcsBotPlayerProfile);
-            cloneSubTitle.Hide(0f);
-            _subTitles[mcsBotPlayerProfile.Id] = cloneSubTitle;
+            _knownNicknames[mcsBotPlayerProfile.Id] = mcsBotPlayerProfile.McsNickname;
         }
 
         public override void OnRaidEnded()
         {
             base.OnRaidEnded();
-            if (_subTitles != null)
-            {
-                foreach (var subTitle in _subTitles.Values)
-                {
-                    if (subTitle?.SubtitlesView?.gameObject == null)
-                    {
-                        continue;
-                    }
-                    Destroy(subTitle.SubtitlesView.gameObject);
-                }
-                _subTitles.Clear();
-            }
-        }
-
-        public class Subtitles
-        {
-            public SubtitlesView SubtitlesView;
-            private TMP_Text _textField;
-            private GameLoop _gameLoop;
-            private Coroutine _coroutine;
-            private EPhraseTrigger _lastPhraseTrigger;
-            private Profile _mcsBotPlayerProfile;
-            private float _cooddown;
-
-            public Subtitles(GameLoop gameLoop, SubtitlesView subtitlesView, Profile mcsBotPlayerProfile)
-            {
-                _lastPhraseTrigger = EPhraseTrigger.None;
-                _mcsBotPlayerProfile = mcsBotPlayerProfile;
-                _cooddown = 0;
-                SubtitlesView = subtitlesView;
-                _gameLoop = gameLoop;
-                var subtitlesViewTraverse = Traverse.Create(subtitlesView);
-                _textField = subtitlesViewTraverse.Field<TMP_Text>("_textField").Value;
-            }
-
-            public void Show(string msg, EPhraseTrigger talkContentType)
-            {
-                if (_lastPhraseTrigger == talkContentType)
-                {
-                    if (Time.time < _cooddown)
-                    {
-                        return;
-                    }
-                }
-
-                Hide(0f);
-                if (_coroutine != null)
-                {
-                    _gameLoop.StopCoroutine(_coroutine);
-                }
-                _textField.text = $"<b>{_mcsBotPlayerProfile.McsNickname}</b>: " + msg;
-                if (SubtitlesView != null)
-                {
-                    SubtitlesView.ShowGameObject();
-                    _cooddown = Time.time + 2f;
-                    _lastPhraseTrigger = talkContentType;
-                    _coroutine = _gameLoop.StartCoroutine(Hide(4f));
-                }
-            }
-
-            public string CurrentMsg()
-            {
-                return _textField.text;
-            }
-
-            public IEnumerator Hide(float time)
-            {
-                yield return new WaitForSeconds(time);
-                if (SubtitlesView != null)
-                {
-                    SubtitlesView.HideGameObject();
-                    _textField.text = string.Empty;
-                }
-            }
+            _lines.Clear();
+            _dirty = true;
+            Render();
         }
     }
 }

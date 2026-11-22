@@ -1,6 +1,5 @@
 
 using System.Runtime.Serialization;
-using EFT;
 
 namespace MiyakoCarryService.Client.Models
 {
@@ -8,7 +7,7 @@ namespace MiyakoCarryService.Client.Models
     public class FriendlyFirePenalty
     {
         [DataMember(Name = "FriendlyFirePlayerId")]
-        public MongoID FriendlyFirePlayerId;
+        public string FriendlyFirePlayerId;
 
         [DataMember(Name = "Diff")]
         public double Diff;

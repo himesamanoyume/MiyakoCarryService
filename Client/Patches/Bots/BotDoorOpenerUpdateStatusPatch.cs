@@ -3,7 +3,8 @@ using EFT;
 using EFT.Interactive;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
-using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Utils;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
 
 namespace MiyakoCarryService.Client.Patches.Bots
@@ -50,7 +51,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
             }
 
             var botPosition = botOwner.Position;
-            var targetPoint = botOwner.Mover.TargetPoint;
+            var targetPoint = Tools.GetMoveTargetPoint(botOwner);
             var moveDir = Vector3.zero;
             if (targetPoint.HasValue)
             {
@@ -78,7 +79,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     if (targetPoint.HasValue)
                     {
                         var segmentClose = doorLink.SegmentClose;
-                        if (AIUtility.GetCrossPoint(botPosition, targetPoint.Value, segmentClose.a, segmentClose.b) != null)
+                        if (Tools.HasCrossPoint(botPosition, targetPoint.Value, segmentClose.a, segmentClose.b))
                         {
                             return true;
                         }

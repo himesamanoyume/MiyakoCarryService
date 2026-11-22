@@ -2,8 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DrakiaXYZ.BigBrain.Brains;
 using EFT;
+using HarmonyLib;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -14,7 +16,9 @@ namespace MiyakoCarryService.Client.Utils
     {
         private static int _currentLayerId = 15156;
 
-        private static Type _customLayerWrapperType;
+        private static BrainManager _brainManager;
+        private static MethodInfo _getState;
+        private static MethodInfo _addLayer;
         private static bool _initialized = false;
 
         private static readonly Dictionary<string, Dictionary<string, int>> _injectedLayers = new();
@@ -29,7 +33,8 @@ namespace MiyakoCarryService.Client.Utils
                 return;
             }
 
-            _customLayerWrapperType = typeof(BrainManager).Assembly.GetType("DrakiaXYZ.BigBrain.Internal.CustomLayerWrapper");
+            _brainManager = (BrainManager)AccessTools.PropertyGetter(typeof(BrainManager), "Instance").Invoke(null, null);
+            _getState = AccessTools.Method(typeof(BrainManager), "GetState", [typeof(BotOwner)]);
             _initialized = true;
         }
 
@@ -121,13 +126,16 @@ namespace MiyakoCarryService.Client.Utils
 
             try
             {
-                var wrapper = (AICoreLayer<BotLogicDecision>)Activator.CreateInstance(_customLayerWrapperType, [customLayerType, botOwner, priority]);
-
-                var layerId = _currentLayerId++;
-                if (!botOwner.Brain.BaseBrain.TryAddLayer(layerId, wrapper, true))
+                var state = _getState.Invoke(_brainManager, [botOwner]);
+                if (state == null)
                 {
                     return false;
                 }
+
+                _addLayer ??= AccessTools.Method(state.GetType(), "AddLayer", [typeof(BrainManager.LayerInfo)]);
+
+                var layerId = _currentLayerId++;
+                _addLayer.Invoke(state, [new BrainManager.LayerInfo(customLayerType, [botOwner.Brain.BaseBrain.ShortName()], priority, layerId)]);
 
                 map[layerName] = layerId;
                 return true;

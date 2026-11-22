@@ -20,7 +20,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 return;
             }
 
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
         }
     }
 }

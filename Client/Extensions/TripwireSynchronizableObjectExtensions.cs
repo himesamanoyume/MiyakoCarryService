@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class TripwireSynchronizableObjectExtensions
     {
-        private static readonly AttachedTable<TripwireSynchronizableObject, TripwireData> _datas = new();
 
         extension(TripwireSynchronizableObject tripwireSynchronizableObject)
         {
             public TripwireData GetData()
             {
-                return _datas.GetOrCreate(tripwireSynchronizableObject, key => new TripwireData(key));
+                return InteropDataCache<TripwireData>.GetOrCreate(tripwireSynchronizableObject.Pointer, () => new TripwireData(tripwireSynchronizableObject));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<TripwireData>.Clear();
         }
     }
 }

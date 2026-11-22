@@ -85,14 +85,6 @@ namespace MiyakoCarryService.Client.Utils
             WildSpawnType.followerZryachiy
         };
 
-        public static readonly HashSet<EBotEnemyCause> InitialBotEnemyCauses = new()
-        {
-            EBotEnemyCause.initial,
-            EBotEnemyCause.AddNewMember,
-            EBotEnemyCause.warn,
-            EBotEnemyCause.addBotNoGroup
-        };
-
         public static readonly HashSet<BodyPartType> AimingBodyPartTypes = new()
         {
             BodyPartType.head,
@@ -206,6 +198,14 @@ namespace MiyakoCarryService.Client.Utils
             Intents.ShouldEscortToBtr,
             Intents.ShouldGoToPoint,
             Intents.ShouldDropTargetLoot,
+        };
+
+        public static readonly HashSet<WildSpawnType> NeutralBotTypes = new()
+        {
+            WildSpawnType.vsRF,
+            WildSpawnType.vsRFSniper,
+            WildSpawnType.vsRFFight,
+            WildSpawnType.civilian
         };
     }
 }

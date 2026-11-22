@@ -1,11 +1,8 @@
 
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using EFT;
 using EFT.Quests;
-using MiyakoCarryService.Client.Enums;
-using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Interfaces;
 using MiyakoCarryService.Client.Mgrs;
@@ -16,26 +13,65 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class QuestData : TriggerData, IProxyActor
     {
-        private WeakReference<QuestDataClass> _questRef;
-        public QuestDataClass Quest => _questRef.TryGetTarget(out var quest) ? quest : null;
-        private WeakReference<Condition> _conditionRef;
-        public Condition QuestCondition => _conditionRef != null ? _conditionRef.TryGetTarget(out var condition) ? condition : null : null;
-        private WeakReference<Condition> _parentConditionRef;
-        public Condition QuestParentCondition => _parentConditionRef != null ? _parentConditionRef.TryGetTarget(out var parentCondition) ? parentCondition : null : null;
-        private WeakReference<Transform> _transformRef;
-        private Transform _questTransform => _transformRef.TryGetTarget(out var transform) ? transform : null;
+        private QuestStatusData _questRef;
+        public QuestStatusData Quest => _questRef;
+        private Condition _conditionRef;
+        public Condition QuestCondition => _conditionRef;
+        private Condition _parentConditionRef;
+        public Condition QuestParentCondition => _parentConditionRef;
+        private Transform _transformRef;
+        private Transform _questTransform => _transformRef;
+        private string _zoneId;
+        private string _targetId;
+        public string ZoneId => _zoneId;
+        public string TargetId => _targetId;
         private QuestDataMgr QuestDataMgr => field ??= MgrAccessor.Get<QuestDataMgr>();
 
-        public QuestData(QuestDataClass quest, Transform questTransform, Condition condition, Condition parentCondition = null) : base()
+        public QuestData(QuestStatusData quest, Transform questTransform, Condition condition, string zoneId, string targetId, Condition parentCondition = null) : base()
         {
-            _conditionRef = new WeakReference<Condition>(condition);
-            _parentConditionRef = new WeakReference<Condition>(parentCondition);
-            _questRef = new WeakReference<QuestDataClass>(quest);
-            _transformRef = new WeakReference<Transform>(questTransform);
+            _conditionRef = condition;
+            _parentConditionRef = parentCondition;
+            _questRef = quest;
+            _transformRef = questTransform;
+            _zoneId = zoneId;
+            _targetId = targetId;
             _colliders = questTransform.GetComponentsInChildren<Collider>().ToList();
         }
 
-        public override string GetActionName() => QuestParentCondition != null ? QuestParentCondition.id.ToString().McsLocalized() : QuestCondition.id.ToString().McsLocalized();
+        public override string GetActionName()
+        {
+            var condition = QuestParentCondition != null ? QuestParentCondition : QuestCondition;
+            return GetConditionText(condition);
+        }
+
+        private static string GetConditionText(Condition condition)
+        {
+            if (condition == null)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                var text = condition.FormattedDescription;
+                if (!string.IsNullOrEmpty(text))
+                {
+                    return text;
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                return condition.id.ToString().McsLocalized();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
 
         public override string GetActionTargetName(Vector3 myPlayerPos) => string.Format(Locales.GETACTIONTARGETNAME_TARGETNAME.McsLocalized(), Mathf.RoundToInt(Vector3.Distance(myPlayerPos, _questTransform.position)));
         
@@ -46,53 +82,63 @@ namespace MiyakoCarryService.Client.Datas
             base.Dispose();
             _questRef = null;
             _conditionRef = null;
+            _parentConditionRef = null;
             _transformRef = null;
         }
 
         public virtual async Task ForceCompleteQuest(Player mcsBotPlayer)
         {
-            await QuestDataMgr.ForceCompleteCondition(QuestCondition.GetType(), mcsBotPlayer, QuestCondition);
+            await QuestDataMgr.ForceCompleteCondition(mcsBotPlayer, this);
 
-            if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            // if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
+            // {
+            //     EventMgr.Notify(new CommandMgrHandleFikaEvent
+            //     {
+            //         McsBotPlayer = mcsBotPlayer,
+            //         CommandPacketType = ECommandType.EndProxyAction.ToString()
+            //     });
+            // }
+            // else
+            // {
+            //     var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+            //     if (mcsBotPlayerData != null)
+            //     {
+            //         mcsBotPlayerData.RemoveIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldHoldPosition]);
+            //         mcsBotPlayerData.TargetPos = null;
+            //         mcsBotPlayerData.ProxyTargetId = null;
+            //     }
+            // }
+
+            var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
+            if (mcsBotPlayerData != null)
             {
-                EventMgr.Notify(new CommandMgrHandleFikaEvent
-                {
-                    McsBotPlayer = mcsBotPlayer,
-                    CommandPacketType = ECommandType.EndProxyAction.ToString()
-                });
-            }
-            else
-            {
-                var mcsBotPlayerData = mcsBotPlayer.AIData.BotOwner.GetMcsBotPlayerData();
-                if (mcsBotPlayerData != null)
-                {
-                    mcsBotPlayerData.RemoveIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldHoldPosition]);
-                    mcsBotPlayerData.TargetPos = null;
-                    mcsBotPlayerData.ProxyTargetId = null;
-                }
+                mcsBotPlayerData.RemoveIntent([Intents.ShouldInteractionProxyAction, Intents.ShouldQuestProxyAction, Intents.ShouldLootProxyAction, Intents.ShouldHoldPosition]);
+                mcsBotPlayerData.TargetPos = null;
+                mcsBotPlayerData.ProxyTargetId = null;
             }
         }
 
         public virtual bool IsProxyActionDisabled()
         {
-            return QuestCondition switch
+            var condition = QuestCondition;
+            if (condition == null)
             {
-                ConditionVisitPlace or
-                ConditionLeaveItemAtLocation or
-                ConditionPlaceBeacon => false,
-                _ => true
-            };
+                return true;
+            }
+
+            if (condition.TryCast<ConditionVisitPlace>() != null
+                || condition.TryCast<ConditionLeaveItemAtLocation>() != null
+                || condition.TryCast<ConditionPlaceBeacon>() != null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public virtual string Id()
         {
-            return QuestCondition switch
-            {
-                ConditionVisitPlace conditionVisitPlace => conditionVisitPlace.target,
-                ConditionLeaveItemAtLocation conditionLeaveItemAtLocation => conditionLeaveItemAtLocation.zoneId,
-                ConditionPlaceBeacon conditionPlaceBeacon => conditionPlaceBeacon.zoneId,
-                _ => ""
-            };
+            return $"{_zoneId}|{_targetId}";
         }
     }
 }

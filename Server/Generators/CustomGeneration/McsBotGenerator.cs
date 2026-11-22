@@ -55,13 +55,15 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
                 botGenerationDetails.BotDifficulty
             );
 
-            var botRole = botGenerationDetails.IsPmc
-                ? botBaseClone.Info.Side
-                : botGenerationDetails.Role;
+            var botRole = botGenerationDetails.Role;
             var botJsonTemplateClone = cloner.Clone(botHelper.GetBotTemplate(botRole));
             if (botJsonTemplateClone is null)
             {
                 logger.Error($"Unable to retrieve: {botRole} bot template, cannot generate bot of this type");
+            }
+            else
+            {
+                ApplyDifficultyVariant(botJsonTemplateClone, botGenerationDetails);
             }
 
             // 所有装备部位100%生成
@@ -168,6 +170,10 @@ namespace MiyakoCarryService.Server.Generators.CustomGeneration
             };
 
             bot.Info.PrestigeLevel = 0;
+            if (bot.Info.PrestigeGameMode == null)
+            {
+                bot.Info.PrestigeGameMode = "regular";
+            }
 
             if (botGenerationDetails.IsPmc)
             {

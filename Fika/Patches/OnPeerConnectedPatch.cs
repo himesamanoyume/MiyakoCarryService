@@ -8,7 +8,7 @@ using Fika.Core.Networking.Packets.Backend;
 using HarmonyLib;
 using MiyakoCarryService.Client;
 using MiyakoCarryService.Client.Patches.Events;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {
@@ -41,7 +41,6 @@ namespace MiyakoCarryService.Fika.Patches
                         {
                             Level = groupPlayerViewModelClass.Info.Level,
                             Experience = ProfileInfo.GetExperience(groupPlayerViewModelClass.Info.Level),
-                            PrestigeLevel = groupPlayerViewModelClass.Info.PrestigeLevel,
                             MemberCategory = groupPlayerViewModelClass.Info.MemberCategory,
                             SelectedMemberCategory = groupPlayerViewModelClass.Info.SelectedMemberCategory,
                             Nickname = groupPlayerViewModelClass.Info.Nickname,
@@ -53,7 +52,7 @@ namespace MiyakoCarryService.Fika.Patches
                         },
                         Customization = groupPlayerViewModelClass.PlayerVisualRepresentation.Customization,
                         Health = new(),
-                        InsuredItems = [],
+                        InsuredItems = new JsonType.InsuredProfileItems[0],
                         Inventory = new()
                         {
                             Equipment = ItemBinarySerializer.SerializeItem(groupPlayerViewModelClass.PlayerVisualRepresentation.Equipment, FullySearchedSearchController.Instance)

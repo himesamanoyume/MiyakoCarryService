@@ -8,12 +8,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class DamageTriggerData : ObstacleData
     {
-        private WeakReference<DamageTrigger> _damageTriggerRef;
-        public DamageTrigger DamageTrigger => _damageTriggerRef.TryGetTarget(out var damageTrigger) ? damageTrigger : null;
+        private DamageTrigger _damageTriggerRef;
+        public DamageTrigger DamageTrigger => _damageTriggerRef;
 
         public DamageTriggerData(DamageTrigger damageTrigger) : base()
         {
-            _damageTriggerRef = new WeakReference<DamageTrigger>(damageTrigger);
+            _damageTriggerRef = damageTrigger;
             _colliders = damageTrigger.GetComponentsInChildren<Collider>().ToList();
             InitObstacle();
         }

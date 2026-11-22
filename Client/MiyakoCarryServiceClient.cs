@@ -1,39 +1,29 @@
-using BepInEx;
-using BepInEx.Configuration;
 using UnityEngine;
-using System.Collections.Generic;
-using System;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Utils;
-using MiyakoCarryService.Client.Patches.RefreshQuests;
-using MiyakoCarryService.Client.Patches.Raid;
-using MiyakoCarryService.Client.Patches.Bots;
-using MiyakoCarryService.Client.Patches.Group;
-using MiyakoCarryService.Client.Patches.BepInEx;
-using MiyakoCarryService.Client.Patches.Events;
 using System.Text.RegularExpressions;
-using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Extensions;
-using BepInEx.Bootstrap;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Events;
-using MiyakoCarryService.Client.Patches.Inventory;
-using MiyakoCarryService.Client.Patches.SAIN;
-using System.Reflection;
-using SPT.Reflection.Patching;
-using MiyakoCarryService.Client.Patches.Interactive;
+using SPTushonka.Reflection.Patching;
 using EFT;
 using EFT.Communications;
+using System;
+using System.Collections.Generic;
+using BepInEx;
+using BepInEx.Unity.IL2CPP;
+using BepInEx.Configuration;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client
 {
     [BepInPlugin(McsGUID, McsPluginName, BepInExClientVersion)]
     [BepInProcess(EFTapp)]
     [BepInDependency(BigBrainGUID, BepInDependency.DependencyFlags.HardDependency)]
-    public sealed class MiyakoCarryServicePlugin : BaseUnityPlugin
+    public sealed class MiyakoCarryServicePlugin : BasePlugin
     {
-        public const string BepInExClientVersion = "1.1.5.0";
+        public const string BepInExClientVersion = "1.99.1";
         public static System.Version ClientVersion { get; } = new(BepInExClientVersion);
         public const string EFTapp = "EscapeFromTarkov.exe";
         public const string McsGUID = "top.himesamanoyume.miyakocarryservice";
@@ -47,11 +37,7 @@ namespace MiyakoCarryService.Client
         public const string MiyakoTraderId = "6952ced4bcc1dd1e3c80dfcb";
         public static MiyakoCarryServicePlugin Instance;
         public static McsPluginClientConfig McsPluginClientConfig = null;
-        private List<ModulePatch> _patches = new();
-        public static bool IsLoadedByScriptEngine = false;
-        public static bool FikaInstalled { get; private set; } = false;
-        public static bool IsFikaHeadless { get; private set; } = false;
-        public static bool SAINInstalled { get; private set; } = false;
+        private PatchManager _patchManager;
         private Regex _stackRegex = new(@"\s*\(at <[^>]+>:\d+\)", RegexOptions.Compiled);
         internal static LogBuffer LogBuffer = new LogBuffer();
         private Debouncer<string, McsBotPlayerConfig> _configDebouncer;
@@ -104,54 +90,80 @@ namespace MiyakoCarryService.Client
 
         #endregion
 
-        void Awake()
+        public override void Load()
         {
             Instance = this;
-            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            if (string.IsNullOrEmpty(assemblyLocation))
-            {
-                IsLoadedByScriptEngine = true;
-            }
-        }
 
-        void Start()
-        {
-            Application.logMessageReceived += OnLog;
-            FikaInstalled = !CheckPlugin([FikaGUID]);
-            IsFikaHeadless = !CheckPlugin(["com.fika.headless"]);
-            SAINInstalled = !CheckPlugin(["me.sol.sain"]);
+            MainThread.Install(this);
+            Il2CppExceptionSafety.Install();
+            Application.add_logMessageReceived(DelegateSupport.ConvertDelegate<Application.LogCallback>(new Action<string, string, LogType>(OnLog)));
+            RegisterAll();
             SetupConfig();
-            McsPluginClientConfig = McsRequestHandler.GetMcsPluginClientConfig();
             DefaultLang = LocalizationManager.Instance.Culture;
             foreach (var kvp in LocalLocales.LoadingLocales)
             {
-                LocalizationManager.Instance.UpdateLocales(kvp.Key, kvp.Value);
+                LocalizationManager.Instance.UpdateLocales(kvp.Key, kvp.Value.ToIl2CppDictionary());
             }
+
+            McsPluginClientConfig = McsRequestHandler.GetMcsPluginClientConfig();
             EnableAllPatches();
             GameLoop.Instance.Init();
         }
 
+        public override bool Unload()
+        {
+            if (MiyakoCarryServiceSingleton<GameLoop>.Instantiated)
+            {
+                GameLoop.Instance.Destroy();
+            }
+
+            _patchManager?.DisablePatches();
+
+            EventMgr.OnMgrDestroy();
+            return true;
+        }
+
+        private static bool _isHandlingLog = false;
+
         private void OnLog(string condition, string stackTrace, LogType type)
         {
-            if (LogBuffer == null)
+            if (_isHandlingLog)
             {
                 return;
             }
 
-            if (condition.Contains("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced."))
-            {
-                return;
-            }
+            _isHandlingLog = true;
 
-            if (type is LogType.Exception or LogType.Error)
+            try
             {
-                LogBuffer.AddEntryIfNotFull(condition, _stackRegex.Replace(stackTrace, ""));
+                if (LogBuffer == null || condition == null)
+                {
+                    return;
+                }
+
+                if (condition.Contains("GUI Error: You are pushing more GUIClips than you are popping. Make sure they are balanced."))
+                {
+                    return;
+                }
+
+                if (type is LogType.Exception or LogType.Error)
+                {
+                    LogBuffer.AddEntryIfNotFull(condition, _stackRegex.Replace(stackTrace ?? string.Empty, ""));
+                }
+            }
+            catch (System.Exception ex)
+            {
+                McsLogger.LogError($"[MiyakoCarryServicePlugin.OnLog] {ex}");
+            }
+            finally
+            {
+                _isHandlingLog = false;
             }
         }
 
         public bool CheckPlugin(List<string> pluginList)
         {
-            var pluginInfos = new List<PluginInfo>(Chainloader.PluginInfos.Values);
+            var pluginInfos = new List<PluginInfo>(IL2CPPChainloader.Instance.Plugins.Values);
 
             foreach (PluginInfo Info in pluginInfos)
             {
@@ -172,125 +184,8 @@ namespace MiyakoCarryService.Client
 
         private void EnableAllPatches()
         {
-            _patches.Add(new ContainsSearchStringPatch());
-            _patches.Add(new DrawSinglePluginPatch());
-            _patches.Add(new DrawFlagsFieldPatch());
-            _patches.Add(new TraderScreensGroupShowPatch());
-            _patches.Add(new RaidSettingsLocalPatch());
-            _patches.Add(new MainMenuControllerClassPatch());
-            _patches.Add(new MatchMakerAcceptScreenReadyPatch());
-            _patches.Add(new BotsControllerInitPatch());
-            _patches.Add(new AddEnemyPatch());
-            _patches.Add(new MakingShotPatch());
-            _patches.Add(new BotDoorOpenerUpdateStatusPatch());
-            _patches.Add(new TraderClassConstructorPatch());
-            _patches.Add(new TraderControllerClassConstructorPatch());
-            _patches.Add(new TraderControllerClassAddItemEventInvokePatch());
-            _patches.Add(new TraderControllerClassRemoveItemEventInvokePatch());
-            _patches.Add(new TraderControllerClassOutProcessPatch());
-            _patches.Add(new TraderControllerClassInProcessPatch());
-            _patches.Add(new ApplyDamagePatch());
-            _patches.Add(new OnGameStartedPatch());
-            _patches.Add(new RaidEndedPatch());
-            _patches.Add(new TransitPointPatch1());
-            _patches.Add(new TransitPointPatch2());
-            _patches.Add(new MatchmakerTimeHasComePatch());
-            _patches.Add(new MatchMakerAcceptScreenCallbackPatch());
-            _patches.Add(new GroupPlayerViewModelClassPatch());
-            _patches.Add(new GetDailyQuestsPatch());
-            _patches.Add(new MatchmakerAcceptScreenShowPatch());
-            _patches.Add(new MatchingAbortPatch());
-            _patches.Add(new DisbandRaidGroupPatch());
-            _patches.Add(new MenuTaskBarAwakePatch());
-            _patches.Add(new NewNewsCountPatch());
-            _patches.Add(new SetGoalEnemyPatch());
-            _patches.Add(new MessageReceivedHandlerPatch());
-            _patches.Add(new LocalQuestControllerClassPatch());
-            _patches.Add(new GetContextInteractionsPatch());
-            _patches.Add(new ContextInteractionsClassPatch());
-            _patches.Add(new GetProfilesPatch());
-            _patches.Add(new MenuScreenPatch());
-            _patches.Add(new TryFindChangedContainerPatch());
-            _patches.Add(new CanModifyItemPatch());
-            _patches.Add(new ItemSubtract1Patch());
-            _patches.Add(new ItemSubtract2Patch());
-            _patches.Add(new TryReloadPatch());
-            _patches.Add(new BotWeaponSelectorPatch());
-            _patches.Add(new AdvAssaultTargetPatch());
-            _patches.Add(new InitVaultComponentPatch());
-            _patches.Add(new DoVaultingTickPatch());
-            _patches.Add(new VaultStateEnterPatch());
-            _patches.Add(new VaultStateExitPatch());
-            _patches.Add(new ClimbStateEnterPatch());
-            _patches.Add(new ClimbStateExitPatch());
-            _patches.Add(new VaultInteractDistancePatch());
-            _patches.Add(new VaultAutoInteractDistancePatch());
-            _patches.Add(new ClimbInteractDistancePatch());
-            _patches.Add(new ClimbAutoInteractDistancePatch());
-            _patches.Add(new BotMoverHopGuardPatch());
-            _patches.Add(new BotMoverFixedUpdatePatch());
-            _patches.Add(new NavBridgeObstaclePatch());
-            _patches.Add(new CastFromPosPatch());
-            _patches.Add(new FindBetterPositionPatch());
-            _patches.Add(new SetPlayerToNavMeshPatch());
-            _patches.Add(new PlayerTeleportPatch());
-            _patches.Add(new MatchMakerSideSelectionScreenPatch());
-            _patches.Add(new ActionPanelAnchorPatch());
-            _patches.Add(new PartyInfoPanelScrollPatch());
-            _patches.Add(new EquipmentBuildsScreenPatch());
-            _patches.Add(new BotFirstAidClassMinPercentPatch());
-            _patches.Add(new OnBeenKilledByAggressorPatch());
-            _patches.Add(new TriggerWithIdEnterPatch());
-            _patches.Add(new TriggerWithIdExitPatch());
-            _patches.Add(new GetPartToShootPatch());
-            _patches.Add(new IsAllowedPlayerPatch());
-            _patches.Add(new DoorGetActionsClassPatch());
-            _patches.Add(new LootItemGetActionsClassPatch());
-            _patches.Add(new StationaryWeaponGetActionsClassPatch());
-            _patches.Add(new RefreshMedsPatch());
-            _patches.Add(new BotHearingSensorPatch());
-            _patches.Add(new PlayerSayPatch());
-            _patches.Add(new PlayHitEffectPatch());
-            _patches.Add(new BotBewarePlantedMineUpdatePatch());
-            _patches.Add(new AvailableInteractionStateSetterPatch());
-            _patches.Add(new FindDamagedPartPatch());
-            _patches.Add(new MedsWeaponRestorePatch());
-
-            if (FikaInstalled)
-            {
-                if (IsLoadedByScriptEngine)
-                {
-                    _patches.Add(new PlayerOnDeadPatch());
-                }
-            }
-            else
-            {
-                _patches.Add(new PlayerOnDeadPatch());
-            }
-
-            if (SAINInstalled)
-            {
-                _patches.Add(new SainPlayVoiceLinePatch());
-            }
-
-#if DEBUG
-
-#endif
-
-            foreach (var patch in _patches)
-            {
-                patch.Enable();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            foreach (var patch in _patches)
-            {
-                patch.Disable();
-            }
-            GameLoop.Instance.Destroy();
-            Destroy(this);
+            _patchManager = new PatchManager(this, true);
+            _patchManager.EnablePatches();
         }
 
         private static readonly Dictionary<string, ConfigSection> _sections = new();
@@ -343,11 +238,11 @@ namespace MiyakoCarryService.Client
                     var entry = (ConfigEntryBase)sender;
                     if ((bool)entry.BoxedValue)
                     {
-                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#00ff00>{Locales.FUNCTIONENABLED.McsLocalized()}</color>");
+                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#00ff00>{Locales.FUNCTIONENABLED.McsLocalized()}</color>", textColor: new Il2CppSystem.Nullable<Color>());
                     }
                     else
                     {
-                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#ff0000>{Locales.FUNCTIONDISABLED.McsLocalized()}</color>");
+                        NotificationManager.DisplayMessageNotification($"{configEntry.Definition.Key.McsLocalized()} <color=#ff0000>{Locales.FUNCTIONDISABLED.McsLocalized()}</color>", textColor: new Il2CppSystem.Nullable<Color>());
                     }
                 };
             }
@@ -422,11 +317,46 @@ namespace MiyakoCarryService.Client
                 }
             }
 
-            var newIndex = GUILayout.SelectionGrid(selectedIndex, options, xCount);
+            var newIndex = Tools.DrawSelectionGrid(selectedIndex, options, xCount);
             if (newIndex != selectedIndex)
             {
                 entry.BoxedValue = values.GetValue(newIndex);
             }
+        }
+
+        public void RegisterAll()
+        {
+            if (!TomlTypeConverter.CanConvert(typeof(Color)))
+            {
+                TomlTypeConverter.AddConverter(typeof(Color), new TypeConverter
+                {
+                    ConvertToString = (value, _) => ColorToHex((Color)value),
+                    ConvertToObject = (value, _) => HexToColor((string)value),
+                });
+            }
+
+            if (!TomlTypeConverter.CanConvert(typeof(KeyboardShortcut)))
+            {
+                TomlTypeConverter.AddConverter(typeof(KeyboardShortcut), new TypeConverter
+                {
+                    ConvertToString = (value, _) => ((KeyboardShortcut)value).Serialize(),
+                    ConvertToObject = (value, _) => KeyboardShortcut.Deserialize((string)value),
+                });
+            }
+        }
+
+        private string ColorToHex(Color color)
+        {
+            return ColorUtility.ToHtmlStringRGBA(color);   // "RRGGBBAA"
+        }
+
+        private Color HexToColor(string text)
+        {
+            if (text[0] != '#')
+            {
+                text = "#" + text;
+            }
+            return ColorUtility.TryParseHtmlString(text, out var color) ? color : Color.white;
         }
 
         private void SetupConfig()
@@ -629,7 +559,7 @@ namespace MiyakoCarryService.Client
             if (_configDebouncer == null)
             {
                 _configDebouncer = new Debouncer<string, McsBotPlayerConfig>(
-                    this,
+                    GameLoop.Instance,
                     1f,
                     ExecuteConfigChanges
                 );
@@ -660,4 +590,3 @@ namespace MiyakoCarryService.Client
         }
     }
 }
-

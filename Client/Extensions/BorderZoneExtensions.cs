@@ -6,14 +6,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class BorderZoneExtensions
     {
-        private static readonly AttachedTable<BorderZone, BorderZoneData> _datas = new();
 
         extension(BorderZone borderZone)
         {
             public BorderZoneData GetData()
             {
-                return _datas.GetOrCreate(borderZone, key => new BorderZoneData(key));
+                return InteropDataCache<BorderZoneData>.GetOrCreate(borderZone.Pointer, () => new BorderZoneData(borderZone));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<BorderZoneData>.Clear();
         }
     }
 }

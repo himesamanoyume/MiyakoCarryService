@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MiyakoCarryService.Client.Datas;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Misc;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ namespace MiyakoCarryService.Client.Utils
             if (!_isRunning)
             {
                 _isRunning = true;
-                _debounceCoroutine = _coroutineRunner.StartCoroutine(DebounceCoroutine());
+                _debounceCoroutine = _coroutineRunner.StartCoroutine(DebounceCoroutine().McsSafe());
             }
             else
             {
@@ -52,7 +53,7 @@ namespace MiyakoCarryService.Client.Utils
                 {
                     _coroutineRunner.StopCoroutine(_debounceCoroutine);
                 }
-                _debounceCoroutine = _coroutineRunner.StartCoroutine(DebounceCoroutine());
+                _debounceCoroutine = _coroutineRunner.StartCoroutine(DebounceCoroutine().McsSafe());
             }
         }
 

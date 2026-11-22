@@ -10,11 +10,17 @@ using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class PlayerDataMgr : ItemDataMgr
     {
+        public PlayerDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         private List<McsBotPlayerData> _visibleDatas = new();
         private int _guiFontSize;
 
@@ -33,25 +39,25 @@ namespace MiyakoCarryService.Client.Mgrs
 
         private BrainMgr BrainMgr => field ??= MgrAccessor.Get<BrainMgr>();
 
-        public override void Start()
+        protected override void OnMgrStart()
         {
-            base.Start();
+            base.OnMgrStart();
             MiyakoCarryServicePlugin.DebugTextSize.SettingChanged += OnDebugTextSizeChanged;
         }
 
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            StartCoroutine(ReloadDataLoop(1f, LoadItemData<PlayerData>));
-            StartCoroutine(RecordAgentInfo(1f));
-            StartCoroutine(UpdateItemData(1f));
-            StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f));
-            StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f));
-            StartCoroutine(CheckFastOpenDoorLoop(1f));
+            StartCoroutine(ReloadDataLoop(1f, LoadItemData<PlayerData>).McsSafe());
+            StartCoroutine(RecordAgentInfo(1f).McsSafe());
+            StartCoroutine(UpdateItemData(1f).McsSafe());
+            StartCoroutine(RefreshMcsBotPlayersInterestingLoop(10f).McsSafe());
+            StartCoroutine(CheckMcsLeadPlayerSeenEnemiesLoop(1f).McsSafe());
+            StartCoroutine(CheckFastOpenDoorLoop(1f).McsSafe());
             _guiFontSize = MiyakoCarryServicePlugin.DebugTextSize.Value;
             _visibleDatas.Clear();
-            StartCoroutine(ReloadDataVisibleLoop(1f));
-            StartCoroutine(UpdateDataLoop());
+            StartCoroutine(ReloadDataVisibleLoop(1f).McsSafe());
+            StartCoroutine(UpdateDataLoop().McsSafe());
             var mcsBotPlayerDatas = GetMcsBotPlayerDatas();
             foreach (var mcsBotPlayerData in mcsBotPlayerDatas)
             {
@@ -208,7 +214,8 @@ namespace MiyakoCarryService.Client.Mgrs
                             mcsAILeadPlayer.CleanupDeadEnemies();
                         }
 
-                        var leadPlayer = mcsAILeadPlayer.Player() as Player;
+                        var leadPlayerInterface = mcsAILeadPlayer.Player();
+                        var leadPlayer = leadPlayerInterface == null ? null : leadPlayerInterface.TryCast<Player>();
                         var leadPlayerPos = leadPlayer.Position + Vector3.up * 1.6f;
                         var playerDatas = GetDatas<PlayerData>();
 

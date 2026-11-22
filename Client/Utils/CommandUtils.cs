@@ -2,15 +2,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using HarmonyLib;
-using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Models;
-using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -25,10 +23,37 @@ namespace MiyakoCarryService.Client.Utils
         private static readonly List<InteractionAction> _injectedObjectActions = new();
         private static readonly Stack<int> _selectionStack = new();
         private static int _pendingSelectedIndex = -1;
+
+        private static string _lastInjectedSignature;
+
+        private static readonly HashSet<IntPtr> _ourMenuPointers = new();
+
         public static bool IsCommandMenuOpen => _menuStack.Count > 0;
         public static AvailableInteractionState CurrentMenu => _currentMenu;
+
+        public static bool IsCurrentMenu(AvailableInteractionState state)
+        {
+            if (state == null || _currentMenu == null)
+            {
+                return false;
+            }
+
+            return state.Pointer == _currentMenu.Pointer;
+        }
+
+        public static bool IsOurMenu(AvailableInteractionState state)
+        {
+            if (state == null)
+            {
+                return false;
+            }
+
+            return _ourMenuPointers.Contains(state.Pointer);
+        }
+
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
-        private static NavMeshTriangulation? _cachedTriangulation;
+        private static Vector3[] _cachedVertices;
+        private static bool _navMeshUnavailable;
 
         private static ConcurrentDictionary<string, McsCommandHandler> _handlersMap;
 
@@ -78,12 +103,29 @@ namespace MiyakoCarryService.Client.Utils
 
         public static void NavMeshCache()
         {
-            _cachedTriangulation ??= NavMesh.CalculateTriangulation();
+            TryFillCachedVertices();
         }
 
         public static void ClearNavMeshCache()
         {
-            _cachedTriangulation = null;
+            _cachedVertices = null;
+            _navMeshUnavailable = false;
+        }
+
+        private static void TryFillCachedVertices()
+        {
+            if (_cachedVertices != null || _navMeshUnavailable)
+            {
+                return;
+            }
+
+            if (NavMeshTriangulationIcall.TryGetVertices(out var vertices))
+            {
+                _cachedVertices = vertices;
+                return;
+            }
+
+            _navMeshUnavailable = true;
         }
 
         public static void ClearMenuStack()
@@ -91,6 +133,7 @@ namespace MiyakoCarryService.Client.Utils
             _menuStack.Clear();
             _selectionStack.Clear();
             _pendingSelectedIndex = -1;
+            _ourMenuPointers.Clear();
         }
 
         public static void RegisterCommandMenu(string menuKey, Action<McsCommandMenu, Player[]> menu)
@@ -126,7 +169,9 @@ namespace MiyakoCarryService.Client.Utils
                 Actions = new()
             };
 
-            actionsReturnClass.CurrentActionChanged.Bind(OnCurrentActionChanged);
+            _ourMenuPointers.Add(actionsReturnClass.Pointer);
+
+            actionsReturnClass.CurrentActionChanged.Bind(new Action(OnCurrentActionChanged));
         }
 
         public static void OnCurrentActionChanged()
@@ -142,7 +187,7 @@ namespace MiyakoCarryService.Client.Utils
                 return;
             }
 
-            var itemName = AccessTools.Field(typeof(ActionPanel), "_itemName").GetValue(actionPanel) as TextMeshProUGUI;
+            var itemName = actionPanel._itemName;
 
             var selectedAction = GamePlayerOwner?.AvailableInteractionState?.Value?.SelectedAction;
             if (selectedAction == null)
@@ -176,20 +221,22 @@ namespace MiyakoCarryService.Client.Utils
 
             _currentMenu = actionsReturnClass;
             _injectedObjectActions.Clear();
+            _lastInjectedSignature = null;
 
             if (existing != null && !ReferenceEquals(existing, previousCommandMenu) && existing.Actions != null && existing.Actions.Count > 0)
             {
                 MergeIncomingIntoCommandMenu(existing);
             }
-            else
+
+            if (_currentMenu != null)
             {
-                if (_currentMenu != null && _pendingSelectedIndex >= 0 && _pendingSelectedIndex < _currentMenu.Actions.Count && !_currentMenu.Actions[_pendingSelectedIndex].Disabled)
+                if (_pendingSelectedIndex >= 0 && _pendingSelectedIndex < _currentMenu.Actions.Count && !_currentMenu.Actions[_pendingSelectedIndex].Disabled)
                 {
-                    _currentMenu.SelectedAction = _currentMenu.Actions[_pendingSelectedIndex];
+                    _currentMenu.SelectAction(_currentMenu.Actions[_pendingSelectedIndex]);
                 }
                 else
                 {
-                    _currentMenu?.InitSelected();
+                    SelectFirstAvailableAction();
                 }
             }
 
@@ -202,10 +249,117 @@ namespace MiyakoCarryService.Client.Utils
             _menuStack.Clear();
             _selectionStack.Clear();
             _pendingSelectedIndex = -1;
+            _lastInjectedSignature = null;
             _currentMenu = null;
             _cancelAction = null;
             _injectedObjectActions.Clear();
             GamePlayerOwner.AvailableInteractionState.Value = new AvailableInteractionState();
+        }
+
+        public static void KeepCommandMenuOpen()
+        {
+            try
+            {
+                if (!IsCommandMenuOpen)
+                {
+                    return;
+                }
+
+                if (!Singleton<GameWorld>.Instantiated || Singleton<GameWorld>.Instance?.MainPlayer == null)
+                {
+                    return;
+                }
+
+                var owner = GamePlayerOwner;
+                if (owner == null)
+                {
+                    return;
+                }
+
+                var bindable = owner.AvailableInteractionState;
+                if (bindable == null)
+                {
+                    return;
+                }
+
+                var currentState = bindable.Value;
+                if (ReferenceEquals(currentState, _currentMenu))
+                {
+                    return;
+                }
+
+                MergeIncomingIntoCommandMenu(currentState);
+                bindable.Value = _currentMenu;
+            }
+            catch (Exception ex)
+            {
+                McsLogger.LogError($"[CommandUtils.KeepCommandMenuOpen] {ex}");
+            }
+        }
+
+        public static void OnGameProducedInteractionState(GamePlayerOwner owner)
+        {
+            if (!IsCommandMenuOpen || _currentMenu == null || owner == null)
+            {
+                return;
+            }
+
+            var bindable = owner.AvailableInteractionState;
+            if (bindable == null)
+            {
+                return;
+            }
+
+            var currentState = bindable.Value;
+            if (ReferenceEquals(currentState, _currentMenu))
+            {
+                return;
+            }
+
+            MergeIncomingIntoCommandMenu(currentState);
+            bindable.Value = _currentMenu;
+        }
+
+        public static void ReassertCommandMenu(GamePlayerOwner owner)
+        {
+            if (!IsCommandMenuOpen || _currentMenu == null || owner == null)
+            {
+                return;
+            }
+
+            var bindable = owner.AvailableInteractionState;
+            if (bindable == null)
+            {
+                return;
+            }
+
+            if (ReferenceEquals(bindable.Value, _currentMenu))
+            {
+                return;
+            }
+
+            bindable.Value = _currentMenu;
+        }
+
+        private static void SelectFirstAvailableAction()
+        {
+            if (_currentMenu?.Actions == null)
+            {
+                return;
+            }
+
+            foreach (var action in _currentMenu.Actions)
+            {
+                if (action == null || action.Disabled)
+                {
+                    continue;
+                }
+
+                _currentMenu.SelectAction(action);
+                return;
+            }
+
+            _currentMenu.InitSelected();
         }
 
         public static InteractionAction MakeCommand(string name, string targetName, bool disabled, Action action)
@@ -297,33 +451,8 @@ namespace MiyakoCarryService.Client.Utils
             ForEachAlive(mcsBotPlayers, mcsBotPlayer =>
             {
                 var ctx = CreateCommandContext(commandType, mcsBotPlayer, data, shouldCheckExclude);
-
-                if (MiyakoCarryServicePlugin.FikaInstalled && !Tools.IsHost)
-                {
-                    if (isLocal)
-                    {
-                        ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                        Execute(ctx, false);
-                    }
-                    else
-                    {
-                        EventMgr.Notify(new CommandMgrHandleFikaEvent
-                        {
-                            McsBotPlayer = mcsBotPlayer,
-                            CommandPacketType = ctx.CommandType,
-                            Position = ctx.Position,
-                            TargetId = ctx.TargetId,
-                            AimingBodyPartType = ctx.AimingBodyPartType,
-                            ShouldCheckExclude = ctx.ShouldCheckExclude,
-                            Extensions = ctx.Extensions
-                        });
-                    }
-                }
-                else
-                {
-                    ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
-                    Execute(ctx, true);
-                }
+                ctx.McsLeadPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+                Execute(ctx, true);
             });
 
             if (isLocal && (mcsBotPlayers == null || mcsBotPlayers.Length == 0))
@@ -373,8 +502,8 @@ namespace MiyakoCarryService.Client.Utils
         {
             var result = new List<Vector3>();
 
-            _cachedTriangulation ??= NavMesh.CalculateTriangulation();
-            var verts = _cachedTriangulation.Value.vertices;
+            TryFillCachedVertices();
+            var verts = _cachedVertices;
             if (verts == null || verts.Length == 0)
             {
                 return result;
@@ -491,13 +620,31 @@ namespace MiyakoCarryService.Client.Utils
                 return;
             }
 
+            if (incoming != null && _ourMenuPointers.Contains(incoming.Pointer))
+            {
+                return;
+            }
+
+            var hasIncoming = incoming != null && !ReferenceEquals(incoming, _currentMenu) && incoming.Actions != null && incoming.Actions.Count > 0;
+
+            List<InteractionAction> incomingActions = null;
+            if (hasIncoming)
+            {
+                incomingActions = [.. incoming.Actions];
+
+                if (BuildActionSignature(incomingActions) == _lastInjectedSignature)
+                {
+                    return;
+                }
+            }
+
             foreach (var action in _injectedObjectActions)
             {
                 _currentMenu.Actions.Remove(action);
             }
             _injectedObjectActions.Clear();
 
-            if (incoming != null && !ReferenceEquals(incoming, _currentMenu) && incoming.Actions != null && incoming.Actions.Count > 0)
+            if (hasIncoming)
             {
                 var insertIndex = _cancelAction != null ? _currentMenu.Actions.IndexOf(_cancelAction) : -1;
                 if (insertIndex < 0)
@@ -505,18 +652,45 @@ namespace MiyakoCarryService.Client.Utils
                     insertIndex = _currentMenu.Actions.Count;
                 }
 
-                foreach (var action in incoming.Actions)
+                foreach (var action in incomingActions)
                 {
                     _currentMenu.Actions.Insert(insertIndex++, action);
                     _injectedObjectActions.Add(action);
                 }
+
+                _lastInjectedSignature = BuildActionSignature(incomingActions);
+            }
+            else
+            {
+                _lastInjectedSignature = null;
             }
 
             var prev = _currentMenu.SelectedAction;
             if (prev == null || prev.Disabled || !_currentMenu.Actions.Contains(prev))
             {
-                _currentMenu.InitSelected();
+                SelectFirstAvailableAction();
             }
+        }
+
+        private static string BuildActionSignature(List<InteractionAction> actions)
+        {
+            if (actions == null || actions.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            foreach (var action in actions)
+            {
+                if (action == null)
+                {
+                    continue;
+                }
+
+                builder.Append(action.Name).Append('|').Append(action.TargetName).Append(';');
+            }
+
+            return builder.ToString();
         }
     }
 }

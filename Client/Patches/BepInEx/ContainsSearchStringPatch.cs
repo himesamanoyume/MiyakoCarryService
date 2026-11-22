@@ -3,7 +3,7 @@ using System.Reflection;
 using ConfigurationManager;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.BepInEx
 {

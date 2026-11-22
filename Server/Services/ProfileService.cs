@@ -37,6 +37,7 @@ using SPTarkov.Server.Core.Services.Locales;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 using SPTarkov.Server.Core.Services.Profile;
+using SPTarkov.Server.Core.Helpers.Items;
 
 namespace MiyakoCarryService.Server.Services
 {
@@ -71,6 +72,7 @@ namespace MiyakoCarryService.Server.Services
         HideoutTable hideoutTable,
         PlayerScavConfig playerScavConfig,
         CompatibilityService compatibilityService,
+        ItemHelper itemHelper,
         ProfileMigrationService profileMigrationService
     )
     {
@@ -642,7 +644,7 @@ namespace MiyakoCarryService.Server.Services
                 tradersInfo[traderId] = new TraderInfo
                 {
                     LoyaltyLevel = 4,
-                    SalesSum = 999999999.0,
+                    SalesSum = 999999999,
                     Standing = 10.0,
                     NextResupply = trader.Base?.NextResupply ?? 0,
                     Unlocked = true,
@@ -663,7 +665,7 @@ namespace MiyakoCarryService.Server.Services
 
                 var dbArea = hideoutAreas.FirstOrDefault(area => area.Type == areaType);
                 int maxLevel = 0;
-                MongoId? containerId = null;
+                MongoId containerId = null;
 
                 if (dbArea != null && dbArea.Stages != null)
                 {
@@ -671,9 +673,9 @@ namespace MiyakoCarryService.Server.Services
 
                     if (maxLevel >= 0 && dbArea.Stages.TryGetValue(maxLevel.ToString(), out var maxStage))
                     {
-                        if (maxStage.Container.HasValue && !maxStage.Container.Value.IsEmpty)
+                        if (!maxStage.Container.IsEmpty)
                         {
-                            containerId = maxStage.Container.Value;
+                            containerId = maxStage.Container;
                         }
                     }
                 }
@@ -865,7 +867,7 @@ namespace MiyakoCarryService.Server.Services
 
             foreach (var dbArea in hideoutAreas)
             {
-                if (dbArea.Type == null || dbArea.Stages == null)
+                if (dbArea.Stages == null)
                 {
                     continue;
                 }
@@ -881,7 +883,7 @@ namespace MiyakoCarryService.Server.Services
                     continue;
                 }
 
-                if (!stage.Container.HasValue || stage.Container.Value.IsEmpty)
+                if (string.IsNullOrEmpty(stage.Container) || !itemHelper.IsValidItem(stage.Container))
                 {
                     continue;
                 }
@@ -898,13 +900,13 @@ namespace MiyakoCarryService.Server.Services
                     var newContainerItem = new Item
                     {
                         Id = dbArea.Id,
-                        Template = stage.Container.Value
+                        Template = stage.Container
                     };
                     pmcData.Inventory.Items.Add(newContainerItem);
                 }
                 else
                 {
-                    existingInventoryItem.Template = stage.Container.Value;
+                    existingInventoryItem.Template = stage.Container;
                 }
             }
 

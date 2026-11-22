@@ -1,8 +1,7 @@
 using System.Reflection;
 using EFT.UI;
 using HarmonyLib;
-using SPT.Reflection.Patching;
-using UnityEngine;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -14,9 +13,9 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ActionPanel), nameof(ActionPanel.Start));
 
         [PatchPostfix]
-        public static void Postfix(RectTransform ____interactionButtonsContainer)
+        public static void Postfix(ActionPanel __instance)
         {
-            ____interactionButtonsContainer.pivot = new(____interactionButtonsContainer.pivot.x, 0f);
+            __instance._interactionButtonsContainer.pivot = new(__instance._interactionButtonsContainer.pivot.x, 0f);
         }
     }
 }

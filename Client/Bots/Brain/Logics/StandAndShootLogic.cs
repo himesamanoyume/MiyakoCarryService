@@ -28,7 +28,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
             var goalEnemy = BotOwner.Memory.GoalEnemy;
             if (goalEnemy == null)
             {
-                _baseLogic.UpdateNodeByMain(data);
+                _baseLogic.UpdateNodeByMain(null);
                 return;
             }
 
@@ -41,7 +41,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                     _strafeUntilTime = 0f;
                     BotOwner.StopMove();
                 }
-                _baseLogic.UpdateNodeByMain(data);
+                _baseLogic.UpdateNodeByMain(null);
                 return;
             }
 
@@ -64,7 +64,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Logics
                 }
             }
 
-            _baseLogic.UpdateNodeByMain(data);
+            _baseLogic.UpdateNodeByMain(null);
         }
 
         private void UpdateStrafe(EnemyInfo goalEnemy)

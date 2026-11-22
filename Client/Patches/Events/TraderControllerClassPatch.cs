@@ -1,7 +1,6 @@
-
 using Comfort.Common;
 using EFT.InventoryLogic;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 using MiyakoCarryService.Client.Extensions;
@@ -43,7 +42,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                             }
                             foreach (var mcsAILeadPlayer in mcsAILeadPlayers)
                             {
-                                GameLoop.Instance.StartCoroutine(itemData.UnlockRefreshRootItemInteresting(mcsAILeadPlayer));
+                                GameLoop.Instance.StartCoroutine(itemData.UnlockRefreshRootItemInteresting(mcsAILeadPlayer).McsSafe());
                             }
                         }
                         catch (Exception e)
@@ -61,17 +60,17 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassAddItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_addItemEvent").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemController), nameof(ItemController.RaiseAddEvent));
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(object __instance, AddItemEventArgs obj)
+        public static void Postfix(object __instance, AddItemEventArgs args)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
             {
-                var item = obj.Item;
+                var item = args.Item;
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (item != null)
                 {
@@ -85,7 +84,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     }
                 }
 
-                var to = obj.To;
+                var to = args.To;
                 if (to != null)
                 {
                     var toRootItem = to.GetRootItem();
@@ -110,17 +109,17 @@ namespace MiyakoCarryService.Client.Patches.Events
     /// </summary>
     public sealed class TraderControllerClassRemoveItemEventInvokePatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(AccessTools.Field(typeof(ItemController), "_removeItemEvent").FieldType, "Invoke");
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(ItemController), nameof(ItemController.RaiseRemoveEvent));
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [PatchPostfix]
-        public static void Postfix(object __instance, RemoveItemEventArgs obj)
+        public static void Postfix(object __instance, RemoveItemEventArgs args)
         {
             var gameloop = GameLoop.Instance;
             if (gameloop.IsVaildGameWorld)
             {
-                var item = obj.Item;
+                var item = args.Item;
                 var mcsAILeadPlayers = McsMgr.GetAllMcsAILeadPlayer();
                 if (item != null)
                 {
@@ -134,7 +133,7 @@ namespace MiyakoCarryService.Client.Patches.Events
                     }
                 }
 
-                var from = obj.From;
+                var from = args.From;
                 if (from != null)
                 {
                     var fromRootItem = from.GetRootItem();

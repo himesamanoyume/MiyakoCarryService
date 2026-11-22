@@ -34,10 +34,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 }
 
                 var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                if (mcsLeadPlayerPos == null)
-                {
-                    return new Action(typeof(HoldPositionLogic), "Mcs:LeadPosNull");
-                }
 
                 if (McsBotPlayerData.HasIntent(Intents.ShouldDropTargetLoot) && BotOwner.ExternalItemsController.HaveItemsToDrop())
                 {
@@ -102,12 +98,12 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 CheckWeaponSwitch();
 
-                if (!BotOwner.WeaponManager.Reload.Reloading)
+                if (!Tools.IsReloading(BotOwner))
                 {
                     var haveBullets = BotOwner.WeaponManager.HaveBullets;
                     if (!haveBullets || BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                     {
-                        BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                     }
                 }
 
@@ -218,7 +214,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = playerPosition;
                 BotOwner.Mover._lastGoodCastPointTime = Time.time;
                 BotOwner.Mover._prevPosLinkedTime = 0f;
-                BotOwner.Mover.SetPlayerToNavMesh(playerPosition);
+                var deltaMove = playerPosition - BotOwner.Mover._prevSuccessLinkedFrom;
+                BotOwner.Mover.SetPlayerToNavMesh(playerPosition, deltaMove, out var _);
                 BotOwner.Mover.RecalcWay();
                 BotOwner.Mover.Pause = true;
                 UpdateLeadNearMoveTarget(McsBotPlayerData.LeadPlayer.Position, out float nextTime);

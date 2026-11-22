@@ -2,7 +2,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +17,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(PartyInfoPanel), nameof(PartyInfoPanel.Show));
 
         [PatchPostfix]
-        public static void Postfix(PartyInfoPanel __instance, Transform ____playersContainer, GameObject ____separator)
+        public static void Postfix(PartyInfoPanel __instance)
         {
             var panelRect = __instance.GetComponent<RectTransform>();
             if (panelRect == null)
@@ -33,7 +34,7 @@ namespace MiyakoCarryService.Client.Patches.Events
 
             verticalLayoutGroup.enabled = false;
 
-            var containerRect = ____playersContainer.GetComponent<RectTransform>();
+            var containerRect = __instance._playersContainer.GetComponent<RectTransform>();
             if (containerRect == null)
             {
                 return;
@@ -41,10 +42,10 @@ namespace MiyakoCarryService.Client.Patches.Events
 
             containerRect.pivot = new Vector2(0f, 1f);
 
-            var csf = ____playersContainer.GetComponent<ContentSizeFitter>();
+            var csf = __instance._playersContainer.GetComponent<ContentSizeFitter>();
             if (csf == null)
             {
-                csf = ____playersContainer.gameObject.AddComponent<ContentSizeFitter>();
+                csf = __instance._playersContainer.gameObject.AddComponent<ContentSizeFitter>();
             }
             csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             csf.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -60,11 +61,12 @@ namespace MiyakoCarryService.Client.Patches.Events
             scrollRect.vertical = true;
             scrollRect.scrollSensitivity = 30f;
             scrollRect.movementType = ScrollRect.MovementType.Clamped;
-            TasksExtensions.HandleExceptions(SetIndex(____separator));
+            SetIndex(__instance._separator).McsHandleExceptions();
         }
 
         private static async Task SetIndex(GameObject separator)
         {
+            // 续体拉回主线程：SetSiblingIndex 是纯 Unity API，在线程池上调用会 AV
             await Task.Delay(1000);
             separator.transform.SetSiblingIndex(2);
         }

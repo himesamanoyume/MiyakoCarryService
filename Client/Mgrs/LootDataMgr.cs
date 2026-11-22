@@ -1,20 +1,26 @@
-
 using System.Collections.Generic;
 using System.Linq;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
 using UnityEngine;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class LootDataMgr : ItemDataMgr
     {
+        public LootDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public HashSet<LootData> LockedLootingTarget = new();
         public HashSet<Transform> LockedLootingTargetRootTransform = new();
-        public override void Start()
+        protected override void OnMgrStart()
         {
-            base.Start();
+            base.OnMgrStart();
         }
 
         public bool IsLockedLootingTarget(LootData lootData)
@@ -50,8 +56,8 @@ namespace MiyakoCarryService.Client.Mgrs
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
-            StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>));
-            StartCoroutine(UpdateItemData(1f));
+            StartCoroutine(ReloadDataLoop(1f, LoadItemData<LootData>).McsSafe());
+            StartCoroutine(UpdateItemData(1f).McsSafe());
             LockedLootingTarget.Clear();
             LockedLootingTargetRootTransform.Clear();
         }

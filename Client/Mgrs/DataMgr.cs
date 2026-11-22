@@ -11,12 +11,16 @@ namespace MiyakoCarryService.Client.Mgrs
 {
     public abstract class DataMgr : BaseMgr
     {
+        protected DataMgr(IntPtr pointer) : base(pointer)
+        {
+        }
+
         protected HashSet<BaseData> _datas;
         protected McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
-        public override void Start()
+        protected override void OnMgrStart()
         {
-            base.Start();
+            base.OnMgrStart();
             _datas = new HashSet<BaseData>();
         }
 
@@ -71,6 +75,11 @@ namespace MiyakoCarryService.Client.Mgrs
 
         public void DataClear()
         {
+            if (_datas == null)
+            {
+                return;
+            }
+
             foreach (var data in _datas)
             {
                 if (data is IDisposable disposable)

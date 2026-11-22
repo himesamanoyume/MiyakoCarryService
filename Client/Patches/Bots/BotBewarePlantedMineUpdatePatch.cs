@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using MiyakoCarryService.Client.Extensions;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
@@ -49,7 +50,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     continue;
                 }
 
-                var vector = nearestMine.Pos - __instance._owner.Position;
+                var vector = nearestMine.MidPosition - __instance._owner.Position;
                 if (Vector3.Dot(vector, __instance._owner.LookDirection) >= 0f && Mathf.Abs(vector.y) <= 1f)
                 {
                     float sqrMagnitude = vector.sqrMagnitude;
@@ -63,20 +64,20 @@ namespace MiyakoCarryService.Client.Patches.Bots
                         min = sqrMagnitude;
                         plantedMineAIInfo2 = nearestMine;
                     }
-                    list.Add(nearestMine.Pos);
+                    list.Add(nearestMine.MidPosition);
                 }
             }
             if (plantedMineAIInfo == null)
             {
                 return false;
             }
-            var vector2 = (plantedMineAIInfo.Pos + plantedMineAIInfo2.Pos) * 0.5f;
-            if (__instance._owner.Mover.TryRelacePathAround(vector2, list, out var botCurrentPathAbstractClass))
+            var vector2 = (plantedMineAIInfo.MidPosition + plantedMineAIInfo2.MidPosition) * 0.5f;
+            if (__instance._owner.Mover.TryRelacePathAround(vector2, list.ToIl2CppList(), out var _))
             {
                 __instance._nextCheck = Time.time + 4f;
                 return false;
             }
-            if (plantedMineAIInfo.CanTakeToDeactivate(__instance._owner.Id) && __instance._owner.Mover.IsPointOnCurrentWay(plantedMineAIInfo.Pos, 2.5f))
+            if (plantedMineAIInfo.CanTakeToDeactivate(__instance._owner.Id) && __instance._owner.Mover.IsPointOnCurrentWay(plantedMineAIInfo.MidPosition, 2.5f))
             {
                 __instance._owner.BewarePlantedMine.SetMineToDeactivate(plantedMineAIInfo);
             }

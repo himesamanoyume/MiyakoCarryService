@@ -3,11 +3,18 @@
 using EFT.Interactive;
 using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class DamageTriggerDataMgr : LabyrinthDataMgr
     {
+        public DamageTriggerDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();

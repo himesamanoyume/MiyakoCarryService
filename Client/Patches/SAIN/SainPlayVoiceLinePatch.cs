@@ -1,11 +1,8 @@
-using System.Reflection;
-using HarmonyLib;
-using MiyakoCarryService.Client.Mgrs;
-using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.SAIN
 {
+    // 5.0：假定无 SAIN，整体注释
+    /*
     public sealed class SainPlayVoiceLinePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(SAINUtils.PlayerComponentType, "PlayVoiceLine");
@@ -30,4 +27,5 @@ namespace MiyakoCarryService.Client.Patches.SAIN
             return true;
         }
     }
+    */
 }

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using HarmonyLib;
 using MiyakoCarryService.Client.Patches.BigSurvey;
-using UnityEngine;
 
 namespace MiyakoCarryService.Client.Utils
 {
@@ -148,19 +146,38 @@ namespace MiyakoCarryService.Client.Utils
 
         public void ShowNewInformation()
         {
-            if (Singleton<PreloaderUI>.Instantiated)
+            if (!Singleton<PreloaderUI>.Instantiated)
             {
-                var menuTaskBar = Singleton<PreloaderUI>.Instance.MenuTaskBar;
-                var menuTaskBarTraverse = Traverse.Create(menuTaskBar);
-                var newInformations = menuTaskBarTraverse.Field<GameObject[]>("_newInformation").Value;
-                foreach (var newInformation in newInformations)
+                return;
+            }
+
+            var menuTaskBar = Singleton<PreloaderUI>.Instance.MenuTaskBar;
+            if (menuTaskBar == null)
+            {
+                return;
+            }
+
+            var newInformations = menuTaskBar._newInformation;
+            if (newInformations == null)
+            {
+                return;
+            }
+
+            foreach (var newInformation in newInformations)
+            {
+                if (newInformation != null)
                 {
                     newInformation.SetActive(true);
                 }
-
-                MenuTaskBarAwakePatch.NewBigSurveyCount += _newBigSurveyCount;
-                _newBigSurveyCount = 0;
             }
+
+            SettlePendingCount();
+        }
+
+        public void SettlePendingCount()
+        {
+            MenuTaskBarAwakePatch.NewBigSurveyCount += _newBigSurveyCount;
+            _newBigSurveyCount = 0;
         }
     }
 

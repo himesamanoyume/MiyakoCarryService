@@ -1,7 +1,9 @@
 
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using ChatShared;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -9,13 +11,16 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
+using Il2CppSystem.Linq;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Patches.BigSurvey;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
-using UI.Matchmaker.Group;
+using SPTushonka.Reflection.Patching;
+using UnityEngine;
+using SPTushonka.Reflection.Il2Cpp;
 
 namespace MiyakoCarryService.Client.Patches.Group
 {
@@ -26,102 +31,138 @@ namespace MiyakoCarryService.Client.Patches.Group
     {
         protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(MatchmakerPlayersController), nameof(MatchmakerPlayersController.GetContextInteractions));
 
-        private static Traverse _tarkovApplicationTraverse;
         public static bool IsMcsBotPlayerInventoryMode = false;
         public static string McsBotPlayerAid = "";
+
+        /// <summary>好友列表刷新是否正在进行（0/1，用 Interlocked 访问）</summary>
+        private static int _refreshInFlight;
 
         [PatchPostfix]
         public static void Postfix(GroupPlayer player, RaidGroupContextInteractions __result)
         {
-            __result.method_2(
+            __result.AddDynamicInteraction(
                 id: "RefreshFriendList",
                 key: Locales.REFRESHFRIENDLIST.McsLocalized(),
-                callback: OnRefreshFriendList
+                callback: new System.Action(RefreshFriendListWithRebuild)
             );
 
             if (IsMcsBotPlayerInventoryMode)
             {
-                __result.method_2(
+                __result.AddDynamicInteraction(
                     id: "BackMainChar",
                     key: Locales.RETURNTOMAINCHAR.McsLocalized(),
-                    callback: () => TasksExtensions.HandleExceptions(OnExitMcsBotPlayerInventoryMode(player.AccountId))
+                    callback: new System.Action(() => OnExitMcsBotPlayerInventoryMode(player.AccountId).McsHandleExceptions())
                 );
 
                 return;
             }
 
-            __result.method_2(
+            __result.AddDynamicInteraction(
                 id: "OpenMcsBotPlayerInventoryMode",
                 key: Locales.OPENMCSBOTPLAYERINVENTORY.McsLocalized(),
-                callback: () => TasksExtensions.HandleExceptions(OnOpenMcsBotPlayerInventoryMode(player.AccountId))
+                callback: new System.Action(() => OnOpenMcsBotPlayerInventoryMode(player.AccountId).McsHandleExceptions())
             );
 
-            __result.method_2(
+            __result.AddDynamicInteraction(
                 id: "SettleMcsOrder",
                 key: Locales.SETTLEMCSORDER.McsLocalized(),
-                callback: () => OnSettleMcsOrder(player.AccountId)
+                callback: new System.Action(() => OnSettleMcsOrder(player.AccountId).McsHandleExceptions())
             );
 
-            __result.method_2(
+            __result.AddDynamicInteraction(
                 id: "RenewMcsOrder",
                 key: Locales.RENEWMCSORDER.McsLocalized(),
-                callback: () => OnRenewMcsOrder(player.AccountId)
+                callback: new System.Action(() => OnRenewMcsOrder(player.AccountId).McsHandleExceptions())
             );
         }
 
-        private static async void OnRefreshFriendList()
+        public static void RefreshFriendListWithRebuild()
         {
-            var session = GameLoop.Instance.Session;
-            session.SocialNetwork.FriendsList.Clear();
-            session.GetFriendsList(result =>
+            if (Interlocked.CompareExchange(ref _refreshInFlight, 1, 0) != 0)
             {
-                if (!result.Succeed)
+                return;
+            }
+
+            RefreshFriendListLoopAsync().McsHandleExceptions();
+        }
+
+        private static async Task RefreshFriendListLoopAsync()
+        {
+            try
+            {
+                var session = GameLoop.Instance.Session;
+                var social = session?.SocialNetwork;
+                if (social == null)
                 {
                     return;
                 }
 
-                session.SocialNetwork.CG_method_13(result);  
-                UnityEngine.Object.FindObjectOfType<FriendListInvitePlayerPanel>()?.UpdateFriendList(); 
-            });
+                var result = await session.GetFriendsList().AsManaged();
+                if (result == null || !result.Succeed)
+                {
+                    return;
+                }
+
+                var eftFriendsList = social.EftFriendsList;
+                if (eftFriendsList == null)
+                {
+                    return;
+                }
+
+                var friends = new Il2CppSystem.Collections.Generic.List<UpdatableChatMember>();
+                foreach (var member in result.Value.EftFriends)
+                {
+                    if (member != null)
+                    {
+                        friends.Add(member);
+                    }
+                }
+
+                eftFriendsList.UpdateItems(new Il2CppSystem.Collections.Generic.List<UpdatableChatMember>());
+                social.RebuildCombinedFriendsList();
+                await Task.Delay(100);
+                eftFriendsList.UpdateItems(friends);
+                social.RebuildCombinedFriendsList();
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _refreshInFlight, 0);
+            }
         }
 
         public static async Task OnExitMcsBotPlayerInventoryMode(string aid)
         {
-            await GameLoop.Instance.Session.FlushOperationQueue();
+            await GameLoop.Instance.Session.FlushOperationQueue().AsManaged();
 
             if (!HasWeaponInEquipmentSlots())
             {
-                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARNOWEAPON.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARNOWEAPON.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
 
             if (aid != McsBotPlayerAid)
             {
-                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
 
             if (!McsRequestHandler.RemoveMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARTIP.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
 
-            if (_tarkovApplicationTraverse == null)
-            {
-                TarkovApplication.Exist(out var tarkovApplication);
-                _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
-            }
+            TarkovApplication.Exist(out var tarkovApplication);
 
-            var menuOperation = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
+            var menuOperation = tarkovApplication._menuOperation;
 
             McsBotPlayerAid = "";
             IsMcsBotPlayerInventoryMode = false;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            await menuOperation.AfterErrorHandler();
+            await menuOperation.AfterErrorHandler().AsManaged();
             EventMgr.Notify(new UpdateProfileEvent());
             EventMgr.Notify(new UpdateMiyakoTraderAssortmentEvent());
-            await GameLoop.Instance.Session.RequestBuilds();
+            await GameLoop.Instance.Session.RequestBuilds().AsManaged();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(false);
         }
 
@@ -177,48 +218,44 @@ namespace MiyakoCarryService.Client.Patches.Group
 
         private static async Task OnOpenMcsBotPlayerInventoryMode(string aid)
         {
-            await GameLoop.Instance.Session.FlushOperationQueue();
+            await GameLoop.Instance.Session.FlushOperationQueue().AsManaged();
             if (!McsRequestHandler.VerifyMcsBotPlayerAid(new() { Aid = aid }))
             {
-                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RETURNTOMAINCHARREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
 
-            if (_tarkovApplicationTraverse == null)
-            {
-                TarkovApplication.Exist(out var tarkovApplication);
-                _tarkovApplicationTraverse = Traverse.Create(tarkovApplication);
-            }
-
-            var menuOperation = _tarkovApplicationTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
+            TarkovApplication.Exist(out var tarkovApplication);
+            var menuOperation = tarkovApplication._menuOperation;
 
             McsBotPlayerAid = aid;
             IsMcsBotPlayerInventoryMode = true;
             Singleton<PreloaderUI>.Instance.SetLoaderStatus(true);
-            await menuOperation.AfterErrorHandler();
+            await menuOperation.AfterErrorHandler().AsManaged();
             EventMgr.Notify(new UpdateProfileEvent());
-            await GameLoop.Instance.Session.RequestBuilds();
+            await GameLoop.Instance.Session.RequestBuilds().AsManaged();
             MenuTaskBarAwakePatch.ShowMcsBotPlayerInventoryModeInfo(true);
         }
 
-        private static void OnSettleMcsOrder(string aid)
+        private static async Task OnSettleMcsOrder(string aid)
         {
             if (!McsRequestHandler.SettleMcsOrder(new() { Aid = aid }))
             {
-                NotificationManager.DisplayMessageNotification(Locales.SETTLEMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.SETTLEMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
-            OnRefreshFriendList();
+            RefreshFriendListWithRebuild();
         }
 
-        private static void OnRenewMcsOrder(string aid)
+        private static async Task OnRenewMcsOrder(string aid)
         {
             if (!McsRequestHandler.RenewMcsOrder(new() { Aid = aid }))
             {
-                NotificationManager.DisplayMessageNotification(Locales.RENEWMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert);
+                NotificationManager.DisplayMessageNotification(Locales.RENEWMCSORDERREFUSE.McsLocalized(), iconType: ENotificationIconType.Alert, textColor: new Il2CppSystem.Nullable<Color>());
                 return;
             }
-            NotificationManager.DisplayMessageNotification(Locales.MIYAKOTRADERORDERNEWQUEST.McsLocalized());
+
+            NotificationManager.DisplayMessageNotification(Locales.MIYAKOTRADERORDERNEWQUEST.McsLocalized(), textColor: new Il2CppSystem.Nullable<Color>());
             EventMgr.Notify(new UpdateDailyQuestsEvent());
         }
     }

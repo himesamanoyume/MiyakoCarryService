@@ -3,9 +3,10 @@ using Comfort.Common;
 using EFT;
 using HarmonyLib;
 using MiyakoCarryService.Client.Events;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Events
 {
@@ -23,7 +24,7 @@ namespace MiyakoCarryService.Client.Patches.Events
         {
             if (Tools.IsHost)
             {
-                TasksExtensions.HandleExceptions(GameLoop.Instance.SpawnMcsBotPlayer());
+                GameLoop.Instance.SpawnMcsBotPlayer().McsHandleExceptions();
             }
         }
 

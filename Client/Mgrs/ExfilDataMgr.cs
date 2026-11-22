@@ -1,21 +1,39 @@
 
+using System;
+using System.Collections.Generic;
 using Comfort.Common;
+using CommonAssets.Scripts.Cutscenes;
 using EFT;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     public class ExfilDataMgr : GameWorldDataMgr
     {
+        public ExfilDataMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
+        private readonly List<FinallExitZone> _finalExitZones = new();
+
         public override void OnRaidStarted()
         {
             base.OnRaidStarted();
             LoadData(LoadExfiltrationPoints);
         }
 
+        public override void OnRaidEnded()
+        {
+            base.OnRaidEnded();
+            InteropRegistry<FinallExitZone>.Clear();
+        }
+
         private void LoadExfiltrationPoints()
         {
-            Singleton<GameWorld>.Instance.AllPlayersEverExisted.ExecuteForEach((Player player) =>
+            Singleton<GameWorld>.Instance.AllPlayersEverExisted.ExecuteForEach(new Action<Player>((Player player) =>
             {
                 if (!player.IsYourPlayer)
                 {
@@ -25,14 +43,21 @@ namespace MiyakoCarryService.Client.Mgrs
                 var exfiltrationController = Singleton<GameWorld>.Instance.ExfiltrationController;
                 if (player.Profile.Side != EPlayerSide.Savage)
                 {
-                    exfiltrationController.EligiblePoints(player.Profile).ExecuteForEach((exfiltrationPoint) =>
+                    var exfiltrationPoints = exfiltrationController.EligiblePoints(player.Profile);
+
+                    if (exfiltrationPoints == null || exfiltrationPoints.Length == 0)
+                    {
+                        exfiltrationPoints = exfiltrationController.ExfiltrationPoints;
+                    }
+
+                    foreach (var exfiltrationPoint in exfiltrationPoints)
                     {
                         var data = exfiltrationPoint.GetData();
                         if (data != null)
                         {
                             _datas.Add(data);
                         }
-                    });
+                    }
                 }
                 else
                 {
@@ -67,7 +92,22 @@ namespace MiyakoCarryService.Client.Mgrs
                         }
                     }
                 }
-            });
+
+                InteropRegistry<FinallExitZone>.CopyTo(_finalExitZones);
+                foreach (var finalExitZone in _finalExitZones)
+                {
+                    if (finalExitZone == null)
+                    {
+                        continue;
+                    }
+
+                    var data = finalExitZone.GetData();
+                    if (data != null)
+                    {
+                        _datas.Add(data);
+                    }
+                }
+            }));
         }
     }
 }

@@ -8,9 +8,11 @@ using EFT;
 using EFT.Ballistics;
 using EFT.Counters;
 using EFT.InventoryLogic;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using MiyakoCarryService.Client.Datas;
 using MiyakoCarryService.Client.Enums;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Mgrs;
 using UnityEngine;
 using UnityEngine.AI;
@@ -100,7 +102,7 @@ namespace MiyakoCarryService.Client.Utils
                 EItemType.Goggles => blockItemType.HasFlag(EBlockItemType.Goggles),
                 EItemType.Rig => blockItemType.HasFlag(EBlockItemType.Rig),
                 EItemType.Armor => blockItemType.HasFlag(EBlockItemType.Armor),
-                EItemType.Equipment => lootData.Item is Headphones ? blockItemType.HasFlag(EBlockItemType.Headphone) : blockItemType.HasFlag(EBlockItemType.TacticalVest),
+                EItemType.Equipment => lootData.Item != null && lootData.Item.TryCast<Headphones>() != null ? blockItemType.HasFlag(EBlockItemType.Headphone) : blockItemType.HasFlag(EBlockItemType.TacticalVest),
                 EItemType.Grenade => blockItemType.HasFlag(EBlockItemType.Grenade),
                 EItemType.Info => blockItemType.HasFlag(EBlockItemType.Info),
                 EItemType.Keys => blockItemType.HasFlag(EBlockItemType.Keys),
@@ -348,7 +350,8 @@ namespace MiyakoCarryService.Client.Utils
                         killedPlayer.Inventory.EquippedInSlotsTemplateIds, damageInfo.Weapon, bodyPart, mcsLeadPlayer.Location,
                         Vector3.Distance(aggressor.Position, killedPlayer.Position), settings.Role.ToStringNoBox(),
                         mcsLeadPlayer.CurrentHour, killedPlayer.HealthController.BodyPartEffects,
-                        aggressor.HealthController.BodyPartEffects, killedPlayer.TriggerZones, aggressor.HealthController.ActiveBuffsNames());
+                        aggressor.HealthController.BodyPartEffects, killedPlayer.TriggerZones, aggressor.HealthController.ActiveBuffsNames(),
+                        killedPlayer.HealthController.ActiveBuffsNames());
                 }
             }
         }
@@ -512,7 +515,7 @@ namespace MiyakoCarryService.Client.Utils
             return basePos + offset;
         }
 
-        public static int GetMcsBotPlayerIndex(MongoID mcsBotPlayerId, bool sequentialFill = false)
+        public static int GetMcsBotPlayerIndex(string mcsBotPlayerId, bool sequentialFill = false)
         {
             return McsMgr.GetMcsBotPlayerIndex(mcsBotPlayerId, sequentialFill);
         }
@@ -579,6 +582,52 @@ namespace MiyakoCarryService.Client.Utils
             _formationOpenCells.Remove(key, out var index);
         }
 
+        public static int DrawSelectionGrid(int selectedIndex, string[] options, int xCount)
+        {
+            if (options == null || options.Length == 0)
+            {
+                return selectedIndex;
+            }
+
+            if (xCount <= 0)
+            {
+                xCount = options.Length;
+            }
+
+            var newIndex = selectedIndex;
+            var previousColor = GUI.backgroundColor;
+            var column = 0;
+
+            for (var i = 0; i < options.Length; i++)
+            {
+                if (column == 0)
+                {
+                    GUILayout.BeginHorizontal();
+                }
+
+                if (i == selectedIndex)
+                {
+                    GUI.backgroundColor = Color.green;
+                }
+
+                if (GUILayout.Button(options[i], GUILayout.ExpandWidth(true)))
+                {
+                    newIndex = i;
+                }
+
+                GUI.backgroundColor = previousColor;
+
+                column++;
+                if (column >= xCount || i == options.Length - 1)
+                {
+                    GUILayout.EndHorizontal();
+                    column = 0;
+                }
+            }
+
+            return newIndex;
+        }
+
         public static string DrawFormationMatrix(string key, string formationMatrix)
         {
             var arr = ParseFormationMatrix(formationMatrix);
@@ -615,7 +664,7 @@ namespace MiyakoCarryService.Client.Utils
                     currentIndex = 0;
                 }
 
-                var newIndex = GUILayout.SelectionGrid(currentIndex, options, options.Length);
+                var newIndex = DrawSelectionGrid(currentIndex, options, options.Length);
                 if (newIndex != currentIndex)
                 {
                     FormationMatrixSetCell(arr, _formationOpenCells.GetOrAdd(key, -1), optionValues[newIndex]);
@@ -641,7 +690,7 @@ namespace MiyakoCarryService.Client.Utils
                 return false;
             }
 
-            if (person.Profile.Info.GroupId is "Mcs" or "Fika")
+            if (person.Profile.Info.GroupId is "Mcs")
             {
                 return true;
             }
@@ -652,6 +701,109 @@ namespace MiyakoCarryService.Client.Utils
             }
 
             return person.Profile.Info.Settings?.Role is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy;
+        }
+
+        public static bool IsNeutralBot(WildSpawnType role)
+        {
+            return role is WildSpawnType.vsRF or WildSpawnType.vsRFSniper or WildSpawnType.vsRFFight or WildSpawnType.civilian;
+        }
+
+        public static void MakeNeutralBotTypes(BotSettings settings)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            foreach (var neutralType in Classification.NeutralBotTypes)
+            {
+                settings.GetAlwaysFriendlyBotTypes().Remove(neutralType);
+                settings.GetWarnBotTypes().Remove(neutralType);
+                settings.GetEnemyBotTypes().Remove(neutralType);
+                settings.GetFriendlyBotTypes().Add(neutralType);
+            }
+
+            settings.FileSettings.Mind.WARN_BOT_TYPES = RemoveNeutralTypes(settings.FileSettings.Mind.WARN_BOT_TYPES);
+            settings.FileSettings.Mind.ENEMY_BOT_TYPES = RemoveNeutralTypes(settings.FileSettings.Mind.ENEMY_BOT_TYPES);
+        }
+
+        private static Il2CppStructArray<WildSpawnType> RemoveNeutralTypes(Il2CppStructArray<WildSpawnType> existingTypes)
+        {
+            if (existingTypes == null)
+            {
+                return null;
+            }
+
+            var filteredTypes = new List<WildSpawnType>();
+            foreach (var existingType in existingTypes)
+            {
+                if (!IsNeutralBot(existingType))
+                {
+                    filteredTypes.Add(existingType);
+                }
+            }
+
+            return filteredTypes.ToArray().ToIl2CppStructArray();
+        }
+
+        public static Vector3? GetMoveTargetPoint(BotOwner botOwner)
+        {
+            var mover = botOwner?.Mover;
+            if (mover == null)
+            {
+                return null;
+            }
+
+            var currentTargetPoint = mover._currentTargetPoint;
+            return currentTargetPoint == Vector3.zero ? null : currentTargetPoint;
+        }
+
+        public static bool HasCrossPoint(Vector3 a1, Vector3 b1, Vector3 a2, Vector3 b2)
+        {
+            var p1 = new Vector2(a1.x, a1.z);
+            var p2 = new Vector2(b1.x, b1.z);
+            var p3 = new Vector2(a2.x, a2.z);
+            var p4 = new Vector2(b2.x, b2.z);
+
+            var d1 = p2 - p1;
+            var d2 = p4 - p3;
+            var denominator = d1.x * d2.y - d1.y * d2.x;
+            if (Mathf.Abs(denominator) < 0.0001f)
+            {
+                return false;
+            }
+
+            var diff = p3 - p1;
+            var t = (diff.x * d2.y - diff.y * d2.x) / denominator;
+            var u = (diff.x * d1.y - diff.y * d1.x) / denominator;
+
+            return t > 0f && t < 1f && u > 0f && u < 1f;
+        }
+
+        public static BotWeaponInfo GetWeaponInfo(BotOwner botOwner)
+        {
+            return botOwner?.WeaponManager?._currentWeaponInfo;
+        }
+
+        public static BotReload GetReload(BotOwner botOwner)
+        {
+            return GetWeaponInfo(botOwner)?.Reload;
+        }
+
+        public static bool IsReloading(BotOwner botOwner)
+        {
+            return GetReload(botOwner)?.Reloading == true;
+        }
+
+        public static void McsTryReload(BotOwner botOwner)
+        {
+            var reload = GetReload(botOwner);
+            if (reload == null)
+            {
+                return;
+            }
+
+            reload.McsTryReload();
         }
 
         public static bool TryMakeRoomForEnemy(BotOwner botOwner)

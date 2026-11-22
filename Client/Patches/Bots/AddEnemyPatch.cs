@@ -2,9 +2,10 @@ using System;
 using System.Reflection;
 using EFT;
 using HarmonyLib;
+using MiyakoCarryService.Client.Extensions;
 using MiyakoCarryService.Client.Mgrs;
 using MiyakoCarryService.Client.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Client.Patches.Bots
 {
@@ -13,65 +14,113 @@ namespace MiyakoCarryService.Client.Patches.Bots
     /// </summary>
     public sealed class AddEnemyPatch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsGroup), nameof(BotsGroup.AddEnemy));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotGroupHostility), nameof(BotGroupHostility.AddEnemyAction));
 
         private static McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
 
         [ThreadStatic]
         private static bool _isPropagating;
 
+        [ThreadStatic]
+        private static bool _blockedThisCall;
+
         [PatchPrefix]
-        public static bool Prefix(BotsGroup __instance, IPlayer person, EBotEnemyCause cause, ref bool __result)
+        public static bool Prefix(BotGroupHostility __instance, IPlayer player)
         {
-            if (person == null)
+            _blockedThisCall = false;
+
+            if (player == null)
             {
                 return true;
             }
 
-            if (__instance._defWildSpawnType is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
+            var group = __instance.OwnedGroup;
+            if (group == null)
             {
-                if (McsMgr.IsMcsBotPlayer(person.ProfileId))
+                return true;
+            }
+
+            if (group._defWildSpawnType is WildSpawnType.shooterBTR or WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
+            {
+                if (McsMgr.IsMcsBotPlayer(player.ProfileId))
                 {
-                    __result = false;
+                    _blockedThisCall = true;
                     return false;
                 }
             }
 
-            foreach (var botOwner in __instance._members)
+            if (!GroupHasMcsMember(group))
             {
-                if (McsMgr.IsMcsBotPlayer(botOwner.ProfileId))
-                {
-                    if (Tools.IsForbiddenEnemy(person))
-                    {
-                        __result = false;
-                        return false;
-                    }
-                }
+                return true;
             }
+
+            if (Tools.IsForbiddenEnemy(player))
+            {
+                _blockedThisCall = true;
+                return false;
+            }
+
             return true;
         }
 
-        [PatchPostfix]
-        public static void Postfix(BotsGroup __instance, IPlayer person, EBotEnemyCause cause)
+        /// <summary>
+        /// 判定一个 BotsGroup 是否属于 MCS 护航：组 boss 或任一成员是 MCS 护航 bot。
+        /// ⚠️ 必须同时看 <c>_initialBot</c>：加敌可能发生在成员尚未挂上（或成员表为空）时，
+        /// 只看 <c>_members</c> 会漏拦。
+        /// </summary>
+        private static bool GroupHasMcsMember(BotsGroup group)
         {
-            if (person == null || _isPropagating)
+            if (group == null)
+            {
+                return false;
+            }
+
+            if (group._initialBot != null && McsMgr.IsMcsBotPlayer(group._initialBot.ProfileId))
+            {
+                return true;
+            }
+
+            foreach (var member in group._members)
+            {
+                if (member != null && McsMgr.IsMcsBotPlayer(member.ProfileId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [PatchPostfix]
+        public static void Postfix(BotGroupHostility __instance, IPlayer player)
+        {
+            var blocked = _blockedThisCall;
+            _blockedThisCall = false;
+
+            if (player == null || _isPropagating || blocked)
             {
                 return;
             }
 
-            if (McsMgr.IsMcsLeadPlayer(person.ProfileId) || McsMgr.IsMcsBotPlayer(person.ProfileId))
+            var __instanceGroup = __instance.OwnedGroup;
+            if (__instanceGroup == null)
             {
-                MirrorHostilityToSquadGroups(__instance, person);
                 return;
             }
 
-            if (person.Profile.Info.GroupId is "Mcs" or "Fika" || McsMgr.IsMcsBotPlayer(person.ProfileId) || McsMgr.IsMcsLeadPlayer(person.ProfileId))
+            if (McsMgr.IsMcsLeadPlayer(player.ProfileId) || McsMgr.IsMcsBotPlayer(player.ProfileId))
+            {
+                MirrorHostilityToSquadGroups(__instanceGroup, player);
+                return;
+            }
+
+            if (player.Profile.Info.GroupId is "Mcs" || McsMgr.IsMcsBotPlayer(player.ProfileId) || McsMgr.IsMcsLeadPlayer(player.ProfileId))
             {
                 return;
             }
 
             string mcsLeadPlayerId = null;
-            foreach (var member in __instance._members)
+            foreach (var member in __instanceGroup._members)
             {
                 if (McsMgr.IsMcsBotPlayer(member.ProfileId))
                 {
@@ -96,12 +145,12 @@ namespace MiyakoCarryService.Client.Patches.Bots
                 foreach (var member in allMcsMembers)
                 {
                     var botGroup = member.AIData?.BotOwner?.BotsGroup;
-                    if (botGroup == null || botGroup == __instance)
+                    if (botGroup == null || botGroup == __instanceGroup)
                     {
                         continue;
                     }
 
-                    var attackerGroup = person.AIData?.BotOwner?.BotsGroup;
+                    var attackerGroup = player.AIData?.BotOwner?.BotsGroup;
                     if (attackerGroup != null)
                     {
                         foreach (var enemy in attackerGroup._members)
@@ -111,7 +160,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                                 continue;
                             }
 
-                            botGroup.AddEnemy(enemy.GetPlayer, EBotEnemyCause.callForHelp1);
+                            botGroup.AddEnemy(enemy.GetPlayer);
                         }
                     }
                     else
@@ -121,7 +170,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                             continue;
                         }
 
-                        botGroup.AddEnemy(person, EBotEnemyCause.callForHelp1);
+                        botGroup.AddEnemy(player);
                     }
                 }
             }
@@ -188,7 +237,7 @@ namespace MiyakoCarryService.Client.Patches.Bots
                     return;
                 }
 
-                targetGroup.AddEnemy(hostileMember.GetPlayer, EBotEnemyCause.callForHelp1);
+                targetGroup.AddEnemy(hostileMember.GetPlayer);
             }
         }
     }

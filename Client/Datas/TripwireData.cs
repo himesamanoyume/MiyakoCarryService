@@ -10,19 +10,19 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class TripwireData : ObstacleData
     {
-        private WeakReference<TripwireSynchronizableObject> _tripwireRef;
-        public TripwireSynchronizableObject Tripwire => _tripwireRef.TryGetTarget(out var tripwire) ? tripwire : null;
+        private TripwireSynchronizableObject _tripwireRef;
+        public TripwireSynchronizableObject Tripwire => _tripwireRef;
         public bool IsPlantedByAI;
 
         public TripwireData(TripwireSynchronizableObject tripwire) : base()
         {
-            _tripwireRef = new WeakReference<TripwireSynchronizableObject>(tripwire);
+            _tripwireRef = tripwire;
             _colliders = new List<Collider>()
             {
                 CreateBoxCollider(tripwire.FromPosition, tripwire.ToPosition)
             };
             InitObstacle();
-            var player = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(Tripwire.PlacerPlayerId);
+            var player = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(Tripwire.PlacerRaidId);
             if (player != null)
             {
                 IsPlantedByAI = player.IsAI;

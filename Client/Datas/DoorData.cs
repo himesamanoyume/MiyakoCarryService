@@ -7,12 +7,12 @@ namespace MiyakoCarryService.Client.Datas
 {
     public class DoorData : InteractableObjectData
     {
-        private WeakReference<Door> _doorRef;
-        public Door Door => _doorRef.TryGetTarget(out var door) ? door : null;
+        private Door _doorRef;
+        public Door Door => _doorRef;
 
         public DoorData(Door door): base()
         {
-            _doorRef = new WeakReference<Door>(door);
+            _doorRef = door;
         }
 
         public override string GetActionName()

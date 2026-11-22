@@ -623,7 +623,7 @@ namespace MiyakoCarryService.Server.Services
             );
         }
 
-        public async Task<ProfileChange> UpdateProfile(MongoId mcsLeadPlayerId)
+        public async Task<McsProfileChangesResponse> UpdateProfile(MongoId mcsLeadPlayerId)
         {
             PmcData targetPmcData;
 
@@ -638,17 +638,16 @@ namespace MiyakoCarryService.Server.Services
 
             return new()
             {
-                Id = mcsLeadPlayerId,
-                Experience = targetPmcData.Info.Experience,
-                TraderRelations = targetPmcData.TradersInfo.ToDictionary(
-                    trader => trader.Key,
-                    trader => new TraderData
+                Experience = targetPmcData.Info.Experience ?? 0,
+                TradersData = targetPmcData.TradersInfo.ToDictionary(
+                    trader => trader.Key.ToString(),
+                    trader => new McsTraderDataResponse
                     {
-                        SalesSum = trader.Value.SalesSum,  
-                        Standing = trader.Value.Standing,  
-                        Loyalty = trader.Value.LoyaltyLevel,  
-                        Unlocked = trader.Value.Unlocked,  
-                        Disabled = trader.Value.Disabled, 
+                        SalesSum = trader.Value.SalesSum,
+                        Standing = trader.Value.Standing,
+                        LoyaltyLevel = trader.Value.LoyaltyLevel,
+                        Unlocked = trader.Value.Unlocked,
+                        Disabled = trader.Value.Disabled,
                     }
                 )
             };

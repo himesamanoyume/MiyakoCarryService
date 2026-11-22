@@ -1,5 +1,4 @@
 
-using EFT;
 
 namespace MiyakoCarryService.Client.Utils
 {

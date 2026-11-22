@@ -148,7 +148,8 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                                 BotOwner.Mover._lastGoodCastPoint = BotOwner.Mover._prevSuccessLinkedFrom = BotOwner.Mover._prevLinkPos = BotOwner.Mover.PositionOnWayInner = operatorPos;
                                 BotOwner.Mover._lastGoodCastPointTime = time;
                                 BotOwner.Mover._prevPosLinkedTime = 0f;
-                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos);
+                                var deltaMove = operatorPos - BotOwner.Mover._prevSuccessLinkedFrom;
+                                BotOwner.Mover.SetPlayerToNavMesh(operatorPos, deltaMove, out var _);
                                 BotOwner.Mover.RecalcWay();
                                 BotOwner.Mover.Pause = true;
 
@@ -174,7 +175,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                         var isEnemyAtSector = stationary.IsEnemyAtSector(stationary.CurLink);
 
-                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision() == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
+                        if (stationaryWeaponLink.HaveAmmo() && (goalEnemy == null || (isEnemyAtSector && stationary.GetCurrentDecision().HasValue && stationary.GetCurrentDecision().Value == BotLogicDecision.shootFromStationary && goalEnemy.CanShoot && IsTargetPitchReachable(stationaryWeapon, goalEnemy.CurrPosition))))
                         {
                             BotOwner.ShootData.EndShoot();
                             return new Action(typeof(ShootFromStationaryLogic), "Mcs:UseStationaryWeapon");
@@ -205,7 +206,7 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (BotOwner.NearDoorData.RecentlyClosedDoorCheckTime + 0.3f < time && BotOwner.BotsGroup.EnemyLastSeenTimeReal + 7f >= time && GetCrossPoint(goalEnemy))
                 {
-                    BotOwner.Memory.Spotted(false, null, null);
+                    BotOwner.Memory.Spotted(false, new Il2CppSystem.Nullable<Vector3>(), new Il2CppSystem.Nullable<float>());
                 }
 
                 if (!CheckFirearmsAnimatorState())
@@ -220,11 +221,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
 
                 if (!haveBullets.Value)
                 {
-                    BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                 }
                 else if (!goalEnemy.CanShoot && BotOwner.McsGetCurrentMagAmmoRatio() <= 0.3f)
                 {
-                    BotOwner.WeaponManager.Reload.McsTryReload();
+                        Tools.McsTryReload(BotOwner);
                 }
 
                 if (BotOwner.WeaponManager.UnderbarrelLauncherController.NeedToReload())
@@ -245,10 +246,6 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 else
                 {
                     var mcsLeadPlayerPos = BotOwner.GetMcsLeadPlayerPos(McsBotPlayerData);
-                    if (mcsLeadPlayerPos == null)
-                    {
-                        return new Action(typeof(HoldPositionLogic), "Mcs:Uninitialized");
-                    }
 
                     var safeFire = false;
                     if (canShoot)
@@ -489,9 +486,11 @@ namespace MiyakoCarryService.Client.Bots.Brain.Layers
                 {
                     if (enemyExist)
                     {
-                        if (BotOwner.Boss.BossLogic is BossZryachiy bossZryachiy)
+                        var bossLogic = BotOwner.Boss == null ? null : BotOwner.Boss.BossLogic;
+                        var bossZryachiy = bossLogic == null ? null : bossLogic.TryCast<BossZryachiy>();
+                        if (bossZryachiy != null)
                         {
-                            bossZryachiy.AddEnemy(goalEnemy.Person, EBotEnemyCause.zryachiyLogic);
+                            bossZryachiy.AddEnemy(goalEnemy.Person);
                         }
                     }
                 }

@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class DamageTriggerExtensions
     {
-        private static readonly AttachedTable<DamageTrigger, DamageTriggerData> _datas = new();
 
         extension(DamageTrigger damageTrigger)
         {
             public DamageTriggerData GetData()
             {
-                return _datas.GetOrCreate(damageTrigger, key => new DamageTriggerData(key));
+                return InteropDataCache<DamageTriggerData>.GetOrCreate(damageTrigger.Pointer, () => new DamageTriggerData(damageTrigger));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<DamageTriggerData>.Clear();
         }
     }
 }

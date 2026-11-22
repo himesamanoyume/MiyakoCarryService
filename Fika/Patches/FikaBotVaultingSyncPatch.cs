@@ -4,7 +4,7 @@ using Fika.Core.Networking.LiteNetLib;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace MiyakoCarryService.Fika.Patches
 {
@@ -18,15 +18,14 @@ namespace MiyakoCarryService.Fika.Patches
         [PatchPostfix]
         public static void Postfix(FikaBot __instance)
         {
-            var packetSender = __instance.PacketSender;
+            var packetSender = __instance.BotPacketSender;
             if (packetSender == null || packetSender.NetworkManager == null)
             {
                 return;
             }
 
             var vaultingParameters = __instance.VaultingParameters;
-            __instance.CommonPacket.Type = ECommonSubPacketType.Vault;
-            __instance.CommonPacket.SubPacket = VaultPacket.FromValue(
+            var packet = new VaultPacket(
                 vaultingParameters.GetVaultingStrategy(),
                 vaultingParameters.MaxWeightPointPosition,
                 vaultingParameters.VaultingHeight,
@@ -34,7 +33,7 @@ namespace MiyakoCarryService.Fika.Patches
                 __instance.MovementContext.VaultingSpeed,
                 vaultingParameters.BehindObstacleRatio,
                 vaultingParameters.AbsoluteForwardVelocity);
-            packetSender.NetworkManager.SendNetReusable(ref __instance.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            packetSender.NetworkManager.SendPlayerPacket(in packet, __instance.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }

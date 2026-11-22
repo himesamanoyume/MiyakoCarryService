@@ -6,30 +6,39 @@ using EFT;
 using MiyakoCarryService.Client.Bots.Brain.Layers;
 using MiyakoCarryService.Client.Events;
 using MiyakoCarryService.Client.Extensions;
+using MiyakoCarryService.Client.Extensions.ToIl2Cpp;
 using MiyakoCarryService.Client.Misc;
 using MiyakoCarryService.Client.Models;
 using MiyakoCarryService.Client.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace MiyakoCarryService.Client.Mgrs
 {
     internal class BrainMgr : BaseMgr
     {
+        public BrainMgr(IntPtr pointer) : base(pointer)
+        {
+            ClassInjector.DerivedConstructorBody(this);
+        }
+
         private McsMgr McsMgr => field ??= MgrAccessor.Get<McsMgr>();
         
-        public override void Start()
+        protected override void OnMgrStart()
         {
-            base.Start();
+            base.OnMgrStart();
             InitCustomLayerMaps();
-            Gameloop.IsGameStarted = Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld;
+            var gameWorld = Singleton<GameWorld>.Instance;
+            Gameloop.IsGameStarted = Singleton<GameWorld>.Instantiated && gameWorld != null && gameWorld.TryCast<HideoutGameWorld>() == null;
             Gameloop.CheckVaildGameWorld();
-            if (MiyakoCarryServicePlugin.IsLoadedByScriptEngine && Gameloop.IsVaildGameWorld)
+            if (Gameloop.IsVaildGameWorld)
             {
                 McsMgr.IsHost = true;
                 EventMgr.Notify(new GameWorldStartedEvent
                 {
                     GameWorld = Singleton<GameWorld>.Instance,
                 });
-                TasksExtensions.HandleExceptions(Reload());
+                Reload().McsHandleExceptions();
             }
         }
 
@@ -66,7 +75,7 @@ namespace MiyakoCarryService.Client.Mgrs
 
             var leadPlayers = mcsProfilesDict
                 .Where(kvp => kvp.Value.Length > 0)
-                .Select(kvp => Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(kvp.Key))
+                .Select(kvp => Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(kvp.Key))
                 .Where(leadPlayer => leadPlayer != null);
 
             foreach (var leadPlayer in leadPlayers)

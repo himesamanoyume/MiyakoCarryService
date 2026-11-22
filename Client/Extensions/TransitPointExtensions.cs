@@ -7,14 +7,18 @@ namespace MiyakoCarryService.Client.Extensions
 {
     public static class TransitPointExtensions
     {
-        private static readonly AttachedTable<TransitPoint, TransitData> _datas = new();
 
         extension(TransitPoint transitPoint)
         {
             public TransitData GetData()
             {
-                return _datas.GetOrCreate(transitPoint, key => new TransitData(key));
+                return InteropDataCache<TransitData>.GetOrCreate(transitPoint.Pointer, () => new TransitData(transitPoint));
             }
+        }
+
+        public static void Clear()
+        {
+            InteropDataCache<TransitData>.Clear();
         }
     }
 }
